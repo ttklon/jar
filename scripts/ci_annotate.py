@@ -66,13 +66,16 @@ def annotate(log: str, limit: int = 20) -> list[str]:
                 continue
             if HEADER.match(stripped) or LOCATION.match(probe) or stripped.startswith("|"):
                 continue
+            # Служебные строки cargo/сборки — шум, настоящая причина ниже.
+            if stripped.startswith(("cargo:", "--- stdout", "--- stderr", "warning: build failed")):
+                continue
             if stripped.startswith(("Caused by", "note:", "help:", "error:", "warning:")) or (
                 causes and probe.startswith((" ", "\t"))
             ):
                 causes.append(stripped)
             elif causes:
                 break
-            if len(causes) >= 4:
+            if len(causes) >= 8 or sum(len(c) for c in causes) > 1200:
                 break
         if causes:
             message = f"{message} — {' / '.join(causes)}"
