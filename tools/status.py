@@ -28,6 +28,7 @@ AGENTS = ROOT / "AGENTS.md"
 ACTIONS = ROOT / "data" / "actions.json"
 PROFILES = ROOT / "data" / "profiles"
 SKILLS = ROOT / "data" / "skills"
+ECOSYSTEM = ROOT / "data" / "ecosystem"
 TARGETS = ROOT / "data" / "app_targets.psv"
 POLICY = ROOT / "data" / "domain_profile_policy.json"
 EVALS = ROOT / "data" / "evals.json"
@@ -39,6 +40,17 @@ END = "<!-- STATUS:END -->"
 
 
 RESEARCH_SOURCES = ROOT / "research" / "SOURCES.json"
+
+
+def ecosystem_stats() -> tuple[int, int, int]:
+    """(catalogues, records, selected) из data/ecosystem/*.json."""
+    cats = total = selected = 0
+    for path in sorted(ECOSYSTEM.glob("*.json")):
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        cats += 1
+        total += len(rows)
+        selected += sum(1 for r in rows if r.get("status") == "selected")
+    return cats, total, selected
 
 
 def skill_stats(actions: list[dict]) -> tuple[int, int, int]:
@@ -176,6 +188,7 @@ def build_block() -> str:
         n_evals, n_curated = len(evals_raw), 0
     src_total, src_cats = count_sources()
     n_skills, n_steps, skill_covered = skill_stats(actions)
+    n_cats, n_eco, n_eco_sel = ecosystem_stats()
 
     L = [
         BEGIN,
@@ -192,6 +205,7 @@ def build_block() -> str:
         f"| Доменов без профиля | **{len(no_prof)}** — в очереди {len(queue)}, по решению {len(by_design)} |",
         f"| Сценариев в плане проверок | **{n_evals}** (+ {n_curated} обязательных) |",
         f"| Скиллов | **{n_skills}** · шагов {n_steps} · действий задействовано {skill_covered} из {len(actions)} |",
+        f"| Экосистема | **{n_eco}** записей в {n_cats} каталогах (проверено и выбрано {n_eco_sel}) |",
         f"| Источников в каталоге | **{src_total}** в {src_cats} категориях |",
         "",
         "**Очередь на углубление** (домены с наименьшим отношением «операции профилей / действия реестра», "

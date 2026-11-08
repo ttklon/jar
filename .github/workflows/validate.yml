@@ -38,6 +38,11 @@ jobs:
       - name: Skills reference real registry rows, risk matches, done criteria present
         run: python3 tools/skills.py
 
+      - name: Ecosystem catalogues (10 catalogues, >=200 each, ids unique, statuses honest)
+        run: |
+          python3 tools/build_ecosystem.py
+          python3 tools/ecosystem.py
+
       - name: AGENTS.md status block matches the data
         run: python3 tools/status.py --check
 
@@ -46,7 +51,7 @@ jobs:
 
       - name: Generated artefacts are committed and up to date
         run: |
-          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md docs/EVALS.md docs/APP-COVERAGE.md docs/SKILLS.md data/evals.json AGENTS.md \
+          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md docs/EVALS.md docs/APP-COVERAGE.md docs/SKILLS.md docs/ECOSYSTEM.md data/evals.json data/ecosystem AGENTS.md \
             || { echo "::error::generated files are stale — run tools/actions.py, tools/profiles.py, tools/audit_actions.py and commit"; exit 1; }
 
       - name: Summary
