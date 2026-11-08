@@ -36,6 +36,26 @@ Ableton Live, Bitwig Studio). Задача — не «описать прило�
 | Zotero | локальный API `127.0.0.1:23119`, `zotero.sqlite` (read-only) | UI-клики по коллекциям | `GET /items` + валидный BibTeX на выходе |
 | Ableton Live | AbletonOSC / Live Object Model через User Remote Script | UIA: интерфейс нарисован OpenGL, дерева нет | `/live/song/get/num_tracks` > 0 |
 | Bitwig Studio | Controller API (Java) + generic OSC | UIA: тот же OpenGL-случай | `trackCount`, уровень канала > −60 dB |
+| DaVinci Resolve | Python-API (`DaVinciResolveScript`), `SetRenderSettings` + `StartRendering` | UIA: Qt-интерфейс, панели пересоздаются при смене страницы | `ffprobe` результата + число кадров против таймлайна |
+| WinSCP | `winscp.com /command` или COM `Session` | UIA-диалоги мастера сессий | `pwd` в сессии + сверка хэшей на сервере |
+| FileZilla | URL-подключение `filezilla.exe sftp://…` + клавиатура | UIA: панели — кастомные контролы без дерева | пустая очередь + совпадение размеров после Refresh |
+| DBeaver | нативные клиенты (`psql`, `mysqldump`, `sqlite3`) под тем же соединением | UIA Qt: таблицы результатов виртуализированы | `information_schema` и `PRAGMA integrity_check` |
+| Visual Studio | `msbuild` + `vstest.console` + COM `DTE2` | UIA: редактор — кастомный контрол, дерево обрезано | `Build succeeded`, `.trx`-отчёт |
+| JetBrains IDE | `gradlew`, `inspect.bat` (headless), `rg` | UIA Qt | XML-отчёт инспекций, `build/test-results` |
+| Wireshark | `dumpcap` + `tshark -z` | UIA: список пакетов виртуализирован, прокрутка ломает индексы | разобранный `pcapng` + таблица соединений |
+| Бэкап/диски | `robocopy /MIR` с логом, `smartctl`, `Optimize-Volume -ReTrim` | оснастка «Управление дисками» | лог robocopy (код < 8) + атрибуты SMART + хэши |
+
+
+## Отдельный класс: инструменты без интерфейса
+
+Часть профилей — не приложения, а инструменты: `robocopy`, `dumpcap`, `psql`, `msbuild`,
+`gradlew`. У них нет ни окна, ни якорей, и это лучший возможный случай: проверка результата
+всегда машинная (лог, XML, хэш), а не «на глаз». Отсюда правило для каталога: если у приложения
+есть командный инструмент-спутник (DBeaver → `psql`, Wireshark → `tshark`, Visual Studio →
+`msbuild`), профиль описывает **спутник**, а GUI оставляет человеку.
+
+Исключение — операции, которых в CLI нет вообще: настройка вида, привязки MIDI, монтаж по кликам.
+Там профиль остаётся UIA-профилем, но с обязательным машинным подтверждением после шага.
 
 ## Пять правил, вытащенных из этих профилей
 

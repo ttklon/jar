@@ -2,26 +2,26 @@
 
 Аудит реестра действий и профилей. Генерируется `python3 tools/audit_actions.py`.
 
-**Действий: 787** · доменов: 49 · глаголов: 200 · профилей: 38 · операций в профилях: 229
+**Действий: 792** · доменов: 49 · глаголов: 200 · профилей: 46 · операций в профилях: 270
 
 ## Статусы, риск, железо
 
 | Разрез | Значение | Кол-во |
 | --- | --- | --- |
-| статус | `v1` | 593 |
-| статус | `v2` | 183 |
+| статус | `v1` | 596 |
+| статус | `v2` | 185 |
 | статус | `never` | 11 |
-| риск | `write-local` | 381 |
-| риск | `read` | 284 |
+| риск | `write-local` | 384 |
+| риск | `read` | 286 |
 | риск | `destructive` | 60 |
 | риск | `external` | 51 |
 | риск | `identity` | 7 |
 | риск | `money` | 4 |
-| tier | `T1` | 378 |
-| tier | `T0` | 288 |
+| tier | `T1` | 382 |
+| tier | `T0` | 289 |
 | tier | `T2` | 103 |
 | tier | `T3` | 18 |
-| человек | `c` | 708 |
+| человек | `c` | 713 |
 | человек | `h` | 46 |
 | человек | `n` | 33 |
 
@@ -43,7 +43,6 @@
 
 - `health-daily` — 22 действий
 - `superhuman` — 20 действий
-- `network` — 19 действий
 - `devices` — 19 действий
 - `security-access` — 18 действий
 - `input` — 16 действий
@@ -51,21 +50,19 @@
 - `smart-home` — 16 действий
 - `music` — 15 действий
 - `home-daily` — 15 действий
-- `storage-backup` — 14 действий
 - `languages` — 14 действий
 - `career` — 14 действий
 - `calendar-tasks` — 13 действий
 - `ai-ml` — 13 действий
 - `legal-docs` — 13 действий
-- `databases` — 12 действий
 - `licensing` — 12 действий
 - `apps-generic` — 10 действий
 
-С профилями: `music-production` (26), `video` (26), `files` (19), `dev-code` (16), `learning-research` (13), `chat-social` (12), `processes-services` (11), `text-docs` (11), `audio` (9), `creative-3d` (8), `web` (8), `images` (8), `apps-windows` (7), `email` (7), `business-finance` (6), `personal-finance` (6), `games` (6), `sheets-data` (5), `automation` (5), `virtualization-remote` (4), `slides-pdf-print` (4), `video-production` (3), `system-power` (2), `engineering-3d` (1), `distribution` (1), `monitoring-triage` (1), `hardware-diag` (1), `accessibility` (1), `accounts-updates` (1), `display-sound` (1).
+С профилями: `video` (32), `music-production` (26), `dev-code` (26), `files` (21), `learning-research` (13), `chat-social` (12), `processes-services` (11), `text-docs` (11), `audio` (9), `virtualization-remote` (9), `creative-3d` (8), `web` (8), `images` (8), `apps-windows` (7), `email` (7), `business-finance` (6), `personal-finance` (6), `databases` (6), `network` (6), `games` (6), `storage-backup` (6), `sheets-data` (5), `automation` (5), `slides-pdf-print` (4), `video-production` (3), `system-power` (2), `engineering-3d` (1), `distribution` (1), `monitoring-triage` (1), `hardware-diag` (1), `accessibility` (1), `accounts-updates` (1), `display-sound` (1).
 
-Это главный честный разрыв: ширина есть, глубина — в 30 доменах из 49.
+Это главный честный разрыв: ширина есть, глубина — в 33 доменах из 49.
 Очередь закрывается не «по одному домену за раз», а через профили приложений: адресный список — в `docs/APP-COVERAGE.md` (приоритеты P0…P3).
-Крупнейшие непокрытые домены: `health-daily` (22), `superhuman` (20), `network` (19), `devices` (19), `security-access` (18), `input` (16).
+Крупнейшие непокрытые домены: `health-daily` (22), `superhuman` (20), `devices` (19), `security-access` (18), `input` (16), `travel` (16).
 
 ## 5. Глаголы-одиночки (встречаются один раз)
 
@@ -84,4 +81,4 @@
 3. Тонкие домены довести до CRUD, а не раздувать новыми доменами.
 4. Глаголы-одиночки либо подтвердить как редкие, либо применить к другим объектам.
 
-Инвариант: **787 строк реестра без проверок хуже, чем 100 строк с проверками.** Аудит существует, чтобы это соотношение не ухудшалось незаметно.
+Инвариант: **792 строк реестра без проверок хуже, чем 100 строк с проверками.** Аудит существует, чтобы это соотношение не ухудшалось незаметно.

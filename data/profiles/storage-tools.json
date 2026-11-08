@@ -1,0 +1,65 @@
+{
+  "app": "Бэкап и диски Windows (robocopy / wbadmin / smartctl)",
+  "exe": ["robocopy.exe", "wbadmin.exe", "smartctl.exe", "diskmgmt.msc"],
+  "ui_stack": "win32",
+  "version_seen": "Windows 11 24H2 + smartmontools 7.4 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "robocopy": { "by": "api", "value": "robocopy <src> <dst> /MIR /R:2 /W:2 /XD \"$RECYCLE.BIN\" \"System Volume Information\" /LOG:<file> /TEE /NP" },
+    "smartctl": { "by": "api", "value": "smartctl -a /dev/sdX или -a \\\\.\\PhysicalDrive0 (нужны права администратора)" },
+    "wmic_disk": { "by": "api", "value": "Get-PhysicalDisk | Get-StorageReliabilityCounter; Get-Disk | Select Number,FriendlyName,HealthStatus" },
+    "wbadmin": { "by": "api", "value": "wbadmin start backup -backupTarget:<drive> -include:<volume> -quiet" },
+    "defrag": { "by": "api", "value": "Optimize-Volume -DriveLetter C -ReTrim -Verbose (для SSD — TRIM, не дефрагментация)" },
+    "free_space": { "by": "api", "value": "Get-PSDrive -PSProvider FileSystem | Select Name,@{n='FreeGB';e={[math]::Round($_.Free/1GB,1)}}" }
+  },
+  "operations": [
+    {
+      "name": "Проверить здоровье дисков",
+      "registry": "storage-backup|проверить|SMART диска",
+      "steps": ["smartctl -a <device> — Read Error Rate, Reallocated Sectors, Wear Leveling", "Get-StorageReliabilityCounter — температура, часы работы, ошибки записи", "сопоставить с событиями disk/ntfs за месяц"],
+      "verify": ["получены конкретные значения атрибутов, а не только «OK»", "указано поведение Wear Leveling (оставшийся ресурс) для SSD", "дан вердикт: норма / наблюдать / менять, с обоснованием"],
+      "risk": "read",
+      "notes": "«SMART OK» — это не «диск здоров»: умирающие SSD показывают OK до последнего дня"
+    },
+    {
+      "name": "Создать бэкап папки",
+      "registry": "storage-backup|создать|бэкап папки",
+      "steps": ["проверить свободное место на приёмнике (нужно ≥ 2× объёма)", "формат: robocopy /MIR с логом, а не копирование через Проводник", "снять снимок состояния VSS, если файлы открыты", "проверить лог: ошибки 0, скопировано N файлов"],
+      "verify": ["лог robocopy: код возврата < 8 (0–7 — успех с нюансами)", "число файлов и суммарный размер совпадают с источником", "выборочно открыть 3 файла из бэкапа (не только их наличие)"],
+      "risk": "destructive",
+      "on_fail": "не удалять источник и не запускать /MIR повторно до разбора лога: /MIR удаляет на приёмнике то, чего нет в источнике",
+      "notes": "/MIR опасен при перепутанных аргументах — сначала прогон с /L (только список), потом реальная команда"
+    },
+    {
+      "name": "Восстановить из бэкапа",
+      "registry": "storage-backup|восстановить|из бэкапа",
+      "steps": ["показать пользователю, что именно будет перезаписано", "восстановить в отдельную папку, а не поверх рабочей", "сверить контрольные суммы с бэкапом", "после подтверждения — перенести в рабочее место"],
+      "verify": ["восстановленные файлы открываются и не нулевого размера", "хэши совпадают с бэкапом", "исходное состояние сохранено как .bak до замены"],
+      "risk": "destructive",
+      "notes": "восстановление «поверх» — самая частая потеря данных: сначала во временную папку"
+    },
+    {
+      "name": "Мониторить заполнение диска",
+      "registry": "storage-backup|мониторить|заполнение диска",
+      "steps": ["anchor:free_space", "найти топ-10 папок по объёму (WizTree/NCDU или PowerShell-обход)", "алерт при свободном < 10 % или < 15 ГБ"],
+      "verify": ["свободное место в ГБ и процентах", "топ папок с объёмами, сумма объясняет большинство", "порог алерта настроен и проверен (тестовое срабатывание)"],
+      "risk": "read"
+    },
+    {
+      "name": "Очистить временные файлы и корзину",
+      "registry": "storage-backup|очистить|временные файлы",
+      "steps": ["посчитать объём %TEMP%, Windows\\Temp, корзины, папки обновлений", "показать список и объём", "удалить только после подтверждения, корзину — через Clear-RecycleBin"],
+      "verify": ["освобождённый объём измерен до/после", "система продолжает работать (проверить запуск 2–3 приложений после очистки)", "не тронуты папки загрузок и документов пользователя"],
+      "risk": "destructive",
+      "on_fail": "если после очистки что-то сломалось — перечислить удалённое по журналу, не заметать следы"
+    },
+    {
+      "name": "Выполнить TRIM на SSD",
+      "registry": "storage-backup|выполнить|TRIM на SSD",
+      "steps": ["проверить тип носителя: Get-PhysicalDisk | Select MediaType", "убедиться, что TRIM включён: fsutil behavior query DisableDeleteNotify (0 = включён)", "Optimize-Volume -DriveLetter C -ReTrim"],
+      "verify": ["MediaType = SSD (иначе операция бессмысленна)", "DisableDeleteNotify = 0", "после TRIM нет ошибок в Optimize-Volume и диск отвечает"],
+      "risk": "write-local",
+      "notes": "дефрагментация SSD вредна: только ReTrim"
+    }
+  ]
+}

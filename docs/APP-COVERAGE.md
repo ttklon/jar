@@ -3,14 +3,14 @@
 Данные — [`data/app_targets.psv`](../data/app_targets.psv), файл генерируется
 `python3 tools/app_targets.py`, руками не править.
 
-**Приложений в каталоге: 122** · категорий: **17** · профиль найден по процессу: **50** · без профиля (визуальный агент): **72**
+**Приложений в каталоге: 122** · категорий: **17** · профиль найден по процессу: **60** · без профиля (визуальный агент): **62**
 
 ## Три уровня покрытия (почему не «профиль на каждую программу руками»)
 
 | Tier | Что это | Сколько | Как появляется |
 | --- | --- | --- | --- |
-| **A** | ручной профиль: якоря, шаги, проверки | 39 | пишется человеком/агентом по UIA-дампу |
-| **B** | авто-профиль из UIA + подтверждение | 50 | `tools/uia_probe` → кандидаты → подтверждение |
+| **A** | ручной профиль: якоря, шаги, проверки | 48 | пишется человеком/агентом по UIA-дампу |
+| **B** | авто-профиль из UIA + подтверждение | 41 | `tools/uia_probe` → кандидаты → подтверждение |
 | **C** | только визуальный агент (скриншот→OCR/VLM→клик) | 33 | профиля нет, работает универсальный цикл |
 
 Подробно — [`PROFILE-STRATEGY.md`](PROFILE-STRATEGY.md). Правило: приложение без профиля
@@ -53,17 +53,17 @@
 | Windows Terminal | `WindowsTerminal.exe` | cli+uia | A | P0 | ✅ | профили, panes |
 | Командная строка | `cmd.exe` | cli | A | P0 | ✅ |  |
 | Docker Desktop | `Docker Desktop.exe` | cli | A | P1 | ✅ | docker CLI |
-| DBeaver | `dbeaver.exe` | cli | B | P2 | — | JDBC, но лучше напрямую |
-| FileZilla | `filezilla.exe` | cli+uia | B | P2 | — |  |
+| DBeaver | `dbeaver.exe` | cli | A | P2 | ✅ | JDBC, но лучше напрямую |
+| FileZilla | `filezilla.exe` | cli+uia | A | P2 | ✅ |  |
 | PuTTY | `putty.exe` | cli | B | P2 | — | plink |
-| Visual Studio | `devenv.exe` | cli+com | B | P2 | — | msbuild/dotnet |
-| WinSCP | `WinSCP.exe` | cli | B | P2 | — | winscp.com скрипты |
-| Wireshark | `Wireshark.exe` | cli | B | P2 | — | tshark |
-| Android Studio | `studio64.exe` | cli | B | P3 | — | gradle/adb |
-| IntelliJ IDEA | `idea64.exe` | cli | B | P3 | — |  |
+| Visual Studio | `devenv.exe` | cli+com | A | P2 | ✅ | msbuild/dotnet |
+| WinSCP | `WinSCP.exe` | cli | A | P2 | ✅ | winscp.com скрипты |
+| Wireshark | `Wireshark.exe` | cli | A | P2 | ✅ | tshark |
+| Android Studio | `studio64.exe` | cli | A | P3 | ✅ | gradle/adb |
+| IntelliJ IDEA | `idea64.exe` | cli | A | P3 | ✅ |  |
 | JetBrains Rider | `rider64.exe` | cli | B | P3 | — |  |
 | Postman | `Postman.exe` | api | B | P3 | — | newman |
-| PyCharm | `pycharm64.exe` | cli | B | P3 | — |  |
+| PyCharm | `pycharm64.exe` | cli | A | P3 | ✅ |  |
 | SQL Server Management Studio | `Ssms.exe` | cli | C | P3 | — | sqlcmd |
 | Windows Terminal Preview | `WindowsTerminal.exe` | cli+uia | C | P3 | ✅ |  |
 | pgAdmin | `pgAdmin4.exe` | cli | C | P3 | — | psql |
@@ -82,7 +82,7 @@
 | Adobe After Effects | `AfterFX.exe` | uia+jsx | C | P2 | — |  |
 | Adobe Illustrator | `Illustrator.exe` | uia | C | P2 | — | скрипты ExtendScript |
 | Adobe Lightroom | `Lightroom.exe` | uia | C | P2 | — |  |
-| DaVinci Resolve | `Resolve.exe` | api+uia | B | P2 | — | скриптовый API Python/Lua |
+| DaVinci Resolve | `Resolve.exe` | api+uia | A | P2 | ✅ | скриптовый API Python/Lua |
 | Spotify | `Spotify.exe` | api+uia | B | P2 | — | Web API (нужен токен) |
 | foobar2000 | `foobar2000.exe` | cli+uia | B | P2 | — | /command |
 | Adobe InDesign | `InDesign.exe` | uia+jsx | C | P3 | — |  |
@@ -103,7 +103,7 @@
 | Просмотр событий | `mmc.exe` | cli | A | P1 | ✅ | wevtutil/Get-WinEvent |
 | Диспетчер устройств | `mmc.exe` | uia+cli | B | P2 | ✅ | pnputil |
 | Редактор реестра | `regedit.exe` | cli | C | P2 | — | reg.exe, GUI — последний вариант |
-| Управление дисками | `diskmgmt.msc` | uia | C | P2 | — | опасно, только с подтверждением |
+| Управление дисками | `diskmgmt.msc` | uia | C | P2 | ✅ | опасно, только с подтверждением |
 | Монитор ресурсов | `resmon.exe` | uia | C | P3 | — |  |
 
 ### Офис (10)

@@ -1,0 +1,66 @@
+{
+  "app": "DaVinci Resolve",
+  "exe": ["Resolve.exe", "DaVinciResolve.exe"],
+  "ui_stack": "qt",
+  "version_seen": "19.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "script_api": { "by": "api", "value": "RESOLVE_SCRIPT_API=%PROGRAMDATA%\\Blackmagic Design\\DaVinci Resolve\\Support\\Developer\\Scripting; RESOLVE_SCRIPT_LIB=...\\fusionscript.dll; import DaVinciResolveScript as dvr", "fallback": "Workspace → Scripts → <ваш .py> (тот же API, но без внешнего процесса)" },
+    "media_pool": { "by": "api", "value": "project.GetMediaPool() → ImportMedia([...]), AddSubFolder" },
+    "timeline": { "by": "api", "value": "mediaPool.CreateTimelineFromClips(name, clips), AppendToTimeline(clipInfo)" },
+    "render": { "by": "api", "value": "project.SetRenderSettings({...}) → AddRenderJob() → StartRendering()" },
+    "deliver_page": { "by": "hotkey", "value": "Shift+6 (страница Deliver)", "fallback": "нижняя панель → иконка ракеты" },
+    "proxy_mode": { "by": "menu", "value": "Playback → Proxy Mode → Half/Quarter", "fallback": "Ctrl+Shift+P" }
+  },
+  "operations": [
+    {
+      "name": "Импортировать медиа и разложить по папкам проекта",
+      "registry": "video|импортировать|медиа в проект",
+      "steps": ["script_api: подключиться к запущенному Resolve (GetResolve())", "media_pool: ImportMedia(список файлов)", "разложить по AddSubFolder: VIDEO / AUDIO / MUSIC / SFX", "прочитать метаданные каждого клипа"],
+      "verify": ["GetClipList() содержит все импортированные файлы (число совпадает)", "у каждого клипа ненулевая длительность", "ни один файл не помечен как offline"],
+      "risk": "write-local",
+      "on_fail": "если Resolve не запущен, API вернёт None — не притворяться, а запустить приложение и повторить",
+      "notes": "скриптовый API есть только в Studio-редакции? нет: бесплатная версия тоже отдаёт API, но часть экспортных пресетов ограничена"
+    },
+    {
+      "name": "Смонтировать по монтажному листу",
+      "registry": "video|монтировать|через ffmpeg",
+      "steps": ["разобрать лист: таймкоды входа/выхода на клип", "для каждой сцены: AppendToTimeline с in/out", "проверить чёрные кадры и разрывы", "добавить переходы только на стыках сцен"],
+      "verify": ["длительность таймлайна = сумме сцен ±0.5 с", "нет чёрных кадров >0.2 с (детект по кадрам)", "каждый клип на таймлайне имеет источник в медиапуле"],
+      "risk": "write-local",
+      "notes": "монтажный лист строим из транскрипта (Whisper) — так резка идёт по смыслу, а не по тишине"
+    },
+    {
+      "name": "Отрендерить готовый ролик",
+      "registry": "video|экспортировать|готовый ролик",
+      "steps": ["anchor:deliver_page", "SetRenderSettings: формат MP4, кодек H.264, битрейт по разрешению, целевой путь", "AddRenderJob + StartRendering", "дождаться IsRenderingInProgress = False"],
+      "verify": ["файл существует и его размер > 0", "ffprobe: разрешение, fps, длительность, кодек совпадают с заданием", "нет дропнутых кадров: сравнить число кадров с таймлайном"],
+      "risk": "write-local",
+      "timeouts_ms": 3600000,
+      "on_fail": "если рендер упал — прочитать JobStatus из проекта, а не перезапускать вслепую"
+    },
+    {
+      "name": "Оптимизировать монтаж на слабом ПК через прокси",
+      "registry": "video|оптимизировать|монтаж на слабом ПК",
+      "steps": ["сгенерировать прокси 1080p/720p с тем же именем", "menu:Playback → Proxy Mode → Quarter", "работать на прокси, финальный рендер — с оригинала"],
+      "verify": ["все клипы имеют прокси-файл (проверка по папке Proxy)", "воспроизведение без дропфреймов (Playback → Frame rate)", "перед рендером прокси отключены (проверить, что рендер читает originals)"],
+      "risk": "write-local",
+      "notes": "на 8 ГБ RAM и встроенной графике это разница между «монтирую» и «смотрю на счётчик»"
+    },
+    {
+      "name": "Проверить готовый ролик на артефакты",
+      "registry": "video|проверить|качество и артефакты",
+      "steps": ["ffprobe: контейнер, кодеки, битрейт, частота кадров", "ffmpeg: чёрные кадры (blackdetect), замороженные кадры (freezedetect), громкость (ebur128)", "сравнить 5 случайных кадров с исходником (SSIM)"],
+      "verify": ["нет чёрных вставок вне замысла", "звук: LUFS в целевом диапазоне, пики ≤ −1 dBTP", "SSIM выборочных кадров > 0.95"],
+      "risk": "read",
+      "notes": "проверка занимает минуты, но ловит артефакты, которые на 13-дюймовом экране не видны"
+    },
+    {
+      "name": "Сжать ролик для отправки",
+      "registry": "video|сжать|размер",
+      "steps": ["цель: ≤ 25 МБ для мессенджера / ≤ 2 ГБ для YouTube", "двухпроходный H.264 или H.265 при поддержке", "аудио AAC 128 kbps"],
+      "verify": ["размер в пределах цели", "SSIM относительно мастера > 0.95", "длительность не изменилась"],
+      "risk": "write-local"
+    }
+  ]
+}

@@ -12644,5 +12644,86 @@
   "human_code": "c",
   "status": "v1",
   "notes": ""
+ },
+ {
+  "id": "video-788",
+  "domain": "video",
+  "verb": "импортировать",
+  "object": "медиа в проект",
+  "example": "закинь эти файлы на таймлайн",
+  "implementation": [
+   "API монтажки или drag через UIA"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "проверить, что все файлы на месте и без битых"
+ },
+ {
+  "id": "video-789",
+  "domain": "video",
+  "verb": "экспортировать",
+  "object": "готовый ролик",
+  "example": "отрендери готовый ролик",
+  "implementation": [
+   "render API / ffmpeg"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "проверка по ffprobe и кадрам"
+ },
+ {
+  "id": "video-790",
+  "domain": "video",
+  "verb": "подписать",
+  "object": "субтитры по таймкодам",
+  "example": "подпиши видео по времени",
+  "implementation": [
+   "ASR + субтитры в контейнер"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "databases-791",
+  "domain": "databases",
+  "verb": "сравнить",
+  "object": "схемы двух БД",
+  "example": "сравни схему теста и прода",
+  "implementation": [
+   "information_schema diff"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "network-792",
+  "domain": "network",
+  "verb": "замерить",
+  "object": "задержку до узла",
+  "example": "сколько пинг до сервера",
+  "implementation": [
+   "Test-NetConnection",
+   "ping"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
  }
 ]

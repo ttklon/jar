@@ -1,0 +1,47 @@
+{
+  "app": "WinSCP",
+  "exe": ["WinSCP.exe", "winscp.com"],
+  "ui_stack": "win32",
+  "version_seen": "6.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "script_cli": { "by": "api", "value": "winscp.com /ini=nul /log=<log> /command \"open sftp://user@host:22/ -hostkey=\\\"ssh-ed25519 255 <fp>\\\"\" \"put ...\" \"exit\"" },
+    "com": { "by": "api", "value": "COM: WinSCP.Session (SessionOptions, Open, PutFiles, SynchronizeDirectories)", "fallback": "скриптовый режим /command" },
+    "hostkey": { "by": "api", "value": "winscp.com /command \"open ...\" → первый запуск сохраняет отпечаток; сверять вручную", "fallback": "Настройки сессии → SSH → host key" },
+    "site_manager": { "by": "uia", "value": "Диалог «Сайт» → TreeItem Name=<сессия> (локализуется)", "fallback": "импорт сессий из .ini" }
+  },
+  "operations": [
+    {
+      "name": "Проверить доступность сервера до передачи",
+      "registry": "virtualization-remote|проверить|доступность сервера",
+      "steps": ["cli:Test-NetConnection <host> -Port 22 -InformationLevel Quiet", "cli:winscp.com /command \"open <session>\" \"pwd\" \"exit\"", "прочитать лог подключения"],
+      "verify": ["порт отвечает", "pwd вернул путь (сессия реально установлена)", "отпечаток ключа совпадает с сохранённым"],
+      "risk": "read",
+      "on_fail": "при смене отпечатка ключа — остановиться и показать разницу: это может быть MITM, а не «обновился сервер»"
+    },
+    {
+      "name": "Передать файлы на сервер",
+      "registry": "virtualization-remote|передать|файл на сервер",
+      "steps": ["сформировать список файлов и целевые пути", "cli:winscp.com /command \"open ...\" \"put -resumesupport=on <local> <remote>\" \"exit\"", "прочитать лог: какие файлы переданы, какие пропущены"],
+      "verify": ["код возврата winscp = 0", "размер и хэш файлов на сервере совпадают с локальными (через sha256sum в сессии)", "ни один файл не остался в состоянии .filepart"],
+      "risk": "external",
+      "notes": "передача на чужой/прод-сервер — внешнее действие: подтверждение обязательно, даже если «просто копия»"
+    },
+    {
+      "name": "Синхронизировать папку с сервером",
+      "registry": "virtualization-remote|синхронизировать|с сервером",
+      "steps": ["сначала dry-run: /command \"synchronize -preview\"", "показать пользователю список изменений", "запустить реальную синхронизацию в нужном направлении"],
+      "verify": ["повторный preview показывает 0 изменений", "удалённых файлов не больше, чем показано в preview", "направление совпадает с запрошенным (local→remote, а не наоборот)"],
+      "risk": "write-local",
+      "on_fail": "если направление перепутано — немедленно остановить; восстановление только из бэкапа",
+      "notes": "synchronize -mirror удаляет лишнее на приёмнике: по умолчанию используем -mirror=off и удаление отдельным подтверждённым шагом"
+    },
+    {
+      "name": "Забрать файлы с сервера",
+      "registry": "files|скопировать|файлы/папки",
+      "steps": ["cli:winscp.com /command \"open ...\" \"get <remote> <local>\" \"exit\"", "сверить список с запрошенным"],
+      "verify": ["число скачанных файлов = запрошенному", "контрольные суммы совпадают", "локальная папка не содержит недокачанных .filepart"],
+      "risk": "write-local"
+    }
+  ]
+}

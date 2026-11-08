@@ -20,7 +20,7 @@
 - [ ] Спайк до основной работы: release-сборка без портов, без DevTools, single-instance, офлайн (см. [`RUNTIME.md`](RUNTIME.md) §5)
 - [ ] SQLite-схема (events/jobs/steps/audit/facts), миграции
 - [ ] Нативный слой: скриншот, UIA-дамп, клик/ввод, проверка после действия (**прототип Rust**)
-- [ ] Capability registry, сгенерированный из `data/actions.json` (787 действий) + первые 10 инструментов
+- [ ] Capability registry, сгенерированный из `data/actions.json` (792 действия) + первые 10 инструментов
 - [ ] Загрузчик профилей `data/profiles/*.json` + движение по шагам с обязательной верификацией (`tools/profiles.py` уже валидирует данные)
 - [ ] `tools/uia_probe.py`: авто-профиль из UIA-дампа (tier B) + визуальный агент как fallback (tier C)
 - [ ] Policy engine (3 режима) + аудит + подтверждение в UI

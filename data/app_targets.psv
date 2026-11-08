@@ -46,20 +46,20 @@ foxit|Foxit Reader|Офис|FoxitReader.exe|uia|C|P3|
 notepadpp|Notepad++|Офис|notepad++.exe|cli+uia|B|P2|
 sublime|Sublime Text|Офис|sublime_text.exe|cli|B|P3|subl --command
 vscode|Visual Studio Code|Разработка|Code.exe|cli|A|P0|профиль готов
-visual-studio|Visual Studio|Разработка|devenv.exe|cli+com|B|P2|msbuild/dotnet
+visual-studio|Visual Studio|Разработка|devenv.exe|cli+com|A|P2|msbuild/dotnet
 rider|JetBrains Rider|Разработка|rider64.exe|cli|B|P3|
-idea|IntelliJ IDEA|Разработка|idea64.exe|cli|B|P3|
-pycharm|PyCharm|Разработка|pycharm64.exe|cli|B|P3|
-android-studio|Android Studio|Разработка|studio64.exe|cli|B|P3|gradle/adb
+idea|IntelliJ IDEA|Разработка|idea64.exe|cli|A|P3|
+pycharm|PyCharm|Разработка|pycharm64.exe|cli|A|P3|
+android-studio|Android Studio|Разработка|studio64.exe|cli|A|P3|gradle/adb
 git-bash|Git for Windows|Разработка|git-bash.exe|cli|A|P0|
 docker|Docker Desktop|Разработка|Docker Desktop.exe|cli|A|P1|docker CLI
 postman|Postman|Разработка|Postman.exe|api|B|P3|newman
-dbeaver|DBeaver|Разработка|dbeaver.exe|cli|B|P2|JDBC, но лучше напрямую
+dbeaver|DBeaver|Разработка|dbeaver.exe|cli|A|P2|JDBC, но лучше напрямую
 pgadmin|pgAdmin|Разработка|pgAdmin4.exe|cli|C|P3|psql
 ssms|SQL Server Management Studio|Разработка|Ssms.exe|cli|C|P3|sqlcmd
-wireshark|Wireshark|Разработка|Wireshark.exe|cli|B|P2|tshark
-filezilla|FileZilla|Разработка|filezilla.exe|cli+uia|B|P2|
-winscp|WinSCP|Разработка|WinSCP.exe|cli|B|P2|winscp.com скрипты
+wireshark|Wireshark|Разработка|Wireshark.exe|cli|A|P2|tshark
+filezilla|FileZilla|Разработка|filezilla.exe|cli+uia|A|P2|
+winscp|WinSCP|Разработка|WinSCP.exe|cli|A|P2|winscp.com скрипты
 putty|PuTTY|Разработка|putty.exe|cli|B|P2|plink
 virtualbox|VirtualBox|Виртуализация|VirtualBox.exe|cli|B|P1|VBoxManage
 vmware|VMware Workstation|Виртуализация|vmware.exe|cli|B|P2|vmrun
@@ -73,7 +73,7 @@ indesign|Adobe InDesign|Медиа|InDesign.exe|uia+jsx|C|P3|
 lightroom|Adobe Lightroom|Медиа|Lightroom.exe|uia|C|P2|
 premiere|Adobe Premiere Pro|Медиа|Adobe Premiere Pro.exe|uia|A|P1|профиль готов
 aftereffects|Adobe After Effects|Медиа|AfterFX.exe|uia+jsx|C|P2|
-davinci|DaVinci Resolve|Медиа|Resolve.exe|api+uia|B|P2|скриптовый API Python/Lua
+davinci|DaVinci Resolve|Медиа|Resolve.exe|api+uia|A|P2|скриптовый API Python/Lua
 capcut|CapCut|Медиа|CapCut.exe|uia|A|P0|профиль готов
 obs|OBS Studio|Медиа|obs64.exe|api|A|P0|профиль готов (websocket)
 vegas|VEGAS Pro|Медиа|vegas.exe|uia|C|P3|

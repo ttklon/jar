@@ -6,7 +6,7 @@
 
 Файл генерируется `python3 tools/profiles.py`; руками не править.
 
-**Профилей: 38** · операций: **229** · проблем: **0**
+**Профилей: 46** · операций: **270** · проблем: **0**
 
 Правила (проверяются автоматически, ошибка = ненулевой код возврата):
 
@@ -28,16 +28,21 @@
 | Blender | `blender.exe` | qt | 4.x (2026-11) | 2026-11-08 | 3 | 5 | `blender.json` |
 | CapCut (Desktop) | `CapCut.exe` | electron | 6.x (2026-11) | 2026-11-08 | 6 | 9 | `capcut.json` |
 | Chrome / Edge / Yandex (Chromium) | `chrome.exe, msedge.exe, browser.exe` | web | Chrome 131+ / Edge 131+ | 2026-11-08 | 7 | 8 | `browser.json` |
+| DBeaver | `dbeaver.exe, dbeaverc.exe` | qt | 25.x (2026-11) | 2026-11-08 | 6 | 6 | `dbeaver.json` |
+| DaVinci Resolve | `Resolve.exe, DaVinciResolve.exe` | qt | 19.x (2026-11) | 2026-11-08 | 6 | 6 | `davinci.json` |
 | Discord (desktop) | `Discord.exe` | electron | 0.0.9x (2026-11) | 2026-11-08 | 5 | 6 | `discord.json` |
 | Docker Desktop | `Docker Desktop.exe, com.docker.backend.exe` | electron | 4.3x (2026-11) | 2026-11-08 | 5 | 7 | `docker.json` |
 | Everything | `Everything.exe` | win32 | 1.5.x (2026-11) | 2026-11-08 | 4 | 5 | `everything.json` |
 | FL Studio | `FL64.exe, FL.exe` | win32 | FL Studio 2024/2025 (2026-11) | 2026-11-08 | 8 | 6 | `flstudio.json` |
 | Figma (desktop / web) | `Figma.exe, chrome.exe` | web | 2026-11 | 2026-11-08 | 6 | 6 | `figma.json` |
+| FileZilla | `filezilla.exe` | win32 | 3.6x (2026-11) | 2026-11-08 | 5 | 4 | `filezilla.json` |
 | Git for Windows (git-bash / git.exe) | `git-bash.exe, git.exe, bash.exe` | win32 | 2.4x (2026-11) | 2026-11-08 | 2 | 5 | `git-bash.json` |
 | HandBrake | `HandBrake.exe, HandBrakeCLI.exe` | win32 | 1.9.x (2026-11) | 2026-11-08 | 2 | 4 | `handbrake.json` |
+| JetBrains IDE (IDEA / PyCharm / WebStorm) | `idea64.exe, pycharm64.exe, webstorm64.exe, studio64.exe` | qt | 2025.3 (2026-11) | 2026-11-08 | 7 | 5 | `jetbrains.json` |
 | Microsoft Excel | `EXCEL.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 4 | 8 | `excel.json` |
 | Microsoft Outlook (классический и новый) | `OUTLOOK.EXE, olk.exe` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 8 | 7 | `outlook.json` |
 | Microsoft PowerPoint | `POWERPNT.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 6 | 6 | `powerpoint.json` |
+| Microsoft Visual Studio | `devenv.exe` | uia | 17.x (2022, 2026-11) | 2026-11-08 | 7 | 5 | `visualstudio.json` |
 | Microsoft Word | `WINWORD.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 7 | 8 | `word.json` |
 | Notion | `Notion.exe` | electron | 4.x (2026-11) | 2026-11-08 | 5 | 5 | `notion.json` |
 | OBS Studio | `obs64.exe` | qt | 31.x (2026-11) | 2026-11-08 | 7 | 7 | `obs.json` |
@@ -48,9 +53,12 @@
 | Telegram Desktop | `Telegram.exe` | qt | 5.x (2026-11) | 2026-11-08 | 5 | 6 | `telegram.json` |
 | VLC media player | `vlc.exe` | win32 | 3.0.x (2026-11) | 2026-11-08 | 4 | 5 | `vlc.json` |
 | Visual Studio Code | `Code.exe` | electron | 1.9x (2026-11) | 2026-11-08 | 7 | 7 | `vscode.json` |
+| WinSCP | `WinSCP.exe, winscp.com` | win32 | 6.x (2026-11) | 2026-11-08 | 4 | 4 | `winscp.json` |
 | Windows Terminal | `WindowsTerminal.exe, wt.exe` | uia | 1.2x (2026-11) | 2026-11-08 | 6 | 5 | `wt.json` |
+| Wireshark / tshark | `Wireshark.exe, tshark.exe, dumpcap.exe` | qt | 4.4.x (2026-11) | 2026-11-08 | 6 | 5 | `tshark.json` |
 | Zotero | `zotero.exe` | uia | 7.x (2026-11) | 2026-11-08 | 5 | 4 | `zotero.json` |
 | Банк (веб-кабинет и десктоп-клиент) — только чтение | `chrome.exe, msedge.exe, browser.exe` | web | 2026-11 | 2026-11-08 | 5 | 6 | `bank.json` |
+| Бэкап и диски Windows (robocopy / wbadmin / smartctl) | `robocopy.exe, wbadmin.exe, smartctl.exe, diskmgmt.msc` | win32 | Windows 11 24H2 + smartmontools 7.4 (2026-11) | 2026-11-08 | 6 | 6 | `storage-tools.json` |
 | Диспетчер задач | `Taskmgr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `taskmgr.json` |
 | Командная строка (cmd.exe) и пакетные файлы | `cmd.exe` | win32 | Windows 10/11 (2026-11) | 2026-11-08 | 2 | 4 | `cmd.json` |
 | Параметры Windows | `SystemSettings.exe, ApplicationFrameHost.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `windows-settings.json` |
@@ -59,24 +67,25 @@
 
 ## Риск операций
 
-- `write-local` — 138
-- `read` — 66
-- `external` — 14
-- `destructive` — 9
+- `write-local` — 155
+- `read` — 84
+- `external` — 17
+- `destructive` — 12
 - `money` — 1
 - `identity` — 1
 
 ## Покрытие доменов реестра
 
+- `video` — 32
 - `music-production` — 26
-- `video` — 26
-- `files` — 19
-- `dev-code` — 16
+- `dev-code` — 26
+- `files` — 21
 - `learning-research` — 13
 - `chat-social` — 12
 - `processes-services` — 11
 - `text-docs` — 11
 - `audio` — 9
+- `virtualization-remote` — 9
 - `creative-3d` — 8
 - `web` — 8
 - `images` — 8
@@ -84,10 +93,12 @@
 - `email` — 7
 - `business-finance` — 6
 - `personal-finance` — 6
+- `databases` — 6
+- `network` — 6
 - `games` — 6
+- `storage-backup` — 6
 - `sheets-data` — 5
 - `automation` — 5
-- `virtualization-remote` — 4
 - `slides-pdf-print` — 4
 - `video-production` — 3
 - `system-power` — 2

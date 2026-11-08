@@ -1,6 +1,6 @@
 {
   "generated_from": "data/actions.psv",
-  "count": 787,
+  "count": 792,
   "curated": [
     {
       "priority": "P0",
@@ -21953,6 +21953,146 @@
       },
       "then": [
         "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-video-788",
+      "action_id": "video-788",
+      "domain": "video",
+      "phrase": "закинь эти файлы на таймлайн",
+      "when": "медиа в проект",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "ffprobe: кодек/разрешение/длительность",
+        "нет рассинхрона"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-video-789",
+      "action_id": "video-789",
+      "domain": "video",
+      "phrase": "отрендери готовый ролик",
+      "when": "готовый ролик",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "ffprobe: кодек/разрешение/длительность",
+        "нет рассинхрона"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-video-790",
+      "action_id": "video-790",
+      "domain": "video",
+      "phrase": "подпиши видео по времени",
+      "when": "субтитры по таймкодам",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "ffprobe: кодек/разрешение/длительность",
+        "нет рассинхрона"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-databases-791",
+      "action_id": "databases-791",
+      "domain": "databases",
+      "phrase": "сравни схему теста и прода",
+      "when": "схемы двух БД",
+      "tier": "T1",
+      "risk": "read",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "integrity_check ok",
+        "число строк/контрольная сумма совпадают"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-network-792",
+      "action_id": "network-792",
+      "domain": "network",
+      "phrase": "сколько пинг до сервера",
+      "when": "задержку до узла",
+      "tier": "T0",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "пинг/запрос проходит",
+        "параметр сети читается обратно"
       ],
       "must_not": [
         "молча провалиться",
