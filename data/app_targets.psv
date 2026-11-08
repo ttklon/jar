@@ -14,7 +14,7 @@ powershell|PowerShell|Разработка|powershell.exe|cli|A|P0|основн�
 wt|Windows Terminal|Разработка|WindowsTerminal.exe|cli+uia|A|P0|профили, panes
 cmd|Командная строка|Разработка|cmd.exe|cli|A|P0|
 7zip|7-Zip|Утилиты|7zFM.exe|cli|A|P0|7z.exe
-winrar|WinRAR|Утилиты|WinRAR.exe|cli|B|P2|rar.exe
+winrar|WinRAR|Утилиты|WinRAR.exe|cli|A|P2|rar.exe; профиль готов
 everything|Everything|Утилиты|Everything.exe|cli|A|P1|ES CLI, индексация по имени
 wiztree|WizTree|Утилиты|WizTree.exe|cli|B|P2|экспорт CSV
 cpu-z|CPU-Z|Утилиты|cpuz.exe|uia|C|P3|лучше WMI
@@ -47,13 +47,13 @@ notepadpp|Notepad++|Офис|notepad++.exe|cli+uia|B|P2|
 sublime|Sublime Text|Офис|sublime_text.exe|cli|B|P3|subl --command
 vscode|Visual Studio Code|Разработка|Code.exe|cli|A|P0|профиль готов
 visual-studio|Visual Studio|Разработка|devenv.exe|cli+com|A|P2|msbuild/dotnet
-rider|JetBrains Rider|Разработка|rider64.exe|cli|B|P3|
+rider|JetBrains Rider|Разработка|rider64.exe|cli|A|P3|профиль готов
 idea|IntelliJ IDEA|Разработка|idea64.exe|cli|A|P3|
 pycharm|PyCharm|Разработка|pycharm64.exe|cli|A|P3|
 android-studio|Android Studio|Разработка|studio64.exe|cli|A|P3|gradle/adb
 git-bash|Git for Windows|Разработка|git-bash.exe|cli|A|P0|
 docker|Docker Desktop|Разработка|Docker Desktop.exe|cli|A|P1|docker CLI
-postman|Postman|Разработка|Postman.exe|api|B|P3|newman
+postman|Postman|Разработка|Postman.exe|api|A|P3|newman; профиль готов
 dbeaver|DBeaver|Разработка|dbeaver.exe|cli|A|P2|JDBC, но лучше напрямую
 sqlite3|SQLite CLI|Разработка|sqlite3.exe|cli|A|P2|профиль готов; бэкап только VACUUM INTO
 psql|PostgreSQL CLI|Разработка|psql.exe|cli|A|P2|профиль готов; psql/pg_dump/pg_restore
@@ -62,9 +62,9 @@ ssms|SQL Server Management Studio|Разработка|Ssms.exe|cli|C|P3|sqlcmd
 wireshark|Wireshark|Разработка|Wireshark.exe|cli|A|P2|tshark
 filezilla|FileZilla|Разработка|filezilla.exe|cli+uia|A|P2|
 winscp|WinSCP|Разработка|WinSCP.exe|cli|A|P2|winscp.com скрипты
-putty|PuTTY|Разработка|putty.exe|cli|B|P2|plink
+putty|PuTTY|Разработка|putty.exe|cli|A|P2|plink; профиль готов
 virtualbox|VirtualBox|Виртуализация|VirtualBox.exe|cli|A|P1|VBoxManage
-vmware|VMware Workstation|Виртуализация|vmware.exe|cli|B|P2|vmrun
+vmware|VMware Workstation|Виртуализация|vmware.exe|cli|A|P2|vmrun; профиль готов
 hyperv|Hyper-V Manager|Виртуализация|mmc.exe|cli|B|P2|PowerShell Hyper-V
 rustdesk|RustDesk|Удалённый доступ|rustdesk.exe|cli+uia|B|P2|
 anydesk|AnyDesk|Удалённый доступ|AnyDesk.exe|uia|C|P3|
@@ -82,7 +82,7 @@ vegas|VEGAS Pro|Медиа|vegas.exe|uia|C|P3|
 handbrake|HandBrake|Медиа|HandBrake.exe|cli|A|P0|HandBrakeCLI
 vlc|VLC|Медиа|vlc.exe|cli|A|P0|--intf dummy
 spotify|Spotify|Медиа|Spotify.exe|api+uia|B|P2|Web API (нужен токен)
-foobar|foobar2000|Медиа|foobar2000.exe|cli+uia|B|P2|/command
+foobar|foobar2000|Медиа|foobar2000.exe|cli+uia|A|P2|/command; профиль готов
 musicbee|MusicBee|Медиа|MusicBee.exe|uia|C|P3|
 audacity|Audacity|Медиа|audacity.exe|cli|A|P1|макросы
 fl-studio|FL Studio|Музыка|FL64.exe|uia+midi|A|P0|нет полного API: MIDI+шаблоны
@@ -112,7 +112,7 @@ amocrm|amoCRM (web)|Бизнес|chrome.exe|web|B|P2|
 bank|Банк (веб/клиент)|Бизнес|chrome.exe|web|A|P1|профиль готов (read-only)
 notion|Notion|Знания|Notion.exe|api+uia|A|P1|API
 obsidian|Obsidian|Знания|Obsidian.exe|cli|A|P1|markdown-файлы напрямую
-joplin|Joplin|Знания|Joplin.exe|cli|B|P2|CLI + markdown
+joplin|Joplin|Знания|Joplin.exe|cli|A|P2|CLI + markdown; профиль готов
 evernote|Evernote|Знания|Evernote.exe|uia|C|P3|
 onenote-desk|OneNote (классический)|Знания|ONENOTE.EXE|com|B|P2|
 zotero|Zotero|Знания|zotero.exe|api|A|P1|локальная БД + connector

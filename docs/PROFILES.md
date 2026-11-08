@@ -6,7 +6,7 @@
 
 Файл генерируется `python3 tools/profiles.py`; руками не править.
 
-**Профилей: 81** · операций: **522** · проблем: **0**
+**Профилей: 87** · операций: **547** · проблем: **0**
 
 Правила (проверяются автоматически, ошибка = ненулевой код возврата):
 
@@ -45,7 +45,8 @@
 | Git for Windows (git-bash / git.exe) | `app` | `git-bash.exe, git.exe, bash.exe` | win32 | 2.4x (2026-11) | 2026-11-08 | 2 | 5 | `git-bash.json` |
 | HandBrake | `app` | `HandBrake.exe, HandBrakeCLI.exe` | win32 | 1.9.x (2026-11) | 2026-11-08 | 2 | 4 | `handbrake.json` |
 | Inkscape | `tool` | `inkscape.exe, inkscape.com` | qt | 1.4 (2026-11) | 2026-11-08 | 5 | 4 | `inkscape.json` |
-| JetBrains IDE (IDEA / PyCharm / WebStorm) | `app` | `idea64.exe, pycharm64.exe, webstorm64.exe, studio64.exe` | qt | 2025.3 (2026-11) | 2026-11-08 | 7 | 5 | `jetbrains.json` |
+| JetBrains IDE (IDEA / PyCharm / WebStorm / Rider) | `app` | `idea64.exe, pycharm64.exe, webstorm64.exe, studio64.exe, rider64.exe` | qt | 2025.3 (2026-11) | 2026-11-08 | 7 | 5 | `jetbrains.json` |
+| Joplin (десктоп + CLI) | `tool` | `Joplin.exe, joplin.exe` | electron | Joplin 3.x (2026-11) | 2026-11-08 | 5 | 4 | `joplin.json` |
 | KeePassXC (хранилище паролей) | `tool` | `KeePassXC.exe, keepassxc-cli.exe` | qt | 2.7.x (2026-11) | 2026-11-08 | 6 | 5 | `keepassxc.json` |
 | LibreOffice | `tool` | `soffice.exe, soffice.com, soffice.bin` | win32 | 25.x (2026-11) | 2026-11-08 | 5 | 6 | `libreoffice.json` |
 | Microsoft Excel | `app` | `EXCEL.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 4 | 10 | `excel.json` |
@@ -59,19 +60,24 @@
 | Obsidian | `app` | `Obsidian.exe` | electron | 1.9.x (2026-11) | 2026-11-08 | 5 | 5 | `obsidian.json` |
 | Oracle VirtualBox | `app` | `VirtualBox.exe, VBoxManage.exe, VBoxHeadless.exe` | qt | 7.1.x (2026-11) | 2026-11-08 | 5 | 5 | `virtualbox.json` |
 | PostgreSQL (psql / pg_dump / pg_restore) | `tool` | `psql.exe, pg_dump.exe, pg_restore.exe` | win32 | PostgreSQL 16–17 (2026-11) | 2026-11-08 | 8 | 11 | `postgres-cli.json` |
+| Postman / newman | `tool` | `Postman.exe, newman.exe, newman.cmd` | electron | Postman 11.x / newman 6.x (2026-11) | 2026-11-08 | 6 | 4 | `newman.json` |
 | PowerShell 7 / Windows PowerShell | `app` | `pwsh.exe, powershell.exe` | win32 | 7.5 / 5.1 (2026-11) | 2026-11-08 | 3 | 5 | `powershell.json` |
+| PuTTY (plink / pscp / puttygen) | `tool` | `putty.exe, plink.exe, pscp.exe, puttygen.exe` | win32 | PuTTY 0.83 (2026-11) | 2026-11-08 | 6 | 4 | `plink.json` |
 | REAPER | `app` | `reaper.exe` | win32 | 7.x (2026-11) | 2026-11-08 | 4 | 9 | `reaper.json` |
 | SQLite (sqlite3.exe) | `tool` | `sqlite3.exe` | win32 | SQLite 3.45+ (2026-11) | 2026-11-08 | 7 | 14 | `sqlite-cli.json` |
 | Slack | `app` | `slack.exe` | electron | 4.4x (2026-11) | 2026-11-08 | 5 | 5 | `slack.json` |
 | Steam | `app` | `steam.exe, steamwebhelper.exe` | electron | 2026-11 | 2026-11-08 | 6 | 9 | `steam.json` |
 | Telegram Desktop | `app` | `Telegram.exe` | qt | 5.x (2026-11) | 2026-11-08 | 5 | 7 | `telegram.json` |
 | VLC media player | `app` | `vlc.exe` | win32 | 3.0.x (2026-11) | 2026-11-08 | 4 | 5 | `vlc.json` |
+| VMware Workstation (vmrun) | `tool` | `vmware.exe, vmrun.exe` | win32 | VMware Workstation 17.x (2026-11) | 2026-11-08 | 6 | 5 | `vmware.json` |
 | Visual Studio Code | `app` | `Code.exe` | electron | 1.9x (2026-11) | 2026-11-08 | 7 | 7 | `vscode.json` |
 | WhatsApp Desktop | `app` | `WhatsApp.exe` | electron | 2.24xx (2026-11) | 2026-11-08 | 6 | 4 | `whatsapp.json` |
+| WinRAR (rar.exe / unrar.exe) | `tool` | `WinRAR.exe, rar.exe, UnRAR.exe` | win32 | WinRAR 7.x (2026-11) | 2026-11-08 | 6 | 4 | `rar.json` |
 | WinSCP | `app` | `WinSCP.exe, winscp.com` | win32 | 6.x (2026-11) | 2026-11-08 | 4 | 4 | `winscp.json` |
 | Windows Terminal | `app` | `WindowsTerminal.exe, wt.exe` | uia | 1.2x (2026-11) | 2026-11-08 | 6 | 5 | `wt.json` |
 | Wireshark / tshark | `tool` | `Wireshark.exe, tshark.exe, dumpcap.exe` | qt | 4.4.x (2026-11) | 2026-11-08 | 6 | 5 | `tshark.json` |
 | Zotero | `app` | `zotero.exe` | uia | 7.x (2026-11) | 2026-11-08 | 5 | 4 | `zotero.json` |
+| foobar2000 | `app` | `foobar2000.exe` | win32 | foobar2000 2.x (2026-11) | 2026-11-08 | 6 | 4 | `foobar.json` |
 | qBittorrent | `tool` | `qbittorrent.exe` | qt | 5.x (2026-11) | 2026-11-08 | 6 | 5 | `qbittorrent.json` |
 | Автоматизация любого приложения (руки и глаза) | `tool` | `python.exe, uia_probe.py` | uia | ZShelper tools/uia_probe.py v1 (2026-11) | 2026-11-08 | 5 | 8 | `apps-generic.json` |
 | Банк (веб-кабинет и десктоп-клиент) — только чтение | `app` | `chrome.exe, msedge.exe, browser.exe` | web | 2026-11 | 2026-11-08 | 5 | 6 | `bank.json` |
@@ -100,39 +106,40 @@
 | Умный дом (Home Assistant / MQTT / Matter) | `system` | `` | web | HA 2026.1 + Matter 1.3 (2026-11) | 2026-11-08 | 6 | 7 | `home-assistant.json` |
 | Устройства Windows (USB / Bluetooth / печать) | `system` | `pnputil.exe, printui.exe, DevicePairingWizard.exe, SystemSettings.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 10 | `devices.json` |
 
-По типу: `app` — 50 · `tool` — 21 · `system` — 10. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
+По типу: `app` — 51 · `tool` — 26 · `system` — 10. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
 
 ## Риск операций
 
-- `write-local` — 267
-- `read` — 173
-- `destructive` — 43
-- `external` — 34
+- `write-local` — 282
+- `read` — 177
+- `destructive` — 46
+- `external` — 37
 - `identity` — 4
 - `money` — 1
 
 ## Покрытие доменов реестра
 
 - `video` — 40
+- `files` — 31
 - `databases` — 31
+- `dev-code` — 29
 - `music-production` — 26
-- `dev-code` — 26
-- `files` — 25
 - `business-finance` — 23
 - `chat-social` — 22
-- `text-docs` — 18
+- `virtualization-remote` — 22
+- `text-docs` — 19
 - `images` — 17
+- `web` — 16
 - `video-production` — 16
-- `web` — 15
-- `network` — 15
+- `network` — 16
 - `engineering-3d` — 14
-- `virtualization-remote` — 14
-- `learning-research` — 13
+- `learning-research` — 14
+- `audio` — 12
 - `personal-finance` — 12
-- `audio` — 11
 - `creative-3d` — 11
 - `processes-services` — 11
 - `slides-pdf-print` — 10
+- `music` — 10
 - `apps-windows` — 10
 - `devices` — 10
 - `security-access` — 10
@@ -143,7 +150,6 @@
 - `storage-backup` — 8
 - `hardware-diag` — 8
 - `games` — 8
-- `music` — 7
 - `sheets-data` — 7
 - `smart-home` — 7
 - `input` — 7

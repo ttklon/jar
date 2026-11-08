@@ -3,14 +3,14 @@
 Данные — [`data/app_targets.psv`](../data/app_targets.psv), файл генерируется
 `python3 tools/app_targets.py`, руками не править.
 
-**Приложений в каталоге: 136** · категорий: **17** · профиль найден по процессу: **85** · без профиля (визуальный агент): **51**
+**Приложений в каталоге: 136** · категорий: **17** · профиль найден по процессу: **92** · без профиля (визуальный агент): **44**
 
 ## Три уровня покрытия (почему не «профиль на каждую программу руками»)
 
 | Tier | Что это | Сколько | Как появляется |
 | --- | --- | --- | --- |
-| **A** | ручной профиль: якоря, шаги, проверки | 70 | пишется человеком/агентом по UIA-дампу |
-| **B** | авто-профиль из UIA + подтверждение | 32 | `tools/uia_probe` → кандидаты → подтверждение |
+| **A** | ручной профиль: якоря, шаги, проверки | 77 | пишется человеком/агентом по UIA-дампу |
+| **B** | авто-профиль из UIA + подтверждение | 25 | `tools/uia_probe` → кандидаты → подтверждение |
 | **C** | только визуальный агент (скриншот→OCR/VLM→клик) | 34 | профиля нет, работает универсальный цикл |
 
 Подробно — [`PROFILE-STRATEGY.md`](PROFILE-STRATEGY.md). Правило: приложение без профиля
@@ -56,15 +56,15 @@
 | DBeaver | `dbeaver.exe` | cli | A | P2 | ✅ | JDBC, но лучше напрямую |
 | FileZilla | `filezilla.exe` | cli+uia | A | P2 | ✅ |  |
 | PostgreSQL CLI | `psql.exe` | cli | A | P2 | ✅ | профиль готов; psql/pg_dump/pg_restore |
-| PuTTY | `putty.exe` | cli | B | P2 | — | plink |
+| PuTTY | `putty.exe` | cli | A | P2 | ✅ | plink; профиль готов |
 | SQLite CLI | `sqlite3.exe` | cli | A | P2 | ✅ | профиль готов; бэкап только VACUUM INTO |
 | Visual Studio | `devenv.exe` | cli+com | A | P2 | ✅ | msbuild/dotnet |
 | WinSCP | `WinSCP.exe` | cli | A | P2 | ✅ | winscp.com скрипты |
 | Wireshark | `Wireshark.exe` | cli | A | P2 | ✅ | tshark |
 | Android Studio | `studio64.exe` | cli | A | P3 | ✅ | gradle/adb |
 | IntelliJ IDEA | `idea64.exe` | cli | A | P3 | ✅ |  |
-| JetBrains Rider | `rider64.exe` | cli | B | P3 | — |  |
-| Postman | `Postman.exe` | api | B | P3 | — | newman |
+| JetBrains Rider | `rider64.exe` | cli | A | P3 | ✅ | профиль готов |
+| Postman | `Postman.exe` | api | A | P3 | ✅ | newman; профиль готов |
 | PyCharm | `pycharm64.exe` | cli | A | P3 | ✅ |  |
 | SQL Server Management Studio | `Ssms.exe` | cli | C | P3 | — | sqlcmd |
 | Windows Terminal Preview | `WindowsTerminal.exe` | cli+uia | C | P3 | ✅ |  |
@@ -86,7 +86,7 @@
 | Adobe Lightroom | `Lightroom.exe` | uia | C | P2 | — |  |
 | DaVinci Resolve | `Resolve.exe` | api+uia | A | P2 | ✅ | скриптовый API Python/Lua |
 | Spotify | `Spotify.exe` | api+uia | B | P2 | — | Web API (нужен токен) |
-| foobar2000 | `foobar2000.exe` | cli+uia | B | P2 | — | /command |
+| foobar2000 | `foobar2000.exe` | cli+uia | A | P2 | ✅ | /command; профиль готов |
 | Adobe InDesign | `InDesign.exe` | uia+jsx | C | P3 | — |  |
 | Kdenlive | `kdenlive.exe` | api | B | P3 | — | MLT-скрипты, рендер через melt |
 | MusicBee | `MusicBee.exe` | uia | C | P3 | — |  |
@@ -119,7 +119,7 @@
 | HWiNFO | `HWiNFO64.exe` | api | A | P1 | ✅ | shared memory/датчики |
 | KeePassXC | `KeePassXC.exe` | cli | A | P1 | ✅ | keepassxc-cli: чтение записей без UI |
 | PowerToys | `PowerToys.exe` | uia | B | P2 | — | часть функций через API |
-| WinRAR | `WinRAR.exe` | cli | B | P2 | — | rar.exe |
+| WinRAR | `WinRAR.exe` | cli | A | P2 | ✅ | rar.exe; профиль готов |
 | WizTree | `WizTree.exe` | cli | B | P2 | — | экспорт CSV |
 | qBittorrent | `qbittorrent.exe` | api | A | P2 | ✅ | Web API /api/v2, сессии и лимиты |
 | CPU-Z | `cpuz.exe` | uia | C | P3 | — | лучше WMI |
@@ -163,7 +163,7 @@
 | Obsidian | `Obsidian.exe` | cli | A | P1 | ✅ | markdown-файлы напрямую |
 | Zotero | `zotero.exe` | api | A | P1 | ✅ | локальная БД + connector |
 | Calibre | `calibre.exe` | cli | A | P2 | ✅ | ebook-convert |
-| Joplin | `Joplin.exe` | cli | B | P2 | — | CLI + markdown |
+| Joplin | `Joplin.exe` | cli | A | P2 | ✅ | CLI + markdown; профиль готов |
 | OneNote (классический) | `ONENOTE.EXE` | com | B | P2 | — |  |
 | Evernote | `Evernote.exe` | uia | C | P3 | — |  |
 | Kindle | `Kindle.exe` | uia | C | P3 | — |  |
@@ -247,7 +247,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | VirtualBox | `VirtualBox.exe` | cli | A | P1 | ✅ | VBoxManage |
 | Hyper-V Manager | `mmc.exe` | cli | B | P2 | ✅ | PowerShell Hyper-V |
-| VMware Workstation | `vmware.exe` | cli | B | P2 | — | vmrun |
+| VMware Workstation | `vmware.exe` | cli | A | P2 | ✅ | vmrun; профиль готов |
 
 ### Удалённый доступ (3)
 

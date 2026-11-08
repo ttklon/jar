@@ -1,54 +1,122 @@
 {
-  "app": "JetBrains IDE (IDEA / PyCharm / WebStorm)",
-  "exe": ["idea64.exe", "pycharm64.exe", "webstorm64.exe", "studio64.exe"],
+  "app": "JetBrains IDE (IDEA / PyCharm / WebStorm / Rider)",
+  "exe": [
+    "idea64.exe",
+    "pycharm64.exe",
+    "webstorm64.exe",
+    "studio64.exe",
+    "rider64.exe"
+  ],
   "ui_stack": "qt",
   "version_seen": "2025.3 (2026-11)",
   "verified_at": "2026-11-08",
   "anchors": {
-    "cli_launcher": { "by": "api", "value": "bin\\idea64.exe /path/to/project, bin\\idea64.exe diff <a> <b> <out>" },
-    "gradle": { "by": "api", "value": "gradlew.bat build test --console=plain (или mvn -q)" },
-    "inspect_cli": { "by": "api", "value": "bin\\inspect.bat <project> <inspection-profile> <out.xml> (headless-инспекции)", "fallback": "Code → Inspect Code в IDE" },
-    "search_everywhere": { "by": "hotkey", "value": "Shift+Shift" },
-    "find_in_path": { "by": "hotkey", "value": "Ctrl+Shift+F" },
-    "refactor_menu": { "by": "hotkey", "value": "Ctrl+Alt+Shift+T" },
-    "run_tests": { "by": "hotkey", "value": "Ctrl+Shift+F10 (текущий тест)" }
+    "cli_launcher": {
+      "by": "api",
+      "value": "bin\\idea64.exe /path/to/project, bin\\idea64.exe diff <a> <b> <out>"
+    },
+    "gradle": {
+      "by": "api",
+      "value": "gradlew.bat build test --console=plain (или mvn -q)"
+    },
+    "inspect_cli": {
+      "by": "api",
+      "value": "bin\\inspect.bat <project> <inspection-profile> <out.xml> (headless-инспекции)",
+      "fallback": "Code → Inspect Code в IDE"
+    },
+    "search_everywhere": {
+      "by": "hotkey",
+      "value": "Shift+Shift"
+    },
+    "find_in_path": {
+      "by": "hotkey",
+      "value": "Ctrl+Shift+F"
+    },
+    "refactor_menu": {
+      "by": "hotkey",
+      "value": "Ctrl+Alt+Shift+T"
+    },
+    "run_tests": {
+      "by": "hotkey",
+      "value": "Ctrl+Shift+F10 (текущий тест)"
+    }
   },
   "operations": [
     {
       "name": "Собрать проект и прочитать результат",
       "registry": "dev-code|собрать|релиз",
-      "steps": ["cli:gradlew.bat build --console=plain (или mvn -q -DskipTests package)", "сохранить лог", "при ошибках — прочитать первую, а не последнюю"],
-      "verify": ["код возврата 0", "артефакт сборки существует (jar/build/libs, dist/)", "в логе нет warnings о deprecated API, критичных для релиза"],
+      "steps": [
+        "cli:gradlew.bat build --console=plain (или mvn -q -DskipTests package)",
+        "сохранить лог",
+        "при ошибках — прочитать первую, а не последнюю"
+      ],
+      "verify": [
+        "код возврата 0",
+        "артефакт сборки существует (jar/build/libs, dist/)",
+        "в логе нет warnings о deprecated API, критичных для релиза"
+      ],
       "risk": "write-local",
       "timeouts_ms": 1200000
     },
     {
       "name": "Запустить тесты",
       "registry": "dev-code|запустить|тесты",
-      "steps": ["cli:gradlew.bat test --console=plain", "прочитать отчёт build/reports/tests/test/index.html или XML в build/test-results"],
-      "verify": ["XML-отчёт содержит tests/failures числа", "число тестов > 0", "для упавших — имя класса, метода и сообщение"],
+      "steps": [
+        "cli:gradlew.bat test --console=plain",
+        "прочитать отчёт build/reports/tests/test/index.html или XML в build/test-results"
+      ],
+      "verify": [
+        "XML-отчёт содержит tests/failures числа",
+        "число тестов > 0",
+        "для упавших — имя класса, метода и сообщение"
+      ],
       "risk": "write-local"
     },
     {
       "name": "Найти в коде",
       "registry": "dev-code|найти|в коде",
-      "steps": ["cli:rg -n --hidden -g '!**/build/**' '<строка>' .", "если нужен поиск по символам — Shift+Shift в IDE (Search Everywhere)"],
-      "verify": ["найденные файлы и строки процитированы", "поиск не заглядывал в build/.git (проверка по путям)", "число вхождений посчитано"],
+      "steps": [
+        "cli:rg -n --hidden -g '!**/build/**' '<строка>' .",
+        "если нужен поиск по символам — Shift+Shift в IDE (Search Everywhere)"
+      ],
+      "verify": [
+        "найденные файлы и строки процитированы",
+        "поиск не заглядывал в build/.git (проверка по путям)",
+        "число вхождений посчитано"
+      ],
       "risk": "read"
     },
     {
       "name": "Прогнать инспекции кода",
       "registry": "dev-code|настроить|линтеры и pre-commit",
-      "steps": ["cli:inspect.bat <project> <profile> <out.xml>", "разобрать XML: severity, файл, строка", "разделить: баги / потенциальные проблемы / стиль"],
-      "verify": ["XML создан и разобран", "для каждой проблемы указан файл и строка", "стиль отделён от дефектов — иначе отчёт бесполезен"],
+      "steps": [
+        "cli:inspect.bat <project> <profile> <out.xml>",
+        "разобрать XML: severity, файл, строка",
+        "разделить: баги / потенциальные проблемы / стиль"
+      ],
+      "verify": [
+        "XML создан и разобран",
+        "для каждой проблемы указан файл и строка",
+        "стиль отделён от дефектов — иначе отчёт бесполезен"
+      ],
       "risk": "write-local",
       "notes": "headless-инспекции работают без запуска окна IDE: это дешевле и воспроизводимо в CI"
     },
     {
       "name": "Отрефакторить переименование по проекту",
       "registry": "dev-code|отрефакторить|код",
-      "steps": ["VCS: убедиться, что рабочее дерево чистое (git status)", "Shift+F6 на символе → Rename", "просмотреть превью изменений и подтвердить", "запустить сборку и тесты"],
-      "verify": ["git diff показывает только ожидаемые файлы", "сборка проходит", "тесты зелёные", "нет новых вхождений старого имени (rg)"],
+      "steps": [
+        "VCS: убедиться, что рабочее дерево чистое (git status)",
+        "Shift+F6 на символе → Rename",
+        "просмотреть превью изменений и подтвердить",
+        "запустить сборку и тесты"
+      ],
+      "verify": [
+        "git diff показывает только ожидаемые файлы",
+        "сборка проходит",
+        "тесты зелёные",
+        "нет новых вхождений старого имени (rg)"
+      ],
       "risk": "write-local",
       "on_fail": "откат: git checkout -- <файлы>; без чистого дерева рефакторинг не начинать"
     }
