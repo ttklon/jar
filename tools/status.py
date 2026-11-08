@@ -18,6 +18,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import re
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -152,6 +153,19 @@ def build_block() -> str:
     return "\n".join(L)
 
 
+def check_links(text: str) -> list[str]:
+    """Every relative markdown link in AGENTS.md must resolve — a broken link there
+    is fatal for someone reading this repository for the first time."""
+    broken = []
+    for label, target in re.findall(r"\[([^\]]+)\]\(([^)]+)\)", text):
+        if target.startswith(("http://", "https://", "#", "mailto:")):
+            continue
+        path = (ROOT / target.split("#")[0]).resolve()
+        if not path.exists():
+            broken.append(f"{label} -> {target}")
+    return broken
+
+
 def main() -> int:
     if not AGENTS.exists():
         print("AGENTS.md not found", file=sys.stderr)
@@ -160,6 +174,13 @@ def main() -> int:
     if BEGIN not in text or END not in text:
         print(f"AGENTS.md must contain {BEGIN} and {END}", file=sys.stderr)
         return 2
+    broken = check_links(text)
+    if broken:
+        print("broken links in AGENTS.md:", file=sys.stderr)
+        for b in broken:
+            print("  -", b, file=sys.stderr)
+        return 1
+
     head, rest = text.split(BEGIN, 1)
     _, tail = rest.split(END, 1)
     new = head + build_block() + tail

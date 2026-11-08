@@ -76,25 +76,25 @@
 
 | Файл | Вопрос, на который отвечает | Кто пишет |
 | --- | --- | --- |
-| `data/actions.psv` | «какие способности вообще существуют?» | человек/агент вручную |
-| `data/actions.json`, `docs/ACTIONS.md` | то же, но машиночитаемо и читаемо | **генерируется** `tools/actions.py` |
-| `data/profiles/*.json` | «как сделать это в этой программе?» | вручную, по живому интерфейсу |
-| `data/profiles/_schema.json` | какие поля допустимы в профиле | вручную |
-| `docs/PROFILES.md` | сводка профилей и их проверок | **генерируется** `tools/profiles.py` |
-| `data/app_targets.psv` | «какие приложения мы обязаны вести?» | вручную |
-| `docs/APP-COVERAGE.md` | покрытие каталога, tier, приоритеты | **генерируется** `tools/app_targets.py` |
-| `data/domain_profile_policy.json` | «почему у домена нет профиля: долг или решение?» | вручную |
-| `docs/COVERAGE.md` | дырки: тонкие домены, семейства, глубина, очередь | **генерируется** `tools/audit_actions.py` |
-| `data/evals.json`, `docs/EVALS.md` | «как проверить, что способность работает?» | **генерируется** `tools/evals.py` |
-| `data/verb_families.json` | какие глаголы к каким семействам относятся | вручную |
-| `data/domain_families.json` | какие семейства обязательны для домена | вручную |
+| [`data/actions.psv`](data/actions.psv) | «какие способности вообще существуют?» | человек/агент вручную |
+| [`data/actions.json`](data/actions.json), [`docs/ACTIONS.md`](docs/ACTIONS.md) | то же, но машиночитаемо и читаемо | **генерируется** `tools/actions.py` |
+| [`data/profiles/*.json`](data/profiles) | «как сделать это в этой программе?» | вручную, по живому интерфейсу |
+| [`data/profiles/_schema.json`](data/profiles/_schema.json) | какие поля допустимы в профиле | вручную |
+| [`docs/PROFILES.md`](docs/PROFILES.md) | сводка профилей и их проверок | **генерируется** `tools/profiles.py` |
+| [`data/app_targets.psv`](data/app_targets.psv) | «какие приложения мы обязаны вести?» | вручную |
+| [`docs/APP-COVERAGE.md`](docs/APP-COVERAGE.md) | покрытие каталога, tier, приоритеты | **генерируется** `tools/app_targets.py` |
+| [`data/domain_profile_policy.json`](data/domain_profile_policy.json) | «почему у домена нет профиля: долг или решение?» | вручную |
+| [`docs/COVERAGE.md`](docs/COVERAGE.md) | дырки: тонкие домены, семейства, глубина, очередь | **генерируется** `tools/audit_actions.py` |
+| [`data/evals.json`](data/evals.json), [`docs/EVALS.md`](docs/EVALS.md) | «как проверить, что способность работает?» | **генерируется** `tools/evals.py` |
+| [`data/verb_families.json`](data/verb_families.json) | какие глаголы к каким семействам относятся | вручную |
+| [`data/domain_families.json`](data/domain_families.json) | какие семейства обязательны для домена | вручную |
 | `data/profile_drafts/` | черновики профилей из UIA-дампа | `tools/uia_probe.py`, в релиз не идут |
-| `tools/sources.json`, `research/` | откуда взяты знания и лицензии | `tools/collect_sources.py` |
-| `docs/DECISION-STACK.md` | почему Tauri 2, а не Electron/WinUI | решение, не менять молча |
-| `docs/LICENSING.md` | как продаётся подписка и защищается от копирования | решение |
-| `docs/RUNTIME.md` | как приложение запускается как нормальное десктопное | решение |
-| `docs/PROFILE-STRATEGY.md` | три tier и как покрывать «любое» приложение | решение |
-| `research/notes/NN-*.md` | разбор темы с цифрами и источниками | вручную |
+| [`tools/sources.json`](tools/sources.json), [`research/`](research/) | откуда взяты знания и лицензии | `tools/collect_sources.py` |
+| [`docs/DECISION-STACK.md`](docs/DECISION-STACK.md) | почему Tauri 2, а не Electron/WinUI | решение, не менять молча |
+| [`docs/LICENSING.md`](docs/LICENSING.md) | как продаётся подписка и защищается от копирования | решение |
+| [`docs/RUNTIME.md`](docs/RUNTIME.md) | как приложение запускается как нормальное десктопное | решение |
+| [`docs/PROFILE-STRATEGY.md`](docs/PROFILE-STRATEGY.md) | три tier и как покрывать «любое» приложение | решение |
+| [`research/notes/NN-*.md`](research/notes) | разбор темы с цифрами и источниками | вручную |
 
 ## 4. Пять рецептов: как добавить что-то, не сломав систему
 
