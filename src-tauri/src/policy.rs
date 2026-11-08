@@ -51,7 +51,9 @@ impl Decision {
     pub fn reason(self) -> &'static str {
         match self {
             Decision::Allow => "чтение: можно выполнять без подтверждения",
-            Decision::AllowWithNotice => "изменение в пределах приложения: выполняем и показываем результат",
+            Decision::AllowWithNotice => {
+                "изменение в пределах приложения: выполняем и показываем результат"
+            }
             Decision::Confirm => "нужно подтверждение человеком",
             Decision::Deny(reason) => reason,
         }
