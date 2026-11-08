@@ -28,7 +28,7 @@ ZShelper — Windows 10/11 приложение по подписке: голо�
 | ИИ | сайдкары: `llama.cpp`-server, `whisper.cpp`, PaddleOCR, Piper/Kokoro (localhost HTTP) |
 | Лицензии | Rust-модуль: `ed25519-dalek`, отпечаток устройства + TPM-ключ (NCrypt) |
 | Обновления | `tauri-plugin-updater`, Ed25519-манифест, дельта-обновления |
-| Упаковка | **MSIX** (основной) + **NSIS** (portable/офлайн), подпись Authenticode |
+| Упаковка | **NSIS** (собирает `tauri build`) → **MSIX** отдельным шагом через `MakeAppx` + `AppxManifest`, подпись Authenticode. Tauri 2 не умеет MSIX «из коробки» — проверено на `build.rs`. |
 | Сервер | VPS: Caddy → Axum (или Fastify) → Postgres; выдача лицензий и пакетов умений |
 
 ## Как выглядит запуск у пользователя

@@ -65,7 +65,7 @@
 | --- | --- | --- |
 | Стек | Tauri 2 + Rust-ядро + React 19 + TypeScript strict + Fluent UI v9 | `docs/DECISION-STACK.md` |
 | Рантайм окна | WebView2 (есть в Windows 10/11, при отсутствии — установщик ставит) | `docs/RUNTIME.md` |
-| Пакет | MSIX, подпись, автообновление через манифест | `docs/RUNTIME.md`, `docs/LICENSING.md` |
+| Пакет | NSIS (собирает Tauri) → MSIX отдельным шагом (MakeAppx), подпись Authenticode, автообновление по манифесту | `docs/RUNTIME.md`, `docs/LICENSING.md` |
 | Модели | локальные, GGUF/ONNX, менеджер с SHA-256 и LRU | `research/notes/03-model-catalog.md` |
 | Инференс LLM | `llama-server` (GGUF) как отдельный процесс, HTTP на 127.0.0.1 | §9 |
 | Речь | Silero VAD + whisper.cpp (ASR) + Kokoro/Piper (TTS) + SAPI fallback | §10 |
@@ -750,7 +750,7 @@ python tools/check_all.py           # данные (обязательно пе�
 | `validate` | python-генераторы + `--check` (реестр, профили, скиллы, экосистема, dashboard, ссылки) | каждый push |
 | `ui` | `npm run typecheck` + `npm test` + `npm run build` | каждый push |
 | `core` | на Windows: `cargo clippy -D warnings`, `cargo test`, `cargo fmt --check` | каждый push |
-| `package` | MSIX, подпись (секреты), артефакт | тег `v*` |
+| `package` | `tauri build` (NSIS) + MSIX через MakeAppx, подпись (секреты), артефакт | тег `v*` |
 | `audit` | `cargo deny`, `npm audit`, SBOM | раз в неделю |
 
 Правило: **сгенерированные файлы коммитятся**; `--check` падает на расхождении. Это защита от
@@ -759,7 +759,11 @@ python tools/check_all.py           # данные (обязательно пе�
 ### 18.3 Релиз
 
 1. Версия: `0.x.y` до v1; changelog из коммитов (`git cliff` или руками).
-2. Сборка MSIX, `signtool verify /pa`, проверка на чистой ВМ Windows 11 (без Visual Studio).
+2. Сборка: `tauri build` даёт NSIS-установщик. **MSIX Tauri сам не собирает** —
+   `bundle.targets` принимает `nsis`/`msi`, а попытка указать `msix` валит
+   `build.rs` (`data did not match any variant of untagged enum BundleTargetInner`).
+   MSIX делается отдельным шагом: `MakeAppx pack` + `AppxManifest.xml`, затем
+   `signtool sign`, `signtool verify /pa`, проверка на чистой ВМ без Visual Studio.
 3. Обновление: манифест `latest.json` (stable/beta), sha256, размер; клиент проверяет подпись.
 4. Откат: предыдущий MSIX хранится; «не поднялось» → откат автоматически, лог пользователю.
 5. Телеметрии нет — качество релиза оценивается по добровольным отчётам и нашим прогонам evals.
