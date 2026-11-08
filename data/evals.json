@@ -1,6 +1,6 @@
 {
   "generated_from": "data/actions.psv",
-  "count": 751,
+  "count": 787,
   "curated": [
     {
       "priority": "P0",
@@ -20963,6 +20963,981 @@
       "domain": "distribution",
       "phrase": "F12 не должен открывать отладку",
       "when": "что DevTools недоступны в релизе",
+      "tier": "T0",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-752",
+      "action_id": "music-production-752",
+      "domain": "music-production",
+      "phrase": "сделай бит в стиле трэп",
+      "when": "бит (драм-паттерн)",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-753",
+      "action_id": "music-production-753",
+      "domain": "music-production",
+      "phrase": "придумай мелодию под этот текст",
+      "when": "мелодию и аккорды",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-754",
+      "action_id": "music-production-754",
+      "domain": "music-production",
+      "phrase": "напиши текст про осень",
+      "when": "текст песни",
+      "tier": "T0",
+      "risk": "write-local",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-755",
+      "action_id": "music-production-755",
+      "domain": "music-production",
+      "phrase": "разбери 5 треков этого артиста",
+      "when": "референсы",
+      "tier": "T1",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-756",
+      "action_id": "music-production-756",
+      "domain": "music-production",
+      "phrase": "найди похожие треки",
+      "when": "референсы под задачу",
+      "tier": "T1",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-757",
+      "action_id": "music-production-757",
+      "domain": "music-production",
+      "phrase": "запусти FL Studio с шаблоном",
+      "when": "проект в DAW",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-758",
+      "action_id": "music-production-758",
+      "domain": "music-production",
+      "phrase": "закинь миди в проект",
+      "when": "MIDI в проект",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-759",
+      "action_id": "music-production-759",
+      "domain": "music-production",
+      "phrase": "запиши мой вокал",
+      "when": "вокал",
+      "tier": "T2",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-760",
+      "action_id": "music-production-760",
+      "domain": "music-production",
+      "phrase": "сделай мой голос",
+      "when": "голос (только свой)",
+      "tier": "T3",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-761",
+      "action_id": "music-production-761",
+      "domain": "music-production",
+      "phrase": "спой этот текст моим голосом",
+      "when": "вокал по тексту",
+      "tier": "T3",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-762",
+      "action_id": "music-production-762",
+      "domain": "music-production",
+      "phrase": "выровняй вокал",
+      "when": "питч и тайминг вокала",
+      "tier": "T2",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-763",
+      "action_id": "music-production-763",
+      "domain": "music-production",
+      "phrase": "сведи бит и вокал",
+      "when": "дорожки в микс",
+      "tier": "T2",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-764",
+      "action_id": "music-production-764",
+      "domain": "music-production",
+      "phrase": "сделай мастеринг как у референса",
+      "when": "трек по референсу",
+      "tier": "T2",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-765",
+      "action_id": "music-production-765",
+      "domain": "music-production",
+      "phrase": "вытащи вокал из готового трека",
+      "when": "трек на стемы",
+      "tier": "T3",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-766",
+      "action_id": "music-production-766",
+      "domain": "music-production",
+      "phrase": "сделай инструментал 30 секунд",
+      "when": "инструментал",
+      "tier": "T3",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-767",
+      "action_id": "music-production-767",
+      "domain": "music-production",
+      "phrase": "это не клиппит",
+      "when": "громкость и пики",
+      "tier": "T0",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-768",
+      "action_id": "music-production-768",
+      "domain": "music-production",
+      "phrase": "выгрузи мастер 24 бит",
+      "when": "финальный мастер",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-769",
+      "action_id": "music-production-769",
+      "domain": "music-production",
+      "phrase": "залей на площадки",
+      "when": "трек через дистрибуцию",
+      "tier": "T1",
+      "risk": "external",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": true,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": true
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-770",
+      "action_id": "music-production-770",
+      "domain": "music-production",
+      "phrase": "сделай обложку и теги",
+      "when": "обложку и метаданные",
+      "tier": "T3",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-771",
+      "action_id": "music-production-771",
+      "domain": "music-production",
+      "phrase": "когда выпускать трек",
+      "when": "релиз",
+      "tier": "T0",
+      "risk": "write-local",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-apps-generic-772",
+      "action_id": "apps-generic-772",
+      "domain": "apps-generic",
+      "phrase": "что за кнопки в этом окне",
+      "when": "UIA-дерево приложения",
+      "tier": "T0",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-apps-generic-773",
+      "action_id": "apps-generic-773",
+      "domain": "apps-generic",
+      "phrase": "сделай профиль для этой программы",
+      "when": "профиль приложения по UIA",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-apps-generic-774",
+      "action_id": "apps-generic-774",
+      "domain": "apps-generic",
+      "phrase": "нажми кнопку «Экспорт»",
+      "when": "элемент по описанию",
+      "tier": "T1",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-apps-generic-775",
+      "action_id": "apps-generic-775",
+      "domain": "apps-generic",
+      "phrase": "нажми и убедись что сработало",
+      "when": "по элементу с проверкой",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-apps-generic-776",
+      "action_id": "apps-generic-776",
+      "domain": "apps-generic",
+      "phrase": "запиши как я это делаю",
+      "when": "траекторию действий пользователя",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-apps-generic-777",
+      "action_id": "apps-generic-777",
+      "domain": "apps-generic",
+      "phrase": "повтори мои шаги",
+      "when": "траекторию с проверками",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-apps-generic-778",
+      "action_id": "apps-generic-778",
+      "domain": "apps-generic",
+      "phrase": "кнопка переехала — поправь",
+      "when": "профиль к новой версии",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-apps-generic-779",
+      "action_id": "apps-generic-779",
+      "domain": "apps-generic",
+      "phrase": "оно вообще запустилось",
+      "when": "что приложение открылось",
+      "tier": "T0",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-apps-generic-780",
+      "action_id": "apps-generic-780",
+      "domain": "apps-generic",
+      "phrase": "чем автоматизировать это приложение",
+      "when": "тип интерфейса",
+      "tier": "T0",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-apps-generic-781",
+      "action_id": "apps-generic-781",
+      "domain": "apps-generic",
+      "phrase": "нет UIA — работай глазами",
+      "when": "до визуального агента",
+      "tier": "T1",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-dev-code-782",
+      "action_id": "dev-code-782",
+      "domain": "dev-code",
+      "phrase": "что изменилось в проекте",
+      "when": "состояние репозитория",
+      "tier": "T0",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "тесты зелёные",
+        "сборка проходит",
+        "диff соответствует заявленному"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-video-783",
+      "action_id": "video-783",
+      "domain": "video",
+      "phrase": "включи этот фильм",
+      "when": "файл или плейлист",
+      "tier": "T0",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "ffprobe: кодек/разрешение/длительность",
+        "нет рассинхрона"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-784",
+      "action_id": "music-production-784",
+      "domain": "music-production",
+      "phrase": "не украл ли я строку",
+      "when": "текст на плагиат",
+      "tier": "T0",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-785",
+      "action_id": "music-production-785",
+      "domain": "music-production",
+      "phrase": "запиши 20 минут моего голоса",
+      "when": "сэмплы голоса для клонирования",
+      "tier": "T2",
+      "risk": "write-local",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-786",
+      "action_id": "music-production-786",
+      "domain": "music-production",
+      "phrase": "вокал звучит чисто",
+      "when": "качество вокала",
+      "tier": "T2",
+      "risk": "read",
+      "status": "v2",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-music-production-787",
+      "action_id": "music-production-787",
+      "domain": "music-production",
+      "phrase": "покажи бит и спроси",
+      "when": "этап с пользователем",
       "tier": "T0",
       "risk": "read",
       "status": "v1",

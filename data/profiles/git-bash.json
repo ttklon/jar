@@ -1,0 +1,90 @@
+{
+  "app": "Git for Windows (git-bash / git.exe)",
+  "exe": [
+    "git-bash.exe",
+    "git.exe",
+    "bash.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "2.4x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": {
+      "by": "api",
+      "value": "git -C <repo> <subcommand> --no-pager"
+    },
+    "credential": {
+      "by": "api",
+      "value": "credential manager / SSH-агент; токены только из secrets.enc"
+    }
+  },
+  "operations": [
+    {
+      "name": "Проверить состояние репозитория",
+      "registry": "dev-code|показать|состояние репозитория",
+      "steps": [
+        "cli:git -C <repo> status --porcelain=v2 --branch",
+        "cli:git -C <repo> log -1 --format=%H"
+      ],
+      "verify": [
+        "ветка и коммит прочитаны",
+        "exit code 0"
+      ],
+      "risk": "read"
+    },
+    {
+      "name": "Сделать локальный коммит",
+      "registry": "dev-code|зафиксировать|изменения локально",
+      "steps": [
+        "cli:git add -A",
+        "cli:git commit -m '<msg>' --no-verify? (нет — хуки оставляем)"
+      ],
+      "verify": [
+        "git log -1 содержит сообщение",
+        "git status чистый по этим путям"
+      ],
+      "risk": "write-local",
+      "notes": "pre-commit хуки не обходим: если падают — показываем причину"
+    },
+    {
+      "name": "Отправить изменения в удалённый репозиторий",
+      "registry": "dev-code|работать|с git",
+      "steps": [
+        "показать пользователю diff --stat",
+        "cli:git push <remote> <branch>"
+      ],
+      "verify": [
+        "git status -sb показывает 'ahead 0'",
+        "удалённая ветка содержит новый SHA (git ls-remote)"
+      ],
+      "risk": "external",
+      "on_fail": "не ретраить force-push; сообщить и остановиться"
+    },
+    {
+      "name": "Найти, кто и когда изменил строку",
+      "registry": "dev-code|найти|в коде",
+      "steps": [
+        "cli:git -C <repo> log -L '<start>,<end>:<file>'",
+        "cli:git blame -L"
+      ],
+      "verify": [
+        "получен список коммитов с авторами и датами"
+      ],
+      "risk": "read"
+    },
+    {
+      "name": "Безопасно отменить локальные правки",
+      "registry": "automation|откатить|изменения",
+      "steps": [
+        "создать stash: git stash push -u",
+        "проверить: рабочее дерево чистое"
+      ],
+      "verify": [
+        "git status чистый",
+        "stash list содержит запись (данные не потеряны)"
+      ],
+      "risk": "destructive",
+      "notes": "никогда не `git checkout -- .` без stash: это необратимо для незакоммиченного"
+    }
+  ]
+}

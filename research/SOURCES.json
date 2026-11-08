@@ -1242,6 +1242,34 @@
   {
     "id": "github:MTG/essentia",
     "kind": "github",
+    "category": "daw-music-production",
+    "repo": "MTG/essentia",
+    "url": "https://github.com/MTG/essentia",
+    "description": "C++ library for audio and music analysis, description and synthesis, including Python bindings",
+    "stars": 3796,
+    "forks": 643,
+    "language": "C++",
+    "license": "AGPL-3.0",
+    "topics": [
+      "audio",
+      "audio-analysis",
+      "c-plus-plus",
+      "dsp",
+      "essentia",
+      "music",
+      "music-information-retrieval",
+      "python",
+      "sound-processing"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-05T14:09:22Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/MTG__essentia/README.md"
+  },
+  {
+    "id": "github:MTG/essentia",
+    "kind": "github",
     "category": "music-audio",
     "repo": "MTG/essentia",
     "url": "https://github.com/MTG/essentia",
@@ -2015,6 +2043,40 @@
     "_path": "research/sources/inference-runtimes/ROCm__ROCm/README.md"
   },
   {
+    "id": "github:RVC-Project/Retrieval-based-Voice-Conversion-WebUI",
+    "kind": "github",
+    "category": "voice-cloning-svc",
+    "repo": "RVC-Project/Retrieval-based-Voice-Conversion-WebUI",
+    "url": "https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI",
+    "description": "Easily train a good VC model with voice data <= 10 mins!",
+    "stars": 39113,
+    "forks": 5348,
+    "language": "Python",
+    "license": "MIT",
+    "topics": [
+      "audio-analysis",
+      "change",
+      "conversational-ai",
+      "conversion",
+      "converter",
+      "retrieval-model",
+      "retrieve-data",
+      "rvc",
+      "so-vits-svc",
+      "sovits",
+      "vc",
+      "vits",
+      "voice",
+      "voice-conversion",
+      "voice-converter"
+    ],
+    "archived": false,
+    "pushed_at": "2026-08-04T07:47:32Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/voice-cloning-svc/RVC-Project__Retrieval-based-Voice-Conversion-WebUI/README.md"
+  },
+  {
     "id": "github:Raphire/Win11Debloat",
     "kind": "github",
     "category": "system-triage",
@@ -2626,6 +2688,24 @@
     "default_branch": "develop",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/updates/Squirrel__Squirrel.Windows/README.md"
+  },
+  {
+    "id": "github:Stability-AI/stable-audio-tools",
+    "kind": "github",
+    "category": "music-ai-generation",
+    "repo": "Stability-AI/stable-audio-tools",
+    "url": "https://github.com/Stability-AI/stable-audio-tools",
+    "description": "Generative models for conditional audio generation",
+    "stars": 3901,
+    "forks": 490,
+    "language": "Python",
+    "license": "MIT",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-01T04:15:33Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/music-ai-generation/Stability-AI__stable-audio-tools/README.md"
   },
   {
     "id": "github:Stirling-Tools/Stirling-PDF",
@@ -5113,6 +5193,24 @@
   {
     "id": "github:cuthbertLab/music21",
     "kind": "github",
+    "category": "daw-music-production",
+    "repo": "cuthbertLab/music21",
+    "url": "https://github.com/cuthbertLab/music21",
+    "description": "music21: a Toolkit for Computer-Aided Musical Analysis and Computational Musicology",
+    "stars": 2619,
+    "forks": 467,
+    "language": "Python",
+    "license": "BSD-3-Clause",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-03T04:37:46Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/cuthbertLab__music21/README.md"
+  },
+  {
+    "id": "github:cuthbertLab/music21",
+    "kind": "github",
     "category": "music-audio",
     "repo": "cuthbertLab/music21",
     "url": "https://github.com/cuthbertLab/music21",
@@ -5285,6 +5383,31 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/dbos-inc__dbos-transact-py/README.md"
+  },
+  {
+    "id": "github:declare-lab/tango",
+    "kind": "github",
+    "category": "music-ai-generation",
+    "repo": "declare-lab/tango",
+    "url": "https://github.com/declare-lab/tango",
+    "description": "A family of diffusion models for text-to-audio generation.",
+    "stars": 1243,
+    "forks": 103,
+    "language": "Python",
+    "license": "NOASSERTION",
+    "topics": [
+      "audio-generation",
+      "diffusion",
+      "diffusion-models",
+      "language-models",
+      "large-language-models",
+      "text-to-audio"
+    ],
+    "archived": false,
+    "pushed_at": "2025-07-29T02:13:29Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/music-ai-generation/declare-lab__tango/README.md"
   },
   {
     "id": "github:deepseek-ai/DeepSeek-OCR",
@@ -6547,6 +6670,42 @@
     "_path": "research/sources/updates/facebook__zstd/README.md"
   },
   {
+    "id": "github:facebookresearch/audiocraft",
+    "kind": "github",
+    "category": "music-ai-generation",
+    "repo": "facebookresearch/audiocraft",
+    "url": "https://github.com/facebookresearch/audiocraft",
+    "description": "Audiocraft is a library for audio processing and generation with deep learning. It features the state-of-the-art EnCodec audio compressor / tokenizer, along with MusicGen, a simple and controllable music generation LM with textual and melodic conditioning.",
+    "stars": 23834,
+    "forks": 2715,
+    "language": "Jupyter Notebook",
+    "license": "MIT",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-03-03T21:50:32Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/music-ai-generation/facebookresearch__audiocraft/README.md"
+  },
+  {
+    "id": "github:facebookresearch/demucs",
+    "kind": "github",
+    "category": "daw-music-production",
+    "repo": "facebookresearch/demucs",
+    "url": "https://github.com/facebookresearch/demucs",
+    "description": "Code for the paper Hybrid Spectrogram and Waveform Source Separation",
+    "stars": 10405,
+    "forks": 1675,
+    "language": "Python",
+    "license": "MIT",
+    "topics": [],
+    "archived": true,
+    "pushed_at": "2024-04-24T20:25:19Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/facebookresearch__demucs/README.md"
+  },
+  {
     "id": "github:facebookresearch/demucs",
     "kind": "github",
     "category": "music-audio",
@@ -6633,6 +6792,40 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/system-triage/farag2__Sophia-Script-for-Windows/README.md"
+  },
+  {
+    "id": "github:ffmpeg/ffmpeg",
+    "kind": "github",
+    "category": "daw-music-production",
+    "repo": "ffmpeg/ffmpeg",
+    "url": "https://github.com/ffmpeg/ffmpeg",
+    "description": "Mirror of https://git.ffmpeg.org/ffmpeg.git",
+    "stars": 66743,
+    "forks": 14543,
+    "language": "C",
+    "license": "NOASSERTION",
+    "topics": [
+      "audio",
+      "c",
+      "ffmpeg",
+      "fft",
+      "hevc",
+      "hls",
+      "matroska",
+      "mp4",
+      "mpeg",
+      "multimedia",
+      "rtmp",
+      "rtsp",
+      "streaming",
+      "video",
+      "webm"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T13:08:02Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/ffmpeg__ffmpeg/README.md"
   },
   {
     "id": "github:firefly-iii/firefly-iii",
@@ -7600,6 +7793,26 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/perf-optimization/guidance-ai__guidance/README.md"
+  },
+  {
+    "id": "github:haoheliu/AudioLDM2",
+    "kind": "github",
+    "category": "music-ai-generation",
+    "repo": "haoheliu/AudioLDM2",
+    "url": "https://github.com/haoheliu/AudioLDM2",
+    "description": "Text-to-Audio/Music Generation",
+    "stars": 2644,
+    "forks": 209,
+    "language": "Python",
+    "license": "NOASSERTION",
+    "topics": [
+      "audio-generation"
+    ],
+    "archived": false,
+    "pushed_at": "2024-09-29T15:05:21Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/music-ai-generation/haoheliu__AudioLDM2/README.md"
   },
   {
     "id": "github:hatchet-dev/hatchet",
@@ -9751,6 +9964,31 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T12:43:21Z",
     "_path": "research/sources/devices-peripherals/libimobiledevice__usbmuxd/README.md"
+  },
+  {
+    "id": "github:librosa/librosa",
+    "kind": "github",
+    "category": "daw-music-production",
+    "repo": "librosa/librosa",
+    "url": "https://github.com/librosa/librosa",
+    "description": "Python library for audio and music analysis",
+    "stars": 8807,
+    "forks": 1101,
+    "language": "Python",
+    "license": "ISC",
+    "topics": [
+      "audio",
+      "dsp",
+      "librosa",
+      "music",
+      "python",
+      "scipy"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T21:45:58Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/librosa__librosa/README.md"
   },
   {
     "id": "github:librosa/librosa",
@@ -12249,6 +12487,28 @@
     "_path": "research/sources/connectors/microsoftgraph__msgraph-sdk-python/README.md"
   },
   {
+    "id": "github:mido/mido",
+    "kind": "github",
+    "category": "daw-music-production",
+    "repo": "mido/mido",
+    "url": "https://github.com/mido/mido",
+    "description": "MIDI Objects for Python",
+    "stars": 1658,
+    "forks": 296,
+    "language": "Python",
+    "license": "MIT",
+    "topics": [
+      "midi",
+      "midifile",
+      "python"
+    ],
+    "archived": false,
+    "pushed_at": "2026-10-31T16:24:04Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/mido__mido/README.md"
+  },
+  {
     "id": "github:mifi/lossless-cut",
     "kind": "github",
     "category": "media-production",
@@ -14338,6 +14598,35 @@
     "_path": "research/sources/inference-runtimes/openvinotoolkit__openvino.genai/README.md"
   },
   {
+    "id": "github:openvpi/DiffSinger",
+    "kind": "github",
+    "category": "voice-cloning-svc",
+    "repo": "openvpi/DiffSinger",
+    "url": "https://github.com/openvpi/DiffSinger",
+    "description": "An advanced singing voice synthesis system with high fidelity, expressiveness, controllability and flexibility based on DiffSinger: Singing Voice Synthesis via Shallow Diffusion Mechanism",
+    "stars": 3237,
+    "forks": 354,
+    "language": "Python",
+    "license": "Apache-2.0",
+    "topics": [
+      "acoustic-model",
+      "diffusion",
+      "diffussion-model",
+      "melody-frontend",
+      "midi",
+      "pitch-prediction",
+      "rectified-flow",
+      "singing-voice",
+      "singing-voice-synthesis",
+      "svs"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-03T10:16:39Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/voice-cloning-svc/openvpi__DiffSinger/README.md"
+  },
+  {
     "id": "github:oraios/serena",
     "kind": "github",
     "category": "mcp-and-tools",
@@ -16074,6 +16363,40 @@
     "_path": "research/sources/windows-automation/sentialx__node-window-manager/README.md"
   },
   {
+    "id": "github:sergree/matchering",
+    "kind": "github",
+    "category": "daw-music-production",
+    "repo": "sergree/matchering",
+    "url": "https://github.com/sergree/matchering",
+    "description": "🎚️ Open Source Audio Matching and Mastering",
+    "stars": 2684,
+    "forks": 297,
+    "language": "Python",
+    "license": "GPL-3.0",
+    "topics": [
+      "audio",
+      "docker-image",
+      "dsp",
+      "equalizer",
+      "filter",
+      "limiter",
+      "mastering",
+      "matchering",
+      "matching",
+      "music",
+      "numpy",
+      "python",
+      "python-library",
+      "python3",
+      "scipy"
+    ],
+    "archived": false,
+    "pushed_at": "2026-10-07T14:04:36Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/sergree__matchering/README.md"
+  },
+  {
     "id": "github:sgl-project/sglang",
     "kind": "github",
     "category": "inference-runtimes",
@@ -16788,6 +17111,37 @@
     "_path": "research/sources/memory-and-rag/spotify__annoy/README.md"
   },
   {
+    "id": "github:spotify/pedalboard",
+    "kind": "github",
+    "category": "daw-music-production",
+    "repo": "spotify/pedalboard",
+    "url": "https://github.com/spotify/pedalboard",
+    "description": "🎛 🔊 A Python library for audio.",
+    "stars": 6467,
+    "forks": 373,
+    "language": "C++",
+    "license": "GPL-3.0",
+    "topics": [
+      "audio",
+      "audio-processing",
+      "audio-production",
+      "audio-research",
+      "audio-unit",
+      "augmentation",
+      "juce",
+      "machine-learning",
+      "pybind11",
+      "python",
+      "vst3",
+      "vst3-host"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-03T20:21:12Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/spotify__pedalboard/README.md"
+  },
+  {
     "id": "github:spotify/web-api",
     "kind": "github",
     "category": "connectors",
@@ -17002,6 +17356,40 @@
     "default_branch": "next",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/ui-ux/storybookjs__storybook/README.md"
+  },
+  {
+    "id": "github:svc-develop-team/so-vits-svc",
+    "kind": "github",
+    "category": "voice-cloning-svc",
+    "repo": "svc-develop-team/so-vits-svc",
+    "url": "https://github.com/svc-develop-team/so-vits-svc",
+    "description": "SoftVC VITS Singing Voice Conversion",
+    "stars": 28048,
+    "forks": 5011,
+    "language": "Python",
+    "license": "AGPL-3.0",
+    "topics": [
+      "ai",
+      "audio-analysis",
+      "deep-learning",
+      "flow",
+      "generative-adversarial-network",
+      "pytorch",
+      "singing-voice-conversion",
+      "so-vits-svc",
+      "sovits",
+      "speech",
+      "variational-inference",
+      "vc",
+      "vits",
+      "voice",
+      "voice-changer"
+    ],
+    "archived": true,
+    "pushed_at": "2023-11-11T13:11:31Z",
+    "default_branch": "4.1-Stable",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/voice-cloning-svc/svc-develop-team__so-vits-svc/README.md"
   },
   {
     "id": "github:swisskyrepo/PayloadsAllTheThings",
@@ -24528,6 +24916,20 @@
     "_path": "research/sources/academic-writing/pypi__arxiv.md"
   },
   {
+    "id": "pypi:audiocraft",
+    "kind": "pypi",
+    "category": "music-ai-generation",
+    "package": "audiocraft",
+    "version": "1.3.0",
+    "url": "https://pypi.org/project/audiocraft/",
+    "home_page": "https://github.com/facebookresearch/audiocraft",
+    "license": "MIT License",
+    "requires_python": ">=3.8.0",
+    "summary": "Audio generation research library for PyTorch",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/music-ai-generation/pypi__audiocraft.md"
+  },
+  {
     "id": "pypi:audioread",
     "kind": "pypi",
     "category": "media-production",
@@ -25066,6 +25468,19 @@
   {
     "id": "pypi:demucs",
     "kind": "pypi",
+    "category": "daw-music-production",
+    "package": "demucs",
+    "version": "4.1.0",
+    "url": "https://pypi.org/project/demucs/",
+    "license": "MIT License",
+    "requires_python": ">=3.10",
+    "summary": "Music source separation in the waveform domain.",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/pypi__demucs.md"
+  },
+  {
+    "id": "pypi:demucs",
+    "kind": "pypi",
     "category": "music-audio",
     "package": "demucs",
     "version": "4.1.0",
@@ -25075,6 +25490,20 @@
     "summary": "Music source separation in the waveform domain.",
     "fetched_at": "2026-11-08T13:04:20Z",
     "_path": "research/sources/music-audio/pypi__demucs.md"
+  },
+  {
+    "id": "pypi:diffusers",
+    "kind": "pypi",
+    "category": "music-ai-generation",
+    "package": "diffusers",
+    "version": "0.42.1",
+    "url": "https://pypi.org/project/diffusers/",
+    "home_page": "https://github.com/huggingface/diffusers",
+    "license": "Apache 2.0 License",
+    "requires_python": ">=3.11.0",
+    "summary": "State-of-the-art diffusion in PyTorch.",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/music-ai-generation/pypi__diffusers.md"
   },
   {
     "id": "pypi:discord.py",
@@ -26188,6 +26617,20 @@
   {
     "id": "pypi:librosa",
     "kind": "pypi",
+    "category": "daw-music-production",
+    "package": "librosa",
+    "version": "1.0.0",
+    "url": "https://pypi.org/project/librosa/",
+    "home_page": "https://librosa.org",
+    "license": "ISC",
+    "requires_python": ">=3.12",
+    "summary": "Python module for audio and music processing",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/pypi__librosa.md"
+  },
+  {
+    "id": "pypi:librosa",
+    "kind": "pypi",
     "category": "media-production",
     "package": "librosa",
     "version": "1.0.0",
@@ -26212,6 +26655,20 @@
     "summary": "Python module for audio and music processing",
     "fetched_at": "2026-11-08T13:04:20Z",
     "_path": "research/sources/music-audio/pypi__librosa.md"
+  },
+  {
+    "id": "pypi:librosa",
+    "kind": "pypi",
+    "category": "voice-cloning-svc",
+    "package": "librosa",
+    "version": "1.0.0",
+    "url": "https://pypi.org/project/librosa/",
+    "home_page": "https://librosa.org",
+    "license": "ISC",
+    "requires_python": ">=3.12",
+    "summary": "Python module for audio and music processing",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/voice-cloning-svc/pypi__librosa.md"
   },
   {
     "id": "pypi:libvirt-python",
@@ -26371,6 +26828,20 @@
     "_path": "research/sources/documents-ocr/pypi__markitdown.md"
   },
   {
+    "id": "pypi:matchering",
+    "kind": "pypi",
+    "category": "daw-music-production",
+    "package": "matchering",
+    "version": "2.0.6",
+    "url": "https://pypi.org/project/matchering/",
+    "home_page": "https://github.com/sergree/matchering",
+    "license": "GPLv3",
+    "requires_python": ">=3.8",
+    "summary": "Audio Matching and Mastering Python Library",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/pypi__matchering.md"
+  },
+  {
     "id": "pypi:matplotlib",
     "kind": "pypi",
     "category": "design-3d",
@@ -26499,6 +26970,19 @@
     "_path": "research/sources/memory-and-rag/pypi__mem0ai.md"
   },
   {
+    "id": "pypi:mido",
+    "kind": "pypi",
+    "category": "daw-music-production",
+    "package": "mido",
+    "version": "1.3.3",
+    "url": "https://pypi.org/project/mido/",
+    "license": "MIT",
+    "requires_python": "~=3.7",
+    "summary": "MIDI Objects for Python",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/pypi__mido.md"
+  },
+  {
     "id": "pypi:mouse",
     "kind": "pypi",
     "category": "system-control",
@@ -26575,6 +27059,18 @@
     "summary": "An ultra fast cross-platform multiple screenshots module in pure python using ctypes.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/pypi__mss.md"
+  },
+  {
+    "id": "pypi:music21",
+    "kind": "pypi",
+    "category": "daw-music-production",
+    "package": "music21",
+    "version": "10.5.2",
+    "url": "https://pypi.org/project/music21/",
+    "requires_python": ">=3.11",
+    "summary": "A Toolkit for Computer-Aided Musical Analysis and Computational Musicology.",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/pypi__music21.md"
   },
   {
     "id": "pypi:music21",
@@ -27367,6 +27863,19 @@
     "_path": "research/sources/office-automation/pypi__pdfplumber.md"
   },
   {
+    "id": "pypi:pedalboard",
+    "kind": "pypi",
+    "category": "daw-music-production",
+    "package": "pedalboard",
+    "version": "0.9.26",
+    "url": "https://pypi.org/project/pedalboard/",
+    "license": "GNU GENERAL PUBLIC LICENSE",
+    "requires_python": ">=3.10",
+    "summary": "A Python library for adding effects to audio.",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/pypi__pedalboard.md"
+  },
+  {
     "id": "pypi:pefile",
     "kind": "pypi",
     "category": "code-signing-msix",
@@ -27543,6 +28052,20 @@
     "_path": "research/sources/perf-optimization/pypi__polars.md"
   },
   {
+    "id": "pypi:praat-parselmouth",
+    "kind": "pypi",
+    "category": "voice-cloning-svc",
+    "package": "praat-parselmouth",
+    "version": "0.4.7",
+    "url": "https://pypi.org/project/praat-parselmouth/",
+    "home_page": "https://github.com/YannickJadoul/Parselmouth",
+    "license": "GPLv3",
+    "requires_python": "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7",
+    "summary": "Praat in Python, the Pythonic way",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/voice-cloning-svc/pypi__praat-parselmouth.md"
+  },
+  {
     "id": "pypi:pre-commit",
     "kind": "pypi",
     "category": "coding-agents",
@@ -27604,6 +28127,19 @@
     "summary": "Presidio Anonymizer package - replaces analyzed text with desired values.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/pypi__presidio-anonymizer.md"
+  },
+  {
+    "id": "pypi:pretty-midi",
+    "kind": "pypi",
+    "category": "daw-music-production",
+    "package": "pretty-midi",
+    "version": "0.2.11.post0",
+    "url": "https://pypi.org/project/pretty-midi/",
+    "home_page": "https://github.com/craffel/pretty-midi",
+    "license": "MIT",
+    "summary": "Functions and classes for handling MIDI data conveniently.",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/pypi__pretty-midi.md"
   },
   {
     "id": "pypi:prometheus-client",
@@ -28610,6 +29146,18 @@
     "_path": "research/sources/virtualization-remote/pypi__pywinrm.md"
   },
   {
+    "id": "pypi:pyworld",
+    "kind": "pypi",
+    "category": "voice-cloning-svc",
+    "package": "pyworld",
+    "version": "0.3.6",
+    "url": "https://pypi.org/project/pyworld/",
+    "home_page": "https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder",
+    "summary": "PyWorld: a Python wrapper for WORLD vocoder",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/voice-cloning-svc/pypi__pyworld.md"
+  },
+  {
     "id": "pypi:qdrant-client",
     "kind": "pypi",
     "category": "memory-and-rag",
@@ -29280,6 +29828,20 @@
   {
     "id": "pypi:soundfile",
     "kind": "pypi",
+    "category": "daw-music-production",
+    "package": "soundfile",
+    "version": "0.14.0",
+    "url": "https://pypi.org/project/soundfile/",
+    "home_page": "https://github.com/bastibe/python-soundfile",
+    "license": "BSD 3-Clause License",
+    "requires_python": ">=3.10",
+    "summary": "An audio library based on libsndfile, CFFI and NumPy",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/daw-music-production/pypi__soundfile.md"
+  },
+  {
+    "id": "pypi:soundfile",
+    "kind": "pypi",
     "category": "media-production",
     "package": "soundfile",
     "version": "0.14.0",
@@ -29594,6 +30156,32 @@
     "_path": "research/sources/perf-optimization/pypi__torchao.md"
   },
   {
+    "id": "pypi:torchaudio",
+    "kind": "pypi",
+    "category": "music-ai-generation",
+    "package": "torchaudio",
+    "version": "2.11.1",
+    "url": "https://pypi.org/project/torchaudio/",
+    "home_page": "https://github.com/pytorch/audio",
+    "requires_python": ">=3.10",
+    "summary": "An audio package for PyTorch",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/music-ai-generation/pypi__torchaudio.md"
+  },
+  {
+    "id": "pypi:torchcrepe",
+    "kind": "pypi",
+    "category": "voice-cloning-svc",
+    "package": "torchcrepe",
+    "version": "0.0.24",
+    "url": "https://pypi.org/project/torchcrepe/",
+    "home_page": "https://github.com/maxrmorrison/torchcrepe",
+    "license": "MIT",
+    "summary": "Pytorch implementation of CREPE pitch tracker",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/voice-cloning-svc/pypi__torchcrepe.md"
+  },
+  {
     "id": "pypi:trafilatura",
     "kind": "pypi",
     "category": "academic-writing",
@@ -29632,6 +30220,20 @@
     "summary": "Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training.",
     "fetched_at": "2026-11-08T11:47:22Z",
     "_path": "research/sources/low-end-inference/pypi__transformers.md"
+  },
+  {
+    "id": "pypi:transformers",
+    "kind": "pypi",
+    "category": "music-ai-generation",
+    "package": "transformers",
+    "version": "5.22.2",
+    "url": "https://pypi.org/project/transformers/",
+    "home_page": "https://github.com/huggingface/transformers",
+    "license": "Apache 2.0 License",
+    "requires_python": ">=3.11.0",
+    "summary": "Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training.",
+    "fetched_at": "2026-11-08T13:28:58Z",
+    "_path": "research/sources/music-ai-generation/pypi__transformers.md"
   },
   {
     "id": "pypi:transformers",

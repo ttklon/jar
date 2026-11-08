@@ -6,7 +6,7 @@
 
 Файл генерируется `python3 tools/profiles.py`; руками не править.
 
-**Профилей: 16** · операций: **112** · проблем: **0**
+**Профилей: 25** · операций: **155** · проблем: **0**
 
 Правила (проверяются автоматически, ошибка = ненулевой код возврата):
 
@@ -19,51 +19,64 @@
 | Приложение | Процесс | Стек | Версия | Проверен | Якорей | Операций | Файл |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1С:Предприятие 8 (тонкий/толстый клиент) | `1cv8.exe, 1cv8c.exe` | win32 | 8.3.x (2026-11) | 2026-11-08 | 5 | 6 | `1c.json` |
+| 7-Zip | `7zFM.exe, 7z.exe, 7zG.exe` | win32 | 24.x (2026-11) | 2026-11-08 | 2 | 4 | `7zip.json` |
 | Adobe Photoshop | `Photoshop.exe` | win32 | 2026 (v27) | 2026-11-08 | 8 | 8 | `photoshop.json` |
 | Adobe Premiere Pro | `Adobe Premiere Pro.exe` | win32 | 2026 (v26) | 2026-11-08 | 8 | 7 | `premiere.json` |
+| Blender | `blender.exe` | qt | 4.x (2026-11) | 2026-11-08 | 3 | 5 | `blender.json` |
 | CapCut (Desktop) | `CapCut.exe` | electron | 6.x (2026-11) | 2026-11-08 | 6 | 9 | `capcut.json` |
 | Chrome / Edge / Yandex (Chromium) | `chrome.exe, msedge.exe, browser.exe` | web | Chrome 131+ / Edge 131+ | 2026-11-08 | 7 | 8 | `browser.json` |
 | Discord (desktop) | `Discord.exe` | electron | 0.0.9x (2026-11) | 2026-11-08 | 5 | 6 | `discord.json` |
+| FL Studio | `FL64.exe, FL.exe` | win32 | FL Studio 2024/2025 (2026-11) | 2026-11-08 | 8 | 6 | `flstudio.json` |
 | Figma (desktop / web) | `Figma.exe, chrome.exe` | web | 2026-11 | 2026-11-08 | 6 | 6 | `figma.json` |
+| Git for Windows (git-bash / git.exe) | `git-bash.exe, git.exe, bash.exe` | win32 | 2.4x (2026-11) | 2026-11-08 | 2 | 5 | `git-bash.json` |
+| HandBrake | `HandBrake.exe, HandBrakeCLI.exe` | win32 | 1.9.x (2026-11) | 2026-11-08 | 2 | 4 | `handbrake.json` |
 | Microsoft Excel | `EXCEL.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 4 | 8 | `excel.json` |
 | Microsoft Outlook (классический и новый) | `OUTLOOK.EXE, olk.exe` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 8 | 7 | `outlook.json` |
 | Microsoft Word | `WINWORD.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 7 | 8 | `word.json` |
 | OBS Studio | `obs64.exe` | qt | 31.x (2026-11) | 2026-11-08 | 7 | 7 | `obs.json` |
+| PowerShell 7 / Windows PowerShell | `pwsh.exe, powershell.exe` | win32 | 7.5 / 5.1 (2026-11) | 2026-11-08 | 3 | 5 | `powershell.json` |
+| REAPER | `reaper.exe` | win32 | 7.x (2026-11) | 2026-11-08 | 4 | 5 | `reaper.json` |
 | Steam | `steam.exe, steamwebhelper.exe` | electron | 2026-11 | 2026-11-08 | 6 | 6 | `steam.json` |
 | Telegram Desktop | `Telegram.exe` | qt | 5.x (2026-11) | 2026-11-08 | 5 | 6 | `telegram.json` |
+| VLC media player | `vlc.exe` | win32 | 3.0.x (2026-11) | 2026-11-08 | 4 | 5 | `vlc.json` |
 | Visual Studio Code | `Code.exe` | electron | 1.9x (2026-11) | 2026-11-08 | 7 | 7 | `vscode.json` |
 | Банк (веб-кабинет и десктоп-клиент) — только чтение | `chrome.exe, msedge.exe, browser.exe` | web | 2026-11 | 2026-11-08 | 5 | 6 | `bank.json` |
+| Командная строка (cmd.exe) и пакетные файлы | `cmd.exe` | win32 | Windows 10/11 (2026-11) | 2026-11-08 | 2 | 4 | `cmd.json` |
 | Проводник Windows | `explorer.exe` | uia | Windows 11 24H2 / Windows 10 22H2 | 2026-11-08 | 6 | 7 | `explorer.json` |
 
 ## Риск операций
 
-- `write-local` — 69
-- `read` — 27
-- `external` — 12
-- `destructive` — 2
+- `write-local` — 95
+- `read` — 39
+- `external` — 14
+- `destructive` — 5
 - `money` — 1
 - `identity` — 1
 
 ## Покрытие доменов реестра
 
-- `video` — 17
+- `video` — 26
+- `files` — 13
 - `chat-social` — 12
+- `dev-code` — 12
+- `music-production` — 10
+- `creative-3d` — 8
 - `web` — 8
-- `dev-code` — 8
 - `images` — 8
 - `text-docs` — 8
-- `files` — 7
 - `email` — 7
 - `business-finance` — 6
 - `personal-finance` — 6
 - `games` — 6
 - `sheets-data` — 5
-- `creative-3d` — 4
+- `automation` — 5
 - `video-production` — 3
-- `automation` — 2
-- `audio` — 2
+- `processes-services` — 3
+- `audio` — 3
+- `apps-windows` — 2
+- `engineering-3d` — 1
+- `distribution` — 1
 - `slides-pdf-print` — 1
-- `apps-windows` — 1
 - `accessibility` — 1
 
 ## Проблемы

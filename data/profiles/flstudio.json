@@ -1,0 +1,66 @@
+{
+  "app": "FL Studio",
+  "exe": ["FL64.exe", "FL.exe"],
+  "ui_stack": "win32",
+  "version_seen": "FL Studio 2024/2025 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "open_project": { "by": "cli", "value": "FL64.exe <project.flp>" },
+    "play": { "by": "hotkey", "value": "Space" },
+    "record": { "by": "hotkey", "value": "R" },
+    "pattern_selector": { "by": "uia", "value": "Name~«Pattern»", "fallback": "цифры 1..9 для переключения паттернов" },
+    "export_wav": { "by": "menu", "value": "File → Export → Wave file", "fallback": "Ctrl+R (render)" },
+    "channel_rack": { "by": "uia", "value": "Name~«Channel Rack»", "fallback": "F6" },
+    "piano_roll": { "by": "hotkey", "value": "F7" },
+    "midi_import": { "by": "menu", "value": "File → Import → MIDI file" }
+  },
+  "operations": [
+    {
+      "name": "Открыть проект-шаблон",
+      "registry": "music-production|открыть|проект в DAW",
+      "steps": ["cli:FL64.exe <template.flp>", "wait:3000", "проверить заголовок окна"],
+      "verify": ["процесс FL64 жив", "в заголовке имя проекта", "нет окна-предупреждения (OCR)"],
+      "risk": "write-local",
+      "notes": "вся магия — в шаблонах: заранее собранный проект с нужными плагинами и маршрутизацией"
+    },
+    {
+      "name": "Импортировать MIDI-паттерн",
+      "registry": "music-production|импортировать|MIDI",
+      "steps": ["anchor:midi_import", "type:path.mid", "Enter", "выбрать канал", "OK"],
+      "verify": ["в Channel Rack появился новый канал", "в Piano Roll видны ноты (OCR)"],
+      "risk": "write-local",
+      "on_fail": "откатить Ctrl+Z, попробовать drag&drop из Проводника"
+    },
+    {
+      "name": "Собрать бит из готовых паттернов",
+      "registry": "music-production|сочинить|бит",
+      "steps": ["переключить паттерн (1..9)", "anchor:piano_roll", "вставить ноты из MIDI", "зациклить и прослушать"],
+      "verify": ["паттерн содержит ноты", "звук воспроизводится (анализ уровня сигнала при рендере)"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Записать вокал с микрофона",
+      "registry": "music-production|записать|вокал",
+      "steps": ["выбрать дорожку вокала", "включить мониторинг", "anchor:record", "остановить", "сохранить"],
+      "verify": ["на дорожке появился аудиоклип", "длительность > 0", "пик не в клиппинге (анализ WAV)"],
+      "risk": "write-local",
+      "notes": "запись через ASIO: перед стартом убедиться, что устройство не занято другим приложением"
+    },
+    {
+      "name": "Экспортировать мастер в WAV",
+      "registry": "music-production|экспортировать|финальный мастер",
+      "steps": ["anchor:export_wav", "выбрать 24 бит / 44.1 кГц", "type:path", "Start", "wait:до конца рендера"],
+      "verify": ["файл существует", "ffprobe: pcm_s24le, 44100", "длительность = длине плейлиста ±1 с"],
+      "risk": "write-local",
+      "timeouts_ms": 1800000
+    },
+    {
+      "name": "Проверить мастер на клиппинг и громкость",
+      "registry": "music-production|проверить|громкость и пики",
+      "steps": ["ffmpeg ebur128/loudnorm на экспортированном файле"],
+      "verify": ["true peak < -1 dBTP", "LUFS в целевом диапазоне (-14 ±1 для стриминга)"],
+      "risk": "read",
+      "on_fail": "вернуть в микс, снизить лимитер — не «лечить» мастер громче"
+    }
+  ]
+}

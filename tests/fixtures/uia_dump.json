@@ -1,0 +1,83 @@
+{
+  "exe": "CapCut.exe",
+  "windows": [
+    {
+      "title": "CapCut",
+      "class_name": "Chrome_WidgetWin_1",
+      "tree": {
+        "name": "CapCut",
+        "control_type": "Window",
+        "automation_id": "",
+        "class_name": "",
+        "enabled": true,
+        "children": [
+          {
+            "name": "Экспорт",
+            "control_type": "Button",
+            "automation_id": "ExportButton",
+            "class_name": "",
+            "enabled": true,
+            "children": []
+          },
+          {
+            "name": "Импорт",
+            "control_type": "Button",
+            "automation_id": "ImportButton",
+            "class_name": "",
+            "enabled": true,
+            "children": []
+          },
+          {
+            "name": "Таймлайн",
+            "control_type": "Pane",
+            "automation_id": "",
+            "class_name": "",
+            "enabled": true,
+            "children": []
+          },
+          {
+            "name": "Item 12",
+            "control_type": "ListItem",
+            "automation_id": "",
+            "class_name": "",
+            "enabled": true,
+            "children": []
+          },
+          {
+            "name": "Медиатека",
+            "control_type": "List",
+            "automation_id": "",
+            "class_name": "",
+            "enabled": true,
+            "children": [
+              {
+                "name": "video1.mp4",
+                "control_type": "ListItem",
+                "automation_id": "",
+                "class_name": "",
+                "enabled": true,
+                "children": []
+              },
+              {
+                "name": "video2.mp4",
+                "control_type": "ListItem",
+                "automation_id": "",
+                "class_name": "",
+                "enabled": true,
+                "children": []
+              }
+            ]
+          },
+          {
+            "name": "Текст",
+            "control_type": "TabItem",
+            "automation_id": "",
+            "class_name": "",
+            "enabled": true,
+            "children": []
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # ИНДЕКС ИСТОЧНИКОВ — ZShelper
 
-Сгенерировано: `2026-11-08T13:15:31Z` · всего записей: **1614** · GitHub-репозиториев: **750**
+Сгенерировано: `2026-11-08T13:29:40Z` · всего записей: **1645** · GitHub-репозиториев: **765**
 
 Полные тексты лежат в `research/sources/<категория>/`. Машиночитаемый реестр — `research/SOURCES.json`.
 
@@ -21,6 +21,7 @@
 | [`connectors`](#connectors) | 44 | 591,577 |
 | [`connectors-extra`](#connectors-extra) | 37 | 338,500 |
 | [`crypto-privacy`](#crypto-privacy) | 12 | 54,031 |
+| [`daw-music-production`](#daw-music-production) | 16 | 103,179 |
 | [`deployment-admin`](#deployment-admin) | 21 | 210,007 |
 | [`design-3d`](#design-3d) | 26 | 240,390 |
 | [`devices-peripherals`](#devices-peripherals) | 32 | 374,202 |
@@ -33,6 +34,7 @@
 | [`mcp-and-tools`](#mcp-and-tools) | 50 | 956,879 |
 | [`media-production`](#media-production) | 45 | 486,062 |
 | [`memory-and-rag`](#memory-and-rag) | 50 | 573,502 |
+| [`music-ai-generation`](#music-ai-generation) | 8 | 31,622 |
 | [`music-audio`](#music-audio) | 23 | 307,563 |
 | [`network-admin`](#network-admin) | 26 | 216,887 |
 | [`observability-evals`](#observability-evals) | 32 | 207,602 |
@@ -53,6 +55,7 @@
 | [`ui-ux`](#ui-ux) | 66 | 706,173 |
 | [`updates`](#updates) | 25 | 103,468 |
 | [`virtualization-remote`](#virtualization-remote) | 16 | 268,324 |
+| [`voice-cloning-svc`](#voice-cloning-svc) | 7 | 70,398 |
 | [`whisper-and-asr`](#whisper-and-asr) | 52 | 438,275 |
 | [`windows-automation`](#windows-automation) | 56 | 560,206 |
 | [`winui-dotnet`](#winui-dotnet) | 8 | 53,637 |
@@ -461,6 +464,27 @@
 | [pypi: pykeepass](https://pypi.org/project/pykeepass/) | - | GPL-3.0 |  | Python library to interact with keepass databases (supports KDBX3 and KDBX4) | `research/sources/crypto-privacy/pypi__pykeepass.md` |
 | [pypi: PyOTP](https://pypi.org/project/PyOTP/) | - | - |  | Python One Time Password Library | `research/sources/crypto-privacy/pypi__pyotp.md` |
 | [pypi: python-gnupg](https://pypi.org/project/python-gnupg/) | - | BSD |  | A wrapper for the Gnu Privacy Guard (GPG or GnuPG) | `research/sources/crypto-privacy/pypi__python-gnupg.md` |
+
+## daw-music-production
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [ffmpeg/ffmpeg](https://github.com/ffmpeg/ffmpeg) | 66,743 | NOASSERTION | 2026-11-08 | Mirror of https://git.ffmpeg.org/ffmpeg.git | `research/sources/daw-music-production/ffmpeg__ffmpeg/README.md` |
+| [facebookresearch/demucs](https://github.com/facebookresearch/demucs) | 10,405 | MIT | 2024-04-24 | Code for the paper Hybrid Spectrogram and Waveform Source Separation | `research/sources/daw-music-production/facebookresearch__demucs/README.md` |
+| [librosa/librosa](https://github.com/librosa/librosa) | 8,807 | ISC | 2026-11-07 | Python library for audio and music analysis | `research/sources/daw-music-production/librosa__librosa/README.md` |
+| [spotify/pedalboard](https://github.com/spotify/pedalboard) | 6,467 | GPL-3.0 | 2026-11-03 | 🎛 🔊 A Python library for audio. | `research/sources/daw-music-production/spotify__pedalboard/README.md` |
+| [MTG/essentia](https://github.com/MTG/essentia) | 3,796 | AGPL-3.0 | 2026-11-05 | C++ library for audio and music analysis, description and synthesis, including Python bindings | `research/sources/daw-music-production/MTG__essentia/README.md` |
+| [sergree/matchering](https://github.com/sergree/matchering) | 2,684 | GPL-3.0 | 2026-10-07 | 🎚️ Open Source Audio Matching and Mastering | `research/sources/daw-music-production/sergree__matchering/README.md` |
+| [cuthbertLab/music21](https://github.com/cuthbertLab/music21) | 2,619 | BSD-3-Clause | 2026-11-03 | music21: a Toolkit for Computer-Aided Musical Analysis and Computational Musicology | `research/sources/daw-music-production/cuthbertLab__music21/README.md` |
+| [mido/mido](https://github.com/mido/mido) | 1,658 | MIT | 2026-10-31 | MIDI Objects for Python | `research/sources/daw-music-production/mido__mido/README.md` |
+| [pypi: demucs](https://pypi.org/project/demucs/) | - | MIT License |  | Music source separation in the waveform domain. | `research/sources/daw-music-production/pypi__demucs.md` |
+| [pypi: librosa](https://pypi.org/project/librosa/) | - | ISC |  | Python module for audio and music processing | `research/sources/daw-music-production/pypi__librosa.md` |
+| [pypi: matchering](https://pypi.org/project/matchering/) | - | GPLv3 |  | Audio Matching and Mastering Python Library | `research/sources/daw-music-production/pypi__matchering.md` |
+| [pypi: mido](https://pypi.org/project/mido/) | - | MIT |  | MIDI Objects for Python | `research/sources/daw-music-production/pypi__mido.md` |
+| [pypi: music21](https://pypi.org/project/music21/) | - | - |  | A Toolkit for Computer-Aided Musical Analysis and Computational Musicology. | `research/sources/daw-music-production/pypi__music21.md` |
+| [pypi: pedalboard](https://pypi.org/project/pedalboard/) | - | GNU GENERAL PUBLIC LICENSE |  | A Python library for adding effects to audio. | `research/sources/daw-music-production/pypi__pedalboard.md` |
+| [pypi: pretty-midi](https://pypi.org/project/pretty-midi/) | - | MIT |  | Functions and classes for handling MIDI data conveniently. | `research/sources/daw-music-production/pypi__pretty-midi.md` |
+| [pypi: soundfile](https://pypi.org/project/soundfile/) | - | BSD 3-Clause License |  | An audio library based on libsndfile, CFFI and NumPy | `research/sources/daw-music-production/pypi__soundfile.md` |
 
 ## deployment-admin
 
@@ -902,6 +926,19 @@
 | [pypi: rank-bm25](https://pypi.org/project/rank-bm25/) | - | Apache2.0 |  | Various BM25 algorithms for document ranking | `research/sources/memory-and-rag/pypi__rank-bm25.md` |
 | [pypi: sentence-transformers](https://pypi.org/project/sentence-transformers/) | - | - |  | Embeddings, Retrieval, and Reranking | `research/sources/memory-and-rag/pypi__sentence-transformers.md` |
 | [pypi: sqlite-vec](https://pypi.org/project/sqlite-vec/) | - | MIT License, Apache License, Version 2.0 |  |  | `research/sources/memory-and-rag/pypi__sqlite-vec.md` |
+
+## music-ai-generation
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [facebookresearch/audiocraft](https://github.com/facebookresearch/audiocraft) | 23,834 | MIT | 2026-03-03 | Audiocraft is a library for audio processing and generation with deep learning. It features the state-of-the-art EnCodec audio compressor / tokenizer, along with MusicGen, a simple | `research/sources/music-ai-generation/facebookresearch__audiocraft/README.md` |
+| [Stability-AI/stable-audio-tools](https://github.com/Stability-AI/stable-audio-tools) | 3,901 | MIT | 2026-11-01 | Generative models for conditional audio generation | `research/sources/music-ai-generation/Stability-AI__stable-audio-tools/README.md` |
+| [haoheliu/AudioLDM2](https://github.com/haoheliu/AudioLDM2) | 2,644 | NOASSERTION | 2024-09-29 | Text-to-Audio/Music Generation | `research/sources/music-ai-generation/haoheliu__AudioLDM2/README.md` |
+| [declare-lab/tango](https://github.com/declare-lab/tango) | 1,243 | NOASSERTION | 2025-07-29 | A family of diffusion models for text-to-audio generation. | `research/sources/music-ai-generation/declare-lab__tango/README.md` |
+| [pypi: audiocraft](https://pypi.org/project/audiocraft/) | - | MIT License |  | Audio generation research library for PyTorch | `research/sources/music-ai-generation/pypi__audiocraft.md` |
+| [pypi: diffusers](https://pypi.org/project/diffusers/) | - | Apache 2.0 License |  | State-of-the-art diffusion in PyTorch. | `research/sources/music-ai-generation/pypi__diffusers.md` |
+| [pypi: torchaudio](https://pypi.org/project/torchaudio/) | - | - |  | An audio package for PyTorch | `research/sources/music-ai-generation/pypi__torchaudio.md` |
+| [pypi: transformers](https://pypi.org/project/transformers/) | - | Apache 2.0 License |  | Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training. | `research/sources/music-ai-generation/pypi__transformers.md` |
 
 ## music-audio
 
@@ -1779,6 +1816,18 @@
 | [pypi: paramiko](https://pypi.org/project/paramiko/) | - | - |  | SSH2 protocol library | `research/sources/virtualization-remote/pypi__paramiko.md` |
 | [pypi: pyvmomi](https://pypi.org/project/pyvmomi/) | - | License :: OSI Approved :: Apache Software License |  | VMware vSphere Python SDK | `research/sources/virtualization-remote/pypi__pyvmomi.md` |
 | [pypi: pywinrm](https://pypi.org/project/pywinrm/) | - | Copyright (c) 2013 Alexey Diyan  Permission is hereby granted, free of charge, t |  | Python library for Windows Remote Management | `research/sources/virtualization-remote/pypi__pywinrm.md` |
+
+## voice-cloning-svc
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [RVC-Project/Retrieval-based-Voice-Conversion-WebUI](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI) | 39,113 | MIT | 2026-08-04 | Easily train a good VC model with voice data <= 10 mins! | `research/sources/voice-cloning-svc/RVC-Project__Retrieval-based-Voice-Conversion-WebUI/README.md` |
+| [svc-develop-team/so-vits-svc](https://github.com/svc-develop-team/so-vits-svc) | 28,048 | AGPL-3.0 | 2023-11-11 | SoftVC VITS Singing Voice Conversion | `research/sources/voice-cloning-svc/svc-develop-team__so-vits-svc/README.md` |
+| [openvpi/DiffSinger](https://github.com/openvpi/DiffSinger) | 3,237 | Apache-2.0 | 2026-11-03 | An advanced singing voice synthesis system with high fidelity, expressiveness, controllability and flexibility based on DiffSinger: Singing Voice Synthesis via Shallow Diffusion Me | `research/sources/voice-cloning-svc/openvpi__DiffSinger/README.md` |
+| [pypi: librosa](https://pypi.org/project/librosa/) | - | ISC |  | Python module for audio and music processing | `research/sources/voice-cloning-svc/pypi__librosa.md` |
+| [pypi: praat-parselmouth](https://pypi.org/project/praat-parselmouth/) | - | GPLv3 |  | Praat in Python, the Pythonic way | `research/sources/voice-cloning-svc/pypi__praat-parselmouth.md` |
+| [pypi: pyworld](https://pypi.org/project/pyworld/) | - | - |  | PyWorld: a Python wrapper for WORLD vocoder | `research/sources/voice-cloning-svc/pypi__pyworld.md` |
+| [pypi: torchcrepe](https://pypi.org/project/torchcrepe/) | - | MIT |  | Pytorch implementation of CREPE pitch tracker | `research/sources/voice-cloning-svc/pypi__torchcrepe.md` |
 
 ## whisper-and-asr
 

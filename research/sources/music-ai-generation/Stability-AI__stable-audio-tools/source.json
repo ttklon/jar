@@ -1,0 +1,17 @@
+{
+  "id": "github:Stability-AI/stable-audio-tools",
+  "kind": "github",
+  "category": "music-ai-generation",
+  "repo": "Stability-AI/stable-audio-tools",
+  "url": "https://github.com/Stability-AI/stable-audio-tools",
+  "description": "Generative models for conditional audio generation",
+  "stars": 3901,
+  "forks": 490,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-01T04:15:33Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:28:58Z"
+}

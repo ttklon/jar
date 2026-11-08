@@ -12068,5 +12068,581 @@
   "human_code": "c",
   "status": "v1",
   "notes": ""
+ },
+ {
+  "id": "music-production-752",
+  "domain": "music-production",
+  "verb": "сочинить",
+  "object": "бит (драм-паттерн)",
+  "example": "сделай бит в стиле трэп",
+  "implementation": [
+   "MIDI-генерация + шаблон DAW"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-753",
+  "domain": "music-production",
+  "verb": "сочинить",
+  "object": "мелодию и аккорды",
+  "example": "придумай мелодию под этот текст",
+  "implementation": [
+   "теория музыки + LLM → MIDI"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-754",
+  "domain": "music-production",
+  "verb": "написать",
+  "object": "текст песни",
+  "example": "напиши текст про осень",
+  "implementation": [
+   "LLM + анализ референсов"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-production-755",
+  "domain": "music-production",
+  "verb": "проанализировать",
+  "object": "референсы",
+  "example": "разбери 5 треков этого артиста",
+  "implementation": [
+   "librosa + транскрипция"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-production-756",
+  "domain": "music-production",
+  "verb": "подобрать",
+  "object": "референсы под задачу",
+  "example": "найди похожие треки",
+  "implementation": [
+   "поиск + анализ"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-production-757",
+  "domain": "music-production",
+  "verb": "открыть",
+  "object": "проект в DAW",
+  "example": "запусти FL Studio с шаблоном",
+  "implementation": [
+   "UIA/CLI/шаблон проекта"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-758",
+  "domain": "music-production",
+  "verb": "импортировать",
+  "object": "MIDI в проект",
+  "example": "закинь миди в проект",
+  "implementation": [
+   "drag&drop + UIA"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-759",
+  "domain": "music-production",
+  "verb": "записать",
+  "object": "вокал",
+  "example": "запиши мой вокал",
+  "implementation": [
+   "ASIO-маршрутизация"
+  ],
+  "risk": "write-local",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-760",
+  "domain": "music-production",
+  "verb": "клонировать",
+  "object": "голос (только свой)",
+  "example": "сделай мой голос",
+  "implementation": [
+   "RVC/so-vits, свои сэмплы"
+  ],
+  "risk": "write-local",
+  "tier": "T3",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "согласие; чужие голоса — never"
+ },
+ {
+  "id": "music-production-761",
+  "domain": "music-production",
+  "verb": "синтезировать",
+  "object": "вокал по тексту",
+  "example": "спой этот текст моим голосом",
+  "implementation": [
+   "SVC + TTS-певучий"
+  ],
+  "risk": "write-local",
+  "tier": "T3",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-762",
+  "domain": "music-production",
+  "verb": "поправить",
+  "object": "питч и тайминг вокала",
+  "example": "выровняй вокал",
+  "implementation": [
+   "мелодин-подобная обработка"
+  ],
+  "risk": "write-local",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-763",
+  "domain": "music-production",
+  "verb": "свести",
+  "object": "дорожки в микс",
+  "example": "сведи бит и вокал",
+  "implementation": [
+   "pedalboard/ReaScript"
+  ],
+  "risk": "write-local",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-764",
+  "domain": "music-production",
+  "verb": "мастерить",
+  "object": "трек по референсу",
+  "example": "сделай мастеринг как у референса",
+  "implementation": [
+   "matchering"
+  ],
+  "risk": "write-local",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-765",
+  "domain": "music-production",
+  "verb": "разделить",
+  "object": "трек на стемы",
+  "example": "вытащи вокал из готового трека",
+  "implementation": [
+   "demucs"
+  ],
+  "risk": "write-local",
+  "tier": "T3",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "только свои файлы"
+ },
+ {
+  "id": "music-production-766",
+  "domain": "music-production",
+  "verb": "сгенерировать",
+  "object": "инструментал",
+  "example": "сделай инструментал 30 секунд",
+  "implementation": [
+   "MusicGen/Stable Audio"
+  ],
+  "risk": "write-local",
+  "tier": "T3",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-767",
+  "domain": "music-production",
+  "verb": "проверить",
+  "object": "громкость и пики",
+  "example": "это не клиппит",
+  "implementation": [
+   "loudnorm/LUFS"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-production-768",
+  "domain": "music-production",
+  "verb": "экспортировать",
+  "object": "финальный мастер",
+  "example": "выгрузи мастер 24 бит",
+  "implementation": [
+   "ffmpeg"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-production-769",
+  "domain": "music-production",
+  "verb": "опубликовать",
+  "object": "трек через дистрибуцию",
+  "example": "залей на площадки",
+  "implementation": [
+   "API дистрибутора/браузер"
+  ],
+  "risk": "external",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "права и метаданные"
+ },
+ {
+  "id": "music-production-770",
+  "domain": "music-production",
+  "verb": "оформить",
+  "object": "обложку и метаданные",
+  "example": "сделай обложку и теги",
+  "implementation": [
+   "SD + ID3"
+  ],
+  "risk": "write-local",
+  "tier": "T3",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-771",
+  "domain": "music-production",
+  "verb": "спланировать",
+  "object": "релиз",
+  "example": "когда выпускать трек",
+  "implementation": [
+   "календарь + площадки"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "apps-generic-772",
+  "domain": "apps-generic",
+  "verb": "снять",
+  "object": "UIA-дерево приложения",
+  "example": "что за кнопки в этом окне",
+  "implementation": [
+   "UIA dump"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "apps-generic-773",
+  "domain": "apps-generic",
+  "verb": "сгенерировать",
+  "object": "профиль приложения по UIA",
+  "example": "сделай профиль для этой программы",
+  "implementation": [
+   "UIA → кандидаты → подтверждение"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "apps-generic-774",
+  "domain": "apps-generic",
+  "verb": "найти",
+  "object": "элемент по описанию",
+  "example": "нажми кнопку «Экспорт»",
+  "implementation": [
+   "vision + OCR + UIA"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "apps-generic-775",
+  "domain": "apps-generic",
+  "verb": "кликнуть",
+  "object": "по элементу с проверкой",
+  "example": "нажми и убедись что сработало",
+  "implementation": [
+   "SendInput + verify"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "apps-generic-776",
+  "domain": "apps-generic",
+  "verb": "записать",
+  "object": "траекторию действий пользователя",
+  "example": "запиши как я это делаю",
+  "implementation": [
+   "UIA-запись"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "apps-generic-777",
+  "domain": "apps-generic",
+  "verb": "воспроизвести",
+  "object": "траекторию с проверками",
+  "example": "повтори мои шаги",
+  "implementation": [
+   "UIA-плеер"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "apps-generic-778",
+  "domain": "apps-generic",
+  "verb": "адаптировать",
+  "object": "профиль к новой версии",
+  "example": "кнопка переехала — поправь",
+  "implementation": [
+   "re-anchor по UIA/OCR"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "apps-generic-779",
+  "domain": "apps-generic",
+  "verb": "проверить",
+  "object": "что приложение открылось",
+  "example": "оно вообще запустилось",
+  "implementation": [
+   "PID + заголовок окна"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "apps-generic-780",
+  "domain": "apps-generic",
+  "verb": "определить",
+  "object": "тип интерфейса",
+  "example": "чем автоматизировать это приложение",
+  "implementation": [
+   "UIA probe + эвристики"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "apps-generic-781",
+  "domain": "apps-generic",
+  "verb": "деградировать",
+  "object": "до визуального агента",
+  "example": "нет UIA — работай глазами",
+  "implementation": [
+   "screenshot-loop"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "dev-code-782",
+  "domain": "dev-code",
+  "verb": "показать",
+  "object": "состояние репозитория",
+  "example": "что изменилось в проекте",
+  "implementation": [
+   "git status/log"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "video-783",
+  "domain": "video",
+  "verb": "воспроизвести",
+  "object": "файл или плейлист",
+  "example": "включи этот фильм",
+  "implementation": [
+   "VLC/ffplay"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-production-784",
+  "domain": "music-production",
+  "verb": "проверить",
+  "object": "текст на плагиат",
+  "example": "не украл ли я строку",
+  "implementation": [
+   "n-граммы против референсов и веба"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-production-785",
+  "domain": "music-production",
+  "verb": "подготовить",
+  "object": "сэмплы голоса для клонирования",
+  "example": "запиши 20 минут моего голоса",
+  "implementation": [
+   "скрипт записи + чистка"
+  ],
+  "risk": "write-local",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "только свой голос, согласие"
+ },
+ {
+  "id": "music-production-786",
+  "domain": "music-production",
+  "verb": "оценить",
+  "object": "качество вокала",
+  "example": "вокал звучит чисто",
+  "implementation": [
+   "метрики + прослушивание"
+  ],
+  "risk": "read",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-production-787",
+  "domain": "music-production",
+  "verb": "согласовать",
+  "object": "этап с пользователем",
+  "example": "покажи бит и спроси",
+  "implementation": [
+   "чекпойнт в диалоге"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
  }
 ]

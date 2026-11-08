@@ -1,0 +1,52 @@
+{
+  "app": "REAPER",
+  "exe": ["reaper.exe"],
+  "ui_stack": "win32",
+  "version_seen": "7.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": { "by": "api", "value": "reaper.exe -new -nosplash <project.rpp> / ReaScript через reaper.exe -batch" },
+    "reascript": { "by": "api", "value": "Lua/Python: reaper.Main_OnCommand, InsertMedia, SetMediaItemInfo" },
+    "render": { "by": "cli", "value": "-renderproject <file.rpp>" },
+    "actions_window": { "by": "hotkey", "value": "?" }
+  },
+  "operations": [
+    {
+      "name": "Собрать сессию из MIDI и аудио",
+      "registry": "music-production|свести|дорожки",
+      "steps": ["reascript:вставить дорожки из шаблона", "reascript:InsertMedia для MIDI/WAV", "выставить темп и сетку"],
+      "verify": ["число треков = плану", "длительность проекта = длине аранжировки", "сохранён .rpp"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Применить цепочку обработки на мастер",
+      "registry": "music-production|мастерить|трек",
+      "steps": ["reascript:добавить FX-цепочку (EQ → компрессор → лимитер)", "установить параметры"],
+      "verify": ["FX присутствуют в проекте", "после рендера true peak < -1 dBTP"],
+      "risk": "write-local",
+      "notes": "REAPER — лучший выбор для программного мастеринга: всё управляется скриптом"
+    },
+    {
+      "name": "Отрендерить мастер и стемы",
+      "registry": "music-production|экспортировать|финальный мастер",
+      "steps": ["cli:reaper.exe -renderproject <file.rpp>", "wait:до конца"],
+      "verify": ["WAV существует", "ffprobe: pcm_s24le 44.1/48 кГц", "число стемов = числу дорожек"],
+      "risk": "write-local",
+      "timeouts_ms": 1800000
+    },
+    {
+      "name": "Нормализовать громкость по стандарту",
+      "registry": "audio|нормализовать|громкость",
+      "steps": ["reascript:SWS/ReaScript loudness normalize", "проверить ebur128"],
+      "verify": ["LUFS -14 ±1", "true peak < -1 dBTP"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Сохранить проект с версией",
+      "registry": "music-production|открыть|проект в DAW",
+      "steps": ["reascript:Main_SaveProject", "копия в папку версий с датой"],
+      "verify": [".rpp существует", "резервная копия отличается по хэшу при изменениях"],
+      "risk": "write-local"
+    }
+  ]
+}

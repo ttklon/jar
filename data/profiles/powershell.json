@@ -1,0 +1,54 @@
+{
+  "app": "PowerShell 7 / Windows PowerShell",
+  "exe": ["pwsh.exe", "powershell.exe"],
+  "ui_stack": "win32",
+  "version_seen": "7.5 / 5.1 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": { "by": "api", "value": "запуск процесса с -NoProfile -NonInteractive -OutputFormat JSON" },
+    "uia_console": { "by": "uia", "value": "ControlType=Document; Name~«Console»", "fallback": "только для интерактивных сессий" },
+    "transcript": { "by": "api", "value": "Start-Transcript для аудита длинных сессий" }
+  },
+  "operations": [
+    {
+      "name": "Выполнить команду и получить структурированный результат",
+      "registry": "automation|запустить|скрипт",
+      "steps": ["cli:pwsh -NoProfile -NonInteractive -Command '<cmd> | ConvertTo-Json -Depth 5'", "read:stdout"],
+      "verify": ["exit code 0", "JSON парсится", "stderr пуст или разобран"],
+      "risk": "write-local",
+      "timeouts_ms": 120000,
+      "notes": "никогда не собирать команды конкатенацией строк без экранирования — только аргументы/скрипт-файл"
+    },
+    {
+      "name": "Проверить синтаксис скрипта до запуска",
+      "registry": "automation|проверить|скрипт перед запуском",
+      "steps": ["cli:pwsh -NoProfile -Command \"[System.Management.Automation.Language.Parser]::ParseFile('<path>',[ref]$null,[ref]$errs); $errs\""],
+      "verify": ["список ошибок пуст"],
+      "risk": "read",
+      "notes": "обязательный шаг: непроверенный скрипт не запускаем"
+    },
+    {
+      "name": "Управлять службой",
+      "registry": "processes-services|отключить|службу",
+      "steps": ["cli:Get-Service <name> | ConvertTo-Json", "cli:Stop-Service <name> -Force", "cli:Set-Service <name> -StartupType Manual"],
+      "verify": ["Status = Stopped", "StartType = Manual", "создана точка восстановления до изменения"],
+      "risk": "destructive",
+      "on_fail": "вернуть исходный StartType и запустить службу",
+      "notes": "аналог sc.exe; для критичных служб — только через policy engine с подтверждением"
+    },
+    {
+      "name": "Собрать снимок системы",
+      "registry": "processes-services|показать|топ по нагрузке",
+      "steps": ["cli:Get-Process | Sort CPU -desc | Select -First 20", "cli:Get-CimInstance Win32_Service", "cli:Get-CimInstance Win32_StartupCommand"],
+      "verify": ["JSON содержит >= 1 процесс", "поля Name/CPU/WallSec присутствуют"],
+      "risk": "read"
+    },
+    {
+      "name": "Найти файлы и посчитать размер",
+      "registry": "files|найти|по имени",
+      "steps": ["cli:Get-ChildItem -Recurse -Filter <mask> | Select FullName,Length"],
+      "verify": ["пути внутри разрешённых корней", "сумма размеров совпадает с выборочной проверкой"],
+      "risk": "read"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "id": "github:sergree/matchering",
+  "kind": "github",
+  "category": "daw-music-production",
+  "repo": "sergree/matchering",
+  "url": "https://github.com/sergree/matchering",
+  "description": "🎚️ Open Source Audio Matching and Mastering",
+  "stars": 2684,
+  "forks": 297,
+  "language": "Python",
+  "license": "GPL-3.0",
+  "topics": [
+    "audio",
+    "docker-image",
+    "dsp",
+    "equalizer",
+    "filter",
+    "limiter",
+    "mastering",
+    "matchering",
+    "matching",
+    "music",
+    "numpy",
+    "python",
+    "python-library",
+    "python3",
+    "scipy"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-07T14:04:36Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:28:58Z"
+}

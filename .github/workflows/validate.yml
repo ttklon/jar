@@ -32,9 +32,15 @@ jobs:
       - name: Eval plan is generated for every action
         run: python3 tools/evals.py
 
+      - name: App target catalogue (tier A ⇒ profile exists)
+        run: python3 tools/app_targets.py
+
+      - name: UIA draft generator works on a fixture dump
+        run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
+
       - name: Generated artefacts are committed and up to date
         run: |
-          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md docs/EVALS.md data/evals.json \
+          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md docs/EVALS.md docs/APP-COVERAGE.md data/evals.json \
             || { echo "::error::generated files are stale — run tools/actions.py, tools/profiles.py, tools/audit_actions.py and commit"; exit 1; }
 
       - name: Summary

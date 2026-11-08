@@ -2,7 +2,7 @@
 
 Полный, систематический перечень того, что приложение должно уметь делать. Источник — [`data/actions.psv`](../data/actions.psv); файл генерируется `python3 tools/actions.py`, руками не править.
 
-**Всего действий: 751** · доменов: **47** · уникальных глаголов: **191**
+**Всего действий: 787** · доменов: **49** · уникальных глаголов: **200**
 
 Обозначения: `risk` — R(чтение) / W(запись локально) / D(разрушительное) / E(внешний эффект) / M(деньги) / I(идентичность); `tier` — минимальное железо (T0…T3); `человек` — может / сложно / **не может** (то, ради чего продукт и нужен).
 
@@ -10,10 +10,10 @@
 
 | Риск | Действий | | Tier | Действий | | Статус | Действий |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `write-local` | 359 | `T1` | 363 | `v1` | 576 |
-| `read` | 271 | `T0` | 278 | `v2` | 164 |
-| `destructive` | 60 | `T2` | 97 | `never` | 11 |
-| `external` | 50 | `T3` | 13 |  |  |
+| `write-local` | 381 | `T1` | 378 | `v1` | 593 |
+| `read` | 284 | `T0` | 288 | `v2` | 183 |
+| `destructive` | 60 | `T2` | 103 | `never` | 11 |
+| `external` | 51 | `T3` | 18 |  |  |
 | `identity` | 7 |  |  |  |  |
 | `money` | 4 |  |  |  |  |
 
@@ -21,8 +21,9 @@
 
 | Домен | Действий | R | W | D | E | M | I | T0 | T1+ | «не может» |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Разработка и код | 26 | 5 | 18 | 1 | 2 | 0 | 0 | 3 | 23 | 0 |
-| Видео | 24 | 5 | 17 | 1 | 1 | 0 | 0 | 7 | 17 | 0 |
+| Разработка и код | 27 | 6 | 18 | 1 | 2 | 0 | 0 | 4 | 23 | 0 |
+| Видео | 25 | 6 | 17 | 1 | 1 | 0 | 0 | 8 | 17 | 0 |
+| music-production | 24 | 6 | 17 | 0 | 1 | 0 | 0 | 5 | 19 | 0 |
 | Веб и браузер | 22 | 13 | 4 | 1 | 3 | 0 | 1 | 12 | 10 | 1 |
 | health-daily | 22 | 12 | 8 | 0 | 1 | 1 | 0 | 16 | 6 | 1 |
 | Файлы | 21 | 6 | 12 | 3 | 0 | 0 | 0 | 13 | 8 | 0 |
@@ -67,11 +68,12 @@
 | licensing | 12 | 4 | 6 | 1 | 1 | 0 | 0 | 12 | 0 | 1 |
 | Дисплей и звук | 11 | 3 | 8 | 0 | 0 | 0 | 0 | 8 | 3 | 0 |
 | Доступность | 10 | 5 | 4 | 1 | 0 | 0 | 0 | 3 | 7 | 0 |
+| apps-generic | 10 | 5 | 5 | 0 | 0 | 0 | 0 | 3 | 7 | 0 |
 | Игры | 8 | 3 | 4 | 0 | 1 | 0 | 0 | 3 | 5 | 1 |
 
 ## Каталог по доменам
 
-### Разработка и код (26)
+### Разработка и код (27)
 
 | # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -101,8 +103,9 @@
 | 712 | **настроить** линтеры и pre-commit | _поставь проверки перед коммитом_ | husky/pre-commit + ruff | write-local | T1 | может | v1 |
 | 713 | **проверить** уязвимости зависимостей | _есть ли дыры в пакетах_ | npm audit/pip-audit/OSV | read | T1 | может | v1 |
 | 714 | **собрать** Docker-образ | _собери контейнер_ | docker build | write-local | T1 | может | v1 |
+| 782 | **показать** состояние репозитория | _что изменилось в проекте_ | git status/log | read | T0 | может | v1 |
 
-### Видео (24)
+### Видео (25)
 
 | # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -130,6 +133,36 @@
 | 616 | **оптимизировать** монтаж на слабом ПК (прокси) | _смонтируй через прокси_ | ffmpeg прокси + Premiere | write-local | T1 | может | v1 — главный приём для слабого железа |
 | 617 | **настроить** сцену в OBS | _сделай сцену «экран + камера»_ | OBS WebSocket API | write-local | T1 | может | v1 |
 | 618 | **включить** виртуальную камеру | _включи виртуальную камеру OBS_ | OBS API | write-local | T1 | может | v2 |
+| 783 | **воспроизвести** файл или плейлист | _включи этот фильм_ | VLC/ffplay | read | T0 | может | v1 |
+
+### music-production (24)
+
+| # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 752 | **сочинить** бит (драм-паттерн) | _сделай бит в стиле трэп_ | MIDI-генерация + шаблон DAW | write-local | T1 | может | v2 |
+| 753 | **сочинить** мелодию и аккорды | _придумай мелодию под этот текст_ | теория музыки + LLM → MIDI | write-local | T1 | может | v2 |
+| 754 | **написать** текст песни | _напиши текст про осень_ | LLM + анализ референсов | write-local | T0 | может | v1 |
+| 755 | **проанализировать** референсы | _разбери 5 треков этого артиста_ | librosa + транскрипция | read | T1 | может | v1 |
+| 756 | **подобрать** референсы под задачу | _найди похожие треки_ | поиск + анализ | read | T1 | может | v1 |
+| 757 | **открыть** проект в DAW | _запусти FL Studio с шаблоном_ | UIA/CLI/шаблон проекта | write-local | T1 | может | v2 |
+| 758 | **импортировать** MIDI в проект | _закинь миди в проект_ | drag&drop + UIA | write-local | T1 | может | v2 |
+| 759 | **записать** вокал | _запиши мой вокал_ | ASIO-маршрутизация | write-local | T2 | может | v2 |
+| 760 | **клонировать** голос (только свой) | _сделай мой голос_ | RVC/so-vits, свои сэмплы | write-local | T3 | может | v2 — согласие; чужие голоса — never |
+| 761 | **синтезировать** вокал по тексту | _спой этот текст моим голосом_ | SVC + TTS-певучий | write-local | T3 | может | v2 |
+| 762 | **поправить** питч и тайминг вокала | _выровняй вокал_ | мелодин-подобная обработка | write-local | T2 | может | v2 |
+| 763 | **свести** дорожки в микс | _сведи бит и вокал_ | pedalboard/ReaScript | write-local | T2 | может | v2 |
+| 764 | **мастерить** трек по референсу | _сделай мастеринг как у референса_ | matchering | write-local | T2 | может | v2 |
+| 765 | **разделить** трек на стемы | _вытащи вокал из готового трека_ | demucs | write-local | T3 | может | v2 — только свои файлы |
+| 766 | **сгенерировать** инструментал | _сделай инструментал 30 секунд_ | MusicGen/Stable Audio | write-local | T3 | может | v2 |
+| 767 | **проверить** громкость и пики | _это не клиппит_ | loudnorm/LUFS | read | T0 | может | v1 |
+| 768 | **экспортировать** финальный мастер | _выгрузи мастер 24 бит_ | ffmpeg | write-local | T1 | может | v1 |
+| 769 | **опубликовать** трек через дистрибуцию | _залей на площадки_ | API дистрибутора/браузер | external | T1 | может | v2 — права и метаданные |
+| 770 | **оформить** обложку и метаданные | _сделай обложку и теги_ | SD + ID3 | write-local | T3 | может | v2 |
+| 771 | **спланировать** релиз | _когда выпускать трек_ | календарь + площадки | write-local | T0 | может | v1 |
+| 784 | **проверить** текст на плагиат | _не украл ли я строку_ | n-граммы против референсов и веба | read | T0 | может | v1 |
+| 785 | **подготовить** сэмплы голоса для клонирования | _запиши 20 минут моего голоса_ | скрипт записи + чистка | write-local | T2 | может | v2 — только свой голос, согласие |
+| 786 | **оценить** качество вокала | _вокал звучит чисто_ | метрики + прослушивание | read | T2 | может | v2 |
+| 787 | **согласовать** этап с пользователем | _покажи бит и спроси_ | чекпойнт в диалоге | read | T0 | может | v1 |
 
 ### health-daily (22)
 
@@ -1044,6 +1077,21 @@
 | 605 | **проверить** что функция доступности работает | _проверь что экранный диктор включился_ | API + тестовое действие | read | T0 | может | v1 |
 | 624 | **проверить** контраст и читаемость | _проверь контраст текста_ | WCAG-расчёт | read | T0 | может | v1 |
 
+### apps-generic (10)
+
+| # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 772 | **снять** UIA-дерево приложения | _что за кнопки в этом окне_ | UIA dump | read | T0 | может | v1 |
+| 773 | **сгенерировать** профиль приложения по UIA | _сделай профиль для этой программы_ | UIA → кандидаты → подтверждение | write-local | T1 | может | v1 |
+| 774 | **найти** элемент по описанию | _нажми кнопку «Экспорт»_ | vision + OCR + UIA | read | T1 | может | v1 |
+| 775 | **кликнуть** по элементу с проверкой | _нажми и убедись что сработало_ | SendInput + verify | write-local | T1 | может | v1 |
+| 776 | **записать** траекторию действий пользователя | _запиши как я это делаю_ | UIA-запись | write-local | T1 | может | v2 |
+| 777 | **воспроизвести** траекторию с проверками | _повтори мои шаги_ | UIA-плеер | write-local | T1 | может | v2 |
+| 778 | **адаптировать** профиль к новой версии | _кнопка переехала — поправь_ | re-anchor по UIA/OCR | write-local | T1 | может | v2 |
+| 779 | **проверить** что приложение открылось | _оно вообще запустилось_ | PID + заголовок окна | read | T0 | может | v1 |
+| 780 | **определить** тип интерфейса | _чем автоматизировать это приложение_ | UIA probe + эвристики | read | T0 | может | v1 |
+| 781 | **деградировать** до визуального агента | _нет UIA — работай глазами_ | screenshot-loop | read | T1 | может | v1 |
+
 ### Игры (8)
 
 | # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
@@ -1063,9 +1111,9 @@
 
 | Глагол | Действий | Где встречается |
 | --- | --- | --- |
-| проверить | 84 | accessibility, accounts-updates, ai-ml, apps-windows, automation, business-finance… |
+| проверить | 87 | accessibility, accounts-updates, ai-ml, apps-generic, apps-windows, automation… |
 | создать | 41 | accounts-updates, apps-windows, audio, automation, business-finance, calendar-tasks… |
-| найти | 33 | business-finance, calendar-tasks, career, chat-social, dev-code, devices… |
+| найти | 34 | apps-generic, business-finance, calendar-tasks, career, chat-social, dev-code… |
 | настроить | 31 | accounts-updates, ai-ml, apps-windows, audio, automation, dev-code… |
 | собрать | 25 | career, chat-social, dev-code, distribution, engineering-3d, hardware-diag… |
 | удалить | 18 | accounts-updates, apps-windows, audio, calendar-tasks, chat-social, databases… |
@@ -1073,28 +1121,28 @@
 | изменить | 17 | accounts-updates, audio, calendar-tasks, chat-social, creative-3d, databases… |
 | автоматизировать | 16 | apps-windows, creative-3d, devices, display-sound, distribution, email… |
 | сравнить | 15 | ai-ml, career, engineering-3d, files, hardware-diag, health-daily… |
+| записать | 15 | apps-generic, audio, devices, display-sound, games, health-daily… |
 | перевести | 14 | audio, chat-social, dev-code, languages, learning-research, legal-docs… |
 | работать | 13 | apps-windows, dev-code, devices, sheets-data, superhuman, text-docs… |
-| записать | 13 | audio, devices, display-sound, games, health-daily, input… |
 | напомнить | 11 | calendar-tasks, chat-social, health-daily, home-daily, legal-docs, personal-finance… |
+| показать | 11 | calendar-tasks, creative-3d, dev-code, games, hardware-diag, input… |
 | составить | 11 | health-daily, home-daily, languages, learning-research, legal-docs, monitoring-triage… |
-| показать | 10 | calendar-tasks, creative-3d, games, hardware-diag, input, licensing… |
 | распознать | 9 | ai-ml, audio, home-daily, images, music, slides-pdf-print… |
 | запустить | 9 | ai-ml, apps-windows, automation, dev-code, games, licensing… |
+| подготовить | 9 | ai-ml, career, creative-3d, distribution, engineering-3d, music-production… |
 | прочитать | 8 | apps-windows, chat-social, email, images, languages, legal-docs… |
-| подготовить | 8 | ai-ml, career, creative-3d, distribution, engineering-3d, personal-finance |
+| открыть | 7 | business-finance, creative-3d, files, music-production, network, smart-home… |
 | заполнить | 7 | career, legal-docs, sheets-data, text-docs, travel, web |
 | посчитать | 7 | business-finance, calendar-tasks, engineering-3d, home-daily, personal-finance, sheets-data… |
+| экспортировать | 7 | ai-ml, business-finance, creative-3d, databases, music-production, personal-finance… |
 | управлять | 7 | accessibility, audio, devices, input, system-power |
-| открыть | 6 | business-finance, creative-3d, files, network, smart-home, web |
+| написать | 6 | career, dev-code, music-production, text-docs, video-production |
 | конвертировать | 6 | audio, engineering-3d, images, music, text-docs, video |
-| экспортировать | 6 | ai-ml, business-finance, creative-3d, databases, personal-finance, sheets-data |
 | следить | 6 | engineering-3d, hardware-diag, smart-home, system-power, travel, video-production |
 | объяснить | 6 | dev-code, health-daily, languages, learning-research, processes-services, smart-home |
 | наблюдать | 6 | monitoring-triage |
 | восстановить | 5 | databases, engineering-3d, files, storage-backup, superhuman |
 | подключить | 5 | devices, storage-backup |
-| написать | 5 | career, dev-code, text-docs, video-production |
 | извлечь | 5 | devices, images, text-docs, video, web |
 | построить | 5 | health-daily, personal-finance, sheets-data |
 | отправить | 5 | chat-social, email, slides-pdf-print |
@@ -1105,56 +1153,60 @@
 | вести | 5 | business-finance, health-daily, home-daily, languages |
 | мониторить | 4 | databases, storage-backup, superhuman, web |
 | озвучить | 4 | accessibility, audio, text-docs, video-production |
+| разделить | 4 | audio, music, music-production, slides-pdf-print |
 | нарезать | 4 | audio, engineering-3d, video, video-production |
 | сохранить | 4 | learning-research, legal-docs, travel, web |
 | установить | 4 | accounts-updates, apps-windows, devices, distribution |
+| воспроизвести | 4 | apps-generic, input, video |
 | подключиться | 4 | databases, network, virtualization-remote |
+| сгенерировать | 4 | ai-ml, apps-generic, dev-code, music-production |
+| оценить | 4 | ai-ml, hardware-diag, health-daily, music-production |
+| свести | 4 | business-finance, music, music-production |
 | сжать | 3 | files, slides-pdf-print, video |
 | зашифровать | 3 | files, security-access |
 | синхронизировать | 3 | calendar-tasks, files, virtualization-remote |
 | очистить | 3 | sheets-data, storage-backup |
 | выполнить | 3 | databases, storage-backup, superhuman |
+| импортировать | 3 | music-production, personal-finance, sheets-data |
 | связать | 3 | automation, sheets-data, smart-home |
-| разделить | 3 | audio, music, slides-pdf-print |
 | подписать | 3 | distribution, legal-docs, slides-pdf-print |
 | нормализовать | 3 | audio, music |
 | замерить | 3 | audio, hardware-diag |
 | скачать | 3 | video, web |
 | монтировать | 3 | video |
+| опубликовать | 3 | chat-social, distribution, music-production |
+| спланировать | 3 | calendar-tasks, career, music-production |
 | отследить | 3 | calendar-tasks, career, personal-finance |
 | ввести | 3 | apps-windows, input |
 | отключить | 3 | input, processes-services |
+| проанализировать | 3 | music-production, network, processes-services |
 | обучить | 3 | ai-ml, learning-research |
-| оценить | 3 | ai-ml, hardware-diag, health-daily |
 | откатить | 3 | automation, distribution, hardware-diag |
 | субтитрировать | 3 | accessibility, languages, video-production |
-| свести | 3 | business-finance, music |
+| подобрать | 3 | creative-3d, music-production, video-production |
 | скопировать | 2 | devices, files |
-| импортировать | 2 | personal-finance, sheets-data |
 | защитить | 2 | sheets-data, slides-pdf-print |
+| оформить | 2 | music-production, slides-pdf-print |
 | печатать | 2 | slides-pdf-print |
 | аннотировать | 2 | creative-3d, images |
 | склеить | 2 | audio, video |
 | транскрибировать | 2 | audio, superhuman |
 | разобрать | 2 | email, languages |
 | классифицировать | 2 | email, personal-finance |
-| опубликовать | 2 | chat-social, distribution |
-| спланировать | 2 | calendar-tasks, career |
 | нажать | 2 | apps-windows, input |
 | запомнить | 2 | apps-windows, languages |
-| воспроизвести | 2 | input |
 | заблокировать | 2 | security-access, system-power |
-| проанализировать | 2 | network, processes-services |
 | диагностировать | 2 | hardware-diag, processes-services |
 | ограничить | 2 | network, smart-home |
 | исправить | 2 | dev-code, video-production |
 | развернуть | 2 | dev-code, virtualization-remote |
-| сгенерировать | 2 | ai-ml, dev-code |
+| снять | 2 | apps-generic, virtualization-remote |
 | спрогнозировать | 2 | business-finance, personal-finance |
-| подобрать | 2 | creative-3d, video-production |
 | заказать | 2 | health-daily, home-daily |
 | тренировать | 2 | languages, learning-research |
+| адаптировать | 2 | apps-generic, languages |
 | выгрузить | 2 | video-production |
+| сочинить | 2 | music-production |
 | переместить | 1 | files |
 | переименовать | 1 | files |
 | сортировать | 1 | files |
@@ -1167,7 +1219,6 @@
 | форматировать | 1 | text-docs |
 | сшить | 1 | text-docs |
 | визуализировать | 1 | sheets-data |
-| оформить | 1 | slides-pdf-print |
 | сканировать | 1 | slides-pdf-print |
 | отменить | 1 | slides-pdf-print |
 | улучшить | 1 | images |
@@ -1213,7 +1264,6 @@
 | предупредить | 1 | monitoring-triage |
 | передать | 1 | virtualization-remote |
 | помочь | 1 | virtualization-remote |
-| снять | 1 | virtualization-remote |
 | диктовать | 1 | accessibility |
 | увеличить | 1 | accessibility |
 | упростить | 1 | accessibility |
@@ -1234,7 +1284,6 @@
 | купить | 1 | travel |
 | забронировать | 1 | travel |
 | предложить | 1 | hardware-diag |
-| адаптировать | 1 | languages |
 | практиковать | 1 | languages |
 | смоделировать | 1 | engineering-3d |
 | напечатать | 1 | engineering-3d |
@@ -1254,6 +1303,14 @@
 | встроить | 1 | licensing |
 | сообщить | 1 | licensing |
 | отозвать | 1 | licensing |
+| клонировать | 1 | music-production |
+| синтезировать | 1 | music-production |
+| поправить | 1 | music-production |
+| мастерить | 1 | music-production |
+| кликнуть | 1 | apps-generic |
+| определить | 1 | apps-generic |
+| деградировать | 1 | apps-generic |
+| согласовать | 1 | music-production |
 
 ## Чего в реестре ещё нет (честные пробелы)
 

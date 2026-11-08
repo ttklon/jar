@@ -1,0 +1,267 @@
+# Каталог приложений: что ZShelper должен уметь автоматизировать
+
+Данные — [`data/app_targets.psv`](../data/app_targets.psv), файл генерируется
+`python3 tools/app_targets.py`, руками не править.
+
+**Приложений в каталоге: 122** · категорий: **17** · с готовым профилем: **122**
+
+## Три уровня покрытия (почему не «профиль на каждую программу руками»)
+
+| Tier | Что это | Сколько | Как появляется |
+| --- | --- | --- | --- |
+| **A** | ручной профиль: якоря, шаги, проверки | 26 | пишется человеком/агентом по UIA-дампу |
+| **B** | авто-профиль из UIA + подтверждение | 63 | `tools/uia_probe` → кандидаты → подтверждение |
+| **C** | только визуальный агент (скриншот→OCR/VLM→клик) | 33 | профиля нет, работает универсальный цикл |
+
+Подробно — [`PROFILE-STRATEGY.md`](PROFILE-STRATEGY.md). Правило: приложение без профиля
+всё равно **работает**, просто медленнее и с меньшей надёжностью.
+
+## Каналы автоматизации
+
+Предпочтение: **api → cli → com → web → midi → jsx → remote → uia → vision**.
+
+| Основной канал | Приложений |
+| --- | --- |
+| `cli` | 47 |
+| `uia` | 43 |
+| `api` | 19 |
+| `web` | 8 |
+| `com` | 5 |
+
+## Приоритеты
+
+| Приоритет | Приложений |
+| --- | --- |
+| P0 | 22 |
+| P1 | 27 |
+| P2 | 40 |
+| P3 | 33 |
+
+## Инвариант: tier A ⇒ есть профиль
+
+Все приложения tier A имеют профиль в `data/profiles/`. ✅
+
+## Полный каталог
+
+### Разработка (20)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Git for Windows | `git-bash.exe` | cli | A | P0 | ✅ |  |
+| PowerShell | `powershell.exe` | cli | A | P0 | ✅ | основной канал автоматизации |
+| Visual Studio Code | `Code.exe` | cli | A | P0 | ✅ | профиль готов |
+| Windows Terminal | `WindowsTerminal.exe` | cli+uia | B | P0 | — | профили, panes |
+| Командная строка | `cmd.exe` | cli | A | P0 | ✅ |  |
+| Docker Desktop | `Docker Desktop.exe` | cli | B | P1 | — | docker CLI |
+| DBeaver | `dbeaver.exe` | cli | B | P2 | — | JDBC, но лучше напрямую |
+| FileZilla | `filezilla.exe` | cli+uia | B | P2 | — |  |
+| PuTTY | `putty.exe` | cli | B | P2 | — | plink |
+| Visual Studio | `devenv.exe` | cli+com | B | P2 | — | msbuild/dotnet |
+| WinSCP | `WinSCP.exe` | cli | B | P2 | — | winscp.com скрипты |
+| Wireshark | `Wireshark.exe` | cli | B | P2 | — | tshark |
+| Android Studio | `studio64.exe` | cli | B | P3 | — | gradle/adb |
+| IntelliJ IDEA | `idea64.exe` | cli | B | P3 | — |  |
+| JetBrains Rider | `rider64.exe` | cli | B | P3 | — |  |
+| Postman | `Postman.exe` | api | B | P3 | — | newman |
+| PyCharm | `pycharm64.exe` | cli | B | P3 | — |  |
+| SQL Server Management Studio | `Ssms.exe` | cli | C | P3 | — | sqlcmd |
+| Windows Terminal Preview | `WindowsTerminal.exe` | cli+uia | C | P3 | — |  |
+| pgAdmin | `pgAdmin4.exe` | cli | C | P3 | — | psql |
+
+### Медиа (16)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| CapCut | `CapCut.exe` | uia | A | P0 | ✅ | профиль готов |
+| HandBrake | `HandBrake.exe` | cli | A | P0 | ✅ | HandBrakeCLI |
+| OBS Studio | `obs64.exe` | api | A | P0 | ✅ | профиль готов (websocket) |
+| VLC | `vlc.exe` | cli | A | P0 | ✅ | --intf dummy |
+| Adobe Photoshop | `Photoshop.exe` | uia | A | P1 | ✅ | профиль готов |
+| Adobe Premiere Pro | `Adobe Premiere Pro.exe` | uia | A | P1 | ✅ | профиль готов |
+| Audacity | `audacity.exe` | cli | B | P1 | — | макросы |
+| Adobe After Effects | `AfterFX.exe` | uia+jsx | C | P2 | — |  |
+| Adobe Illustrator | `Illustrator.exe` | uia | C | P2 | — | скрипты ExtendScript |
+| Adobe Lightroom | `Lightroom.exe` | uia | C | P2 | — |  |
+| DaVinci Resolve | `Resolve.exe` | api+uia | B | P2 | — | скриптовый API Python/Lua |
+| Spotify | `Spotify.exe` | api+uia | B | P2 | — | Web API (нужен токен) |
+| foobar2000 | `foobar2000.exe` | cli+uia | B | P2 | — | /command |
+| Adobe InDesign | `InDesign.exe` | uia+jsx | C | P3 | — |  |
+| MusicBee | `MusicBee.exe` | uia | C | P3 | — |  |
+| VEGAS Pro | `vegas.exe` | uia | C | P3 | — |  |
+
+### Система (12)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Диспетчер задач | `Taskmgr.exe` | uia+cli | B | P0 | — | быстрее через WMI/Get-Process |
+| Планировщик заданий | `mmc.exe` | cli | B | P0 | — | schtasks |
+| Проводник | `explorer.exe` | uia | A | P0 | ✅ | профиль готов |
+| Службы | `mmc.exe` | uia+cli | B | P0 | — | sc.exe/PowerShell надёжнее GUI |
+| Ножницы/Snip&Sketch | `SnippingTool.exe` | cli+uia | B | P1 | — | screenshot через Win32 проще |
+| Панель управления | `control.exe` | uia | B | P1 | — | часть настроек через CLI/реестр |
+| Параметры Windows | `SystemSettings.exe` | uia | B | P1 | — | частые экраны: обновления, звук, дисплей |
+| Просмотр событий | `mmc.exe` | cli | B | P1 | — | wevtutil/Get-WinEvent |
+| Диспетчер устройств | `mmc.exe` | uia+cli | B | P2 | — | pnputil |
+| Редактор реестра | `regedit.exe` | cli | C | P2 | — | reg.exe, GUI — последний вариант |
+| Управление дисками | `diskmgmt.msc` | uia | C | P2 | — | опасно, только с подтверждением |
+| Монитор ресурсов | `resmon.exe` | uia | C | P3 | — |  |
+
+### Офис (10)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Microsoft Excel | `EXCEL.EXE` | com+uia | A | P0 | ✅ | профиль готов |
+| Microsoft Word | `WINWORD.EXE` | com+uia | A | P0 | ✅ | профиль готов |
+| Microsoft PowerPoint | `POWERPNT.EXE` | com+uia | B | P1 | — | COM-объектная модель |
+| Adobe Acrobat Reader | `AcroRd32.exe` | cli+uia | B | P2 | — | pdf-библиотеки надёжнее |
+| LibreOffice Calc | `soffice.exe` | cli | B | P2 | — |  |
+| LibreOffice Writer | `soffice.exe` | cli | B | P2 | — | --headless конвертация |
+| Microsoft OneNote | `ONENOTE.EXE` | com | B | P2 | — |  |
+| Notepad++ | `notepad++.exe` | cli+uia | B | P2 | — |  |
+| Foxit Reader | `FoxitReader.exe` | uia | C | P3 | — |  |
+| Sublime Text | `sublime_text.exe` | cli | B | P3 | — | subl --command |
+
+### Бизнес (10)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1С:Предприятие | `1cv8.exe` | uia | A | P1 | ✅ | профиль готов |
+| Jira (web) | `chrome.exe` | web | B | P1 | ✅ | REST API |
+| Банк (веб/клиент) | `chrome.exe` | web | A | P1 | ✅ | профиль готов (read-only) |
+| SAP GUI | `saplogon.exe` | uia+com | C | P2 | — |  |
+| Trello (web) | `chrome.exe` | api | B | P2 | ✅ |  |
+| amoCRM (web) | `chrome.exe` | web | B | P2 | ✅ |  |
+| Битрикс24 (web) | `chrome.exe` | web | B | P2 | ✅ | REST |
+| Miro (web) | `chrome.exe` | api | B | P3 | ✅ |  |
+| Гарант | `garant.exe` | uia | C | P3 | — |  |
+| КонсультантПлюс | `cons.exe` | uia | C | P3 | — |  |
+
+### Знания (9)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Notion | `Notion.exe` | api+uia | B | P1 | — | API |
+| Obsidian | `Obsidian.exe` | cli | B | P1 | — | markdown-файлы напрямую |
+| Zotero | `zotero.exe` | api | B | P1 | — | локальная БД + connector |
+| Calibre | `calibre.exe` | cli | B | P2 | — | ebook-convert |
+| Joplin | `Joplin.exe` | cli | B | P2 | — | CLI + markdown |
+| OneNote (классический) | `ONENOTE.EXE` | com | B | P2 | — |  |
+| Evernote | `Evernote.exe` | uia | C | P3 | — |  |
+| Kindle | `Kindle.exe` | uia | C | P3 | — |  |
+| Mendeley | `MendeleyDesktop.exe` | uia | C | P3 | — |  |
+
+### Утилиты (8)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| 7-Zip | `7zFM.exe` | cli | A | P0 | ✅ | 7z.exe |
+| CrystalDiskInfo | `crystaldiskinfo.exe` | cli | B | P1 | — | SMART через smartctl |
+| Everything | `Everything.exe` | cli | B | P1 | — | ES CLI, индексация по имени |
+| HWiNFO | `HWiNFO64.exe` | api | B | P1 | — | shared memory/датчики |
+| PowerToys | `PowerToys.exe` | uia | B | P2 | — | часть функций через API |
+| WinRAR | `WinRAR.exe` | cli | B | P2 | — | rar.exe |
+| WizTree | `WizTree.exe` | cli | B | P2 | — | экспорт CSV |
+| CPU-Z | `cpuz.exe` | uia | C | P3 | — | лучше WMI |
+
+### Мессенджер (7)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Telegram Desktop | `Telegram.exe` | api+uia | A | P0 | ✅ | профиль готов |
+| Discord | `Discord.exe` | api | A | P1 | ✅ | профиль готов (Bot API) |
+| WhatsApp Desktop | `WhatsApp.exe` | uia | B | P1 | — | web-клиент в оболочке |
+| Slack | `slack.exe` | api+uia | B | P2 | — | Slack API |
+| Discord Canary | `DiscordCanary.exe` | api | C | P3 | — |  |
+| Microsoft Teams | `ms-teams.exe` | uia | C | P3 | — | Graph API лучше |
+| Signal Desktop | `Signal.exe` | uia | C | P3 | — | нет API, только GUI |
+
+### Музыка (6)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| FL Studio | `FL64.exe` | uia+midi | A | P0 | ✅ | нет полного API: MIDI+шаблоны |
+| REAPER | `reaper.exe` | api | A | P0 | ✅ | ReaScript — полная автоматизация |
+| Ableton Live | `Ableton Live 12.exe` | uia+remote | B | P1 | — | MIDI Remote Scripts |
+| Bitwig Studio | `Bitwig Studio.exe` | api | B | P1 | — | Java API |
+| PreSonus Studio One | `Studio One.exe` | uia | C | P3 | — |  |
+| Steinberg Cubase | `Cubase12.exe` | uia | C | P3 | — |  |
+
+### Игры (5)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Steam | `steam.exe` | api+uia | A | P1 | ✅ | профиль готов |
+| Battle.net | `Battle.net.exe` | uia | C | P3 | — |  |
+| Epic Games Launcher | `EpicGamesLauncher.exe` | uia | C | P3 | — |  |
+| Game Bar | `GameBar.exe` | uia | C | P3 | — | запись лучше через OBS |
+| Xbox | `xbox.exe` | uia | C | P3 | — |  |
+
+### Браузер (4)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Google Chrome | `chrome.exe` | web | A | P0 | ✅ | профиль готов |
+| Microsoft Edge | `msedge.exe` | web | A | P0 | ✅ | тот же профиль Chromium |
+| Firefox | `firefox.exe` | web | B | P1 | — | отдельный профиль (Marionette) |
+| Яндекс Браузер | `browser.exe` | web | B | P2 | ✅ |  |
+
+### Дизайн (4)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Figma | `Figma.exe` | api | A | P1 | ✅ | профиль готов |
+| GIMP | `gimp-2.10.exe` | cli | B | P2 | — | Script-Fu/batch |
+| Inkscape | `inkscape.exe` | cli | B | P2 | — | --export |
+| Krita | `krita.exe` | uia | C | P2 | — |  |
+
+### Виртуализация (3)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| VirtualBox | `VirtualBox.exe` | cli | B | P1 | — | VBoxManage |
+| Hyper-V Manager | `mmc.exe` | cli | B | P2 | — | PowerShell Hyper-V |
+| VMware Workstation | `vmware.exe` | cli | B | P2 | — | vmrun |
+
+### Удалённый доступ (3)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| RustDesk | `rustdesk.exe` | cli+uia | B | P2 | — |  |
+| AnyDesk | `AnyDesk.exe` | uia | C | P3 | — |  |
+| TeamViewer | `TeamViewer.exe` | uia | C | P3 | — |  |
+
+### Почта (2)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Microsoft Outlook | `OUTLOOK.EXE` | api+uia | A | P1 | ✅ | профиль готов (Graph) |
+| Mozilla Thunderbird | `thunderbird.exe` | uia | B | P2 | — | IMAP/SMTP напрямую лучше |
+
+### Связь (2)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Zoom | `Zoom.exe` | cli+uia | B | P2 | — | Zoom CLI, запись |
+| Skype | `Skype.exe` | uia | C | P3 | — |  |
+
+### 3D (1)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Blender | `blender.exe` | api | A | P0 | ✅ | bpy headless |
+
+## Как каталог пополняется
+
+1. Пользователь просит «сделай что-то в программе X».
+2. Программа определяется по имени процесса (или файла).
+3. Если её нет в каталоге — ZShelper спрашивает разрешение на «осмотр» окна,
+   снимает UIA-дерево, создаёт черновик профиля tier B и работает через него.
+4. После подтверждения человеком черновик становится tier A (с `verified_at`).
+5. Если UIA-дерева нет (игра, канвас) — включается визуальный агент (tier C).
+
+Так «умеет всё» становится процессом, а не обещанием: каталог растёт сам, по мере
+реальных запросов, и каждое новое приложение оставляет после себя артефакт.
+
+## Проблемы данных
+
+Нет.

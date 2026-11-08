@@ -1,0 +1,33 @@
+{
+  "id": "github:RVC-Project/Retrieval-based-Voice-Conversion-WebUI",
+  "kind": "github",
+  "category": "voice-cloning-svc",
+  "repo": "RVC-Project/Retrieval-based-Voice-Conversion-WebUI",
+  "url": "https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI",
+  "description": "Easily train a good VC model with voice data <= 10 mins!",
+  "stars": 39113,
+  "forks": 5348,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "audio-analysis",
+    "change",
+    "conversational-ai",
+    "conversion",
+    "converter",
+    "retrieval-model",
+    "retrieve-data",
+    "rvc",
+    "so-vits-svc",
+    "sovits",
+    "vc",
+    "vits",
+    "voice",
+    "voice-conversion",
+    "voice-converter"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-04T07:47:32Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:28:58Z"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "github:mido/mido",
+  "kind": "github",
+  "category": "daw-music-production",
+  "repo": "mido/mido",
+  "url": "https://github.com/mido/mido",
+  "description": "MIDI Objects for Python",
+  "stars": 1658,
+  "forks": 296,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "midi",
+    "midifile",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-31T16:24:04Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:28:58Z"
+}

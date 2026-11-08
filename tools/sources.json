@@ -2016,6 +2016,67 @@
       "pypi": [
         "pythonnet"
       ]
+    },
+    "daw-music-production": {
+      "github": [
+        "cockos/reaper",
+        "REAPER-ReaScript/ReaScriptAPI",
+        "mido/mido",
+        "cuthbertLab/music21",
+        "librosa/librosa",
+        "MTG/essentia",
+        "spotify/pedalboard",
+        "sergree/matchering",
+        "facebookresearch/demucs",
+        "ffmpeg/ffmpeg",
+        "prettymidi/pretty_midi"
+      ],
+      "npm": [
+        "tonejs/Tone.js",
+        "magenta/magenta-js"
+      ],
+      "pypi": [
+        "mido",
+        "music21",
+        "librosa",
+        "pedalboard",
+        "matchering",
+        "demucs",
+        "pretty-midi",
+        "soundfile"
+      ]
+    },
+    "voice-cloning-svc": {
+      "github": [
+        "RVC-Project/Retrieval-based-Voice-Conversion-WebUI",
+        "svc-develop-team/so-vits-svc",
+        "openvpi/DiffSinger",
+        "svc-developer/so-vits-svc-fork",
+        "facebookresearch/voicebox"
+      ],
+      "npm": [],
+      "pypi": [
+        "torchcrepe",
+        "pyworld",
+        "praat-parselmouth",
+        "librosa"
+      ]
+    },
+    "music-ai-generation": {
+      "github": [
+        "facebookresearch/audiocraft",
+        "Stability-AI/stable-audio-tools",
+        "declare-lab/tango",
+        "haoheliu/AudioLDM2",
+        "eloimoliner/MusicGen"
+      ],
+      "npm": [],
+      "pypi": [
+        "audiocraft",
+        "torchaudio",
+        "transformers",
+        "diffusers"
+      ]
     }
   },
   "extras": {

@@ -1,0 +1,28 @@
+{
+  "id": "github:openvpi/DiffSinger",
+  "kind": "github",
+  "category": "voice-cloning-svc",
+  "repo": "openvpi/DiffSinger",
+  "url": "https://github.com/openvpi/DiffSinger",
+  "description": "An advanced singing voice synthesis system with high fidelity, expressiveness, controllability and flexibility based on DiffSinger: Singing Voice Synthesis via Shallow Diffusion Mechanism",
+  "stars": 3237,
+  "forks": 354,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "acoustic-model",
+    "diffusion",
+    "diffussion-model",
+    "melody-frontend",
+    "midi",
+    "pitch-prediction",
+    "rectified-flow",
+    "singing-voice",
+    "singing-voice-synthesis",
+    "svs"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-03T10:16:39Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:28:58Z"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "github:MTG/essentia",
+  "kind": "github",
+  "category": "daw-music-production",
+  "repo": "MTG/essentia",
+  "url": "https://github.com/MTG/essentia",
+  "description": "C++ library for audio and music analysis, description and synthesis, including Python bindings",
+  "stars": 3796,
+  "forks": 643,
+  "language": "C++",
+  "license": "AGPL-3.0",
+  "topics": [
+    "audio",
+    "audio-analysis",
+    "c-plus-plus",
+    "dsp",
+    "essentia",
+    "music",
+    "music-information-retrieval",
+    "python",
+    "sound-processing"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T14:09:22Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:28:58Z"
+}

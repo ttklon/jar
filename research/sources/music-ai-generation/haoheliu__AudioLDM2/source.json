@@ -1,0 +1,19 @@
+{
+  "id": "github:haoheliu/AudioLDM2",
+  "kind": "github",
+  "category": "music-ai-generation",
+  "repo": "haoheliu/AudioLDM2",
+  "url": "https://github.com/haoheliu/AudioLDM2",
+  "description": "Text-to-Audio/Music Generation",
+  "stars": 2644,
+  "forks": 209,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "audio-generation"
+  ],
+  "archived": false,
+  "pushed_at": "2024-09-29T15:05:21Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:28:58Z"
+}

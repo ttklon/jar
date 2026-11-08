@@ -1,0 +1,33 @@
+{
+  "id": "github:svc-develop-team/so-vits-svc",
+  "kind": "github",
+  "category": "voice-cloning-svc",
+  "repo": "svc-develop-team/so-vits-svc",
+  "url": "https://github.com/svc-develop-team/so-vits-svc",
+  "description": "SoftVC VITS Singing Voice Conversion",
+  "stars": 28048,
+  "forks": 5011,
+  "language": "Python",
+  "license": "AGPL-3.0",
+  "topics": [
+    "ai",
+    "audio-analysis",
+    "deep-learning",
+    "flow",
+    "generative-adversarial-network",
+    "pytorch",
+    "singing-voice-conversion",
+    "so-vits-svc",
+    "sovits",
+    "speech",
+    "variational-inference",
+    "vc",
+    "vits",
+    "voice",
+    "voice-changer"
+  ],
+  "archived": true,
+  "pushed_at": "2023-11-11T13:11:31Z",
+  "default_branch": "4.1-Stable",
+  "fetched_at": "2026-11-08T13:28:58Z"
+}
