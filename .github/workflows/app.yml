@@ -61,11 +61,32 @@ jobs:
           npm ci
           npm run build
 
-      - name: Clippy (ошибки = падение)
-        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+      # Вывод компилятора пишем в файл и превращаем в аннотации: логи джобов
+      # доступны не всегда, а аннотации читаются через API в любом случае.
+      - name: Clippy
+        id: clippy
+        shell: bash
+        run: |
+          set +e
+          cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings > clippy.log 2>&1
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Clippy report
+        if: always()
+        shell: bash
+        run: python scripts/ci_annotate.py clippy.log
+
+      - name: Clippy gate
+        if: steps.clippy.outputs.status != '0'
+        shell: bash
+        run: |
+          echo "::error::clippy завершился с ошибками (см. аннотации выше)"
+          exit 1
 
       - name: Tests (реестр встроен в бинарник)
+        if: steps.clippy.outputs.status == '0'
         run: cargo test --manifest-path src-tauri/Cargo.toml
 
       - name: Rustfmt
+        if: steps.clippy.outputs.status == '0'
         run: cargo fmt --manifest-path src-tauri/Cargo.toml --check

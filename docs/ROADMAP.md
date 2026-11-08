@@ -21,12 +21,18 @@
 
 ## M1 · Скелет приложения и «руки» (2–3 недели)
 
-- [ ] **Tauri 2 + React 19/TS strict** (решение — [`DECISION-STACK.md`](DECISION-STACK.md)), окно с Mica, трей, хоткеи, capability-манифест
-- [ ] Rust-ядро: команды IPC, менеджер сайдкаров (llama.cpp/whisper.cpp), логирование
+- [x] **Tauri 2 + React 19/TS strict** (решение — [`DECISION-STACK.md`](DECISION-STACK.md)): окно, трей, capability-манифест, иконки
+      генерируются скриптом, сборка UI проверяется в CI (`src-tauri/`, `src/`)
+- [ ] Хоткеи (push-to-talk `Ctrl+Alt+Z`) и Mica-эффект окна
+- [x] Rust-ядро: команды IPC (`registry_snapshot`, `app_status`), логирование в
+      `%LOCALAPPDATA%\ZShelper\logs`, тесты реестра (`cargo test`)
+- [ ] Менеджер сайдкаров (llama.cpp/whisper.cpp)
 - [ ] Спайк до основной работы: release-сборка без портов, без DevTools, single-instance, офлайн (см. [`RUNTIME.md`](RUNTIME.md) §5)
 - [ ] SQLite-схема (events/jobs/steps/audit/facts), миграции
 - [ ] Нативный слой: скриншот, UIA-дамп, клик/ввод, проверка после действия (**прототип Rust**)
-- [ ] Capability registry, сгенерированный из `data/actions.json` (829 действий) + первые 10 инструментов
+- [x] Реестр `data/actions.json` загружается как каталог инструментов: индексы по `id` и
+      `domain|verb|object`, статистика, поиск, экран «Что умею» с фильтром риска
+- [ ] Первые 10 исполняемых инструментов (сейчас каталог только показывает возможности)
 - [ ] Загрузчик профилей `data/profiles/*.json` + движение по шагам с обязательной верификацией (`tools/profiles.py` уже валидирует данные)
 - [ ] `tools/uia_probe.py`: авто-профиль из UIA-дампа (tier B) + визуальный агент как fallback (tier C)
 - [ ] Policy engine (3 режима) + аудит + подтверждение в UI

@@ -139,6 +139,44 @@ def apps_without_profile(n: dict) -> list[list[str]]:
     return [t for t in n["targets"] if t[3].lower() not in exes]
 
 
+def code_stats() -> dict:
+    """Что уже написано: файлы, строки, тесты. Считается по факту, а не по памяти.
+
+    Пока приложения не было, DASHBOARD описывал только данные. Теперь у проекта
+    есть код, и честный отчёт обязан показывать, сколько его и насколько он
+    покрыт тестами — иначе «готово» превращается в обещание.
+    """
+    src = ROOT / "src"
+    core = ROOT / "src-tauri" / "src"
+
+    def count(paths, exclude_tests: bool):
+        files = lines = 0
+        for path in paths:
+            if exclude_tests and (".test." in path.name or path.name == "tests.rs"):
+                continue
+            files += 1
+            lines += sum(1 for _ in path.read_text(encoding="utf-8").splitlines())
+        return files, lines
+
+    ts = sorted(p for p in src.rglob("*.ts*")) if src.exists() else []
+    rs = sorted(core.rglob("*.rs")) if core.exists() else []
+    ts_files, ts_lines = count(ts, True)
+    rs_files, rs_lines = count(rs, True)
+    ts_tests, _ = count(ts, False)
+    ts_tests = sum(1 for p in ts if ".test." in p.name)
+    rs_tests = sum(
+        p.read_text(encoding="utf-8").count("#[test]") for p in rs
+    )
+    return {
+        "ts_files": ts_files,
+        "ts_lines": ts_lines,
+        "rs_files": rs_files,
+        "rs_lines": rs_lines,
+        "ts_tests": ts_tests,
+        "rs_tests": rs_tests,
+    }
+
+
 def render_dashboard(n: dict) -> str:
     acts = n["actions"]
     risks = Counter(a["risk"] for a in acts)
@@ -149,6 +187,7 @@ def render_dashboard(n: dict) -> str:
     curated = len(ev.get("curated", [])) if isinstance(ev, dict) else 0
     lic = Counter((r.get("license") or "не указана") for v in n["eco"].values() for r in v)
     no_lic = sum(c for k, c in lic.items() if k in ("не указана", "proprietary"))
+    code = code_stats()
 
     L: list[str] = [
         "# Сводный отчёт по репозиторию",
@@ -174,6 +213,20 @@ def render_dashboard(n: dict) -> str:
         f"| План проверок | **{n_evals}** сценариев (+{curated} обязательных) | "
         "генерируется из реестра |",
         f"| Исследование | **{len(n['sources'])}** источников | `research/` |",
+        "",
+        "## Код приложения",
+        "",
+        "Считается по файлам: `src/` (UI) и `src-tauri/src/` (ядро). Тесты — отдельно, "
+        "потому что покрытие важнее объёма.",
+        "",
+        "| Часть | Файлов | Строк | Тестов |",
+        "| --- | --- | --- | --- |",
+        f"| Ядро (Rust) | {code['rs_files']} | {code['rs_lines']} | {code['rs_tests']} |",
+        f"| Интерфейс (TypeScript) | {code['ts_files']} | {code['ts_lines']} | {code['ts_tests']} файла |",
+        "",
+        "Что уже работает: окно, трей, логи в `%LOCALAPPDATA%`, реестр как каталог "
+        "инструментов (индексы, статистика, поиск), экран «Что умею» с риском и каналами.",
+        "Чего ещё нет: исполнения действий, планировщика, моделей, голоса, памяти, MCP.",
         "",
         "## Риск в реестре",
         "",
@@ -258,14 +311,17 @@ def render_dashboard(n: dict) -> str:
         "",
         "## Следующие 10 действий (в порядке пользы)",
         "",
-        "1. Зафиксировать каркас приложения по `docs/BUILD-GUIDE.md` (M1: окно, трей, хоткей).",
-        "2. Читать `data/actions.json` в рантайме — реестр становится каталогом инструментов.",
-        "3. Реализовать политику риска и подтверждения (§7 BUILD-GUIDE) — раньше любых действий.",
-        "4. Сделать исполнитель CLI-каналов: 60 % действий закрываются им без UIA.",
-        "5. Подключить MCP-клиент (stdio) — экосистема даёт 900 серверов под это.",
-        "6. Менеджер моделей: скачивание по манифесту, sha256, LRU, `llama-server`.",
-        "7. Голосовой конвейер: VAD → ASR → план → TTS, замер латентности.",
-        "8. Память: SQLite + эмбеддинги, индексация файлов и заметок.",
+        "Каркас и каталог готовы (см. «Код приложения»), поэтому список начинается с "
+        "первого исполняемого действия — дальше приложение впервые что-то *делает*.",
+        "",
+        "1. Политика риска и подтверждения (`policy.rs`) + журнал (`audit.rs`) — до первого исполнения.",
+        "2. Исполнитель CLI-каналов (`executor/cli.rs`) + проверка результата (`verifier.rs`).",
+        "3. Первые 10 инструментов из реестра + экран «план → выполнение» с отменой.",
+        "4. Хоткеи push-to-talk и Mica-эффект окна (остаток M1).",
+        "5. SQLite-схема: следы, шаги, артефакты (`memory/`).",
+        "6. Менеджер моделей: манифест, sha256, LRU, `llama-server`.",
+        "7. Планировщик с JSON-схемой и валидацией ключей реестра.",
+        "8. Голос: VAD → ASR → план → TTS, замер латентности.",
         "9. Прогнать 15 обязательных eval-сценариев на живой Windows.",
         "10. Собрать MSIX, подписать, проверить обновление и откат.",
         "",

@@ -195,7 +195,7 @@ pub fn load_actions() -> Vec<Action> {
 ├─ research/                 исследование и конспекты (только чтение при разработке)
 ├─ tools/                    генераторы и валидаторы (python)
 │
-├─ package.json              фронтенд (pnpm)
+├─ package.json              фронтенд (npm, lock-файл в репозитории)
 ├─ tsconfig.json
 ├─ vite.config.ts
 ├─ src/                      UI
@@ -680,7 +680,7 @@ CREATE TABLE vectors(ref_id TEXT, ref_kind TEXT, vec BLOB);
 | --- | --- | --- |
 | Данные | реестр/профили/скиллы/экосистема консистентны | `python3 tools/check_all.py` |
 | Юнит (Rust) | политика, парсер плана, verifier, роутинг | `cargo test` |
-| Юнит (TS) | сторы, IPC-обёртки, валидаторы форм | `pnpm test` |
+| Юнит (TS) | инварианты реестра, поиск, дымовой тест UI | `npm test` |
 | Интеграция | шаг «cli/fs» на фикстурах, без живой системы | `cargo test --features it` |
 | E2E (живая Windows) | 15 обязательных сценариев из `data/evals.json` | ручной прогон + скрипт |
 | Качество планов | 829 автопроверок структуры плана | `cargo run --bin eval-plans` |
@@ -731,23 +731,27 @@ CREATE TABLE vectors(ref_id TEXT, ref_kind TEXT, vec BLOB);
 ### 18.1 Локально
 
 ```powershell
-pnpm install
-pnpm tauri dev                      # разработка
-cargo test --manifest-path src-tauri/Cargo.toml
+npm ci                              # фронтенд-зависимости (lock-файл в репозитории)
+npm run dev                         # UI в браузере на данных из репозитория — без Rust
+npm run tauri dev                   # приложение целиком (нужен Rust + WebView2)
+npm test                            # инварианты реестра + дымовые тесты UI
+cargo test --manifest-path src-tauri/Cargo.toml   # тесты ядра (реестр встроен в бинарник)
 python tools/check_all.py           # данные (обязательно перед коммитом)
-python tools/build_ecosystem.py && python tools/ecosystem.py
-python tools/dashboard.py
 ```
+
+Что уже стоит в репозитории на момент написания (проверять, а не предполагать):
+`src-tauri/src/{registry,ipc,tray,logging,lib}.rs`, `src/{app,screens,components,ipc,lib,i18n}`,
+`scripts/make_icons.py`, CI-джобы `ui` и `core` в `.github/workflows/app.yml`.
 
 ### 18.2 CI (`.github/workflows/`)
 
 | Job | Что делает | Когда |
 | --- | --- | --- |
-| `validate` | python-генераторы + `--check` (реестр, профили, скиллы, экосистема, dashboard) | каждый push |
-| `build` | `pnpm build` + `cargo build --release` + `cargo clippy -D warnings` + `cargo fmt --check` | каждый push |
-| `test` | `cargo test`, `pnpm test` | каждый push |
+| `validate` | python-генераторы + `--check` (реестр, профили, скиллы, экосистема, dashboard, ссылки) | каждый push |
+| `ui` | `npm run typecheck` + `npm test` + `npm run build` | каждый push |
+| `core` | на Windows: `cargo clippy -D warnings`, `cargo test`, `cargo fmt --check` | каждый push |
 | `package` | MSIX, подпись (секреты), артефакт | тег `v*` |
-| `audit` | `cargo deny`, `pnpm audit`, SBOM | раз в неделю |
+| `audit` | `cargo deny`, `npm audit`, SBOM | раз в неделю |
 
 Правило: **сгенерированные файлы коммитятся**; `--check` падает на расхождении. Это защита от
 «в данных одно, в документах другое».
@@ -769,11 +773,11 @@ python tools/dashboard.py
 
 ### Этап 1 · Каркас (3–5 дней)
 
-- [ ] `pnpm create tauri-app` (React + TS), strict, ESLint + Prettier.
+- [x] Каркас собран вручную (React + TS strict, окно, трей, логи) — см. §18.1.
 - [ ] Окно, трей, single instance, `--minimized`, логи (`tracing` + файл-ротатор).
 - [ ] `ipc.rs`: `app_status`, `registry_stats`, `list_domains` — и типизированные обёртки в `src/ipc`.
 - [ ] Экраны Home + Settings (пустые, но рабочие), тёмная тема.
-- [ ] **DoD:** `pnpm tauri build` → установщик открывается на чистой ВМ, окно есть, лог пишется.
+- [ ] **DoD:** `npm run tauri build` → установщик открывается на чистой ВМ, окно есть, лог пишется.
 
 ### Этап 2 · Реестр как каталог инструментов (3–4 дня)
 
@@ -949,13 +953,13 @@ python tools/dashboard.py
 
 ## 23. Первый рабочий день: чеклист
 
-1. `git clone`, `git checkout arena/564637fa-jar`, `pnpm install`.
+1. `git clone`, `git checkout arena/564637fa-jar`, `npm ci`.
 2. `python3 tools/check_all.py` — убедиться, что данные зелёные.
 3. `python3 tools/dashboard.py` — прочитать `docs/DASHBOARD.md`: где мы.
 4. `python3 tools/ecosystem.py --check` — экосистема не разъехалась.
-5. `pnpm create tauri-app` не нужен: структура уже описана — создавать по §5.
+5. `npm run dev` — UI живёт на данных репозитория без Rust; `npm run tauri dev` — приложение целиком.
 6. Первый коммит: каркас Tauri + `registry.rs` + экран «Что умею» (читает `actions.json`).
-7. Прогнать `pnpm tauri dev`, увидеть 829 действий и 49 доменов из данных.
+7. Прогнать `npm run tauri dev`, увидеть 829 действий и 49 доменов из данных.
 8. Второй коммит: `executor/cli.rs` + `policy.rs` + evals №1 и №4.
 9. Не трогать `data/` без причины; не менять контракты §6 без версии.
 10. Каждый вечер: `check_all` + CI + обновить `ROADMAP` (галочка = прогресс в DASHBOARD).
