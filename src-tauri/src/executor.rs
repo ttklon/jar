@@ -214,7 +214,10 @@ mod tests {
         let started = Instant::now();
         let output = run(&request, &cancel_flag()).expect("запуск");
         assert!(output.timed_out, "должен быть таймаут");
-        assert!(started.elapsed() < Duration::from_secs(3), "не ждём все 5 секунд");
+        assert!(
+            started.elapsed() < Duration::from_secs(3),
+            "не ждём все 5 секунд"
+        );
     }
 
     #[cfg(unix)]

@@ -157,7 +157,11 @@ mod tests {
 
     #[test]
     fn missing_file_reads_as_empty() {
-        let audit = Audit::new(std::env::temp_dir().join("zshelper-audit-missing").join("none.jsonl"));
+        let audit = Audit::new(
+            std::env::temp_dir()
+                .join("zshelper-audit-missing")
+                .join("none.jsonl"),
+        );
         assert!(audit.tail(5).is_empty());
     }
 }

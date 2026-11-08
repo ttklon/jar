@@ -78,7 +78,10 @@ fn action_for<'a>(registry: &'a Registry, key: &str) -> Option<&'a Action> {
 fn decision_of(inner: &Inner, key: &str) -> (Decision, String) {
     match action_for(&inner.registry, key) {
         Some(action) => (policy::decide(action), risk_label(action)),
-        None => (Decision::Deny("такого действия нет в реестре"), "unknown".into()),
+        None => (
+            Decision::Deny("такого действия нет в реестре"),
+            "unknown".into(),
+        ),
     }
 }
 
@@ -156,7 +159,10 @@ pub fn app_status(state: State<'_, AppState>) -> AppStatus {
 /// Десять инструментов, которые уже умеют работать.
 #[tauri::command]
 pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
-    tools::all().iter().map(|spec| view(&state.inner, spec)).collect()
+    tools::all()
+        .iter()
+        .map(|spec| view(&state.inner, spec))
+        .collect()
 }
 
 /// Что политика скажет про действие — без выполнения.
@@ -298,11 +304,10 @@ pub async fn run_tool(
 
     let worker = Arc::clone(&inner);
     let key = registry.clone();
-    let outcome = tauri::async_runtime::spawn_blocking(move || {
-        tools::run(&key, &params, &worker.cancel)
-    })
-    .await
-    .map_err(|error| format!("исполнение прервано: {error}"))?;
+    let outcome =
+        tauri::async_runtime::spawn_blocking(move || tools::run(&key, &params, &worker.cancel))
+            .await
+            .map_err(|error| format!("исполнение прервано: {error}"))?;
 
     let summary = if outcome.ok { "ok" } else { "failed" };
     audit(
