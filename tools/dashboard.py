@@ -390,7 +390,9 @@ def render_index() -> str:
     disc = ROOT / "research" / "discovery"
     vault = ROOT / "research" / "sources"
     disc_md = sorted(disc.glob("*.md")) if disc.exists() else []
-    disc_json = sorted(disc.glob("*.json")) if disc.exists() else []
+    # `_`-prefixed files are local caches (gitignored) — never count them, or this
+    # index would differ between a working copy and a fresh CI clone.
+    disc_json = sorted(p for p in disc.glob("*.json") if not p.name.startswith("_")) if disc.exists() else []
     vault_dirs = sorted(p for p in vault.iterdir() if p.is_dir()) if vault.exists() else []
     L += [
         "",

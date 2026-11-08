@@ -114,7 +114,7 @@
 | [`research/sources/`](../research/sources/) | vault: 51 категорий скачанных первоисточников (README, документация, метаданные) | `tools/collect_sources.py` |
 | [`research/SOURCES.json`](../research/SOURCES.json) | каталог источников с лицензиями и звёздами | `tools/collect_sources.py` |
 | [`research/INDEX.md`](../research/INDEX.md) | индекс vault | генератор |
-| [`research/discovery/`](../research/discovery/) | 77 шортлистов по темам («что брать для X») + 6 инвентарей awesome-листов | `tools/mine_awesome.py`, `tools/shortlist.py` |
+| [`research/discovery/`](../research/discovery/) | 77 шортлистов по темам («что брать для X») + 5 инвентарей awesome-листов | `tools/mine_awesome.py`, `tools/shortlist.py` |
 | [`research/PENDING.md`](../research/PENDING.md) | что не докачалось и как добрать | `tools/collect_sources.py` |
 | [`research/notes/`](../research/notes/) | конспекты: решения и обоснования (см. выше) | руками |
 
