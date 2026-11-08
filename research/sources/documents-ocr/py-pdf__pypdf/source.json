@@ -1,0 +1,26 @@
+{
+  "id": "github:py-pdf/pypdf",
+  "kind": "github",
+  "category": "documents-ocr",
+  "repo": "py-pdf/pypdf",
+  "url": "https://github.com/py-pdf/pypdf",
+  "description": "A pure-python PDF library capable of splitting, merging, cropping, and transforming the pages of PDF files",
+  "stars": 10291,
+  "forks": 1691,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "help-wanted",
+    "pdf",
+    "pdf-documents",
+    "pdf-manipulation",
+    "pdf-parser",
+    "pdf-parsing",
+    "pypdf2",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T11:13:41Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

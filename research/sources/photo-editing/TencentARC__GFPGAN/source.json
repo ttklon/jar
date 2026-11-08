@@ -1,0 +1,25 @@
+{
+  "id": "github:TencentARC/GFPGAN",
+  "kind": "github",
+  "category": "photo-editing",
+  "repo": "TencentARC/GFPGAN",
+  "url": "https://github.com/TencentARC/GFPGAN",
+  "description": "GFPGAN aims at developing Practical Algorithms for Real-world Face Restoration.",
+  "stars": 37699,
+  "forks": 6278,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "deep-learning",
+    "face-restoration",
+    "gan",
+    "gfpgan",
+    "image-restoration",
+    "pytorch",
+    "super-resolution"
+  ],
+  "archived": false,
+  "pushed_at": "2024-07-26T18:44:02Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

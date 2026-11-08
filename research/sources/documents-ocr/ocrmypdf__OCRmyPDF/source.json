@@ -1,0 +1,23 @@
+{
+  "id": "github:ocrmypdf/OCRmyPDF",
+  "kind": "github",
+  "category": "documents-ocr",
+  "repo": "ocrmypdf/OCRmyPDF",
+  "url": "https://github.com/ocrmypdf/OCRmyPDF",
+  "description": "OCRmyPDF adds an OCR text layer to scanned PDF files, allowing them to be searched",
+  "stars": 35263,
+  "forks": 2449,
+  "language": "Python",
+  "license": "MPL-2.0",
+  "topics": [
+    "image-processing",
+    "ocr",
+    "pdf",
+    "python",
+    "tesseract"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:22:36Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "github:OpenSCAD/OpenSCAD",
+  "kind": "github",
+  "category": "home-iot",
+  "repo": "OpenSCAD/OpenSCAD",
+  "url": "https://github.com/OpenSCAD/OpenSCAD",
+  "description": "OpenSCAD - The Programmers Solid 3D CAD Modeller",
+  "stars": 10616,
+  "forks": 1790,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "3d",
+    "3d-graphics",
+    "3d-models",
+    "3d-printing",
+    "c-plus-plus",
+    "c-plus-plus-17",
+    "cad",
+    "dxf-files",
+    "linux",
+    "macos",
+    "opengl",
+    "openscad",
+    "qt5",
+    "qt6",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T18:46:26Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

@@ -1,0 +1,28 @@
+{
+  "id": "github:esphome/esphome",
+  "kind": "github",
+  "category": "home-iot",
+  "repo": "esphome/esphome",
+  "url": "https://github.com/esphome/esphome",
+  "description": "ESPHome is a system to control your ESP32, ESP8266, BK72xx, RP2040 by simple yet powerful configuration files and control them remotely through Home Automation systems.",
+  "stars": 12069,
+  "forks": 5792,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "esp32",
+    "esp8266",
+    "hacktoberfest",
+    "home-assistant",
+    "home-automation",
+    "iot",
+    "mqtt",
+    "platformio",
+    "python",
+    "yaml"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T07:19:22Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

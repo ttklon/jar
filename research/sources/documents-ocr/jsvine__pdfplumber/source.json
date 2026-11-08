@@ -1,0 +1,21 @@
+{
+  "id": "github:jsvine/pdfplumber",
+  "kind": "github",
+  "category": "documents-ocr",
+  "repo": "jsvine/pdfplumber",
+  "url": "https://github.com/jsvine/pdfplumber",
+  "description": "Plumb a PDF for detailed information about each char, rectangle, line, et cetera — and easily extract text and tables.",
+  "stars": 10886,
+  "forks": 950,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "pdf",
+    "pdf-parsing",
+    "table-extraction"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-15T01:46:06Z",
+  "default_branch": "stable",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

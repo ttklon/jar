@@ -1,6 +1,6 @@
 # ИНДЕКС ИСТОЧНИКОВ — ZShelper
 
-Сгенерировано: `2026-11-08T12:50:00Z` · всего записей: **1463** · GitHub-репозиториев: **665**
+Сгенерировано: `2026-11-08T13:05:33Z` · всего записей: **1552** · GitHub-репозиториев: **715**
 
 Полные тексты лежат в `research/sources/<категория>/`. Машиночитаемый реестр — `research/SOURCES.json`.
 
@@ -21,18 +21,22 @@
 | [`deployment-admin`](#deployment-admin) | 21 | 210,007 |
 | [`design-3d`](#design-3d) | 26 | 240,390 |
 | [`devices-peripherals`](#devices-peripherals) | 32 | 374,202 |
+| [`documents-ocr`](#documents-ocr) | 21 | 546,386 |
 | [`electron-shell`](#electron-shell) | 28 | 381,504 |
+| [`home-iot`](#home-iot) | 18 | 213,164 |
 | [`inference-runtimes`](#inference-runtimes) | 45 | 1,169,178 |
 | [`low-end-inference`](#low-end-inference) | 35 | 638,695 |
 | [`mcp-and-tools`](#mcp-and-tools) | 50 | 956,879 |
 | [`media-production`](#media-production) | 45 | 486,062 |
 | [`memory-and-rag`](#memory-and-rag) | 50 | 573,502 |
+| [`music-audio`](#music-audio) | 23 | 307,563 |
 | [`network-admin`](#network-admin) | 26 | 216,887 |
 | [`observability-evals`](#observability-evals) | 32 | 207,602 |
 | [`office-automation`](#office-automation) | 44 | 138,819 |
 | [`orchestration`](#orchestration) | 94 | 2,899,123 |
 | [`packaging-and-ci`](#packaging-and-ci) | 52 | 171,295 |
 | [`perf-optimization`](#perf-optimization) | 65 | 420,497 |
+| [`photo-editing`](#photo-editing) | 27 | 376,269 |
 | [`reference-apps`](#reference-apps) | 25 | 1,013,937 |
 | [`safety-and-security`](#safety-and-security) | 38 | 493,731 |
 | [`screen-understanding`](#screen-understanding) | 42 | 700,299 |
@@ -502,6 +506,32 @@
 | [pypi: sounddevice](https://pypi.org/project/sounddevice/) | - | - |  | Play and Record Sound with Python | `research/sources/devices-peripherals/pypi__sounddevice.md` |
 | [pypi: WMI](https://pypi.org/project/WMI/) | - | http://www.opensource.org/licenses/mit-license.php |  | Windows Management Instrumentation | `research/sources/devices-peripherals/pypi__wmi.md` |
 
+## documents-ocr
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [microsoft/markitdown](https://github.com/microsoft/markitdown) | 194,397 | MIT | 2026-11-07 | Python tool for converting files and office documents to Markdown. | `research/sources/documents-ocr/microsoft__markitdown/README.md` |
+| [PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) | 92,423 | Apache-2.0 | 2026-09-16 | Turn any PDF or image document into structured data for your AI. A powerful, lightweight OCR toolkit that bridges the gap between images/PDFs and LLMs. Supports 100+ languages. | `research/sources/documents-ocr/PaddlePaddle__PaddleOCR/README.md` |
+| [tesseract-ocr/tesseract](https://github.com/tesseract-ocr/tesseract) | 77,409 | Apache-2.0 | 2026-11-02 | Tesseract Open Source OCR Engine (main repository) | `research/sources/documents-ocr/tesseract-ocr__tesseract/README.md` |
+| [docling-project/docling](https://github.com/docling-project/docling) | 70,282 | MIT | 2026-11-08 | Get your documents ready for gen AI | `research/sources/documents-ocr/docling-project__docling/README.md` |
+| [ocrmypdf/OCRmyPDF](https://github.com/ocrmypdf/OCRmyPDF) | 35,263 | MPL-2.0 | 2026-11-08 | OCRmyPDF adds an OCR text layer to scanned PDF files, allowing them to be searched | `research/sources/documents-ocr/ocrmypdf__OCRmyPDF/README.md` |
+| [JaidedAI/EasyOCR](https://github.com/JaidedAI/EasyOCR) | 30,130 | Apache-2.0 | 2025-12-05 | Ready-to-use OCR with 80+ supported languages and all popular writing scripts including Latin, Chinese, Arabic, Devanagari, Cyrillic and etc. | `research/sources/documents-ocr/JaidedAI__EasyOCR/README.md` |
+| [Unstructured-IO/unstructured](https://github.com/Unstructured-IO/unstructured) | 15,697 | Apache-2.0 | 2026-11-06 | Convert documents to structured data effortlessly. Unstructured is open-source ETL solution for transforming complex documents into clean, structured formats for language models.   | `research/sources/documents-ocr/Unstructured-IO__unstructured/README.md` |
+| [jsvine/pdfplumber](https://github.com/jsvine/pdfplumber) | 10,886 | MIT | 2026-10-15 | Plumb a PDF for detailed information about each char, rectangle, line, et cetera — and easily extract text and tables. | `research/sources/documents-ocr/jsvine__pdfplumber/README.md` |
+| [py-pdf/pypdf](https://github.com/py-pdf/pypdf) | 10,291 | NOASSERTION | 2026-11-07 | A pure-python PDF library capable of splitting, merging, cropping, and transforming the pages of PDF files | `research/sources/documents-ocr/py-pdf__pypdf/README.md` |
+| [python-openxml/python-docx](https://github.com/python-openxml/python-docx) | 5,759 | MIT | 2026-08-01 | Create and modify Word documents with Python | `research/sources/documents-ocr/python-openxml__python-docx/README.md` |
+| [camelot-dev/camelot](https://github.com/camelot-dev/camelot) | 3,849 | MIT | 2026-10-30 | A Python library to extract tabular data from PDFs | `research/sources/documents-ocr/camelot-dev__camelot/README.md` |
+| [pypi: camelot-py](https://pypi.org/project/camelot-py/) | - | MIT |  | PDF Table Extraction for Humans. | `research/sources/documents-ocr/pypi__camelot-py.md` |
+| [pypi: docling](https://pypi.org/project/docling/) | - | - |  | SDK and CLI for parsing PDF, DOCX, HTML, and more, to a unified document representation for powering downstream workflows such as gen AI applications. | `research/sources/documents-ocr/pypi__docling.md` |
+| [pypi: markitdown](https://pypi.org/project/markitdown/) | - | - |  | Utility tool for converting various files to Markdown | `research/sources/documents-ocr/pypi__markitdown.md` |
+| [pypi: ocrmypdf](https://pypi.org/project/ocrmypdf/) | - | - |  | OCRmyPDF adds an OCR text layer to scanned PDF files, allowing them to be searched | `research/sources/documents-ocr/pypi__ocrmypdf.md` |
+| [pypi: pdf2image](https://pypi.org/project/pdf2image/) | - | MIT |  | A wrapper around the pdftoppm and pdftocairo command line tools to convert PDF to a PIL Image list. | `research/sources/documents-ocr/pypi__pdf2image.md` |
+| [pypi: pdfplumber](https://pypi.org/project/pdfplumber/) | - | - |  | Plumb a PDF for detailed information about each char, rectangle, and line. | `research/sources/documents-ocr/pypi__pdfplumber.md` |
+| [pypi: pypdf](https://pypi.org/project/pypdf/) | - | - |  | A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files | `research/sources/documents-ocr/pypi__pypdf.md` |
+| [pypi: pytesseract](https://pypi.org/project/pytesseract/) | - | Apache License 2.0 |  | Python-tesseract is a python wrapper for Google's Tesseract-OCR | `research/sources/documents-ocr/pypi__pytesseract.md` |
+| [pypi: python-docx](https://pypi.org/project/python-docx/) | - | MIT |  | Create, read, and update Microsoft Word .docx files. | `research/sources/documents-ocr/pypi__python-docx.md` |
+| [pypi: python-pptx](https://pypi.org/project/python-pptx/) | - | MIT |  | Create, read, and update PowerPoint 2007+ (.pptx) files. | `research/sources/documents-ocr/pypi__python-pptx.md` |
+
 ## electron-shell
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
@@ -534,6 +564,29 @@
 | [npm: electron-updater](https://www.npmjs.com/package/electron-updater) | - | MIT |  | Cross platform updater for electron applications | `research/sources/electron-shell/npm__electron-updater.md` |
 | [npm: electron-vite](https://www.npmjs.com/package/electron-vite) | - | MIT |  | Electron build tooling based on Vite | `research/sources/electron-shell/npm__electron-vite.md` |
 | [npm: vite](https://www.npmjs.com/package/vite) | - | MIT |  | Native-ESM powered web dev build tool | `research/sources/electron-shell/npm__vite.md` |
+
+## home-iot
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [home-assistant/core](https://github.com/home-assistant/core) | 92,062 | Apache-2.0 | 2026-11-08 | :house_with_garden: Open source home automation that puts local control and privacy first. | `research/sources/home-iot/home-assistant__core/README.md` |
+| [blender/blender](https://github.com/blender/blender) | 21,754 | NOASSERTION | 2026-11-07 | Official mirror of Blender | `research/sources/home-iot/blender__blender/README.md` |
+| [Koenkk/zigbee2mqtt](https://github.com/Koenkk/zigbee2mqtt) | 15,798 | GPL-3.0 | 2026-11-06 | Zigbee 🐝 to MQTT bridge 🌉, get rid of your proprietary Zigbee bridges 🔨 | `research/sources/home-iot/Koenkk__zigbee2mqtt/README.md` |
+| [assimp/assimp](https://github.com/assimp/assimp) | 13,312 | NOASSERTION | 2026-11-07 | The official Open-Asset-Importer-Library Repository. Loads 40+ 3D-file-formats into one unified and clean data structure. | `research/sources/home-iot/assimp__assimp/README.md` |
+| [esphome/esphome](https://github.com/esphome/esphome) | 12,069 | NOASSERTION | 2026-11-08 | ESPHome is a system to control your ESP32, ESP8266, BK72xx, RP2040 by simple yet powerful configuration files and control them remotely through Home Automation systems. | `research/sources/home-iot/esphome__esphome/README.md` |
+| [Klipper3d/klipper](https://github.com/Klipper3d/klipper) | 12,031 | GPL-3.0 | 2026-11-08 | Klipper is a 3d-printer firmware | `research/sources/home-iot/Klipper3d__klipper/README.md` |
+| [OpenSCAD/OpenSCAD](https://github.com/OpenSCAD/OpenSCAD) | 10,616 | NOASSERTION | 2026-11-07 | OpenSCAD - The Programmers Solid 3D CAD Modeller | `research/sources/home-iot/OpenSCAD__OpenSCAD/README.md` |
+| [prusa3d/PrusaSlicer](https://github.com/prusa3d/PrusaSlicer) | 9,465 | AGPL-3.0 | 2026-11-07 | G-code generator for 3D printers (RepRap, Makerbot, Ultimaker etc.) | `research/sources/home-iot/prusa3d__PrusaSlicer/README.md` |
+| [OctoPrint/OctoPrint](https://github.com/OctoPrint/OctoPrint) | 9,188 | AGPL-3.0 | 2026-10-30 | OctoPrint is the snappy web interface for your 3D printer! | `research/sources/home-iot/OctoPrint__OctoPrint/README.md` |
+| [Ultimaker/Cura](https://github.com/Ultimaker/Cura) | 7,073 | LGPL-3.0 | 2026-11-06 | 3D printer / slicing GUI built on top of the Uranium framework | `research/sources/home-iot/Ultimaker__Cura/README.md` |
+| [CadQuery/cadquery](https://github.com/CadQuery/cadquery) | 6,077 | NOASSERTION | 2026-11-06 | A python parametric CAD scripting framework based on OCCT | `research/sources/home-iot/CadQuery__cadquery/README.md` |
+| [mikedh/trimesh](https://github.com/mikedh/trimesh) | 3,719 | MIT | 2026-11-06 | Python library for loading and using triangular meshes. | `research/sources/home-iot/mikedh__trimesh/README.md` |
+| [npm: mqtt](https://www.npmjs.com/package/mqtt) | - | MIT |  | A library for the MQTT protocol | `research/sources/home-iot/npm__mqtt.md` |
+| [pypi: cadquery](https://pypi.org/project/cadquery/) | - | Apache Public License 2.0 |  | CadQuery is a parametric  scripting language for creating and traversing CAD models | `research/sources/home-iot/pypi__cadquery.md` |
+| [pypi: homeassistant](https://pypi.org/project/homeassistant/) | - | - |  | Open-source home automation platform running on Python 3. | `research/sources/home-iot/pypi__homeassistant.md` |
+| [pypi: numpy-stl](https://pypi.org/project/numpy-stl/) | - | - |  | Library to make reading, writing and modifying both binary and ascii STL files easy. | `research/sources/home-iot/pypi__numpy-stl.md` |
+| [pypi: paho-mqtt](https://pypi.org/project/paho-mqtt/) | - | - |  | MQTT version 5.0/3.1.1 client class | `research/sources/home-iot/pypi__paho-mqtt.md` |
+| [pypi: trimesh](https://pypi.org/project/trimesh/) | - | The MIT License (MIT) |  | Import, export, process, analyze and view triangular meshes. | `research/sources/home-iot/pypi__trimesh.md` |
 
 ## inference-runtimes
 
@@ -784,6 +837,34 @@
 | [pypi: rank-bm25](https://pypi.org/project/rank-bm25/) | - | Apache2.0 |  | Various BM25 algorithms for document ranking | `research/sources/memory-and-rag/pypi__rank-bm25.md` |
 | [pypi: sentence-transformers](https://pypi.org/project/sentence-transformers/) | - | - |  | Embeddings, Retrieval, and Reranking | `research/sources/memory-and-rag/pypi__sentence-transformers.md` |
 | [pypi: sqlite-vec](https://pypi.org/project/sqlite-vec/) | - | MIT License, Apache License, Version 2.0 |  |  | `research/sources/memory-and-rag/pypi__sqlite-vec.md` |
+
+## music-audio
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp) | 206,120 | Unlicense | 2026-11-04 | A feature-rich command-line audio/video downloader | `research/sources/music-audio/yt-dlp__yt-dlp/README.md` |
+| [spotDL/spotify-downloader](https://github.com/spotDL/spotify-downloader) | 26,748 | MIT | 2026-11-03 | Download your Spotify playlists and songs along with album art and metadata (from YouTube if a match is found). | `research/sources/music-audio/spotDL__spotify-downloader/README.md` |
+| [audacity/audacity](https://github.com/audacity/audacity) | 18,992 | NOASSERTION | 2026-11-06 | Audio Editor | `research/sources/music-audio/audacity__audacity/README.md` |
+| [beetbox/beets](https://github.com/beetbox/beets) | 15,909 | MIT | 2026-11-07 | music library manager and MusicBrainz tagger | `research/sources/music-audio/beetbox__beets/README.md` |
+| [facebookresearch/demucs](https://github.com/facebookresearch/demucs) | 10,405 | MIT | 2024-04-24 | Code for the paper Hybrid Spectrogram and Waveform Source Separation | `research/sources/music-audio/facebookresearch__demucs/README.md` |
+| [librosa/librosa](https://github.com/librosa/librosa) | 8,807 | ISC | 2026-11-07 | Python library for audio and music analysis | `research/sources/music-audio/librosa__librosa/README.md` |
+| [Ardour/ardour](https://github.com/Ardour/ardour) | 5,414 | NOASSERTION | 2026-11-08 | Mirror of Ardour Source Code | `research/sources/music-audio/Ardour__ardour/README.md` |
+| [MTG/essentia](https://github.com/MTG/essentia) | 3,796 | AGPL-3.0 | 2026-11-05 | C++ library for audio and music analysis, description and synthesis, including Python bindings | `research/sources/music-audio/MTG__essentia/README.md` |
+| [aubio/aubio](https://github.com/aubio/aubio) | 3,784 | GPL-3.0 | 2026-04-10 | a library for audio and music analysis | `research/sources/music-audio/aubio__aubio/README.md` |
+| [cuthbertLab/music21](https://github.com/cuthbertLab/music21) | 2,619 | BSD-3-Clause | 2026-11-03 | music21: a Toolkit for Computer-Aided Musical Analysis and Computational Musicology | `research/sources/music-audio/cuthbertLab__music21/README.md` |
+| [quodlibet/mutagen](https://github.com/quodlibet/mutagen) | 1,982 | GPL-2.0 | 2026-11-03 | Python module for handling audio metadata | `research/sources/music-audio/quodlibet__mutagen/README.md` |
+| [sigsep/open-unmix-pytorch](https://github.com/sigsep/open-unmix-pytorch) | 1,520 | MIT | 2024-06-17 | Open-Unmix - Music Source Separation for PyTorch | `research/sources/music-audio/sigsep__open-unmix-pytorch/README.md` |
+| [taglib/taglib](https://github.com/taglib/taglib) | 1,467 | LGPL-2.1 | 2026-11-04 | TagLib Audio Meta-Data Library | `research/sources/music-audio/taglib__taglib/README.md` |
+| [npm: lamejs](https://www.npmjs.com/package/lamejs) | - | LGPL-3.0 |  | Pure JavaScript MP3 Encoder | `research/sources/music-audio/npm__lamejs.md` |
+| [npm: music-metadata](https://www.npmjs.com/package/music-metadata) | - | MIT |  | Music metadata parser for Node.js, supporting virtual any audio and tag format. | `research/sources/music-audio/npm__music-metadata.md` |
+| [pypi: demucs](https://pypi.org/project/demucs/) | - | MIT License |  | Music source separation in the waveform domain. | `research/sources/music-audio/pypi__demucs.md` |
+| [pypi: essentia](https://pypi.org/project/essentia/) | - | - |  | Library for audio and music analysis, description and synthesis | `research/sources/music-audio/pypi__essentia.md` |
+| [pypi: librosa](https://pypi.org/project/librosa/) | - | ISC |  | Python module for audio and music processing | `research/sources/music-audio/pypi__librosa.md` |
+| [pypi: music21](https://pypi.org/project/music21/) | - | - |  | A Toolkit for Computer-Aided Musical Analysis and Computational Musicology. | `research/sources/music-audio/pypi__music21.md` |
+| [pypi: mutagen](https://pypi.org/project/mutagen/) | - | - |  | read and write audio tags for many formats | `research/sources/music-audio/pypi__mutagen.md` |
+| [pypi: pydub](https://pypi.org/project/pydub/) | - | MIT |  | Manipulate audio with an simple and easy high level interface | `research/sources/music-audio/pypi__pydub.md` |
+| [pypi: soundfile](https://pypi.org/project/soundfile/) | - | BSD 3-Clause License |  | An audio library based on libsndfile, CFFI and NumPy | `research/sources/music-audio/pypi__soundfile.md` |
+| [pypi: yt-dlp](https://pypi.org/project/yt-dlp/) | - | - |  | A feature-rich command-line audio/video downloader | `research/sources/music-audio/pypi__yt-dlp.md` |
 
 ## network-admin
 
@@ -1127,6 +1208,38 @@
 | [pypi: tokenizers](https://pypi.org/project/tokenizers/) | - | - |  |  | `research/sources/perf-optimization/pypi__tokenizers.md` |
 | [pypi: torchao](https://pypi.org/project/torchao/) | - | - |  | Package for applying ao techniques to GPU models | `research/sources/perf-optimization/pypi__torchao.md` |
 | [pypi: xgrammar](https://pypi.org/project/xgrammar/) | - | Apache 2.0 |  | Efficient, Flexible and Portable Structured Generation | `research/sources/perf-optimization/pypi__xgrammar.md` |
+
+## photo-editing
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [opencv/opencv](https://github.com/opencv/opencv) | 91,484 | Apache-2.0 | 2026-11-08 | Open Source Computer Vision Library | `research/sources/photo-editing/opencv__opencv/README.md` |
+| [facebookresearch/segment-anything](https://github.com/facebookresearch/segment-anything) | 55,108 | Apache-2.0 | 2024-09-18 | The repository provides code for running inference with the SegmentAnything Model (SAM), links for downloading the trained model checkpoints, and example notebooks that show how to | `research/sources/photo-editing/facebookresearch__segment-anything/README.md` |
+| [TencentARC/GFPGAN](https://github.com/TencentARC/GFPGAN) | 37,699 | NOASSERTION | 2024-07-26 | GFPGAN aims at developing Practical Algorithms for Real-world Face Restoration. | `research/sources/photo-editing/TencentARC__GFPGAN/README.md` |
+| [xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) | 37,411 | BSD-3-Clause | 2024-08-06 | Real-ESRGAN aims at developing Practical Algorithms for General Image/Video Restoration. | `research/sources/photo-editing/xinntao__Real-ESRGAN/README.md` |
+| [lovell/sharp](https://github.com/lovell/sharp) | 32,829 | Apache-2.0 | 2026-11-05 | High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, AVIF and TIFF images. Uses the libvips library. | `research/sources/photo-editing/lovell__sharp/README.md` |
+| [danielgatis/rembg](https://github.com/danielgatis/rembg) | 25,387 | MIT | 2026-11-06 | Rembg is a tool to remove images background | `research/sources/photo-editing/danielgatis__rembg/README.md` |
+| [Sanster/IOPaint](https://github.com/Sanster/IOPaint) | 23,284 | Apache-2.0 | 2025-04-29 | Image inpainting tool powered by SOTA AI Model. Remove any unwanted object, defect, people from your pictures or erase and replace(powered by stable diffusion) any thing on your pi | `research/sources/photo-editing/Sanster__IOPaint/README.md` |
+| [ImageMagick/ImageMagick](https://github.com/ImageMagick/ImageMagick) | 17,816 | NOASSERTION | 2026-11-08 | ImageMagick is a free, open-source software suite for creating, editing, converting, and displaying images. It supports 200+ formats and offers powerful command-line tools and APIs | `research/sources/photo-editing/ImageMagick__ImageMagick/README.md` |
+| [darktable-org/darktable](https://github.com/darktable-org/darktable) | 13,411 | GPL-3.0 | 2026-11-08 | darktable is an open source photography workflow application and raw developer | `research/sources/photo-editing/darktable-org__darktable/README.md` |
+| [kornia/kornia](https://github.com/kornia/kornia) | 12,356 | Apache-2.0 | 2026-11-08 | 🐍 Geometric Computer Vision Library for Spatial AI | `research/sources/photo-editing/kornia__kornia/README.md` |
+| [libvips/libvips](https://github.com/libvips/libvips) | 11,792 | LGPL-2.1 | 2026-11-07 | A fast image processing library with low memory needs. | `research/sources/photo-editing/libvips__libvips/README.md` |
+| [nadermx/backgroundremover](https://github.com/nadermx/backgroundremover) | 8,165 | MIT | 2026-07-10 | Background Remover lets you Remove Background from images and video using AI with a simple command line interface that is free and open source. | `research/sources/photo-editing/nadermx__backgroundremover/README.md` |
+| [exiftool/exiftool](https://github.com/exiftool/exiftool) | 5,246 | GPL-3.0 | 2026-11-05 | ExifTool meta information reader/writer | `research/sources/photo-editing/exiftool__exiftool/README.md` |
+| [Beep6581/RawTherapee](https://github.com/Beep6581/RawTherapee) | 4,281 | GPL-3.0 | 2026-11-08 | A powerful cross-platform raw photo processing program | `research/sources/photo-editing/Beep6581__RawTherapee/README.md` |
+| [npm: exifr](https://www.npmjs.com/package/exifr) | - | MIT |  | 📷 The fastest and most versatile JavaScript EXIF reading library. | `research/sources/photo-editing/npm__exifr.md` |
+| [npm: imagemin](https://www.npmjs.com/package/imagemin) | - | MIT |  | Minify images seamlessly | `research/sources/photo-editing/npm__imagemin.md` |
+| [npm: jimp](https://www.npmjs.com/package/jimp) | - | MIT |  | An image processing library written entirely in JavaScript. | `research/sources/photo-editing/npm__jimp.md` |
+| [npm: probe-image-size](https://www.npmjs.com/package/probe-image-size) | - | MIT |  | Get image size without full download (JPG, GIF, PNG, WebP, BMP, TIFF, PSD) | `research/sources/photo-editing/npm__probe-image-size.md` |
+| [npm: sharp](https://www.npmjs.com/package/sharp) | - | Apache-2.0 |  | High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images | `research/sources/photo-editing/npm__sharp.md` |
+| [pypi: ExifRead](https://pypi.org/project/ExifRead/) | - | - |  | Library to extract Exif information from digital camera image files. | `research/sources/photo-editing/pypi__exifread.md` |
+| [pypi: opencv-python](https://pypi.org/project/opencv-python/) | - | Apache 2.0 |  | Wrapper package for OpenCV python bindings. | `research/sources/photo-editing/pypi__opencv-python.md` |
+| [pypi: pillow](https://pypi.org/project/pillow/) | - | - |  | Python Imaging Library (fork) | `research/sources/photo-editing/pypi__pillow.md` |
+| [pypi: pillow-heif](https://pypi.org/project/pillow-heif/) | - | BSD-3-Clause |  | Python interface for libheif library | `research/sources/photo-editing/pypi__pillow-heif.md` |
+| [pypi: pyvips](https://pypi.org/project/pyvips/) | - | MIT |  | binding for the libvips image processing library | `research/sources/photo-editing/pypi__pyvips.md` |
+| [pypi: rawpy](https://pypi.org/project/rawpy/) | - | - |  | RAW image processing for Python, a wrapper for libraw | `research/sources/photo-editing/pypi__rawpy.md` |
+| [pypi: rembg](https://pypi.org/project/rembg/) | - | MIT |  | Remove image background | `research/sources/photo-editing/pypi__rembg.md` |
+| [pypi: Wand](https://pypi.org/project/Wand/) | - | - |  | Ctypes-based simple MagickWand API binding for Python | `research/sources/photo-editing/pypi__wand.md` |
 
 ## reference-apps
 

@@ -1783,6 +1783,127 @@
         "tree-kill",
         "which"
       ]
+    },
+    "photo-editing": {
+      "github": [
+        "libvips/libvips",
+        "lovell/sharp",
+        "ImageMagick/ImageMagick",
+        "exiftool/exiftool",
+        "danielgatis/rembg",
+        "nadermx/backgroundremover",
+        "xinntao/Real-ESRGAN",
+        "TencentARC/GFPGAN",
+        "Sanster/IOPaint",
+        "facebookresearch/segment-anything",
+        "kornia/kornia",
+        "darktable-org/darktable",
+        "Beep6581/RawTherapee",
+        "opencv/opencv"
+      ],
+      "npm": [
+        "sharp",
+        "jimp",
+        "exifr",
+        "imagemin",
+        "probe-image-size"
+      ],
+      "pypi": [
+        "pillow",
+        "opencv-python",
+        "rawpy",
+        "exifread",
+        "rembg",
+        "pillow-heif",
+        "pyvips",
+        "wand"
+      ]
+    },
+    "music-audio": {
+      "github": [
+        "beetbox/beets",
+        "librosa/librosa",
+        "cuthbertLab/music21",
+        "MTG/essentia",
+        "facebookresearch/demucs",
+        "sigsep/open-unmix-pytorch",
+        "quodlibet/mutagen",
+        "taglib/taglib",
+        "audacity/audacity",
+        "Ardour/ardour",
+        "aubio/aubio",
+        "spotDL/spotify-downloader",
+        "yt-dlp/yt-dlp"
+      ],
+      "npm": [
+        "music-metadata",
+        "lamejs"
+      ],
+      "pypi": [
+        "mutagen",
+        "librosa",
+        "pydub",
+        "demucs",
+        "music21",
+        "essentia",
+        "yt-dlp",
+        "soundfile"
+      ]
+    },
+    "documents-ocr": {
+      "github": [
+        "tesseract-ocr/tesseract",
+        "JaidedAI/EasyOCR",
+        "PaddlePaddle/PaddleOCR",
+        "ocrmypdf/OCRmyPDF",
+        "jsvine/pdfplumber",
+        "camelot-dev/camelot",
+        "python-openxml/python-docx",
+        "python-openxml/python-pptx",
+        "py-pdf/pypdf",
+        "microsoft/markitdown",
+        "docling-project/docling",
+        "Unstructured-IO/unstructured"
+      ],
+      "pypi": [
+        "pytesseract",
+        "pdfplumber",
+        "camelot-py",
+        "python-docx",
+        "python-pptx",
+        "pypdf",
+        "markitdown",
+        "docling",
+        "ocrmypdf",
+        "pdf2image"
+      ]
+    },
+    "home-iot": {
+      "github": [
+        "home-assistant/core",
+        "esphome/esphome",
+        "Koenkk/zigbee2mqtt",
+        "OctoPrint/OctoPrint",
+        "Klipper3d/klipper",
+        "prusa3d/PrusaSlicer",
+        "Ultimaker/Cura",
+        "OpenSCAD/OpenSCAD",
+        "CadQuery/cadquery",
+        "mikedh/trimesh",
+        "assimp/assimp",
+        "blender/blender"
+      ],
+      "npm": [
+        "mqtt",
+        "node-red/node-red"
+      ],
+      "pypi": [
+        "homeassistant",
+        "paho-mqtt",
+        "trimesh",
+        "cadquery",
+        "numpy-stl"
+      ]
     }
   },
   "extras": {

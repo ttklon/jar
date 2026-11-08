@@ -1,0 +1,33 @@
+{
+  "id": "github:lovell/sharp",
+  "kind": "github",
+  "category": "photo-editing",
+  "repo": "lovell/sharp",
+  "url": "https://github.com/lovell/sharp",
+  "description": "High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, AVIF and TIFF images. Uses the libvips library.",
+  "stars": 32829,
+  "forks": 1450,
+  "language": "JavaScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "avif",
+    "crop",
+    "exif",
+    "icc",
+    "image",
+    "image-processing",
+    "javascript",
+    "jpeg",
+    "libvips",
+    "nodejs",
+    "performance",
+    "png",
+    "resize",
+    "sharp",
+    "svg"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T21:21:21Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

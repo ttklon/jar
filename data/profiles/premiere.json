@@ -1,0 +1,71 @@
+{
+  "app": "Adobe Premiere Pro",
+  "exe": ["Adobe Premiere Pro.exe"],
+  "ui_stack": "win32",
+  "version_seen": "2026 (v26)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "import": { "by": "hotkey", "value": "Ctrl+I" },
+    "new_sequence": { "by": "hotkey", "value": "Ctrl+N" },
+    "export_media": { "by": "hotkey", "value": "Ctrl+M" },
+    "razor": { "by": "hotkey", "value": "Ctrl+K" },
+    "save": { "by": "hotkey", "value": "Ctrl+S" },
+    "timeline": { "by": "uia", "value": "Name~«Таймлайн»", "fallback": "панель внизу окна" },
+    "effect_controls": { "by": "uia", "value": "Name~«Элементы управления эффектами»" },
+    "clip_api": { "by": "api", "value": "ExtendScript/UXP или ffmpeg-препроцессинг" }
+  },
+  "operations": [
+    {
+      "name": "Импорт клипов и создание секвенции",
+      "registry": "video|монтировать|в Premiere",
+      "steps": ["anchor:import", "type:папка с клипами", "Enter", "выбрать клип → «Новая секвенция из клипа»", "wait:4000"],
+      "verify": ["секвенция открыта", "число клипов в проекте = числу файлов", "разрешение секвенции совпадает с клипом"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Разрезать и убрать лишнее",
+      "registry": "video|нарезать|фрагменты",
+      "steps": ["anchor:razor", "выделить ненужное", "Delete", "закрыть разрыв (Q/W)"],
+      "verify": ["длительность секвенции уменьшилась", "нет чёрных кадров (проверка кадров ffmpeg)"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Автоматические субтитры",
+      "registry": "video-production|субтитрировать|автоматически",
+      "steps": ["Текст → Транскрибировать последовательность", "выбрать язык", "Создать подписи", "оформить стиль"],
+      "verify": ["дорожка субтитров не пустая", "тайминг первого субтитра совпадает с речью (±0.5 с)"],
+      "risk": "write-local",
+      "timeouts_ms": 600000
+    },
+    {
+      "name": "Нормализация звука до -14 LUFS",
+      "registry": "audio|нормализовать|громкость",
+      "steps": ["anchor:effect_controls", "Loudness Radar/Усиление", "применить на все клипы"],
+      "verify": ["ffmpeg loudnorm: измеренная громкость -14 ±1 LUFS", "пиков нет выше -1 dBTP"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Прокси для слабого ПК",
+      "registry": "video|оптимизировать|монтаж",
+      "steps": ["создать прокси через ffmpeg (720p, intraframe)", "подключить как прокси", "переключить просмотр на прокси"],
+      "verify": ["прокси-файлы существуют для всех клипов", "просмотр без дропов (проверка FPS рендера)"],
+      "risk": "write-local",
+      "notes": "ключевой приём: делает монтаж 4K возможным на ноутбуке без GPU"
+    },
+    {
+      "name": "Экспорт H.264 для YouTube",
+      "registry": "video|сжать|размер",
+      "steps": ["anchor:export_media", "формат H.264", "пресет YouTube 1080p", "type:путь", "Экспорт", "wait:по прогрессу"],
+      "verify": ["ffprobe: h264, 1920x1080, 30 или 60 fps", "длительность совпадает с секвенцией ±0.2 с", "аудио дорожка есть"],
+      "risk": "write-local",
+      "on_fail": "сообщить код ошибки Media Encoder, не закрывать проект"
+    },
+    {
+      "name": "Сохранить проект и автосохранения",
+      "registry": "video|монтировать|в Premiere",
+      "steps": ["anchor:save", "проверить папку Auto-Save"],
+      "verify": [".prproj существует", "в Auto-Save есть файл с текущей датой"],
+      "risk": "write-local"
+    }
+  ]
+}

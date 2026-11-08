@@ -1,0 +1,70 @@
+{
+  "app": "OBS Studio",
+  "exe": ["obs64.exe"],
+  "ui_stack": "qt",
+  "version_seen": "31.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "ws": { "by": "api", "value": "obs-websocket v5 (localhost:4455, пароль в secrets.enc)", "fallback": "UIA + горячие клавиши" },
+    "scenes": { "by": "uia", "value": "ControlType=List; Name~«Сцены»" },
+    "sources": { "by": "uia", "value": "ControlType=List; Name~«Источники»" },
+    "start_record": { "by": "hotkey", "value": "Ctrl+F9 (настраивается)" },
+    "start_stream": { "by": "hotkey", "value": "Ctrl+F10 (настраивается)" },
+    "settings": { "by": "menu", "value": "Файл → Настройки" },
+    "status_bar": { "by": "ocr", "value": "«Запись»/«В эфире» + таймер" }
+  },
+  "operations": [
+    {
+      "name": "Создать сцену «экран + камера»",
+      "registry": "video|настроить|сцену в OBS",
+      "steps": ["ws:CreateScene", "ws:CreateInput(monitor_capture)", "ws:CreateInput(video_capture_device)", "расположить камеру в углу"],
+      "verify": ["ws:GetSceneList содержит сцену", "ws:GetInputList содержит оба источника", "скриншот превью не чёрный"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Настроить микрофон и шумоподавление",
+      "registry": "audio|настроить|микрофон",
+      "steps": ["ws:SetInputSettings(mic)", "включить фильтры: noise_suppress, gate, compressor"],
+      "verify": ["фильтры в списке активны", "тестовая запись 5 с: шум фона ниже -50 dB"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Записать экран",
+      "registry": "video|записать|экран",
+      "steps": ["ws:StartRecord", "wait:длительность", "ws:StopRecord"],
+      "verify": ["ffprobe: файл существует, длительность > 0", "размер > 10 КБ", "разрешение совпадает с монитором"],
+      "risk": "write-local",
+      "on_fail": "проверить свободное место и путь записи, не начинать дубль без предупреждения"
+    },
+    {
+      "name": "Запустить стрим",
+      "registry": "video|стримить|в сервис",
+      "steps": ["проверить ключ и сервер", "ws:StartStream", "watch: bitrate/dropped frames 60 с"],
+      "verify": ["ws:GetStreamStatus.active = true", "dropped frames < 1%", "в чате сервиса видно «в эфире»"],
+      "risk": "external",
+      "on_fail": "немедленно остановить при падении битрейта, сообщить в Telegram"
+    },
+    {
+      "name": "Включить виртуальную камеру",
+      "registry": "video|включить|виртуальную камеру",
+      "steps": ["ws:StartVirtualCam"],
+      "verify": ["в Zoom/Teams камера «OBS Virtual Camera» доступна", "превью не чёрное"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Хоткеи переключения сцен",
+      "registry": "automation|создать|хоткей",
+      "steps": ["ws:SetHotkey для сцен 1–4", "проверить в настройках горячих клавиш"],
+      "verify": ["нажатие хоткея переключает сцену (ws:GetCurrentProgramScene)"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Проверить, что запись не пустая и со звуком",
+      "registry": "video|проверить|качество",
+      "steps": ["ffprobe потоков", "ffmpeg: замерить громкость", "взять 3 кадра и проверить, что не чёрные"],
+      "verify": ["есть video и audio потоки", "средняя громкость > -40 dB", "кадры не однотонные"],
+      "risk": "read",
+      "notes": "самая частая ошибка стримеров: запись без звука — проверять всегда"
+    }
+  ]
+}

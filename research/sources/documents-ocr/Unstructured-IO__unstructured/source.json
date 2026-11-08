@@ -1,0 +1,33 @@
+{
+  "id": "github:Unstructured-IO/unstructured",
+  "kind": "github",
+  "category": "documents-ocr",
+  "repo": "Unstructured-IO/unstructured",
+  "url": "https://github.com/Unstructured-IO/unstructured",
+  "description": "Convert documents to structured data effortlessly. Unstructured is open-source ETL solution for transforming complex documents into clean, structured formats for language models.  Visit our website to learn more about our enterprise grade Platform product for production grade workflows, partitioning, enrichments, chunking and embedding.",
+  "stars": 15697,
+  "forks": 1385,
+  "language": "HTML",
+  "license": "Apache-2.0",
+  "topics": [
+    "data-pipelines",
+    "deep-learning",
+    "document-image-analysis",
+    "document-image-processing",
+    "document-parser",
+    "document-parsing",
+    "docx",
+    "donut",
+    "information-retrieval",
+    "langchain",
+    "llm",
+    "machine-learning",
+    "ml",
+    "natural-language-processing",
+    "nlp"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T21:29:24Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

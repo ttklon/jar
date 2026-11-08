@@ -1,0 +1,30 @@
+{
+  "id": "github:spotDL/spotify-downloader",
+  "kind": "github",
+  "category": "music-audio",
+  "repo": "spotDL/spotify-downloader",
+  "url": "https://github.com/spotDL/spotify-downloader",
+  "description": "Download your Spotify playlists and songs along with album art and metadata (from YouTube if a match is found).",
+  "stars": 26748,
+  "forks": 2313,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "download-music",
+    "hacktoberfest",
+    "mp3",
+    "music",
+    "playlists",
+    "python",
+    "song",
+    "song-lyrics",
+    "spotdl",
+    "spotdl-cli",
+    "spotify",
+    "youtube-music"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-03T12:39:02Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

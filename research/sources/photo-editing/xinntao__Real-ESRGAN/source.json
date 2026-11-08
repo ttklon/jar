@@ -1,0 +1,26 @@
+{
+  "id": "github:xinntao/Real-ESRGAN",
+  "kind": "github",
+  "category": "photo-editing",
+  "repo": "xinntao/Real-ESRGAN",
+  "url": "https://github.com/xinntao/Real-ESRGAN",
+  "description": "Real-ESRGAN aims at developing Practical Algorithms for General Image/Video Restoration.",
+  "stars": 37411,
+  "forks": 4527,
+  "language": "Python",
+  "license": "BSD-3-Clause",
+  "topics": [
+    "amine",
+    "denoise",
+    "esrgan",
+    "image-restoration",
+    "jpeg-compression",
+    "pytorch",
+    "real-esrgan",
+    "super-resolution"
+  ],
+  "archived": false,
+  "pushed_at": "2024-08-06T13:15:18Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "github:tesseract-ocr/tesseract",
+  "kind": "github",
+  "category": "documents-ocr",
+  "repo": "tesseract-ocr/tesseract",
+  "url": "https://github.com/tesseract-ocr/tesseract",
+  "description": "Tesseract Open Source OCR Engine (main repository)",
+  "stars": 77409,
+  "forks": 10903,
+  "language": "C++",
+  "license": "Apache-2.0",
+  "topics": [
+    "hacktoberfest",
+    "lstm",
+    "machine-learning",
+    "ocr",
+    "ocr-engine",
+    "tesseract",
+    "tesseract-ocr"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-02T18:20:18Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

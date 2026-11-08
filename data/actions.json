@@ -9625,7 +9625,7 @@
   "id": "video-production-599",
   "domain": "video-production",
   "verb": "ответить",
-  "object": "ответить на комментарии",
+  "object": "на комментарии",
   "example": "ответь на частые вопросы",
   "implementation": [
    "API + шаблоны"
@@ -9876,5 +9876,1109 @@
   "human_code": "c",
   "status": "v1",
   "notes": "push — отдельная external-операция"
+ },
+ {
+  "id": "video-615",
+  "domain": "video",
+  "verb": "монтировать",
+  "object": "в Premiere пошагово",
+  "example": "собери секвенцию в Premiere",
+  "implementation": [
+   "UIA + горячие клавиши"
+  ],
+  "risk": "write-local",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "профиль приложения"
+ },
+ {
+  "id": "video-616",
+  "domain": "video",
+  "verb": "оптимизировать",
+  "object": "монтаж на слабом ПК (прокси)",
+  "example": "смонтируй через прокси",
+  "implementation": [
+   "ffmpeg прокси + Premiere"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "главный приём для слабого железа"
+ },
+ {
+  "id": "video-617",
+  "domain": "video",
+  "verb": "настроить",
+  "object": "сцену в OBS",
+  "example": "сделай сцену «экран + камера»",
+  "implementation": [
+   "OBS WebSocket API"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "video-618",
+  "domain": "video",
+  "verb": "включить",
+  "object": "виртуальную камеру",
+  "example": "включи виртуальную камеру OBS",
+  "implementation": [
+   "OBS API"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "audio-619",
+  "domain": "audio",
+  "verb": "нормализовать",
+  "object": "громкость",
+  "example": "выровняй громкость до -14 LUFS",
+  "implementation": [
+   "ffmpeg loudnorm"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "audio-620",
+  "domain": "audio",
+  "verb": "настроить",
+  "object": "микрофон и шумоподавление",
+  "example": "убери шум из микрофона",
+  "implementation": [
+   "OBS/EqualizerAPO"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "creative-3d-621",
+  "domain": "creative-3d",
+  "verb": "открыть",
+  "object": "макет в редакторе",
+  "example": "открой макет в Figma",
+  "implementation": [
+   "UIA/браузер"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "creative-3d-622",
+  "domain": "creative-3d",
+  "verb": "экспортировать",
+  "object": "ассеты (PNG/SVG)",
+  "example": "выгрузи иконки в svg",
+  "implementation": [
+   "API/UI экспорт"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "creative-3d-623",
+  "domain": "creative-3d",
+  "verb": "аннотировать",
+  "object": "макет комментариями",
+  "example": "оставь комментарий к кнопке",
+  "implementation": [
+   "API/UI"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "accessibility-624",
+  "domain": "accessibility",
+  "verb": "проверить",
+  "object": "контраст и читаемость",
+  "example": "проверь контраст текста",
+  "implementation": [
+   "WCAG-расчёт"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "dev-code-625",
+  "domain": "dev-code",
+  "verb": "сгенерировать",
+  "object": "вёрстку по макету",
+  "example": "сделай html по макету",
+  "implementation": [
+   "VLM + шаблоны"
+  ],
+  "risk": "write-local",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "проверка скриншотом"
+ },
+ {
+  "id": "music-626",
+  "domain": "music",
+  "verb": "создать",
+  "object": "плейлист по настроению",
+  "example": "собери плейлист для работы",
+  "implementation": [
+   "анализ BPM/жанра + правила"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-627",
+  "domain": "music",
+  "verb": "распознать",
+  "object": "что за трек",
+  "example": "что это за песня",
+  "implementation": [
+   "Chromaprint/акустический отпечаток"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-628",
+  "domain": "music",
+  "verb": "изменить",
+  "object": "теги (ID3) массово",
+  "example": "проставь исполнителя и альбом везде",
+  "implementation": [
+   "mutagen"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-629",
+  "domain": "music",
+  "verb": "конвертировать",
+  "object": "формат",
+  "example": "переведи flac в mp3 320",
+  "implementation": [
+   "ffmpeg"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-630",
+  "domain": "music",
+  "verb": "нормализовать",
+  "object": "громкость альбома",
+  "example": "выровняй громкость по альбому",
+  "implementation": [
+   "ffmpeg loudnorm + ReplayGain"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-631",
+  "domain": "music",
+  "verb": "разделить",
+  "object": "на стемы",
+  "example": "вытащи вокал и минус",
+  "implementation": [
+   "demucs"
+  ],
+  "risk": "write-local",
+  "tier": "T3",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "нужен GPU"
+ },
+ {
+  "id": "music-632",
+  "domain": "music",
+  "verb": "удалить",
+  "object": "шум и тишину",
+  "example": "убери шипение в записи",
+  "implementation": [
+   "ffmpeg afftdn"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-633",
+  "domain": "music",
+  "verb": "найти",
+  "object": "дубликаты треков",
+  "example": "найди одинаковые песни в разных битрейтах",
+  "implementation": [
+   "fingerprint + теги"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-634",
+  "domain": "music",
+  "verb": "найти",
+  "object": "трек по описанию",
+  "example": "найди ту песню где «нанана»",
+  "implementation": [
+   "поиск по базе + LLM"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "сложно",
+  "human_code": "h",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-635",
+  "domain": "music",
+  "verb": "составить",
+  "object": "плейлист под тренировку",
+  "example": "сделай на 45 минут с BPM 140",
+  "implementation": [
+   "BPM-анализ"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-636",
+  "domain": "music",
+  "verb": "записать",
+  "object": "идею голосом",
+  "example": "запиши напев и сохрани",
+  "implementation": [
+   "микрофон + заметка"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-637",
+  "domain": "music",
+  "verb": "создать",
+  "object": "музыку",
+  "example": "сгенерируй фоновую музыку",
+  "implementation": [
+   "MusicGen локально"
+  ],
+  "risk": "write-local",
+  "tier": "T3",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "music-638",
+  "domain": "music",
+  "verb": "проверить",
+  "object": "качество библиотеки",
+  "example": "нет ли битых файлов",
+  "implementation": [
+   "ffprobe + проверка декодирования"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-639",
+  "domain": "music",
+  "verb": "упорядочить",
+  "object": "библиотеку по папкам",
+  "example": "разложи по жанрам и годам",
+  "implementation": [
+   "правила + теги"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "music-640",
+  "domain": "music",
+  "verb": "свести",
+  "object": "дорожки в микс",
+  "example": "сведи минус и вокал",
+  "implementation": [
+   "ffmpeg amix / Audacity"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-641",
+  "domain": "personal-finance",
+  "verb": "импортировать",
+  "object": "выписку банка",
+  "example": "загрузи выписку за месяц",
+  "implementation": [
+   "csv/pdf парсинг"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-642",
+  "domain": "personal-finance",
+  "verb": "классифицировать",
+  "object": "траты по категориям",
+  "example": "разложи расходы по категориям",
+  "implementation": [
+   "правила + LLM"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-643",
+  "domain": "personal-finance",
+  "verb": "построить",
+  "object": "бюджет на месяц",
+  "example": "сделай бюджет на ноябрь",
+  "implementation": [
+   "таблица + история"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-644",
+  "domain": "personal-finance",
+  "verb": "найти",
+  "object": "подписки и забытые платежи",
+  "example": "на что я подписан",
+  "implementation": [
+   "периодические списания"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-645",
+  "domain": "personal-finance",
+  "verb": "построить",
+  "object": "отчёт доходы и расходы",
+  "example": "покажи куда уходят деньги",
+  "implementation": [
+   "дашборд"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-646",
+  "domain": "personal-finance",
+  "verb": "сравнить",
+  "object": "месяцы между собой",
+  "example": "в ноябре я тратил больше",
+  "implementation": [
+   "SQL по данным"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-647",
+  "domain": "personal-finance",
+  "verb": "спрогнозировать",
+  "object": "остаток до зарплаты",
+  "example": "хватит ли денег до 25-го",
+  "implementation": [
+   "модель + история"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-648",
+  "domain": "personal-finance",
+  "verb": "напомнить",
+  "object": "о платеже",
+  "example": "напомни про аренду 1-го",
+  "implementation": [
+   "планировщик"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-649",
+  "domain": "personal-finance",
+  "verb": "проверить",
+  "object": "подозрительные списания",
+  "example": "нет ли мошенничества",
+  "implementation": [
+   "аномалии"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-650",
+  "domain": "personal-finance",
+  "verb": "подготовить",
+  "object": "данные для налоговой",
+  "example": "собери суммы для декларации",
+  "implementation": [
+   "csv + чеклист"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "только навигатор, не расчёт налогов"
+ },
+ {
+  "id": "personal-finance-651",
+  "domain": "personal-finance",
+  "verb": "посчитать",
+  "object": "кредитную нагрузку",
+  "example": "сколько уходит на кредиты",
+  "implementation": [
+   "доли от дохода"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-652",
+  "domain": "personal-finance",
+  "verb": "отследить",
+  "object": "курсы и цены",
+  "example": "как изменился курс",
+  "implementation": [
+   "API курсов"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-653",
+  "domain": "personal-finance",
+  "verb": "собрать",
+  "object": "чеки в отчёт",
+  "example": "сфотографируй чеки и посчитай",
+  "implementation": [
+   "OCR + категории"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-654",
+  "domain": "personal-finance",
+  "verb": "оплатить",
+  "object": "счёт",
+  "example": "оплати коммуналку",
+  "implementation": [
+   "—"
+  ],
+  "risk": "money",
+  "tier": "T1",
+  "human": "сложно",
+  "human_code": "h",
+  "status": "never",
+  "notes": "деньги — только навигатор"
+ },
+ {
+  "id": "legal-docs-655",
+  "domain": "legal-docs",
+  "verb": "прочитать",
+  "object": "договор и объяснить",
+  "example": "объясни что я подписываю",
+  "implementation": [
+   "LLM + извлечение пунктов"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "legal-docs-656",
+  "domain": "legal-docs",
+  "verb": "найти",
+  "object": "опасные пункты",
+  "example": "где тут штрафы и автопродление",
+  "implementation": [
+   "правила + LLM"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "legal-docs-657",
+  "domain": "legal-docs",
+  "verb": "сравнить",
+  "object": "две редакции договора",
+  "example": "что изменили в новой версии",
+  "implementation": [
+   "diff + смысловой разбор"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "legal-docs-658",
+  "domain": "legal-docs",
+  "verb": "составить",
+  "object": "договор по шаблону",
+  "example": "сделай NDA для подрядчика",
+  "implementation": [
+   "шаблон + подстановки"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "юрист проверяет"
+ },
+ {
+  "id": "legal-docs-659",
+  "domain": "legal-docs",
+  "verb": "проверить",
+  "object": "сроки и даты",
+  "example": "когда истекает договор",
+  "implementation": [
+   "извлечение дат"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "legal-docs-660",
+  "domain": "legal-docs",
+  "verb": "собрать",
+  "object": "пакет документов",
+  "example": "собери всё для сделки",
+  "implementation": [
+   "чеклист + pdf"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "legal-docs-661",
+  "domain": "legal-docs",
+  "verb": "заполнить",
+  "object": "бланк или заявление",
+  "example": "заполни заявление по образцу",
+  "implementation": [
+   "шаблон + данные профиля"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "legal-docs-662",
+  "domain": "legal-docs",
+  "verb": "проверить",
+  "object": "реквизиты контрагента",
+  "example": "это нормальная фирма",
+  "implementation": [
+   "открытые реестры через браузер"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "legal-docs-663",
+  "domain": "legal-docs",
+  "verb": "перевести",
+  "object": "договор",
+  "example": "переведи на английский",
+  "implementation": [
+   "MT + терминология"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "legal-docs-664",
+  "domain": "legal-docs",
+  "verb": "напомнить",
+  "object": "о юридическом сроке",
+  "example": "напомни за месяц до продления",
+  "implementation": [
+   "планировщик"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "legal-docs-665",
+  "domain": "legal-docs",
+  "verb": "подписать",
+  "object": "документ электронно",
+  "example": "подпиши договор",
+  "implementation": [
+   "КЭП/сервис подписи"
+  ],
+  "risk": "identity",
+  "tier": "T2",
+  "human": "сложно",
+  "human_code": "h",
+  "status": "never",
+  "notes": "юридически значимо, только человек"
+ },
+ {
+  "id": "legal-docs-666",
+  "domain": "legal-docs",
+  "verb": "сохранить",
+  "object": "архив с версиями и хэшами",
+  "example": "сохрани подписанный оригинал",
+  "implementation": [
+   "fs + sha256 + журнал"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "legal-docs-667",
+  "domain": "legal-docs",
+  "verb": "найти",
+  "object": "практику по похожему делу",
+  "example": "есть ли похожие дела",
+  "implementation": [
+   "браузер + выдержки со ссылками"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-668",
+  "domain": "home-daily",
+  "verb": "составить",
+  "object": "график уборки",
+  "example": "кто и когда убирает",
+  "implementation": [
+   "планировщик"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-669",
+  "domain": "home-daily",
+  "verb": "напомнить",
+  "object": "полить растения",
+  "example": "напомни про цветы",
+  "implementation": [
+   "планировщик + сезон"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-670",
+  "domain": "home-daily",
+  "verb": "распознать",
+  "object": "болезнь растения по фото",
+  "example": "что с моим фикусом",
+  "implementation": [
+   "VLM + справочник"
+  ],
+  "risk": "read",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-671",
+  "domain": "home-daily",
+  "verb": "напомнить",
+  "object": "корм и лекарства животным",
+  "example": "напомни про кота",
+  "implementation": [
+   "планировщик"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-672",
+  "domain": "home-daily",
+  "verb": "найти",
+  "object": "ветклинику и записать",
+  "example": "запиши кота к врачу",
+  "implementation": [
+   "браузер"
+  ],
+  "risk": "external",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-673",
+  "domain": "home-daily",
+  "verb": "составить",
+  "object": "смету ремонта",
+  "example": "посчитай материалы для комнаты",
+  "implementation": [
+   "замеры + цены"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-674",
+  "domain": "home-daily",
+  "verb": "сравнить",
+  "object": "мастеров и цены",
+  "example": "кто дешевле и надёжнее",
+  "implementation": [
+   "браузер + отзывы"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-675",
+  "domain": "home-daily",
+  "verb": "посчитать",
+  "object": "площадь по плану",
+  "example": "сколько квадратов в комнате",
+  "implementation": [
+   "парсинг плана/фото"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-676",
+  "domain": "home-daily",
+  "verb": "собрать",
+  "object": "инструкцию по ремонту",
+  "example": "как положить плитку",
+  "implementation": [
+   "база + видео + шаги"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-677",
+  "domain": "home-daily",
+  "verb": "проверить",
+  "object": "сроки продуктов по фото",
+  "example": "это ещё можно есть",
+  "implementation": [
+   "OCR дат + справочник"
+  ],
+  "risk": "read",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-678",
+  "domain": "home-daily",
+  "verb": "составить",
+  "object": "меню на неделю",
+  "example": "спланируй еду и закупки",
+  "implementation": [
+   "LLM + остатки"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-679",
+  "domain": "home-daily",
+  "verb": "заказать",
+  "object": "мастера",
+  "example": "вызови сантехника",
+  "implementation": [
+   "—"
+  ],
+  "risk": "external",
+  "tier": "T1",
+  "human": "сложно",
+  "human_code": "h",
+  "status": "v2",
+  "notes": "только с подтверждением"
+ },
+ {
+  "id": "home-daily-680",
+  "domain": "home-daily",
+  "verb": "вести",
+  "object": "журнал дома",
+  "example": "что когда чинили",
+  "implementation": [
+   "SQLite + напоминания"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-681",
+  "domain": "home-daily",
+  "verb": "напомнить",
+  "object": "про обслуживание",
+  "example": "пора менять фильтр",
+  "implementation": [
+   "журнал + интервалы"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "home-daily-682",
+  "domain": "home-daily",
+  "verb": "изменить",
+  "object": "список дел по дому",
+  "example": "перенеси уборку на субботу",
+  "implementation": [
+   "планировщик"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-683",
+  "domain": "personal-finance",
+  "verb": "изменить",
+  "object": "категорию операции",
+  "example": "это не еда, а транспорт",
+  "implementation": [
+   "правила категоризации"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
  }
 ]

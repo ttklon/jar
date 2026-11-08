@@ -1,0 +1,17 @@
+{
+  "id": "github:facebookresearch/segment-anything",
+  "kind": "github",
+  "category": "photo-editing",
+  "repo": "facebookresearch/segment-anything",
+  "url": "https://github.com/facebookresearch/segment-anything",
+  "description": "The repository provides code for running inference with the SegmentAnything Model (SAM), links for downloading the trained model checkpoints, and example notebooks that show how to use the model.",
+  "stars": 55108,
+  "forks": 6401,
+  "language": "Jupyter Notebook",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2024-09-18T17:46:55Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

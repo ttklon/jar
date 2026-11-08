@@ -1,0 +1,33 @@
+{
+  "id": "github:assimp/assimp",
+  "kind": "github",
+  "category": "home-iot",
+  "repo": "assimp/assimp",
+  "url": "https://github.com/assimp/assimp",
+  "description": "The official Open-Asset-Importer-Library Repository. Loads 40+ 3D-file-formats into one unified and clean data structure.",
+  "stars": 13312,
+  "forks": 3272,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "3mf",
+    "android",
+    "asset-pipeline",
+    "assets",
+    "assimp",
+    "c-plus-plus",
+    "collada",
+    "dae",
+    "fbx",
+    "fbx-exporter",
+    "game-development",
+    "gamedev-tool",
+    "gamedevelopment",
+    "gltf",
+    "gltf2"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T23:11:07Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

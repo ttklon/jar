@@ -1,6 +1,6 @@
 # Недокачанное
 
-Проверено: 2026-11-08T12:47:34Z. Всего: 29.
+Проверено: 2026-11-08T13:05:33Z. Всего: 31.
 
 Дозакачать: `GITHUB_TOKEN=$(gh auth token) python3 tools/collect_sources.py fetch`
 (или `--no-github`, если GitHub недоступен).
@@ -36,3 +36,5 @@
 | npm | business-finance | `money.js` |
 | github | accessibility-api | `microsoft/axe-core` |
 | pypi | accessibility-api | `pyatspi` |
+| github | documents-ocr | `python-openxml/python-pptx` |
+| npm | home-iot | `node-red/node-red` |

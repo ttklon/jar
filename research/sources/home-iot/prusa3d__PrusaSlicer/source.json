@@ -1,0 +1,17 @@
+{
+  "id": "github:prusa3d/PrusaSlicer",
+  "kind": "github",
+  "category": "home-iot",
+  "repo": "prusa3d/PrusaSlicer",
+  "url": "https://github.com/prusa3d/PrusaSlicer",
+  "description": "G-code generator for 3D printers (RepRap, Makerbot, Ultimaker etc.)",
+  "stars": 9465,
+  "forks": 2398,
+  "language": "C++",
+  "license": "AGPL-3.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T00:35:45Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}
