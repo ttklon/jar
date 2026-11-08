@@ -1,0 +1,19 @@
+{
+  "id": "github:gpg/gnupg",
+  "kind": "github",
+  "category": "crypto-privacy",
+  "repo": "gpg/gnupg",
+  "url": "https://github.com/gpg/gnupg",
+  "description": "The GNU Privacy Guard. NOTE: Maintainers are not tracking this mirror. Do not make pull requests here, nor comment any commits, submit them usual way to bug tracker (https://www.gnupg.org/documentation/bts.html) or to the mailing list (https://www.gnupg.org/documentation/mailing-lists.html).",
+  "stars": 999,
+  "forks": 219,
+  "language": "C",
+  "license": "GPL-3.0",
+  "topics": [
+    "openpgp"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T23:03:19Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:07:59Z"
+}

@@ -1,6 +1,6 @@
 {
   "generated_from": "data/actions.psv",
-  "count": 717,
+  "count": 724,
   "curated": [
     {
       "priority": "P0",
@@ -20056,6 +20056,199 @@
       },
       "then": [
         "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-personal-finance-718",
+      "action_id": "personal-finance-718",
+      "domain": "personal-finance",
+      "phrase": "сколько сейчас на счёте",
+      "when": "баланс и последние операции",
+      "tier": "T1",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-personal-finance-719",
+      "action_id": "personal-finance-719",
+      "domain": "personal-finance",
+      "phrase": "найди платёж на 3400",
+      "when": "операцию по сумме или дате",
+      "tier": "T0",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-personal-finance-720",
+      "action_id": "personal-finance-720",
+      "domain": "personal-finance",
+      "phrase": "выгрузи всё в Excel",
+      "when": "операции в таблицу",
+      "tier": "T0",
+      "risk": "write-local",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "результат проверен повторным чтением состояния"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-business-finance-721",
+      "action_id": "business-finance-721",
+      "domain": "business-finance",
+      "phrase": "открой отчёт по продажам",
+      "when": "отчёт в 1С",
+      "tier": "T1",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "суммы сходятся",
+        "документ сформирован без пропусков"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-business-finance-722",
+      "action_id": "business-finance-722",
+      "domain": "business-finance",
+      "phrase": "выгрузи отчёт в Excel",
+      "when": "отчёт в Excel",
+      "tier": "T1",
+      "risk": "write-local",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": true,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "суммы сходятся",
+        "документ сформирован без пропусков"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-business-finance-723",
+      "action_id": "business-finance-723",
+      "domain": "business-finance",
+      "phrase": "найди счёт 1523",
+      "when": "документ по номеру",
+      "tier": "T1",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "суммы сходятся",
+        "документ сформирован без пропусков"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-business-finance-724",
+      "action_id": "business-finance-724",
+      "domain": "business-finance",
+      "phrase": "нет ли задвоенных счетов",
+      "when": "дубли документов",
+      "tier": "T1",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "суммы сходятся",
+        "документ сформирован без пропусков"
       ],
       "must_not": [
         "молча провалиться",

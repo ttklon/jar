@@ -1,0 +1,17 @@
+{
+  "id": "github:signalapp/libsignal",
+  "kind": "github",
+  "category": "crypto-privacy",
+  "repo": "signalapp/libsignal",
+  "url": "https://github.com/signalapp/libsignal",
+  "description": "Home to the Signal Protocol as well as other cryptographic primitives which make Signal possible.",
+  "stars": 6116,
+  "forks": 808,
+  "language": "Rust",
+  "license": "AGPL-3.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-05T20:38:51Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:07:59Z"
+}

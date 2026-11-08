@@ -129,8 +129,8 @@
 | `engineering-3d` | 17 | — | D (печать) | OpenSCAD, trimesh, PrusaSlicer |
 | `images` | 21 | Photoshop | D (дубликаты) | libvips, rembg, exiftool |
 
-Итого по репозиторию: **683 действия / 44 домена / 11 профилей / 81 операция в профилях /
-683 сценария в eval-плане**, источников в vault — **1552 в 42 категориях**.
+На момент написания: 683 действия / 44 домена / 11 профилей / 81 операция.
+Текущий срез — в [`docs/ACTIONS.md`](../docs/ACTIONS.md) и [`docs/PROFILES.md`](../docs/PROFILES.md).
 
 ## 9. Что это даёт продукту
 

@@ -458,6 +458,26 @@
     "_path": "research/sources/perf-optimization/Dao-AILab__flash-attention/README.md"
   },
   {
+    "id": "github:DeviceFarmer/adbkit",
+    "kind": "github",
+    "category": "adb-android",
+    "repo": "DeviceFarmer/adbkit",
+    "url": "https://github.com/DeviceFarmer/adbkit",
+    "description": "A pure Node.js client for the Android Debug Bridge.",
+    "stars": 308,
+    "forks": 63,
+    "language": "TypeScript",
+    "license": "NOASSERTION",
+    "topics": [
+      "hacktoberfest"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T15:40:32Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/adb-android/DeviceFarmer__adbkit/README.md"
+  },
+  {
     "id": "github:EleutherAI/lm-evaluation-harness",
     "kind": "github",
     "category": "observability-evals",
@@ -648,6 +668,34 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/whisper-and-asr/FunAudioLLM__SenseVoice/README.md"
+  },
+  {
+    "id": "github:Genymobile/scrcpy",
+    "kind": "github",
+    "category": "adb-android",
+    "repo": "Genymobile/scrcpy",
+    "url": "https://github.com/Genymobile/scrcpy",
+    "description": "Display and control your Android device",
+    "stars": 154301,
+    "forks": 14169,
+    "language": "C",
+    "license": "Apache-2.0",
+    "topics": [
+      "android",
+      "c",
+      "ffmpeg",
+      "genyteam-system",
+      "libav",
+      "mirroring",
+      "recording",
+      "screen",
+      "sdl2"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T21:30:53Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/adb-android/Genymobile__scrcpy/README.md"
   },
   {
     "id": "github:Genymobile/scrcpy",
@@ -2856,6 +2904,24 @@
   {
     "id": "github:WireGuard/wireguard-windows",
     "kind": "github",
+    "category": "crypto-privacy",
+    "repo": "WireGuard/wireguard-windows",
+    "url": "https://github.com/WireGuard/wireguard-windows",
+    "description": "Download WireGuard for Windows at https://www.wireguard.com/install . This repo is a mirror only. Official repository is at https://git.zx2c4.com/wireguard-windows",
+    "stars": 2885,
+    "forks": 700,
+    "language": "Go",
+    "license": "MIT",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-09-26T07:07:38Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/WireGuard__wireguard-windows/README.md"
+  },
+  {
+    "id": "github:WireGuard/wireguard-windows",
+    "kind": "github",
     "category": "network-admin",
     "repo": "WireGuard/wireguard-windows",
     "url": "https://github.com/WireGuard/wireguard-windows",
@@ -4049,6 +4115,38 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/bencevans__screenshot-desktop/README.md"
+  },
+  {
+    "id": "github:bitwarden/clients",
+    "kind": "github",
+    "category": "crypto-privacy",
+    "repo": "bitwarden/clients",
+    "url": "https://github.com/bitwarden/clients",
+    "description": "Bitwarden client apps (web, browser extension, desktop, and cli).",
+    "stars": 14178,
+    "forks": 2198,
+    "language": "TypeScript",
+    "license": "NOASSERTION",
+    "topics": [
+      "angular",
+      "bitwarden",
+      "browser-extension",
+      "chrome",
+      "cli",
+      "desktop",
+      "electron",
+      "firefox",
+      "javascript",
+      "nodejs",
+      "safari",
+      "typescript",
+      "webextension"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T04:06:05Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/bitwarden__clients/README.md"
   },
   {
     "id": "github:bleachbit/bleachbit",
@@ -6984,6 +7082,24 @@
     "_path": "research/sources/self-extension/google__adk-python/README.md"
   },
   {
+    "id": "github:google/android-emulator-container-scripts",
+    "kind": "github",
+    "category": "adb-android",
+    "repo": "google/android-emulator-container-scripts",
+    "url": "https://github.com/google/android-emulator-container-scripts",
+    "description": "This is a set of minimal scripts to run the emulator in a container for various systems such as Docker, for external consumption",
+    "stars": 2110,
+    "forks": 294,
+    "language": "Python",
+    "license": "Apache-2.0",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-10-06T02:44:04Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/adb-android/google__android-emulator-container-scripts/README.md"
+  },
+  {
     "id": "github:google/gemma.cpp",
     "kind": "github",
     "category": "inference-runtimes",
@@ -7152,6 +7268,26 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/connectors/googleworkspace__apps-script-samples/README.md"
+  },
+  {
+    "id": "github:gpg/gnupg",
+    "kind": "github",
+    "category": "crypto-privacy",
+    "repo": "gpg/gnupg",
+    "url": "https://github.com/gpg/gnupg",
+    "description": "The GNU Privacy Guard. NOTE: Maintainers are not tracking this mirror. Do not make pull requests here, nor comment any commits, submit them usual way to bug tracker (https://www.gnupg.org/documentation/bts.html) or to the mailing list (https://www.gnupg.org/documentation/mailing-lists.html).",
+    "stars": 999,
+    "forks": 219,
+    "language": "C",
+    "license": "GPL-3.0",
+    "topics": [
+      "openpgp"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T23:03:19Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/gpg__gnupg/README.md"
   },
   {
     "id": "github:grammyjs/grammY",
@@ -8504,6 +8640,37 @@
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/whisper-and-asr/k2-fsa__sherpa-onnx/README.md",
     "_extras": 1
+  },
+  {
+    "id": "github:keepassxreboot/keepassxc",
+    "kind": "github",
+    "category": "crypto-privacy",
+    "repo": "keepassxreboot/keepassxc",
+    "url": "https://github.com/keepassxreboot/keepassxc",
+    "description": "KeePassXC is a cross-platform community-driven port of the Windows application “KeePass Password Safe”.",
+    "stars": 29853,
+    "forks": 2015,
+    "language": "C++",
+    "license": "NOASSERTION",
+    "topics": [
+      "cross-platform",
+      "hacktoberfest",
+      "keepass",
+      "keepassxc",
+      "linux",
+      "macos",
+      "password",
+      "password-manager",
+      "privacy",
+      "security",
+      "windows",
+      "yubikey"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T08:46:27Z",
+    "default_branch": "develop",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/keepassxreboot__keepassxc/README.md"
   },
   {
     "id": "github:keepassxreboot/keepassxc",
@@ -12250,6 +12417,28 @@
     "_path": "research/sources/tts-and-voice/myshell-ai__OpenVoice/README.md"
   },
   {
+    "id": "github:mzlogin/awesome-adb",
+    "kind": "github",
+    "category": "adb-android",
+    "repo": "mzlogin/awesome-adb",
+    "url": "https://github.com/mzlogin/awesome-adb",
+    "description": "ADB Usage Complete / ADB 用法大全",
+    "stars": 12528,
+    "forks": 2289,
+    "language": "",
+    "license": "MIT",
+    "topics": [
+      "android",
+      "android-adb",
+      "android-debug-bridge"
+    ],
+    "archived": false,
+    "pushed_at": "2026-09-29T06:42:05Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/adb-android/mzlogin__awesome-adb/README.md"
+  },
+  {
     "id": "github:n8n-io/n8n",
     "kind": "github",
     "category": "connectors",
@@ -15420,6 +15609,24 @@
     "_path": "research/sources/benchmarks/sierra-research__tau-bench/README.md"
   },
   {
+    "id": "github:signalapp/libsignal",
+    "kind": "github",
+    "category": "crypto-privacy",
+    "repo": "signalapp/libsignal",
+    "url": "https://github.com/signalapp/libsignal",
+    "description": "Home to the Signal Protocol as well as other cryptographic primitives which make Signal possible.",
+    "stars": 6116,
+    "forks": 808,
+    "language": "Rust",
+    "license": "AGPL-3.0",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-05T20:38:51Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/signalapp__libsignal/README.md"
+  },
+  {
     "id": "github:sigrokproject/pulseview",
     "kind": "github",
     "category": "devices-peripherals",
@@ -18294,6 +18501,19 @@
     "_path": "research/sources/academic-writing/npm__citation-js-core.md"
   },
   {
+    "id": "npm:@devicefarmer/adbkit",
+    "kind": "npm",
+    "category": "adb-android",
+    "package": "@devicefarmer/adbkit",
+    "version": "4.1.0",
+    "url": "https://www.npmjs.com/package/@devicefarmer/adbkit",
+    "homepage": "https://github.com/DeviceFarmer/adbkit#readme",
+    "license": "Apache-2.0",
+    "summary": "A Typescript client for the Android Debug Bridge.",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/adb-android/npm__devicefarmer-adbkit.md"
+  },
+  {
     "id": "npm:@diffusionstudio/vits-web",
     "kind": "npm",
     "category": "tts-and-voice",
@@ -19161,6 +19381,19 @@
     "summary": "Get metadata about the active window and open windows (title, id, bounds, owner, URL, etc)",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/npm__active-win.md"
+  },
+  {
+    "id": "npm:adbkit",
+    "kind": "npm",
+    "category": "adb-android",
+    "package": "adbkit",
+    "version": "2.11.1",
+    "url": "https://www.npmjs.com/package/adbkit",
+    "homepage": "https://github.com/openstf/adbkit#readme",
+    "license": "Apache-2.0",
+    "summary": "A pure Node.js client for the Android Debug Bridge.",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/adb-android/npm__adbkit.md"
   },
   {
     "id": "npm:adm-zip",
@@ -21163,6 +21396,19 @@
   {
     "id": "npm:node-forge",
     "kind": "npm",
+    "category": "crypto-privacy",
+    "package": "node-forge",
+    "version": "1.4.3",
+    "url": "https://www.npmjs.com/package/node-forge",
+    "homepage": "https://github.com/digitalbazaar/forge",
+    "license": "(BSD-3-Clause OR GPL-2.0)",
+    "summary": "JavaScript implementations of network transports, cryptography, ciphers, PKI, message digests, and various utilities.",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/npm__node-forge.md"
+  },
+  {
+    "id": "npm:node-forge",
+    "kind": "npm",
     "category": "security-ops",
     "package": "node-forge",
     "version": "1.4.3",
@@ -21587,6 +21833,19 @@
     "summary": "The official TypeScript library for the OpenAI API",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/npm__openai.md"
+  },
+  {
+    "id": "npm:otplib",
+    "kind": "npm",
+    "category": "crypto-privacy",
+    "package": "otplib",
+    "version": "13.6.0",
+    "url": "https://www.npmjs.com/package/otplib",
+    "homepage": "https://otplib.yeojz.dev",
+    "license": "MIT",
+    "summary": "TypeScript-first library for TOTP and HOTP with multi-runtime and plugin support",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/npm__otplib.md"
   },
   {
     "id": "npm:otplib",
@@ -23402,6 +23661,20 @@
     "_path": "research/sources/accessibility-api/pypi__accessible-output2.md"
   },
   {
+    "id": "pypi:adbutils",
+    "kind": "pypi",
+    "category": "adb-android",
+    "package": "adbutils",
+    "version": "2.12.0",
+    "url": "https://pypi.org/project/adbutils/",
+    "home_page": "https://github.com/openatx/adbutils",
+    "license": "MIT",
+    "requires_python": ">=3.8",
+    "summary": "Pure Python Adb Library",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/adb-android/pypi__adbutils.md"
+  },
+  {
     "id": "pypi:ansible",
     "kind": "pypi",
     "category": "deployment-admin",
@@ -23860,6 +24133,18 @@
     "summary": "Cutting-edge framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/pypi__crewai.md"
+  },
+  {
+    "id": "pypi:cryptography",
+    "kind": "pypi",
+    "category": "crypto-privacy",
+    "package": "cryptography",
+    "version": "50.0.2",
+    "url": "https://pypi.org/project/cryptography/",
+    "requires_python": "!=3.9.0,!=3.9.1,>=3.9",
+    "summary": "cryptography is a package which provides cryptographic recipes and primitives to Python developers.",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/pypi__cryptography.md"
   },
   {
     "id": "pypi:cryptography",
@@ -24928,6 +25213,18 @@
     "summary": "Hook and simulate keyboard events on Windows and Linux",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/pypi__keyboard.md"
+  },
+  {
+    "id": "pypi:keyring",
+    "kind": "pypi",
+    "category": "crypto-privacy",
+    "package": "keyring",
+    "version": "25.7.0",
+    "url": "https://pypi.org/project/keyring/",
+    "requires_python": ">=3.9",
+    "summary": "Store and access your passwords safely.",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/pypi__keyring.md"
   },
   {
     "id": "pypi:keyring",
@@ -26578,6 +26875,19 @@
     "_path": "research/sources/windows-automation/pypi__psutil.md"
   },
   {
+    "id": "pypi:pure-python-adb",
+    "kind": "pypi",
+    "category": "adb-android",
+    "package": "pure-python-adb",
+    "version": "0.3.0.dev0",
+    "url": "https://pypi.org/project/pure-python-adb/",
+    "home_page": "https://github.com/Swind/pure-python-adb",
+    "license": "MIT license",
+    "summary": "Pure python implementation of the adb client",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/adb-android/pypi__pure-python-adb.md"
+  },
+  {
     "id": "pypi:pvporcupine",
     "kind": "pypi",
     "category": "whisper-and-asr",
@@ -26841,6 +27151,19 @@
     "_path": "research/sources/system-control/pypi__pygetwindow.md"
   },
   {
+    "id": "pypi:pykeepass",
+    "kind": "pypi",
+    "category": "crypto-privacy",
+    "package": "pykeepass",
+    "version": "4.2.0",
+    "url": "https://pypi.org/project/pykeepass/",
+    "license": "GPL-3.0",
+    "requires_python": ">=3.7",
+    "summary": "Python library to interact with keepass databases (supports KDBX3 and KDBX4)",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/pypi__pykeepass.md"
+  },
+  {
     "id": "pypi:pylatexenc",
     "kind": "pypi",
     "category": "academic-writing",
@@ -26878,6 +27201,18 @@
     "summary": "Monitor and control user input devices",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/pypi__pynput.md"
+  },
+  {
+    "id": "pypi:pyotp",
+    "kind": "pypi",
+    "category": "crypto-privacy",
+    "package": "PyOTP",
+    "version": "2.10.0",
+    "url": "https://pypi.org/project/PyOTP/",
+    "requires_python": ">=3.8",
+    "summary": "Python One Time Password Library",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/pypi__pyotp.md"
   },
   {
     "id": "pypi:pyotp",
@@ -27144,6 +27479,19 @@
     "summary": "Read key-value pairs from a .env file and set them as environment variables",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/pypi__python-dotenv.md"
+  },
+  {
+    "id": "pypi:python-gnupg",
+    "kind": "pypi",
+    "category": "crypto-privacy",
+    "package": "python-gnupg",
+    "version": "0.5.7",
+    "url": "https://pypi.org/project/python-gnupg/",
+    "home_page": "https://github.com/vsajip/python-gnupg",
+    "license": "BSD",
+    "summary": "A wrapper for the Gnu Privacy Guard (GPG or GnuPG)",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/crypto-privacy/pypi__python-gnupg.md"
   },
   {
     "id": "pypi:python-pptx",
@@ -28525,6 +28873,20 @@
     "summary": "Python UIAutomation for Windows",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/pypi__uiautomation.md"
+  },
+  {
+    "id": "pypi:uiautomator2",
+    "kind": "pypi",
+    "category": "adb-android",
+    "package": "uiautomator2",
+    "version": "3.7.1",
+    "url": "https://pypi.org/project/uiautomator2/",
+    "home_page": "https://github.com/openatx/uiautomator2",
+    "license": "MIT",
+    "requires_python": "<4.0,>=3.8",
+    "summary": "uiautomator for android device",
+    "fetched_at": "2026-11-08T13:07:59Z",
+    "_path": "research/sources/adb-android/pypi__uiautomator2.md"
   },
   {
     "id": "pypi:unstructured",

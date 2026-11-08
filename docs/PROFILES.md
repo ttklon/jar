@@ -6,7 +6,7 @@
 
 Файл генерируется `python3 tools/profiles.py`; руками не править.
 
-**Профилей: 14** · операций: **100** · проблем: **0**
+**Профилей: 16** · операций: **112** · проблем: **0**
 
 Правила (проверяются автоматически, ошибка = ненулевой код возврата):
 
@@ -18,6 +18,7 @@
 
 | Приложение | Процесс | Стек | Версия | Проверен | Якорей | Операций | Файл |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1С:Предприятие 8 (тонкий/толстый клиент) | `1cv8.exe, 1cv8c.exe` | win32 | 8.3.x (2026-11) | 2026-11-08 | 5 | 6 | `1c.json` |
 | Adobe Photoshop | `Photoshop.exe` | win32 | 2026 (v27) | 2026-11-08 | 8 | 8 | `photoshop.json` |
 | Adobe Premiere Pro | `Adobe Premiere Pro.exe` | win32 | 2026 (v26) | 2026-11-08 | 8 | 7 | `premiere.json` |
 | CapCut (Desktop) | `CapCut.exe` | electron | 6.x (2026-11) | 2026-11-08 | 6 | 9 | `capcut.json` |
@@ -31,14 +32,16 @@
 | Steam | `steam.exe, steamwebhelper.exe` | electron | 2026-11 | 2026-11-08 | 6 | 6 | `steam.json` |
 | Telegram Desktop | `Telegram.exe` | qt | 5.x (2026-11) | 2026-11-08 | 5 | 6 | `telegram.json` |
 | Visual Studio Code | `Code.exe` | electron | 1.9x (2026-11) | 2026-11-08 | 7 | 7 | `vscode.json` |
+| Банк (веб-кабинет и десктоп-клиент) — только чтение | `chrome.exe, msedge.exe, browser.exe` | web | 2026-11 | 2026-11-08 | 5 | 6 | `bank.json` |
 | Проводник Windows | `explorer.exe` | uia | Windows 11 24H2 / Windows 10 22H2 | 2026-11-08 | 6 | 7 | `explorer.json` |
 
 ## Риск операций
 
-- `write-local` — 65
-- `read` — 20
+- `write-local` — 69
+- `read` — 27
 - `external` — 12
 - `destructive` — 2
+- `money` — 1
 - `identity` — 1
 
 ## Покрытие доменов реестра
@@ -51,6 +54,8 @@
 - `text-docs` — 8
 - `files` — 7
 - `email` — 7
+- `business-finance` — 6
+- `personal-finance` — 6
 - `games` — 6
 - `sheets-data` — 5
 - `creative-3d` — 4

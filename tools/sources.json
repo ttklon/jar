@@ -1904,6 +1904,44 @@
         "cadquery",
         "numpy-stl"
       ]
+    },
+    "adb-android": {
+      "github": [
+        "Genymobile/scrcpy",
+        "DeviceFarmer/adbkit",
+        "mzlogin/awesome-adb",
+        "google/android-emulator-container-scripts"
+      ],
+      "npm": [
+        "adbkit",
+        "@devicefarmer/adbkit"
+      ],
+      "pypi": [
+        "adbutils",
+        "pure-python-adb",
+        "uiautomator2"
+      ]
+    },
+    "crypto-privacy": {
+      "github": [
+        "signalapp/libsignal",
+        "WireGuard/wireguard-windows",
+        "bitwarden/clients",
+        "keepassxreboot/keepassxc",
+        "age-encryption/age",
+        "gpg/gnupg"
+      ],
+      "npm": [
+        "otplib",
+        "node-forge"
+      ],
+      "pypi": [
+        "cryptography",
+        "pyotp",
+        "keyring",
+        "pykeepass",
+        "python-gnupg"
+      ]
     }
   },
   "extras": {

@@ -1,0 +1,21 @@
+{
+  "id": "github:mzlogin/awesome-adb",
+  "kind": "github",
+  "category": "adb-android",
+  "repo": "mzlogin/awesome-adb",
+  "url": "https://github.com/mzlogin/awesome-adb",
+  "description": "ADB Usage Complete / ADB 用法大全",
+  "stars": 12528,
+  "forks": 2289,
+  "language": "",
+  "license": "MIT",
+  "topics": [
+    "android",
+    "android-adb",
+    "android-debug-bridge"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-29T06:42:05Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:07:59Z"
+}

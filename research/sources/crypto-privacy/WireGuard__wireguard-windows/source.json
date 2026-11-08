@@ -1,0 +1,17 @@
+{
+  "id": "github:WireGuard/wireguard-windows",
+  "kind": "github",
+  "category": "crypto-privacy",
+  "repo": "WireGuard/wireguard-windows",
+  "url": "https://github.com/WireGuard/wireguard-windows",
+  "description": "Download WireGuard for Windows at https://www.wireguard.com/install . This repo is a mirror only. Official repository is at https://git.zx2c4.com/wireguard-windows",
+  "stars": 2885,
+  "forks": 700,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-09-26T07:07:38Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:07:59Z"
+}

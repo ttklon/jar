@@ -1,0 +1,17 @@
+{
+  "id": "github:google/android-emulator-container-scripts",
+  "kind": "github",
+  "category": "adb-android",
+  "repo": "google/android-emulator-container-scripts",
+  "url": "https://github.com/google/android-emulator-container-scripts",
+  "description": "This is a set of minimal scripts to run the emulator in a container for various systems such as Docker, for external consumption",
+  "stars": 2110,
+  "forks": 294,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-06T02:44:04Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:07:59Z"
+}

@@ -11524,5 +11524,117 @@
   "human_code": "c",
   "status": "v1",
   "notes": ""
+ },
+ {
+  "id": "personal-finance-718",
+  "domain": "personal-finance",
+  "verb": "показать",
+  "object": "баланс и последние операции",
+  "example": "сколько сейчас на счёте",
+  "implementation": [
+   "API/парсинг выписки"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "только чтение"
+ },
+ {
+  "id": "personal-finance-719",
+  "domain": "personal-finance",
+  "verb": "найти",
+  "object": "операцию по сумме или дате",
+  "example": "найди платёж на 3400",
+  "implementation": [
+   "поиск по выписке"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "personal-finance-720",
+  "domain": "personal-finance",
+  "verb": "экспортировать",
+  "object": "операции в таблицу",
+  "example": "выгрузи всё в Excel",
+  "implementation": [
+   "pandas + xlsx"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "business-finance-721",
+  "domain": "business-finance",
+  "verb": "открыть",
+  "object": "отчёт в 1С",
+  "example": "открой отчёт по продажам",
+  "implementation": [
+   "UIA/тонкий клиент"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "business-finance-722",
+  "domain": "business-finance",
+  "verb": "экспортировать",
+  "object": "отчёт в Excel",
+  "example": "выгрузи отчёт в Excel",
+  "implementation": [
+   "выгрузка/COM"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "business-finance-723",
+  "domain": "business-finance",
+  "verb": "найти",
+  "object": "документ по номеру",
+  "example": "найди счёт 1523",
+  "implementation": [
+   "поиск в конфигурации"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "business-finance-724",
+  "domain": "business-finance",
+  "verb": "проверить",
+  "object": "дубли документов",
+  "example": "нет ли задвоенных счетов",
+  "implementation": [
+   "SQL/отчёт"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
  }
 ]

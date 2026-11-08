@@ -1,0 +1,31 @@
+{
+  "id": "github:bitwarden/clients",
+  "kind": "github",
+  "category": "crypto-privacy",
+  "repo": "bitwarden/clients",
+  "url": "https://github.com/bitwarden/clients",
+  "description": "Bitwarden client apps (web, browser extension, desktop, and cli).",
+  "stars": 14178,
+  "forks": 2198,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "angular",
+    "bitwarden",
+    "browser-extension",
+    "chrome",
+    "cli",
+    "desktop",
+    "electron",
+    "firefox",
+    "javascript",
+    "nodejs",
+    "safari",
+    "typescript",
+    "webextension"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T04:06:05Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:07:59Z"
+}

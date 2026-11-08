@@ -1,6 +1,6 @@
 # ИНДЕКС ИСТОЧНИКОВ — ZShelper
 
-Сгенерировано: `2026-11-08T13:05:33Z` · всего записей: **1552** · GitHub-репозиториев: **715**
+Сгенерировано: `2026-11-08T13:08:35Z` · всего записей: **1573** · GitHub-репозиториев: **724**
 
 Полные тексты лежат в `research/sources/<категория>/`. Машиночитаемый реестр — `research/SOURCES.json`.
 
@@ -10,6 +10,7 @@
 | --- | --- | --- |
 | [`academic-writing`](#academic-writing) | 60 | 313,296 |
 | [`accessibility-api`](#accessibility-api) | 15 | 40,384 |
+| [`adb-android`](#adb-android) | 9 | 169,247 |
 | [`backup-archive`](#backup-archive) | 22 | 152,678 |
 | [`benchmarks`](#benchmarks) | 14 | 43,820 |
 | [`benchmarks-extra`](#benchmarks-extra) | 12 | 33,029 |
@@ -18,6 +19,7 @@
 | [`configuration`](#configuration) | 22 | 47,652 |
 | [`connectors`](#connectors) | 44 | 591,577 |
 | [`connectors-extra`](#connectors-extra) | 37 | 338,500 |
+| [`crypto-privacy`](#crypto-privacy) | 12 | 54,031 |
 | [`deployment-admin`](#deployment-admin) | 21 | 210,007 |
 | [`design-3d`](#design-3d) | 26 | 240,390 |
 | [`devices-peripherals`](#devices-peripherals) | 32 | 374,202 |
@@ -135,6 +137,20 @@
 | [pypi: comtypes](https://pypi.org/project/comtypes/) | - | - |  | Pure Python COM package | `research/sources/accessibility-api/pypi__comtypes.md` |
 | [pypi: pyttsx3](https://pypi.org/project/pyttsx3/) | - | - |  | Text to Speech (TTS) library for Python 3. Works without internet connection or delay. Supports multiple TTS engines, including Sapi5, nsss, and espeak. | `research/sources/accessibility-api/pypi__pyttsx3.md` |
 | [pypi: uiautomation](https://pypi.org/project/uiautomation/) | - | Apache 2.0 |  | Python UIAutomation for Windows | `research/sources/accessibility-api/pypi__uiautomation.md` |
+
+## adb-android
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [Genymobile/scrcpy](https://github.com/Genymobile/scrcpy) | 154,301 | Apache-2.0 | 2026-11-06 | Display and control your Android device | `research/sources/adb-android/Genymobile__scrcpy/README.md` |
+| [mzlogin/awesome-adb](https://github.com/mzlogin/awesome-adb) | 12,528 | MIT | 2026-09-29 | ADB Usage Complete / ADB 用法大全 | `research/sources/adb-android/mzlogin__awesome-adb/README.md` |
+| [google/android-emulator-container-scripts](https://github.com/google/android-emulator-container-scripts) | 2,110 | Apache-2.0 | 2026-10-06 | This is a set of minimal scripts to run the emulator in a container for various systems such as Docker, for external consumption | `research/sources/adb-android/google__android-emulator-container-scripts/README.md` |
+| [DeviceFarmer/adbkit](https://github.com/DeviceFarmer/adbkit) | 308 | NOASSERTION | 2026-11-07 | A pure Node.js client for the Android Debug Bridge. | `research/sources/adb-android/DeviceFarmer__adbkit/README.md` |
+| [npm: @devicefarmer/adbkit](https://www.npmjs.com/package/@devicefarmer/adbkit) | - | Apache-2.0 |  | A Typescript client for the Android Debug Bridge. | `research/sources/adb-android/npm__devicefarmer-adbkit.md` |
+| [npm: adbkit](https://www.npmjs.com/package/adbkit) | - | Apache-2.0 |  | A pure Node.js client for the Android Debug Bridge. | `research/sources/adb-android/npm__adbkit.md` |
+| [pypi: adbutils](https://pypi.org/project/adbutils/) | - | MIT |  | Pure Python Adb Library | `research/sources/adb-android/pypi__adbutils.md` |
+| [pypi: pure-python-adb](https://pypi.org/project/pure-python-adb/) | - | MIT license |  | Pure python implementation of the adb client | `research/sources/adb-android/pypi__pure-python-adb.md` |
+| [pypi: uiautomator2](https://pypi.org/project/uiautomator2/) | - | MIT |  | uiautomator for android device | `research/sources/adb-android/pypi__uiautomator2.md` |
 
 ## backup-archive
 
@@ -411,6 +427,23 @@
 | [pypi: requests](https://pypi.org/project/requests/) | - | Apache-2.0 |  | Python HTTP for Humans. | `research/sources/connectors-extra/pypi__requests.md` |
 | [pypi: slack-sdk](https://pypi.org/project/slack-sdk/) | - | MIT |  | The Slack API Platform SDK for Python | `research/sources/connectors-extra/pypi__slack-sdk.md` |
 | [pypi: twilio](https://pypi.org/project/twilio/) | - | MIT |  | Twilio API client and TwiML generator | `research/sources/connectors-extra/pypi__twilio.md` |
+
+## crypto-privacy
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [keepassxreboot/keepassxc](https://github.com/keepassxreboot/keepassxc) | 29,853 | NOASSERTION | 2026-11-08 | KeePassXC is a cross-platform community-driven port of the Windows application “KeePass Password Safe”. | `research/sources/crypto-privacy/keepassxreboot__keepassxc/README.md` |
+| [bitwarden/clients](https://github.com/bitwarden/clients) | 14,178 | NOASSERTION | 2026-11-08 | Bitwarden client apps (web, browser extension, desktop, and cli). | `research/sources/crypto-privacy/bitwarden__clients/README.md` |
+| [signalapp/libsignal](https://github.com/signalapp/libsignal) | 6,116 | AGPL-3.0 | 2026-11-05 | Home to the Signal Protocol as well as other cryptographic primitives which make Signal possible. | `research/sources/crypto-privacy/signalapp__libsignal/README.md` |
+| [WireGuard/wireguard-windows](https://github.com/WireGuard/wireguard-windows) | 2,885 | MIT | 2026-09-26 | Download WireGuard for Windows at https://www.wireguard.com/install . This repo is a mirror only. Official repository is at https://git.zx2c4.com/wireguard-windows | `research/sources/crypto-privacy/WireGuard__wireguard-windows/README.md` |
+| [gpg/gnupg](https://github.com/gpg/gnupg) | 999 | GPL-3.0 | 2026-11-06 | The GNU Privacy Guard. NOTE: Maintainers are not tracking this mirror. Do not make pull requests here, nor comment any commits, submit them usual way to bug tracker (https://www.gn | `research/sources/crypto-privacy/gpg__gnupg/README.md` |
+| [npm: node-forge](https://www.npmjs.com/package/node-forge) | - | (BSD-3-Clause OR GPL-2.0) |  | JavaScript implementations of network transports, cryptography, ciphers, PKI, message digests, and various utilities. | `research/sources/crypto-privacy/npm__node-forge.md` |
+| [npm: otplib](https://www.npmjs.com/package/otplib) | - | MIT |  | TypeScript-first library for TOTP and HOTP with multi-runtime and plugin support | `research/sources/crypto-privacy/npm__otplib.md` |
+| [pypi: cryptography](https://pypi.org/project/cryptography/) | - | - |  | cryptography is a package which provides cryptographic recipes and primitives to Python developers. | `research/sources/crypto-privacy/pypi__cryptography.md` |
+| [pypi: keyring](https://pypi.org/project/keyring/) | - | - |  | Store and access your passwords safely. | `research/sources/crypto-privacy/pypi__keyring.md` |
+| [pypi: pykeepass](https://pypi.org/project/pykeepass/) | - | GPL-3.0 |  | Python library to interact with keepass databases (supports KDBX3 and KDBX4) | `research/sources/crypto-privacy/pypi__pykeepass.md` |
+| [pypi: PyOTP](https://pypi.org/project/PyOTP/) | - | - |  | Python One Time Password Library | `research/sources/crypto-privacy/pypi__pyotp.md` |
+| [pypi: python-gnupg](https://pypi.org/project/python-gnupg/) | - | BSD |  | A wrapper for the Gnu Privacy Guard (GPG or GnuPG) | `research/sources/crypto-privacy/pypi__python-gnupg.md` |
 
 ## deployment-admin
 
