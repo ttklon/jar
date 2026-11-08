@@ -35,6 +35,44 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+  # Спайк релиза из `RUNTIME.md` §5: приложение должно не только компилироваться в
+  # dev-профиле, но и собираться в release с установщиком. Делается на push, а не на
+  # каждом pull request: release-сборка с LTO идёт десятки минут.
+  bundle:
+    name: release (installer, Windows)
+    if: github.event_name == 'push'
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Вывод сборки превращается в аннотации: логи джоб недоступны, аннотации — да.
+      - name: Build installer (NSIS)
+        shell: bash
+        run: |
+          set +e
+          npm run tauri build > bundle.log 2>&1
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            python scripts/ci_log_annotate.py bundle.log --title "tauri build"
+            exit "$status"
+          fi
+          ls -la src-tauri/target/release/bundle/nsis
+
   rust:
     name: core (cargo check + tests, Windows)
     runs-on: windows-latest

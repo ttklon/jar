@@ -69,6 +69,12 @@ pub fn run() {
     };
 
     tauri::Builder::default()
+        // Второй запуск не открывает второе приложение: показываем уже работающее.
+        // Без этого трей и горячая клавиша удваиваются, а журнал пишется из двух мест.
+        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+            tracing::info!("повторный запуск — показываю открытое окно");
+            hotkey::reveal_main(app);
+        }))
         .manage(state)
         .invoke_handler(tauri::generate_handler![
             ipc::registry_snapshot,

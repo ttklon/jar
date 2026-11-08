@@ -21,6 +21,21 @@ pub fn shortcut() -> Shortcut {
     Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::KeyZ)
 }
 
+/// Показать окно из любого состояния: свёрнуто, скрыто, за другими окнами.
+pub fn reveal_main(app: &AppHandle) {
+    let Some(window) = app.get_webview_window("main") else {
+        return;
+    };
+    if let Err(error) = window.show() {
+        tracing::warn!(%error, "окно не показывается");
+        return;
+    }
+    let _ = window.unminimize();
+    if let Err(error) = window.set_focus() {
+        tracing::warn!(%error, "окно не получает фокус");
+    }
+}
+
 /// Показать окно, если скрыто; скрыть, если оно на экране и в фокусе.
 pub fn toggle_main(app: &AppHandle) {
     let Some(window) = app.get_webview_window("main") else {
