@@ -1,0 +1,58 @@
+{
+  "app": "Диспетчер задач",
+  "exe": ["Taskmgr.exe"],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "tabs": { "by": "uia", "value": "TabItem Name ∈ {Процессы, Производительность, Журнал, Автозагрузка, Пользователи, Подробности, Службы}", "fallback": "Ctrl+Tab по вкладкам" },
+    "proc_list": { "by": "uia", "value": "DataGrid/List AutomationId='ProcessesList'", "fallback": "ocr: искать по заголовкам колонок «Имя», «ЦП»" },
+    "end_task": { "by": "uia", "value": "Button Name='Снять задачу'", "fallback": "Delete на выбранном процессе" },
+    "cli_list": { "by": "api", "value": "Get-Process | Sort-Object -Descending CPU | Select-Object -First 15 Name,Id,CPU,WorkingSet" },
+    "cli_autostart": { "by": "api", "value": "Get-CimInstance Win32_StartupCommand | Select Name,Command,Location,User" }
+  },
+  "operations": [
+    {
+      "name": "Показать, что грузит компьютер",
+      "registry": "processes-services|показать|топ по нагрузке",
+      "steps": ["cli:Get-Process | Sort-Object -Descending CPU | Select-Object -First 15 Name,Id,CPU,WorkingSet", "для GPU: Get-Counter '\\GPU Engine(*)\\Utilization Percentage'", "сгруппировать по приложению"],
+      "verify": ["таблица из N строк с числами CPU/памяти", "сумма по CPU объясняет большую часть загрузки", "те же процессы видны в Диспетчере (перекрёстная проверка)"],
+      "risk": "read",
+      "notes": "CLI предпочтительнее UIA: Диспетчер пересортировывает строки и ломает индексы во время клика"
+    },
+    {
+      "name": "Найти подозрительный процесс",
+      "registry": "processes-services|найти|подозрительный процесс",
+      "steps": ["cli:Get-Process | Where-Object {$_.Path -and $_.Path -notlike 'C:\\Windows\\*'} | Select Name,Id,Path,Company", "проверить подпись: Get-AuthenticodeSignature", "сверить хэш с VirusTotal только по явному согласию (external)"],
+      "verify": ["для каждого кандидата указан путь, издатель и статус подписи", "нет ложных обвинений: легитимные приложения перечислены отдельно"],
+      "risk": "read",
+      "on_fail": "не завершать процесс на основании одного имени: сначала путь и подпись"
+    },
+    {
+      "name": "Завершить процесс",
+      "registry": "processes-services|завершить",
+      "steps": ["сопоставить имя → PID и путь", "проверить, что это именно тот экземпляр", "cli:Stop-Process -Id <PID> (сначала мягко: CloseMainWindow)", "wait:3s"],
+      "verify": ["Get-Process -Id <PID> возвращает ошибку (процесса нет)", "нет осиротевших дочерних процессов", "приложение не перезапустилось службой — проверить через 10 с"],
+      "risk": "destructive",
+      "timeouts_ms": 20000,
+      "on_fail": "если процесс системный (Session 0, критичный) — не убивать, объяснить и предложить перезагрузку",
+      "notes": "сначала CloseMainWindow: даёт приложению сохранить данные; Stop-Process -Force — только по подтверждению"
+    },
+    {
+      "name": "Проанализировать автозапуск",
+      "registry": "processes-services|проанализировать|автозапуск",
+      "steps": ["cli:Get-CimInstance Win32_StartupCommand", "реестр: HKCU/HKLM ...\\CurrentVersion\\Run + StartupApproved", "задачи: Get-ScheduledTask | Where {$_.Triggers.CimClass.CimClassName -match 'Logon'}", "папки Startup"],
+      "verify": ["полный список с источником (реестр/папка/задача/служба)", "для каждой записи указано, включена ли она (StartupApproved)", "дана оценка вклада в загрузку, а не только список"],
+      "risk": "read"
+    },
+    {
+      "name": "Поменять приоритет процесса",
+      "registry": "processes-services|настроить|приоритет",
+      "steps": ["определить PID", "cli:(Get-Process -Id <PID>).PriorityClass = 'High'", "запомнить исходное значение"],
+      "verify": ["Get-Process -Id <PID> | Select PriorityClass даёт новое значение", "через 1 мин проверить, что система не начала «залипать»"],
+      "risk": "destructive",
+      "on_fail": "вернуть исходный приоритет немедленно",
+      "notes": "High для игры/рендера; Realtime не ставить никогда — вешает ввод и сеть"
+    }
+  ]
+}

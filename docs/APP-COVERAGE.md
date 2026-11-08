@@ -3,14 +3,14 @@
 Данные — [`data/app_targets.psv`](../data/app_targets.psv), файл генерируется
 `python3 tools/app_targets.py`, руками не править.
 
-**Приложений в каталоге: 122** · категорий: **17** · с готовым профилем: **122**
+**Приложений в каталоге: 122** · категорий: **17** · профиль найден по процессу: **50** · без профиля (визуальный агент): **72**
 
 ## Три уровня покрытия (почему не «профиль на каждую программу руками»)
 
 | Tier | Что это | Сколько | Как появляется |
 | --- | --- | --- | --- |
-| **A** | ручной профиль: якоря, шаги, проверки | 26 | пишется человеком/агентом по UIA-дампу |
-| **B** | авто-профиль из UIA + подтверждение | 63 | `tools/uia_probe` → кандидаты → подтверждение |
+| **A** | ручной профиль: якоря, шаги, проверки | 39 | пишется человеком/агентом по UIA-дампу |
+| **B** | авто-профиль из UIA + подтверждение | 50 | `tools/uia_probe` → кандидаты → подтверждение |
 | **C** | только визуальный агент (скриншот→OCR/VLM→клик) | 33 | профиля нет, работает универсальный цикл |
 
 Подробно — [`PROFILE-STRATEGY.md`](PROFILE-STRATEGY.md). Правило: приложение без профиля
@@ -50,9 +50,9 @@
 | Git for Windows | `git-bash.exe` | cli | A | P0 | ✅ |  |
 | PowerShell | `powershell.exe` | cli | A | P0 | ✅ | основной канал автоматизации |
 | Visual Studio Code | `Code.exe` | cli | A | P0 | ✅ | профиль готов |
-| Windows Terminal | `WindowsTerminal.exe` | cli+uia | B | P0 | — | профили, panes |
+| Windows Terminal | `WindowsTerminal.exe` | cli+uia | A | P0 | ✅ | профили, panes |
 | Командная строка | `cmd.exe` | cli | A | P0 | ✅ |  |
-| Docker Desktop | `Docker Desktop.exe` | cli | B | P1 | — | docker CLI |
+| Docker Desktop | `Docker Desktop.exe` | cli | A | P1 | ✅ | docker CLI |
 | DBeaver | `dbeaver.exe` | cli | B | P2 | — | JDBC, но лучше напрямую |
 | FileZilla | `filezilla.exe` | cli+uia | B | P2 | — |  |
 | PuTTY | `putty.exe` | cli | B | P2 | — | plink |
@@ -65,7 +65,7 @@
 | Postman | `Postman.exe` | api | B | P3 | — | newman |
 | PyCharm | `pycharm64.exe` | cli | B | P3 | — |  |
 | SQL Server Management Studio | `Ssms.exe` | cli | C | P3 | — | sqlcmd |
-| Windows Terminal Preview | `WindowsTerminal.exe` | cli+uia | C | P3 | — |  |
+| Windows Terminal Preview | `WindowsTerminal.exe` | cli+uia | C | P3 | ✅ |  |
 | pgAdmin | `pgAdmin4.exe` | cli | C | P3 | — | psql |
 
 ### Медиа (16)
@@ -78,7 +78,7 @@
 | VLC | `vlc.exe` | cli | A | P0 | ✅ | --intf dummy |
 | Adobe Photoshop | `Photoshop.exe` | uia | A | P1 | ✅ | профиль готов |
 | Adobe Premiere Pro | `Adobe Premiere Pro.exe` | uia | A | P1 | ✅ | профиль готов |
-| Audacity | `audacity.exe` | cli | B | P1 | — | макросы |
+| Audacity | `audacity.exe` | cli | A | P1 | ✅ | макросы |
 | Adobe After Effects | `AfterFX.exe` | uia+jsx | C | P2 | — |  |
 | Adobe Illustrator | `Illustrator.exe` | uia | C | P2 | — | скрипты ExtendScript |
 | Adobe Lightroom | `Lightroom.exe` | uia | C | P2 | — |  |
@@ -93,15 +93,15 @@
 
 | Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
 | --- | --- | --- | --- | --- | --- | --- |
-| Диспетчер задач | `Taskmgr.exe` | uia+cli | B | P0 | — | быстрее через WMI/Get-Process |
-| Планировщик заданий | `mmc.exe` | cli | B | P0 | — | schtasks |
+| Диспетчер задач | `Taskmgr.exe` | uia+cli | A | P0 | ✅ | быстрее через WMI/Get-Process |
+| Планировщик заданий | `mmc.exe` | cli | B | P0 | ✅ | schtasks |
 | Проводник | `explorer.exe` | uia | A | P0 | ✅ | профиль готов |
-| Службы | `mmc.exe` | uia+cli | B | P0 | — | sc.exe/PowerShell надёжнее GUI |
+| Службы | `mmc.exe` | uia+cli | B | P0 | ✅ | sc.exe/PowerShell надёжнее GUI |
 | Ножницы/Snip&Sketch | `SnippingTool.exe` | cli+uia | B | P1 | — | screenshot через Win32 проще |
 | Панель управления | `control.exe` | uia | B | P1 | — | часть настроек через CLI/реестр |
-| Параметры Windows | `SystemSettings.exe` | uia | B | P1 | — | частые экраны: обновления, звук, дисплей |
-| Просмотр событий | `mmc.exe` | cli | B | P1 | — | wevtutil/Get-WinEvent |
-| Диспетчер устройств | `mmc.exe` | uia+cli | B | P2 | — | pnputil |
+| Параметры Windows | `SystemSettings.exe` | uia | A | P1 | ✅ | частые экраны: обновления, звук, дисплей |
+| Просмотр событий | `mmc.exe` | cli | A | P1 | ✅ | wevtutil/Get-WinEvent |
+| Диспетчер устройств | `mmc.exe` | uia+cli | B | P2 | ✅ | pnputil |
 | Редактор реестра | `regedit.exe` | cli | C | P2 | — | reg.exe, GUI — последний вариант |
 | Управление дисками | `diskmgmt.msc` | uia | C | P2 | — | опасно, только с подтверждением |
 | Монитор ресурсов | `resmon.exe` | uia | C | P3 | — |  |
@@ -112,7 +112,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | Microsoft Excel | `EXCEL.EXE` | com+uia | A | P0 | ✅ | профиль готов |
 | Microsoft Word | `WINWORD.EXE` | com+uia | A | P0 | ✅ | профиль готов |
-| Microsoft PowerPoint | `POWERPNT.EXE` | com+uia | B | P1 | — | COM-объектная модель |
+| Microsoft PowerPoint | `POWERPNT.EXE` | com+uia | A | P1 | ✅ | COM-объектная модель |
 | Adobe Acrobat Reader | `AcroRd32.exe` | cli+uia | B | P2 | — | pdf-библиотеки надёжнее |
 | LibreOffice Calc | `soffice.exe` | cli | B | P2 | — |  |
 | LibreOffice Writer | `soffice.exe` | cli | B | P2 | — | --headless конвертация |
@@ -140,9 +140,9 @@
 
 | Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
 | --- | --- | --- | --- | --- | --- | --- |
-| Notion | `Notion.exe` | api+uia | B | P1 | — | API |
-| Obsidian | `Obsidian.exe` | cli | B | P1 | — | markdown-файлы напрямую |
-| Zotero | `zotero.exe` | api | B | P1 | — | локальная БД + connector |
+| Notion | `Notion.exe` | api+uia | A | P1 | ✅ | API |
+| Obsidian | `Obsidian.exe` | cli | A | P1 | ✅ | markdown-файлы напрямую |
+| Zotero | `zotero.exe` | api | A | P1 | ✅ | локальная БД + connector |
 | Calibre | `calibre.exe` | cli | B | P2 | — | ebook-convert |
 | Joplin | `Joplin.exe` | cli | B | P2 | — | CLI + markdown |
 | OneNote (классический) | `ONENOTE.EXE` | com | B | P2 | — |  |
@@ -156,7 +156,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | 7-Zip | `7zFM.exe` | cli | A | P0 | ✅ | 7z.exe |
 | CrystalDiskInfo | `crystaldiskinfo.exe` | cli | B | P1 | — | SMART через smartctl |
-| Everything | `Everything.exe` | cli | B | P1 | — | ES CLI, индексация по имени |
+| Everything | `Everything.exe` | cli | A | P1 | ✅ | ES CLI, индексация по имени |
 | HWiNFO | `HWiNFO64.exe` | api | B | P1 | — | shared memory/датчики |
 | PowerToys | `PowerToys.exe` | uia | B | P2 | — | часть функций через API |
 | WinRAR | `WinRAR.exe` | cli | B | P2 | — | rar.exe |
@@ -181,8 +181,8 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | FL Studio | `FL64.exe` | uia+midi | A | P0 | ✅ | нет полного API: MIDI+шаблоны |
 | REAPER | `reaper.exe` | api | A | P0 | ✅ | ReaScript — полная автоматизация |
-| Ableton Live | `Ableton Live 12.exe` | uia+remote | B | P1 | — | MIDI Remote Scripts |
-| Bitwig Studio | `Bitwig Studio.exe` | api | B | P1 | — | Java API |
+| Ableton Live | `Ableton Live 12.exe` | uia+remote | A | P1 | ✅ | MIDI Remote Scripts |
+| Bitwig Studio | `Bitwig Studio.exe` | api | A | P1 | ✅ | Java API |
 | PreSonus Studio One | `Studio One.exe` | uia | C | P3 | — |  |
 | Steinberg Cubase | `Cubase12.exe` | uia | C | P3 | — |  |
 
@@ -219,7 +219,7 @@
 | Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
 | --- | --- | --- | --- | --- | --- | --- |
 | VirtualBox | `VirtualBox.exe` | cli | B | P1 | — | VBoxManage |
-| Hyper-V Manager | `mmc.exe` | cli | B | P2 | — | PowerShell Hyper-V |
+| Hyper-V Manager | `mmc.exe` | cli | B | P2 | ✅ | PowerShell Hyper-V |
 | VMware Workstation | `vmware.exe` | cli | B | P2 | — | vmrun |
 
 ### Удалённый доступ (3)

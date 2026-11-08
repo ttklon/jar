@@ -20,13 +20,13 @@
 | Путь | Что это |
 | --- | --- |
 | [`research/`](research/README.md) | **Исследовательский vault**: ~740 скачанных первоисточников (README репозиториев, документация, метаданные PyPI/npm), каталог ~1645 источников, каталог ~1470 MCP-серверов, шортлисты по доменам |
-| [`research/notes/`](research/notes/00-vision.md) | 29 конспектов: архитектура, железо, модели, голос, оркестратор, MCP, глаза/руки, кодинг-агент, безопасность, память, коннекторы, UX, сборка/CI, оценки, **оптимизация под любое железо**, **карта способностей**, академическое письмо, саморасширение, разбор системы, обновления, настройки |
+| [`research/notes/`](research/notes/00-vision.md) | 30 конспектов: архитектура, железо, модели, голос, оркестратор, MCP, глаза/руки, кодинг-агент, безопасность, память, коннекторы, UX, сборка/CI, оценки, **оптимизация под любое железо**, **карта способностей**, академическое письмо, саморасширение, разбор системы, обновления, настройки, **музыка**, **каналы автоматизации системных приложений** |
 | [`research/INDEX.md`](research/INDEX.md) | Автогенерируемый индекс всех источников с лицензиями и звёздами |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | План по этапам M0…M7 с критериями выхода |
 | [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) | Стек v1 с версиями и **аудитом лицензий** (генерируется из vault) |
 | [`docs/ACTIONS.md`](docs/ACTIONS.md) | **Реестр действий: 787 действий / 49 доменов** — всё, что умеет, с риском, tier'ом и границами |
 | [`data/actions.psv`](data/actions.psv) | Исходник реестра (машиночитаемо, генерирует каталог, права и тесты) |
-| [`docs/PROFILES.md`](docs/PROFILES.md) | **Профили приложений**: 155 операций в 25 приложениях (CapCut, Excel, Проводник, браузер, Word, VS Code, Telegram, Photoshop, Premiere, OBS, Figma, Outlook, Discord, Steam, банк (read-only), 1С) — якоря, шаги, проверки |
+| [`docs/PROFILES.md`](docs/PROFILES.md) | **Профили приложений**: 229 операций в 38 приложениях — CapCut, Excel, Проводник, браузер, Word, PowerPoint, VS Code, Telegram, Photoshop, Premiere, OBS, Figma, Outlook, Discord, Steam, банк (read-only), 1С, PowerShell, cmd, 7-Zip, Git Bash, HandBrake, VLC, FL Studio, REAPER, Bitwig, Ableton, Blender, Audacity, Docker Desktop, Windows Terminal, Диспетчер задач, Everything, Параметры Windows, Просмотр событий, Notion, Obsidian, Zotero — якоря, шаги, проверки |
 | [`data/profiles/`](data/profiles) | Профили как данные: `app`, `anchors`, `operations` + валидатор инвариантов |
 | [`docs/COVERAGE.md`](docs/COVERAGE.md) | **Аудит покрытия**: тонкие домены, дырки по семействам действий, домены без профиля |
 | [`docs/EVALS.md`](docs/EVALS.md) | **План проверок**: 787 сценариев из реестра + 15 обязательных P0/P1 до релиза |
@@ -43,6 +43,7 @@
 | [`research/notes/28-stack-choice.md`](research/notes/28-stack-choice.md) | **На чём писать**: Python/Electron/Tauri/WinUI — цифры, компромиссы, рекомендация |
 | [`research/notes/29-licensing-and-antipiracy.md`](research/notes/29-licensing-and-antipiracy.md) | **Защита от пиратства**: модель угроз, серверный дизайн, честные пределы |
 | [`research/notes/30-music-production.md`](research/notes/30-music-production.md) | **«Сделай трек»**: бит → текст → голос → мастеринг → релиз, с границами |
+| [`research/notes/31-system-app-channels.md`](research/notes/31-system-app-channels.md) | **Каналы автоматизации системных приложений**: что работает, что ломается, пять правил выбора |
 | [`tools/actions.py`](tools/actions.py) · [`tools/profiles.py`](tools/profiles.py) · [`tools/audit_actions.py`](tools/audit_actions.py) · [`tools/evals.py`](tools/evals.py) | Реестр → каталог, профили → проверка, покрытие → дырки, реестр → тест-план. Всё генерируется и проверяется в CI |
 | [`tools/collect_sources.py`](tools/collect_sources.py) | Скачивание/обновление источников (идемпотентно) |
 | [`tools/mine_awesome.py`](tools/mine_awesome.py) | Разбор awesome-листов в инвентаризацию с метаданными |

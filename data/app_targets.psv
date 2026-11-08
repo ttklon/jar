@@ -1,21 +1,21 @@
 # id|app|category|exe|automation|tier|priority|notes
 explorer|Проводник|Система|explorer.exe|uia|A|P0|профиль готов
 control-panel|Панель управления|Система|control.exe|uia|B|P1|часть настроек через CLI/реестр
-win-settings|Параметры Windows|Система|SystemSettings.exe|uia|B|P1|частые экраны: обновления, звук, дисплей
-taskmgr|Диспетчер задач|Система|Taskmgr.exe|uia+cli|B|P0|быстрее через WMI/Get-Process
+win-settings|Параметры Windows|Система|SystemSettings.exe|uia|A|P1|частые экраны: обновления, звук, дисплей
+taskmgr|Диспетчер задач|Система|Taskmgr.exe|uia+cli|A|P0|быстрее через WMI/Get-Process
 services|Службы|Система|mmc.exe|uia+cli|B|P0|sc.exe/PowerShell надёжнее GUI
 task-scheduler|Планировщик заданий|Система|mmc.exe|cli|B|P0|schtasks
 regedit|Редактор реестра|Система|regedit.exe|cli|C|P2|reg.exe, GUI — последний вариант
 diskmgmt|Управление дисками|Система|diskmgmt.msc|uia|C|P2|опасно, только с подтверждением
-eventvwr|Просмотр событий|Система|mmc.exe|cli|B|P1|wevtutil/Get-WinEvent
+eventvwr|Просмотр событий|Система|mmc.exe|cli|A|P1|wevtutil/Get-WinEvent
 devicemgr|Диспетчер устройств|Система|mmc.exe|uia+cli|B|P2|pnputil
 resource-monitor|Монитор ресурсов|Система|resmon.exe|uia|C|P3|
 powershell|PowerShell|Разработка|powershell.exe|cli|A|P0|основной канал автоматизации
-wt|Windows Terminal|Разработка|WindowsTerminal.exe|cli+uia|B|P0|профили, panes
+wt|Windows Terminal|Разработка|WindowsTerminal.exe|cli+uia|A|P0|профили, panes
 cmd|Командная строка|Разработка|cmd.exe|cli|A|P0|
 7zip|7-Zip|Утилиты|7zFM.exe|cli|A|P0|7z.exe
 winrar|WinRAR|Утилиты|WinRAR.exe|cli|B|P2|rar.exe
-everything|Everything|Утилиты|Everything.exe|cli|B|P1|ES CLI, индексация по имени
+everything|Everything|Утилиты|Everything.exe|cli|A|P1|ES CLI, индексация по имени
 wiztree|WizTree|Утилиты|WizTree.exe|cli|B|P2|экспорт CSV
 cpu-z|CPU-Z|Утилиты|cpuz.exe|uia|C|P3|лучше WMI
 hwinfo|HWiNFO|Утилиты|HWiNFO64.exe|api|B|P1|shared memory/датчики
@@ -37,7 +37,7 @@ zoom|Zoom|Связь|Zoom.exe|cli+uia|B|P2|Zoom CLI, запись
 skype|Skype|Связь|Skype.exe|uia|C|P3|
 word|Microsoft Word|Офис|WINWORD.EXE|com+uia|A|P0|профиль готов
 excel|Microsoft Excel|Офис|EXCEL.EXE|com+uia|A|P0|профиль готов
-powerpoint|Microsoft PowerPoint|Офис|POWERPNT.EXE|com+uia|B|P1|COM-объектная модель
+powerpoint|Microsoft PowerPoint|Офис|POWERPNT.EXE|com+uia|A|P1|COM-объектная модель
 onenote|Microsoft OneNote|Офис|ONENOTE.EXE|com|B|P2|
 libreoffice-writer|LibreOffice Writer|Офис|soffice.exe|cli|B|P2|--headless конвертация
 libreoffice-calc|LibreOffice Calc|Офис|soffice.exe|cli|B|P2|
@@ -52,7 +52,7 @@ idea|IntelliJ IDEA|Разработка|idea64.exe|cli|B|P3|
 pycharm|PyCharm|Разработка|pycharm64.exe|cli|B|P3|
 android-studio|Android Studio|Разработка|studio64.exe|cli|B|P3|gradle/adb
 git-bash|Git for Windows|Разработка|git-bash.exe|cli|A|P0|
-docker|Docker Desktop|Разработка|Docker Desktop.exe|cli|B|P1|docker CLI
+docker|Docker Desktop|Разработка|Docker Desktop.exe|cli|A|P1|docker CLI
 postman|Postman|Разработка|Postman.exe|api|B|P3|newman
 dbeaver|DBeaver|Разработка|dbeaver.exe|cli|B|P2|JDBC, но лучше напрямую
 pgadmin|pgAdmin|Разработка|pgAdmin4.exe|cli|C|P3|psql
@@ -82,11 +82,11 @@ vlc|VLC|Медиа|vlc.exe|cli|A|P0|--intf dummy
 spotify|Spotify|Медиа|Spotify.exe|api+uia|B|P2|Web API (нужен токен)
 foobar|foobar2000|Медиа|foobar2000.exe|cli+uia|B|P2|/command
 musicbee|MusicBee|Медиа|MusicBee.exe|uia|C|P3|
-audacity|Audacity|Медиа|audacity.exe|cli|B|P1|макросы
+audacity|Audacity|Медиа|audacity.exe|cli|A|P1|макросы
 fl-studio|FL Studio|Музыка|FL64.exe|uia+midi|A|P0|нет полного API: MIDI+шаблоны
-ableton|Ableton Live|Музыка|Ableton Live 12.exe|uia+remote|B|P1|MIDI Remote Scripts
+ableton|Ableton Live|Музыка|Ableton Live 12.exe|uia+remote|A|P1|MIDI Remote Scripts
 reaper|REAPER|Музыка|reaper.exe|api|A|P0|ReaScript — полная автоматизация
-bitwig|Bitwig Studio|Музыка|Bitwig Studio.exe|api|B|P1|Java API
+bitwig|Bitwig Studio|Музыка|Bitwig Studio.exe|api|A|P1|Java API
 cubase|Steinberg Cubase|Музыка|Cubase12.exe|uia|C|P3|
 studio-one|PreSonus Studio One|Музыка|Studio One.exe|uia|C|P3|
 blender|Blender|3D|blender.exe|api|A|P0|bpy headless
@@ -108,12 +108,12 @@ miro|Miro (web)|Бизнес|chrome.exe|api|B|P3|
 bitrix24|Битрикс24 (web)|Бизнес|chrome.exe|web|B|P2|REST
 amocrm|amoCRM (web)|Бизнес|chrome.exe|web|B|P2|
 bank|Банк (веб/клиент)|Бизнес|chrome.exe|web|A|P1|профиль готов (read-only)
-notion|Notion|Знания|Notion.exe|api+uia|B|P1|API
-obsidian|Obsidian|Знания|Obsidian.exe|cli|B|P1|markdown-файлы напрямую
+notion|Notion|Знания|Notion.exe|api+uia|A|P1|API
+obsidian|Obsidian|Знания|Obsidian.exe|cli|A|P1|markdown-файлы напрямую
 joplin|Joplin|Знания|Joplin.exe|cli|B|P2|CLI + markdown
 evernote|Evernote|Знания|Evernote.exe|uia|C|P3|
 onenote-desk|OneNote (классический)|Знания|ONENOTE.EXE|com|B|P2|
-zotero|Zotero|Знания|zotero.exe|api|B|P1|локальная БД + connector
+zotero|Zotero|Знания|zotero.exe|api|A|P1|локальная БД + connector
 mendeley|Mendeley|Знания|MendeleyDesktop.exe|uia|C|P3|
 calibre|Calibre|Знания|calibre.exe|cli|B|P2|ebook-convert
 kindle|Kindle|Знания|Kindle.exe|uia|C|P3|

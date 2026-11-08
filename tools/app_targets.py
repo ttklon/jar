@@ -77,6 +77,7 @@ def render(rows: list[dict], errs: list[str], have: set[str]) -> str:
 
     tier_a = [r for r in rows if r["tier"] == "A"]
     missing = [r for r in tier_a if r["exe"].lower() not in have]
+    direct = [r for r in rows if r["exe"].lower() in have]
 
     L = [
         "# Каталог приложений: что ZShelper должен уметь автоматизировать",
@@ -85,7 +86,8 @@ def render(rows: list[dict], errs: list[str], have: set[str]) -> str:
         "`python3 tools/app_targets.py`, руками не править.",
         "",
         f"**Приложений в каталоге: {len(rows)}** · категорий: **{len(cats)}** · "
-        f"с готовым профилем: **{len(rows) - len(missing)}**",
+        f"профиль найден по процессу: **{len(direct)}** · "
+        f"без профиля (визуальный агент): **{len(rows) - len(direct)}**",
         "",
         "## Три уровня покрытия (почему не «профиль на каждую программу руками»)",
         "",
@@ -168,6 +170,7 @@ def main() -> int:
     OUT.write_text(render(rows, errs, have), encoding="utf-8")
     tier_a = [r for r in rows if r["tier"] == "A"]
     missing = [r for r in tier_a if r["exe"].lower() not in have]
+    direct = [r for r in rows if r["exe"].lower() in have]
     print(f"targets: {len(rows)}, tier A: {len(tier_a)} (missing profiles: {len(missing)}), "
           f"errors: {len(errs)} -> {OUT.relative_to(ROOT)}")
     for m in missing:
