@@ -31,6 +31,7 @@ TARGETS = ROOT / "data" / "app_targets.psv"
 POLICY = ROOT / "data" / "domain_profile_policy.json"
 EVALS = ROOT / "data" / "evals.json"
 SOURCES = ROOT / "tools" / "sources.json"
+ROADMAP = ROOT / "docs" / "ROADMAP.md"
 
 BEGIN = "<!-- STATUS:BEGIN -->"
 END = "<!-- STATUS:END -->"
@@ -56,6 +57,36 @@ def count_sources() -> tuple[int, int]:
         for k in ("github", "pypi", "npm")
     )
     return total, len([n for n in cats if not n.startswith("$")])
+
+
+def parse_roadmap() -> list[dict]:
+    """Stages from docs/ROADMAP.md: title, done/total tasks, first open task, exit criterion.
+
+    AGENTS.md must contain the whole development process, but it must not fork it:
+    docs/ROADMAP.md stays the single source, and the entrypoint re-renders it.
+    """
+    if not ROADMAP.exists():
+        return []
+    stages: list[dict] = []
+    cur: dict | None = None
+    for raw in ROADMAP.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if line.startswith("## M"):
+            title = line[3:].strip()
+            cur = {"title": title, "done": 0, "total": 0, "first_open": None, "exit": None}
+            stages.append(cur)
+            continue
+        if cur is None:
+            continue
+        if line.startswith(("- [x]", "- [~]", "- [ ]")):
+            cur["total"] += 1
+            if line.startswith("- [x]"):
+                cur["done"] += 1
+            elif cur["first_open"] is None:
+                cur["first_open"] = line[5:].strip().rstrip(".")
+        elif line.startswith("**Выход:**") or line.startswith("**Критерий выхода"):
+            cur["exit"] = line.split(":**", 1)[-1].strip()
+    return stages
 
 
 def build_block() -> str:
@@ -149,6 +180,28 @@ def build_block() -> str:
         L += ["", "**Домены в очереди на профиль:** " + ", ".join(f"`{d}`" for d in queue) + "."]
     else:
         L += ["", "**Домены в очереди на профиль:** нет — все оставшиеся классифицированы как решения."]
+    stages = parse_roadmap()
+    if stages:
+        L += [
+            "",
+            "## План разработки (зеркало `docs/ROADMAP.md`, генерируется)",
+            "",
+            "Этапы идут по порядку. «Задачи» — сколько закрыто чекбоксов; «следующий шаг» — "
+            "первый незакрытый пункт этапа. Источник истины — `docs/ROADMAP.md`, здесь он "
+            "пересказан машиной, чтобы не разъезжаться.",
+            "",
+            "| Этап | Задачи | Следующий шаг |",
+            "| --- | --- | --- |",
+        ]
+        for s in stages:
+            # links from ROADMAP.md are relative to docs/ and would be broken at the repo
+            # root, so the mirror keeps plain text instead of copying hyperlinks
+            strip = lambda x: re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", x).replace("|", "/")
+            title = strip(s["title"])
+            nxt = strip(s["first_open"] or "—")
+            if len(nxt) > 110:
+                nxt = nxt[:107] + "…"
+            L.append(f"| **{title}** | {s['done']}/{s['total']} | {nxt} |")
     L.append(END)
     return "\n".join(L)
 
@@ -174,16 +227,17 @@ def main() -> int:
     if BEGIN not in text or END not in text:
         print(f"AGENTS.md must contain {BEGIN} and {END}", file=sys.stderr)
         return 2
-    broken = check_links(text)
+    head, rest = text.split(BEGIN, 1)
+    _, tail = rest.split(END, 1)
+    new = head + build_block() + tail
+
+    # check the file we are about to write, not the (possibly stale) one on disk
+    broken = check_links(new)
     if broken:
         print("broken links in AGENTS.md:", file=sys.stderr)
         for b in broken:
             print("  -", b, file=sys.stderr)
         return 1
-
-    head, rest = text.split(BEGIN, 1)
-    _, tail = rest.split(END, 1)
-    new = head + build_block() + tail
     if "--check" in sys.argv:
         if new != text:
             print("AGENTS.md status block is stale — run python3 tools/status.py", file=sys.stderr)
