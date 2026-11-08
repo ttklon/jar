@@ -66,6 +66,13 @@ def annotate(log: str, limit: int = 20) -> list[str]:
 
 
 def main() -> int:
+    # Windows-консоль по умолчанию в cp1252, а сообщения rustc у нас русские:
+    # без этого скрипт падал на печати вместо того, чтобы показать ошибки.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
     argv = sys.argv[1:]
     if not argv:
         print("usage: ci_annotate.py <log> [--max N]", file=sys.stderr)

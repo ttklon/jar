@@ -74,6 +74,9 @@ jobs:
       - name: Clippy report
         if: always()
         shell: bash
+        continue-on-error: true
+        env:
+          PYTHONIOENCODING: utf-8
         run: python scripts/ci_annotate.py clippy.log
 
       - name: Clippy gate
