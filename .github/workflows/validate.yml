@@ -1,0 +1,54 @@
+name: validate
+
+on:
+  push:
+    branches: [main, "arena/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  registry:
+    name: action registry, profiles, coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Registry is well-formed (10 fields, risk/tier/human/status valid)
+        run: python3 tools/actions.py
+
+      - name: Every profile op maps to a registry row, risk not lowered, verify present
+        run: python3 tools/profiles.py
+
+      - name: Coverage audit (thin domains, family gaps, orphan verbs)
+        run: python3 tools/audit_actions.py
+
+      - name: Generated artefacts are committed and up to date
+        run: |
+          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md \
+            || { echo "::error::generated files are stale — run tools/actions.py, tools/profiles.py, tools/audit_actions.py and commit"; exit 1; }
+
+      - name: Summary
+        run: |
+          {
+            echo "### ZShelper registry"
+            echo ""
+            echo '```'
+            python3 - <<'PY'
+          import json
+          from collections import Counter
+          rows = json.load(open("data/actions.json"))
+          print(f"actions: {len(rows)}")
+          print(f"domains: {len({r['domain'] for r in rows})}")
+          print(f"verbs:   {len({r['verb'] for r in rows})}")
+          print("risk:   ", dict(Counter(r["risk"] for r in rows)))
+          print("status: ", dict(Counter(r["status"] for r in rows)))
+          PY
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

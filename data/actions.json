@@ -528,7 +528,7 @@
  {
   "id": "storage-backup-033",
   "domain": "storage-backup",
-  "verb": "monitor",
+  "verb": "мониторить",
   "object": "заполнение диска",
   "example": "предупреди меня, когда останется 10%",
   "implementation": [
@@ -2340,8 +2340,8 @@
   ],
   "risk": "write-local",
   "tier": "T1",
-  "human": "c1",
-  "human_code": "c1",
+  "human": "сложно",
+  "human_code": "h",
   "status": "v2",
   "notes": "этика и нагрузка"
  },
@@ -3876,7 +3876,7 @@
  {
   "id": "processes-services-240",
   "domain": "processes-services",
-  "verb": "diagnose",
+  "verb": "диагностировать",
   "object": "синий экран",
   "example": "почему был BSOD",
   "implementation": [
@@ -6152,7 +6152,7 @@
  {
   "id": "accessibility-382",
   "domain": "accessibility",
-  "verb": "субтитры",
+  "verb": "субтитрировать",
   "object": "для любого звука",
   "example": "включи живые субтитры",
   "implementation": [
@@ -6702,8 +6702,8 @@
   "implementation": [
    "—"
   ],
-  "risk": "—",
-  "tier": "—",
+  "risk": "external",
+  "tier": "T0",
   "human": "не может",
   "human_code": "n",
   "status": "never",
@@ -6728,7 +6728,7 @@
  {
   "id": "superhuman-418",
   "domain": "superhuman",
-  "verb": "выполнять",
+  "verb": "выполнить",
   "object": "параллельно в N потоков",
   "example": "проверь сразу 200 сайтов",
   "implementation": [
@@ -6776,7 +6776,7 @@
  {
   "id": "superhuman-421",
   "domain": "superhuman",
-  "verb": "искать",
+  "verb": "найти",
   "object": "по тысячам источников",
   "example": "прочитай 300 статей и сделай вывод",
   "implementation": [
@@ -6792,7 +6792,7 @@
  {
   "id": "superhuman-422",
   "domain": "superhuman",
-  "verb": "сравнивать",
+  "verb": "сравнить",
   "object": "сотни вариантов",
   "example": "сравни 50 тарифов по 20 параметрам",
   "implementation": [
@@ -6808,7 +6808,7 @@
  {
   "id": "superhuman-423",
   "domain": "superhuman",
-  "verb": "проверять",
+  "verb": "проверить",
   "object": "каждый шаг",
   "example": "проверь, что всё реально сработало",
   "implementation": [
@@ -6872,7 +6872,7 @@
  {
   "id": "superhuman-427",
   "domain": "superhuman",
-  "verb": "переводить",
+  "verb": "перевести",
   "object": "мгновенно и в объёме",
   "example": "переведи 200 страниц",
   "implementation": [
@@ -6904,7 +6904,7 @@
  {
   "id": "superhuman-429",
   "domain": "superhuman",
-  "verb": "подводить",
+  "verb": "подвести",
   "object": "итоги по всей истории",
   "example": "что я делал весь год",
   "implementation": [
@@ -6920,7 +6920,7 @@
  {
   "id": "superhuman-430",
   "domain": "superhuman",
-  "verb": "восстанавливать",
+  "verb": "восстановить",
   "object": "контекст после сбоя",
   "example": "продолжи с того места, где упало",
   "implementation": [
@@ -6952,7 +6952,7 @@
  {
   "id": "superhuman-432",
   "domain": "superhuman",
-  "verb": "расширять",
+  "verb": "расширить",
   "object": "себя",
   "example": "научись делать то, чего не умеешь",
   "implementation": [
@@ -6990,11 +6990,11 @@
   "implementation": [
    "—"
   ],
-  "risk": "—",
-  "tier": "—",
+  "risk": "read",
+  "tier": "T0",
   "human": "не может",
   "human_code": "n",
-  "status": "—",
+  "status": "v1",
   "notes": "это и есть продукт"
  },
  {
@@ -7016,7 +7016,7 @@
  {
   "id": "superhuman-436",
   "domain": "superhuman",
-  "verb": "делать",
+  "verb": "сделать",
   "object": "полный цикл без человека",
   "example": "сделай проект от идеи до релиза",
   "implementation": [
@@ -8040,7 +8040,7 @@
  {
   "id": "languages-500",
   "domain": "languages",
-  "verb": "субтитровать",
+  "verb": "субтитрировать",
   "object": "двуязычно",
   "example": "сделай субтитры ru+en",
   "implementation": [
@@ -8056,7 +8056,7 @@
  {
   "id": "languages-501",
   "domain": "languages",
-  "verb": "читать",
+  "verb": "прочитать",
   "object": "вслух с правильной интонацией",
   "example": "прочитай по-английски",
   "implementation": [
@@ -8120,7 +8120,7 @@
  {
   "id": "languages-505",
   "domain": "languages",
-  "verb": "переводить",
+  "verb": "перевести",
   "object": "переписку на лету",
   "example": "переводи входящие сообщения",
   "implementation": [
@@ -8136,7 +8136,7 @@
  {
   "id": "languages-506",
   "domain": "languages",
-  "verb": "запоминать",
+  "verb": "запомнить",
   "object": "контекст слов",
   "example": "в каком тексте я видел это слово",
   "implementation": [
@@ -9037,6 +9037,822 @@
   "example": "сделай отдельный профиль без рекламы",
   "implementation": [
    "persistent profile + фильтры"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "chat-social-563",
+  "domain": "chat-social",
+  "verb": "изменить",
+  "object": "своё сообщение",
+  "example": "исправь опечатку в последнем сообщении",
+  "implementation": [
+   "API мессенджера"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "в пределах окна редактирования"
+ },
+ {
+  "id": "chat-social-564",
+  "domain": "chat-social",
+  "verb": "удалить",
+  "object": "сообщение/переписку",
+  "example": "удали это сообщение",
+  "implementation": [
+   "API/UI"
+  ],
+  "risk": "destructive",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "chat-social-565",
+  "domain": "chat-social",
+  "verb": "проверить",
+  "object": "доставку и прочтение",
+  "example": "сообщение дошло",
+  "implementation": [
+   "API статусов"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "creative-3d-566",
+  "domain": "creative-3d",
+  "verb": "показать",
+  "object": "модель и её параметры",
+  "example": "сколько полигонов в модели",
+  "implementation": [
+   "assimp/trimesh"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "creative-3d-567",
+  "domain": "creative-3d",
+  "verb": "изменить",
+  "object": "параметры модели",
+  "example": "увеличь толщину стенки до 3 мм",
+  "implementation": [
+   "OpenSCAD параметры"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "creative-3d-568",
+  "domain": "creative-3d",
+  "verb": "автоматизировать",
+  "object": "пакетный рендер",
+  "example": "отрендерь 20 ракурсов",
+  "implementation": [
+   "Blender headless"
+  ],
+  "risk": "write-local",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "creative-3d-569",
+  "domain": "creative-3d",
+  "verb": "проверить",
+  "object": "модель на ошибки",
+  "example": "манifold ли она",
+  "implementation": [
+   "trimesh + проверки"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "databases-570",
+  "domain": "databases",
+  "verb": "проверить",
+  "object": "целостность и индексы",
+  "example": "всё ли ок с базой",
+  "implementation": [
+   "PRAGMA integrity_check"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "databases-571",
+  "domain": "databases",
+  "verb": "удалить",
+  "object": "устаревшие записи",
+  "example": "удали старше года",
+  "implementation": [
+   "SQL DELETE с бэкапом"
+  ],
+  "risk": "destructive",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "только с подтверждением и копией"
+ },
+ {
+  "id": "dev-code-572",
+  "domain": "dev-code",
+  "verb": "удалить",
+  "object": "мёртвый код и ветки",
+  "example": "убери неиспользуемое",
+  "implementation": [
+   "статический анализ + git"
+  ],
+  "risk": "destructive",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "только с тестами"
+ },
+ {
+  "id": "devices-573",
+  "domain": "devices",
+  "verb": "автоматизировать",
+  "object": "подключение профилей",
+  "example": "когда вставлю телефон — скопируй фото",
+  "implementation": [
+   "правило + триггер"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "devices-574",
+  "domain": "devices",
+  "verb": "удалить",
+  "object": "безопасно извлечь",
+  "example": "выключи флешку безопасно",
+  "implementation": [
+   "eject API"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "display-sound-575",
+  "domain": "display-sound",
+  "verb": "автоматизировать",
+  "object": "яркость и звук по расписанию",
+  "example": "вечером звук тише",
+  "implementation": [
+   "правило + API"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "email-576",
+  "domain": "email",
+  "verb": "проверить",
+  "object": "вложения и ссылки на опасность",
+  "example": "это письмо безопасно",
+  "implementation": [
+   "эвристики + VT"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "email-577",
+  "domain": "email",
+  "verb": "автоматизировать",
+  "object": "правила сортировки",
+  "example": "счета — в папку Счета",
+  "implementation": [
+   "API/DOM"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "files-578",
+  "domain": "files",
+  "verb": "автоматизировать",
+  "object": "автосортировку по правилам",
+  "example": "всё с рабочего стола — по папкам",
+  "implementation": [
+   "правила + cron"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "с журналом и откатом"
+ },
+ {
+  "id": "games-579",
+  "domain": "games",
+  "verb": "показать",
+  "object": "требования игры",
+  "example": "потянет ли моё железо",
+  "implementation": [
+   "база + характеристики"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "games-580",
+  "domain": "games",
+  "verb": "изменить",
+  "object": "настройки графики",
+  "example": "поставь средние и 60 fps",
+  "implementation": [
+   "конфиги/оверлей"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "games-581",
+  "domain": "games",
+  "verb": "проверить",
+  "object": "целостность файлов",
+  "example": "проверь файлы игры",
+  "implementation": [
+   "Steam API"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "health-daily-582",
+  "domain": "health-daily",
+  "verb": "изменить",
+  "object": "напоминание",
+  "example": "перенеси таблетки на 10 утра",
+  "implementation": [
+   "планировщик"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "health-daily-583",
+  "domain": "health-daily",
+  "verb": "проверить",
+  "object": "пропущенные приёмы",
+  "example": "сколько раз пропустил за месяц",
+  "implementation": [
+   "журнал + отчёт"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "images-584",
+  "domain": "images",
+  "verb": "автоматизировать",
+  "object": "пакетную обработку",
+  "example": "сожми и приведи к 2000px все фото",
+  "implementation": [
+   "sharp + правило"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "images-585",
+  "domain": "images",
+  "verb": "проверить",
+  "object": "качество и дубли",
+  "example": "нет ли размытых и повторов",
+  "implementation": [
+   "метрики резкости + pHash"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "input-586",
+  "domain": "input",
+  "verb": "показать",
+  "object": "раскладку и хоткеи",
+  "example": "какая сейчас раскладка",
+  "implementation": [
+   "Windows API"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "input-587",
+  "domain": "input",
+  "verb": "проверить",
+  "object": "что ввод дошёл",
+  "example": "текст действительно появился в поле",
+  "implementation": [
+   "UIA/OCR после ввода"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "ключевая проверка для GUI"
+ },
+ {
+  "id": "learning-research-588",
+  "domain": "learning-research",
+  "verb": "обучить",
+  "object": "карточками и повторениями",
+  "example": "сделай карточки и спрашивай по интервалам",
+  "implementation": [
+   "SRT + SQLite"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "monitoring-triage-589",
+  "domain": "monitoring-triage",
+  "verb": "изменить",
+  "object": "пороги алертов",
+  "example": "предупреждай если диск меньше 10%",
+  "implementation": [
+   "правила"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "monitoring-triage-590",
+  "domain": "monitoring-triage",
+  "verb": "проверить",
+  "object": "что алерт дошёл",
+  "example": "тестовое сообщение в телеграм",
+  "implementation": [
+   "heartbeat + ack"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "monitoring-triage-591",
+  "domain": "monitoring-triage",
+  "verb": "автоматизировать",
+  "object": "авто-реакцию на инцидент",
+  "example": "если процесс упал — перезапусти",
+  "implementation": [
+   "правило + действие"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "не может",
+  "human_code": "n",
+  "status": "v2",
+  "notes": "человек не дежурит 24-7"
+ },
+ {
+  "id": "monitoring-triage-592",
+  "domain": "monitoring-triage",
+  "verb": "решить",
+  "object": "что важнее",
+  "example": "что чинить первым",
+  "implementation": [
+   "приоритезация + LLM"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "network-593",
+  "domain": "network",
+  "verb": "автоматизировать",
+  "object": "переключение сети",
+  "example": "если Wi-Fi пропал — включи мобильный",
+  "implementation": [
+   "правила + API"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "processes-services-594",
+  "domain": "processes-services",
+  "verb": "автоматизировать",
+  "object": "правила «если — то»",
+  "example": "если запустился Steam — отключи уведомления",
+  "implementation": [
+   "правило + триггер"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "sheets-data-595",
+  "domain": "sheets-data",
+  "verb": "автоматизировать",
+  "object": "регулярный отчёт",
+  "example": "каждый понедельник — отчёт по продажам",
+  "implementation": [
+   "шаблон + cron"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "text-docs-596",
+  "domain": "text-docs",
+  "verb": "работать",
+  "object": "работа в Word по шагам",
+  "example": "поставь оглавление через интерфейс",
+  "implementation": [
+   "UIA + COM"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "video-597",
+  "domain": "video",
+  "verb": "проверить",
+  "object": "качество и артефакты",
+  "example": "нет ли рассинхрона звука",
+  "implementation": [
+   "ffprobe + метрики"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "video-598",
+  "domain": "video",
+  "verb": "удалить",
+  "object": "черновики и дубли",
+  "example": "убери дубли клипов",
+  "implementation": [
+   "хэши + подтверждение"
+  ],
+  "risk": "destructive",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "video-production-599",
+  "domain": "video-production",
+  "verb": "ответить",
+  "object": "ответить на комментарии",
+  "example": "ответь на частые вопросы",
+  "implementation": [
+   "API + шаблоны"
+  ],
+  "risk": "external",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "черновик + подтверждение"
+ },
+ {
+  "id": "virtualization-remote-600",
+  "domain": "virtualization-remote",
+  "verb": "автоматизировать",
+  "object": "бэкап ВМ по расписанию",
+  "example": "снимай снапшот каждую ночь",
+  "implementation": [
+   "API гипервизора"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "virtualization-remote-601",
+  "domain": "virtualization-remote",
+  "verb": "удалить",
+  "object": "ненужную ВМ",
+  "example": "удали тестовую машину",
+  "implementation": [
+   "API гипервизора"
+  ],
+  "risk": "destructive",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "с подтверждением"
+ },
+ {
+  "id": "web-602",
+  "domain": "web",
+  "verb": "автоматизировать",
+  "object": "мониторинг по расписанию",
+  "example": "проверяй цену каждые 2 часа",
+  "implementation": [
+   "демон + браузер"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "не может",
+  "human_code": "n",
+  "status": "v2",
+  "notes": "человек не проверяет круглосуточно"
+ },
+ {
+  "id": "web-603",
+  "domain": "web",
+  "verb": "удалить",
+  "object": "кэш и данные сайта",
+  "example": "очисти куки для этого сайта",
+  "implementation": [
+   "CDP"
+  ],
+  "risk": "destructive",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "games-604",
+  "domain": "games",
+  "verb": "автоматизировать",
+  "object": "запуск и настройку окружения",
+  "example": "запусти игру с оверлеем",
+  "implementation": [
+   "скрипт + конфиг"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "accessibility-605",
+  "domain": "accessibility",
+  "verb": "проверить",
+  "object": "что функция доступности работает",
+  "example": "проверь что экранный диктор включился",
+  "implementation": [
+   "API + тестовое действие"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "accounts-updates-606",
+  "domain": "accounts-updates",
+  "verb": "удалить",
+  "object": "старые точки восстановления",
+  "example": "удали лишние бэкапы системы",
+  "implementation": [
+   "vssadmin с подтверждением"
+  ],
+  "risk": "destructive",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "только по явной просьбе"
+ },
+ {
+  "id": "ai-ml-607",
+  "domain": "ai-ml",
+  "verb": "обучить",
+  "object": "модель на своих данных",
+  "example": "дообучи на моих заметках",
+  "implementation": [
+   "LoRA локально"
+  ],
+  "risk": "write-local",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "долго на слабом ПК"
+ },
+ {
+  "id": "ai-ml-608",
+  "domain": "ai-ml",
+  "verb": "проверить",
+  "object": "качество модели",
+  "example": "она стала хуже",
+  "implementation": [
+   "eval-набор"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "apps-windows-609",
+  "domain": "apps-windows",
+  "verb": "проверить",
+  "object": "что действие в окне сработало",
+  "example": "кнопка действительно нажалась",
+  "implementation": [
+   "UIA-состояние после действия"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "основа всех GUI-операций"
+ },
+ {
+  "id": "business-finance-610",
+  "domain": "business-finance",
+  "verb": "ответить",
+  "object": "на письмо клиенту по счёту",
+  "example": "напомни об оплате вежливо",
+  "implementation": [
+   "шаблон + почта"
+  ],
+  "risk": "external",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "черновик, отправка с подтверждением"
+ },
+ {
+  "id": "calendar-tasks-611",
+  "domain": "calendar-tasks",
+  "verb": "проверить",
+  "object": "что встреча создана",
+  "example": "встреча видна в календаре",
+  "implementation": [
+   "API повторным чтением"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "learning-research-612",
+  "domain": "learning-research",
+  "verb": "тренировать",
+  "object": "знания вопросами",
+  "example": "проверь меня по этой статье",
+  "implementation": [
+   "LLM + SRT"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "ai-ml-613",
+  "domain": "ai-ml",
+  "verb": "настроить",
+  "object": "параметры инференса",
+  "example": "поставь температуру 0.2 и контекст 8192",
+  "implementation": [
+   "llama-server флаги"
   ],
   "risk": "write-local",
   "tier": "T0",
