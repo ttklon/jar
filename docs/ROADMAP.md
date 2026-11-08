@@ -104,15 +104,16 @@
 - [x] Генератор авто-профилей `tools/uia_probe.py` (dump → draft), классификация интерфейса
 - [x] Профили P0: Диспетчер задач, Windows Terminal, Everything (Службы и Планировщик — через
       `sc.exe` / `schtasks`, в профиле диспетчера)
-- [~] Профили P1: Параметры Windows, Просмотр событий, Docker — **готовы**; Панель управления,
-      Firefox, WhatsApp, VirtualBox, HWiNFO, CrystalDiskInfo — очередь
+- [x] Профили P1: Параметры Windows, Просмотр событий, Docker, Панель управления, Firefox,
+      WhatsApp, VirtualBox, HWiNFO — **готовы**; CrystalDiskInfo — покрыт через smartctl
 - [x] Профили P2: DaVinci Resolve, Visual Studio, JetBrains (IDEA/PyCharm/Android Studio),
       WinSCP, FileZilla, DBeaver, tshark, robocopy/smartctl
-- [x] Профили P2 остаток: Slack, LibreOffice, Acrobat, CapCut-углубление (Steam — в очереди)
+- [x] Профили P2 остаток: Slack, LibreOffice, Acrobat, CapCut, Steam (углублён до 9 операций)
 - [x] Профили-инструменты и классы: `kind: tool` (robocopy, tshark, soffice, beets, AHK) и
       `kind: system` (устройства, безопасность аккаунтов, календарь)
 - [x] Политика `data/domain_profile_policy.json`: домен без профиля обязан быть классифицирован
       (аудит падает на неклассифицированном)
+- [x] Медиа-конвейер как инструмент: `ffmpeg.json` (субтитры, LUFS, SSIM, склейка, изоляция вокала)
 - [ ] Tier C: список приложений-канвасов + политика «визуальный агент с проверкой по скриншоту»
 - [ ] Дрейф: пере-проверка якорей по `verified_at` старше 90 дней, отчёт в CI
 - [x] Домены без профиля: очереди нет — `smart-home` закрыт профилем хаба
@@ -120,6 +121,9 @@
       (health-daily, travel, home-daily, languages, career, ai-ml, legal-docs, licensing,
       superhuman): каждый закрывается скилл-рецептом, коннектором, бенчмарком или API, а не
       профилем приложения. См. `research/notes/32-artifact-types.md`
+
+**Состояние:** 63 профиля / 378 операций, tier A — 57 из 122 приложений каталога, очередь
+доменов без профиля пуста.
 
 **Критерий выхода линии:** ≥60 профилей tier A + ≥30 приложений, прошедших авто-профиль с
 подтверждением вручную; ни одного приложения из P0 без профиля.
