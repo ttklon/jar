@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: read
+  # нужно, чтобы публиковать дифф форматирования отдельной проверкой
+  checks: write
 
 jobs:
   web:
@@ -108,5 +110,6 @@ jobs:
             cargo fmt --manifest-path src-tauri/Cargo.toml --all
             git diff -- src-tauri/src src-tauri/build.rs > fmt.diff
             python scripts/ci_annotate.py fmt.diff --raw
+            python scripts/ci_check_report.py --name rustfmt-diff --title "rustfmt" --file fmt.diff
             exit 1
           fi
