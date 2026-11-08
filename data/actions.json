@@ -12004,5 +12004,69 @@
   "human_code": "c",
   "status": "v1",
   "notes": ""
+ },
+ {
+  "id": "distribution-748",
+  "domain": "distribution",
+  "verb": "проверить",
+  "object": "наличие WebView2 Runtime",
+  "example": "есть ли компонент рендеринга",
+  "implementation": [
+   "WebView2Loader API / EdgeUpdate"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-749",
+  "domain": "distribution",
+  "verb": "установить",
+  "object": "WebView2 Runtime молча",
+  "example": "доставь зависимость при установке",
+  "implementation": [
+   "bootstrapper / offlineInstaller"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-750",
+  "domain": "distribution",
+  "verb": "проверить",
+  "object": "что релиз не открывает сетевых портов",
+  "example": "никаких слушающих портов",
+  "implementation": [
+   "Get-NetTCPConnection"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-751",
+  "domain": "distribution",
+  "verb": "проверить",
+  "object": "что DevTools недоступны в релизе",
+  "example": "F12 не должен открывать отладку",
+  "implementation": [
+   "release-профиль без devtools"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
  }
 ]

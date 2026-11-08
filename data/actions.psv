@@ -745,3 +745,7 @@ distribution|подготовить|листинг в Store|сделай стр�
 distribution|собрать|SBOM и аудит зависимостей|что внутри сборки|syft/grype + pip-audit|R|T0|c|v1|
 distribution|проверить|отсутствие секретов в бинарнике|нет ли ключей внутри|grep по строкам релиза|R|T0|c|v1|
 distribution|автоматизировать|сборку и релиз в CI|собирай и подписывай автоматически|GitHub Actions + signtool|W|T1|c|v1|
+distribution|проверить|наличие WebView2 Runtime|есть ли компонент рендеринга|WebView2Loader API / EdgeUpdate|R|T0|c|v1|
+distribution|установить|WebView2 Runtime молча|доставь зависимость при установке|bootstrapper / offlineInstaller|W|T0|c|v1|
+distribution|проверить|что релиз не открывает сетевых портов|никаких слушающих портов|Get-NetTCPConnection|R|T0|c|v1|
+distribution|проверить|что DevTools недоступны в релизе|F12 не должен открывать отладку|release-профиль без devtools|R|T0|c|v1|

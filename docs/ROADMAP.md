@@ -17,9 +17,10 @@
 
 - [ ] **Tauri 2 + React 19/TS strict** (решение — [`DECISION-STACK.md`](DECISION-STACK.md)), окно с Mica, трей, хоткеи, capability-манифест
 - [ ] Rust-ядро: команды IPC, менеджер сайдкаров (llama.cpp/whisper.cpp), логирование
+- [ ] Спайк до основной работы: release-сборка без портов, без DevTools, single-instance, офлайн (см. [`RUNTIME.md`](RUNTIME.md) §5)
 - [ ] SQLite-схема (events/jobs/steps/audit/facts), миграции
 - [ ] Нативный слой: скриншот, UIA-дамп, клик/ввод, проверка после действия (**прототип Rust**)
-- [ ] Capability registry, сгенерированный из `data/actions.json` (747 действий) + первые 10 инструментов
+- [ ] Capability registry, сгенерированный из `data/actions.json` (751 действие) + первые 10 инструментов
 - [ ] Загрузчик профилей `data/profiles/*.json` + движение по шагам с обязательной верификацией (`tools/profiles.py` уже валидирует данные)
 - [ ] Policy engine (3 режима) + аудит + подтверждение в UI
 - [ ] Профилировщик железа (статика + калибровка)

@@ -2,7 +2,7 @@
 
 Полный, систематический перечень того, что приложение должно уметь делать. Источник — [`data/actions.psv`](../data/actions.psv); файл генерируется `python3 tools/actions.py`, руками не править.
 
-**Всего действий: 747** · доменов: **47** · уникальных глаголов: **191**
+**Всего действий: 751** · доменов: **47** · уникальных глаголов: **191**
 
 Обозначения: `risk` — R(чтение) / W(запись локально) / D(разрушительное) / E(внешний эффект) / M(деньги) / I(идентичность); `tier` — минимальное железо (T0…T3); `человек` — может / сложно / **не может** (то, ради чего продукт и нужен).
 
@@ -10,8 +10,8 @@
 
 | Риск | Действий | | Tier | Действий | | Статус | Действий |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `write-local` | 358 | `T1` | 363 | `v1` | 572 |
-| `read` | 268 | `T0` | 274 | `v2` | 164 |
+| `write-local` | 359 | `T1` | 363 | `v1` | 576 |
+| `read` | 271 | `T0` | 278 | `v2` | 164 |
 | `destructive` | 60 | `T2` | 97 | `never` | 11 |
 | `external` | 50 | `T3` | 13 |  |  |
 | `identity` | 7 |  |  |  |  |
@@ -48,6 +48,7 @@
 | Дизайн, графика, 3D | 15 | 3 | 12 | 0 | 0 | 0 | 0 | 6 | 9 | 0 |
 | music | 15 | 4 | 11 | 0 | 0 | 0 | 0 | 7 | 8 | 0 |
 | home-daily | 15 | 7 | 6 | 0 | 2 | 0 | 0 | 7 | 8 | 0 |
+| distribution | 15 | 7 | 6 | 1 | 1 | 0 | 0 | 8 | 7 | 0 |
 | Диски, бэкапы, восстановление | 14 | 3 | 5 | 6 | 0 | 0 | 0 | 3 | 11 | 0 |
 | Презентации, PDF, печать, сканирование | 14 | 2 | 10 | 0 | 1 | 0 | 1 | 6 | 8 | 0 |
 | Почта | 14 | 3 | 6 | 1 | 4 | 0 | 0 | 0 | 14 | 0 |
@@ -65,7 +66,6 @@
 | Учёба и исследования | 12 | 7 | 5 | 0 | 0 | 0 | 0 | 2 | 10 | 0 |
 | licensing | 12 | 4 | 6 | 1 | 1 | 0 | 0 | 12 | 0 | 1 |
 | Дисплей и звук | 11 | 3 | 8 | 0 | 0 | 0 | 0 | 8 | 3 | 0 |
-| distribution | 11 | 4 | 5 | 1 | 1 | 0 | 0 | 4 | 7 | 0 |
 | Доступность | 10 | 5 | 4 | 1 | 0 | 0 | 0 | 3 | 7 | 0 |
 | Игры | 8 | 3 | 4 | 0 | 1 | 0 | 0 | 3 | 5 | 1 |
 
@@ -661,6 +661,26 @@
 | 622 | **экспортировать** ассеты (PNG/SVG) | _выгрузи иконки в svg_ | API/UI экспорт | write-local | T0 | может | v1 |
 | 623 | **аннотировать** макет комментариями | _оставь комментарий к кнопке_ | API/UI | write-local | T1 | может | v2 |
 
+### distribution (15)
+
+| # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 737 | **собрать** установщик | _собери MSIX и exe_ | tauri build + signtool | write-local | T1 | может | v1 |
+| 738 | **подписать** код | _подпиши релиз_ | Azure Artifact Signing | write-local | T1 | может | v1 |
+| 739 | **опубликовать** релиз с манифестом | _выложи версию_ | GitHub Releases + Ed25519 | external | T1 | может | v1 |
+| 740 | **проверить** подпись перед публикацией | _подпись валидна_ | signtool verify / WinVerifyTrust | read | T0 | может | v1 |
+| 741 | **настроить** канал обновлений | _stable или beta_ | updater endpoints | write-local | T0 | может | v1 |
+| 742 | **откатить** релиз | _верни прошлую версию_ | manifest revoked + rollback | destructive | T1 | может | v1 |
+| 743 | **проверить** совместимость Win10 и Win11 | _работает на десятке_ | VM-прогон + скриншоты | read | T1 | может | v1 |
+| 744 | **подготовить** листинг в Store | _сделай страницу приложения_ | Partner Center ассеты | write-local | T1 | может | v2 |
+| 745 | **собрать** SBOM и аудит зависимостей | _что внутри сборки_ | syft/grype + pip-audit | read | T0 | может | v1 |
+| 746 | **проверить** отсутствие секретов в бинарнике | _нет ли ключей внутри_ | grep по строкам релиза | read | T0 | может | v1 |
+| 747 | **автоматизировать** сборку и релиз в CI | _собирай и подписывай автоматически_ | GitHub Actions + signtool | write-local | T1 | может | v1 |
+| 748 | **проверить** наличие WebView2 Runtime | _есть ли компонент рендеринга_ | WebView2Loader API / EdgeUpdate | read | T0 | может | v1 |
+| 749 | **установить** WebView2 Runtime молча | _доставь зависимость при установке_ | bootstrapper / offlineInstaller | write-local | T0 | может | v1 |
+| 750 | **проверить** что релиз не открывает сетевых портов | _никаких слушающих портов_ | Get-NetTCPConnection | read | T0 | может | v1 |
+| 751 | **проверить** что DevTools недоступны в релизе | _F12 не должен открывать отладку_ | release-профиль без devtools | read | T0 | может | v1 |
+
 ### home-daily (15)
 
 | # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
@@ -1009,22 +1029,6 @@
 | 278 | **проверить** качество связи | _проверь микрофон и колонки_ | тест-тон + запись | read | T0 | может | v1 |
 | 575 | **автоматизировать** яркость и звук по расписанию | _вечером звук тише_ | правило + API | write-local | T0 | может | v1 |
 
-### distribution (11)
-
-| # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 737 | **собрать** установщик | _собери MSIX и exe_ | tauri build + signtool | write-local | T1 | может | v1 |
-| 738 | **подписать** код | _подпиши релиз_ | Azure Artifact Signing | write-local | T1 | может | v1 |
-| 739 | **опубликовать** релиз с манифестом | _выложи версию_ | GitHub Releases + Ed25519 | external | T1 | может | v1 |
-| 740 | **проверить** подпись перед публикацией | _подпись валидна_ | signtool verify / WinVerifyTrust | read | T0 | может | v1 |
-| 741 | **настроить** канал обновлений | _stable или beta_ | updater endpoints | write-local | T0 | может | v1 |
-| 742 | **откатить** релиз | _верни прошлую версию_ | manifest revoked + rollback | destructive | T1 | может | v1 |
-| 743 | **проверить** совместимость Win10 и Win11 | _работает на десятке_ | VM-прогон + скриншоты | read | T1 | может | v1 |
-| 744 | **подготовить** листинг в Store | _сделай страницу приложения_ | Partner Center ассеты | write-local | T1 | может | v2 |
-| 745 | **собрать** SBOM и аудит зависимостей | _что внутри сборки_ | syft/grype + pip-audit | read | T0 | может | v1 |
-| 746 | **проверить** отсутствие секретов в бинарнике | _нет ли ключей внутри_ | grep по строкам релиза | read | T0 | может | v1 |
-| 747 | **автоматизировать** сборку и релиз в CI | _собирай и подписывай автоматически_ | GitHub Actions + signtool | write-local | T1 | может | v1 |
-
 ### Доступность (10)
 
 | # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
@@ -1059,7 +1063,7 @@
 
 | Глагол | Действий | Где встречается |
 | --- | --- | --- |
-| проверить | 81 | accessibility, accounts-updates, ai-ml, apps-windows, automation, business-finance… |
+| проверить | 84 | accessibility, accounts-updates, ai-ml, apps-windows, automation, business-finance… |
 | создать | 41 | accounts-updates, apps-windows, audio, automation, business-finance, calendar-tasks… |
 | найти | 33 | business-finance, calendar-tasks, career, chat-social, dev-code, devices… |
 | настроить | 31 | accounts-updates, ai-ml, apps-windows, audio, automation, dev-code… |
@@ -1103,6 +1107,7 @@
 | озвучить | 4 | accessibility, audio, text-docs, video-production |
 | нарезать | 4 | audio, engineering-3d, video, video-production |
 | сохранить | 4 | learning-research, legal-docs, travel, web |
+| установить | 4 | accounts-updates, apps-windows, devices, distribution |
 | подключиться | 4 | databases, network, virtualization-remote |
 | сжать | 3 | files, slides-pdf-print, video |
 | зашифровать | 3 | files, security-access |
@@ -1118,7 +1123,6 @@
 | монтировать | 3 | video |
 | отследить | 3 | calendar-tasks, career, personal-finance |
 | ввести | 3 | apps-windows, input |
-| установить | 3 | accounts-updates, apps-windows, devices |
 | отключить | 3 | input, processes-services |
 | обучить | 3 | ai-ml, learning-research |
 | оценить | 3 | ai-ml, hardware-diag, health-daily |
