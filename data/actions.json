@@ -13093,5 +13093,85 @@
   "human_code": "c",
   "status": "v2",
   "notes": ""
+ },
+ {
+  "id": "security-access-816",
+  "domain": "security-access",
+  "verb": "найти",
+  "object": "пароль в хранилище",
+  "example": "дай пароль от этого сайта",
+  "implementation": [
+   "keepassxc-cli show"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "не может",
+  "human_code": "n",
+  "status": "v1",
+  "notes": "показывать с маской, копировать по кнопке"
+ },
+ {
+  "id": "security-access-817",
+  "domain": "security-access",
+  "verb": "создать",
+  "object": "запись в хранилище паролей",
+  "example": "сохрани этот пароль",
+  "implementation": [
+   "keepassxc-cli add"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "генератор, а не придуманный пароль"
+ },
+ {
+  "id": "security-access-818",
+  "domain": "security-access",
+  "verb": "создать",
+  "object": "резервную копию хранилища",
+  "example": "сделай бэкап паролей",
+  "implementation": [
+   "copy .kdbx + проверка открытия"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "хранилище не синхронизировать в облако"
+ },
+ {
+  "id": "security-access-819",
+  "domain": "security-access",
+  "verb": "проверить",
+  "object": "надёжность и повторное использование паролей",
+  "example": "проверь мои пароли",
+  "implementation": [
+   "аудит kdbx + HIBP k-anonymity"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "accounts-updates-820",
+  "domain": "accounts-updates",
+  "verb": "проверить",
+  "object": "целостность установки Windows",
+  "example": "проверь, не побилась ли система",
+  "implementation": [
+   "sfc /scannow + DISM /RestoreHealth"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "долго: 10-40 мин"
  }
 ]

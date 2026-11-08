@@ -6,7 +6,7 @@
 
 Файл генерируется `python3 tools/profiles.py`; руками не править.
 
-**Профилей: 68** · операций: **427** · проблем: **0**
+**Профилей: 72** · операций: **454** · проблем: **0**
 
 Правила (проверяются автоматически, ошибка = ненулевой код возврата):
 
@@ -44,6 +44,7 @@
 | Git for Windows (git-bash / git.exe) | `app` | `git-bash.exe, git.exe, bash.exe` | win32 | 2.4x (2026-11) | 2026-11-08 | 2 | 5 | `git-bash.json` |
 | HandBrake | `app` | `HandBrake.exe, HandBrakeCLI.exe` | win32 | 1.9.x (2026-11) | 2026-11-08 | 2 | 4 | `handbrake.json` |
 | JetBrains IDE (IDEA / PyCharm / WebStorm) | `app` | `idea64.exe, pycharm64.exe, webstorm64.exe, studio64.exe` | qt | 2025.3 (2026-11) | 2026-11-08 | 7 | 5 | `jetbrains.json` |
+| KeePassXC (хранилище паролей) | `tool` | `KeePassXC.exe, keepassxc-cli.exe` | qt | 2.7.x (2026-11) | 2026-11-08 | 6 | 5 | `keepassxc.json` |
 | LibreOffice | `tool` | `soffice.exe, soffice.com, soffice.bin` | win32 | 25.x (2026-11) | 2026-11-08 | 5 | 6 | `libreoffice.json` |
 | Microsoft Excel | `app` | `EXCEL.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 4 | 10 | `excel.json` |
 | Microsoft Outlook (классический и новый) | `app` | `OUTLOOK.EXE, olk.exe` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 8 | 7 | `outlook.json` |
@@ -76,26 +77,29 @@
 | Доступность (экранный диктор, субтитры, контраст, управление без мыши) | `system` | `narrator.exe, Magnify.exe, osk.exe, SystemSettings.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 6 | `accessibility.json` |
 | Календарь и задачи | `system` | `OUTLOOK.EXE, olk.exe, schtasks.exe, Calendar.exe` | uia | Outlook 365 + Windows 11 (2026-11) | 2026-11-08 | 5 | 6 | `calendar-tasks.json` |
 | Командная строка (cmd.exe) и пакетные файлы | `app` | `cmd.exe` | win32 | Windows 10/11 (2026-11) | 2026-11-08 | 2 | 4 | `cmd.json` |
+| Личные финансы (выписки, бюджет, чеки) | `tool` | `python.exe, pdftotext.exe, tesseract.exe` | win32 | pandas 2.x, pdfplumber 0.11, pytesseract 0.3 (2026-11) | 2026-11-08 | 6 | 6 | `finance-docs.json` |
 | Мониторинг железа (HWiNFO / smartctl / diskspd) | `tool` | `HWiNFO64.exe, LibreHardwareMonitor.exe, smartctl.exe, diskspd.exe` | win32 | HWiNFO 8.x, LibreHardwareMonitor 0.9, smartmontools 7.4 (2026-11) | 2026-11-08 | 6 | 6 | `hardware-monitor.json` |
 | Музыкальная библиотека (beets / fpcalc / rsgain) | `tool` | `beet.exe, fpcalc.exe, rsgain.exe, loudgain.exe, ffmpeg.exe` | win32 | beets 2.x, chromaprint 1.5, rsgain 3.x (2026-11) | 2026-11-08 | 5 | 6 | `music-library.json` |
 | Наблюдение и разбор инцидентов | `system` | `perfmon.exe, wpr.exe, resmon.exe, nssm.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 7 | `monitoring-triage.json` |
+| Обслуживание Windows (sfc / DISM / slmgr / vssadmin / pnputil) | `system` | `sfc.exe, dism.exe, slmgr.vbs, vssadmin.exe, pnputil.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 5 | `os-maintenance.json` |
 | Панель управления и установка программ | `system` | `control.exe, appwiz.cpl, winget.exe, msiexec.exe` | uia | Windows 11 24H2 + winget 1.9 (2026-11) | 2026-11-08 | 5 | 4 | `control-panel.json` |
 | Параметры Windows | `app` | `SystemSettings.exe, ApplicationFrameHost.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 15 | `windows-settings.json` |
 | Проводник Windows | `app` | `explorer.exe` | uia | Windows 11 24H2 / Windows 10 22H2 | 2026-11-08 | 6 | 7 | `explorer.json` |
 | Просмотр событий | `app` | `mmc.exe, eventvwr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `eventvwr.json` |
 | Релизный конвейер (cargo/tauri build, signtool, gh, syft) | `tool` | `cargo.exe, tauri.exe, signtool.exe, iscc.exe, gh.exe, syft.exe` | win32 | Rust 1.8x, Tauri CLI 2.x, WiX 3.14, NSIS 3.10, signtool 10.0 (2026-11) | 2026-11-08 | 7 | 8 | `release-pipeline.json` |
+| Сеть Windows (netsh / Test-NetConnection / firewall / hosts) | `tool` | `netsh.exe, ping.exe, tracert.exe, nslookup.exe` | win32 | Windows 11 24H2 (2026-11) | 2026-11-08 | 7 | 7 | `net-cli.json` |
 | Умный дом (Home Assistant / MQTT / Matter) | `system` | `` | web | HA 2026.1 + Matter 1.3 (2026-11) | 2026-11-08 | 6 | 7 | `home-assistant.json` |
-| Устройства Windows (USB / Bluetooth / печать) | `system` | `pnputil.exe, printui.exe, DevicePairingWizard.exe, SystemSettings.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 6 | `devices.json` |
+| Устройства Windows (USB / Bluetooth / печать) | `system` | `pnputil.exe, printui.exe, DevicePairingWizard.exe, SystemSettings.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 10 | `devices.json` |
 
-По типу: `app` — 49 · `tool` — 12 · `system` — 7. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
+По типу: `app` — 49 · `tool` — 15 · `system` — 8. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
 
 ## Риск операций
 
-- `write-local` — 234
-- `read` — 135
+- `write-local` — 243
+- `read` — 145
+- `destructive` — 33
 - `external` — 28
-- `destructive` — 26
-- `identity` — 3
+- `identity` — 4
 - `money` — 1
 
 ## Покрытие доменов реестра
@@ -109,17 +113,21 @@
 - `engineering-3d` — 14
 - `web` — 14
 - `virtualization-remote` — 14
+- `network` — 13
 - `learning-research` — 13
+- `personal-finance` — 12
 - `audio` — 11
 - `processes-services` — 11
 - `slides-pdf-print` — 10
 - `apps-windows` — 10
+- `devices` — 10
+- `security-access` — 10
 - `creative-3d` — 9
 - `distribution` — 9
+- `monitoring-triage` — 9
 - `images` — 9
 - `apps-generic` — 8
 - `video-production` — 8
-- `monitoring-triage` — 8
 - `hardware-diag` — 8
 - `games` — 8
 - `accessibility` — 7
@@ -128,18 +136,14 @@
 - `sheets-data` — 7
 - `smart-home` — 7
 - `input` — 7
+- `accounts-updates` — 7
 - `email` — 7
 - `business-finance` — 6
-- `personal-finance` — 6
 - `calendar-tasks` — 6
 - `databases` — 6
-- `devices` — 6
-- `network` — 6
 - `system-power` — 6
 - `automation` — 5
-- `security-access` — 5
 - `display-sound` — 5
-- `accounts-updates` — 3
 
 ## Проблемы
 

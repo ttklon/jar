@@ -1,31 +1,73 @@
 {
   "app": "Устройства Windows (USB / Bluetooth / печать)",
   "kind": "system",
-  "exe": ["pnputil.exe", "printui.exe", "DevicePairingWizard.exe", "SystemSettings.exe"],
+  "exe": [
+    "pnputil.exe",
+    "printui.exe",
+    "DevicePairingWizard.exe",
+    "SystemSettings.exe"
+  ],
   "ui_stack": "uia",
   "version_seen": "Windows 11 24H2 (2026-11)",
   "verified_at": "2026-11-08",
   "anchors": {
-    "pnp_list": { "by": "api", "value": "Get-PnpDevice -PresentOnly | Select Status,Class,FriendlyName,InstanceId | Where Status -ne 'OK'" },
-    "usb_tree": { "by": "api", "value": "Get-PnpDevice -Class USB,USBDevice | Format-Table -AutoSize" },
-    "printer": { "by": "api", "value": "Get-Printer; Add-Printer -Name <n> -DriverName <d> -PortName <p>; Add-PrinterPort" },
-    "bluetooth_page": { "by": "api", "value": "start ms-settings:bluetooth", "fallback": "панель быстрых настроек → Bluetooth" },
-    "eject_shell": { "by": "api", "value": "(New-Object -comObject Shell.Application).Namespace(17).ParseName('<E:>').InvokeVerb('Eject')" },
-    "network_devices": { "by": "api", "value": "Get-NetNeighbor -AddressFamily IPv4 | Where-Object State -ne 'Unreachable'" }
+    "pnp_list": {
+      "by": "api",
+      "value": "Get-PnpDevice -PresentOnly | Select Status,Class,FriendlyName,InstanceId | Where Status -ne 'OK'"
+    },
+    "usb_tree": {
+      "by": "api",
+      "value": "Get-PnpDevice -Class USB,USBDevice | Format-Table -AutoSize"
+    },
+    "printer": {
+      "by": "api",
+      "value": "Get-Printer; Add-Printer -Name <n> -DriverName <d> -PortName <p>; Add-PrinterPort"
+    },
+    "bluetooth_page": {
+      "by": "api",
+      "value": "start ms-settings:bluetooth",
+      "fallback": "панель быстрых настроек → Bluetooth"
+    },
+    "eject_shell": {
+      "by": "api",
+      "value": "(New-Object -comObject Shell.Application).Namespace(17).ParseName('<E:>').InvokeVerb('Eject')"
+    },
+    "network_devices": {
+      "by": "api",
+      "value": "Get-NetNeighbor -AddressFamily IPv4 | Where-Object State -ne 'Unreachable'"
+    }
   },
   "operations": [
     {
       "name": "Проверить USB-устройства и найти проблемные",
       "registry": "devices|проверить|USB-устройства",
-      "steps": ["anchor:usb_tree", "отфильтровать Status ≠ OK (Error, Unknown, Degraded)", "для проблемных — прочитать ProblemCode через Get-PnpDeviceProperty DEVPKEY_Device_ProblemCode"],
-      "verify": ["список устройств с именем, классом и статусом", "для ошибок указан код проблемы и человеческое объяснение (например Code 43 = сбой драйвера)", "нет рекомендации «переустановите Windows» вместо диагностики"],
+      "steps": [
+        "anchor:usb_tree",
+        "отфильтровать Status ≠ OK (Error, Unknown, Degraded)",
+        "для проблемных — прочитать ProblemCode через Get-PnpDeviceProperty DEVPKEY_Device_ProblemCode"
+      ],
+      "verify": [
+        "список устройств с именем, классом и статусом",
+        "для ошибок указан код проблемы и человеческое объяснение (например Code 43 = сбой драйвера)",
+        "нет рекомендации «переустановите Windows» вместо диагностики"
+      ],
       "risk": "read"
     },
     {
       "name": "Подключить Bluetooth-устройство",
       "registry": "devices|подключить|Bluetooth-устройство",
-      "steps": ["открыть anchor:bluetooth_page", "включить Bluetooth, если выключен", "перевести наушники/мышь в режим сопряжения (по инструкции устройства)", "нажать «Добавить устройство» → выбрать из списка", "дождаться статуса «Подключено»"],
-      "verify": ["устройство появилось в Get-PnpDevice -Class Bluetooth с Status OK", "в ms-settings устройство отмечено как подключённое", "звук/ввод реально идут через него (проверка воспроизведения или движения курсора)"],
+      "steps": [
+        "открыть anchor:bluetooth_page",
+        "включить Bluetooth, если выключен",
+        "перевести наушники/мышь в режим сопряжения (по инструкции устройства)",
+        "нажать «Добавить устройство» → выбрать из списка",
+        "дождаться статуса «Подключено»"
+      ],
+      "verify": [
+        "устройство появилось в Get-PnpDevice -Class Bluetooth с Status OK",
+        "в ms-settings устройство отмечено как подключённое",
+        "звук/ввод реально идут через него (проверка воспроизведения или движения курсора)"
+      ],
       "risk": "write-local",
       "on_fail": "если сопряжение не идёт — сначала проверить батарею и режим pairing, а не переустанавливать драйвер",
       "notes": "сопряжение — действие в чужом железе: делаем только с подтверждением, устройство может быть не тем"
@@ -33,33 +75,135 @@
     {
       "name": "Подключить принтер",
       "registry": "devices|подключить|принтер",
-      "steps": ["найти принтер в сети: Get-PrinterPort + ARP по модели", "Add-PrinterDriver / Add-PrinterPort -Name 'IP_192.168.1.50' -PrinterHostAddress ...", "Add-Printer -Name <n> -DriverName <d> -PortName <p>", "напечатать тестовую страницу"],
-      "verify": ["Get-Printer показывает принтер с Status = Normal", "тестовая страница ушла в очередь и очередь пуста", "в документе нет ошибок «драйвер не найден»"],
+      "steps": [
+        "найти принтер в сети: Get-PrinterPort + ARP по модели",
+        "Add-PrinterDriver / Add-PrinterPort -Name 'IP_192.168.1.50' -PrinterHostAddress ...",
+        "Add-Printer -Name <n> -DriverName <d> -PortName <p>",
+        "напечатать тестовую страницу"
+      ],
+      "verify": [
+        "Get-Printer показывает принтер с Status = Normal",
+        "тестовая страница ушла в очередь и очередь пуста",
+        "в документе нет ошибок «драйвер не найден»"
+      ],
       "risk": "write-local",
       "notes": "печать — физическое действие: тестовая страница только с подтверждением (расход бумаги)"
     },
     {
       "name": "Безопасно извлечь флешку",
       "registry": "devices|извлечь|флешку безопасно",
-      "steps": ["определить букву тома: Get-Volume | Where DriveType -eq 'Removable'", "проверить, что нет открытых файлов с этого тома (handle/rg)", "anchor:eject_shell"],
-      "verify": ["том исчез из Get-Volume", "буква больше не отображается в Проводнике", "на устройстве нет незавершённых записей (нет ошибок в events)"],
+      "steps": [
+        "определить букву тома: Get-Volume | Where DriveType -eq 'Removable'",
+        "проверить, что нет открытых файлов с этого тома (handle/rg)",
+        "anchor:eject_shell"
+      ],
+      "verify": [
+        "том исчез из Get-Volume",
+        "буква больше не отображается в Проводнике",
+        "на устройстве нет незавершённых записей (нет ошибок в events)"
+      ],
       "risk": "write-local",
       "on_fail": "если том занят — не игнорировать: показать, какой процесс держит файл, и спросить, закрывать ли"
     },
     {
       "name": "Найти устройства в локальной сети",
       "registry": "devices|найти|устройства в сети",
-      "steps": ["anchor:network_devices", "сопоставить MAC → производитель (OUI-таблица)", "попробовать разрешить имена через mDNS/NetBIOS"],
-      "verify": ["список IP + MAC + предполагаемый тип устройства", "указано, какие устройства отвечают на ping, а какие только в ARP-кэше", "скан портов не выполняется без отдельного запроса"],
+      "steps": [
+        "anchor:network_devices",
+        "сопоставить MAC → производитель (OUI-таблица)",
+        "попробовать разрешить имена через mDNS/NetBIOS"
+      ],
+      "verify": [
+        "список IP + MAC + предполагаемый тип устройства",
+        "указано, какие устройства отвечают на ping, а какие только в ARP-кэше",
+        "скан портов не выполняется без отдельного запроса"
+      ],
       "risk": "read"
     },
     {
       "name": "Скопировать фото и файлы с телефона",
       "registry": "devices|скопировать|фото и файлы с телефона",
-      "steps": ["подключить телефон по USB и разблокировать, выбрать режим «Передача файлов»", "прочитать содержимое через Shell.Application (This PC → устройство)", "скопировать в папку с датой, проверить размеры"],
-      "verify": ["число скопированных файлов = числу в источнике", "размеры совпадают побайтно (проверка по выборке)", "ни один файл не имеет нулевого размера"],
+      "steps": [
+        "подключить телефон по USB и разблокировать, выбрать режим «Передача файлов»",
+        "прочитать содержимое через Shell.Application (This PC → устройство)",
+        "скопировать в папку с датой, проверить размеры"
+      ],
+      "verify": [
+        "число скопированных файлов = числу в источнике",
+        "размеры совпадают побайтно (проверка по выборке)",
+        "ни один файл не имеет нулевого размера"
+      ],
       "risk": "write-local",
       "on_fail": "если MTP «завис» (частая беда Windows) — перезапустить explorer.exe, а не форматировать телефон"
+    },
+    {
+      "name": "Отформатировать флешку",
+      "registry": "devices|отформатировать|флешку",
+      "steps": [
+        "определить том: Get-Volume | Where DriveType -eq 'Removable'",
+        "проверить, что это не системный диск (буква и размер)",
+        "показать, что будет уничтожено",
+        "Format-Volume -FileSystem exFAT -NewFileSystemLabel ZSFLASH"
+      ],
+      "verify": [
+        "файловая система и метка соответствуют заданным",
+        "том пуст и доступен для записи",
+        "системный диск не затронут (проверка Get-Disk по номеру)"
+      ],
+      "risk": "destructive",
+      "on_fail": "если перепутан диск — остановиться немедленно; восстановление данных с форматированной флешки — отдельная платная процедура",
+      "notes": "перед форматированием всегда показываем модель и объём устройства: буквы дисков меняются при переподключении"
+    },
+    {
+      "name": "Записать загрузочную флешку",
+      "registry": "devices|записать|загрузочную флешку",
+      "steps": [
+        "проверить ISO на целостность (SHA-256 с сайта вендора)",
+        "Ventoy2Disk.exe /I /Drive:<N> (или Rufus в ручном режиме)",
+        "скопировать ISO на флешку",
+        "проверить, что флешка видна как загрузочная в BIOS/UEFI"
+      ],
+      "verify": [
+        "ISO-хэш совпал с опубликованным",
+        "флешка содержит файл ISO и загрузочные файлы",
+        "объём флешки ≥ размера ISO с запасом"
+      ],
+      "risk": "destructive",
+      "on_fail": "не писать загрузчик на диск с данными: подтверждение номера диска обязательно перед записью",
+      "notes": "UEFI+Secure Boot: Ventoy требует подписанный загрузчик, иначе флешка не стартует"
+    },
+    {
+      "name": "Сделать скриншот экрана телефона",
+      "registry": "devices|сделать|скриншот экрана телефона",
+      "steps": [
+        "подключить телефон по USB, включить отладку по USB",
+        "adb devices — подтвердить, что устройство авторизовано",
+        "adb exec-out screencap -p > screen.png"
+      ],
+      "verify": [
+        "файл создан и открывается",
+        "разрешение совпадает с экраном устройства",
+        "на скриншоте нет системных диалогов разработчика"
+      ],
+      "risk": "read",
+      "notes": "отладка по USB — это полный доступ к устройству: включаем только по явной команде и выключаем после"
+    },
+    {
+      "name": "Управлять телефоном по ADB",
+      "registry": "devices|управлять|телефоном",
+      "steps": [
+        "проверить подключение (adb devices)",
+        "выполнить нужные команды (установка, запуск, файлы)",
+        "при необходимости — удалённый экран через scrcpy"
+      ],
+      "verify": [
+        "каждая команда вернула ожидаемый вывод (adb shell echo)",
+        "изменение видно на устройстве (проверка через скриншот)",
+        "для установки APK проверен пакет и разрешения"
+      ],
+      "risk": "write-local",
+      "on_fail": "если устройство отвалилось — не перезагружать циклами: проверить кабель и режим USB",
+      "notes": "ADB на чужом телефоне — никогда; на своём — по подтверждению, что это именно то устройство"
     }
   ]
 }

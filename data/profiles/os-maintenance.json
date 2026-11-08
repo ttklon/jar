@@ -1,0 +1,60 @@
+{
+  "app": "Обслуживание Windows (sfc / DISM / slmgr / vssadmin / pnputil)",
+  "kind": "system",
+  "exe": ["sfc.exe", "dism.exe", "slmgr.vbs", "vssadmin.exe", "pnputil.exe"],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "sfc": { "by": "api", "value": "sfc /scannow (нужен администратор; 10–40 мин)" },
+    "dism": { "by": "api", "value": "DISM /Online /Cleanup-Image /RestoreHealth (источник — Windows Update или /Source:wim)" },
+    "license": { "by": "api", "value": "slmgr.vbs /dli /dlv (редакция, канал, статус активации); winver" },
+    "restore_points": { "by": "api", "value": "Get-ComputerRestorePoint; vssadmin list shadows; vssadmin delete shadows /for=C: /oldest" },
+    "drivers": { "by": "api", "value": "pnputil /enum-drivers; Get-WindowsDriver -Online; Get-PnpDevice -Status Error | Select FriendlyName,InstanceId" },
+    "events_after": { "by": "api", "value": "после ремонта: Get-WinEvent -FilterHashtable @{LogName='System';Level=1,2;StartTime=(Get-Date).AddHours(-2)}" }
+  },
+  "operations": [
+    {
+      "name": "Проверить целостность системы",
+      "registry": "accounts-updates|проверить|целостность установки Windows",
+      "steps": ["DISM /Online /Cleanup-Image /ScanHealth (быстро: есть ли повреждения)","если есть — DISM /RestoreHealth, затем sfc /scannow","прочитать хвост CBS.log при ошибках"],
+      "verify": ["итог указан явно: «повреждений не обнаружено» или «исправлено N компонентов»","после ремонта повторный ScanHealth чист","система загружается и работает после операции (проверить перезагрузкой)"],
+      "risk": "write-local",
+      "timeouts_ms": 3600000,
+      "on_fail": "если DISM не может скачать источник — указать /Source с ISO и объяснить, а не гонять цикл",
+      "notes": "это лечение, а не профилактика: без симптомов не запускаем — процедура долгая и грузит диск"
+    },
+    {
+      "name": "Проверить версию и статус лицензии",
+      "registry": "accounts-updates|проверить|лицензию",
+      "steps": ["winver → сборка и редакция","slmgr.vbs /dli → канал, статус активации, срок (для подписки)","для OEM проверить привязку к железу"],
+      "verify": ["указаны сборка, редакция, канал и статус активации","для активированной по подписке — дата окончания","не даётся вывод «пиратка/не пиратка» без фактов (только статус активации)"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Разобрать проблемные драйверы",
+      "registry": "accounts-updates|обновить|драйвер",
+      "steps": ["Get-PnpDevice -Status Error|Unknown — список с кодами проблем","pnputil /enum-drivers — вернуть список сторонних драйверов старых версий","обновить через Windows Update или с сайта производителя; откат — pnputil /delete-driver"],
+      "verify": ["для каждого проблемного устройства указан код и человеческое объяснение","после установки статус OK и устройство работает (проверка функцией, а не только статусом)","сохранён старый драйвер для отката"],
+      "risk": "destructive",
+      "on_fail": "если после установки драйвера пропал экран/сеть — откат через безопасный режим, и об этом предупредить заранее",
+      "notes": "на ноутбуках драйверы ставить только с сайта производителя модели: универсальные ломают управление питанием"
+    },
+    {
+      "name": "Удалить старые точки восстановления",
+      "registry": "accounts-updates|удалить|старые точки восстановления",
+      "steps": ["Get-ComputerRestorePoint — список с датами и типами","показать, сколько места занимают теневые копии (vssadmin list shadowstorage)","удалить все, кроме последней: vssadmin delete shadows /for=C: /oldest (по одной)"],
+      "verify": ["осталась минимум одна свежая точка","занятое место под теневые копии уменьшилось (числа до/после)","точка восстановления всё ещё создаётся (Checkpoint-Computer после проверки)"],
+      "risk": "destructive",
+      "on_fail": "не удалять все точки до нуля: без точки восстановления откат системы невозможен",
+      "notes": "часто это несколько гигабайт — но единственный бесплатный откат системы"
+    },
+    {
+      "name": "Проверить, что после ремонта не появилось новых ошибок",
+      "registry": "monitoring-triage|наблюдать|за системой",
+      "steps": ["снять события Level 1–2 за 2 часа после операции","сравнить с периодом до: новые источники/ID","проверить загрузку CPU/диска в простое"],
+      "verify": ["список новых критичных событий (или «нет новых»)","нагрузка в простое вернулась к прежним значениям","если появились новые ошибки — они привязаны к выполненной операции"],
+      "risk": "read"
+    }
+  ]
+}

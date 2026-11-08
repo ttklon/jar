@@ -1,0 +1,77 @@
+{
+  "app": "Сеть Windows (netsh / Test-NetConnection / firewall / hosts)",
+  "kind": "tool",
+  "exe": ["netsh.exe", "ping.exe", "tracert.exe", "nslookup.exe"],
+  "ui_stack": "win32",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "connectivity": { "by": "api", "value": "Test-NetConnection <host> -Port <p> -InformationLevel Detailed; Test-Connection <host> -Count 10" },
+    "dns": { "by": "api", "value": "Get-DnsClientServerAddress; Set-DnsClientServerAddress -InterfaceAlias <if> -ServerAddresses <ip>; Resolve-DnsName" },
+    "firewall": { "by": "api", "value": "New-NetFirewallRule -DisplayName <n> -Direction Inbound -Protocol TCP -LocalPort <p> -Action Allow -Profile Private" },
+    "wifi": { "by": "api", "value": "netsh wlan show profiles; netsh wlan connect name=<ssid> interface=<if>" },
+    "speed": { "by": "api", "value": "speedtest.exe (Ookla CLI) --format=json, либо замер curl по 100 МБ файлу" },
+    "tls": { "by": "api", "value": "проверка сертификата: openssl s_client -connect host:443 -servername host / .NET HttpClient с проверкой цепочки" },
+    "hosts": { "by": "api", "value": "%SystemRoot%\\System32\\drivers\\etc\\hosts (бэкап до правки, затем ipconfig /flushdns)" }
+  },
+  "operations": [
+    {
+      "name": "Проверить подключение и найти, где рвётся",
+      "registry": "network|проверить|подключение",
+      "steps": ["Get-NetAdapter — состояние и скорость линка","Test-NetConnection <host> -Port <p> — TCP-доступ","tracert <host> — где начинаются потери","Resolve-DnsName <host> — резолвится ли имя"],
+      "verify": ["указано, что именно работает/не работает: линк, IP, DNS, TCP-порт, приложение","есть числа: ping ms, потери %, скорость линка","не даётся вывод «интернета нет» без разделения уровней"],
+      "risk": "read",
+      "notes": "80 % «нет интернета» — это DNS; поэтому резолв проверяем отдельным шагом, а не в конце"
+    },
+    {
+      "name": "Настроить DNS",
+      "registry": "network|настроить|DNS",
+      "steps": ["записать текущие DNS по каждому интерфейсу","Set-DnsClientServerAddress на нужный интерфейс","ipconfig /flushdns","проверить резолв и скорость ответа"],
+      "verify": ["Get-DnsClientServerAddress показывает новые адреса","резолв работает (Resolve-DnsName 3 доменов)","время ответа измерено до/после","старые значения сохранены для отката"],
+      "risk": "destructive",
+      "on_fail": "если после смены DNS ничего не резолвится — вернуть прежние адреса немедленно (и объяснить, что делать без сети)",
+      "notes": "DoH в Windows 11 включается отдельно: простой смены адреса на 1.1.1.1 недостаточно"
+    },
+    {
+      "name": "Открыть порт в брандмауэре",
+      "registry": "network|открыть|порт",
+      "steps": ["проверить, не слушается ли порт уже кем-то (Get-NetTCPConnection)","создать правило только для нужного профиля сети (Private, а не Any)","ограничить RemoteAddress локальной подсетью, если возможно","проверить доступность извне/из LAN"],
+      "verify": ["правило создано с профилем Private/Domain и видно в Get-NetFirewallRule","порт недоступен из публичной сети (проверка с другой сети/через внешний сервис)","если правило больше не нужно — оно перечислено в отчёте как временное"],
+      "risk": "destructive",
+      "on_fail": "открывать порт в профиле Any — типичная ошибка, за которую платят шифровальщики: не делаем даже «на минуточку»",
+      "notes": "правило всегда с явным DisplayName вида ZShelper-<сервис>-<дата>, чтобы его можно было найти и удалить"
+    },
+    {
+      "name": "Подключиться к Wi-Fi",
+      "registry": "network|подключиться|к Wi-Fi",
+      "steps": ["netsh wlan show networks — найти SSID","если профиль есть: netsh wlan connect name=<ssid>","если нет: добавить профиль с паролем из хранилища (не из чата)"],
+      "verify": ["Get-NetConnectionProfile показывает подключение к нужной сети","интернет реально работает (не только «подключено»)","пароль не попал в историю команд (передан через параметр/файл с правами)"],
+      "risk": "write-local",
+      "on_fail": "если сеть открытая — предупредить, что трафик видят все, и не подключаться автоматически в публичных местах"
+    },
+    {
+      "name": "Показать реальную скорость интернета",
+      "registry": "network|показать|скорость",
+      "steps": ["speedtest CLI в JSON (или замер curl по крупному файлу)","снять down/up/ping/jitter","сравнить с тарифом провайдера"],
+      "verify": ["получены числа: Мбит/с скачивание, отдача, ping, jitter","указан сервер замера и время","если результат ниже тарифа на 30 % — предложена проверка по кабелю/5 ГГц"],
+      "risk": "read",
+      "notes": "замер по Wi-Fi 2.4 ГГц почти всегда занижает — это не «медленный интернет», а диапазон"
+    },
+    {
+      "name": "Проверить сертификат сайта",
+      "registry": "network|проверить|сертификат/SSL",
+      "steps": ["получить цепочку: openssl s_client -connect <host>:443 -servername <host>","проверить сроки и издателя, совпадение домена","проверить поддерживаемые версии TLS"],
+      "verify": ["указаны дата истечения, издатель и subject","домен совпадает (нет ошибки несовпадения)","нет поддержки TLS 1.0/1.1 (если есть — это предупреждение)"],
+      "risk": "read"
+    },
+    {
+      "name": "Прописать домен в hosts",
+      "registry": "network|настроить|файл hosts",
+      "steps": ["бэкап файла hosts с датой","добавить строку <ip> <домен> с комментарием и датой","ipconfig /flushdns","проверить пинг и резолв"],
+      "verify": ["Resolve-DnsName <домен> возвращает указанный IP","бэкап существует, откат = копирование назад","в файле нет дублирующихся записей для того же домена"],
+      "risk": "destructive",
+      "on_fail": "если домен перестал открываться — вернуть бэкап, а не «подождать»",
+      "notes": "hosts не работает для HTTPS-сайтов с HSTS-пиннингом и часто игнорируется VPN-клиентами"
+    }
+  ]
+}
