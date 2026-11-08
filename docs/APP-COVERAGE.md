@@ -3,14 +3,14 @@
 Данные — [`data/app_targets.psv`](../data/app_targets.psv), файл генерируется
 `python3 tools/app_targets.py`, руками не править.
 
-**Приложений в каталоге: 122** · категорий: **17** · профиль найден по процессу: **66** · без профиля (визуальный агент): **56**
+**Приложений в каталоге: 122** · категорий: **17** · профиль найден по процессу: **70** · без профиля (визуальный агент): **52**
 
 ## Три уровня покрытия (почему не «профиль на каждую программу руками»)
 
 | Tier | Что это | Сколько | Как появляется |
 | --- | --- | --- | --- |
-| **A** | ручной профиль: якоря, шаги, проверки | 54 | пишется человеком/агентом по UIA-дампу |
-| **B** | авто-профиль из UIA + подтверждение | 35 | `tools/uia_probe` → кандидаты → подтверждение |
+| **A** | ручной профиль: якоря, шаги, проверки | 57 | пишется человеком/агентом по UIA-дампу |
+| **B** | авто-профиль из UIA + подтверждение | 32 | `tools/uia_probe` → кандидаты → подтверждение |
 | **C** | только визуальный агент (скриншот→OCR/VLM→клик) | 33 | профиля нет, работает универсальный цикл |
 
 Подробно — [`PROFILE-STRATEGY.md`](PROFILE-STRATEGY.md). Правило: приложение без профиля
@@ -98,7 +98,7 @@
 | Проводник | `explorer.exe` | uia | A | P0 | ✅ | профиль готов |
 | Службы | `mmc.exe` | uia+cli | B | P0 | ✅ | sc.exe/PowerShell надёжнее GUI |
 | Ножницы/Snip&Sketch | `SnippingTool.exe` | cli+uia | B | P1 | — | screenshot через Win32 проще |
-| Панель управления | `control.exe` | uia | B | P1 | — | часть настроек через CLI/реестр |
+| Панель управления | `control.exe` | uia | B | P1 | ✅ | часть настроек через CLI/реестр |
 | Параметры Windows | `SystemSettings.exe` | uia | A | P1 | ✅ | частые экраны: обновления, звук, дисплей |
 | Просмотр событий | `mmc.exe` | cli | A | P1 | ✅ | wevtutil/Get-WinEvent |
 | Диспетчер устройств | `mmc.exe` | uia+cli | B | P2 | ✅ | pnputil |
@@ -157,7 +157,7 @@
 | 7-Zip | `7zFM.exe` | cli | A | P0 | ✅ | 7z.exe |
 | CrystalDiskInfo | `crystaldiskinfo.exe` | cli | B | P1 | — | SMART через smartctl |
 | Everything | `Everything.exe` | cli | A | P1 | ✅ | ES CLI, индексация по имени |
-| HWiNFO | `HWiNFO64.exe` | api | B | P1 | — | shared memory/датчики |
+| HWiNFO | `HWiNFO64.exe` | api | A | P1 | ✅ | shared memory/датчики |
 | PowerToys | `PowerToys.exe` | uia | B | P2 | — | часть функций через API |
 | WinRAR | `WinRAR.exe` | cli | B | P2 | — | rar.exe |
 | WizTree | `WizTree.exe` | cli | B | P2 | — | экспорт CSV |
@@ -169,7 +169,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | Telegram Desktop | `Telegram.exe` | api+uia | A | P0 | ✅ | профиль готов |
 | Discord | `Discord.exe` | api | A | P1 | ✅ | профиль готов (Bot API) |
-| WhatsApp Desktop | `WhatsApp.exe` | uia | B | P1 | — | web-клиент в оболочке |
+| WhatsApp Desktop | `WhatsApp.exe` | uia | A | P1 | ✅ | web-клиент в оболочке |
 | Slack | `slack.exe` | api+uia | A | P2 | ✅ | Slack API |
 | Discord Canary | `DiscordCanary.exe` | api | C | P3 | — |  |
 | Microsoft Teams | `ms-teams.exe` | uia | C | P3 | — | Graph API лучше |
@@ -202,7 +202,7 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | Google Chrome | `chrome.exe` | web | A | P0 | ✅ | профиль готов |
 | Microsoft Edge | `msedge.exe` | web | A | P0 | ✅ | тот же профиль Chromium |
-| Firefox | `firefox.exe` | web | B | P1 | — | отдельный профиль (Marionette) |
+| Firefox | `firefox.exe` | web | A | P1 | ✅ | отдельный профиль (Marionette) |
 | Яндекс Браузер | `browser.exe` | web | B | P2 | ✅ |  |
 
 ### Дизайн (4)

@@ -18,17 +18,17 @@ winrar|WinRAR|Утилиты|WinRAR.exe|cli|B|P2|rar.exe
 everything|Everything|Утилиты|Everything.exe|cli|A|P1|ES CLI, индексация по имени
 wiztree|WizTree|Утилиты|WizTree.exe|cli|B|P2|экспорт CSV
 cpu-z|CPU-Z|Утилиты|cpuz.exe|uia|C|P3|лучше WMI
-hwinfo|HWiNFO|Утилиты|HWiNFO64.exe|api|B|P1|shared memory/датчики
+hwinfo|HWiNFO|Утилиты|HWiNFO64.exe|api|A|P1|shared memory/датчики
 crystaldiskinfo|CrystalDiskInfo|Утилиты|crystaldiskinfo.exe|cli|B|P1|SMART через smartctl
 powertoys|PowerToys|Утилиты|PowerToys.exe|uia|B|P2|часть функций через API
 chrome|Google Chrome|Браузер|chrome.exe|web|A|P0|профиль готов
 edge|Microsoft Edge|Браузер|msedge.exe|web|A|P0|тот же профиль Chromium
-firefox|Firefox|Браузер|firefox.exe|web|B|P1|отдельный профиль (Marionette)
+firefox|Firefox|Браузер|firefox.exe|web|A|P1|отдельный профиль (Marionette)
 yandex|Яндекс Браузер|Браузер|browser.exe|web|B|P2|
 outlook|Microsoft Outlook|Почта|OUTLOOK.EXE|api+uia|A|P1|профиль готов (Graph)
 thunderbird|Mozilla Thunderbird|Почта|thunderbird.exe|uia|B|P2|IMAP/SMTP напрямую лучше
 telegram|Telegram Desktop|Мессенджер|Telegram.exe|api+uia|A|P0|профиль готов
-whatsapp|WhatsApp Desktop|Мессенджер|WhatsApp.exe|uia|B|P1|web-клиент в оболочке
+whatsapp|WhatsApp Desktop|Мессенджер|WhatsApp.exe|uia|A|P1|web-клиент в оболочке
 discord|Discord|Мессенджер|Discord.exe|api|A|P1|профиль готов (Bot API)
 slack|Slack|Мессенджер|slack.exe|api+uia|A|P2|Slack API
 teams|Microsoft Teams|Мессенджер|ms-teams.exe|uia|C|P3|Graph API лучше

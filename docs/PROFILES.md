@@ -6,7 +6,7 @@
 
 Файл генерируется `python3 tools/profiles.py`; руками не править.
 
-**Профилей: 58** · операций: **344** · проблем: **0**
+**Профилей: 63** · операций: **378** · проблем: **0**
 
 Правила (проверяются автоматически, ошибка = ненулевой код возврата):
 
@@ -22,7 +22,7 @@
 | 7-Zip | `app` | `7zFM.exe, 7z.exe, 7zG.exe` | win32 | 24.x (2026-11) | 2026-11-08 | 2 | 4 | `7zip.json` |
 | Ableton Live 12 | `app` | `Ableton Live 12.exe, Ableton Live 12 Beta.exe` | win32 | 12.x (2026-11) | 2026-11-08 | 7 | 7 | `ableton.json` |
 | Adobe Acrobat | `app` | `Acrobat.exe, AcroRd32.exe, AcrobatDC.exe` | uia | 2025.x (2026-11) | 2026-11-08 | 5 | 6 | `acrobat.json` |
-| Adobe Photoshop | `app` | `Photoshop.exe` | win32 | 2026 (v27) | 2026-11-08 | 8 | 8 | `photoshop.json` |
+| Adobe Photoshop | `app` | `Photoshop.exe` | win32 | 2026 (v27) | 2026-11-08 | 8 | 10 | `photoshop.json` |
 | Adobe Premiere Pro | `app` | `Adobe Premiere Pro.exe` | win32 | 2026 (v26) | 2026-11-08 | 8 | 7 | `premiere.json` |
 | Audacity | `app` | `audacity.exe` | win32 | 3.7.x (2026-11) | 2026-11-08 | 6 | 6 | `audacity.json` |
 | Bitwig Studio | `app` | `Bitwig Studio.exe` | win32 | 5.x (2026-11) | 2026-11-08 | 5 | 5 | `bitwig.json` |
@@ -35,6 +35,7 @@
 | Discord (desktop) | `app` | `Discord.exe` | electron | 0.0.9x (2026-11) | 2026-11-08 | 5 | 6 | `discord.json` |
 | Docker Desktop | `app` | `Docker Desktop.exe, com.docker.backend.exe` | electron | 4.3x (2026-11) | 2026-11-08 | 5 | 7 | `docker.json` |
 | Everything | `app` | `Everything.exe` | win32 | 1.5.x (2026-11) | 2026-11-08 | 4 | 5 | `everything.json` |
+| FFmpeg (медиа-конвейер) | `tool` | `ffmpeg.exe, ffprobe.exe, ffplay.exe` | win32 | 7.1 (2026-11) | 2026-11-08 | 6 | 6 | `ffmpeg.json` |
 | FL Studio | `app` | `FL64.exe, FL.exe` | win32 | FL Studio 2024/2025 (2026-11) | 2026-11-08 | 8 | 6 | `flstudio.json` |
 | Figma (desktop / web) | `app` | `Figma.exe, chrome.exe` | web | 2026-11 | 2026-11-08 | 6 | 6 | `figma.json` |
 | FileZilla | `app` | `filezilla.exe` | win32 | 3.6x (2026-11) | 2026-11-08 | 5 | 4 | `filezilla.json` |
@@ -42,11 +43,12 @@
 | HandBrake | `app` | `HandBrake.exe, HandBrakeCLI.exe` | win32 | 1.9.x (2026-11) | 2026-11-08 | 2 | 4 | `handbrake.json` |
 | JetBrains IDE (IDEA / PyCharm / WebStorm) | `app` | `idea64.exe, pycharm64.exe, webstorm64.exe, studio64.exe` | qt | 2025.3 (2026-11) | 2026-11-08 | 7 | 5 | `jetbrains.json` |
 | LibreOffice | `tool` | `soffice.exe, soffice.com, soffice.bin` | win32 | 25.x (2026-11) | 2026-11-08 | 5 | 6 | `libreoffice.json` |
-| Microsoft Excel | `app` | `EXCEL.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 4 | 8 | `excel.json` |
+| Microsoft Excel | `app` | `EXCEL.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 4 | 10 | `excel.json` |
 | Microsoft Outlook (классический и новый) | `app` | `OUTLOOK.EXE, olk.exe` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 8 | 7 | `outlook.json` |
 | Microsoft PowerPoint | `app` | `POWERPNT.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 6 | 6 | `powerpoint.json` |
 | Microsoft Visual Studio | `app` | `devenv.exe` | uia | 17.x (2022, 2026-11) | 2026-11-08 | 7 | 5 | `visualstudio.json` |
 | Microsoft Word | `app` | `WINWORD.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 7 | 8 | `word.json` |
+| Mozilla Firefox | `app` | `firefox.exe, geckodriver.exe` | web | 14x (2026-11) | 2026-11-08 | 6 | 6 | `firefox.json` |
 | Notion | `app` | `Notion.exe` | electron | 4.x (2026-11) | 2026-11-08 | 5 | 5 | `notion.json` |
 | OBS Studio | `app` | `obs64.exe` | qt | 31.x (2026-11) | 2026-11-08 | 7 | 7 | `obs.json` |
 | Obsidian | `app` | `Obsidian.exe` | electron | 1.9.x (2026-11) | 2026-11-08 | 5 | 5 | `obsidian.json` |
@@ -54,10 +56,11 @@
 | PowerShell 7 / Windows PowerShell | `app` | `pwsh.exe, powershell.exe` | win32 | 7.5 / 5.1 (2026-11) | 2026-11-08 | 3 | 5 | `powershell.json` |
 | REAPER | `app` | `reaper.exe` | win32 | 7.x (2026-11) | 2026-11-08 | 4 | 9 | `reaper.json` |
 | Slack | `app` | `slack.exe` | electron | 4.4x (2026-11) | 2026-11-08 | 5 | 5 | `slack.json` |
-| Steam | `app` | `steam.exe, steamwebhelper.exe` | electron | 2026-11 | 2026-11-08 | 6 | 6 | `steam.json` |
-| Telegram Desktop | `app` | `Telegram.exe` | qt | 5.x (2026-11) | 2026-11-08 | 5 | 6 | `telegram.json` |
+| Steam | `app` | `steam.exe, steamwebhelper.exe` | electron | 2026-11 | 2026-11-08 | 6 | 9 | `steam.json` |
+| Telegram Desktop | `app` | `Telegram.exe` | qt | 5.x (2026-11) | 2026-11-08 | 5 | 7 | `telegram.json` |
 | VLC media player | `app` | `vlc.exe` | win32 | 3.0.x (2026-11) | 2026-11-08 | 4 | 5 | `vlc.json` |
 | Visual Studio Code | `app` | `Code.exe` | electron | 1.9x (2026-11) | 2026-11-08 | 7 | 7 | `vscode.json` |
+| WhatsApp Desktop | `app` | `WhatsApp.exe` | electron | 2.24xx (2026-11) | 2026-11-08 | 6 | 4 | `whatsapp.json` |
 | WinSCP | `app` | `WinSCP.exe, winscp.com` | win32 | 6.x (2026-11) | 2026-11-08 | 4 | 4 | `winscp.json` |
 | Windows Terminal | `app` | `WindowsTerminal.exe, wt.exe` | uia | 1.2x (2026-11) | 2026-11-08 | 6 | 5 | `wt.json` |
 | Wireshark / tshark | `tool` | `Wireshark.exe, tshark.exe, dumpcap.exe` | qt | 4.4.x (2026-11) | 2026-11-08 | 6 | 5 | `tshark.json` |
@@ -70,43 +73,49 @@
 | Диспетчер задач | `app` | `Taskmgr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `taskmgr.json` |
 | Календарь и задачи | `system` | `OUTLOOK.EXE, olk.exe, schtasks.exe, Calendar.exe` | uia | Outlook 365 + Windows 11 (2026-11) | 2026-11-08 | 5 | 6 | `calendar-tasks.json` |
 | Командная строка (cmd.exe) и пакетные файлы | `app` | `cmd.exe` | win32 | Windows 10/11 (2026-11) | 2026-11-08 | 2 | 4 | `cmd.json` |
+| Мониторинг железа (HWiNFO / smartctl / diskspd) | `tool` | `HWiNFO64.exe, LibreHardwareMonitor.exe, smartctl.exe, diskspd.exe` | win32 | HWiNFO 8.x, LibreHardwareMonitor 0.9, smartmontools 7.4 (2026-11) | 2026-11-08 | 6 | 6 | `hardware-monitor.json` |
 | Музыкальная библиотека (beets / fpcalc / rsgain) | `tool` | `beet.exe, fpcalc.exe, rsgain.exe, loudgain.exe, ffmpeg.exe` | win32 | beets 2.x, chromaprint 1.5, rsgain 3.x (2026-11) | 2026-11-08 | 5 | 6 | `music-library.json` |
+| Панель управления и установка программ | `system` | `control.exe, appwiz.cpl, winget.exe, msiexec.exe` | uia | Windows 11 24H2 + winget 1.9 (2026-11) | 2026-11-08 | 5 | 4 | `control-panel.json` |
 | Параметры Windows | `app` | `SystemSettings.exe, ApplicationFrameHost.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `windows-settings.json` |
 | Проводник Windows | `app` | `explorer.exe` | uia | Windows 11 24H2 / Windows 10 22H2 | 2026-11-08 | 6 | 7 | `explorer.json` |
 | Просмотр событий | `app` | `mmc.exe, eventvwr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `eventvwr.json` |
 | Умный дом (Home Assistant / MQTT / Matter) | `system` | `` | web | HA 2026.1 + Matter 1.3 (2026-11) | 2026-11-08 | 6 | 7 | `home-assistant.json` |
 | Устройства Windows (USB / Bluetooth / печать) | `system` | `pnputil.exe, printui.exe, DevicePairingWizard.exe, SystemSettings.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 6 | `devices.json` |
 
-По типу: `app` — 47 · `tool` — 7 · `system` — 4. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
+По типу: `app` — 49 · `tool` — 9 · `system` — 5. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
 
 ## Риск операций
 
-- `write-local` — 195
-- `read` — 106
-- `external` — 23
-- `destructive` — 16
+- `write-local` — 205
+- `read` — 120
+- `external` — 27
+- `destructive` — 22
 - `identity` — 3
 - `money` — 1
 
 ## Покрытие доменов реестра
 
-- `video` — 35
+- `video` — 39
 - `music-production` — 26
 - `dev-code` — 26
 - `files` — 23
+- `chat-social` — 22
 - `text-docs` — 18
-- `chat-social` — 17
+- `web` — 14
 - `virtualization-remote` — 14
 - `learning-research` — 13
+- `audio` — 11
 - `processes-services` — 11
 - `slides-pdf-print` — 10
-- `audio` — 9
+- `apps-windows` — 10
+- `creative-3d` — 9
+- `images` — 9
 - `apps-generic` — 8
-- `creative-3d` — 8
-- `web` — 8
-- `images` — 8
+- `hardware-diag` — 8
+- `games` — 8
 - `music` — 7
-- `apps-windows` — 7
+- `storage-backup` — 7
+- `sheets-data` — 7
 - `smart-home` — 7
 - `input` — 7
 - `email` — 7
@@ -116,9 +125,6 @@
 - `databases` — 6
 - `devices` — 6
 - `network` — 6
-- `games` — 6
-- `storage-backup` — 6
-- `sheets-data` — 5
 - `automation` — 5
 - `security-access` — 5
 - `video-production` — 3
@@ -126,7 +132,6 @@
 - `engineering-3d` — 1
 - `distribution` — 1
 - `monitoring-triage` — 1
-- `hardware-diag` — 1
 - `accessibility` — 1
 - `accounts-updates` — 1
 - `display-sound` — 1

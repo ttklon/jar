@@ -1,0 +1,64 @@
+{
+  "app": "Мониторинг железа (HWiNFO / smartctl / diskspd)",
+  "kind": "tool",
+  "exe": ["HWiNFO64.exe", "LibreHardwareMonitor.exe", "smartctl.exe", "diskspd.exe"],
+  "ui_stack": "win32",
+  "version_seen": "HWiNFO 8.x, LibreHardwareMonitor 0.9, smartmontools 7.4 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cim_hw": { "by": "api", "value": "Get-CimInstance Win32_Processor, Win32_VideoController, Win32_PhysicalMemory, Win32_DiskDrive, Win32_BaseBoard" },
+    "hwmon_wmi": { "by": "api", "value": "LibreHardwareMonitor: namespace root\\LibreHardwareMonitor, класс Sensor (SensorType: Temperature/Load/Power)" },
+    "hwinfo_csv": { "by": "api", "value": "HWiNFO64.exe -r <report.csv> (отчёт по датчикам без GUI); shared memory — для реального времени" },
+    "disk_speed": { "by": "api", "value": "diskspd.exe -c1G -d30 -w50 -b1M -o8 -t4 -Sh -L test.dat" },
+    "power_report": { "by": "api", "value": "powercfg /energy /duration 60; powercfg /batteryreport /output <html>" },
+    "memtest": { "by": "api", "value": "mdsched.exe (Windows Memory Diagnostic — требует перезагрузки); альтернатива: TestLimit/MemTest через HCI" }
+  },
+  "operations": [
+    {
+      "name": "Показать характеристики железа",
+      "registry": "hardware-diag|показать|характеристики железа",
+      "steps": ["cli:Get-CimInstance Win32_Processor, Win32_VideoController, Win32_PhysicalMemory, Win32_DiskDrive, Win32_BaseBoard", "дополнить: версия BIOS, тип накопителя (SSD/HDD/NVMe)", "сформировать читаемую сводку"],
+      "verify": ["перечислены CPU (ядра/потоки), RAM (объём и число планок), GPU (модель и VRAM)", "указаны модели дисков с типом и объёмом", "нет пустых полей: если WMI не отдал — помечено"],
+      "risk": "read"
+    },
+    {
+      "name": "Следить за температурой и нагрузкой",
+      "registry": "hardware-diag|следить|за температурой 24-7",
+      "steps": ["подключиться к WMI LibreHardwareMonitor (или HWiNFO shared memory)", "опрашивать раз в 5–10 с: CPU/GPU temp, частота, загрузка, обороты вентиляторов", "алерт при temp > 85 °C CPU / 83 °C GPU или троттлинге"],
+      "verify": ["значения обновляются (не застыли на одном числе)", "порог алерта проверен тестовым значением", "при недоступности датчика сказано «датчика нет», а не показан 0 °C"],
+      "risk": "read",
+      "notes": "опрошировать чаще 1 раза в секунду бессмысленно и заметно по CPU; 5 с достаточно для троттлинга"
+    },
+    {
+      "name": "Замерить скорость диска",
+      "registry": "hardware-diag|замерить|скорость диска",
+      "steps": ["проверить свободное место ≥ 2× размера теста (по умолчанию 1 ГБ)", "diskspd с последовательным и случайным шаблоном", "удалить тестовый файл после замера"],
+      "verify": ["получены MB/s для seq read/write и IOPS для random 4K", "значения сопоставлены с паспортными для модели и интерфейса (NVMe vs SATA)", "тестовый файл удалён (место вернулось)"],
+      "risk": "read",
+      "notes": "на SSD замер пишет гигабайты — предупредить, если диск почти полон или это дешёвый QLC"
+    },
+    {
+      "name": "Оценить энергопотребление и батарею",
+      "registry": "hardware-diag|оценить|энергопотребление",
+      "steps": ["powercfg /energy /duration 60 — отчёт о проблемах энергосбережения", "powercfg /batteryreport — ёмкость проектная и фактическая", "разобрать топ-5 предупреждений"],
+      "verify": ["получены: расчётный расход, ёмкость батареи (design vs full charge), износ в %", "перечислены конкретные причины повышенного расхода", "отчёт сохранён файлом (HTML), вывод — числами"],
+      "risk": "read"
+    },
+    {
+      "name": "Проверить память на ошибки",
+      "registry": "hardware-diag|проверить|память на ошибки",
+      "steps": ["предупредить: тест требует перезагрузки и времени", "запустить Windows Memory Diagnostic (mdsched) по подтверждению", "после перезагрузки прочитать результат из журнала событий (Event ID 1101/1201 MemoryDiagnostics-Results)"],
+      "verify": ["запись в журнале MemoryDiagnostics-Results есть", "указано: ошибок нет или число и адреса ошибок", "пользователь предупреждён, что ПК перезагрузится"],
+      "risk": "destructive",
+      "on_fail": "если тест не запускался — не выдавать «память в порядке» по SMART-логике: это разные вещи",
+      "notes": "перезагрузка прерывает работу пользователя — только по явной команде"
+    },
+    {
+      "name": "Собрать отчёт о системе",
+      "registry": "hardware-diag|собрать|отчёт о системе",
+      "steps": ["Get-ComputerInfo + CIM по компонентам + версия Windows и сборка", "свободное место на всех дисках, состояние SMART", "сформировать markdown-отчёт с таблицами"],
+      "verify": ["отчёт содержит железо, ОС, диски, память, батарею", "все числа из источника (не «примерно 16 ГБ»)", "отчёт можно отдать человеку: нет внутренних путей и секретов"],
+      "risk": "write-local"
+    }
+  ]
+}

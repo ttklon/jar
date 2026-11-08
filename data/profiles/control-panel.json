@@ -1,0 +1,51 @@
+{
+  "app": "Панель управления и установка программ",
+  "kind": "system",
+  "exe": ["control.exe", "appwiz.cpl", "winget.exe", "msiexec.exe"],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 + winget 1.9 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "applets": { "by": "api", "value": "control.exe appwiz.cpl (программы), sysdm.cpl (система), desk.cpl (экран), ncpa.cpl (сеть), powercfg.cpl (питание), timedate.cpl" },
+    "registry_list": { "by": "api", "value": "HKLM/HKCU ...\\Uninstall\\*: DisplayName, DisplayVersion, InstallLocation, UninstallString, EstimatedSize" },
+    "winget": { "by": "api", "value": "winget list --accept-source-agreements; winget install --id <Id> --silent; winget upgrade --all" },
+    "restore_point": { "by": "api", "value": "Checkpoint-Computer -Description <label> -RestorePointType MODIFY_SETTINGS (нужен включённый Защитник системы)" },
+    "msiexec": { "by": "api", "value": "msiexec /x {GUID} /qn /norestart (тихое удаление MSI)" }
+  },
+  "operations": [
+    {
+      "name": "Показать установленные программы",
+      "registry": "apps-windows|показать|установленные программы",
+      "steps": ["прочитать ключи Uninstall в HKLM/HKCU (32 и 64 бит)", "сопоставить с winget list для источников обновлений", "сортировать по размеру и дате установки"],
+      "verify": ["список содержит имя, версию, издателя, размер", "найдены программы без UninstallString (портативные) — помечены отдельно", "для каждой указано, есть ли обновление через winget"],
+      "risk": "read",
+      "notes": "реестр точнее «Параметров»: в них часть портативных и старых программ не видна"
+    },
+    {
+      "name": "Установить программу",
+      "registry": "apps-windows|установить|программу",
+      "steps": ["найти пакет: winget search <name>", "показать пользователю издателя, версию и лицензию", "winget install --id <Id> --silent --accept-package-agreements", "проверить появление в списке и путь установки"],
+      "verify": ["winget вернул код 0", "программа есть в winget list с ожидаемой версией", "исполняемый файл существует и запускается (--version)"],
+      "risk": "destructive",
+      "on_fail": "если источник не winget-репозиторий — не запускать скачанный exe молча: показать домен и хэш файла",
+      "notes": "установка меняет систему: по умолчанию спрашиваем, даже если пакет «безобидный»"
+    },
+    {
+      "name": "Удалить программу",
+      "registry": "apps-windows|удалить|программу",
+      "steps": ["найти точный UninstallString и QuietUninstallString", "показать, что будет удалено (имя, версия, размер, путь данных)", "выполнить тихое удаление (msiexec /x или uninstaller с /S)", "проверить, что записи в реестре и папки не остались"],
+      "verify": ["программа исчезла из списка (реестр + winget list)", "папка установки удалена или пуста", "остаточные службы/автозапуск удалены (проверка sc query и Run-ключей)"],
+      "risk": "destructive",
+      "on_fail": "если удаление требует перезагрузки — не перезагружать без подтверждения; предупредить о незавершённых приложениях",
+      "notes": "перед удалением ПО, которое может держать данные (1С, Outlook), — проверить наличие бэкапа профиля"
+    },
+    {
+      "name": "Создать точку восстановления перед изменениями",
+      "registry": "storage-backup|создать|точку восстановления",
+      "steps": ["проверить, включена ли Защита системы (vssadmin list shadowstorage)", "Checkpoint-Computer -Description \"перед <действием>\"", "проверить список точек"],
+      "verify": ["Get-ComputerRestorePoint показывает свежую точку с описанием", "для тома выделено место под теневые копии", "восстановление реально возможно (не отключено групповой политикой)"],
+      "risk": "destructive",
+      "notes": "точка восстановления не заменяет бэкап данных: она про систему, а не про файлы"
+    }
+  ]
+}

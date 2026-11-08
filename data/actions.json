@@ -12757,5 +12757,341 @@
   "human_code": "c",
   "status": "v1",
   "notes": ""
+ },
+ {
+  "id": "games-795",
+  "domain": "games",
+  "verb": "установить",
+  "object": "игру из библиотеки",
+  "example": "поставь эту игру",
+  "implementation": [
+   "Steam CLI/API + загрузка"
+  ],
+  "risk": "destructive",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "место на диске проверить до"
+ },
+ {
+  "id": "games-796",
+  "domain": "games",
+  "verb": "перенести",
+  "object": "библиотеку на другой диск",
+  "example": "перенеси игры на диск D",
+  "implementation": [
+   "Steam library folders"
+  ],
+  "risk": "destructive",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "свободное место и целостность после"
+ },
+ {
+  "id": "sheets-data-797",
+  "domain": "sheets-data",
+  "verb": "сравнить",
+  "object": "две таблицы",
+  "example": "сравни эти два прайса",
+  "implementation": [
+   "pandas merge/diff"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "text-docs-798",
+  "domain": "text-docs",
+  "verb": "проверить",
+  "object": "соответствие методичке",
+  "example": "проверь по требованиям кафедры",
+  "implementation": [
+   "чеклист + правила"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "не может",
+  "human_code": "n",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "files-799",
+  "domain": "files",
+  "verb": "открыть",
+  "object": "архив без распаковки",
+  "example": "покажи, что внутри архива",
+  "implementation": [
+   "7z l / libarchive"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "files-800",
+  "domain": "files",
+  "verb": "проверить",
+  "object": "дубликаты по хэшу",
+  "example": "найди одинаковые файлы",
+  "implementation": [
+   "SHA-256 группировка"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "audio-801",
+  "domain": "audio",
+  "verb": "замерить",
+  "object": "LUFS и true peak",
+  "example": "сколько люфсов в треке",
+  "implementation": [
+   "ffmpeg ebur128=peak=true"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "video-802",
+  "domain": "video",
+  "verb": "замерить",
+  "object": "качество сжатия (SSIM)",
+  "example": "насколько хуже стало после сжатия",
+  "implementation": [
+   "ffmpeg ssim"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "databases-803",
+  "domain": "databases",
+  "verb": "создать",
+  "object": "индекс",
+  "example": "добавь индекс на эту колонку",
+  "implementation": [
+   "CREATE INDEX CONCURRENTLY"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "на проде только CONCURRENTLY"
+ },
+ {
+  "id": "network-804",
+  "domain": "network",
+  "verb": "настроить",
+  "object": "файл hosts",
+  "example": "пропиши этот домен локально",
+  "implementation": [
+   "C:\\Windows\\System32\\drivers\\etc\\hosts"
+  ],
+  "risk": "destructive",
+  "tier": "T2",
+  "human": "сложно",
+  "human_code": "h",
+  "status": "v2",
+  "notes": "бэкап файла до правки"
+ },
+ {
+  "id": "apps-windows-805",
+  "domain": "apps-windows",
+  "verb": "показать",
+  "object": "установленные программы",
+  "example": "что у меня установлено",
+  "implementation": [
+   "реестр Uninstall + winget list"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "с размером занимаемого места"
+ },
+ {
+  "id": "images-806",
+  "domain": "images",
+  "verb": "извлечь",
+  "object": "таблицу из скриншота",
+  "example": "вытащи таблицу с этой картинки",
+  "implementation": [
+   "OCR + структура таблиц"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "images-807",
+  "domain": "images",
+  "verb": "распознать",
+  "object": "рукописный текст",
+  "example": "прочитай, что написано от руки",
+  "implementation": [
+   "OCR рукописи + VLM-сверка"
+  ],
+  "risk": "read",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "оценка уверенности обязательна"
+ },
+ {
+  "id": "video-808",
+  "domain": "video",
+  "verb": "получить",
+  "object": "встроенные субтитры",
+  "example": "вытащи субтитры из этого файла",
+  "implementation": [
+   "ffmpeg -map 0:s / mkvmerge"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "audio-809",
+  "domain": "audio",
+  "verb": "удалить",
+  "object": "музыку из голоса (изоляция вокала)",
+  "example": "оставь только голос",
+  "implementation": [
+   "demucs --two-stems=vocals"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "dev-code-810",
+  "domain": "dev-code",
+  "verb": "создать",
+  "object": "документацию из кода",
+  "example": "сделай README по коду",
+  "implementation": [
+   "AST/парсер + LLM"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "dev-code-811",
+  "domain": "dev-code",
+  "verb": "найти",
+  "object": "мёртвый и дублирующийся код",
+  "example": "что тут не используется",
+  "implementation": [
+   "vulture/knip + AST"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "databases-812",
+  "domain": "databases",
+  "verb": "импортировать",
+  "object": "таблицу Excel в базу",
+  "example": "залей этот xlsx в sqlite",
+  "implementation": [
+   "pandas.to_sql"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "типы колонок вывести, а не угадать"
+ },
+ {
+  "id": "web-813",
+  "domain": "web",
+  "verb": "извлечь",
+  "object": "контакты и реквизиты",
+  "example": "достань телефон и ИНН с сайта",
+  "implementation": [
+   "парсинг + проверка контрольных сумм"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "персональные данные не кэшировать"
+ },
+ {
+  "id": "files-814",
+  "domain": "files",
+  "verb": "найти",
+  "object": "текст внутри PDF-архива",
+  "example": "поищи фразу во всех pdf",
+  "implementation": [
+   "pdftotext + ripgrep"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "apps-windows-815",
+  "domain": "apps-windows",
+  "verb": "настроить",
+  "object": "горячие клавиши приложения",
+  "example": "повесь это на Ctrl+Alt+J",
+  "implementation": [
+   "настройки приложения или AHK"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
  }
 ]
