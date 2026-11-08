@@ -11636,5 +11636,373 @@
   "human_code": "c",
   "status": "v1",
   "notes": ""
+ },
+ {
+  "id": "licensing-725",
+  "domain": "licensing",
+  "verb": "активировать",
+  "object": "лицензию ключом",
+  "example": "активируй подписку",
+  "implementation": [
+   "Ed25519-токен с сервера"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "licensing-726",
+  "domain": "licensing",
+  "verb": "проверить",
+  "object": "лицензию офлайн",
+  "example": "работает ли подписка без сети",
+  "implementation": [
+   "подпись + exp + отпечаток"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "licensing-727",
+  "domain": "licensing",
+  "verb": "обновить",
+  "object": "токен лицензии",
+  "example": "обнови лицензию",
+  "implementation": [
+   "POST /refresh раз в сутки"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "licensing-728",
+  "domain": "licensing",
+  "verb": "деактивировать",
+  "object": "устройство",
+  "example": "освободи слот на старом ноутбуке",
+  "implementation": [
+   "POST /deactivate"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "licensing-729",
+  "domain": "licensing",
+  "verb": "перенести",
+  "object": "лицензию на новый ПК",
+  "example": "перенеси лицензию",
+  "implementation": [
+   "деактивация + активация"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "licensing-730",
+  "domain": "licensing",
+  "verb": "показать",
+  "object": "статус подписки",
+  "example": "когда кончается подписка",
+  "implementation": [
+   "локальный токен"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "licensing-731",
+  "domain": "licensing",
+  "verb": "продлить",
+  "object": "подписку",
+  "example": "продли на год",
+  "implementation": [
+   "лендинг + вебхук оплаты"
+  ],
+  "risk": "external",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "оплата — у провайдера"
+ },
+ {
+  "id": "licensing-732",
+  "domain": "licensing",
+  "verb": "запустить",
+  "object": "пробный период",
+  "example": "дай 14 дней попробовать",
+  "implementation": [
+   "trial-лицензия"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "licensing-733",
+  "domain": "licensing",
+  "verb": "проверить",
+  "object": "подлинность сборки",
+  "example": "это официальная версия",
+  "implementation": [
+   "хэш vs подписанный манифест"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "licensing-734",
+  "domain": "licensing",
+  "verb": "встроить",
+  "object": "водяной знак в экспорт",
+  "example": "пометь экспорт для триала",
+  "implementation": [
+   "lic_id в метаданные"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "licensing-735",
+  "domain": "licensing",
+  "verb": "сообщить",
+  "object": "об аномалии активаций",
+  "example": "один ключ на 20 машин",
+  "implementation": [
+   "телеметрия без контента"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "не может",
+  "human_code": "n",
+  "status": "v2",
+  "notes": "человек не мониторит"
+ },
+ {
+  "id": "licensing-736",
+  "domain": "licensing",
+  "verb": "отозвать",
+  "object": "ключ",
+  "example": "заблокируй ключ после возврата",
+  "implementation": [
+   "админка VPS + revocations"
+  ],
+  "risk": "destructive",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "только владелец продукта"
+ },
+ {
+  "id": "distribution-737",
+  "domain": "distribution",
+  "verb": "собрать",
+  "object": "установщик",
+  "example": "собери MSIX и exe",
+  "implementation": [
+   "tauri build + signtool"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-738",
+  "domain": "distribution",
+  "verb": "подписать",
+  "object": "код",
+  "example": "подпиши релиз",
+  "implementation": [
+   "Azure Artifact Signing"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-739",
+  "domain": "distribution",
+  "verb": "опубликовать",
+  "object": "релиз с манифестом",
+  "example": "выложи версию",
+  "implementation": [
+   "GitHub Releases + Ed25519"
+  ],
+  "risk": "external",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-740",
+  "domain": "distribution",
+  "verb": "проверить",
+  "object": "подпись перед публикацией",
+  "example": "подпись валидна",
+  "implementation": [
+   "signtool verify / WinVerifyTrust"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-741",
+  "domain": "distribution",
+  "verb": "настроить",
+  "object": "канал обновлений",
+  "example": "stable или beta",
+  "implementation": [
+   "updater endpoints"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-742",
+  "domain": "distribution",
+  "verb": "откатить",
+  "object": "релиз",
+  "example": "верни прошлую версию",
+  "implementation": [
+   "manifest revoked + rollback"
+  ],
+  "risk": "destructive",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-743",
+  "domain": "distribution",
+  "verb": "проверить",
+  "object": "совместимость Win10 и Win11",
+  "example": "работает на десятке",
+  "implementation": [
+   "VM-прогон + скриншоты"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-744",
+  "domain": "distribution",
+  "verb": "подготовить",
+  "object": "листинг в Store",
+  "example": "сделай страницу приложения",
+  "implementation": [
+   "Partner Center ассеты"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "distribution-745",
+  "domain": "distribution",
+  "verb": "собрать",
+  "object": "SBOM и аудит зависимостей",
+  "example": "что внутри сборки",
+  "implementation": [
+   "syft/grype + pip-audit"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-746",
+  "domain": "distribution",
+  "verb": "проверить",
+  "object": "отсутствие секретов в бинарнике",
+  "example": "нет ли ключей внутри",
+  "implementation": [
+   "grep по строкам релиза"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "distribution-747",
+  "domain": "distribution",
+  "verb": "автоматизировать",
+  "object": "сборку и релиз в CI",
+  "example": "собирай и подписывай автоматически",
+  "implementation": [
+   "GitHub Actions + signtool"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
  }
 ]

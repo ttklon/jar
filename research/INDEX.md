@@ -1,6 +1,6 @@
 # ИНДЕКС ИСТОЧНИКОВ — ZShelper
 
-Сгенерировано: `2026-11-08T13:08:35Z` · всего записей: **1573** · GitHub-репозиториев: **724**
+Сгенерировано: `2026-11-08T13:15:31Z` · всего записей: **1614** · GitHub-репозиториев: **750**
 
 Полные тексты лежат в `research/sources/<категория>/`. Машиночитаемый реестр — `research/SOURCES.json`.
 
@@ -15,6 +15,7 @@
 | [`benchmarks`](#benchmarks) | 14 | 43,820 |
 | [`benchmarks-extra`](#benchmarks-extra) | 12 | 33,029 |
 | [`business-finance`](#business-finance) | 22 | 201,708 |
+| [`code-signing-msix`](#code-signing-msix) | 8 | 47,209 |
 | [`coding-agents`](#coding-agents) | 63 | 1,043,500 |
 | [`configuration`](#configuration) | 22 | 47,652 |
 | [`connectors`](#connectors) | 44 | 591,577 |
@@ -27,6 +28,7 @@
 | [`electron-shell`](#electron-shell) | 28 | 381,504 |
 | [`home-iot`](#home-iot) | 18 | 213,164 |
 | [`inference-runtimes`](#inference-runtimes) | 45 | 1,169,178 |
+| [`licensing-drm`](#licensing-drm) | 10 | 25,611 |
 | [`low-end-inference`](#low-end-inference) | 35 | 638,695 |
 | [`mcp-and-tools`](#mcp-and-tools) | 50 | 956,879 |
 | [`media-production`](#media-production) | 45 | 486,062 |
@@ -46,12 +48,14 @@
 | [`self-extension`](#self-extension) | 36 | 532,101 |
 | [`system-control`](#system-control) | 62 | 635,018 |
 | [`system-triage`](#system-triage) | 36 | 421,432 |
+| [`tauri-rust`](#tauri-rust) | 15 | 444,849 |
 | [`tts-and-voice`](#tts-and-voice) | 28 | 329,740 |
 | [`ui-ux`](#ui-ux) | 66 | 706,173 |
 | [`updates`](#updates) | 25 | 103,468 |
 | [`virtualization-remote`](#virtualization-remote) | 16 | 268,324 |
 | [`whisper-and-asr`](#whisper-and-asr) | 52 | 438,275 |
 | [`windows-automation`](#windows-automation) | 56 | 560,206 |
+| [`winui-dotnet`](#winui-dotnet) | 8 | 53,637 |
 
 ## academic-writing
 
@@ -241,6 +245,19 @@
 | [pypi: pandas-datareader](https://pypi.org/project/pandas-datareader/) | - | - |  | Pandas-compatible data readers. Formerly a component of pandas. | `research/sources/business-finance/pypi__pandas-datareader.md` |
 | [pypi: python-pptx](https://pypi.org/project/python-pptx/) | - | MIT |  | Create, read, and update PowerPoint 2007+ (.pptx) files. | `research/sources/business-finance/pypi__python-pptx.md` |
 | [pypi: QuantLib](https://pypi.org/project/QuantLib/) | - | BSD-3-Clause |  | Python bindings for the QuantLib library | `research/sources/business-finance/pypi__quantlib.md` |
+
+## code-signing-msix
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [microsoft/winget-cli](https://github.com/microsoft/winget-cli) | 26,568 | MIT | 2026-11-06 | WinGet is the Windows Package Manager. This project includes a CLI (Command Line Interface), PowerShell modules, and a COM (Component Object Model) API (Application Programming Int | `research/sources/code-signing-msix/microsoft__winget-cli/README.md` |
+| [electron-userland/electron-builder](https://github.com/electron-userland/electron-builder) | 14,704 | MIT | 2026-11-07 | A complete solution to package and build a ready for distribution Electron app with “auto update” support out of the box | `research/sources/code-signing-msix/electron-userland__electron-builder/README.md` |
+| [microsoft/WindowsAppSDK](https://github.com/microsoft/WindowsAppSDK) | 4,725 | MIT | 2026-11-08 | The Windows App SDK empowers all Windows desktop apps with modern Windows UI, APIs, and platform features, including back-compat support, shipped via NuGet. | `research/sources/code-signing-msix/microsoft__WindowsAppSDK/README.md` |
+| [microsoft/msix-packaging](https://github.com/microsoft/msix-packaging) | 1,072 | MIT | 2026-08-24 | MSIX SDK | `research/sources/code-signing-msix/microsoft__msix-packaging/README.md` |
+| [Azure/trusted-signing-action](https://github.com/Azure/trusted-signing-action) | 140 | MIT | 2026-10-07 |  | `research/sources/code-signing-msix/Azure__trusted-signing-action/README.md` |
+| [npm: @electron/windows-sign](https://www.npmjs.com/package/@electron/windows-sign) | - | BSD-2-Clause |  | Codesign Electron Windows apps | `research/sources/code-signing-msix/npm__electron-windows-sign.md` |
+| [pypi: pefile](https://pypi.org/project/pefile/) | - | MIT |  | Python PE parsing module | `research/sources/code-signing-msix/pypi__pefile.md` |
+| [pypi: signify](https://pypi.org/project/signify/) | - | - |  | Module to generate and verify PE signatures | `research/sources/code-signing-msix/pypi__signify.md` |
 
 ## coding-agents
 
@@ -670,6 +687,21 @@
 | [pypi: torch](https://pypi.org/project/torch/) | - | - |  | Tensors and Dynamic neural networks in Python with strong GPU acceleration | `research/sources/inference-runtimes/pypi__torch.md` |
 | [pypi: transformers](https://pypi.org/project/transformers/) | - | Apache 2.0 License |  | Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training. | `research/sources/inference-runtimes/pypi__transformers.md` |
 | [pypi: vllm](https://pypi.org/project/vllm/) | - | - |  | A high-throughput and memory-efficient inference and serving engine for LLMs | `research/sources/inference-runtimes/pypi__vllm.md` |
+
+## licensing-drm
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [jedisct1/libsodium](https://github.com/jedisct1/libsodium) | 14,047 | NOASSERTION | 2026-11-07 | A modern, portable, easy to use crypto library. | `research/sources/licensing-drm/jedisct1__libsodium/README.md` |
+| [golang-jwt/jwt](https://github.com/golang-jwt/jwt) | 9,267 | MIT | 2026-11-04 | Go implementation of JSON Web Tokens (JWT). | `research/sources/licensing-drm/golang-jwt__jwt/README.md` |
+| [keygen-sh/keygen-api](https://github.com/keygen-sh/keygen-api) | 1,627 | NOASSERTION | 2026-11-05 | Keygen is a modern, fair source software licensing and distribution API. For developers, by developers. | `research/sources/licensing-drm/keygen-sh__keygen-api/README.md` |
+| [RustCrypto/signatures](https://github.com/RustCrypto/signatures) | 670 | NOASSERTION | 2026-11-06 | Cryptographic signature algorithms: DSA, ECDSA, Ed25519 | `research/sources/licensing-drm/RustCrypto__signatures/README.md` |
+| [npm: jose](https://www.npmjs.com/package/jose) | - | MIT |  | JWA, JWS, JWE, JWT, JWK, JWKS for Node.js, Browser, Cloudflare Workers, Deno, Bun, and other Web-interoperable runtimes | `research/sources/licensing-drm/npm__jose.md` |
+| [npm: jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) | - | MIT |  | JSON Web Token implementation (symmetric and asymmetric) | `research/sources/licensing-drm/npm__jsonwebtoken.md` |
+| [npm: tweetnacl](https://www.npmjs.com/package/tweetnacl) | - | Unlicense |  | Port of TweetNaCl cryptographic library to JavaScript | `research/sources/licensing-drm/npm__tweetnacl.md` |
+| [pypi: argon2-cffi](https://pypi.org/project/argon2-cffi/) | - | - |  | Argon2 for Python | `research/sources/licensing-drm/pypi__argon2-cffi.md` |
+| [pypi: cryptography](https://pypi.org/project/cryptography/) | - | - |  | cryptography is a package which provides cryptographic recipes and primitives to Python developers. | `research/sources/licensing-drm/pypi__cryptography.md` |
+| [pypi: PyJWT](https://pypi.org/project/PyJWT/) | - | - |  | JSON Web Token implementation in Python | `research/sources/licensing-drm/pypi__pyjwt.md` |
 
 ## low-end-inference
 
@@ -1573,6 +1605,26 @@
 | [pypi: winsdk](https://pypi.org/project/winsdk/) | - | MIT |  | Python bindings for the Windows SDK | `research/sources/system-triage/pypi__winsdk.md` |
 | [pypi: WMI](https://pypi.org/project/WMI/) | - | http://www.opensource.org/licenses/mit-license.php |  | Windows Management Instrumentation | `research/sources/system-triage/pypi__wmi.md` |
 
+## tauri-rust
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | 133,708 | MIT | 2026-11-08 | LLM inference in C/C++ | `research/sources/tauri-rust/ggml-org__llama.cpp/README.md (+2 доп. файлов)` |
+| [rustdesk/rustdesk](https://github.com/rustdesk/rustdesk) | 128,636 | AGPL-3.0 | 2026-11-08 | An open-source remote desktop application designed for self-hosting, as an alternative to TeamViewer. | `research/sources/tauri-rust/rustdesk__rustdesk/README.md` |
+| [tauri-apps/tauri](https://github.com/tauri-apps/tauri) | 112,615 | Apache-2.0 | 2026-11-06 | Build smaller, faster, and more secure desktop and mobile applications with a web frontend. | `research/sources/tauri-rust/tauri-apps__tauri/README.md` |
+| [ggml-org/whisper.cpp](https://github.com/ggml-org/whisper.cpp) | 55,011 | MIT | 2026-11-08 | Port of OpenAI's Whisper model in C/C++ | `research/sources/tauri-rust/ggml-org__whisper.cpp/README.md` |
+| [tauri-apps/wry](https://github.com/tauri-apps/wry) | 5,043 | Apache-2.0 | 2026-11-06 | Cross-platform WebView library in Rust for Tauri. | `research/sources/tauri-rust/tauri-apps__wry/README.md` |
+| [pykeio/ort](https://github.com/pykeio/ort) | 2,611 | Apache-2.0 | 2026-11-01 | Fast ML inference & training for ONNX models in Rust | `research/sources/tauri-rust/pykeio__ort/README.md` |
+| [tauri-apps/tao](https://github.com/tauri-apps/tao) | 2,236 | Apache-2.0 | 2026-11-05 | The TAO of cross-platform windowing. A library in Rust built for Tauri. | `research/sources/tauri-rust/tauri-apps__tao/README.md` |
+| [tauri-apps/plugins-workspace](https://github.com/tauri-apps/plugins-workspace) | 1,841 | Apache-2.0 | 2026-11-07 | All of the official Tauri plugins in one place! | `research/sources/tauri-rust/tauri-apps__plugins-workspace/README.md` |
+| [enigo-rs/enigo](https://github.com/enigo-rs/enigo) | 1,803 | MIT | 2026-11-08 | Cross platform input simulation in Rust | `research/sources/tauri-rust/enigo-rs__enigo/README.md` |
+| [nashaofu/xcap](https://github.com/nashaofu/xcap) | 1,032 | Apache-2.0 | 2026-11-01 | XCap is a cross-platform screen capture library written in Rust. It supports Linux (X11, Wayland), MacOS, and Windows. XCap supports screenshot and video recording (WIP). | `research/sources/tauri-rust/nashaofu__xcap/README.md` |
+| [thewh1teagle/sherpa-rs](https://github.com/thewh1teagle/sherpa-rs) | 313 | MIT | 2026-03-08 | Rust bindings to https://github.com/k2-fsa/sherpa-onnx | `research/sources/tauri-rust/thewh1teagle__sherpa-rs/README.md` |
+| [npm: @fluentui/react-components](https://www.npmjs.com/package/@fluentui/react-components) | - | MIT |  | Suite package for converged React components | `research/sources/tauri-rust/npm__fluentui-react-components.md` |
+| [npm: @tauri-apps/api](https://www.npmjs.com/package/@tauri-apps/api) | - | Apache-2.0 OR MIT |  | Tauri API definitions | `research/sources/tauri-rust/npm__tauri-apps-api.md` |
+| [npm: @tauri-apps/cli](https://www.npmjs.com/package/@tauri-apps/cli) | - | Apache-2.0 OR MIT |  | Command line interface for building Tauri apps | `research/sources/tauri-rust/npm__tauri-apps-cli.md` |
+| [pypi: maturin](https://pypi.org/project/maturin/) | - | - |  | Build and publish crates with pyo3, cffi and uniffi bindings as well as rust binaries as python packages | `research/sources/tauri-rust/pypi__maturin.md` |
+
 ## tts-and-voice
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
@@ -1845,3 +1897,16 @@
 | [pypi: pywinauto](https://pypi.org/project/pywinauto/) | - | BSD 3-clause |  | A set of Python modules to automate the Microsoft Windows GUI | `research/sources/windows-automation/pypi__pywinauto.md` |
 | [pypi: uiautomation](https://pypi.org/project/uiautomation/) | - | Apache 2.0 |  | Python UIAutomation for Windows | `research/sources/windows-automation/pypi__uiautomation.md` |
 | [pypi: WMI](https://pypi.org/project/WMI/) | - | http://www.opensource.org/licenses/mit-license.php |  | Windows Management Instrumentation | `research/sources/windows-automation/pypi__wmi.md` |
+
+## winui-dotnet
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [AvaloniaUI/Avalonia](https://github.com/AvaloniaUI/Avalonia) | 31,780 | MIT | 2026-11-07 | Develop Desktop, Embedded, Mobile and WebAssembly apps with C# and XAML. The future of .NET UI | `research/sources/winui-dotnet/AvaloniaUI__Avalonia/README.md` |
+| [microsoft/microsoft-ui-xaml](https://github.com/microsoft/microsoft-ui-xaml) | 8,588 | MIT | 2026-11-08 | WinUI: a modern UI framework with a rich set of controls and styles to build dynamic and high-performing Windows applications. | `research/sources/winui-dotnet/microsoft__microsoft-ui-xaml/README.md` |
+| [microsoft/WindowsAppSDK](https://github.com/microsoft/WindowsAppSDK) | 4,725 | MIT | 2026-11-08 | The Windows App SDK empowers all Windows desktop apps with modern Windows UI, APIs, and platform features, including back-compat support, shipped via NuGet. | `research/sources/winui-dotnet/microsoft__WindowsAppSDK/README.md` |
+| [microsoft/WinUI-Gallery](https://github.com/microsoft/WinUI-Gallery) | 3,722 | MIT | 2026-11-07 | This app demonstrates the controls available in WinUI and the Fluent Design System. | `research/sources/winui-dotnet/microsoft__WinUI-Gallery/README.md` |
+| [FlaUI/FlaUI](https://github.com/FlaUI/FlaUI) | 3,197 | MIT | 2026-08-13 | UI automation library for .Net | `research/sources/winui-dotnet/FlaUI__FlaUI/README.md` |
+| [amwx/FluentAvalonia](https://github.com/amwx/FluentAvalonia) | 1,625 | MIT | 2026-08-22 | Control library focused on fluent design and bringing more WinUI controls into Avalonia | `research/sources/winui-dotnet/amwx__FluentAvalonia/README.md` |
+| [npm: @microsoft/dotnet-js-interop](https://www.npmjs.com/package/@microsoft/dotnet-js-interop) | - | MIT |  | Provides abstractions and features for interop between .NET and JavaScript code. | `research/sources/winui-dotnet/npm__microsoft-dotnet-js-interop.md` |
+| [pypi: pythonnet](https://pypi.org/project/pythonnet/) | - | - |  | .NET and Mono integration for Python | `research/sources/winui-dotnet/pypi__pythonnet.md` |

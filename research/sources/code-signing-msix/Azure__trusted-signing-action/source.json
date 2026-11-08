@@ -1,0 +1,17 @@
+{
+  "id": "github:Azure/trusted-signing-action",
+  "kind": "github",
+  "category": "code-signing-msix",
+  "repo": "Azure/trusted-signing-action",
+  "url": "https://github.com/Azure/trusted-signing-action",
+  "description": "",
+  "stars": 140,
+  "forks": 26,
+  "language": "",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-07T18:43:45Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

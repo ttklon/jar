@@ -1,0 +1,32 @@
+{
+  "id": "github:microsoft/WinUI-Gallery",
+  "kind": "github",
+  "category": "winui-dotnet",
+  "repo": "microsoft/WinUI-Gallery",
+  "url": "https://github.com/microsoft/WinUI-Gallery",
+  "description": "This app demonstrates the controls available in WinUI and the Fluent Design System.",
+  "stars": 3722,
+  "forks": 766,
+  "language": "C#",
+  "license": "MIT",
+  "topics": [
+    "fluent",
+    "fluent-design",
+    "uwp",
+    "windows",
+    "windowsappsdk",
+    "winrt",
+    "winui",
+    "winui-controls",
+    "winui3",
+    "xaml",
+    "xaml-layout",
+    "xaml-style",
+    "xaml-theme",
+    "xaml-winrt"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T20:02:49Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

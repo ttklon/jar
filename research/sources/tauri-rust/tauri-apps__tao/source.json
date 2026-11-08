@@ -1,0 +1,17 @@
+{
+  "id": "github:tauri-apps/tao",
+  "kind": "github",
+  "category": "tauri-rust",
+  "repo": "tauri-apps/tao",
+  "url": "https://github.com/tauri-apps/tao",
+  "description": "The TAO of cross-platform windowing. A library in Rust built for Tauri.",
+  "stars": 2236,
+  "forks": 441,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-05T01:04:37Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

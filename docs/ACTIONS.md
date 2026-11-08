@@ -2,7 +2,7 @@
 
 Полный, систематический перечень того, что приложение должно уметь делать. Источник — [`data/actions.psv`](../data/actions.psv); файл генерируется `python3 tools/actions.py`, руками не править.
 
-**Всего действий: 724** · доменов: **45** · уникальных глаголов: **184**
+**Всего действий: 747** · доменов: **47** · уникальных глаголов: **191**
 
 Обозначения: `risk` — R(чтение) / W(запись локально) / D(разрушительное) / E(внешний эффект) / M(деньги) / I(идентичность); `tier` — минимальное железо (T0…T3); `человек` — может / сложно / **не может** (то, ради чего продукт и нужен).
 
@@ -10,10 +10,10 @@
 
 | Риск | Действий | | Tier | Действий | | Статус | Действий |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `write-local` | 347 | `T1` | 356 | `v1` | 552 |
-| `read` | 260 | `T0` | 258 | `v2` | 161 |
-| `destructive` | 58 | `T2` | 97 | `never` | 11 |
-| `external` | 48 | `T3` | 13 |  |  |
+| `write-local` | 358 | `T1` | 363 | `v1` | 572 |
+| `read` | 268 | `T0` | 274 | `v2` | 164 |
+| `destructive` | 60 | `T2` | 97 | `never` | 11 |
+| `external` | 50 | `T3` | 13 |  |  |
 | `identity` | 7 |  |  |  |  |
 | `money` | 4 |  |  |  |  |
 
@@ -63,7 +63,9 @@
 | Базы данных | 12 | 4 | 4 | 4 | 0 | 0 | 0 | 2 | 10 | 0 |
 | Автоматизация и скрипты | 12 | 1 | 9 | 0 | 2 | 0 | 0 | 4 | 8 | 0 |
 | Учёба и исследования | 12 | 7 | 5 | 0 | 0 | 0 | 0 | 2 | 10 | 0 |
+| licensing | 12 | 4 | 6 | 1 | 1 | 0 | 0 | 12 | 0 | 1 |
 | Дисплей и звук | 11 | 3 | 8 | 0 | 0 | 0 | 0 | 8 | 3 | 0 |
+| distribution | 11 | 4 | 5 | 1 | 1 | 0 | 0 | 4 | 7 | 0 |
 | Доступность | 10 | 5 | 4 | 1 | 0 | 0 | 0 | 3 | 7 | 0 |
 | Игры | 8 | 3 | 4 | 0 | 1 | 0 | 0 | 3 | 5 | 1 |
 
@@ -974,6 +976,23 @@
 | 588 | **обучить** карточками и повторениями | _сделай карточки и спрашивай по интервалам_ | SRT + SQLite | write-local | T0 | может | v1 |
 | 612 | **тренировать** знания вопросами | _проверь меня по этой статье_ | LLM + SRT | read | T1 | может | v1 |
 
+### licensing (12)
+
+| # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 725 | **активировать** лицензию ключом | _активируй подписку_ | Ed25519-токен с сервера | write-local | T0 | может | v1 |
+| 726 | **проверить** лицензию офлайн | _работает ли подписка без сети_ | подпись + exp + отпечаток | read | T0 | может | v1 |
+| 727 | **обновить** токен лицензии | _обнови лицензию_ | POST /refresh раз в сутки | write-local | T0 | может | v1 |
+| 728 | **деактивировать** устройство | _освободи слот на старом ноутбуке_ | POST /deactivate | write-local | T0 | может | v1 |
+| 729 | **перенести** лицензию на новый ПК | _перенеси лицензию_ | деактивация + активация | write-local | T0 | может | v1 |
+| 730 | **показать** статус подписки | _когда кончается подписка_ | локальный токен | read | T0 | может | v1 |
+| 731 | **продлить** подписку | _продли на год_ | лендинг + вебхук оплаты | external | T0 | может | v2 — оплата — у провайдера |
+| 732 | **запустить** пробный период | _дай 14 дней попробовать_ | trial-лицензия | write-local | T0 | может | v1 |
+| 733 | **проверить** подлинность сборки | _это официальная версия_ | хэш vs подписанный манифест | read | T0 | может | v1 |
+| 734 | **встроить** водяной знак в экспорт | _пометь экспорт для триала_ | lic_id в метаданные | write-local | T0 | может | v1 |
+| 735 | **сообщить** об аномалии активаций | _один ключ на 20 машин_ | телеметрия без контента | read | T0 | не может | v2 — человек не мониторит |
+| 736 | **отозвать** ключ | _заблокируй ключ после возврата_ | админка VPS + revocations | destructive | T0 | может | v1 — только владелец продукта |
+
 ### Дисплей и звук (11)
 
 | # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
@@ -989,6 +1008,22 @@
 | 277 | **настроить** микрофон | _сделай микрофон громче_ | WASAPI + уровень | write-local | T0 | может | v1 |
 | 278 | **проверить** качество связи | _проверь микрофон и колонки_ | тест-тон + запись | read | T0 | может | v1 |
 | 575 | **автоматизировать** яркость и звук по расписанию | _вечером звук тише_ | правило + API | write-local | T0 | может | v1 |
+
+### distribution (11)
+
+| # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 737 | **собрать** установщик | _собери MSIX и exe_ | tauri build + signtool | write-local | T1 | может | v1 |
+| 738 | **подписать** код | _подпиши релиз_ | Azure Artifact Signing | write-local | T1 | может | v1 |
+| 739 | **опубликовать** релиз с манифестом | _выложи версию_ | GitHub Releases + Ed25519 | external | T1 | может | v1 |
+| 740 | **проверить** подпись перед публикацией | _подпись валидна_ | signtool verify / WinVerifyTrust | read | T0 | может | v1 |
+| 741 | **настроить** канал обновлений | _stable или beta_ | updater endpoints | write-local | T0 | может | v1 |
+| 742 | **откатить** релиз | _верни прошлую версию_ | manifest revoked + rollback | destructive | T1 | может | v1 |
+| 743 | **проверить** совместимость Win10 и Win11 | _работает на десятке_ | VM-прогон + скриншоты | read | T1 | может | v1 |
+| 744 | **подготовить** листинг в Store | _сделай страницу приложения_ | Partner Center ассеты | write-local | T1 | может | v2 |
+| 745 | **собрать** SBOM и аудит зависимостей | _что внутри сборки_ | syft/grype + pip-audit | read | T0 | может | v1 |
+| 746 | **проверить** отсутствие секретов в бинарнике | _нет ли ключей внутри_ | grep по строкам релиза | read | T0 | может | v1 |
+| 747 | **автоматизировать** сборку и релиз в CI | _собирай и подписывай автоматически_ | GitHub Actions + signtool | write-local | T1 | может | v1 |
 
 ### Доступность (10)
 
@@ -1024,29 +1059,29 @@
 
 | Глагол | Действий | Где встречается |
 | --- | --- | --- |
-| проверить | 76 | accessibility, accounts-updates, ai-ml, apps-windows, automation, business-finance… |
+| проверить | 81 | accessibility, accounts-updates, ai-ml, apps-windows, automation, business-finance… |
 | создать | 41 | accounts-updates, apps-windows, audio, automation, business-finance, calendar-tasks… |
 | найти | 33 | business-finance, calendar-tasks, career, chat-social, dev-code, devices… |
-| настроить | 30 | accounts-updates, ai-ml, apps-windows, audio, automation, dev-code… |
-| собрать | 23 | career, chat-social, dev-code, engineering-3d, hardware-diag, health-daily… |
+| настроить | 31 | accounts-updates, ai-ml, apps-windows, audio, automation, dev-code… |
+| собрать | 25 | career, chat-social, dev-code, distribution, engineering-3d, hardware-diag… |
 | удалить | 18 | accounts-updates, apps-windows, audio, calendar-tasks, chat-social, databases… |
 | сделать | 18 | ai-ml, business-finance, creative-3d, databases, devices, display-sound… |
 | изменить | 17 | accounts-updates, audio, calendar-tasks, chat-social, creative-3d, databases… |
+| автоматизировать | 16 | apps-windows, creative-3d, devices, display-sound, distribution, email… |
 | сравнить | 15 | ai-ml, career, engineering-3d, files, hardware-diag, health-daily… |
-| автоматизировать | 15 | apps-windows, creative-3d, devices, display-sound, email, files… |
 | перевести | 14 | audio, chat-social, dev-code, languages, learning-research, legal-docs… |
 | работать | 13 | apps-windows, dev-code, devices, sheets-data, superhuman, text-docs… |
 | записать | 13 | audio, devices, display-sound, games, health-daily, input… |
 | напомнить | 11 | calendar-tasks, chat-social, health-daily, home-daily, legal-docs, personal-finance… |
 | составить | 11 | health-daily, home-daily, languages, learning-research, legal-docs, monitoring-triage… |
+| показать | 10 | calendar-tasks, creative-3d, games, hardware-diag, input, licensing… |
 | распознать | 9 | ai-ml, audio, home-daily, images, music, slides-pdf-print… |
-| показать | 9 | calendar-tasks, creative-3d, games, hardware-diag, input, network… |
+| запустить | 9 | ai-ml, apps-windows, automation, dev-code, games, licensing… |
 | прочитать | 8 | apps-windows, chat-social, email, images, languages, legal-docs… |
-| запустить | 8 | ai-ml, apps-windows, automation, dev-code, games, network… |
+| подготовить | 8 | ai-ml, career, creative-3d, distribution, engineering-3d, personal-finance |
 | заполнить | 7 | career, legal-docs, sheets-data, text-docs, travel, web |
 | посчитать | 7 | business-finance, calendar-tasks, engineering-3d, home-daily, personal-finance, sheets-data… |
 | управлять | 7 | accessibility, audio, devices, input, system-power |
-| подготовить | 7 | ai-ml, career, creative-3d, engineering-3d, personal-finance |
 | открыть | 6 | business-finance, creative-3d, files, network, smart-home, web |
 | конвертировать | 6 | audio, engineering-3d, images, music, text-docs, video |
 | экспортировать | 6 | ai-ml, business-finance, creative-3d, databases, personal-finance, sheets-data |
@@ -1062,13 +1097,13 @@
 | ответить | 5 | business-finance, career, chat-social, email, video-production |
 | включить | 5 | accessibility, processes-services, smart-home, system-power, video |
 | оптимизировать | 5 | databases, engineering-3d, network, video, video-production |
+| обновить | 5 | accounts-updates, dev-code, licensing, smart-home |
 | вести | 5 | business-finance, health-daily, home-daily, languages |
 | мониторить | 4 | databases, storage-backup, superhuman, web |
 | озвучить | 4 | accessibility, audio, text-docs, video-production |
 | нарезать | 4 | audio, engineering-3d, video, video-production |
 | сохранить | 4 | learning-research, legal-docs, travel, web |
 | подключиться | 4 | databases, network, virtualization-remote |
-| обновить | 4 | accounts-updates, dev-code, smart-home |
 | сжать | 3 | files, slides-pdf-print, video |
 | зашифровать | 3 | files, security-access |
 | синхронизировать | 3 | calendar-tasks, files, virtualization-remote |
@@ -1076,6 +1111,7 @@
 | выполнить | 3 | databases, storage-backup, superhuman |
 | связать | 3 | automation, sheets-data, smart-home |
 | разделить | 3 | audio, music, slides-pdf-print |
+| подписать | 3 | distribution, legal-docs, slides-pdf-print |
 | нормализовать | 3 | audio, music |
 | замерить | 3 | audio, hardware-diag |
 | скачать | 3 | video, web |
@@ -1086,18 +1122,19 @@
 | отключить | 3 | input, processes-services |
 | обучить | 3 | ai-ml, learning-research |
 | оценить | 3 | ai-ml, hardware-diag, health-daily |
+| откатить | 3 | automation, distribution, hardware-diag |
 | субтитрировать | 3 | accessibility, languages, video-production |
 | свести | 3 | business-finance, music |
 | скопировать | 2 | devices, files |
 | импортировать | 2 | personal-finance, sheets-data |
 | защитить | 2 | sheets-data, slides-pdf-print |
-| подписать | 2 | legal-docs, slides-pdf-print |
 | печатать | 2 | slides-pdf-print |
 | аннотировать | 2 | creative-3d, images |
 | склеить | 2 | audio, video |
 | транскрибировать | 2 | audio, superhuman |
 | разобрать | 2 | email, languages |
 | классифицировать | 2 | email, personal-finance |
+| опубликовать | 2 | chat-social, distribution |
 | спланировать | 2 | calendar-tasks, career |
 | нажать | 2 | apps-windows, input |
 | запомнить | 2 | apps-windows, languages |
@@ -1109,7 +1146,6 @@
 | исправить | 2 | dev-code, video-production |
 | развернуть | 2 | dev-code, virtualization-remote |
 | сгенерировать | 2 | ai-ml, dev-code |
-| откатить | 2 | automation, hardware-diag |
 | спрогнозировать | 2 | business-finance, personal-finance |
 | подобрать | 2 | creative-3d, video-production |
 | заказать | 2 | health-daily, home-daily |
@@ -1140,7 +1176,6 @@
 | подписаться | 1 | web |
 | приложить | 1 | email |
 | отписаться | 1 | email |
-| опубликовать | 1 | chat-social |
 | позвонить | 1 | chat-social |
 | модерировать | 1 | chat-social |
 | закрыть | 1 | apps-windows |
@@ -1208,6 +1243,13 @@
 | зафиксировать | 1 | dev-code |
 | упорядочить | 1 | music |
 | оплатить | 1 | personal-finance |
+| активировать | 1 | licensing |
+| деактивировать | 1 | licensing |
+| перенести | 1 | licensing |
+| продлить | 1 | licensing |
+| встроить | 1 | licensing |
+| сообщить | 1 | licensing |
+| отозвать | 1 | licensing |
 
 ## Чего в реестре ещё нет (честные пробелы)
 

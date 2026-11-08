@@ -1,0 +1,17 @@
+{
+  "id": "github:tauri-apps/wry",
+  "kind": "github",
+  "category": "tauri-rust",
+  "repo": "tauri-apps/wry",
+  "url": "https://github.com/tauri-apps/wry",
+  "description": "Cross-platform WebView library in Rust for Tauri.",
+  "stars": 5043,
+  "forks": 590,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T14:36:27Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

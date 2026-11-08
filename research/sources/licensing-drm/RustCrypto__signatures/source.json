@@ -1,0 +1,23 @@
+{
+  "id": "github:RustCrypto/signatures",
+  "kind": "github",
+  "category": "licensing-drm",
+  "repo": "RustCrypto/signatures",
+  "url": "https://github.com/RustCrypto/signatures",
+  "description": "Cryptographic signature algorithms: DSA, ECDSA, Ed25519",
+  "stars": 670,
+  "forks": 210,
+  "language": "Rust",
+  "license": "NOASSERTION",
+  "topics": [
+    "dsa",
+    "ecdsa",
+    "ed25519",
+    "rust",
+    "signatures"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T14:32:33Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

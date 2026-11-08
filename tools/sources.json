@@ -1942,6 +1942,80 @@
         "pykeepass",
         "python-gnupg"
       ]
+    },
+    "licensing-drm": {
+      "github": [
+        "keygen-sh/keygen-api",
+        "RustCrypto/ed25519-dalek",
+        "RustCrypto/signatures",
+        "jedisct1/libsodium",
+        "golang-jwt/jwt"
+      ],
+      "npm": [
+        "jose",
+        "jsonwebtoken",
+        "tweetnacl"
+      ],
+      "pypi": [
+        "pyjwt",
+        "cryptography",
+        "argon2-cffi"
+      ]
+    },
+    "code-signing-msix": {
+      "github": [
+        "microsoft/msix-packaging",
+        "microsoft/WindowsAppSDK",
+        "microsoft/winget-cli",
+        "Azure/trusted-signing-action",
+        "electron-userland/electron-builder"
+      ],
+      "npm": [
+        "@electron/windows-sign"
+      ],
+      "pypi": [
+        "signify",
+        "pefile"
+      ]
+    },
+    "tauri-rust": {
+      "github": [
+        "tauri-apps/tauri",
+        "tauri-apps/wry",
+        "tauri-apps/tao",
+        "tauri-apps/plugins-workspace",
+        "enigo-rs/enigo",
+        "nashaofu/xcap",
+        "pykeio/ort",
+        "ggml-org/llama.cpp",
+        "ggml-org/whisper.cpp",
+        "thewh1teagle/sherpa-rs",
+        "rustdesk/rustdesk"
+      ],
+      "npm": [
+        "@tauri-apps/api",
+        "@tauri-apps/cli",
+        "@fluentui/react-components"
+      ],
+      "pypi": [
+        "maturin"
+      ]
+    },
+    "winui-dotnet": {
+      "github": [
+        "microsoft/microsoft-ui-xaml",
+        "microsoft/WindowsAppSDK",
+        "microsoft/WinUI-Gallery",
+        "FlaUI/FlaUI",
+        "amwx/FluentAvalonia",
+        "AvaloniaUI/Avalonia"
+      ],
+      "npm": [
+        "@microsoft/dotnet-js-interop"
+      ],
+      "pypi": [
+        "pythonnet"
+      ]
     }
   },
   "extras": {

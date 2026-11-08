@@ -1,0 +1,28 @@
+{
+  "id": "github:microsoft/microsoft-ui-xaml",
+  "kind": "github",
+  "category": "winui-dotnet",
+  "repo": "microsoft/microsoft-ui-xaml",
+  "url": "https://github.com/microsoft/microsoft-ui-xaml",
+  "description": "WinUI: a modern UI framework with a rich set of controls and styles to build dynamic and high-performing Windows applications.",
+  "stars": 8588,
+  "forks": 957,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "cpp",
+    "csharp",
+    "desktop",
+    "fluent-design",
+    "uwp",
+    "windows",
+    "windows-10",
+    "winui",
+    "winui3",
+    "xaml"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:41:13Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

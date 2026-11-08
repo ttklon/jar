@@ -1,0 +1,24 @@
+{
+  "id": "github:thewh1teagle/sherpa-rs",
+  "kind": "github",
+  "category": "tauri-rust",
+  "repo": "thewh1teagle/sherpa-rs",
+  "url": "https://github.com/thewh1teagle/sherpa-rs",
+  "description": "Rust bindings to https://github.com/k2-fsa/sherpa-onnx",
+  "stars": 313,
+  "forks": 71,
+  "language": "Rust",
+  "license": "MIT",
+  "topics": [
+    "audio",
+    "diarization",
+    "embeddings",
+    "rust",
+    "sherpa",
+    "speech-recognition"
+  ],
+  "archived": true,
+  "pushed_at": "2026-03-08T01:09:08Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "github:tauri-apps/tauri",
+  "kind": "github",
+  "category": "tauri-rust",
+  "repo": "tauri-apps/tauri",
+  "url": "https://github.com/tauri-apps/tauri",
+  "description": "Build smaller, faster, and more secure desktop and mobile applications with a web frontend.",
+  "stars": 112615,
+  "forks": 4166,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [
+    "desktop-app",
+    "high-performance",
+    "mobile-app",
+    "native-app",
+    "rust",
+    "web-frontend",
+    "webview"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T18:26:25Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

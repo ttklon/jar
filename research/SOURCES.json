@@ -274,6 +274,58 @@
     "_path": "research/sources/windows-automation/AutoHotkey__AutoHotkey/README.md"
   },
   {
+    "id": "github:AvaloniaUI/Avalonia",
+    "kind": "github",
+    "category": "winui-dotnet",
+    "repo": "AvaloniaUI/Avalonia",
+    "url": "https://github.com/AvaloniaUI/Avalonia",
+    "description": "Develop Desktop, Embedded, Mobile and WebAssembly apps with C# and XAML. The future of .NET UI",
+    "stars": 31780,
+    "forks": 2890,
+    "language": "C#",
+    "license": "MIT",
+    "topics": [
+      "android",
+      "app-framework",
+      "avalonia",
+      "avaloniaui",
+      "browser",
+      "c-sharp",
+      "cross-platform",
+      "csharp",
+      "desktop",
+      "dotnet",
+      "gui",
+      "ios",
+      "linux",
+      "macos",
+      "mobile"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T09:52:26Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/winui-dotnet/AvaloniaUI__Avalonia/README.md"
+  },
+  {
+    "id": "github:Azure/trusted-signing-action",
+    "kind": "github",
+    "category": "code-signing-msix",
+    "repo": "Azure/trusted-signing-action",
+    "url": "https://github.com/Azure/trusted-signing-action",
+    "description": "",
+    "stars": 140,
+    "forks": 26,
+    "language": "",
+    "license": "MIT",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-10-07T18:43:45Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/code-signing-msix/Azure__trusted-signing-action/README.md"
+  },
+  {
     "id": "github:Beep6581/RawTherapee",
     "kind": "github",
     "category": "photo-editing",
@@ -566,6 +618,39 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/FFmpeg__FFmpeg/README.md"
+  },
+  {
+    "id": "github:FlaUI/FlaUI",
+    "kind": "github",
+    "category": "winui-dotnet",
+    "repo": "FlaUI/FlaUI",
+    "url": "https://github.com/FlaUI/FlaUI",
+    "description": "UI automation library for .Net",
+    "stars": 3197,
+    "forks": 449,
+    "language": "C#",
+    "license": "MIT",
+    "topics": [
+      "automation",
+      "automation-ui",
+      "dotnet",
+      "framework",
+      "gui",
+      "microsoft",
+      "qa",
+      "testing",
+      "testing-tools",
+      "ui-automation",
+      "uiautomation",
+      "user-interface",
+      "winforms",
+      "wpf"
+    ],
+    "archived": false,
+    "pushed_at": "2026-08-13T21:45:21Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/winui-dotnet/FlaUI__FlaUI/README.md"
   },
   {
     "id": "github:FlowiseAI/Flowise",
@@ -1980,6 +2065,30 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/RooCodeInc__Roo-Code/README.md"
+  },
+  {
+    "id": "github:RustCrypto/signatures",
+    "kind": "github",
+    "category": "licensing-drm",
+    "repo": "RustCrypto/signatures",
+    "url": "https://github.com/RustCrypto/signatures",
+    "description": "Cryptographic signature algorithms: DSA, ECDSA, Ed25519",
+    "stars": 670,
+    "forks": 210,
+    "language": "Rust",
+    "license": "NOASSERTION",
+    "topics": [
+      "dsa",
+      "ecdsa",
+      "ed25519",
+      "rust",
+      "signatures"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T14:32:33Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/licensing-drm/RustCrypto__signatures/README.md"
   },
   {
     "id": "github:SWE-agent/SWE-agent",
@@ -3503,6 +3612,34 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:26:32Z",
     "_path": "research/sources/whisper-and-asr/alphacep__vosk-api/README.md"
+  },
+  {
+    "id": "github:amwx/FluentAvalonia",
+    "kind": "github",
+    "category": "winui-dotnet",
+    "repo": "amwx/FluentAvalonia",
+    "url": "https://github.com/amwx/FluentAvalonia",
+    "description": "Control library focused on fluent design and bringing more WinUI controls into Avalonia",
+    "stars": 1625,
+    "forks": 169,
+    "language": "C#",
+    "license": "MIT",
+    "topics": [
+      "avalonia",
+      "avaloniaui",
+      "c-sharp",
+      "cross-platform",
+      "dotnet",
+      "dotnetcore",
+      "fluent",
+      "fluent-design",
+      "xaml"
+    ],
+    "archived": false,
+    "pushed_at": "2026-08-22T17:37:48Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/winui-dotnet/amwx__FluentAvalonia/README.md"
   },
   {
     "id": "github:anchore/sbom-action",
@@ -5645,6 +5782,40 @@
   {
     "id": "github:electron-userland/electron-builder",
     "kind": "github",
+    "category": "code-signing-msix",
+    "repo": "electron-userland/electron-builder",
+    "url": "https://github.com/electron-userland/electron-builder",
+    "description": "A complete solution to package and build a ready for distribution Electron app with “auto update” support out of the box",
+    "stars": 14704,
+    "forks": 1895,
+    "language": "TypeScript",
+    "license": "MIT",
+    "topics": [
+      "appx",
+      "auto-update",
+      "builder",
+      "contributions-welcome",
+      "deb",
+      "distribution-electron",
+      "dmg",
+      "electron",
+      "electron-builder",
+      "electron-updater",
+      "linux",
+      "macos",
+      "msi",
+      "nsis",
+      "pkg"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T20:37:01Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/code-signing-msix/electron-userland__electron-builder/README.md"
+  },
+  {
+    "id": "github:electron-userland/electron-builder",
+    "kind": "github",
     "category": "electron-shell",
     "repo": "electron-userland/electron-builder",
     "url": "https://github.com/electron-userland/electron-builder",
@@ -6044,6 +6215,32 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/ui-ux/emilkowalski__sonner/README.md"
+  },
+  {
+    "id": "github:enigo-rs/enigo",
+    "kind": "github",
+    "category": "tauri-rust",
+    "repo": "enigo-rs/enigo",
+    "url": "https://github.com/enigo-rs/enigo",
+    "description": "Cross platform input simulation in Rust",
+    "stars": 1803,
+    "forks": 162,
+    "language": "Rust",
+    "license": "MIT",
+    "topics": [
+      "automation",
+      "cross-platform",
+      "input",
+      "keyboard",
+      "mouse",
+      "rust",
+      "simulation"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T00:51:05Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/enigo-rs__enigo/README.md"
   },
   {
     "id": "github:errata-ai/vale",
@@ -6746,6 +6943,27 @@
     "_extras": 2
   },
   {
+    "id": "github:ggml-org/llama.cpp",
+    "kind": "github",
+    "category": "tauri-rust",
+    "repo": "ggml-org/llama.cpp",
+    "url": "https://github.com/ggml-org/llama.cpp",
+    "description": "LLM inference in C/C++",
+    "stars": 133708,
+    "forks": 25254,
+    "language": "C++",
+    "license": "MIT",
+    "topics": [
+      "ggml"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T11:56:39Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/ggml-org__llama.cpp/README.md",
+    "_extras": 2
+  },
+  {
     "id": "github:ggml-org/whisper.cpp",
     "kind": "github",
     "category": "low-end-inference",
@@ -6769,6 +6987,31 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/low-end-inference/ggml-org__whisper.cpp/README.md"
+  },
+  {
+    "id": "github:ggml-org/whisper.cpp",
+    "kind": "github",
+    "category": "tauri-rust",
+    "repo": "ggml-org/whisper.cpp",
+    "url": "https://github.com/ggml-org/whisper.cpp",
+    "description": "Port of OpenAI's Whisper model in C/C++",
+    "stars": 55011,
+    "forks": 6286,
+    "language": "C++",
+    "license": "MIT",
+    "topics": [
+      "inference",
+      "openai",
+      "speech-recognition",
+      "speech-to-text",
+      "transformer",
+      "whisper"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T04:01:46Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/ggml-org__whisper.cpp/README.md"
   },
   {
     "id": "github:ggml-org/whisper.cpp",
@@ -6968,6 +7211,31 @@
     "default_branch": "stable",
     "fetched_at": "2026-11-08T12:43:21Z",
     "_path": "research/sources/business-finance/gnucash__gnucash/README.md"
+  },
+  {
+    "id": "github:golang-jwt/jwt",
+    "kind": "github",
+    "category": "licensing-drm",
+    "repo": "golang-jwt/jwt",
+    "url": "https://github.com/golang-jwt/jwt",
+    "description": "Go implementation of JSON Web Tokens (JWT).",
+    "stars": 9267,
+    "forks": 457,
+    "language": "Go",
+    "license": "MIT",
+    "topics": [
+      "auth",
+      "ed25519",
+      "go",
+      "golang",
+      "jwt",
+      "security"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-04T15:46:12Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/licensing-drm/golang-jwt__jwt/README.md"
   },
   {
     "id": "github:golang/tools",
@@ -8301,6 +8569,29 @@
     "_path": "research/sources/media-production/jdepoix__youtube-transcript-api/README.md"
   },
   {
+    "id": "github:jedisct1/libsodium",
+    "kind": "github",
+    "category": "licensing-drm",
+    "repo": "jedisct1/libsodium",
+    "url": "https://github.com/jedisct1/libsodium",
+    "description": "A modern, portable, easy to use crypto library.",
+    "stars": 14047,
+    "forks": 1887,
+    "language": "C",
+    "license": "NOASSERTION",
+    "topics": [
+      "c",
+      "crypto",
+      "cryptography",
+      "zig-package"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T15:27:27Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/licensing-drm/jedisct1__libsodium/README.md"
+  },
+  {
     "id": "github:jennyzzt/dgm",
     "kind": "github",
     "category": "self-extension",
@@ -8702,6 +8993,35 @@
     "default_branch": "develop",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/system-control/keepassxreboot__keepassxc/README.md"
+  },
+  {
+    "id": "github:keygen-sh/keygen-api",
+    "kind": "github",
+    "category": "licensing-drm",
+    "repo": "keygen-sh/keygen-api",
+    "url": "https://github.com/keygen-sh/keygen-api",
+    "description": "Keygen is a modern, fair source software licensing and distribution API. For developers, by developers.",
+    "stars": 1627,
+    "forks": 139,
+    "language": "Gherkin",
+    "license": "NOASSERTION",
+    "topics": [
+      "api",
+      "fair-source",
+      "license-keys",
+      "rails",
+      "rails-api",
+      "ruby",
+      "ruby-on-rails",
+      "software-distribution",
+      "software-licensing",
+      "source-available"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-05T14:50:29Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/licensing-drm/keygen-sh__keygen-api/README.md"
   },
   {
     "id": "github:khoj-ai/khoj",
@@ -10567,6 +10887,39 @@
     "_path": "research/sources/virtualization-remote/microsoft__WSL/README.md"
   },
   {
+    "id": "github:microsoft/WinUI-Gallery",
+    "kind": "github",
+    "category": "winui-dotnet",
+    "repo": "microsoft/WinUI-Gallery",
+    "url": "https://github.com/microsoft/WinUI-Gallery",
+    "description": "This app demonstrates the controls available in WinUI and the Fluent Design System.",
+    "stars": 3722,
+    "forks": 766,
+    "language": "C#",
+    "license": "MIT",
+    "topics": [
+      "fluent",
+      "fluent-design",
+      "uwp",
+      "windows",
+      "windowsappsdk",
+      "winrt",
+      "winui",
+      "winui-controls",
+      "winui3",
+      "xaml",
+      "xaml-layout",
+      "xaml-style",
+      "xaml-theme",
+      "xaml-winrt"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T20:02:49Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/winui-dotnet/microsoft__WinUI-Gallery/README.md"
+  },
+  {
     "id": "github:microsoft/Windows-Machine-Learning",
     "kind": "github",
     "category": "perf-optimization",
@@ -10798,6 +11151,38 @@
   {
     "id": "github:microsoft/WindowsAppSDK",
     "kind": "github",
+    "category": "code-signing-msix",
+    "repo": "microsoft/WindowsAppSDK",
+    "url": "https://github.com/microsoft/WindowsAppSDK",
+    "description": "The Windows App SDK empowers all Windows desktop apps with modern Windows UI, APIs, and platform features, including back-compat support, shipped via NuGet.",
+    "stars": 4725,
+    "forks": 482,
+    "language": "C++",
+    "license": "MIT",
+    "topics": [
+      "cpp",
+      "csharp",
+      "desktop",
+      "project-reunion",
+      "win32",
+      "winappsdk",
+      "windows",
+      "windows-10",
+      "windows-11",
+      "windows-app-sdk",
+      "winui",
+      "winui3",
+      "wpf"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T01:38:52Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/code-signing-msix/microsoft__WindowsAppSDK/README.md"
+  },
+  {
+    "id": "github:microsoft/WindowsAppSDK",
+    "kind": "github",
     "category": "devices-peripherals",
     "repo": "microsoft/WindowsAppSDK",
     "url": "https://github.com/microsoft/WindowsAppSDK",
@@ -10858,6 +11243,38 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:26:32Z",
     "_path": "research/sources/windows-automation/microsoft__WindowsAppSDK/README.md"
+  },
+  {
+    "id": "github:microsoft/WindowsAppSDK",
+    "kind": "github",
+    "category": "winui-dotnet",
+    "repo": "microsoft/WindowsAppSDK",
+    "url": "https://github.com/microsoft/WindowsAppSDK",
+    "description": "The Windows App SDK empowers all Windows desktop apps with modern Windows UI, APIs, and platform features, including back-compat support, shipped via NuGet.",
+    "stars": 4725,
+    "forks": 482,
+    "language": "C++",
+    "license": "MIT",
+    "topics": [
+      "cpp",
+      "csharp",
+      "desktop",
+      "project-reunion",
+      "win32",
+      "winappsdk",
+      "windows",
+      "windows-10",
+      "windows-11",
+      "windows-app-sdk",
+      "winui",
+      "winui3",
+      "wpf"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T01:38:52Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/winui-dotnet/microsoft__WindowsAppSDK/README.md"
   },
   {
     "id": "github:microsoft/accessibility-insights-web",
@@ -11161,6 +11578,35 @@
     "_path": "research/sources/mcp-and-tools/microsoft__mcp/README.md"
   },
   {
+    "id": "github:microsoft/microsoft-ui-xaml",
+    "kind": "github",
+    "category": "winui-dotnet",
+    "repo": "microsoft/microsoft-ui-xaml",
+    "url": "https://github.com/microsoft/microsoft-ui-xaml",
+    "description": "WinUI: a modern UI framework with a rich set of controls and styles to build dynamic and high-performing Windows applications.",
+    "stars": 8588,
+    "forks": 957,
+    "language": "C++",
+    "license": "MIT",
+    "topics": [
+      "cpp",
+      "csharp",
+      "desktop",
+      "fluent-design",
+      "uwp",
+      "windows",
+      "windows-10",
+      "winui",
+      "winui3",
+      "xaml"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T10:41:13Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/winui-dotnet/microsoft__microsoft-ui-xaml/README.md"
+  },
+  {
     "id": "github:microsoft/monaco-editor",
     "kind": "github",
     "category": "coding-agents",
@@ -11183,6 +11629,27 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/coding-agents/microsoft__monaco-editor/README.md"
+  },
+  {
+    "id": "github:microsoft/msix-packaging",
+    "kind": "github",
+    "category": "code-signing-msix",
+    "repo": "microsoft/msix-packaging",
+    "url": "https://github.com/microsoft/msix-packaging",
+    "description": "MSIX SDK",
+    "stars": 1072,
+    "forks": 193,
+    "language": "C",
+    "license": "MIT",
+    "topics": [
+      "msix",
+      "uwp"
+    ],
+    "archived": false,
+    "pushed_at": "2026-08-24T23:31:48Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/code-signing-msix/microsoft__msix-packaging/README.md"
   },
   {
     "id": "github:microsoft/msix-packaging",
@@ -11644,6 +12111,29 @@
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/microsoft__windows-rs/README.md",
     "_extras": 1
+  },
+  {
+    "id": "github:microsoft/winget-cli",
+    "kind": "github",
+    "category": "code-signing-msix",
+    "repo": "microsoft/winget-cli",
+    "url": "https://github.com/microsoft/winget-cli",
+    "description": "WinGet is the Windows Package Manager. This project includes a CLI (Command Line Interface), PowerShell modules, and a COM (Component Object Model) API (Application Programming Interface).",
+    "stars": 26568,
+    "forks": 1815,
+    "language": "C++",
+    "license": "MIT",
+    "topics": [
+      "command-line",
+      "package-manager",
+      "windows",
+      "winget"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T19:59:35Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/code-signing-msix/microsoft__winget-cli/README.md"
   },
   {
     "id": "github:microsoft/winget-cli",
@@ -12593,6 +13083,30 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/tts-and-voice/nari-labs__dia/README.md"
+  },
+  {
+    "id": "github:nashaofu/xcap",
+    "kind": "github",
+    "category": "tauri-rust",
+    "repo": "nashaofu/xcap",
+    "url": "https://github.com/nashaofu/xcap",
+    "description": "XCap is a cross-platform screen capture library written in Rust. It supports Linux (X11, Wayland), MacOS, and Windows. XCap supports screenshot and video recording (WIP).",
+    "stars": 1032,
+    "forks": 143,
+    "language": "Rust",
+    "license": "Apache-2.0",
+    "topics": [
+      "monitor",
+      "screen-capture",
+      "screen-record",
+      "screencapture",
+      "windows"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-01T09:53:06Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/nashaofu__xcap/README.md"
   },
   {
     "id": "github:neovim/neovim",
@@ -14538,6 +15052,33 @@
     "_path": "research/sources/orchestration/pydantic__pydantic-ai/README.md"
   },
   {
+    "id": "github:pykeio/ort",
+    "kind": "github",
+    "category": "tauri-rust",
+    "repo": "pykeio/ort",
+    "url": "https://github.com/pykeio/ort",
+    "description": "Fast ML inference & training for ONNX models in Rust",
+    "stars": 2611,
+    "forks": 279,
+    "language": "Rust",
+    "license": "Apache-2.0",
+    "topics": [
+      "ai",
+      "ai-training",
+      "fine-tuning",
+      "inference",
+      "machine-learning",
+      "onnx",
+      "onnxruntime",
+      "rust"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-01T23:23:32Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/pykeio__ort/README.md"
+  },
+  {
     "id": "github:pytest-dev/pytest",
     "kind": "github",
     "category": "coding-agents",
@@ -15307,6 +15848,40 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/coding-agents/rust-lang__rust-analyzer/README.md"
+  },
+  {
+    "id": "github:rustdesk/rustdesk",
+    "kind": "github",
+    "category": "tauri-rust",
+    "repo": "rustdesk/rustdesk",
+    "url": "https://github.com/rustdesk/rustdesk",
+    "description": "An open-source remote desktop application designed for self-hosting, as an alternative to TeamViewer.",
+    "stars": 128636,
+    "forks": 20442,
+    "language": "Rust",
+    "license": "AGPL-3.0",
+    "topics": [
+      "android",
+      "anydesk",
+      "dart",
+      "flatpak",
+      "flutter",
+      "flutter-apps",
+      "ios",
+      "linux",
+      "macos",
+      "p2p",
+      "rdp",
+      "remote-control",
+      "remote-desktop",
+      "rust",
+      "rust-lang"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T13:10:52Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/rustdesk__rustdesk/README.md"
   },
   {
     "id": "github:rustdesk/rustdesk",
@@ -16584,6 +17159,90 @@
     "_path": "research/sources/ui-ux/tailwindlabs__tailwindcss/README.md"
   },
   {
+    "id": "github:tauri-apps/plugins-workspace",
+    "kind": "github",
+    "category": "tauri-rust",
+    "repo": "tauri-apps/plugins-workspace",
+    "url": "https://github.com/tauri-apps/plugins-workspace",
+    "description": "All of the official Tauri plugins in one place!",
+    "stars": 1841,
+    "forks": 635,
+    "language": "Rust",
+    "license": "Apache-2.0",
+    "topics": [
+      "hacktoberfest",
+      "tauri",
+      "tauri-plugin"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T11:13:22Z",
+    "default_branch": "v2",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/tauri-apps__plugins-workspace/README.md"
+  },
+  {
+    "id": "github:tauri-apps/tao",
+    "kind": "github",
+    "category": "tauri-rust",
+    "repo": "tauri-apps/tao",
+    "url": "https://github.com/tauri-apps/tao",
+    "description": "The TAO of cross-platform windowing. A library in Rust built for Tauri.",
+    "stars": 2236,
+    "forks": 441,
+    "language": "Rust",
+    "license": "Apache-2.0",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-05T01:04:37Z",
+    "default_branch": "dev",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/tauri-apps__tao/README.md"
+  },
+  {
+    "id": "github:tauri-apps/tauri",
+    "kind": "github",
+    "category": "tauri-rust",
+    "repo": "tauri-apps/tauri",
+    "url": "https://github.com/tauri-apps/tauri",
+    "description": "Build smaller, faster, and more secure desktop and mobile applications with a web frontend.",
+    "stars": 112615,
+    "forks": 4166,
+    "language": "Rust",
+    "license": "Apache-2.0",
+    "topics": [
+      "desktop-app",
+      "high-performance",
+      "mobile-app",
+      "native-app",
+      "rust",
+      "web-frontend",
+      "webview"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T18:26:25Z",
+    "default_branch": "dev",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/tauri-apps__tauri/README.md"
+  },
+  {
+    "id": "github:tauri-apps/wry",
+    "kind": "github",
+    "category": "tauri-rust",
+    "repo": "tauri-apps/wry",
+    "url": "https://github.com/tauri-apps/wry",
+    "description": "Cross-platform WebView library in Rust for Tauri.",
+    "stars": 5043,
+    "forks": 590,
+    "language": "Rust",
+    "license": "Apache-2.0",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-06T14:36:27Z",
+    "default_branch": "dev",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/tauri-apps__wry/README.md"
+  },
+  {
     "id": "github:taylorwilsdon/google_workspace_mcp",
     "kind": "github",
     "category": "mcp-and-tools",
@@ -16849,6 +17508,31 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/reference-apps/th-ch__youtube-music/README.md"
+  },
+  {
+    "id": "github:thewh1teagle/sherpa-rs",
+    "kind": "github",
+    "category": "tauri-rust",
+    "repo": "thewh1teagle/sherpa-rs",
+    "url": "https://github.com/thewh1teagle/sherpa-rs",
+    "description": "Rust bindings to https://github.com/k2-fsa/sherpa-onnx",
+    "stars": 313,
+    "forks": 71,
+    "language": "Rust",
+    "license": "MIT",
+    "topics": [
+      "audio",
+      "diarization",
+      "embeddings",
+      "rust",
+      "sherpa",
+      "speech-recognition"
+    ],
+    "archived": true,
+    "pushed_at": "2026-03-08T01:09:08Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/thewh1teagle__sherpa-rs/README.md"
   },
   {
     "id": "github:thomasnordquist/MQTT-Explorer",
@@ -18618,6 +19302,19 @@
     "_path": "research/sources/packaging-and-ci/npm__electron-universal.md"
   },
   {
+    "id": "npm:@electron/windows-sign",
+    "kind": "npm",
+    "category": "code-signing-msix",
+    "package": "@electron/windows-sign",
+    "version": "2.1.0",
+    "url": "https://www.npmjs.com/package/@electron/windows-sign",
+    "homepage": "https://github.com/electron/windows-sign",
+    "license": "BSD-2-Clause",
+    "summary": "Codesign Electron Windows apps",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/code-signing-msix/npm__electron-windows-sign.md"
+  },
+  {
     "id": "npm:@ffmpeg-installer/ffmpeg",
     "kind": "npm",
     "category": "media-production",
@@ -18629,6 +19326,19 @@
     "summary": "Platform independent binary installer of FFmpeg for node projects",
     "fetched_at": "2026-11-08T11:47:22Z",
     "_path": "research/sources/media-production/npm__ffmpeg-installer-ffmpeg.md"
+  },
+  {
+    "id": "npm:@fluentui/react-components",
+    "kind": "npm",
+    "category": "tauri-rust",
+    "package": "@fluentui/react-components",
+    "version": "9.75.1",
+    "url": "https://www.npmjs.com/package/@fluentui/react-components",
+    "homepage": "https://github.com/microsoft/fluentui#readme",
+    "license": "MIT",
+    "summary": "Suite package for converged React components",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/npm__fluentui-react-components.md"
   },
   {
     "id": "npm:@gltf-transform/core",
@@ -18719,6 +19429,19 @@
     "license": "Apache-2.0",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/npm__mastra-core.md"
+  },
+  {
+    "id": "npm:@microsoft/dotnet-js-interop",
+    "kind": "npm",
+    "category": "winui-dotnet",
+    "package": "@microsoft/dotnet-js-interop",
+    "version": "10.0.11",
+    "url": "https://www.npmjs.com/package/@microsoft/dotnet-js-interop",
+    "homepage": "https://github.com/dotnet/aspnetcore/tree/main/src/JSInterop",
+    "license": "MIT",
+    "summary": "Provides abstractions and features for interop between .NET and JavaScript code.",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/winui-dotnet/npm__microsoft-dotnet-js-interop.md"
   },
   {
     "id": "npm:@modelcontextprotocol/inspector",
@@ -19225,6 +19948,32 @@
     "summary": "Headless UI for virtualizing scrollable elements in React",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/ui-ux/npm__tanstack-react-virtual.md"
+  },
+  {
+    "id": "npm:@tauri-apps/api",
+    "kind": "npm",
+    "category": "tauri-rust",
+    "package": "@tauri-apps/api",
+    "version": "2.12.4",
+    "url": "https://www.npmjs.com/package/@tauri-apps/api",
+    "homepage": "https://github.com/tauri-apps/tauri#readme",
+    "license": "Apache-2.0 OR MIT",
+    "summary": "Tauri API definitions",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/npm__tauri-apps-api.md"
+  },
+  {
+    "id": "npm:@tauri-apps/cli",
+    "kind": "npm",
+    "category": "tauri-rust",
+    "package": "@tauri-apps/cli",
+    "version": "2.12.4",
+    "url": "https://www.npmjs.com/package/@tauri-apps/cli",
+    "homepage": "https://github.com/tauri-apps/tauri#readme",
+    "license": "Apache-2.0 OR MIT",
+    "summary": "Command line interface for building Tauri apps",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/npm__tauri-apps-cli.md"
   },
   {
     "id": "npm:@testing-library/react",
@@ -20939,6 +21688,19 @@
     "_path": "research/sources/screen-understanding/npm__jimp.md"
   },
   {
+    "id": "npm:jose",
+    "kind": "npm",
+    "category": "licensing-drm",
+    "package": "jose",
+    "version": "6.2.15",
+    "url": "https://www.npmjs.com/package/jose",
+    "homepage": "https://github.com/panva/jose",
+    "license": "MIT",
+    "summary": "JWA, JWS, JWE, JWT, JWK, JWKS for Node.js, Browser, Cloudflare Workers, Deno, Bun, and other Web-interoperable runtimes",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/licensing-drm/npm__jose.md"
+  },
+  {
     "id": "npm:jsdom",
     "kind": "npm",
     "category": "packaging-and-ci",
@@ -20963,6 +21725,19 @@
     "summary": "compile json schema to typescript typings",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/configuration/npm__json-schema-to-typescript.md"
+  },
+  {
+    "id": "npm:jsonwebtoken",
+    "kind": "npm",
+    "category": "licensing-drm",
+    "package": "jsonwebtoken",
+    "version": "9.0.3",
+    "url": "https://www.npmjs.com/package/jsonwebtoken",
+    "homepage": "https://github.com/auth0/node-jsonwebtoken#readme",
+    "license": "MIT",
+    "summary": "JSON Web Token implementation (symmetric and asymmetric)",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/licensing-drm/npm__jsonwebtoken.md"
   },
   {
     "id": "npm:jsonwebtoken",
@@ -23027,6 +23802,19 @@
     "_path": "research/sources/coding-agents/npm__tsx.md"
   },
   {
+    "id": "npm:tweetnacl",
+    "kind": "npm",
+    "category": "licensing-drm",
+    "package": "tweetnacl",
+    "version": "1.0.3",
+    "url": "https://www.npmjs.com/package/tweetnacl",
+    "homepage": "https://tweetnacl.js.org",
+    "license": "Unlicense",
+    "summary": "Port of TweetNaCl cryptographic library to JavaScript",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/licensing-drm/npm__tweetnacl.md"
+  },
+  {
     "id": "npm:typescript",
     "kind": "npm",
     "category": "coding-agents",
@@ -23716,6 +24504,18 @@
     "_path": "research/sources/memory-and-rag/pypi__apsw.md"
   },
   {
+    "id": "pypi:argon2-cffi",
+    "kind": "pypi",
+    "category": "licensing-drm",
+    "package": "argon2-cffi",
+    "version": "25.1.0",
+    "url": "https://pypi.org/project/argon2-cffi/",
+    "requires_python": ">=3.8",
+    "summary": "Argon2 for Python",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/licensing-drm/pypi__argon2-cffi.md"
+  },
+  {
     "id": "pypi:arxiv",
     "kind": "pypi",
     "category": "academic-writing",
@@ -24145,6 +24945,18 @@
     "summary": "cryptography is a package which provides cryptographic recipes and primitives to Python developers.",
     "fetched_at": "2026-11-08T13:07:59Z",
     "_path": "research/sources/crypto-privacy/pypi__cryptography.md"
+  },
+  {
+    "id": "pypi:cryptography",
+    "kind": "pypi",
+    "category": "licensing-drm",
+    "package": "cryptography",
+    "version": "50.0.2",
+    "url": "https://pypi.org/project/cryptography/",
+    "requires_python": "!=3.9.0,!=3.9.1,>=3.9",
+    "summary": "cryptography is a package which provides cryptographic recipes and primitives to Python developers.",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/licensing-drm/pypi__cryptography.md"
   },
   {
     "id": "pypi:cryptography",
@@ -25585,6 +26397,19 @@
     "_path": "research/sources/media-production/pypi__matplotlib.md"
   },
   {
+    "id": "pypi:maturin",
+    "kind": "pypi",
+    "category": "tauri-rust",
+    "package": "maturin",
+    "version": "1.16.0",
+    "url": "https://pypi.org/project/maturin/",
+    "home_page": "https://github.com/pyo3/maturin",
+    "requires_python": ">=3.7",
+    "summary": "Build and publish crates with pyo3, cffi and uniffi bindings as well as rust binaries as python packages",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/tauri-rust/pypi__maturin.md"
+  },
+  {
     "id": "pypi:mcp",
     "kind": "pypi",
     "category": "mcp-and-tools",
@@ -26542,6 +27367,20 @@
     "_path": "research/sources/office-automation/pypi__pdfplumber.md"
   },
   {
+    "id": "pypi:pefile",
+    "kind": "pypi",
+    "category": "code-signing-msix",
+    "package": "pefile",
+    "version": "2024.8.26",
+    "url": "https://pypi.org/project/pefile/",
+    "home_page": "https://github.com/erocarrera/pefile",
+    "license": "MIT",
+    "requires_python": ">=3.6.0",
+    "summary": "Python PE parsing module",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/code-signing-msix/pypi__pefile.md"
+  },
+  {
     "id": "pypi:phoenix",
     "kind": "pypi",
     "category": "observability-evals",
@@ -27151,6 +27990,18 @@
     "_path": "research/sources/system-control/pypi__pygetwindow.md"
   },
   {
+    "id": "pypi:pyjwt",
+    "kind": "pypi",
+    "category": "licensing-drm",
+    "package": "PyJWT",
+    "version": "2.15.1",
+    "url": "https://pypi.org/project/PyJWT/",
+    "requires_python": ">=3.9",
+    "summary": "JSON Web Token implementation in Python",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/licensing-drm/pypi__pyjwt.md"
+  },
+  {
     "id": "pypi:pykeepass",
     "kind": "pypi",
     "category": "crypto-privacy",
@@ -27579,6 +28430,18 @@
     "summary": ".NET and Mono integration for Python",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/pypi__pythonnet.md"
+  },
+  {
+    "id": "pypi:pythonnet",
+    "kind": "pypi",
+    "category": "winui-dotnet",
+    "package": "pythonnet",
+    "version": "3.2.1",
+    "url": "https://pypi.org/project/pythonnet/",
+    "requires_python": "<3.16,>=3.11",
+    "summary": ".NET and Mono integration for Python",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/winui-dotnet/pypi__pythonnet.md"
   },
   {
     "id": "pypi:pyttsx3",
@@ -28300,6 +29163,18 @@
     "requires_python": ">=3.7",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/whisper-and-asr/pypi__sherpa-onnx.md"
+  },
+  {
+    "id": "pypi:signify",
+    "kind": "pypi",
+    "category": "code-signing-msix",
+    "package": "signify",
+    "version": "0.9.3",
+    "url": "https://pypi.org/project/signify/",
+    "requires_python": ">=3.9",
+    "summary": "Module to generate and verify PE signatures",
+    "fetched_at": "2026-11-08T13:14:43Z",
+    "_path": "research/sources/code-signing-msix/pypi__signify.md"
   },
   {
     "id": "pypi:silero-vad",

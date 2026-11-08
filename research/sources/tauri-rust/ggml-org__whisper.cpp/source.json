@@ -1,0 +1,24 @@
+{
+  "id": "github:ggml-org/whisper.cpp",
+  "kind": "github",
+  "category": "tauri-rust",
+  "repo": "ggml-org/whisper.cpp",
+  "url": "https://github.com/ggml-org/whisper.cpp",
+  "description": "Port of OpenAI's Whisper model in C/C++",
+  "stars": 55011,
+  "forks": 6286,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "inference",
+    "openai",
+    "speech-recognition",
+    "speech-to-text",
+    "transformer",
+    "whisper"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T04:01:46Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}
