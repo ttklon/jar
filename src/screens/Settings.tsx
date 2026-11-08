@@ -56,6 +56,18 @@ export function Settings({
 
       <div className={styles.card}>
         <div className={styles.row}>
+          <div>
+            <Text weight="semibold">{t.settingsHotkey}</Text>
+            <Text className={styles.muted} block>
+              {t.settingsHotkeyHint}
+            </Text>
+          </div>
+          <Text className={styles.mono}>{t.settingsHotkeyValue}</Text>
+        </div>
+      </div>
+
+      <div className={styles.card}>
+        <div className={styles.row}>
           <Text weight="semibold">{t.settingsSource}</Text>
           <Text className={styles.mono}>{source}</Text>
         </div>

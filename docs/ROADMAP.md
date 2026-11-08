@@ -23,7 +23,8 @@
 
 - [x] **Tauri 2 + React 19/TS strict** (решение — [`DECISION-STACK.md`](DECISION-STACK.md)): окно, трей, capability-манифест, иконки
       генерируются скриптом, сборка UI проверяется в CI (`src-tauri/`, `src/`)
-- [ ] Хоткеи (push-to-talk `Ctrl+Alt+Z`) и Mica-эффект окна
+- [x] Глобальная клавиша `Ctrl+Alt+Z`: показывает и скрывает окно из любой программы; действий не выполняет — подтвердить что-то за человека клавиша не может
+- [ ] Mica-эффект окна: включать только там, где видно результат
 - [x] Rust-ядро: команды IPC (`registry_snapshot`, `app_status`), логирование в
       `%LOCALAPPDATA%\ZShelper\logs`, тесты реестра (`cargo test`)
 - [ ] Менеджер сайдкаров (llama.cpp/whisper.cpp)

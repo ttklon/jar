@@ -36,6 +36,9 @@ export const t = {
   navOverview: "Обзор",
   navCatalog: "Что умею",
   navSettings: "Настройки",
+  settingsHotkey: "Горячая клавиша",
+  settingsHotkeyHint: "показывает и скрывает окно из любой программы; ничего не выполняет",
+  settingsHotkeyValue: "Ctrl+Alt+Z",
 
   dataSource: {
     core: "данные из ядра",
