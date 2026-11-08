@@ -1,6 +1,6 @@
 # Недокачанное
 
-Проверено: 2026-11-08T12:38:52Z. Всего: 19.
+Проверено: 2026-11-08T12:39:16Z. Всего: 18.
 
 Дозакачать: `GITHUB_TOKEN=$(gh auth token) python3 tools/collect_sources.py fetch`
 (или `--no-github`, если GitHub недоступен).
@@ -15,7 +15,6 @@
 | github | safety-and-security | `humanwhocodes/robot-tourist` |
 | github | connectors | `microsoft/microsoft-graph-sdks` |
 | github | connectors | `n8n-io/n8n-nodes-base` |
-| github | ui-ux | `vaul?` |
 | github | packaging-and-ci | `electron/actions` |
 | github | benchmarks | `microsoft/agent-evaluation` |
 | github | office-automation | `python-openxml/python-pptx` |
