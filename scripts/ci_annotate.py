@@ -30,10 +30,16 @@ from pathlib import Path
 
 HEADER = re.compile(r"^(error|warning)(\[[A-Za-z0-9]+\])?: (?P<msg>.+)$")
 LOCATION = re.compile(r"^\s*-->\s+(?P<path>[^:]+):(?P<line>\d+):(?P<col>\d+)\s*$")
+ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
+def escape(text: str) -> str:
+    """Workflow-команды не терпят переводов строк и процентов."""
+    return text.replace("%", "%25").replace("\r", "").replace("\n", " | ")[:3500]
 
 
 def annotate(log: str, limit: int = 20) -> list[str]:
-    lines = log.splitlines()
+    lines = ANSI.sub("", log).splitlines()
     out: list[str] = []
 
     for index, line in enumerate(lines):
@@ -53,10 +59,10 @@ def annotate(log: str, limit: int = 20) -> list[str]:
             path = location.group("path").replace("\\", "/")
             out.append(
                 f"::error file={path},line={location.group('line')},"
-                f"col={location.group('col')}::{message}"
+                f"col={location.group('col')}::{escape(message)}"
             )
         else:
-            out.append(f"::error::{message}")
+            out.append(f"::error::{escape(message)}")
 
         if len(out) >= limit:
             out.append("::notice::остальные ошибки не показаны — см. полный лог джобы")
@@ -91,7 +97,14 @@ def main() -> int:
     annotations = annotate(text, limit)
 
     if not annotations:
-        print("ci_annotate: диагностик не найдено (сборка прошла или упала до компиляции)")
+        # Диагностик нет — значит упало до компиляции (нет cargo, не скачались
+        # зависимости, битый манифест). Показываем хвост лога как аннотацию:
+        # логи джоб доступны не всегда, а это единственный канал наружу.
+        tail = " | ".join(line for line in text.splitlines() if line.strip())[-3500:]
+        if tail:
+            print(f"::error title=clippy-log::{escape(tail)}")
+        else:
+            print("::error::лога нет: сборка не дошла до компилятора")
         return 0
 
     for item in annotations:

@@ -68,7 +68,12 @@ jobs:
         shell: bash
         run: |
           set +e
-          cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings > clippy.log 2>&1
+          {
+            echo "pwd: $(pwd)"
+            echo "cargo: $(command -v cargo || echo НЕ НАЙДЕН)"
+            cargo --version
+          } > clippy.log 2>&1
+          cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings >> clippy.log 2>&1
           echo "status=$?" >> "$GITHUB_OUTPUT"
 
       - name: Clippy report
