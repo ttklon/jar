@@ -1,0 +1,32 @@
+{
+  "id": "github:cawa-93/vite-electron-builder",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "cawa-93/vite-electron-builder",
+  "url": "https://github.com/cawa-93/vite-electron-builder",
+  "description": "Secure boilerplate for Electron app based on Vite. TypeScript + Vue/React/Angular/Svelte/Vanilla",
+  "stars": 2988,
+  "forks": 293,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "best-practices",
+    "boilerplate",
+    "electron",
+    "electron-builder",
+    "javascript",
+    "preact",
+    "react",
+    "solid",
+    "svelte",
+    "template",
+    "typescipt",
+    "vite",
+    "vite-electron",
+    "vue"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-03T14:05:16Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

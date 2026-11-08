@@ -1,0 +1,27 @@
+{
+  "id": "github:radix-ui/primitives",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "radix-ui/primitives",
+  "url": "https://github.com/radix-ui/primitives",
+  "description": "Radix Primitives is an open-source UI component library for building high-quality, accessible design systems and web apps. Maintained by @workos.",
+  "stars": 19478,
+  "forks": 1306,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "accessibility",
+    "colors",
+    "component-library",
+    "design-systems",
+    "radix-ui",
+    "react",
+    "ui",
+    "ui-components",
+    "ui-kit"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-14T21:52:47Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

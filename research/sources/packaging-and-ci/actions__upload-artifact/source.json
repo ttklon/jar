@@ -1,0 +1,17 @@
+{
+  "id": "github:actions/upload-artifact",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "actions/upload-artifact",
+  "url": "https://github.com/actions/upload-artifact",
+  "description": "",
+  "stars": 4253,
+  "forks": 1110,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-07T10:18:23Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

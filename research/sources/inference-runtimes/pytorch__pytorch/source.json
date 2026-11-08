@@ -1,0 +1,26 @@
+{
+  "id": "github:pytorch/pytorch",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "pytorch/pytorch",
+  "url": "https://github.com/pytorch/pytorch",
+  "description": "Tensors and Dynamic neural networks in Python with strong GPU acceleration",
+  "stars": 105252,
+  "forks": 31325,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "autograd",
+    "deep-learning",
+    "gpu",
+    "machine-learning",
+    "neural-network",
+    "numpy",
+    "python",
+    "tensor"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T09:13:18Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/windows-rs",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "microsoft/windows-rs",
+  "url": "https://github.com/microsoft/windows-rs",
+  "description": "Rust for Windows",
+  "stars": 12901,
+  "forks": 692,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T21:17:23Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

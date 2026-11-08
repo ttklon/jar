@@ -1,0 +1,20 @@
+{
+  "id": "github:punkpeye/awesome-mcp-servers",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "punkpeye/awesome-mcp-servers",
+  "url": "https://github.com/punkpeye/awesome-mcp-servers",
+  "description": "A collection of MCP servers.",
+  "stars": 97459,
+  "forks": 19450,
+  "language": "",
+  "license": "MIT",
+  "topics": [
+    "ai",
+    "mcp"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T17:59:03Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

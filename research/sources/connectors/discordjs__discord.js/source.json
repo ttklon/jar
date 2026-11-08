@@ -1,0 +1,27 @@
+{
+  "id": "github:discordjs/discord.js",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "discordjs/discord.js",
+  "url": "https://github.com/discordjs/discord.js",
+  "description": "A powerful JavaScript library for interacting with the Discord API",
+  "stars": 26825,
+  "forks": 4062,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "bot",
+    "discord",
+    "discord-api",
+    "discord-bot",
+    "discord-server",
+    "discordjs",
+    "hacktoberfest",
+    "nodejs",
+    "voice-support"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T16:38:38Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

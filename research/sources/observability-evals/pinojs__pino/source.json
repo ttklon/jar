@@ -1,0 +1,23 @@
+{
+  "id": "github:pinojs/pino",
+  "kind": "github",
+  "category": "observability-evals",
+  "repo": "pinojs/pino",
+  "url": "https://github.com/pinojs/pino",
+  "description": "🌲 super fast, all natural json logger",
+  "stars": 18290,
+  "forks": 1014,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "fast",
+    "json",
+    "logger",
+    "nodejs",
+    "pino"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-06T15:34:15Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

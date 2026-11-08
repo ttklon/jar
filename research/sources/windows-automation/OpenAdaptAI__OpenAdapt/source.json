@@ -1,0 +1,33 @@
+{
+  "id": "github:OpenAdaptAI/OpenAdapt",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "OpenAdaptAI/OpenAdapt",
+  "url": "https://github.com/OpenAdaptAI/OpenAdapt",
+  "description": "For EHRs, payer portals, and any app your team clicks through. A person or an agent shows the task; OpenAdapt turns it into a local program that repeats the steps with no model calls, checks each save, and stops when something doesn't match.",
+  "stars": 1867,
+  "forks": 280,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agent-harness",
+    "ai-agents",
+    "browser-automation",
+    "citrix",
+    "computer-use-agents",
+    "demonstration-compiler",
+    "desktop-automation",
+    "deterministic-replay",
+    "effect-verification",
+    "gui-automation",
+    "healthcare-automation",
+    "human-in-the-loop",
+    "local-first",
+    "mcp",
+    "rdp"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:19:04Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

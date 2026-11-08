@@ -1,0 +1,27 @@
+{
+  "id": "github:floating-ui/floating-ui",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "floating-ui/floating-ui",
+  "url": "https://github.com/floating-ui/floating-ui",
+  "description": "A JavaScript library to position floating elements and create interactions for them.",
+  "stars": 32793,
+  "forks": 1729,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "dropdown",
+    "hacktoberfest",
+    "popover",
+    "popovers",
+    "position",
+    "positioning",
+    "positioning-engine",
+    "tooltip",
+    "tooltip-position"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T07:07:56Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

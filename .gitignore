@@ -1,0 +1,47 @@
+# dependencies & build output
+node_modules/
+dist/
+out/
+release/
+build/
+.vite/
+.electron-vite/
+coverage/
+
+# models & user data (never commit weights)
+models/
+artifacts/
+workspace/
+snapshots/
+*.gguf
+*.safetensors
+*.onnx
+*.bin
+*.db
+*.db-wal
+*.db-shm
+
+# local config & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.pfx
+*.key
+
+# tooling caches
+__pycache__/
+.venv/
+.pytest_cache/
+.ruff_cache/
+research/discovery/_repo_cache.json
+
+# os junk
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# bulky raw downloads (keep manifests, not blobs)
+research/sources/**/*.png
+research/sources/**/*.jpg
+research/sources/**/*.pdf

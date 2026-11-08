@@ -1,0 +1,27 @@
+{
+  "id": "github:camel-ai/camel",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "camel-ai/camel",
+  "url": "https://github.com/camel-ai/camel",
+  "description": "🐫 CAMEL: The first and the best multi-agent framework. Finding the Scaling Law of Agents. https://www.camel-ai.org",
+  "stars": 18021,
+  "forks": 2141,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent",
+    "ai-societies",
+    "artificial-intelligence",
+    "communicative-ai",
+    "cooperative-ai",
+    "deep-learning",
+    "large-language-models",
+    "multi-agent-systems",
+    "natural-language-processing"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-02T10:15:02Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

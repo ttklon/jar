@@ -1,0 +1,25 @@
+{
+  "id": "github:SWE-agent/SWE-agent",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "SWE-agent/SWE-agent",
+  "url": "https://github.com/SWE-agent/SWE-agent",
+  "description": "SWE-agent takes a GitHub issue and tries to automatically fix it, using your LM of choice. It can also be employed for offensive cybersecurity or competitive coding challenges. [NeurIPS 2024]",
+  "stars": 20758,
+  "forks": 2263,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agent",
+    "agent-based-model",
+    "ai",
+    "cybersecurity",
+    "developer-tools",
+    "llm",
+    "lms"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-02T23:40:08Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

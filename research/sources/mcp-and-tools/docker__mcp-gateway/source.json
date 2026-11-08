@@ -1,0 +1,17 @@
+{
+  "id": "github:docker/mcp-gateway",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "docker/mcp-gateway",
+  "url": "https://github.com/docker/mcp-gateway",
+  "description": "docker mcp CLI plugin / MCP Gateway",
+  "stars": 1626,
+  "forks": 288,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-26T18:57:04Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

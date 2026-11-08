@@ -1,0 +1,25 @@
+{
+  "id": "github:tree-sitter/tree-sitter",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "tree-sitter/tree-sitter",
+  "url": "https://github.com/tree-sitter/tree-sitter",
+  "description": "An incremental parsing system for programming tools",
+  "stars": 27405,
+  "forks": 3024,
+  "language": "Rust",
+  "license": "MIT",
+  "topics": [
+    "c",
+    "incremental",
+    "parser",
+    "parsing",
+    "rust",
+    "tree-sitter",
+    "wasm"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T05:31:18Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

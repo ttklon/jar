@@ -1,0 +1,24 @@
+{
+  "id": "github:framer/motion",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "framer/motion",
+  "url": "https://github.com/framer/motion",
+  "description": "A modern animation library for React and JavaScript",
+  "stars": 34998,
+  "forks": 1522,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "animation",
+    "animation-js",
+    "motion",
+    "react",
+    "reactanimations",
+    "spring"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:18:21Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

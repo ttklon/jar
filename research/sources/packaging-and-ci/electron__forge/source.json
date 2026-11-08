@@ -1,0 +1,28 @@
+{
+  "id": "github:electron/forge",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "electron/forge",
+  "url": "https://github.com/electron/forge",
+  "description": ":electron: A complete tool for building and publishing Electron applications",
+  "stars": 7171,
+  "forks": 655,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "build",
+    "electron",
+    "hacktoberfest",
+    "javascript",
+    "linux",
+    "macos",
+    "package",
+    "typescript",
+    "webpack",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T10:19:23Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

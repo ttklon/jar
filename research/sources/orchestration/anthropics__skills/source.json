@@ -1,0 +1,19 @@
+{
+  "id": "github:anthropics/skills",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "anthropics/skills",
+  "url": "https://github.com/anthropics/skills",
+  "description": "Public repository for Agent Skills",
+  "stars": 189096,
+  "forks": 22292,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "agent-skills"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T22:32:32Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

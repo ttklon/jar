@@ -1,0 +1,22 @@
+{
+  "id": "github:coderamp-labs/gitingest",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "coderamp-labs/gitingest",
+  "url": "https://github.com/coderamp-labs/gitingest",
+  "description": "Replace 'hub' with 'ingest' in any GitHub URL to get a prompt-friendly extract of a codebase",
+  "stars": 16096,
+  "forks": 1209,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "ai",
+    "code",
+    "developer-tool",
+    "ingestion"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T00:39:27Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "github:TanStack/table",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "TanStack/table",
+  "url": "https://github.com/TanStack/table",
+  "description": "🤖 Headless UI for building powerful tables & datagrids for TS/JS -  React-Table, Vue-Table, Solid-Table, Svelte-Table",
+  "stars": 28555,
+  "forks": 3587,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "datagrid",
+    "datagrids",
+    "datatable",
+    "filtering",
+    "grid",
+    "grouping",
+    "hooks",
+    "javascript",
+    "pagination",
+    "react",
+    "reactjs",
+    "solid",
+    "solidjs",
+    "sorting",
+    "svelte"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-02T21:34:42Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "github:letta-ai/letta",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "letta-ai/letta",
+  "url": "https://github.com/letta-ai/letta",
+  "description": "Platform for stateful agents: AI with advanced memory that can learn and self-improve over time.",
+  "stars": 25385,
+  "forks": 2668,
+  "language": "",
+  "license": "Apache-2.0",
+  "topics": [
+    "ai",
+    "ai-agents",
+    "llm",
+    "llm-agent"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-18T22:28:04Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

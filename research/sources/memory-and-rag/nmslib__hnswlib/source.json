@@ -1,0 +1,17 @@
+{
+  "id": "github:nmslib/hnswlib",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "nmslib/hnswlib",
+  "url": "https://github.com/nmslib/hnswlib",
+  "description": "Header-only C++/python library for fast approximate nearest neighbors",
+  "stars": 5365,
+  "forks": 863,
+  "language": "C++",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-09-15T11:56:10Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "github:microsoft/security-devops-action",
+  "kind": "github",
+  "category": "safety-and-security",
+  "repo": "microsoft/security-devops-action",
+  "url": "https://github.com/microsoft/security-devops-action",
+  "description": "Microsoft Security DevOps for GitHub Actions.",
+  "stars": 164,
+  "forks": 61,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "devops",
+    "microsoft",
+    "security"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-02T04:05:41Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

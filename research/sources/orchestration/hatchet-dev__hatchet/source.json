@@ -1,0 +1,31 @@
+{
+  "id": "github:hatchet-dev/hatchet",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "hatchet-dev/hatchet",
+  "url": "https://github.com/hatchet-dev/hatchet",
+  "description": "🪓 An orchestration engine for background tasks, AI agents, and durable workflows",
+  "stars": 8245,
+  "forks": 534,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [
+    "concurrency",
+    "dag",
+    "distributed",
+    "distributed-systems",
+    "durable-execution",
+    "event-driven",
+    "fastapi",
+    "golang",
+    "nodejs",
+    "python",
+    "queue",
+    "typescript",
+    "workflow-engine"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T04:40:04Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

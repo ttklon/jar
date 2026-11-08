@@ -1,0 +1,17 @@
+{
+  "id": "github:SWivid/F5-TTS",
+  "kind": "github",
+  "category": "tts-and-voice",
+  "repo": "SWivid/F5-TTS",
+  "url": "https://github.com/SWivid/F5-TTS",
+  "description": "Official code for \"F5-TTS: A Fairytaler that Fakes Fluent and Faithful Speech with Flow Matching\"",
+  "stars": 15533,
+  "forks": 2270,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-03T15:05:10Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

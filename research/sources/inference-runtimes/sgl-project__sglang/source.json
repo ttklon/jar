@@ -1,0 +1,33 @@
+{
+  "id": "github:sgl-project/sglang",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "sgl-project/sglang",
+  "url": "https://github.com/sgl-project/sglang",
+  "description": "SGLang is a high-performance serving framework for large language models and multimodal models.",
+  "stars": 38574,
+  "forks": 10263,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "attention",
+    "blackwell",
+    "cuda",
+    "deepseek",
+    "diffusion",
+    "glm",
+    "gpt-oss",
+    "inference",
+    "llama",
+    "llm",
+    "minimax",
+    "moe",
+    "qwen",
+    "qwen-image",
+    "reinforcement-learning"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:02:41Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

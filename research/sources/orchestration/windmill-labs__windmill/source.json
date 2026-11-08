@@ -1,0 +1,31 @@
+{
+  "id": "github:windmill-labs/windmill",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "windmill-labs/windmill",
+  "url": "https://github.com/windmill-labs/windmill",
+  "description": "Code-first platform for workflows, apps and AI agents, on the fastest self-hostable orchestrator (benchmarked against Airflow, Prefect and Temporal). Business teams build with AI, engineers control what ships. Open-source alternative to Lovable, Retool and n8n.",
+  "stars": 18467,
+  "forks": 1144,
+  "language": "Rust",
+  "license": "NOASSERTION",
+  "topics": [
+    "ai-agents",
+    "airflow-alternative",
+    "internal-tools",
+    "open-source",
+    "orchestration",
+    "postgresql",
+    "python",
+    "rust",
+    "self-hostable",
+    "self-hosted",
+    "typescript",
+    "vibe-coding",
+    "workflow-engine"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T22:47:50Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

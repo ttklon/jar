@@ -1,0 +1,24 @@
+{
+  "id": "github:github/codeql-action",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "github/codeql-action",
+  "url": "https://github.com/github/codeql-action",
+  "description": "Actions for running CodeQL analysis",
+  "stars": 1669,
+  "forks": 504,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "actions",
+    "advanced-security",
+    "ci",
+    "code-scanning",
+    "codeql",
+    "semmle-ql"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T18:19:59Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

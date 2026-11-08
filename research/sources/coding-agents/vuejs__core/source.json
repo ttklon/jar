@@ -1,0 +1,17 @@
+{
+  "id": "github:vuejs/core",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "vuejs/core",
+  "url": "https://github.com/vuejs/core",
+  "description": "🖖 Vue.js is a progressive, incrementally-adoptable JavaScript framework for building UI on the web.",
+  "stars": 54856,
+  "forks": 9282,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T14:53:32Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,26 @@
+{
+  "id": "github:tailwindlabs/headlessui",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "tailwindlabs/headlessui",
+  "url": "https://github.com/tailwindlabs/headlessui",
+  "description": "Completely unstyled, fully accessible UI components, designed to integrate beautifully with Tailwind CSS.",
+  "stars": 28812,
+  "forks": 1216,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "a11y",
+    "accessibility",
+    "components",
+    "headless-ui",
+    "headlessui",
+    "react",
+    "tailwindcss",
+    "vue"
+  ],
+  "archived": false,
+  "pushed_at": "2026-04-13T16:12:31Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:actions/setup-node",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "actions/setup-node",
+  "url": "https://github.com/actions/setup-node",
+  "description": "Set up your GitHub Actions workflow with a specific version of node.js",
+  "stars": 5016,
+  "forks": 1727,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-04T02:27:47Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

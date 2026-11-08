@@ -1,0 +1,33 @@
+{
+  "id": "github:TanStack/query",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "TanStack/query",
+  "url": "https://github.com/TanStack/query",
+  "description": "🤖 Powerful asynchronous state management, server-state utilities and data fetching for the web. TS/JS, React Query, Solid Query, Svelte Query and Vue Query.",
+  "stars": 50536,
+  "forks": 4225,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "async",
+    "cache",
+    "data",
+    "fetch",
+    "graphql",
+    "hooks",
+    "query",
+    "react",
+    "rest",
+    "solid",
+    "stale",
+    "stale-while-revalidate",
+    "svelte",
+    "typescript",
+    "update"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:56:45Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

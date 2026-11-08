@@ -1,0 +1,32 @@
+{
+  "id": "github:xlang-ai/OSWorld",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "xlang-ai/OSWorld",
+  "url": "https://github.com/xlang-ai/OSWorld",
+  "description": "[NeurIPS 2024] OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments",
+  "stars": 3256,
+  "forks": 557,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent",
+    "artificial-intelligence",
+    "benchmark",
+    "cli",
+    "code-generation",
+    "gui",
+    "language-model",
+    "large-action-model",
+    "llm",
+    "multimodal",
+    "natural-language-processing",
+    "reinforcement-learning",
+    "rpa",
+    "vlm"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-02T16:12:55Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:casper-hansen/AutoAWQ",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "casper-hansen/AutoAWQ",
+  "url": "https://github.com/casper-hansen/AutoAWQ",
+  "description": "AutoAWQ implements the AWQ algorithm for 4-bit quantization with a 2x speedup during inference. Documentation:",
+  "stars": 2344,
+  "forks": 311,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": true,
+  "pushed_at": "2025-05-11T08:52:59Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

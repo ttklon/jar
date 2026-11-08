@@ -1,0 +1,33 @@
+{
+  "id": "github:mcp-use/mcp-use",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "mcp-use/mcp-use",
+  "url": "https://github.com/mcp-use/mcp-use",
+  "description": "The fullstack MCP framework to develop MCP Apps for ChatGPT / Claude & MCP Servers for AI Agents.",
+  "stars": 10855,
+  "forks": 1543,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "agent-plugins",
+    "agentic-framework",
+    "ai",
+    "apps-sdk",
+    "chatgpt",
+    "claude-code",
+    "claude-connectors",
+    "llms",
+    "mcp",
+    "mcp-apps",
+    "mcp-client",
+    "mcp-gateway",
+    "mcp-inspector",
+    "mcp-server",
+    "mcp-servers"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T20:09:55Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

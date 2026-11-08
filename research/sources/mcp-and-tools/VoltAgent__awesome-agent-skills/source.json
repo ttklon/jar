@@ -1,0 +1,30 @@
+{
+  "id": "github:VoltAgent/awesome-agent-skills",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "VoltAgent/awesome-agent-skills",
+  "url": "https://github.com/VoltAgent/awesome-agent-skills",
+  "description": "A curated collection of 1000+ agent skills from official dev teams and the community, compatible with Claude Code, Codex, Gemini CLI, Cursor, and more.",
+  "stars": 36967,
+  "forks": 4093,
+  "language": "",
+  "license": "MIT",
+  "topics": [
+    "agent-skills",
+    "ai-agents",
+    "awesome-list",
+    "claude-code",
+    "claude-code-skills",
+    "claude-skills",
+    "codex",
+    "codex-skills",
+    "cursor",
+    "cursor-skills",
+    "gemini-skills",
+    "skills"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T10:43:36Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:anchore/sbom-action",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "anchore/sbom-action",
+  "url": "https://github.com/anchore/sbom-action",
+  "description": "GitHub Action for creating software bill of materials using Syft.",
+  "stars": 265,
+  "forks": 49,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T18:36:45Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

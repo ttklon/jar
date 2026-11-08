@@ -1,0 +1,31 @@
+{
+  "id": "github:nodegit/nodegit",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "nodegit/nodegit",
+  "url": "https://github.com/nodegit/nodegit",
+  "description": "Native Node bindings to Git.",
+  "stars": 5752,
+  "forks": 708,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "c-plus-plus",
+    "electron",
+    "git",
+    "javascript",
+    "js",
+    "libgit2",
+    "linux",
+    "macos",
+    "mit",
+    "node",
+    "nodegit",
+    "nodejs",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-07-16T18:47:08Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

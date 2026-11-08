@@ -1,0 +1,26 @@
+{
+  "id": "github:inngest/inngest",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "inngest/inngest",
+  "url": "https://github.com/inngest/inngest",
+  "description": "The leading workflow orchestration platform.  Run stateful step functions and AI workflows on serverless, servers, or the edge.",
+  "stars": 6021,
+  "forks": 390,
+  "language": "Go",
+  "license": "NOASSERTION",
+  "topics": [
+    "cli",
+    "event-driven",
+    "event-driven-architecture",
+    "queues",
+    "serverless",
+    "serverless-functions",
+    "workflow-engine",
+    "workflows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:26:24Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

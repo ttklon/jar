@@ -1,0 +1,24 @@
+{
+  "id": "github:BrowserMCP/mcp",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "BrowserMCP/mcp",
+  "url": "https://github.com/BrowserMCP/mcp",
+  "description": "Browser MCP is a Model Context Provider (MCP) server that allows AI applications to control your browser",
+  "stars": 7311,
+  "forks": 603,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "browser-automation",
+    "browser-extension",
+    "claude",
+    "cursor",
+    "mcp",
+    "mcp-server"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T10:48:19Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

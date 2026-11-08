@@ -1,0 +1,23 @@
+{
+  "id": "github:python-telegram-bot/python-telegram-bot",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "python-telegram-bot/python-telegram-bot",
+  "url": "https://github.com/python-telegram-bot/python-telegram-bot",
+  "description": "We have made you a wrapper you can't refuse",
+  "stars": 29564,
+  "forks": 6182,
+  "language": "Python",
+  "license": "GPL-3.0",
+  "topics": [
+    "bot",
+    "chatbot",
+    "framework",
+    "python",
+    "telegram"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-01T02:46:46Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:electron/electron-docs-linter",
+  "kind": "github",
+  "category": "electron-shell",
+  "repo": "electron/electron-docs-linter",
+  "url": "https://github.com/electron/electron-docs-linter",
+  "description": "Parse and validate Electron's API documentation",
+  "stars": 21,
+  "forks": 18,
+  "language": "JavaScript",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": true,
+  "pushed_at": "2026-08-02T07:51:06Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

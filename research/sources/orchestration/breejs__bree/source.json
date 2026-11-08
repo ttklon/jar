@@ -1,0 +1,33 @@
+{
+  "id": "github:breejs/bree",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "breejs/bree",
+  "url": "https://github.com/breejs/bree",
+  "description": "Bree is a Node.js and JavaScript job task scheduler with worker threads, cron, Date, and human syntax. Built for @ladjs, @forwardemail, @spamscanner, @cabinjs.",
+  "stars": 3298,
+  "forks": 91,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "cancelable",
+    "concurrency",
+    "cron",
+    "cronjob",
+    "crontab",
+    "human",
+    "job",
+    "jobs",
+    "ms",
+    "node",
+    "processes",
+    "retries",
+    "sandboxed",
+    "scheduler",
+    "simple"
+  ],
+  "archived": false,
+  "pushed_at": "2026-02-17T22:09:07Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

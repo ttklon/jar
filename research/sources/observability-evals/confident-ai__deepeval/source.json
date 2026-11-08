@@ -1,0 +1,24 @@
+{
+  "id": "github:confident-ai/deepeval",
+  "kind": "github",
+  "category": "observability-evals",
+  "repo": "confident-ai/deepeval",
+  "url": "https://github.com/confident-ai/deepeval",
+  "description": "The LLM Evaluation Framework",
+  "stars": 19363,
+  "forks": 2177,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "evaluation-framework",
+    "evaluation-metrics",
+    "llm-evaluation",
+    "llm-evaluation-framework",
+    "llm-evaluation-metrics",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T21:30:17Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

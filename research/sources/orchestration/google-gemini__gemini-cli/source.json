@@ -1,0 +1,25 @@
+{
+  "id": "github:google-gemini/gemini-cli",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "google-gemini/gemini-cli",
+  "url": "https://github.com/google-gemini/gemini-cli",
+  "description": "An open-source AI agent that brings the power of Gemini directly into your terminal.",
+  "stars": 108778,
+  "forks": 14934,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "ai",
+    "ai-agents",
+    "cli",
+    "gemini",
+    "gemini-api",
+    "mcp-client",
+    "mcp-server"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T01:08:20Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

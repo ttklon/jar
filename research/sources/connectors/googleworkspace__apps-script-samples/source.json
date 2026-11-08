@@ -1,0 +1,28 @@
+{
+  "id": "github:googleworkspace/apps-script-samples",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "googleworkspace/apps-script-samples",
+  "url": "https://github.com/googleworkspace/apps-script-samples",
+  "description": "Apps Script samples for Google Workspace products.",
+  "stars": 5265,
+  "forks": 2006,
+  "language": "JavaScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "adminsdk",
+    "apps-script",
+    "calendar",
+    "classroom",
+    "cloud",
+    "drive",
+    "google-apps-script",
+    "google-workspace",
+    "gsuite",
+    "samples"
+  ],
+  "archived": false,
+  "pushed_at": "2026-07-30T15:21:47Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

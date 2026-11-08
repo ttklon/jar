@@ -1,0 +1,17 @@
+{
+  "id": "github:dependabot/fetch-metadata",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "dependabot/fetch-metadata",
+  "url": "https://github.com/dependabot/fetch-metadata",
+  "description": "Extract information about the dependencies being updated by a Dependabot-generated PR.",
+  "stars": 344,
+  "forks": 125,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T23:17:56Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

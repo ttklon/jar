@@ -1,0 +1,25 @@
+{
+  "id": "github:isomorphic-git/isomorphic-git",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "isomorphic-git/isomorphic-git",
+  "url": "https://github.com/isomorphic-git/isomorphic-git",
+  "description": "A pure JavaScript implementation of git for node and browsers!",
+  "stars": 8387,
+  "forks": 515,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "browser",
+    "git",
+    "hacktoberfest",
+    "isomorphic-javascript",
+    "javascript",
+    "nodejs",
+    "vcs"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T13:03:33Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

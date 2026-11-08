@@ -1,0 +1,17 @@
+{
+  "id": "github:vocodedev/vocode-core",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "vocodedev/vocode-core",
+  "url": "https://github.com/vocodedev/vocode-core",
+  "description": "🤖 Build voice-based LLM agents. Modular + open source.",
+  "stars": 3809,
+  "forks": 655,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2024-11-15T22:16:58Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:winstonjs/winston",
+  "kind": "github",
+  "category": "observability-evals",
+  "repo": "winstonjs/winston",
+  "url": "https://github.com/winstonjs/winston",
+  "description": "A logger for just about everything.",
+  "stars": 24528,
+  "forks": 1856,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-07-20T19:12:28Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

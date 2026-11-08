@@ -1,0 +1,33 @@
+{
+  "id": "github:getsentry/sentry-javascript",
+  "kind": "github",
+  "category": "observability-evals",
+  "repo": "getsentry/sentry-javascript",
+  "url": "https://github.com/getsentry/sentry-javascript",
+  "description": "Official Sentry SDKs for JavaScript",
+  "stars": 8772,
+  "forks": 1890,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "angular",
+    "crash-reporting",
+    "ember",
+    "error-monitoring",
+    "hacktoberfest",
+    "javascript",
+    "javascript-client",
+    "nextjs",
+    "node",
+    "raven",
+    "react",
+    "sdk",
+    "sentry",
+    "sentry-client",
+    "tag-production"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T11:50:01Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

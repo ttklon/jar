@@ -1,0 +1,24 @@
+{
+  "id": "github:obsidianmd/obsidian-releases",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "obsidianmd/obsidian-releases",
+  "url": "https://github.com/obsidianmd/obsidian-releases",
+  "description": "Community plugins list, theme list, and releases of Obsidian.",
+  "stars": 23123,
+  "forks": 7945,
+  "language": "",
+  "license": "NOASSERTION",
+  "topics": [
+    "bases",
+    "jsoncanvas",
+    "markdown",
+    "md",
+    "obsidian",
+    "obsidian-md"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:20:19Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

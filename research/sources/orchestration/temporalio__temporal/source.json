@@ -1,0 +1,33 @@
+{
+  "id": "github:temporalio/temporal",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "temporalio/temporal",
+  "url": "https://github.com/temporalio/temporal",
+  "description": "Temporal service",
+  "stars": 24258,
+  "forks": 2073,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [
+    "cronjob-scheduler",
+    "distributed-cron",
+    "distributed-systems",
+    "durable-execution",
+    "golang",
+    "microservice-framework",
+    "microservice-orchestration",
+    "microservices-architecture",
+    "orchestrator",
+    "service-bus",
+    "service-fabric",
+    "workflow-automation",
+    "workflow-engine",
+    "workflow-management",
+    "workflow-management-system"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T09:30:33Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

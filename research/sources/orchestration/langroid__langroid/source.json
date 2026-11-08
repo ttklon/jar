@@ -1,0 +1,33 @@
+{
+  "id": "github:langroid/langroid",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "langroid/langroid",
+  "url": "https://github.com/langroid/langroid",
+  "description": "Harness LLMs with Multi-Agent Programming",
+  "stars": 4127,
+  "forks": 433,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agents",
+    "ai",
+    "chatgpt",
+    "function-calling",
+    "gpt",
+    "gpt-4",
+    "gpt4",
+    "information-retrieval",
+    "language-model",
+    "llama",
+    "llm",
+    "llm-agent",
+    "llm-framework",
+    "local-llm",
+    "multi-agent-systems"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T09:35:49Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

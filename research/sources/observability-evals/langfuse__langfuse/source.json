@@ -1,0 +1,33 @@
+{
+  "id": "github:langfuse/langfuse",
+  "kind": "github",
+  "category": "observability-evals",
+  "repo": "langfuse/langfuse",
+  "url": "https://github.com/langfuse/langfuse",
+  "description": "🪢 Open source agent evals & observability: Trace, evaluate, and improve LLM applications with one open platform.",
+  "stars": 37141,
+  "forks": 4171,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "analytics",
+    "autogen",
+    "evaluation",
+    "langchain",
+    "large-language-models",
+    "llama-index",
+    "llm",
+    "llm-evaluation",
+    "llm-observability",
+    "llmops",
+    "monitoring",
+    "observability",
+    "open-source",
+    "openai",
+    "playground"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:59:40Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "github:microsoft/playwright-mcp",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "microsoft/playwright-mcp",
+  "url": "https://github.com/microsoft/playwright-mcp",
+  "description": "Playwright MCP server",
+  "stars": 39322,
+  "forks": 3402,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "mcp",
+    "playwright"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T22:49:45Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "github:nodejs/node",
+  "kind": "github",
+  "category": "electron-shell",
+  "repo": "nodejs/node",
+  "url": "https://github.com/nodejs/node",
+  "description": "Node.js JavaScript runtime ✨🐢🚀✨",
+  "stars": 123412,
+  "forks": 38746,
+  "language": "JavaScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "javascript",
+    "js",
+    "linux",
+    "macos",
+    "mit",
+    "node",
+    "nodejs",
+    "runtime",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:26:28Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

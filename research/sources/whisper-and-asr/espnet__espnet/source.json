@@ -1,0 +1,33 @@
+{
+  "id": "github:espnet/espnet",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "espnet/espnet",
+  "url": "https://github.com/espnet/espnet",
+  "description": "End-to-End Speech Processing Toolkit",
+  "stars": 10010,
+  "forks": 2446,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "chainer",
+    "deep-learning",
+    "end-to-end",
+    "kaldi",
+    "machine-translation",
+    "pytorch",
+    "singing-voice-synthesis",
+    "speaker-diarization",
+    "speech-enhancement",
+    "speech-recognition",
+    "speech-separation",
+    "speech-synthesis",
+    "speech-translation",
+    "spoken-language-understanding",
+    "text-to-speech"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T00:57:55Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

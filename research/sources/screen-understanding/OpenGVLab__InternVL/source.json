@@ -1,0 +1,30 @@
+{
+  "id": "github:OpenGVLab/InternVL",
+  "kind": "github",
+  "category": "screen-understanding",
+  "repo": "OpenGVLab/InternVL",
+  "url": "https://github.com/OpenGVLab/InternVL",
+  "description": "[CVPR 2024 Oral] InternVL Family: A Pioneering Open-Source Alternative to GPT-4o.  接近GPT-4o表现的开源多模态对话模型",
+  "stars": 10169,
+  "forks": 792,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "gpt",
+    "gpt-4o",
+    "gpt-4v",
+    "image-classification",
+    "image-text-retrieval",
+    "llm",
+    "multi-modal",
+    "semantic-segmentation",
+    "video-classification",
+    "vision-language-model",
+    "vit-22b",
+    "vit-6b"
+  ],
+  "archived": false,
+  "pushed_at": "2025-09-22T01:36:48Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

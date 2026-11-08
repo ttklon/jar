@@ -1,0 +1,33 @@
+{
+  "id": "github:storybookjs/storybook",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "storybookjs/storybook",
+  "url": "https://github.com/storybookjs/storybook",
+  "description": "Storybook is the industry standard workshop for building, documenting, and testing UI components in isolation",
+  "stars": 91485,
+  "forks": 10504,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "angular",
+    "components",
+    "design-systems",
+    "documentation",
+    "html",
+    "javascript",
+    "react",
+    "react-native",
+    "stories",
+    "storybook",
+    "styleguide",
+    "svelte",
+    "testing",
+    "typescript",
+    "ui"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:34:03Z",
+  "default_branch": "next",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

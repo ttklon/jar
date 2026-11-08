@@ -1,0 +1,33 @@
+{
+  "id": "github:langchain-ai/langgraph",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "langchain-ai/langgraph",
+  "url": "https://github.com/langchain-ai/langgraph",
+  "description": "Build resilient agents.",
+  "stars": 44641,
+  "forks": 7692,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agents",
+    "ai",
+    "ai-agents",
+    "chatgpt",
+    "deepagents",
+    "enterprise",
+    "framework",
+    "gemini",
+    "generative-ai",
+    "langchain",
+    "langgraph",
+    "llm",
+    "multiagent",
+    "open-source",
+    "openai"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T00:33:40Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

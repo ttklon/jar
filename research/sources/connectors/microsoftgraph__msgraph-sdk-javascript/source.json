@@ -1,0 +1,23 @@
+{
+  "id": "github:microsoftgraph/msgraph-sdk-javascript",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "microsoftgraph/msgraph-sdk-javascript",
+  "url": "https://github.com/microsoftgraph/msgraph-sdk-javascript",
+  "description": "Microsoft Graph client library for JavaScript",
+  "stars": 836,
+  "forks": 240,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "devxeng",
+    "js-sdk",
+    "microsoft-graph",
+    "microsoft-graph-sdk",
+    "typescript"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T23:29:26Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

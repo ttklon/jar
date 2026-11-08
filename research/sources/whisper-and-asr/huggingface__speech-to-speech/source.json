@@ -1,0 +1,27 @@
+{
+  "id": "github:huggingface/speech-to-speech",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "huggingface/speech-to-speech",
+  "url": "https://github.com/huggingface/speech-to-speech",
+  "description": "Build voice agents with open-source models",
+  "stars": 13655,
+  "forks": 1688,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "ai",
+    "assistant",
+    "language-model",
+    "machine-learning",
+    "python",
+    "speech",
+    "speech-synthesis",
+    "speech-to-text",
+    "speech-translation"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T07:00:52Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

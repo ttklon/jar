@@ -1,0 +1,17 @@
+{
+  "id": "github:openai/codex",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "openai/codex",
+  "url": "https://github.com/openai/codex",
+  "description": "Lightweight coding agent that runs in your terminal",
+  "stars": 133626,
+  "forks": 21186,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-08T05:59:28Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

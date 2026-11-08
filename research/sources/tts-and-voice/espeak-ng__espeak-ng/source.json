@@ -1,0 +1,23 @@
+{
+  "id": "github:espeak-ng/espeak-ng",
+  "kind": "github",
+  "category": "tts-and-voice",
+  "repo": "espeak-ng/espeak-ng",
+  "url": "https://github.com/espeak-ng/espeak-ng",
+  "description": "eSpeak NG is an open source speech synthesizer that supports more than hundred languages and accents.",
+  "stars": 7010,
+  "forks": 1335,
+  "language": "C",
+  "license": "GPL-3.0",
+  "topics": [
+    "android",
+    "espeak",
+    "espeak-ng",
+    "speech-synthesis",
+    "text-to-speech"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:53:38Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

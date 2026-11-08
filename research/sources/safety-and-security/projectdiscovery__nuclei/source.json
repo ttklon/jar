@@ -1,0 +1,29 @@
+{
+  "id": "github:projectdiscovery/nuclei",
+  "kind": "github",
+  "category": "safety-and-security",
+  "repo": "projectdiscovery/nuclei",
+  "url": "https://github.com/projectdiscovery/nuclei",
+  "description": "Nuclei is a fast, customizable vulnerability scanner powered by the global security community and built on a simple YAML-based DSL, enabling collaboration to tackle trending vulnerabilities on the internet. It helps you find vulnerabilities in your applications, APIs, networks, DNS, and cloud configurations.",
+  "stars": 32668,
+  "forks": 3980,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [
+    "attack-surface",
+    "cve-scanner",
+    "dast",
+    "hacktoberfest",
+    "nuclei-engine",
+    "security",
+    "security-scanner",
+    "subdomain-takeover",
+    "vulnerability-assessment",
+    "vulnerability-detection",
+    "vulnerability-scanner"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T22:50:09Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

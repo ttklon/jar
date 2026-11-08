@@ -1,0 +1,32 @@
+{
+  "id": "github:bytedance/UI-TARS-desktop",
+  "kind": "github",
+  "category": "screen-understanding",
+  "repo": "bytedance/UI-TARS-desktop",
+  "url": "https://github.com/bytedance/UI-TARS-desktop",
+  "description": "The Open-Source Multimodal AI Agent Stack: Connecting Cutting-Edge AI Models and Agent Infra",
+  "stars": 39570,
+  "forks": 4027,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent",
+    "agent-tars",
+    "browser-use",
+    "computer-use",
+    "cowork",
+    "gui-agent",
+    "gui-operator",
+    "mcp",
+    "mcp-server",
+    "multimodal",
+    "tars",
+    "ui-tars",
+    "vision",
+    "vlm"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-09T01:29:53Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

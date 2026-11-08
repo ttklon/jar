@@ -1,0 +1,25 @@
+{
+  "id": "github:OpenInterpreter/open-interpreter",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "OpenInterpreter/open-interpreter",
+  "url": "https://github.com/OpenInterpreter/open-interpreter",
+  "description": "A coding agent for open models like Kimi K3 and GLM 5.3",
+  "stars": 68835,
+  "forks": 5938,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [
+    "acp",
+    "coding-agent",
+    "deepseek",
+    "kimi",
+    "python",
+    "qwen",
+    "rust"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:04:06Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

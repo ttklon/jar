@@ -1,0 +1,24 @@
+{
+  "id": "github:SnosMe/uiohook-napi",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "SnosMe/uiohook-napi",
+  "url": "https://github.com/SnosMe/uiohook-napi",
+  "description": "",
+  "stars": 244,
+  "forks": 67,
+  "language": "C",
+  "license": "MIT",
+  "topics": [
+    "cross-platform",
+    "global-hooks",
+    "keyboard-events",
+    "mouse-events",
+    "n-api",
+    "nodejs"
+  ],
+  "archived": false,
+  "pushed_at": "2026-03-21T18:18:41Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

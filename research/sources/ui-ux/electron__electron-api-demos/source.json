@@ -1,0 +1,17 @@
+{
+  "id": "github:electron/electron-api-demos",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "electron/electron-api-demos",
+  "url": "https://github.com/electron/electron-api-demos",
+  "description": "Explore the Electron APIs",
+  "stars": 10224,
+  "forks": 2075,
+  "language": "HTML",
+  "license": "MIT",
+  "topics": [],
+  "archived": true,
+  "pushed_at": "2026-08-02T07:50:52Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

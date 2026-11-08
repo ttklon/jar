@@ -1,0 +1,17 @@
+{
+  "id": "github:actions/download-artifact",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "actions/download-artifact",
+  "url": "https://github.com/actions/download-artifact",
+  "description": "",
+  "stars": 1927,
+  "forks": 754,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-07T10:19:59Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

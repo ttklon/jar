@@ -1,0 +1,30 @@
+{
+  "id": "github:semgrep/semgrep",
+  "kind": "github",
+  "category": "safety-and-security",
+  "repo": "semgrep/semgrep",
+  "url": "https://github.com/semgrep/semgrep",
+  "description": "Lightweight static analysis for many languages. Find bug variants with patterns that look like source code.",
+  "stars": 17547,
+  "forks": 1158,
+  "language": "C",
+  "license": "LGPL-2.1",
+  "topics": [
+    "c",
+    "go",
+    "java",
+    "javascript",
+    "python",
+    "r2c",
+    "ruby",
+    "sast",
+    "semgrep",
+    "static-analysis",
+    "static-code-analysis",
+    "typescript"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T00:05:37Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

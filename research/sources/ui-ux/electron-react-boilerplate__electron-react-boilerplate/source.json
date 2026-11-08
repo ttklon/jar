@@ -1,0 +1,26 @@
+{
+  "id": "github:electron-react-boilerplate/electron-react-boilerplate",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "electron-react-boilerplate/electron-react-boilerplate",
+  "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate",
+  "description": "A Foundation for Scalable Cross-Platform Apps",
+  "stars": 24251,
+  "forks": 3948,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "babel",
+    "boilerplate",
+    "electron",
+    "eslint",
+    "javascript",
+    "react",
+    "typescript",
+    "webpack"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-30T03:05:55Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

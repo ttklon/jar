@@ -1,0 +1,17 @@
+{
+  "id": "github:obsidianmd/obsidian-api",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "obsidianmd/obsidian-api",
+  "url": "https://github.com/obsidianmd/obsidian-api",
+  "description": "Type definitions for the latest Obsidian API.",
+  "stars": 2351,
+  "forks": 275,
+  "language": "",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-05T19:06:25Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

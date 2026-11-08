@@ -1,0 +1,22 @@
+{
+  "id": "github:upstash/context7",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "upstash/context7",
+  "url": "https://github.com/upstash/context7",
+  "description": "Context7 Platform -- Up-to-date docs for AI agents",
+  "stars": 64345,
+  "forks": 3227,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "llm",
+    "mcp",
+    "mcp-server",
+    "vibe-coding"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T21:31:21Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

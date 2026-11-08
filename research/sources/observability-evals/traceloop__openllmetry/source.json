@@ -1,0 +1,33 @@
+{
+  "id": "github:traceloop/openllmetry",
+  "kind": "github",
+  "category": "observability-evals",
+  "repo": "traceloop/openllmetry",
+  "url": "https://github.com/traceloop/openllmetry",
+  "description": "Open-source observability for your GenAI or LLM application, based on OpenTelemetry",
+  "stars": 7527,
+  "forks": 1188,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "artifical-intelligence",
+    "datascience",
+    "generative-ai",
+    "good-first-issue",
+    "good-first-issues",
+    "help-wanted",
+    "llm",
+    "llmops",
+    "metrics",
+    "ml",
+    "model-monitoring",
+    "monitoring",
+    "observability",
+    "open-source",
+    "open-telemetry"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T16:26:50Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "github:ggml-org/ggml",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "ggml-org/ggml",
+  "url": "https://github.com/ggml-org/ggml",
+  "description": "Tensor library for machine learning",
+  "stars": 15592,
+  "forks": 1922,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "machine-learning"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:24:25Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

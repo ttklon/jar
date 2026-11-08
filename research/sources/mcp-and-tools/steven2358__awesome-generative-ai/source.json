@@ -1,0 +1,26 @@
+{
+  "id": "github:steven2358/awesome-generative-ai",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "steven2358/awesome-generative-ai",
+  "url": "https://github.com/steven2358/awesome-generative-ai",
+  "description": "A curated list of modern Generative Artificial Intelligence projects and services",
+  "stars": 12816,
+  "forks": 2704,
+  "language": "",
+  "license": "CC0-1.0",
+  "topics": [
+    "ai",
+    "artificial-intelligence",
+    "awesome",
+    "awesome-list",
+    "generative-ai",
+    "generative-art",
+    "large-language-models",
+    "llm"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-30T17:31:48Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

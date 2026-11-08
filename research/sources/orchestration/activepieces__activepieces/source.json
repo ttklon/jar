@@ -1,0 +1,31 @@
+{
+  "id": "github:activepieces/activepieces",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "activepieces/activepieces",
+  "url": "https://github.com/activepieces/activepieces",
+  "description": "AI Agents & MCPs & AI Workflow Automation • (~400 MCP servers for AI agents) • AI Automation / AI Agent with MCPs • AI Workflows & AI Agents • MCPs for AI Agents",
+  "stars": 25426,
+  "forks": 4443,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "ai-agent",
+    "ai-agent-tools",
+    "ai-agents",
+    "ai-agents-framework",
+    "mcp",
+    "mcp-server",
+    "mcp-tools",
+    "mcps",
+    "n8n-alternative",
+    "no-code-automation",
+    "workflow",
+    "workflow-automation",
+    "workflows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:08:14Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/pyright",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "microsoft/pyright",
+  "url": "https://github.com/microsoft/pyright",
+  "description": "Static Type Checker for Python",
+  "stars": 15733,
+  "forks": 1842,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T00:45:28Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

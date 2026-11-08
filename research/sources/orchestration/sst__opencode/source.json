@@ -1,0 +1,17 @@
+{
+  "id": "github:sst/opencode",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "sst/opencode",
+  "url": "https://github.com/sst/opencode",
+  "description": "The open source coding agent.",
+  "stars": 225393,
+  "forks": 30433,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:10:59Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

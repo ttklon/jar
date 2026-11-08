@@ -1,0 +1,23 @@
+{
+  "id": "github:duckdb/duckdb",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "duckdb/duckdb",
+  "url": "https://github.com/duckdb/duckdb",
+  "description": "DuckDB is a high-performance analytical database system",
+  "stars": 42912,
+  "forks": 4173,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "analytics",
+    "database",
+    "embedded-database",
+    "olap",
+    "sql"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T20:55:01Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

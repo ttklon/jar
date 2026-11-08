@@ -1,0 +1,27 @@
+{
+  "id": "github:electron/electron",
+  "kind": "github",
+  "category": "electron-shell",
+  "repo": "electron/electron",
+  "url": "https://github.com/electron/electron",
+  "description": ":electron: Build cross-platform desktop apps with JavaScript, HTML, and CSS",
+  "stars": 123823,
+  "forks": 17894,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "c-plus-plus",
+    "chrome",
+    "css",
+    "electron",
+    "html",
+    "javascript",
+    "nodejs",
+    "v8",
+    "works-with-codespaces"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T03:20:41Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "github:open-webui/open-webui",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "open-webui/open-webui",
+  "url": "https://github.com/open-webui/open-webui",
+  "description": "User-friendly AI Interface (Supports Ollama, OpenAI API, ...)",
+  "stars": 158080,
+  "forks": 22982,
+  "language": "Svelte",
+  "license": "NOASSERTION",
+  "topics": [
+    "ai",
+    "llm",
+    "llm-ui",
+    "llm-webui",
+    "llms",
+    "mcp",
+    "ollama",
+    "ollama-webui",
+    "open-webui",
+    "openai",
+    "openapi",
+    "rag",
+    "self-hosted",
+    "ui",
+    "webui"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:07:52Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "github:open-telemetry/opentelemetry-js",
+  "kind": "github",
+  "category": "observability-evals",
+  "repo": "open-telemetry/opentelemetry-js",
+  "url": "https://github.com/open-telemetry/opentelemetry-js",
+  "description": "OpenTelemetry JavaScript Client",
+  "stars": 3516,
+  "forks": 1196,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "api",
+    "distributed-tracing",
+    "metrics",
+    "monitoring",
+    "telemetry"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T21:49:05Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

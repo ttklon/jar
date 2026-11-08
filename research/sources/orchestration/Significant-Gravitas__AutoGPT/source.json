@@ -1,0 +1,29 @@
+{
+  "id": "github:Significant-Gravitas/AutoGPT",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "Significant-Gravitas/AutoGPT",
+  "url": "https://github.com/Significant-Gravitas/AutoGPT",
+  "description": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.",
+  "stars": 187938,
+  "forks": 45894,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "agentic-ai",
+    "agents",
+    "ai",
+    "artificial-intelligence",
+    "autonomous-agents",
+    "claude",
+    "gpt",
+    "llama-api",
+    "llm",
+    "openai",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T05:56:51Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

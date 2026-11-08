@@ -1,0 +1,17 @@
+{
+  "id": "github:RooCodeInc/Roo-Code",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "RooCodeInc/Roo-Code",
+  "url": "https://github.com/RooCodeInc/Roo-Code",
+  "description": "Roo Code gives you a whole dev team of AI agents in your code editor.",
+  "stars": 24238,
+  "forks": 3429,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": true,
+  "pushed_at": "2026-05-15T18:08:47Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

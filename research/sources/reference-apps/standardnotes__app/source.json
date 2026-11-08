@@ -1,0 +1,26 @@
+{
+  "id": "github:standardnotes/app",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "standardnotes/app",
+  "url": "https://github.com/standardnotes/app",
+  "description": "Think fearlessly with end-to-end encrypted notes and files. For issues, visit https://standardnotes.com/forum or https://standardnotes.com/help.",
+  "stars": 6707,
+  "forks": 564,
+  "language": "TypeScript",
+  "license": "AGPL-3.0",
+  "topics": [
+    "encrypted",
+    "evernote",
+    "markdown",
+    "note-taking",
+    "notes",
+    "privacy",
+    "secure",
+    "snippets"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T03:25:02Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

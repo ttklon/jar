@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/mcp",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "microsoft/mcp",
+  "url": "https://github.com/microsoft/mcp",
+  "description": "Catalog of official Microsoft MCP (Model Context Protocol) server implementations for AI-powered data access and tool integration",
+  "stars": 3840,
+  "forks": 666,
+  "language": "C#",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-08T07:31:41Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

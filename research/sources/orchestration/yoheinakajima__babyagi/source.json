@@ -1,0 +1,17 @@
+{
+  "id": "github:yoheinakajima/babyagi",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "yoheinakajima/babyagi",
+  "url": "https://github.com/yoheinakajima/babyagi",
+  "description": "",
+  "stars": 22354,
+  "forks": 2835,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-01-31T05:05:45Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,435 @@
+---
+id: "github:nspady/google-calendar-mcp"
+kind: "github"
+category: "mcp-and-tools"
+repo: "nspady/google-calendar-mcp"
+url: "https://github.com/nspady/google-calendar-mcp"
+description: "MCP integration for Google Calendar to manage events."
+stars: 1212
+forks: 335
+language: "TypeScript"
+license: "MIT"
+archived: false
+pushed_at: "2026-10-29T20:51:00Z"
+default_branch: "main"
+fetched_at: "2026-11-08T11:20:04Z"
+---
+
+# Google Calendar MCP Server
+
+A Model Context Protocol (MCP) server that provides Google Calendar integration for AI assistants like Claude.
+
+<table>
+<tr>
+<td>
+<h3><a href="https://cocal.io/?utm_source=google_calendar_mcp&amp;utm_medium=listing&amp;utm_campaign=release"><img src="docs/images/cocal/logo.svg" alt="Cocal" width="144"></a></h3>
+<p>I also built <a href="https://cocal.io/?utm_source=google_calendar_mcp&amp;utm_medium=listing&amp;utm_campaign=release">Cocal</a>, the calendar integration I wanted for chat: a visual calendar inside Claude that shows your whole day around a proposed time, plus booking links and invites you manage from the conversation. It's hosted, so it works on desktop and mobile with no Google Cloud setup.</p>
+<p>
+<a href="docs/images/cocal/day-view.png"><img src="docs/images/cocal/day-view.png" alt="Cocal visual calendar showing work meetings and a personal gym session together on a timeline" width="300"></a>
+<a href="docs/images/cocal/event-details.png"><img src="docs/images/cocal/event-details.png" alt="Cocal event card showing attendees, timezone context, a description, and no conflicts" width="300"></a>
+</p>
+<p><sub>Real Cocal UI with sample calendar data. Click either screenshot to enlarge.</sub></p>
+<p><strong><a href="https://cocal.io/?utm_source=google_calendar_mcp&amp;utm_medium=listing&amp;utm_campaign=release">Try Cocal →</a></strong></p>
+</td>
+</tr>
+</table>
+
+---
+
+## Features
+
+- **Multi-Account Support**: Connect multiple Google accounts (e.g., work, personal) and query them simultaneously
+- **Multi-Calendar Support**: List events from multiple calendars in a single request
+- **Cross-Account Conflicts**: Detect overlapping events across any combination of calendars
+- **Event Management**: Create, update, delete, and search calendar events
+- **Recurring Events**: Advanced modification capabilities for recurring events
+- **Free/Busy Queries**: Check availability across calendars
+- **Smart Scheduling**: Natural language understanding for dates and times
+- **Intelligent Import**: Add calendar events from images, PDFs, or web links
+
+## Quick Start
+
+> Don't want to set up a Google Cloud project? [Cocal](https://cocal.io/?utm_source=google_calendar_mcp&utm_medium=listing&utm_campaign=release&utm_content=quick_start) is a hosted option that works in Claude on desktop and mobile.
+
+### Prerequisites
+
+1. A Google Cloud project with the Calendar API enabled
+2. OAuth 2.0 credentials (Desktop app type)
+
+### Google Cloud Setup
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com)
+2. Create a new project or select an existing one.
+3. Enable the [Google Calendar API](https://console.cloud.google.com/apis/library/calendar-json.googleapis.com) for your project. Ensure that the right project is selected from the top bar before enabling the API.
+4. Create OAuth 2.0 credentials:
+   - Go to Credentials
+   - Click "Create Credentials" > "OAuth client ID"
+   - Choose "User data" for the type of data that the app will be accessing
+   - Add your app name and contact information
+   - Add the following scopes (optional):
+     - `https://www.googleapis.com/auth/calendar.events` and `https://www.googleapis.com/auth/calendar`
+   - Select "Desktop app" as the application type (Important!)
+   - Save the auth key, you'll need to add its path to the JSON in the next step
+   - Add your email address as a test user under the [Audience screen](https://console.cloud.google.com/auth/audience)
+      - Note: it might take a few minutes for the test user to be added. The OAuth consent will not allow you to proceed until the test user has propagated.
+      - Note about test mode: While an app is in test mode the auth tokens will expire after 1 week and need to be refreshed (see Re-authentication section below).
+
+### Installation
+
+**Option 1: Use with npx (Recommended)**
+
+Add to your Claude Desktop configuration:
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+```json
+{
+  "mcpServers": {
+    "google-calendar": {
+      "command": "npx",
+      "args": ["@cocal/google-calendar-mcp"],
+      "env": {
+        "GOOGLE_OAUTH_CREDENTIALS": "/path/to/your/gcp-oauth.keys.json"
+      }
+    }
+  }
+}
+```
+
+**⚠️ Important Note for npx Users**: When using npx, you **must** specify the credentials file path using the `GOOGLE_OAUTH_CREDENTIALS` environment variable.
+
+**Option 2: Local Installation**
+
+```bash
+git clone https://github.com/nspady/google-calendar-mcp.git
+cd google-calendar-mcp
+npm install
+npm run build
+```
+
+Then add to Claude Desktop config using the local path or by specifying the path with the `GOOGLE_OAUTH_CREDENTIALS` environment variable.
+
+**Option 3: Docker Installation**
+
+```bash
+git clone https://github.com/nspady/google-calendar-mcp.git
+cd google-calendar-mcp
+cp /path/to/your/gcp-oauth.keys.json .
+docker compose up
+```
+
+See the [Docker deployment guide](docs/docker.md) for detailed configuration options including HTTP transport mode.
+
+### First Run
+
+1. Start Claude Desktop
+2. **Ask Claude to authenticate with the Google Calendar MCP server** (e.g., "Authenticate with Google Calendar"). This step is required before using any calendar tool — without it, requests will fail with a `-32600` error.
+3. Complete the OAuth flow in your browser
+4. You're ready to use calendar features!
+
+**Using Claude Code?** The same steps apply — just ask Claude to authenticate with the Google Calendar MCP server from your CLI session before using any calendar tool.
+
+### Re-authentication
+
+If you're in test mode (default), tokens expire after 7 days. If you are using a client like Claude Desktop it should open up a browser window to automatically re-auth. However, if you see authentication errors you can also resolve by following these steps:
+
+**For npx users:**
+```bash
+export GOOGLE_OAUTH_CREDENTIALS="/path/to/your/gcp-oauth.keys.json"
+npx @cocal/google-calendar-mcp auth
+```
+
+**For local installation:**
+```bash
+npm run auth
+```
+
+**To avoid weekly re-authentication**, publish your app to production mode (without verification):
+1. Go to Google Cloud Console → "APIs & Services" → "OAuth consent screen"
+2. Click "PUBLISH APP" and confirm
+3. Your tokens will no longer expire after 7 days but Google will show a warning about the app being unverified. 
+
+See [Authentication Guide](docs/authentication.md#avoiding-token-expiration) for details.
+
+## Service Account Authentication (optional)
+
+A service account carries its own long-lived key, so there is no browser consent step
+and no refresh token to expire. This is the alternative to publishing your OAuth app
+when the weekly re-authentication above is impractical — headless servers, containers,
+CI, or an app you would rather leave in Testing status.
+
+### Which calendars this works for
+
+| Calendar | Works? | How access is granted |
+|---|---|---|
+| Personal `@gmail.com` calendar | **Yes** | Share the calendar with the service account's e-mail address |
+| Google Workspace calendar | **Yes** | Share it, or use domain-wide delegation to impersonate a user |
+| Any calendar shared with you by someone else | No | The owner must share it with the service account directly |
+
+Sharing is what grants access — the service account is a separate identity and sees
+nothing by default. **Domain-wide delegation is not required** for the personal-calendar
+case; it is only needed if you want the service account to act *as* a user.
+
+### Limitations
+
+- **Attendees cannot be invited.** The API rejects this with *"Service accounts cannot
+  invite attendees without Domain-Wide Delegation of Authority"*. Everything else —
+  creating, updating, deleting, searching, free/busy — works normally.
+- **`calendarId` must be explicit.** `primary` refers to the service account's own,
+  empty calendar; pass the calendar's address (e.g. `you@gmail.com`) instead.
+- **`list-calendars` returns nothing.** A calendar shared with a service account does not
+  appear in its `calendarList` unless explicitly added. Address calendars by id.
+
+### Setup
+
+1. Create a service account and a JSON key in your Google Cloud project:
+
+   ```bash
+   gcloud iam service-accounts create calendar-mcp --project=YOUR_PROJECT
+   gcloud iam service-accounts keys create service-account.json \
+     --iam-account=calendar-mcp@YOUR_PROJECT.iam.gserviceaccount.com
+   ```
+
+2. In Google Calendar, open **Settings → your calendar → Share with specific people**,
+   add the service account's e-mail and grant **"Make changes to events"**.
+
+3. Point the server at the key:
+
+   ```json
+   {
+     "mcpServers": {
+       "google-calendar": {
+         "command": "npx",
+         "args": ["@cocal/google-calendar-mcp"],
+         "env": {
+           "GOOGLE_SERVICE_ACCOUNT_KEY": "/path/to/service-account.json"
+         }
+       }
+     }
+   }
+   ```
+
+The key is detected by its contents (`"type": "service_account"`), not by a mode flag,
+so switching an existing install over is a one-file change. Three things are consulted,
+and the first one that yields an answer wins:
+
+1. **`GOOGLE_SERVICE_ACCOUNT_KEY`** — an explicit demand for service account mode. If
+   that file is missing, unreadable, or not a service account key, the server **fails
+   to start** and says so, rather than falling back to OAuth and leaving you to guess
+   why.
+2. **This server's own credentials file** — `GOOGLE_OAUTH_CREDENTIALS` if you set it,
+   otherwise `gcp-oauth.keys.json`. It is read by content, so putting a service account
+   key at that path works. If it holds ordinary OAuth client credentials, that settles
+   it: you have an OAuth setup, and step 3 is skipped.
+3. **`GOOGLE_APPLICATION_CREDENTIALS`** — the shared Google variable, often already set
+   for unrelated tooling. It is consulted only when this server has no credentials file
+   of its own (`GOOGLE_OAUTH_CREDENTIALS` unset and no usable `gcp-oauth.keys.json`), so
+   it never overrides a working OAuth install. If you rely on the default
+   `gcp-oauth.keys.json` and that file goes missing, this variable is used instead; set
+   `GOOGLE_OAUTH_CREDENTIALS` explicitly to rule that out, since an explicit path that
+   can't be read fails startup rather than falling back. A problem with it is warned
+   about, never fatal.
+
+The server logs which credentials it chose, and where they came from, on every startup.
+Set `GOOGLE_SERVICE_ACCOUNT_SUBJECT` only if you are using domain-wide delegation.
+
+Treat the key file as a credential: it does not expire. `chmod 600` it, keep it out of
+version control, and delete the key in the Cloud Console if it is ever exposed.
+
+## Managing Multiple Accounts
+
+Connect multiple Google accounts and use them simultaneously.
+
+**In chat (recommended):** Use the `manage-accounts` tool to add, list, or remove accounts directly from your AI assistant - no terminal needed. See the [Authentication Guide](docs/authentication.md#managing-multiple-accounts) for details.
+
+**CLI:** For initial setup, use `npm run account auth <nickname>` (e.g., `npm run account auth work`).
+
+**HTTP / Docker:** Visit `http://localhost:3000/accounts` to manage accounts in the browser.
+
+When no `account` parameter is supplied to a tool, read-only tools merge results from all accounts, while write tools auto-select the account with appropriate permissions.
+
+## Example Usage
+
+Along with the normal capabilities you would expect for a calendar integration you can also do really dynamic, multi-step processes like:
+
+1. **Cross-calendar availability**:
+   ```
+   Please provide availability looking at both my personal and work calendar for this upcoming week.
+   I am looking for a good time to meet with someone in London for 1 hr.
+   ```
+
+2. Add events from screenshots, images and other data sources:
+   ```
+   Add this event to my calendar based on the attached screenshot.
+   ```
+   Supported image formats: PNG, JPEG, GIF
+   Images can contain event details like date, time, location, and description
+
+3. Calendar analysis:
+   ```
+   What events do I have coming up this week that aren't part of my usual routine?
+   ```
+4. Check attendance:
+   ```
+   Which events tomorrow have attendees who have not accepted the invitation?
+   ```
+5. Respond to invitations:
+   ```
+   Accept the team meeting invitation on my calendar for tomorrow at 2pm
+   ```
+   Decline with a note:
+   ```
+   Decline the Friday meeting with a note that I have a scheduling conflict
+   ```
+   Respond to recurring events:
+   ```
+   Accept just this week's standup, but keep future instances as tentative
+   ```
+   ```
+   Decline all future Monday planning meetings
+   ```
+6. Auto coordinate events:
+   ```
+   Here's some availability that was provided to me by someone. {available times}
+   Take a look at the times provided and let me know which ones are open on my calendar.
+   ```
+
+## Available Tools
+
+| Tool | Description |
+|------|-------------|
+| `list-calendars` | List all available calendars |
+| `list-events` | List events with date filtering |
+| `get-event` | Get details of a specific event by ID |
+| `search-events` | Search events by text query |
+| `create-event` | Create new calendar events, optionally colored with an event label (`eventLabelId`) |
+| `create-events` | Create multiple events in one call with shared defaults (skips conflict detection) |
+| `update-event` | Update existing events, including setting or removing an event label |
+| `delete-event` | Delete events |
+| `respond-to-event` | Respond to event invitations (Accept, Decline, Maybe, No Response) |
+| `get-freebusy` | Check availability across calendars, including external calendars |
+| `get-current-time` | Get current date and time in calendar's timezone |
+| `list-colors` | List legacy event colors, plus a calendar's event labels (custom colors) when given `calendarId` |
+| `manage-accounts` | Add, list, or remove connected Google accounts |
+
+## Documentation
+
+- [Authentication Setup](docs/authentication.md) - Detailed Google Cloud setup
+- [Advanced Usage](docs/advanced-usage.md) - Multi-account, batch operations
+- [Deployment Guide](docs/deployment.md) - HTTP transport, remote access
+- [Docker Guide](docs/docker.md) - Docker deployment with stdio and HTTP modes
+- [Architecture](docs/architecture.md) - Technical architecture overview
+- [Development](docs/development.md) - Contributing and testing
+- [Testing](docs/testing.md) - Unit and integration testing guide
+- [Multi-Account Updates](docs/multi-account-updates.md) - Current status and roadmap for multi-account support
+
+## Sponsorship
+
+If Google Calendar MCP has been useful to you and you're so inclined, I'd greatly appreciate it if you'd consider [sponsoring my open source work](https://github.com/sponsors/nspady).
+
+Thanks! – Nate
+
+## Configuration
+
+**Environment Variables:**
+
+CLI flags take precedence over environment variables. Malformed values (for example a non-numeric `PORT` or an unknown `TRANSPORT`) stop the server at startup with an error, and the resolved configuration is logged to stderr on start.
+
+| Variable | CLI flag | Default | Description |
+|----------|----------|---------|-------------|
+| `GOOGLE_OAUTH_CREDENTIALS` |  | `gcp-oauth.keys.json` in the package root | Path to the OAuth credentials file |
+| `GOOGLE_OAUTH_REDIRECT_BASE` |  | unset (loopback `http://localhost:<port>`) | Public base URL for the OAuth callback when authenticating through a tunnel or reverse proxy (see [docs/authentication.md](docs/authentication.md#remote--headless-authentication-google_oauth_redirect_base)) |
+| `GOOGLE_SERVICE_ACCOUNT_KEY` |  | unset | Path to an explicit service account key file |
+| `GOOGLE_APPLICATION_CREDENTIALS` |  | unset | Ambient Google credentials file, used when this server has no OAuth credentials file |
+| `GOOGLE_SERVICE_ACCOUNT_SUBJECT` |  | unset | Workspace user to impersonate with domain-wide delegation |
+| `GOOGLE_CALENDAR_MCP_TOKEN_PATH` |  | `$XDG_CONFIG_HOME/google-calendar-mcp/tokens.json` | Custom token storage location |
+| `XDG_CONFIG_HOME` |  | `~/.config` | Base config directory for token storage (ignored if GOOGLE_CALENDAR_MCP_TOKEN_PATH is set) |
+| `GOOGLE_ACCOUNT_MODE` |  | `normal` | Account nickname used for single-account operations and the `auth` command |
+| `ENABLED_TOOLS` | `--enable-tools` | all tools | Comma-separated list of tools to expose (see Tool Filtering) |
+| `TRANSPORT` | `--transport` | `stdio` | Transport type: `stdio` or `http` |
+| `PORT` | `--port` | `3000` | HTTP transport port (1-65535) |
+| `HOST` | `--host` | `127.0.0.1` | HTTP transport bind address |
+| `DEBUG` | `--debug` | `false` | Reserved: `true` is accepted and shown in the startup log but currently enables no extra logging |
+| `GOOGLE_CALENDAR_API_BASE_URL` |  | `https://www.googleapis.com` | Send Calendar API calls to this base URL instead (see below) |
+| `NODE_ENV` |  | unset | `test` skips startup authentication and uses the `test` account namespace (for the test suite) |
+
+`GOOGLE_CALENDAR_API_BASE_URL` is for an egress proxy that originates TLS itself, e.g. `http://127.0.0.1:10255/tenant-a/calendar`. A path prefix is kept, so requests go to `<url>/calendar/v3/...`. Calendar access tokens and request data are sent to this URL, unencrypted with `http://`, so point it only at a proxy you control. Token refresh and the login flow are unchanged: refresh still has to reach `oauth2.googleapis.com` directly or through `HTTPS_PROXY`, whatever this is set to. With `HTTPS_PROXY` set, list this URL's host in `NO_PROXY` to reach it directly; batch requests go to it directly either way.
+
+### Tool Filtering
+
+You can limit which tools are exposed to the AI assistant using the `--enable-tools` flag or `ENABLED_TOOLS` environment variable. This is useful for:
+- **Reducing context usage**: Each tool consumes tokens from the AI's context window. Limiting tools can help preserve context for longer conversations.
+- **Security**: Restrict capabilities to read-only operations or specific functionality.
+- **Simplicity**: Only expose the tools your workflow actually needs.
+
+**Via command line:**
+```bash
+npx @cocal/google-calendar-mcp start --enable-tools list-events,create-event,get-current-time
+```
+
+**Via environment variable in Claude Desktop config:**
+```json
+{
+  "mcpServers": {
+    "google-calendar": {
+      "command": "npx",
+      "args": ["@cocal/google-calendar-mcp"],
+      "env": {
+        "GOOGLE_OAUTH_CREDENTIALS": "/path/to/credentials.json",
+        "ENABLED_TOOLS": "list-events,create-event,get-current-time,update-event"
+      }
+    }
+  }
+}
+```
+
+**Available tool names:** `list-calendars`, `list-events`, `search-events`, `get-event`, `list-colors`, `create-event`, `create-events`, `update-event`, `delete-event`, `get-freebusy`, `get-current-time`, `respond-to-event`, `manage-accounts`
+
+**Note:** The `manage-accounts` tool is always available regardless of filtering, as it's needed for authentication management.
+
+When tool filtering is active, the server provides instructions to the AI assistant listing which tools are disabled. This allows the AI to inform users that additional functionality exists but is currently unavailable, without consuming the full token cost of those tool schemas.
+
+If the list is empty or contains only commas, the server will fail to start with an error.
+
+If an invalid tool name is specified, the server will fail to start with an error listing all available tools.
+
+## Security
+
+- OAuth tokens are stored securely in your system's config directory
+- Credentials never leave your local machine
+- All calendar operations require explicit user consent
+
+### Troubleshooting
+
+1. **OAuth Credentials File Not Found:**
+   - For npx users: You **must** specify the credentials file path using `GOOGLE_OAUTH_CREDENTIALS`
+   - Verify file paths are absolute and accessible
+
+2. **Authentication Errors:**
+   - Ensure your credentials file contains credentials for a **Desktop App** type
+   - Verify your user email is added as a **Test User** in the Google Cloud OAuth Consent screen
+   - Try deleting saved tokens and re-authenticating
+   - Check that no other process is blocking ports 3500-3505
+
+3. **Build Errors:**
+   - Run `npm install && npm run build` again
+   - Check Node.js version (use LTS)
+   - Delete the `build/` directory and run `npm run build`
+4. **"Something went wrong" screen during browser authentication**
+   - Run the auth command manually (see [Re-authentication](#re-authentication) above)
+   - Use a Chromium-based browser. Test app authentication may not work on some non-Chromium browsers.
+
+5. **"User Rate Limit Exceeded" errors**
+   - This typically occurs when your OAuth credentials are missing project information
+   - Ensure your `gcp-oauth.keys.json` file includes `project_id`
+   - Re-download credentials from Google Cloud Console if needed
+   - The file should have format: `{"installed": {"project_id": "your-project-id", ...}}`
+
+## License
+
+MIT
+
+## Support
+
+- [GitHub Issues](https://github.com/nspady/google-calendar-mcp/issues)
+- [Documentation](docs/)

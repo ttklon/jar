@@ -1,0 +1,28 @@
+{
+  "id": "github:run-llama/llama_index",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "run-llama/llama_index",
+  "url": "https://github.com/run-llama/llama_index",
+  "description": "LlamaIndex is the document processing platform for AI",
+  "stars": 52844,
+  "forks": 8531,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agents",
+    "application",
+    "data",
+    "fine-tuning",
+    "framework",
+    "llamaindex",
+    "llm",
+    "multi-agents",
+    "rag",
+    "vector-database"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T22:58:11Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

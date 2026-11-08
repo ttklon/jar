@@ -1,0 +1,170 @@
+---
+id: "github:jitsi/jitsi-meet-electron"
+kind: "github"
+category: "reference-apps"
+repo: "jitsi/jitsi-meet-electron"
+url: "https://github.com/jitsi/jitsi-meet-electron"
+description: "Jitsi Meet desktop application powered by :electron:"
+stars: 1636
+forks: 513
+language: "TypeScript"
+license: "Apache-2.0"
+topics:
+  - "electron"
+  - "jitsi"
+  - "jitsi-meet"
+  - "video-conferencing"
+  - "webrtc"
+archived: false
+pushed_at: "2026-10-28T17:59:09Z"
+default_branch: "master"
+fetched_at: "2026-11-08T11:20:04Z"
+---
+
+# Jitsi Meet Electron
+
+Desktop application for [Jitsi Meet] built with [Electron].
+
+![](screenshot.png)
+
+## Features
+
+- [End-to-End Encryption](https://jitsi.org/blog/e2ee/) support (BETA)
+- Works with any Jitsi Meet deployment
+- Built-in auto-updates
+- Screen sharing
+- Remote control
+- Always-On-Top window
+- Support for deeplinks such as `jitsi-meet://myroom` (will open `myroom` on the configured Jitsi instance) or `jitsi-meet://jitsi.mycompany.com/myroom` (will open `myroom` on the Jitsi instance running on `jitsi.mycompany.com`)
+
+## Installation
+
+Download our latest release and you're off to the races!
+
+| Windows | macOS | GNU/Linux (AppImage) | GNU/Linux (Deb) | GNU/Linux (Flatpak) |
+| -- | -- | -- | -- | -- |
+| [Download](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet.exe) | [Download](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet.dmg) | [x64_64](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet-x86_64.AppImage) [arm64](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet-arm64.AppImage) | [x86_64](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet-amd64.deb) [arm64](https://github.com/jitsi/jitsi-meet-electron/releases/latest/download/jitsi-meet-arm64.deb) | [<img src="https://dl.flathub.org/assets/badges/flathub-badge-en.svg" alt="Download On Flathub" height="60">](https://flathub.org/apps/details/org.jitsi.jitsi-meet) |
+
+### Homebrew
+
+For *macOS* users, you can install the application using the following command:
+
+```
+brew install --cask jitsi-meet
+```
+
+## Development
+
+If you want to hack on this project, here is how you do it.
+
+<details><summary>Show building instructions</summary>
+
+#### Installing dependencies
+
+Install Node.js 22 first (or if you use [nvm](https://github.com/nvm-sh/nvm), switch to it by running `nvm use`).
+
+<details><summary>Extra dependencies for Windows</summary>
+
+```bash
+npm install --global --production windows-build-tools
+```
+</details>
+
+<details><summary>Extra dependencies for GNU/Linux</summary>
+
+X11, PNG, and zlib development packages are necessary. On Debian-like systems, they can be installed as follows:
+
+```bash
+sudo apt install libx11-dev zlib1g-dev libpng-dev libxtst-dev
+```
+</details>
+
+Install all required packages:
+
+```bash
+npm install
+```
+
+#### Starting in development mode
+
+```bash
+npm start
+```
+
+The debugger tools are available when running in dev mode, and can be activated with keyboard shortcuts as [defined here](https://github.com/sindresorhus/electron-debug#features).
+
+They can also be displayed automatically with the application `--show-dev-tools` command line flag, or with the `SHOW_DEV_TOOLS` environment variable as shown:
+
+```bash
+SHOW_DEV_TOOLS=true npm start
+```
+
+#### Building the production distribution
+
+```bash
+npm run dist
+```
+
+#### Working with `jitsi-meet-electron-sdk`
+
+For instructions on SDK versus electron-app separation and how to set up local development using `npm link`, please refer to the [Contributing and Local Development guide in the Jitsi Handbook](https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-electron-sdk#contributing-and-local-development).
+
+#### Publishing
+
+1. Create release branch: `git checkout -b release-1-2-3`, replacing `1-2-3` with the desired release version
+2. Increment the version: `npm version patch`, replacing `patch` with `minor` or `major` as required
+3. Push release branch to github: `git push -u origin release-1-2-3`
+4. Create PR: `gh pr create`
+5. Once PR is reviewed and ready to merge, create draft Github release: `gh release create v1.2.3 --draft --title 1.2.3`, replacing `v1.2.3` and `1.2.3` with the desired release version
+6. Merge PR
+7. Github action will build binaries and attach to the draft release
+8. Test binaries from draft release
+9. If all tests are fine, publish draft release
+
+</details>
+
+## Known issues
+
+### Windows
+
+A warning that the app is unsigned will show up upon first install. This is expected.
+
+### macOS
+
+None
+
+### GNU/Linux
+
+* If you can't execute the file directly after downloading it, try running `chmod u+x ./jitsi-meet-x86_64.AppImage`
+  
+* If you experience a blank page after a Jitsi server upgrades, try removing the local cache files:
+
+  ```
+  rm -rf ~/.config/Jitsi\ Meet/
+  ```
+
+## Translations
+
+The JSON files contain all the strings inside the application, and can be translated [here](/app/i18n/lang).
+
+New translations require the addition of a line in [languages.ts](/app/i18n/languages.ts).
+
+`Localize desktop file on linux` requires the addition of a line in [package.json](/package.json).
+Please search for `Comment[hu]` as an example to help add your translation of the English string `Jitsi Meet Desktop App` for your language.
+
+## License
+
+Apache License 2.0. See the [LICENSE] file.
+
+## Community
+
+Jitsi is built by a large community of developers. If you want to participate,
+please join the [community forum].
+
+[Jitsi Meet]: https://github.com/jitsi/jitsi-meet
+[Electron]: https://electronjs.org/
+[latest release]: https://github.com/jitsi/jitsi-meet-electron/releases/latest
+[`jitsi-meet-electron-sdk`]: https://github.com/jitsi/jitsi-meet-electron-sdk
+[`jitsi-meet-electron-sdk` `README`]: https://github.com/jitsi/jitsi-meet-electron-sdk/blob/master/README.md
+[community forum]: https://community.jitsi.org/
+[LICENSE]: LICENSE

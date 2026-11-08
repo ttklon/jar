@@ -1,0 +1,17 @@
+{
+  "id": "github:electron/fuses",
+  "kind": "github",
+  "category": "electron-shell",
+  "repo": "electron/fuses",
+  "url": "https://github.com/electron/fuses",
+  "description": "",
+  "stars": 55,
+  "forks": 22,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-02T01:33:49Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

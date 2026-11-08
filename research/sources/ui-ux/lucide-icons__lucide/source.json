@@ -1,0 +1,28 @@
+{
+  "id": "github:lucide-icons/lucide",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "lucide-icons/lucide",
+  "url": "https://github.com/lucide-icons/lucide",
+  "description": "Beautiful & consistent icon toolkit made by the community. Lucide is an open-source icon library that provides 2000+ vector (svg) files for displaying icons and symbols in digital and non-digital projects.",
+  "stars": 25633,
+  "forks": 1670,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "feather-icons",
+    "figma",
+    "icons",
+    "react",
+    "svg",
+    "svg-icons",
+    "svgs",
+    "ui-components",
+    "ui-design",
+    "vue"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T14:30:50Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

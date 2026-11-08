@@ -1,0 +1,28 @@
+{
+  "id": "github:cheeriojs/cheerio",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "cheeriojs/cheerio",
+  "url": "https://github.com/cheeriojs/cheerio",
+  "description": "The fast, flexible, and elegant library for parsing and manipulating HTML and XML.",
+  "stars": 30534,
+  "forks": 1748,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "cheerio",
+    "dom",
+    "hacktoberfest",
+    "html",
+    "htmlparser",
+    "htmlparser2",
+    "jquery",
+    "parser",
+    "scraper",
+    "selector"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T02:26:26Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

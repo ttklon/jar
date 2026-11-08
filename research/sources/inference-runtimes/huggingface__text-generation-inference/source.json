@@ -1,0 +1,27 @@
+{
+  "id": "github:huggingface/text-generation-inference",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "huggingface/text-generation-inference",
+  "url": "https://github.com/huggingface/text-generation-inference",
+  "description": "Large Language Model Text Generation Inference",
+  "stars": 10882,
+  "forks": 1286,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "bloom",
+    "deep-learning",
+    "falcon",
+    "gpt",
+    "inference",
+    "nlp",
+    "pytorch",
+    "starcoder",
+    "transformer"
+  ],
+  "archived": true,
+  "pushed_at": "2026-03-21T11:34:22Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "github:openai/openai-agents-js",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "openai/openai-agents-js",
+  "url": "https://github.com/openai/openai-agents-js",
+  "description": "A lightweight, powerful framework for multi-agent workflows and voice agents",
+  "stars": 3990,
+  "forks": 1006,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "agents",
+    "openai",
+    "openai-api",
+    "realtime-api",
+    "typescript"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:37:22Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

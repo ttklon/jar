@@ -1,0 +1,18 @@
+---
+id: "github:openhardwaremonitor/openhardwaremonitor"
+kind: "github"
+category: "windows-automation"
+repo: "openhardwaremonitor/openhardwaremonitor"
+url: "https://github.com/openhardwaremonitor/openhardwaremonitor"
+description: "Open Hardware Monitor"
+stars: 6455
+forks: 1313
+language: "C#"
+license: "NOASSERTION"
+archived: false
+pushed_at: "2024-07-13T23:17:33Z"
+default_branch: "master"
+fetched_at: "2026-11-08T11:26:32Z"
+---
+
+_README not available_

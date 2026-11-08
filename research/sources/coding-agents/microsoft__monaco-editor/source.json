@@ -1,0 +1,23 @@
+{
+  "id": "github:microsoft/monaco-editor",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "microsoft/monaco-editor",
+  "url": "https://github.com/microsoft/monaco-editor",
+  "description": "A browser based code editor",
+  "stars": 46959,
+  "forks": 4167,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "browser",
+    "editor",
+    "monaco-editor",
+    "typescript",
+    "vscode"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:01:05Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

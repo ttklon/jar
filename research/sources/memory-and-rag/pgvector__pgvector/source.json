@@ -1,0 +1,20 @@
+{
+  "id": "github:pgvector/pgvector",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "pgvector/pgvector",
+  "url": "https://github.com/pgvector/pgvector",
+  "description": "Open-source vector similarity search for Postgres",
+  "stars": 23618,
+  "forks": 1382,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [
+    "approximate-nearest-neighbor-search",
+    "nearest-neighbor-search"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T07:04:51Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "github:korotovsky/slack-mcp-server",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "korotovsky/slack-mcp-server",
+  "url": "https://github.com/korotovsky/slack-mcp-server",
+  "description": "The most powerful MCP Slack Server with no permission requirements, Apps support, GovSlack, DMs, Group DMs and smart history fetch logic.",
+  "stars": 1889,
+  "forks": 392,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [
+    "assistants",
+    "govslack",
+    "llm",
+    "mcp",
+    "mcp-server",
+    "slack",
+    "slack-api"
+  ],
+  "archived": false,
+  "pushed_at": "2026-07-16T17:14:22Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

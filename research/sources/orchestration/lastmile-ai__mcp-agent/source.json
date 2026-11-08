@@ -1,0 +1,26 @@
+{
+  "id": "github:lastmile-ai/mcp-agent",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "lastmile-ai/mcp-agent",
+  "url": "https://github.com/lastmile-ai/mcp-agent",
+  "description": "Build effective agents using Model Context Protocol and simple workflow patterns",
+  "stars": 8577,
+  "forks": 893,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agents",
+    "ai",
+    "ai-agents",
+    "llm",
+    "llms",
+    "mcp",
+    "model-context-protocol",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-01-25T16:35:16Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

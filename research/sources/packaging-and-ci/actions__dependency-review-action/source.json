@@ -1,0 +1,17 @@
+{
+  "id": "github:actions/dependency-review-action",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "actions/dependency-review-action",
+  "url": "https://github.com/actions/dependency-review-action",
+  "description": "A GitHub Action for detecting vulnerable dependencies and invalid licenses in your PRs",
+  "stars": 933,
+  "forks": 194,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-31T16:34:25Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

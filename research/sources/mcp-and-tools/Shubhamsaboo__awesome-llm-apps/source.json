@@ -1,0 +1,22 @@
+{
+  "id": "github:Shubhamsaboo/awesome-llm-apps",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "Shubhamsaboo/awesome-llm-apps",
+  "url": "https://github.com/Shubhamsaboo/awesome-llm-apps",
+  "description": "100+ AI Agents, Agent Skills and RAG Apps - Free and Open Source.",
+  "stars": 144149,
+  "forks": 21209,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agents",
+    "llms",
+    "python",
+    "rag"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T05:53:36Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

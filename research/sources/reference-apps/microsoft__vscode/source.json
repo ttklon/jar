@@ -1,0 +1,23 @@
+{
+  "id": "github:microsoft/vscode",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "microsoft/vscode",
+  "url": "https://github.com/microsoft/vscode",
+  "description": "Visual Studio Code",
+  "stars": 195177,
+  "forks": 44443,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "editor",
+    "electron",
+    "microsoft",
+    "typescript",
+    "visual-studio-code"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:12:14Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

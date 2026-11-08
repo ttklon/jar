@@ -1,0 +1,17 @@
+{
+  "id": "github:huggingface/candle",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "huggingface/candle",
+  "url": "https://github.com/huggingface/candle",
+  "description": "Minimalist ML framework for Rust",
+  "stars": 21285,
+  "forks": 1856,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-02T12:05:47Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

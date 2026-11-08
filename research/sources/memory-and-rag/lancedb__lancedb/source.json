@@ -1,0 +1,26 @@
+{
+  "id": "github:lancedb/lancedb",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "lancedb/lancedb",
+  "url": "https://github.com/lancedb/lancedb",
+  "description": "Developer-friendly OSS embedded retrieval library for multimodal AI. Search More; Manage Less.",
+  "stars": 11858,
+  "forks": 1153,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [
+    "approximate-nearest-neighbor-search",
+    "image-search",
+    "nearest-neighbor-search",
+    "recommender-system",
+    "search-engine",
+    "semantic-search",
+    "similarity-search",
+    "vector-database"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T06:08:49Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

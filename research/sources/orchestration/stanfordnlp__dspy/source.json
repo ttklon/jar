@@ -1,0 +1,17 @@
+{
+  "id": "github:stanfordnlp/dspy",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "stanfordnlp/dspy",
+  "url": "https://github.com/stanfordnlp/dspy",
+  "description": "DSPy: The framework for programming—not prompting—language models",
+  "stars": 38971,
+  "forks": 3491,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T22:38:13Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

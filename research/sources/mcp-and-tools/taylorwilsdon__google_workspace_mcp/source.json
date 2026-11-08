@@ -1,0 +1,33 @@
+{
+  "id": "github:taylorwilsdon/google_workspace_mcp",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "taylorwilsdon/google_workspace_mcp",
+  "url": "https://github.com/taylorwilsdon/google_workspace_mcp",
+  "description": "Control Gmail, Google Calendar, Docs, Sheets, Slides, Chat, Forms, Tasks, Search & Drive with AI - Comprehensive Google Workspace MCP Server & CLI Tool",
+  "stars": 3483,
+  "forks": 1099,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "ai",
+    "chatgpt",
+    "claude",
+    "claude-code",
+    "claude-desktop",
+    "gmail",
+    "google-calendar",
+    "google-chat",
+    "google-docs",
+    "google-drive",
+    "google-forms",
+    "google-sheets",
+    "google-tasks",
+    "google-workspace",
+    "gsuite"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T12:02:02Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

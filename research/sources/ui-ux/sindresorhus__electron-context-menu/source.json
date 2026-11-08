@@ -1,0 +1,17 @@
+{
+  "id": "github:sindresorhus/electron-context-menu",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "sindresorhus/electron-context-menu",
+  "url": "https://github.com/sindresorhus/electron-context-menu",
+  "description": "Context menu for your Electron app",
+  "stars": 1477,
+  "forks": 165,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-09-20T13:59:39Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

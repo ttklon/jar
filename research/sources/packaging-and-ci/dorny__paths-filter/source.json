@@ -1,0 +1,22 @@
+{
+  "id": "github:dorny/paths-filter",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "dorny/paths-filter",
+  "url": "https://github.com/dorny/paths-filter",
+  "description": "Conditionally run actions based on files modified by PR, feature branch or pushed commits",
+  "stars": 3390,
+  "forks": 389,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "change-detection",
+    "ci-cd",
+    "conditional-execution",
+    "github-actions"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-27T22:03:36Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

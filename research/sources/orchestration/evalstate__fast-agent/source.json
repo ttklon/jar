@@ -1,0 +1,30 @@
+{
+  "id": "github:evalstate/fast-agent",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "evalstate/fast-agent",
+  "url": "https://github.com/evalstate/fast-agent",
+  "description": "Code, Build and Evaluate agents - excellent Model and Skills/MCP/ACP/A2A Support",
+  "stars": 3960,
+  "forks": 460,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "a2a",
+    "acp",
+    "agent",
+    "agent-framework",
+    "agent-skills",
+    "cli",
+    "mcp",
+    "mcp-client",
+    "mcp-server",
+    "python",
+    "skills",
+    "tui"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T07:07:07Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

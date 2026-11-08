@@ -1,0 +1,29 @@
+{
+  "id": "github:pyannote/pyannote-audio",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "pyannote/pyannote-audio",
+  "url": "https://github.com/pyannote/pyannote-audio",
+  "description": "Neural building blocks for speaker diarization: speech activity detection, speaker change detection, overlapped speech detection, speaker embedding",
+  "stars": 10765,
+  "forks": 1134,
+  "language": "Jupyter Notebook",
+  "license": "MIT",
+  "topics": [
+    "overlapped-speech-detection",
+    "pretrained-models",
+    "pytorch",
+    "speaker-change-detection",
+    "speaker-diarization",
+    "speaker-embedding",
+    "speaker-recognition",
+    "speaker-verification",
+    "speech-activity-detection",
+    "speech-processing",
+    "voice-activity-detection"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T13:29:54Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

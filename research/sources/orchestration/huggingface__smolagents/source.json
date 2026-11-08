@@ -1,0 +1,17 @@
+{
+  "id": "github:huggingface/smolagents",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "huggingface/smolagents",
+  "url": "https://github.com/huggingface/smolagents",
+  "description": "🤗 smolagents: a barebones library for agents that think in code.",
+  "stars": 30266,
+  "forks": 3201,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-03T18:36:41Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "github:renovatebot/renovate",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "renovatebot/renovate",
+  "url": "https://github.com/renovatebot/renovate",
+  "description": "Home of the Renovate CLI: Cross-platform Dependency Automation by Mend.io",
+  "stars": 23043,
+  "forks": 3429,
+  "language": "TypeScript",
+  "license": "AGPL-3.0",
+  "topics": [
+    "azure-devops",
+    "bitbucket",
+    "dependencies",
+    "dependencies-checking",
+    "dependency-manager",
+    "github",
+    "gitlab",
+    "npm",
+    "package-management"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:30:01Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

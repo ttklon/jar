@@ -1,0 +1,30 @@
+{
+  "id": "github:marktext/marktext",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "marktext/marktext",
+  "url": "https://github.com/marktext/marktext",
+  "description": "📝A simple and elegant markdown editor, available for Linux, macOS and Windows.",
+  "stars": 63721,
+  "forks": 4725,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "editor",
+    "electron",
+    "focus-mode",
+    "latex",
+    "linux",
+    "mac",
+    "macos",
+    "markdown",
+    "marktext",
+    "source-code",
+    "typewriter-mode",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T08:00:42Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

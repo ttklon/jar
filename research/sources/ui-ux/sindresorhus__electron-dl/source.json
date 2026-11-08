@@ -1,0 +1,17 @@
+{
+  "id": "github:sindresorhus/electron-dl",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "sindresorhus/electron-dl",
+  "url": "https://github.com/sindresorhus/electron-dl",
+  "description": "Simplified file downloads for your Electron app",
+  "stars": 1208,
+  "forks": 138,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-09-20T08:50:34Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

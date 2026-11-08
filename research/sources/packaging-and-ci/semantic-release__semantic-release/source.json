@@ -1,0 +1,30 @@
+{
+  "id": "github:semantic-release/semantic-release",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "semantic-release/semantic-release",
+  "url": "https://github.com/semantic-release/semantic-release",
+  "description": "📦🚀 Fully automated version management and package publishing",
+  "stars": 24162,
+  "forks": 1806,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "automation",
+    "changelog",
+    "package",
+    "publish",
+    "release",
+    "release-automation",
+    "release-workflow",
+    "semantic-release",
+    "semantic-version",
+    "semver",
+    "semver-release",
+    "version"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T20:44:31Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

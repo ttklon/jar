@@ -1,0 +1,20 @@
+{
+  "id": "github:softprops/action-gh-release",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "softprops/action-gh-release",
+  "url": "https://github.com/softprops/action-gh-release",
+  "description": "📦 :octocat: GitHub Action for creating GitHub Releases",
+  "stars": 5793,
+  "forks": 646,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "github-actions",
+    "github-releases"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T14:25:58Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

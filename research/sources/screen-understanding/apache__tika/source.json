@@ -1,0 +1,23 @@
+{
+  "id": "github:apache/tika",
+  "kind": "github",
+  "category": "screen-understanding",
+  "repo": "apache/tika",
+  "url": "https://github.com/apache/tika",
+  "description": "The Apache Tika toolkit detects and extracts metadata and text from over a thousand different file types (such as PPT, XLS, and PDF).",
+  "stars": 4135,
+  "forks": 1037,
+  "language": "Java",
+  "license": "Apache-2.0",
+  "topics": [
+    "content",
+    "extraction",
+    "java",
+    "metadata",
+    "tika"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T01:38:38Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

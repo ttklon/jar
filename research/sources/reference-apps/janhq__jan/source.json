@@ -1,0 +1,26 @@
+{
+  "id": "github:janhq/jan",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "janhq/jan",
+  "url": "https://github.com/janhq/jan",
+  "description": "Jan is an open source alternative to ChatGPT that runs 100% offline on your computer.",
+  "stars": 45583,
+  "forks": 3163,
+  "language": "Rust",
+  "license": "NOASSERTION",
+  "topics": [
+    "chatgpt",
+    "gpt",
+    "llamacpp",
+    "llm",
+    "localai",
+    "open-source",
+    "self-hosted",
+    "tauri"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T13:13:52Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:VRSEN/agency-swarm",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "VRSEN/agency-swarm",
+  "url": "https://github.com/VRSEN/agency-swarm",
+  "description": "Reliable Multi-Agent Orchestration Framework",
+  "stars": 4633,
+  "forks": 1063,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-02T00:31:36Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

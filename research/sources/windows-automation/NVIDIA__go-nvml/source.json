@@ -1,0 +1,17 @@
+{
+  "id": "github:NVIDIA/go-nvml",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "NVIDIA/go-nvml",
+  "url": "https://github.com/NVIDIA/go-nvml",
+  "description": "Go Bindings for the NVIDIA Management Library (NVML)",
+  "stars": 464,
+  "forks": 104,
+  "language": "C",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-05T22:40:45Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

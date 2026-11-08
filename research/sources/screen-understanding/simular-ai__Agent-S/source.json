@@ -1,0 +1,31 @@
+{
+  "id": "github:simular-ai/Agent-S",
+  "kind": "github",
+  "category": "screen-understanding",
+  "repo": "simular-ai/Agent-S",
+  "url": "https://github.com/simular-ai/Agent-S",
+  "description": "Agent S: the state-of-the-art open source computer use agents",
+  "stars": 12906,
+  "forks": 1506,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent-computer-interface",
+    "ai-agents",
+    "computer-automation",
+    "computer-use",
+    "computer-use-agent",
+    "cua",
+    "grounding",
+    "gui-agents",
+    "in-context-reinforcement-learning",
+    "memory",
+    "mllm",
+    "planning",
+    "retrieval-augmented-generation"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-30T20:56:06Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

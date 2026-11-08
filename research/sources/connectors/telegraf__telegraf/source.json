@@ -1,0 +1,28 @@
+{
+  "id": "github:telegraf/telegraf",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "telegraf/telegraf",
+  "url": "https://github.com/telegraf/telegraf",
+  "description": "Modern Telegram Bot Framework for Node.js",
+  "stars": 9203,
+  "forks": 943,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "bot",
+    "bot-api",
+    "bot-framework",
+    "hacktoberfest",
+    "middleware",
+    "telegraf",
+    "telegram",
+    "telegram-bot",
+    "telegram-bot-api",
+    "telegram-bots"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-24T15:15:55Z",
+  "default_branch": "v4",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

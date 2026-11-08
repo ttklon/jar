@@ -1,0 +1,17 @@
+{
+  "id": "github:openai/whisper",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "openai/whisper",
+  "url": "https://github.com/openai/whisper",
+  "description": "Robust Speech Recognition via Large-Scale Weak Supervision",
+  "stars": 112219,
+  "forks": 13583,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-08-31T17:19:19Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

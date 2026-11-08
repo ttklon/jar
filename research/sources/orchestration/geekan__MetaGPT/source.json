@@ -1,0 +1,23 @@
+{
+  "id": "github:geekan/MetaGPT",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "geekan/MetaGPT",
+  "url": "https://github.com/geekan/MetaGPT",
+  "description": "🌟 The Multi-Agent Framework: First AI Software Company, Towards Natural Language Programming",
+  "stars": 71215,
+  "forks": 9104,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agent",
+    "gpt",
+    "llm",
+    "metagpt",
+    "multi-agent"
+  ],
+  "archived": false,
+  "pushed_at": "2026-01-21T10:12:33Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

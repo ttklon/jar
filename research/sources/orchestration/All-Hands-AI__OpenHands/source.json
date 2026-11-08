@@ -1,0 +1,27 @@
+{
+  "id": "github:All-Hands-AI/OpenHands",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "All-Hands-AI/OpenHands",
+  "url": "https://github.com/All-Hands-AI/OpenHands",
+  "description": "🙌 OpenHands: AI-Driven Development",
+  "stars": 92929,
+  "forks": 12416,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "agent",
+    "artificial-intelligence",
+    "chatgpt",
+    "claude-ai",
+    "cli",
+    "developer-tools",
+    "gpt",
+    "llm",
+    "openai"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:28:36Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

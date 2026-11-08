@@ -1,0 +1,17 @@
+{
+  "id": "github:zed-industries/agent-client-protocol",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "zed-industries/agent-client-protocol",
+  "url": "https://github.com/zed-industries/agent-client-protocol",
+  "description": "A protocol for connecting any editor to any agent",
+  "stars": 4597,
+  "forks": 477,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T05:59:14Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

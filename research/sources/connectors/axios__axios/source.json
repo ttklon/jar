@@ -1,0 +1,23 @@
+{
+  "id": "github:axios/axios",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "axios/axios",
+  "url": "https://github.com/axios/axios",
+  "description": "Promise based HTTP client for the browser and node.js",
+  "stars": 109302,
+  "forks": 11987,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "hacktoberfest",
+    "http-client",
+    "javascript",
+    "nodejs",
+    "promise"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T12:05:11Z",
+  "default_branch": "v1.x",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

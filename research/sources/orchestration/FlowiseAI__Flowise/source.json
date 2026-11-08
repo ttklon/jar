@@ -1,0 +1,33 @@
+{
+  "id": "github:FlowiseAI/Flowise",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "FlowiseAI/Flowise",
+  "url": "https://github.com/FlowiseAI/Flowise",
+  "description": "Build AI Agents, Visually",
+  "stars": 55561,
+  "forks": 25094,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "agentic-ai",
+    "agentic-workflow",
+    "agents",
+    "artificial-intelligence",
+    "chatbot",
+    "chatgpt",
+    "javascript",
+    "langchain",
+    "large-language-models",
+    "low-code",
+    "multiagent-systems",
+    "no-code",
+    "openai",
+    "rag",
+    "react"
+  ],
+  "archived": true,
+  "pushed_at": "2026-08-13T12:38:19Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

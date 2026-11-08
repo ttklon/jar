@@ -1,0 +1,22 @@
+{
+  "id": "github:WiseLibs/better-sqlite3",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "WiseLibs/better-sqlite3",
+  "url": "https://github.com/WiseLibs/better-sqlite3",
+  "description": "The fastest and simplest library for SQLite3 in Node.js.",
+  "stars": 7547,
+  "forks": 483,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "database",
+    "sql",
+    "sqlite",
+    "sqlite3"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-10T03:10:10Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

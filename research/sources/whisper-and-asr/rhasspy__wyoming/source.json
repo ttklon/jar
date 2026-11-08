@@ -1,0 +1,17 @@
+{
+  "id": "github:rhasspy/wyoming",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "rhasspy/wyoming",
+  "url": "https://github.com/rhasspy/wyoming",
+  "description": "Peer-to-peer protocol for voice assistants",
+  "stars": 414,
+  "forks": 56,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-05T17:20:36Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

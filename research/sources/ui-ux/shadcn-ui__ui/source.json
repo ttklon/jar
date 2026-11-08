@@ -1,0 +1,33 @@
+{
+  "id": "github:shadcn-ui/ui",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "shadcn-ui/ui",
+  "url": "https://github.com/shadcn-ui/ui",
+  "description": "Composable, accessible components with thoughtful defaults. Build your own component library with code you can customize, extend, and make your own.",
+  "stars": 127608,
+  "forks": 12006,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "ai",
+    "base-ui",
+    "components",
+    "gen-ui",
+    "generative-ai",
+    "generative-ui",
+    "laravel",
+    "nextjs",
+    "radix-ui",
+    "react",
+    "react-aria",
+    "react-aria-components",
+    "shadcn",
+    "tailwindcss",
+    "tanstack"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:14:58Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

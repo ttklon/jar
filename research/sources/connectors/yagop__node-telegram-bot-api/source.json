@@ -1,0 +1,24 @@
+{
+  "id": "github:yagop/node-telegram-bot-api",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "yagop/node-telegram-bot-api",
+  "url": "https://github.com/yagop/node-telegram-bot-api",
+  "description": "Telegram Bot API for NodeJS",
+  "stars": 9216,
+  "forks": 1649,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "api",
+    "bot",
+    "bot-framework",
+    "chatbot",
+    "nodejs",
+    "telegram"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T01:07:27Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

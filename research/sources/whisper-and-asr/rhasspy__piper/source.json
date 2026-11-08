@@ -1,0 +1,21 @@
+{
+  "id": "github:rhasspy/piper",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "rhasspy/piper",
+  "url": "https://github.com/rhasspy/piper",
+  "description": "A fast, local neural text to speech system",
+  "stars": 11317,
+  "forks": 1106,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "speech-synthesis",
+    "text-to-speech",
+    "tts"
+  ],
+  "archived": true,
+  "pushed_at": "2025-08-26T15:01:29Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

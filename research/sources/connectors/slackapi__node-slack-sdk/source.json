@@ -1,0 +1,25 @@
+{
+  "id": "github:slackapi/node-slack-sdk",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "slackapi/node-slack-sdk",
+  "url": "https://github.com/slackapi/node-slack-sdk",
+  "description": "Slack Developer Kit for Node.js",
+  "stars": 3378,
+  "forks": 693,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "slack",
+    "slackapi",
+    "socket-mode",
+    "typescript",
+    "websocket",
+    "websocket-client",
+    "websockets"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T22:45:05Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

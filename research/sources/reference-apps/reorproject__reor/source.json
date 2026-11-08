@@ -1,0 +1,30 @@
+{
+  "id": "github:reorproject/reor",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "reorproject/reor",
+  "url": "https://github.com/reorproject/reor",
+  "description": "Private & local AI personal knowledge management app for high entropy people.",
+  "stars": 8536,
+  "forks": 524,
+  "language": "JavaScript",
+  "license": "AGPL-3.0",
+  "topics": [
+    "ai",
+    "lancedb",
+    "llama",
+    "llamacpp",
+    "local-first",
+    "markdown",
+    "note-taking",
+    "ollama",
+    "pkm",
+    "rag",
+    "second-brain",
+    "vector-database"
+  ],
+  "archived": true,
+  "pushed_at": "2025-05-13T21:28:59Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

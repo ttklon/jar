@@ -1,0 +1,25 @@
+{
+  "id": "github:neovim/neovim",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "neovim/neovim",
+  "url": "https://github.com/neovim/neovim",
+  "description": "Vim-fork focused on extensibility and usability",
+  "stars": 103496,
+  "forks": 7384,
+  "language": "Vim Script",
+  "license": "NOASSERTION",
+  "topics": [
+    "api",
+    "c",
+    "lua",
+    "neovim",
+    "nvim",
+    "text-editor",
+    "vim"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T05:16:13Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

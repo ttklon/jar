@@ -1,0 +1,17 @@
+{
+  "id": "github:anthropics/claude-code-action",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "anthropics/claude-code-action",
+  "url": "https://github.com/anthropics/claude-code-action",
+  "description": "",
+  "stars": 9847,
+  "forks": 2261,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T19:21:23Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

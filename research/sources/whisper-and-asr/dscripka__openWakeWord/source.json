@@ -1,0 +1,17 @@
+{
+  "id": "github:dscripka/openWakeWord",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "dscripka/openWakeWord",
+  "url": "https://github.com/dscripka/openWakeWord",
+  "description": "An open-source audio wake word (or phrase) detection framework with a focus on performance and simplicity.",
+  "stars": 2931,
+  "forks": 369,
+  "language": "Jupyter Notebook",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2025-12-30T16:47:27Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}
