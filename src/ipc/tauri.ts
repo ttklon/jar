@@ -4,7 +4,14 @@
  */
 
 import { invoke } from "@tauri-apps/api/core";
-import type { ConfirmToken, FlowView, RegistrySnapshot, StepResult, ToolView } from "./types";
+import type {
+  AuditEvent,
+  ConfirmToken,
+  FlowView,
+  RegistrySnapshot,
+  StepResult,
+  ToolView,
+} from "./types";
 
 export interface AppStatus {
   version: string;
@@ -50,4 +57,8 @@ export function runTool(
 
 export function cancelTool(): Promise<void> {
   return invoke<void>("cancel_tool");
+}
+
+export function auditTail(limit: number): Promise<AuditEvent[]> {
+  return invoke<AuditEvent[]>("audit_tail", { limit });
 }

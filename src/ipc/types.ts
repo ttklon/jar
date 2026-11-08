@@ -154,3 +154,24 @@ export interface FlowView {
   inputs: FlowInput[];
   steps: FlowStepView[];
 }
+
+/**
+ * Событие журнала — то, что ядро записало в `audit.jsonl`.
+ *
+ * В журнале нет ни путей, ни текста: только ключ действия, риск, решение политики,
+ * отпечаток аргументов и итог. Поэтому его можно показывать целиком.
+ */
+export type AuditKind = "requested" | "confirmed" | "started" | "finished" | "denied";
+
+export interface AuditEvent {
+  /** Unix-время в миллисекундах. */
+  at_ms: number;
+  kind: AuditKind;
+  /** Ключ `domain|verb|object` или `policy` для решений без действия. */
+  subject: string;
+  risk: string;
+  decision: string;
+  args_fingerprint: string;
+  outcome: string;
+  duration_ms: number;
+}

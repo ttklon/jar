@@ -8,6 +8,8 @@
 
 export type {
   Action,
+  AuditEvent,
+  AuditKind,
   ConfirmToken,
   Decision,
   Evidence,
@@ -24,7 +26,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { ConfirmToken, FlowView, StepResult, ToolView } from "./types";
+import type { AuditEvent, ConfirmToken, FlowView, StepResult, ToolView } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -96,4 +98,16 @@ export async function listFlows(): Promise<FlowView[]> {
   }
   const { listFlows: fromData } = await import("./dev");
   return fromData();
+}
+
+// ── Журнал ──────────────────────────────────────────────────────────────────
+
+/** Последние события журнала, новые сверху. В браузере журнала нет. */
+export async function auditTail(limit = 100): Promise<AuditEvent[]> {
+  if (isTauri()) {
+    const { auditTail: fromCore } = await import("./tauri");
+    return fromCore(limit);
+  }
+  const { auditTail: fromData } = await import("./dev");
+  return fromData(limit);
 }

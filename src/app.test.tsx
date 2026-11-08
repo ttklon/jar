@@ -65,6 +65,15 @@ describe("App", () => {
     expect(screen.getAllByText(/\d+ шагов/).length).toBeGreaterThan(0);
   });
 
+  it("экран «История» честно говорит, что журнала в браузере нет", async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
+
+    screen.getByRole("button", { name: "История" }).click();
+    await waitFor(() => expect(screen.getByText(/Пока пусто/)).toBeTruthy());
+    expect(screen.getByText(/В браузере журнала нет/)).toBeTruthy();
+  });
+
   it("каталог фильтрует по фразе", async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });

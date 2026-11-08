@@ -235,6 +235,13 @@ pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
         .collect()
 }
 
+/// Последние события журнала — новые сверху. Экран «Журнал» читает только это:
+/// сам файл остаётся источником истины, команда ничего не меняет.
+#[tauri::command]
+pub fn audit_tail(state: State<'_, AppState>, limit: usize) -> Vec<AuditEvent> {
+    state.inner.audit.recent(limit.clamp(1, 500))
+}
+
 /// Сценарии: план из шагов. Исполняет каждый шаг интерфейс, через `run_tool` —
 /// со своей политикой и своим доказательством.
 #[tauri::command]

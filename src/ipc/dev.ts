@@ -113,7 +113,7 @@ export async function confirmTool(
 // невозможно по той же причине, что и одиночного инструмента.
 
 import flowsJson from "../../data/flows.json";
-import type { Decision, FlowStepView, FlowView, Risk } from "./types";
+import type { AuditEvent, Decision, FlowStepView, FlowView, Risk } from "./types";
 
 const FLOW_SPECS = flowsJson as unknown as {
   id: string;
@@ -185,4 +185,12 @@ export async function listFlows(): Promise<FlowView[]> {
       steps,
     };
   });
+}
+
+/**
+ * Журнала в браузере нет: его пишет ядро на этой машине. Честный ответ — пустой
+ * список, а не выдуманные события: экран покажет «пока пусто» и объяснение.
+ */
+export async function auditTail(_limit: number): Promise<AuditEvent[]> {
+  return [];
 }

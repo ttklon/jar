@@ -14,10 +14,10 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// Одно событие журнала.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuditEvent {
     /// Unix-время в миллисекундах: сортировать и склеивать с логами проще, чем строки.
     pub at_ms: u128,
@@ -33,7 +33,7 @@ pub struct AuditEvent {
     pub duration_ms: u64,
 }
 
-#[derive(Debug, Clone, Copy, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AuditKind {
     Requested,
@@ -84,6 +84,25 @@ impl Audit {
                 tracing::warn!(%error, path = %self.path.display(), "журнал не открывается");
             }
         }
+    }
+
+    /// Последние события, новые сверху — для экрана «Журнал».
+    ///
+    /// Битая строка (например, оборванная запись при падении приложения) молча
+    /// пропускается: экран истории не должен ломаться из-за одной испорченной строки.
+    /// Поэтому журнал и пишется построчно, а не как один JSON-документ.
+    pub fn recent(&self, limit: usize) -> Vec<AuditEvent> {
+        let text = match std::fs::read_to_string(&self.path) {
+            Ok(text) => text,
+            Err(_) => return Vec::new(),
+        };
+
+        text.lines()
+            .rev()
+            .filter(|line| !line.trim().is_empty())
+            .filter_map(|line| serde_json::from_str::<AuditEvent>(line).ok())
+            .take(limit)
+            .collect()
     }
 
     /// Последние `limit` строк — для экрана истории.
@@ -151,6 +170,32 @@ mod tests {
         let tail = audit.tail(2);
         assert_eq!(tail.len(), 2);
         assert!(tail[1].contains("ok-4"));
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn recent_returns_newest_first_and_skips_broken_lines() {
+        let dir = std::env::temp_dir().join(format!("zshelper-audit-recent-{}", now_ms()));
+        let path = dir.join("audit.jsonl");
+        let audit = Audit::new(path.clone());
+        audit.write(event(AuditKind::Requested, "requested"));
+        audit.write(event(AuditKind::Finished, "ok"));
+
+        // Оборванная запись — так выглядит падение посреди строки.
+        let mut file = std::fs::OpenOptions::new()
+            .append(true)
+            .open(&path)
+            .expect("файл открывается");
+        std::io::Write::write_all(&mut file, b"{\"at_ms\": 1, \"kind\": \"fini").expect("дописано");
+        drop(file);
+
+        let recent = audit.recent(10);
+        assert_eq!(recent.len(), 2, "битая строка не должна ломать экран");
+        assert_eq!(recent[0].outcome, "ok", "сначала новые события");
+        assert_eq!(recent[1].outcome, "requested");
+
+        assert_eq!(audit.recent(1).len(), 1);
 
         let _ = std::fs::remove_dir_all(&dir);
     }

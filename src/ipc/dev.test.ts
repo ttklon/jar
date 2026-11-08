@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildStats, listFlows, listTools, registrySnapshot } from "./dev";
+import { auditTail, buildStats, listFlows, listTools, registrySnapshot } from "./dev";
 import { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
 /**
@@ -104,5 +104,11 @@ describe("сценарии в браузере", () => {
     // Сценарий исполняется тем же runTool, что и одиночный инструмент.
     const { runTool } = await import("./dev");
     await expect(runTool(first?.steps[0]?.tool ?? "", {})).rejects.toThrow(/только в приложении/);
+  });
+});
+
+describe("журнал в браузере", () => {
+  it("возвращает пустой список, а не выдуманные события", async () => {
+    await expect(auditTail(10)).resolves.toEqual([]);
   });
 });
