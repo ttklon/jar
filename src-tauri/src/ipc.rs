@@ -205,7 +205,7 @@ pub fn confirm_tool(
                 ttl_sec: TOKEN_TTL.as_secs(),
             })
         }
-        Decision::Deny => Err(decision.reason().to_string()),
+        Decision::Deny(_) => Err(decision.reason().to_string()),
         _ => Err("это действие не требует подтверждения".to_string()),
     }
 }

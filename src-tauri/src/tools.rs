@@ -181,7 +181,7 @@ fn recycle(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         registry,
         RECYCLE,
         &[("PATH", &path), ("IS_DIR", if is_dir { "1" } else { "0" })],
-        Expectation::PathAbsent(path),
+        Expectation::PathAbsent(path.clone()),
         Duration::from_secs(60),
         cancel,
     )
