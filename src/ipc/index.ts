@@ -11,6 +11,9 @@ export type {
   ConfirmToken,
   Decision,
   Evidence,
+  FlowInput,
+  FlowStepView,
+  FlowView,
   ParamSpec,
   RegistrySnapshot,
   RegistryStats,
@@ -21,7 +24,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { ConfirmToken, StepResult, ToolView } from "./types";
+import type { ConfirmToken, FlowView, StepResult, ToolView } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -79,4 +82,18 @@ export async function cancelTool(): Promise<void> {
     const { cancelTool: fromCore } = await import("./tauri");
     return fromCore();
   }
+}
+
+// ── Сценарии ────────────────────────────────────────────────────────────────
+//
+// Сценарий — это данные, а не отдельная команда ядра: шаги исполняются тем же
+// `runTool`, что и одиночный инструмент, со своими подтверждениями и журналом.
+
+export async function listFlows(): Promise<FlowView[]> {
+  if (isTauri()) {
+    const { listFlows: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { listFlows: fromData } = await import("./dev");
+  return fromData();
 }

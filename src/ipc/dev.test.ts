@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildStats, registrySnapshot } from "./dev";
+import { buildStats, listFlows, listTools, registrySnapshot } from "./dev";
 import { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
 /**
@@ -67,5 +67,42 @@ describe("registry snapshot", () => {
     expect(stats.actions).toBe(0);
     expect(stats.domains).toBe(0);
     expect(stats.byRisk.read).toBe(0);
+  });
+});
+
+describe("сценарии в браузере", () => {
+  it("каждый шаг опирается на известный инструмент и на риск своего инструмента", async () => {
+    const tools = await listTools();
+    const byKey = new Map(tools.map((tool) => [tool.registry, tool]));
+
+    const flows = await listFlows();
+    expect(flows.length).toBeGreaterThan(0);
+
+    for (const flow of flows) {
+      expect(flow.steps.length).toBeGreaterThan(0);
+      for (const step of flow.steps) {
+        const tool = byKey.get(step.tool);
+        expect(tool, `шаг ${step.tool} сценария ${flow.id}`).toBeTruthy();
+        expect(step.risk).toBe(tool?.risk);
+        expect(step.needs_token).toBe(tool?.needs_token);
+      }
+
+      // Риск сценария не может быть мягче самого опасного шага.
+      const order = ["read", "write-local", "external", "destructive", "identity", "money"];
+      const worst = flow.steps.reduce(
+        (best, step) => (order.indexOf(step.risk) > order.indexOf(best) ? step.risk : best),
+        "read" as (typeof order)[number],
+      );
+      expect(flow.risk).toBe(worst);
+    }
+  });
+
+  it("исполнение сценария в браузере честно недоступно", async () => {
+    const flows = await listFlows();
+    const first = flows[0];
+    expect(first).toBeTruthy();
+    // Сценарий исполняется тем же runTool, что и одиночный инструмент.
+    const { runTool } = await import("./dev");
+    await expect(runTool(first?.steps[0]?.tool ?? "", {})).rejects.toThrow(/только в приложении/);
   });
 });

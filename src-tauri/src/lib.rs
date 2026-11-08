@@ -3,12 +3,14 @@
 //! Порядок этапов и контракты — `docs/BUILD-GUIDE.md`. Что уже умеет ядро:
 //! * читает реестр и отдаёт его UI (`registry`);
 //! * проводит каждое действие через политику риска (`policy`) и журнал (`audit`);
-//! * выполняет десять инструментов (`tools`) с проверкой результата (`verifier`).
+//! * выполняет десять инструментов (`tools`) с проверкой результата (`verifier`);
+//! * собирает их в сценарии (`flows`) — план из шагов, каждый со своим подтверждением.
 //!
 //! Чего ещё нет: планировщика, моделей, голоса, памяти, MCP — они следующие.
 
 pub mod audit;
 pub mod executor;
+pub mod flows;
 pub mod ipc;
 pub mod logging;
 pub mod policy;
@@ -43,6 +45,7 @@ pub fn run() {
         domains = registry.stats().domains,
         verbs = registry.stats().verbs,
         tools = tools::all().len(),
+        flows = flows::all().len(),
         "реестр загружен"
     );
 
@@ -68,6 +71,7 @@ pub fn run() {
             ipc::registry_snapshot,
             ipc::app_status,
             ipc::list_tools,
+            ipc::list_flows,
             ipc::policy_for,
             ipc::confirm_tool,
             ipc::run_tool,

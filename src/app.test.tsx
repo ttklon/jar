@@ -52,6 +52,19 @@ describe("App", () => {
     expect(screen.getByText(/В браузере инструменты не выполняются/)).toBeTruthy();
   });
 
+  it("экран «Сценарии» показывает план из шагов и риск", async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
+
+    screen.getByRole("button", { name: "Сценарии" }).click();
+    await waitFor(() => expect(screen.getByText(/5 сценариев/)).toBeTruthy());
+
+    // Сценарии собираются из данных: заголовок и его шаги приходят из data/flows.json.
+    expect(screen.getByText("Как поживает компьютер")).toBeTruthy();
+    expect(screen.getAllByText(/В браузере сценарии не выполняются/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/\d+ шагов/).length).toBeGreaterThan(0);
+  });
+
   it("каталог фильтрует по фразе", async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });

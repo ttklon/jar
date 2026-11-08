@@ -11,6 +11,7 @@ import {
 } from "@fluentui/react-components";
 import {
   AppsListDetailRegular,
+  BranchRegular,
   HandRightRegular,
   HomeRegular,
   SettingsRegular,
@@ -20,11 +21,12 @@ import type { RegistrySnapshot } from "./ipc";
 import { Overview } from "./screens/Overview";
 import { Catalog } from "./screens/Catalog";
 import { Hands } from "./screens/Hands";
+import { Flows } from "./screens/Flows";
 import { Settings } from "./screens/Settings";
-import { hands, t } from "./i18n/ru";
+import { flows, hands, t } from "./i18n/ru";
 import { APP_VERSION } from "./version";
 
-type Screen = "overview" | "catalog" | "hands" | "settings";
+type Screen = "overview" | "catalog" | "hands" | "flows" | "settings";
 
 const useStyles = makeStyles({
   shell: {
@@ -97,6 +99,7 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement }[] = [
   { id: "overview", label: t.navOverview, icon: <HomeRegular /> },
   { id: "catalog", label: t.navCatalog, icon: <AppsListDetailRegular /> },
   { id: "hands", label: hands.nav, icon: <HandRightRegular /> },
+  { id: "flows", label: flows.nav, icon: <BranchRegular /> },
   { id: "settings", label: t.navSettings, icon: <SettingsRegular /> },
 ];
 
@@ -178,6 +181,8 @@ export function App() {
             <Catalog snapshot={snapshot} />
           ) : screen === "hands" ? (
             <Hands />
+          ) : screen === "flows" ? (
+            <Flows />
           ) : (
             <Settings
               dark={dark}

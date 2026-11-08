@@ -12,6 +12,7 @@ use serde::Serialize;
 use tauri::State;
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
+use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::step::StepResult;
@@ -39,6 +40,7 @@ pub struct AppStatus {
     pub log_file: String,
     pub audit_file: String,
     pub tools: usize,
+    pub flows: usize,
 }
 
 /// Инструмент для экрана «Руки»: строка реестра + параметры + решение политики.
@@ -54,6 +56,34 @@ pub struct ToolView {
     pub decision: String,
     pub decision_reason: String,
     pub needs_token: bool,
+}
+
+/// Шаг сценария с уже известным решением политики: интерфейс не считает риск сам.
+#[derive(Debug, Serialize)]
+pub struct FlowStepView {
+    pub tool: String,
+    pub title: String,
+    pub note: String,
+    pub params: BTreeMap<String, String>,
+    pub risk: String,
+    pub decision: String,
+    pub decision_reason: String,
+    pub needs_token: bool,
+}
+
+/// Сценарий для экрана «Сценарии»: шаги, входы и риск самого опасного шага.
+#[derive(Debug, Serialize)]
+pub struct FlowView {
+    pub id: String,
+    pub title: String,
+    pub summary: String,
+    pub registry: String,
+    pub risk: String,
+    pub decision: String,
+    pub decision_reason: String,
+    pub needs_token: bool,
+    pub inputs: Vec<FlowInput>,
+    pub steps: Vec<FlowStepView>,
 }
 
 #[derive(Debug, Serialize)]
@@ -112,6 +142,41 @@ fn view(inner: &Inner, spec: &'static ToolSpec) -> ToolView {
     }
 }
 
+fn step_view(inner: &Inner, step: &FlowStep) -> FlowStepView {
+    let (decision, risk) = decision_of(inner, &step.tool);
+    let title = tools::spec(&step.tool)
+        .map(|spec| spec.title.clone())
+        .unwrap_or_else(|| step.tool.clone());
+
+    FlowStepView {
+        tool: step.tool.clone(),
+        title,
+        note: step.note.clone(),
+        params: step.params.clone(),
+        risk,
+        decision: decision.as_str().to_string(),
+        decision_reason: decision.reason().to_string(),
+        needs_token: decision.needs_token(),
+    }
+}
+
+fn flow_view(inner: &Inner, flow: &FlowSpec) -> FlowView {
+    let (decision, risk) = decision_of(inner, &flow.registry);
+
+    FlowView {
+        id: flow.id.clone(),
+        title: flow.title.clone(),
+        summary: flow.summary.clone(),
+        registry: flow.registry.clone(),
+        risk,
+        decision: decision.as_str().to_string(),
+        decision_reason: decision.reason().to_string(),
+        needs_token: decision.needs_token(),
+        inputs: flow.inputs.clone(),
+        steps: flow.steps.iter().map(|step| step_view(inner, step)).collect(),
+    }
+}
+
 /// Одно событие журнала. Структура вместо восьми аргументов: порядок «риск,
 /// решение, отпечаток, итог» слишком легко перепутать местами.
 struct Entry<'a> {
@@ -153,6 +218,7 @@ pub fn app_status(state: State<'_, AppState>) -> AppStatus {
         log_file: state.log_file.clone(),
         audit_file: state.inner.audit.path().display().to_string(),
         tools: tools::all().len(),
+        flows: flows::all().len(),
     }
 }
 
@@ -162,6 +228,16 @@ pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
     tools::all()
         .iter()
         .map(|spec| view(&state.inner, spec))
+        .collect()
+}
+
+/// Сценарии: план из шагов. Исполняет каждый шаг интерфейс, через `run_tool` —
+/// со своей политикой и своим доказательством.
+#[tauri::command]
+pub fn list_flows(state: State<'_, AppState>) -> Vec<FlowView> {
+    flows::all()
+        .iter()
+        .map(|flow| flow_view(&state.inner, flow))
         .collect()
 }
 

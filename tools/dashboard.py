@@ -172,8 +172,18 @@ def code_stats() -> dict:
     if tools_json.exists():
         hands = len(json.loads(tools_json.read_text(encoding="utf-8")))
 
+    flow_list = 0
+    flow_steps = 0
+    flows_json = ROOT / "data" / "flows.json"
+    if flows_json.exists():
+        loaded = json.loads(flows_json.read_text(encoding="utf-8"))
+        flow_list = len(loaded)
+        flow_steps = sum(len(flow.get("steps", [])) for flow in loaded)
+
     return {
         "hands": hands,
+        "flows": flow_list,
+        "flow_steps": flow_steps,
         "ts_files": ts_files,
         "ts_lines": ts_lines,
         "rs_files": rs_files,
@@ -233,10 +243,15 @@ def render_dashboard(n: dict) -> str:
         f"Руки: **{code['hands']}** инструментов (`data/tools.json`), у каждого — проверка "
         "результата и место в реестре.",
         "",
+        f"Сценарии: **{code['flows']}** процедур из **{code['flow_steps']}** шагов "
+        "(`data/flows.json`). Шаг — это инструмент; риск сценария не ниже риска самого "
+        "опасного шага, и это проверяется в CI.",
+        "",
         "Что уже работает: окно, трей, логи в `%LOCALAPPDATA%`, реестр как каталог "
         "инструментов (индексы, статистика, поиск), экран «Что умею», политика риска с "
         "одноразовыми подтверждениями, журнал действий, исполнитель CLI-процессов с "
-        "таймаутом и отменой, десять исполняемых инструментов с проверкой результата.",
+        "таймаутом и отменой, десять исполняемых инструментов с проверкой результата, "
+        "сценарии из нескольких шагов с остановкой на провале и подтверждением опасного шага.",
         "Чего ещё нет: планировщика (модели), голоса, памяти, MCP, профилей приложений.",
         "",
         "## Риск в реестре",

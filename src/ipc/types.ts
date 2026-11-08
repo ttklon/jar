@@ -114,3 +114,43 @@ export interface ConfirmToken {
   token: number;
   ttl_sec: number;
 }
+
+/**
+ * Сценарий — план из нескольких инструментов. Шаги исполняются по одному, каждый
+ * своим путём: политика, журнал и проверка результата у каждого свои.
+ */
+export interface FlowInput {
+  name: string;
+  label: string;
+  placeholder: string;
+  hint: string;
+  required: boolean;
+}
+
+export interface FlowStepView {
+  /** Ключ инструмента из `data/tools.json`. */
+  tool: string;
+  title: string;
+  /** Что произойдёт — словами, а не именем инструмента. */
+  note: string;
+  params: Record<string, string>;
+  risk: Risk;
+  decision: Decision;
+  decision_reason: string;
+  needs_token: boolean;
+}
+
+export interface FlowView {
+  id: string;
+  title: string;
+  summary: string;
+  /** Строка реестра, которую сценарий обещает выполнить. */
+  registry: string;
+  /** Риск самого опасного шага. */
+  risk: Risk;
+  decision: Decision;
+  decision_reason: string;
+  needs_token: boolean;
+  inputs: FlowInput[];
+  steps: FlowStepView[];
+}

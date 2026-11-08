@@ -105,3 +105,84 @@ export async function confirmTool(
 ): Promise<never> {
   throw new Error("подтверждения выдаёт ядро — в браузере их нет");
 }
+
+// ── Сценарии в браузере ─────────────────────────────────────────────────────
+//
+// Ядро отдаёт сценарии командой `list_flows`. Здесь тот же список собирается из
+// `data/flows.json`, чтобы экран верстался без Rust. Исполнение сценария в браузере
+// невозможно по той же причине, что и одиночного инструмента.
+
+import flowsJson from "../../data/flows.json";
+import type { Decision, FlowStepView, FlowView, Risk } from "./types";
+
+const FLOW_SPECS = flowsJson as unknown as {
+  id: string;
+  title: string;
+  summary: string;
+  registry: string;
+  inputs: { name: string; label: string; placeholder: string; hint: string; required: boolean }[];
+  steps: { tool: string; note: string; params: Record<string, string> }[];
+}[];
+
+/** Строка реестра по ключу — с решением политики, без привязки к инструменту. */
+function actionView(registry: string): { risk: Risk; decision: Decision; reason: string } {
+  const action = ROWS.find((row) => `${row.domain}|${row.verb}|${row.object}` === registry);
+  if (!action) {
+    throw new Error(`нет строки реестра: ${registry}`);
+  }
+  const decision = decide(action);
+  return { risk: action.risk, decision, reason: decisionReason(decision, action.risk) };
+}
+
+function toolViewByKey(registry: string): ToolView {
+  const spec = TOOL_SPECS.find((candidate) => candidate.registry === registry);
+  const action = ROWS.find((row) => `${row.domain}|${row.verb}|${row.object}` === registry);
+  if (!spec || !action) {
+    throw new Error(`нет данных для шага сценария: ${registry}`);
+  }
+  const decision = decide(action);
+  return {
+    registry: spec.registry,
+    title: spec.title,
+    summary: spec.summary,
+    implementation: spec.implementation,
+    params: spec.params,
+    risk: action.risk,
+    risk_needs_human: action.risk !== "read",
+    decision,
+    decision_reason: decisionReason(decision, action.risk),
+    needs_token: decision === "confirm",
+  };
+}
+
+export async function listFlows(): Promise<FlowView[]> {
+  return FLOW_SPECS.map((spec) => {
+    const head = actionView(spec.registry);
+    const steps: FlowStepView[] = spec.steps.map((step) => {
+      const tool = toolViewByKey(step.tool);
+      return {
+        tool: step.tool,
+        title: tool.title,
+        note: step.note,
+        params: step.params,
+        risk: tool.risk,
+        decision: tool.decision,
+        decision_reason: tool.decision_reason,
+        needs_token: tool.needs_token,
+      };
+    });
+
+    return {
+      id: spec.id,
+      title: spec.title,
+      summary: spec.summary,
+      registry: spec.registry,
+      risk: head.risk,
+      decision: head.decision,
+      decision_reason: head.reason,
+      needs_token: head.decision === "confirm",
+      inputs: spec.inputs,
+      steps,
+    };
+  });
+}

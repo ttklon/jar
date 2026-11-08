@@ -15,9 +15,10 @@ import {
   tokens,
 } from "@fluentui/react-components";
 import { PlayRegular, StopRegular } from "@fluentui/react-icons";
-import type { Evidence, StepResult, ToolView } from "../ipc";
+import type { StepResult, ToolView } from "../ipc";
 import { cancelTool, confirmTool, isTauri, runTool } from "../ipc";
 import { RISK_LABEL, hands } from "../i18n/ru";
+import { evidenceText } from "../lib/evidence";
 import { RiskBadge } from "./RiskBadge";
 
 const useStyles = makeStyles({
@@ -62,21 +63,6 @@ const useStyles = makeStyles({
   denyNote: { color: tokens.colorPaletteRedForeground2, fontSize: tokens.fontSizeBase200 },
   muted: { color: tokens.colorNeutralForeground3, fontSize: tokens.fontSizeBase200 },
 });
-
-function evidenceText(evidence: Evidence): string {
-  switch (evidence.kind) {
-    case "exit_code":
-      return `код возврата ${evidence.code}`;
-    case "path_exists":
-      return evidence.exists ? `путь существует: ${evidence.path}` : `путь отсутствует: ${evidence.path}`;
-    case "stdout_marker":
-      return evidence.found
-        ? `в выводе найден признак «${evidence.marker}»`
-        : `признак «${evidence.marker}» не найден`;
-    case "failed":
-      return evidence.reason;
-  }
-}
 
 export function ToolCard({ tool }: { tool: ToolView }) {
   const styles = useStyles();

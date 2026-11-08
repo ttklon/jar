@@ -41,6 +41,9 @@ jobs:
       - name: Hands (data/tools.json) reference real registry rows and allowed risk
         run: python3 tools/hands.py
 
+      - name: Flows (data/flows.json) chain real tools and never understate risk
+        run: python3 tools/flows.py
+
       - name: Ecosystem catalogues (10 catalogues, >=200 each, ids unique, statuses honest)
         run: |
           python3 tools/build_ecosystem.py
