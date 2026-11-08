@@ -3,14 +3,14 @@
 Данные — [`data/app_targets.psv`](../data/app_targets.psv), файл генерируется
 `python3 tools/app_targets.py`, руками не править.
 
-**Приложений в каталоге: 134** · категорий: **17** · профиль найден по процессу: **76** · без профиля (визуальный агент): **58**
+**Приложений в каталоге: 134** · категорий: **17** · профиль найден по процессу: **83** · без профиля (визуальный агент): **51**
 
 ## Три уровня покрытия (почему не «профиль на каждую программу руками»)
 
 | Tier | Что это | Сколько | Как появляется |
 | --- | --- | --- | --- |
-| **A** | ручной профиль: якоря, шаги, проверки | 61 | пишется человеком/агентом по UIA-дампу |
-| **B** | авто-профиль из UIA + подтверждение | 39 | `tools/uia_probe` → кандидаты → подтверждение |
+| **A** | ручной профиль: якоря, шаги, проверки | 68 | пишется человеком/агентом по UIA-дампу |
+| **B** | авто-профиль из UIA + подтверждение | 32 | `tools/uia_probe` → кандидаты → подтверждение |
 | **C** | только визуальный агент (скриншот→OCR/VLM→клик) | 34 | профиля нет, работает универсальный цикл |
 
 Подробно — [`PROFILE-STRATEGY.md`](PROFILE-STRATEGY.md). Правило: приложение без профиля
@@ -98,7 +98,7 @@
 | Планировщик заданий | `mmc.exe` | cli | B | P0 | ✅ | schtasks |
 | Проводник | `explorer.exe` | uia | A | P0 | ✅ | профиль готов |
 | Службы | `mmc.exe` | uia+cli | B | P0 | ✅ | sc.exe/PowerShell надёжнее GUI |
-| Ножницы/Snip&Sketch | `SnippingTool.exe` | cli+uia | B | P1 | — | screenshot через Win32 проще |
+| Ножницы/Snip&Sketch | `SnippingTool.exe` | cli+uia | A | P1 | ✅ | screenshot через Win32 проще |
 | Панель управления | `control.exe` | uia | B | P1 | ✅ | часть настроек через CLI/реестр |
 | Параметры Windows | `SystemSettings.exe` | uia | A | P1 | ✅ | частые экраны: обновления, звук, дисплей |
 | Просмотр событий | `mmc.exe` | cli | A | P1 | ✅ | wevtutil/Get-WinEvent |
@@ -112,14 +112,14 @@
 | Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
 | --- | --- | --- | --- | --- | --- | --- |
 | 7-Zip | `7zFM.exe` | cli | A | P0 | ✅ | 7z.exe |
-| CrystalDiskInfo | `crystaldiskinfo.exe` | cli | B | P1 | — | SMART через smartctl |
+| CrystalDiskInfo | `crystaldiskinfo.exe` | cli | A | P1 | ✅ | SMART через smartctl |
 | Everything | `Everything.exe` | cli | A | P1 | ✅ | ES CLI, индексация по имени |
 | HWiNFO | `HWiNFO64.exe` | api | A | P1 | ✅ | shared memory/датчики |
 | KeePassXC | `KeePassXC.exe` | cli | A | P1 | ✅ | keepassxc-cli: чтение записей без UI |
 | PowerToys | `PowerToys.exe` | uia | B | P2 | — | часть функций через API |
 | WinRAR | `WinRAR.exe` | cli | B | P2 | — | rar.exe |
 | WizTree | `WizTree.exe` | cli | B | P2 | — | экспорт CSV |
-| qBittorrent | `qbittorrent.exe` | api | B | P2 | — | Web API /api/v2, сессии и лимиты |
+| qBittorrent | `qbittorrent.exe` | api | A | P2 | ✅ | Web API /api/v2, сессии и лимиты |
 | CPU-Z | `cpuz.exe` | uia | C | P3 | — | лучше WMI |
 | JDownloader | `JDownloader.exe` | api | C | P3 | — | MyJDownloader API, капчи — вручную |
 
@@ -184,10 +184,10 @@
 | Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
 | --- | --- | --- | --- | --- | --- | --- |
 | Figma | `Figma.exe` | api | A | P1 | ✅ | профиль готов |
-| GIMP | `gimp-2.10.exe` | cli | B | P2 | — | Script-Fu/batch |
-| GIMP | `gimp-2.10.exe` | api | B | P2 | — | Script-Fu/Python-Fu, консольный batch |
-| Inkscape | `inkscape.exe` | cli | B | P2 | — | --export |
-| Inkscape | `inkscape.exe` | cli | B | P2 | — | --export-type, векторизация трассировкой |
+| GIMP | `gimp-2.10.exe` | cli | A | P2 | ✅ | Script-Fu/batch |
+| GIMP | `gimp-2.10.exe` | api | A | P2 | ✅ | Script-Fu/Python-Fu, консольный batch |
+| Inkscape | `inkscape.exe` | cli | A | P2 | ✅ | --export |
+| Inkscape | `inkscape.exe` | cli | A | P2 | ✅ | --export-type, векторизация трассировкой |
 | Krita | `krita.exe` | uia | C | P2 | — |  |
 | Krita | `krita.exe` | api | B | P3 | — | Python-плагины, batch-экспорт |
 

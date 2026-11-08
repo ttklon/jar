@@ -19,7 +19,7 @@ everything|Everything|Утилиты|Everything.exe|cli|A|P1|ES CLI, индек�
 wiztree|WizTree|Утилиты|WizTree.exe|cli|B|P2|экспорт CSV
 cpu-z|CPU-Z|Утилиты|cpuz.exe|uia|C|P3|лучше WMI
 hwinfo|HWiNFO|Утилиты|HWiNFO64.exe|api|A|P1|shared memory/датчики
-crystaldiskinfo|CrystalDiskInfo|Утилиты|crystaldiskinfo.exe|cli|B|P1|SMART через smartctl
+crystaldiskinfo|CrystalDiskInfo|Утилиты|crystaldiskinfo.exe|cli|A|P1|SMART через smartctl
 powertoys|PowerToys|Утилиты|PowerToys.exe|uia|B|P2|часть функций через API
 chrome|Google Chrome|Браузер|chrome.exe|web|A|P0|профиль готов
 edge|Microsoft Edge|Браузер|msedge.exe|web|A|P0|тот же профиль Chromium
@@ -92,8 +92,8 @@ studio-one|PreSonus Studio One|Музыка|Studio One.exe|uia|C|P3|
 blender|Blender|3D|blender.exe|api|A|P0|bpy headless
 figma|Figma|Дизайн|Figma.exe|api|A|P1|профиль готов
 krita|Krita|Дизайн|krita.exe|uia|C|P2|
-gimp|GIMP|Дизайн|gimp-2.10.exe|cli|B|P2|Script-Fu/batch
-inkscape|Inkscape|Дизайн|inkscape.exe|cli|B|P2|--export
+gimp|GIMP|Дизайн|gimp-2.10.exe|cli|A|P2|Script-Fu/batch
+inkscape|Inkscape|Дизайн|inkscape.exe|cli|A|P2|--export
 steam|Steam|Игры|steam.exe|api+uia|A|P1|профиль готов
 epic|Epic Games Launcher|Игры|EpicGamesLauncher.exe|uia|C|P3|
 battlenet|Battle.net|Игры|Battle.net.exe|uia|C|P3|
@@ -119,17 +119,17 @@ calibre|Calibre|Знания|calibre.exe|cli|A|P2|ebook-convert
 kindle|Kindle|Знания|Kindle.exe|uia|C|P3|
 discord-canary|Discord Canary|Мессенджер|DiscordCanary.exe|api|C|P3|
 windowsterminal-preview|Windows Terminal Preview|Разработка|WindowsTerminal.exe|cli+uia|C|P3|
-snip|Ножницы/Snip&Sketch|Система|SnippingTool.exe|cli+uia|B|P1|screenshot через Win32 проще
+snip|Ножницы/Snip&Sketch|Система|SnippingTool.exe|cli+uia|A|P1|screenshot через Win32 проще
 xbox-gamebar|Game Bar|Игры|GameBar.exe|uia|C|P3|запись лучше через OBS
 freecad|FreeCAD|3D|FreeCAD.exe|api+cli|A|P1|FreeCADCmd + Python API, профиль готов
 orcaslicer|OrcaSlicer|3D|orca-slicer.exe|cli|A|P2|CLI-нарезка и профили печати, профиль готов
 prusaslicer|PrusaSlicer|3D|prusa-slicer.exe|cli|A|P2|консольная нарезка --export-gcode, профиль готов
 blender-addons|Blender (аддоны и скрипты)|3D|blender.exe|api|B|P2|bpy: аддоны, геоноды, пакетный рендер
-gimp|GIMP|Дизайн|gimp-2.10.exe|api|B|P2|Script-Fu/Python-Fu, консольный batch
+gimp|GIMP|Дизайн|gimp-2.10.exe|api|A|P2|Script-Fu/Python-Fu, консольный batch
 krita|Krita|Дизайн|krita.exe|api|B|P3|Python-плагины, batch-экспорт
-inkscape|Inkscape|Дизайн|inkscape.exe|cli|B|P2|--export-type, векторизация трассировкой
+inkscape|Inkscape|Дизайн|inkscape.exe|cli|A|P2|--export-type, векторизация трассировкой
 kdenlive|Kdenlive|Медиа|kdenlive.exe|api|B|P3|MLT-скрипты, рендер через melt
 keepassxc|KeePassXC|Утилиты|KeePassXC.exe|cli|A|P1|keepassxc-cli: чтение записей без UI
-qbittorrent|qBittorrent|Утилиты|qbittorrent.exe|api|B|P2|Web API /api/v2, сессии и лимиты
+qbittorrent|qBittorrent|Утилиты|qbittorrent.exe|api|A|P2|Web API /api/v2, сессии и лимиты
 jdownloader|JDownloader|Утилиты|JDownloader.exe|api|C|P3|MyJDownloader API, капчи — вручную
 thunderbird|Mozilla Thunderbird|Почта|thunderbird.exe|cli|B|P2|профиль mbox/IMAP, без COM
