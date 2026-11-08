@@ -24,12 +24,12 @@
 | [`research/INDEX.md`](research/INDEX.md) | Автогенерируемый индекс всех источников с лицензиями и звёздами |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | План по этапам M0…M7 с критериями выхода |
 | [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) | Стек v1 с версиями и **аудитом лицензий** (генерируется из vault) |
-| [`docs/ACTIONS.md`](docs/ACTIONS.md) | **Реестр действий: 613 действий / 40 доменов** — всё, что умеет, с риском, tier'ом и границами |
+| [`docs/ACTIONS.md`](docs/ACTIONS.md) | **Реестр действий: 614 действий / 40 доменов** — всё, что умеет, с риском, tier'ом и границами |
 | [`data/actions.psv`](data/actions.psv) | Исходник реестра (машиночитаемо, генерирует каталог, права и тесты) |
-| [`docs/PROFILES.md`](docs/PROFILES.md) | **Профили приложений**: 32 операции в CapCut/Excel/Проводнике/браузере — якоря, шаги, проверки |
+| [`docs/PROFILES.md`](docs/PROFILES.md) | **Профили приложений**: 53 операции в CapCut/Excel/Проводнике/браузере/Word/VS Code/Telegram — якоря, шаги, проверки |
 | [`data/profiles/`](data/profiles) | Профили как данные: `app`, `anchors`, `operations` + валидатор инвариантов |
 | [`docs/COVERAGE.md`](docs/COVERAGE.md) | **Аудит покрытия**: тонкие домены, дырки по семействам действий, домены без профиля |
-| [`docs/EVALS.md`](docs/EVALS.md) | **План проверок**: 613 сценариев из реестра + 15 обязательных P0/P1 до релиза |
+| [`docs/EVALS.md`](docs/EVALS.md) | **План проверок**: 614 сценариев из реестра + 15 обязательных P0/P1 до релиза |
 | [`research/notes/18-capability-map.md`](research/notes/18-capability-map.md) | Обзор по доменам: ~180 строк способностей, риск, tier, границы |
 | [`research/notes/24-action-taxonomy.md`](research/notes/24-action-taxonomy.md) | Метод: как перечислять «всё» системно (объект × глагол × контекст × масштаб × риск) |
 | [`research/notes/25-app-profiles.md`](research/notes/25-app-profiles.md) | Профили: иерархия якорей, обязательные проверки, дрейф интерфейса, self-healing |

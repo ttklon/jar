@@ -9860,5 +9860,21 @@
   "human_code": "c",
   "status": "v1",
   "notes": ""
+ },
+ {
+  "id": "dev-code-614",
+  "domain": "dev-code",
+  "verb": "зафиксировать",
+  "object": "изменения локально (коммит)",
+  "example": "закоммить мои правки",
+  "implementation": [
+   "git commit"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "push — отдельная external-операция"
  }
 ]

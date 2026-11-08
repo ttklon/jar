@@ -1,0 +1,147 @@
+{
+  "app": "Visual Studio Code",
+  "exe": [
+    "Code.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "1.9x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "palette": {
+      "by": "hotkey",
+      "value": "Ctrl+Shift+P"
+    },
+    "quick_open": {
+      "by": "hotkey",
+      "value": "Ctrl+P"
+    },
+    "search": {
+      "by": "hotkey",
+      "value": "Ctrl+Shift+F"
+    },
+    "terminal": {
+      "by": "hotkey",
+      "value": "Ctrl+`"
+    },
+    "problems": {
+      "by": "hotkey",
+      "value": "Ctrl+Shift+M"
+    },
+    "source_control": {
+      "by": "hotkey",
+      "value": "Ctrl+Shift+G"
+    },
+    "cli": {
+      "by": "api",
+      "value": "code --command <id> --args",
+      "fallback": "палитра команд"
+    }
+  },
+  "operations": [
+    {
+      "name": "Открыть папку проекта",
+      "registry": "dev-code|настроить|окружение",
+      "steps": [
+        "cli:code -n <путь>",
+        "wait:2000"
+      ],
+      "verify": [
+        "заголовок окна содержит имя папки",
+        "дерево файлов не пустое"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Найти вхождение по проекту",
+      "registry": "dev-code|найти|в коде",
+      "steps": [
+        "anchor:search",
+        "type:строка",
+        "Enter",
+        "read:панель результатов"
+      ],
+      "verify": [
+        "есть список совпадений",
+        "пути внутри проекта"
+      ],
+      "risk": "read",
+      "notes": "быстрее и надёжнее: ripgrep через terminal"
+    },
+    {
+      "name": "Запустить тесты проекта",
+      "registry": "dev-code|запустить|тесты",
+      "steps": [
+        "anchor:terminal",
+        "type:команда тестов",
+        "Enter",
+        "wait:по выводу"
+      ],
+      "verify": [
+        "код возврата 0 в терминале",
+        "нет строк FAILED"
+      ],
+      "risk": "write-local",
+      "timeouts_ms": 600000
+    },
+    {
+      "name": "Форматирование и линт открытого файла",
+      "registry": "dev-code|отрефакторить|код",
+      "steps": [
+        "anchor:palette",
+        "type:Format Document",
+        "Enter",
+        "проверить панель проблем"
+      ],
+      "verify": [
+        "anchor:problems пуст или только предупреждения",
+        "диff содержит только форматирование"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Установить расширение",
+      "registry": "dev-code|настроить|окружение",
+      "steps": [
+        "anchor:palette",
+        "type:Extensions: Install Extensions",
+        "type:имя",
+        "Enter"
+      ],
+      "verify": [
+        "расширение в списке установленных",
+        "нет ошибок активации в логах"
+      ],
+      "risk": "write-local",
+      "notes": "только из маркетплейса и только с проверкой издателя"
+    },
+    {
+      "name": "Закоммитить изменения",
+      "registry": "dev-code|зафиксировать|изменения локально",
+      "steps": [
+        "anchor:source_control",
+        "type:сообщение коммита",
+        "Ctrl+Enter"
+      ],
+      "verify": [
+        "git log содержит новый коммит",
+        "git status чистый по этим файлам"
+      ],
+      "risk": "write-local",
+      "notes": "push — отдельная external-операция с подтверждением"
+    },
+    {
+      "name": "Просмотреть свой дифф перед PR",
+      "registry": "dev-code|ревью|свой дифф",
+      "steps": [
+        "anchor:source_control",
+        "открыть файл",
+        "прочитать диff"
+      ],
+      "verify": [
+        "диff прочитан и сохранён в отчёте",
+        "список рисковых мест составлен"
+      ],
+      "risk": "read"
+    }
+  ]
+}

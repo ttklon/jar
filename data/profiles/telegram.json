@@ -1,0 +1,62 @@
+{
+  "app": "Telegram Desktop",
+  "exe": ["Telegram.exe"],
+  "ui_stack": "qt",
+  "version_seen": "5.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "search": { "by": "hotkey", "value": "Ctrl+F", "fallback": "поле поиска вверху" },
+    "chat_list": { "by": "uia", "value": "ControlType=List; Name~«Чаты»" },
+    "message_box": { "by": "uia", "value": "ControlType=Edit; Name~«Написать сообщение»", "fallback": "клик в поле ввода" },
+    "attach": { "by": "hotkey", "value": "Ctrl+O", "fallback": "скрепка → Файл" },
+    "api": { "by": "api", "value": "Bot API (свой бот) / MTProto-клиент" }
+  },
+  "operations": [
+    {
+      "name": "Отправить сообщение в чат",
+      "registry": "chat-social|отправить|сообщение",
+      "steps": ["anchor:search", "type:имя чата", "Enter", "anchor:message_box", "type:текст", "Enter"],
+      "verify": ["сообщение видно в ленте (OCR/API)", "статус доставки получен"],
+      "risk": "external",
+      "on_fail": "не отправлять повторно — риск дубля; сообщить человеку",
+      "notes": "для своих уведомлений используется бот, GUI — только для личных чатов по просьбе"
+    },
+    {
+      "name": "Отправить файл",
+      "registry": "chat-social|отправить|файл",
+      "steps": ["anchor:attach", "type:путь", "Enter", "type:подпись", "Enter"],
+      "verify": ["в чате появилось вложение", "размер совпадает с исходным"],
+      "risk": "external"
+    },
+    {
+      "name": "Найти файл в истории чата",
+      "registry": "chat-social|найти|файл в чате",
+      "steps": ["открыть чат", "Ctrl+F → тип «Файлы»", "type:маска"],
+      "verify": ["найден хотя бы один файл", "дата и отправитель совпадают с ожиданием"],
+      "risk": "read"
+    },
+    {
+      "name": "Прочитать новые сообщения и собрать в заметку",
+      "registry": "chat-social|собрать|переписку",
+      "steps": ["чтение API/OCR ленты", "суммаризация", "запись в markdown"],
+      "verify": ["заметка содержит даты и авторов", "нет пропущенных непрочитанных"],
+      "risk": "read"
+    },
+    {
+      "name": "Ответить в чате",
+      "registry": "chat-social|ответить|в мессенджере",
+      "steps": ["контекстное меню сообщения", "Ответить", "type:ответ", "Enter"],
+      "verify": ["в ленте виден ответ с цитатой"],
+      "risk": "external",
+      "notes": "текст ответа показывается пользователю до отправки, если чат не в белом списке"
+    },
+    {
+      "name": "Отправить алерт самому себе через бота",
+      "registry": "chat-social|отправить|сообщение",
+      "steps": ["api:sendMessage(chat_id, текст, кнопки)", "ожидание 200"],
+      "verify": ["API вернул message_id", "сообщение видно в чате «Избранное»/боте"],
+      "risk": "external",
+      "notes": "основной канал алертов: Bot API, не GUI"
+    }
+  ]
+}
