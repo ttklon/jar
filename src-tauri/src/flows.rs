@@ -104,7 +104,9 @@ mod tests {
         let mut seen = std::collections::HashSet::new();
         for flow in all() {
             assert!(
-                flow.id.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-'),
+                flow.id
+                    .chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-'),
                 "id «{}» должен быть слагом",
                 flow.id
             );
@@ -173,7 +175,11 @@ mod tests {
     #[test]
     fn placeholders_refer_to_declared_inputs() {
         for flow in all() {
-            let declared: Vec<&str> = flow.inputs.iter().map(|input| input.name.as_str()).collect();
+            let declared: Vec<&str> = flow
+                .inputs
+                .iter()
+                .map(|input| input.name.as_str())
+                .collect();
             for step in &flow.steps {
                 for raw in step.params.values() {
                     if let Some(input) = raw.strip_prefix('$') {
@@ -201,6 +207,9 @@ mod tests {
         assert_eq!(resolved["path"], "C:\\tmp");
 
         let empty = BTreeMap::new();
-        assert!(resolve_step(&step, &empty).is_err(), "пустой вход — это ошибка");
+        assert!(
+            resolve_step(&step, &empty).is_err(),
+            "пустой вход — это ошибка"
+        );
     }
 }

@@ -173,7 +173,11 @@ fn flow_view(inner: &Inner, flow: &FlowSpec) -> FlowView {
         decision_reason: decision.reason().to_string(),
         needs_token: decision.needs_token(),
         inputs: flow.inputs.clone(),
-        steps: flow.steps.iter().map(|step| step_view(inner, step)).collect(),
+        steps: flow
+            .steps
+            .iter()
+            .map(|step| step_view(inner, step))
+            .collect(),
     }
 }
 
