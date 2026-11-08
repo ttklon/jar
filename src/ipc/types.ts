@@ -1,0 +1,63 @@
+/**
+ * Типы, которые приходят из ядра. Это зеркало структур `src-tauri/src/registry.rs`
+ * — если поле меняется там, оно меняется здесь, и наоборот. Источник истины —
+ * `data/actions.json`, всё остальное его отражает.
+ */
+
+export type Risk =
+  | "read"
+  | "write-local"
+  | "external"
+  | "destructive"
+  | "identity"
+  | "money";
+
+export type Tier = "T0" | "T1" | "T2" | "T3";
+export type HumanCode = "c" | "h" | "n";
+export type ActionStatus = "v1" | "v2" | "later" | "never";
+
+export interface Action {
+  /** "files-001" — слаг строки, стабилен в рамках реестра. */
+  id: string;
+  domain: string;
+  verb: string;
+  object: string;
+  /** Как это говорит человек — по этой строке ищет каталог. */
+  example: string;
+  /** Каналы исполнения: ["fs.mkdir", "PowerShell New-Item"]. */
+  implementation: string[];
+  risk: Risk;
+  tier: Tier;
+  /** Человеческая формулировка: «может» | «редко» | «не может». */
+  human: string;
+  human_code: HumanCode;
+  status: ActionStatus;
+  notes: string;
+}
+
+export interface RegistryStats {
+  actions: number;
+  domains: number;
+  verbs: number;
+  byRisk: Record<Risk, number>;
+  byTier: Record<Tier, number>;
+  byStatus: Record<ActionStatus, number>;
+}
+
+export interface RegistrySnapshot {
+  actions: Action[];
+  stats: RegistryStats;
+}
+
+/** Порядок риска: от безопасного к тому, что требует человека. */
+export const RISK_ORDER: Risk[] = [
+  "read",
+  "write-local",
+  "external",
+  "destructive",
+  "identity",
+  "money",
+];
+
+export const TIER_ORDER: Tier[] = ["T0", "T1", "T2", "T3"];
+export const STATUS_ORDER: ActionStatus[] = ["v1", "v2", "later", "never"];

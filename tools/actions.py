@@ -203,8 +203,28 @@ def render(rows: list[dict]) -> str:
     return "\n".join(out)
 
 
+def check_unique_keys(rows: list[dict]) -> None:
+    """Профили и скиллы ссылаются на действие строкой `domain|verb|object`.
+
+    Если таких строк две, ссылка становится неоднозначной: валидатор разрешит её
+    в первую попавшуюся, и профиль молча начнёт описывать не то действие. Поэтому
+    ключ обязан быть уникальным — различия в оттенке смысла выражаются объектом
+    («громкость» против «громкость по LUFS»), а не повтором.
+    """
+    seen: dict[tuple[str, str, str], str] = {}
+    for row in rows:
+        key = (row["domain"], row["verb"], row["object"])
+        if key in seen:
+            raise SystemExit(
+                f"actions: дубль ключа {'|'.join(key)} — у {seen[key]} и {row['id']}. "
+                "Уточни объект, чтобы ссылки из профилей и скиллов были однозначны."
+            )
+        seen[key] = row["id"]
+
+
 def main() -> None:
     rows = load()
+    check_unique_keys(rows)
     JSON_OUT.write_text(json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
     MD_OUT.write_text(render(rows), encoding="utf-8")
     by_domain = Counter(r["domain"] for r in rows)

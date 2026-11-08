@@ -9945,7 +9945,7 @@
   "id": "audio-619",
   "domain": "audio",
   "verb": "нормализовать",
-  "object": "громкость",
+  "object": "громкость по LUFS",
   "example": "выровняй громкость до -14 LUFS",
   "implementation": [
    "ffmpeg loudnorm"
@@ -11497,7 +11497,7 @@
   "id": "input-716",
   "domain": "input",
   "verb": "воспроизвести",
-  "object": "макрос",
+  "object": "вчерашнюю последовательность",
   "example": "повтори вчерашнюю последовательность",
   "implementation": [
    "UIA-плеер с проверками"

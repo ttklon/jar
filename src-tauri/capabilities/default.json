@@ -1,0 +1,6 @@
+{
+  "identifier": "default",
+  "description": "Минимальные права главного окна: только собственные команды ядра и базовые возможности окна. Права на shell/file-system не выдаются — всё идёт через команды Rust, где работает политика риска.",
+  "windows": ["main"],
+  "permissions": ["core:default", "core:window:allow-start-dragging"]
+}

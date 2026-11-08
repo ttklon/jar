@@ -1,0 +1,71 @@
+name: app
+
+on:
+  push:
+    branches: [main, "arena/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: ui (typecheck, tests, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests (registry invariants, UI smoke)
+        run: npm test
+
+      - name: Build frontend
+        run: npm run build
+
+  rust:
+    name: core (cargo check + tests, Windows)
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+
+      # Tauri проверяет наличие frontendDist при сборке, поэтому фронтенд
+      # собирается до вызова cargo.
+      - name: Build frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Clippy (ошибки = падение)
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+
+      - name: Tests (реестр встроен в бинарник)
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Rustfmt
+        run: cargo fmt --manifest-path src-tauri/Cargo.toml --check

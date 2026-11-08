@@ -98,17 +98,26 @@
 // src-tauri/src/registry.rs
 #[derive(Debug, Clone, Deserialize)]
 pub struct Action {
-    pub id: String,        // "files|создать|папку" — стабильный ключ
-    pub domain: String,
-    pub verb: String,
-    pub object: String,
-    pub example: String,   // как это говорит человек
-    pub how: String,       // канал: fs.mkdir; PowerShell New-Item
-    pub risk: Risk,        // read | write-local | external | destructive | identity | money
-    pub tier: Tier,        // T0..T3 (сколько ресурсов нужно)
-    pub human: Human,      // c | h | n (человек может / редко / не может)
-    pub status: Status,    // v1 | v2 | later | never
+    pub id: String,            // "files-001" — слаг, стабильный в рамках реестра
+    pub domain: String,        // "files"
+    pub verb: String,          // "создать"
+    pub object: String,        // "папку"
+    pub example: String,       // "создай папку Проект X на рабочем столе"
+    pub implementation: Vec<String>, // ["fs.mkdir", "PowerShell New-Item"] — каналы
+    pub risk: Risk,            // read | write-local | external | destructive | identity | money
+    pub tier: Tier,            // T0..T3 (сколько ресурсов нужно)
+    pub human: String,         // «может» | «редко» | «не может» — как сказано человеку
+    pub human_code: Human,     // c | h | n — машиночитаемо
+    pub status: Status,        // v1 | v2 | later | never
     pub notes: String,
+}
+
+impl Action {
+    /// Ключ, которым ссылаются профили и скиллы: "domain|verb|object".
+    /// Именно эта строка лежит в `registry` у операций профиля и в `actions[]` у шага скилла.
+    pub fn key(&self) -> String {
+        format!("{}|{}|{}", self.domain, self.verb, self.object)
+    }
 }
 
 pub fn load_actions() -> Vec<Action> {
@@ -164,7 +173,7 @@ pub fn load_actions() -> Vec<Action> {
 1. **Вход**: текст/голос/событие → нормализация → «намерение» (intent) + слоты.
 2. **Поиск**: скилл по фразе → если есть, рецепт становится каркасом плана; иначе retrieval
    инструментов (5–15 карточек) по домену/глаголу/эмбеддингам.
-3. **План**: LLM строит `Plan` по JSON-схеме (§6.3), каждый шаг обязан ссылаться на `action_id`
+3. **План**: LLM строит `Plan` по JSON-схеме (§6.3), каждый шаг обязан ссылаться на ключ реестра
    из реестра. План показывается человеку **до** выполнения (кроме режима «тихо», см. §13).
 4. **Политика**: для каждого шага — риск, нужен ли подтверждающий токен, есть ли запрет (`never`).
 5. **Выполнение**: по шагам; каждый шаг → `StepResult { ok, evidence, artifacts, error }`.
@@ -210,7 +219,7 @@ pub fn load_actions() -> Vec<Action> {
 │     ├─ catalog.rs          цели, профили, поиск по exe
 │     ├─ orchestrator.rs     вход → намерение → план → исполнение → итог
 │     ├─ planner.rs          LLM-планировщик (schema-constrained)
-│     ├─ plan.rs             структуры Plan/Step, валидация ссылок на action_id
+│     ├─ plan.rs             структуры Plan/Step, валидация ссылок на ключи реестра
 │     ├─ policy.rs           риск, подтверждения, never-лист, бюджеты
 │     ├─ executor/
 │     │  ├─ mod.rs           диспетчер шагов, таймауты, отмена
@@ -264,26 +273,37 @@ pub fn load_actions() -> Vec<Action> {
 ### 6.1 Action (из реестра)
 
 ```json
-{ "id": "files|создать|папку", "domain": "files", "verb": "создать", "object": "папку",
-  "example": "создай папку Проект X на рабочем столе", "how": "fs.mkdir; PowerShell New-Item",
-  "risk": "write-local", "tier": "T0", "human": "c", "status": "v1", "notes": "" }
+{ "id": "files-001", "domain": "files", "verb": "создать", "object": "папку",
+  "example": "создай папку Проект X на рабочем столе",
+  "implementation": ["fs.mkdir", "PowerShell New-Item"],
+  "risk": "write-local", "tier": "T0", "human": "может", "human_code": "c",
+  "status": "v1", "notes": "позиция иконки на десктопе — отдельной операцией" }
 ```
+
+**Два ключа, не путать.** `id` (`files-001`) — идентификатор строки. Профили и скиллы ссылаются на
+действие строкой `domain|verb|object` (`files|создать|папку`) — она человекочитаема и не меняется
+при перенумерации реестра. Загрузчик строит обе карты: по `id` и по `key()`.
 
 ### 6.2 Skill (из `data/skills/*.json`, урезано)
 
 ```json
-{ "id": "system-tuneup", "title": "Привести систему в порядок",
-  "phrases": ["приведи систему в порядок", "компьютер тормозит"],
-  "inputs": ["порог свободного места"], "outputs": ["отчёт до/после"],
-  "domains": ["processes-services", "storage-backup", "accounts-updates", "files"],
-  "risk": "destructive",
-  "steps": [ { "step": "Снять состояние до",
-               "actions": ["processes-services|показать|топ по нагрузке"],
-               "verify": "есть числа: ГБ, топ-5 процессов, ошибки журнала" } ],
-  "done": ["свободного места ≥ порога"],
+{ "id": "file-sortout", "title": "Разобрать завалы в папке",
+  "phrases": ["разбери загрузки", "наведи порядок в папке"],
+  "scope": "инвентаризация → дубли → правила → сортировка → удаление по списку",
+  "inputs": ["папка (по умолчанию Загрузки)", "правила сортировки", "порог «не трогать»"],
+  "outputs": ["дерево папок", "лог перемещений", "отчёт: файлов / дублей / освобождено"],
+  "domains": ["files"], "profiles": ["explorer", "everything", "7zip"],
+  "time": "10–30 мин", "risk": "destructive",
+  "steps": [ { "step": "Инвентаризация",
+               "actions": ["files|проверить|размеры и место"],
+               "verify": "число файлов, объём, топ-5 типов и диапазон дат названы числами" } ],
+  "done": ["свободного места ≥ порога", "лог перемещений существует"],
   "checkpoints": ["удаление файлов вне temp/корзины"],
   "refuse": ["не удалять личные файлы без списка на подтверждение"] }
 ```
+
+`actions[]` шага — **ключи реестра** (`domain|verb|object`), не `id`. Валидатор `tools/skills.py`
+разрешает их в строки реестра и падает, если ключа нет или риск скилла ниже риска действия.
 
 ### 6.3 Plan — центральная структура
 
@@ -298,7 +318,7 @@ pub fn load_actions() -> Vec<Action> {
     {
       "n": 1,
       "title": "Снять состояние до",
-      "action_id": "processes-services|показать|топ по нагрузке",
+      "registry": "processes-services|показать|топ по нагрузке",
       "tool": "cli",
       "args": { "program": "powershell.exe",
                 "argv": ["-NoProfile","-Command","Get-Process | Sort CPU -Desc | Select -First 5"] },
@@ -314,7 +334,7 @@ pub fn load_actions() -> Vec<Action> {
 ```
 
 **Инварианты плана (проверяются до выполнения):**
-* каждый `action_id` существует в реестре и его `status != never`;
+* каждый `registry` существует в реестре и его `status != never`;
 * `risk` плана = максимум по шагам, не меньше риска скилла;
 * шаг с `risk in {destructive, external, identity, money}` обязан иметь `needs_confirmation: true`;
 * сумма `budget.seconds` ≥ суммы таймаутов шагов;
@@ -554,7 +574,7 @@ SQLite (`%LOCALAPPDATA%\ZShelper\memory.db`), WAL. Миграции — `refiner
 -- эпизоды: что просили и что вышло
 CREATE TABLE traces(id TEXT PRIMARY KEY, started_at INTEGER, plan_id TEXT, phrase TEXT,
                     outcome TEXT, risk TEXT, skill_id TEXT, cost_ms INTEGER, model TEXT);
-CREATE TABLE steps(trace_id TEXT, n INTEGER, action_id TEXT, ok INTEGER, error TEXT,
+CREATE TABLE steps(trace_id TEXT, n INTEGER, registry TEXT, ok INTEGER, error TEXT,
                    evidence_kind TEXT, PRIMARY KEY(trace_id,n));
 -- факты: устойчивые знания о пользователе
 CREATE TABLE facts(id TEXT PRIMARY KEY, subject TEXT, predicate TEXT, object TEXT,
@@ -778,7 +798,7 @@ python tools/dashboard.py
 - [ ] `planner.rs`: JSON-схема плана, ретраи, валидация инвариантов (§6.3).
 - [ ] Retrieval: BM25 по `example`/`domain`/`verb` + эмбеддинги (bge-m3 ONNX).
 - [ ] Экран Plan → Run: шаги, evidence, отмена.
-- [ ] **DoD:** «разбери загрузки» строится план из ≥ 3 шагов, все ссылаются на реальные `action_id`,
+- [ ] **DoD:** «разбери загрузки» строится план из ≥ 3 шагов, все ссылаются на реальные ключи реестра,
       выполняется и проверяется.
 
 ### Этап 5 · Скиллы (3–4 дня)
@@ -828,7 +848,7 @@ python tools/dashboard.py
 | Антипаттерн | Чем плохо | Как правильно |
 | --- | --- | --- |
 | «Сначала красивый UI, потом логика» | UI фиксирует неверные контракты | сначала домен и IPC, UI — обёртка |
-| Планировщик без валидации `action_id` | модель «изобретает» возможности | схема + проверка по реестру + отказ |
+| Планировщик без валидации ключей реестра | модель «изобретает» возможности | схема + проверка по реестру + отказ |
 | Успех по `exit_code == 0` | ложные «готово» | независимый evidence |
 | Клики по координатам как основа | хрупко, опасно | UIA/AutomationId, vision — только fallback с подтверждением |
 | Один мегапромпт на всё | нестабильно, дорого | роли моделей + каркасы скиллов |
@@ -883,13 +903,13 @@ python tools/dashboard.py
 Ты — планировщик локального ассистента Windows. Ты НЕ выполняешь действия, только планируешь.
 
 Тебе даны:
-1) карточки инструментов (action_id, домен, глагол, объект, пример, риск, канал);
+1) карточки инструментов (ключ реестра, домен, глагол, объект, пример, риск, каналы);
 2) каркас скилла (если есть) — его шаги обязательны;
 3) факты о пользователе (пути, предпочтения) — только те, что даны.
 
 Верни план по схеме v1 (см. §6.3). Жёсткие правила:
-- каждый шаг обязан содержать action_id ИЗ ПЕРЕДАННЫХ карточек;
-- если для шага нет подходящего action_id — верни {"error":"не умею: <чего именно>"};
+- каждый шаг обязан содержать registry ИЗ ПЕРЕДАННЫХ карточек;
+- если для шага нет подходящего ключа — верни {"error":"не умею: <чего именно>"};
 - destructive/external/identity — needs_confirmation=true;
 - не больше {budget.steps} шагов; предпочитай меньше шагов при том же результате;
 - каждый шаг должен иметь verify — как проверить результат независимо;
