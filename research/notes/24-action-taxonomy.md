@@ -4,8 +4,8 @@
 и всё, что человек вообще не может — программа должна уметь сама».
 
 Прозой это не решается: список из чата теряется, дублируется и не проверяется. Поэтому
-действия **сведены в машиночитаемый реестр**: [`data/actions.psv`](../data/actions.psv) →
-[`data/actions.json`](../data/actions.json) → каталог [`docs/ACTIONS.md`](../docs/ACTIONS.md).
+действия **сведены в машиночитаемый реестр**: [`data/actions.psv`](../../data/actions.psv) →
+[`data/actions.json`](../../data/actions.json) → каталог [`docs/ACTIONS.md`](../../docs/ACTIONS.md).
 
 **Текущее состояние: 792 действия, 49 доменов, 200 уникальных глаголов; 0 дырок по семействам.**
 Пересборка: `python3 tools/actions.py`.
@@ -148,7 +148,7 @@ data/actions.json
 
 ## 9. Статистика текущего среза
 
-Из [`docs/ACTIONS.md`](../docs/ACTIONS.md):
+Из [`docs/ACTIONS.md`](../../docs/ACTIONS.md):
 
 - **436 действий**, 33 домена, 172 глагола;
 - по риску: `write-local` 213, `read` 138, `destructive` 46, `external` 32, `identity` 5,

@@ -4,8 +4,8 @@
 клип в CapCut» — разные вещи: во втором нужно знать, где кнопка, чем проверить, что клип
 реально разрезан, и что делать, если интерфейс обновился.
 
-Этот слой — [`data/profiles/*.json`](../data/profiles) + валидатор
-[`tools/profiles.py`](../tools/profiles.py) + отчёт [`docs/PROFILES.md`](../docs/PROFILES.md).
+Этот слой — [`data/profiles/*.json`](../../data/profiles) + валидатор
+[`tools/profiles.py`](../../tools/profiles.py) + отчёт [`docs/PROFILES.md`](../../docs/PROFILES.md).
 
 Текущий срез: **25 профилей / 155 операций / 0 нарушений**.
 

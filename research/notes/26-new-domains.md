@@ -130,7 +130,7 @@
 | `images` | 21 | Photoshop | D (дубликаты) | libvips, rembg, exiftool |
 
 На момент написания: 683 действия / 44 домена / 11 профилей / 81 операция.
-Текущий срез — в [`docs/ACTIONS.md`](../docs/ACTIONS.md) и [`docs/PROFILES.md`](../docs/PROFILES.md).
+Текущий срез — в [`docs/ACTIONS.md`](../../docs/ACTIONS.md) и [`docs/PROFILES.md`](../../docs/PROFILES.md).
 
 ## 9. Что это даёт продукту
 

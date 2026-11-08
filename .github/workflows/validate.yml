@@ -46,13 +46,19 @@ jobs:
       - name: AGENTS.md status block matches the data
         run: python3 tools/status.py --check
 
+      - name: Dashboard and document index match the data
+        run: python3 tools/dashboard.py
+
+      - name: Relative links in the documentation resolve
+        run: python3 tools/links.py
+
       - name: UIA draft generator works on a fixture dump
         run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
 
       - name: Generated artefacts are committed and up to date
         run: |
-          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md docs/EVALS.md docs/APP-COVERAGE.md docs/SKILLS.md docs/ECOSYSTEM.md data/evals.json data/ecosystem AGENTS.md \
-            || { echo "::error::generated files are stale — run tools/actions.py, tools/profiles.py, tools/audit_actions.py and commit"; exit 1; }
+          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md docs/EVALS.md docs/APP-COVERAGE.md docs/SKILLS.md docs/ECOSYSTEM.md docs/DASHBOARD.md docs/INDEX.md data/evals.json data/ecosystem AGENTS.md \
+            || { echo "::error::generated files are stale — run python3 tools/check_all.py and commit"; exit 1; }
 
       - name: Summary
         run: |

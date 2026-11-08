@@ -68,54 +68,36 @@ def discovery(name: str) -> list[dict]:
 
 # ---------------------------------------------------------------- mcp-servers
 
-MCP_QUOTA = {
-    "Developer Tools": 55,
-    "Communication": 40,
-    "Databases": 30,
-    "Cloud Platforms": 30,
-    "Browser Automation": 25,
-    "Coding Agents": 20,
-    "Command Line": 15,
-    "Code Execution": 12,
-    "Aggregators": 15,
-    "Data Platforms": 11,
-    "Accessibility": 4,
-    "Art & Culture": 6,
-    "Customer Data Platforms": 4,
-}
-
-
 def build_mcp() -> list[dict]:
+    """Все неархивные MCP-серверы из двух awesome-каталогов, по звёздам."""
     entries = discovery("mcp-servers.json") + discovery("mcp-servers-wong2.json")
     seen: set[str] = set()
     rows: list[dict] = []
-    by_cat: dict[str, list[dict]] = defaultdict(list)
-    for e in entries:
+    for e in sorted(entries, key=lambda x: -(x.get("stars") or 0)):
         repo = (e.get("repo") or "").lower()
         if not repo or repo in seen or e.get("archived"):
             continue
+        desc = e.get("gh_description") or e.get("description") or ""
+        if not desc.strip():
+            continue
         seen.add(repo)
-        by_cat[e.get("category", "Other")].append(e)
-    for cat, quota in MCP_QUOTA.items():
-        pool = sorted(by_cat.get(cat, []), key=lambda e: -(e.get("stars") or 0))
-        for e in pool[:quota]:
-            rows.append({
-                "id": "mcp:" + e["repo"],
-                "name": e["name"] if e["name"] not in ("", "Image") else e["repo"],
-                "category": "mcp-servers",
-                "subkind": cat.lower().replace(" ", "-").replace("&", "and"),
-                "origin": "vault",
-                "url": e.get("url"),
-                "license": e.get("license"),
-                "stars": e.get("stars"),
-                "gives": clean(e.get("gh_description") or e.get("description") or ""),
-                "channel": "mcp",
-                "transport": "http" if re.search(r"remote|streamable|sse", (e.get("description") or ""), re.I) else "stdio",
-                "status": "candidate",
-                "needs_check": True,
-            })
-    # skills-центричные MCP из официального реестра тоже полезны — доберём по звёздам
-    rows.sort(key=lambda r: -(r.get("stars") or 0))
+        rows.append({
+            "id": "mcp:" + e["repo"],
+            "name": e["name"] if e["name"] not in ("", "Image") else e["repo"],
+            "category": "mcp-servers",
+            "subkind": (e.get("category") or "other").lower().replace(" ", "-").replace("&", "and").replace(",", ""),
+            "origin": "vault",
+            "url": e.get("url"),
+            "license": e.get("license"),
+            "stars": e.get("stars"),
+            "gives": clean(desc),
+            "channel": "mcp",
+            "transport": "http" if re.search(r"remote|streamable|sse", desc, re.I) else "stdio",
+            "status": "candidate",
+            "needs_check": True,
+        })
+        if len(rows) >= 900:
+            break
     return rows
 
 
@@ -164,7 +146,7 @@ def build_skills() -> list[dict]:
             "status": "candidate",
             "needs_check": True,
         })
-        if len(rows) >= 245:
+        if len(rows) >= 365:
             break
     return rows
 
@@ -203,19 +185,25 @@ def build_agents() -> list[dict]:
     for src in vault_sources():
         if src.get("kind") != "github":
             continue
-        if src.get("category") not in ("orchestration", "coding-agents"):
+        text = ((src.get("description") or "") + " " + " ".join(src.get("topics") or [])).lower()
+        if src.get("category") not in ("orchestration", "coding-agents", "memory-and-rag",
+                                       "self-extension", "observability-evals", "mcp-and-tools",
+                                       "safety-and-security", "benchmarks") and not any(
+                k in text for k in ("agent", "assistant", "copilot", "llm", "autonomous")):
             continue
         add(src.get("repo", ""), src.get("repo", "").split("/")[-1], src.get("url", ""),
             src.get("license"), src.get("stars"), src.get("description") or "", "framework")
-        if len(rows) >= 230:
+        if len(rows) >= 430:
             break
-    return rows[:230]
+    return rows[:430]
 
 
 # ------------------------------------------------------------------ plugins
 
 PLUGIN_CATS = ("ui-ux", "packaging-and-ci", "electron-shell", "orchestration",
-               "observability-evals", "memory-and-rag", "configuration")
+               "observability-evals", "memory-and-rag", "configuration", "coding-agents",
+               "connectors", "connectors-extra", "media-production", "office-automation",
+               "academic-writing", "screen-understanding", "low-end-inference")
 
 
 def build_plugins() -> list[dict]:
@@ -242,7 +230,7 @@ def build_plugins() -> list[dict]:
     for src in sorted(vault_sources(), key=lambda x: -(x.get("stars") or 0)):
         if src.get("kind") not in ("npm", "pypi"):
             continue
-        if src.get("category") not in PLUGIN_CATS:
+        if src.get("category") not in PLUGIN_CATS and not src.get("package"):
             continue
         pkg = src.get("package", "")
         if pkg.lower() in seen:
@@ -261,7 +249,7 @@ def build_plugins() -> list[dict]:
             "status": "candidate",
             "needs_check": True,
         })
-        if len(rows) >= 210:
+        if len(rows) >= 560:
             break
     return rows
 
@@ -272,7 +260,10 @@ TOOL_CATS = ("windows-automation", "system-control", "system-triage", "network-a
              "backup-archive", "documents-ocr", "media-production", "music-audio",
              "deployment-admin", "virtualization-remote", "screen-understanding",
              "devices-peripherals", "crypto-privacy", "home-iot", "adb-android",
-             "inference-runtimes", "academic-writing", "office-automation")
+             "inference-runtimes", "academic-writing", "office-automation", "perf-optimization",
+             "observability-evals", "memory-and-rag", "mcp-and-tools", "safety-and-security",
+             "self-extension", "configuration", "updates", "benchmarks", "benchmarks-extra",
+             "design-3d", "photo-editing", "network-admin", "connectors")
 
 
 def build_tools() -> list[dict]:
@@ -302,7 +293,7 @@ def build_tools() -> list[dict]:
             "status": "candidate",
             "needs_check": True,
         })
-        if len(rows) >= 230:
+        if len(rows) >= 620:
             break
     return rows
 
@@ -313,27 +304,35 @@ DOMAIN_TITLES = None
 
 
 def build_abilities() -> list[dict]:
-    from tools_actions_titles import TITLES  # noqa: WPS433  (см. ниже)
+    """Умение = пара (домен, глагол): «Файлы: найти», «Сеть: проверить».
+
+    Это самый честный уровень: глагол отвечает на «что делает», домен — «с чем».
+    Семейство глаголов уходит в `subkind`, чтобы можно было фильтровать по типу работы.
+    """
+    from tools_actions_titles import TITLES
+
     actions = load(ACTIONS)
     fam = load(VERBS)["families"]
     verb_family = {v: f for f, verbs in fam.items() for v in verbs}
     groups: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for a in actions:
-        groups[(a["domain"], verb_family.get(a["verb"], "прочее"))].append(a)
-    rows: list[dict] = []
+        groups[(a["domain"], a["verb"])].append(a)
     rank = {"read": 0, "write-local": 1, "external": 2, "destructive": 3, "identity": 4, "money": 5}
-    for (domain, family), items in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1])):
+    rows: list[dict] = []
+    for (domain, verb), items in sorted(groups.items(), key=lambda kv: (kv[0][0], kv[0][1])):
         worst = max((a["risk"] for a in items), key=lambda r: rank[r])
         objects = sorted({a["object"] for a in items})
+        slug = verb.replace(" ", "-").replace("/", "-")
         rows.append({
-            "id": f"ability:{domain}:{family}",
-            "name": f"{TITLES.get(domain, domain)}: {family}",
+            "id": f"ability:{domain}:{slug}",
+            "name": f"{TITLES.get(domain, domain)}: {verb}",
             "category": "abilities",
-            "subkind": family,
+            "subkind": verb_family.get(verb, "прочее"),
             "origin": "registry",
             "url": "docs/ACTIONS.md",
             "license": "own",
             "domain": domain,
+            "verb": verb,
             "actions": len(items),
             "gives": f"{len(items)} действий: " + ", ".join(objects[:6]),
             "examples": objects[:6],
@@ -348,11 +347,7 @@ def build_abilities() -> list[dict]:
 # ---------------------------------------------------------------- assistants
 
 def build_assistant_roles() -> list[dict]:
-    """Помощники-роли внутри ZShelper: один на домен реестра.
-
-    Роль — это не приложение и не скилл, а «кто отвечает за домен»: какие действия
-    он ведёт, что обязан проверить и чего не делает никогда (деньги, identity).
-    """
+    """Помощники-роли внутри ZShelper: один на домен реестра."""
     from tools_actions_titles import TITLES
 
     actions = load(ACTIONS)
