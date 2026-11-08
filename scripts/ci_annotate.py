@@ -55,6 +55,28 @@ def annotate(log: str, limit: int = 20) -> list[str]:
                 location = found
                 break
 
+        # Причина обычно в следующих строках («Caused by:», вызовы сборки,
+        # текст ошибки build.rs). Без неё аннотация бесполезна.
+        causes: list[str] = []
+        for probe in lines[index + 1 : index + 14]:
+            stripped = probe.strip()
+            if not stripped:
+                if causes:
+                    break
+                continue
+            if HEADER.match(stripped) or LOCATION.match(probe) or stripped.startswith("|"):
+                continue
+            if stripped.startswith(("Caused by", "note:", "help:", "error:", "warning:")) or (
+                causes and probe.startswith((" ", "\t"))
+            ):
+                causes.append(stripped)
+            elif causes:
+                break
+            if len(causes) >= 4:
+                break
+        if causes:
+            message = f"{message} — {' / '.join(causes)}"
+
         if location:
             path = location.group("path").replace("\\", "/")
             out.append(
