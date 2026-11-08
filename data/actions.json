@@ -12725,5 +12725,37 @@
   "human_code": "c",
   "status": "v1",
   "notes": ""
+ },
+ {
+  "id": "virtualization-remote-793",
+  "domain": "virtualization-remote",
+  "verb": "восстановить",
+  "object": "ВМ из снапшота",
+  "example": "откати виртуалку к вчерашнему состоянию",
+  "implementation": [
+   "VBoxManage snapshot restore"
+  ],
+  "risk": "destructive",
+  "tier": "T1",
+  "human": "сложно",
+  "human_code": "h",
+  "status": "v1",
+  "notes": "текущее состояние сохранить снапшотом"
+ },
+ {
+  "id": "files-794",
+  "domain": "files",
+  "verb": "пометить",
+  "object": "дубликаты для разбора",
+  "example": "покажи дубли книг, но не удаляй",
+  "implementation": [
+   "хэш + метаданные"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
  }
 ]

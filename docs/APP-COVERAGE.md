@@ -3,14 +3,14 @@
 Данные — [`data/app_targets.psv`](../data/app_targets.psv), файл генерируется
 `python3 tools/app_targets.py`, руками не править.
 
-**Приложений в каталоге: 122** · категорий: **17** · профиль найден по процессу: **64** · без профиля (визуальный агент): **58**
+**Приложений в каталоге: 122** · категорий: **17** · профиль найден по процессу: **66** · без профиля (визуальный агент): **56**
 
 ## Три уровня покрытия (почему не «профиль на каждую программу руками»)
 
 | Tier | Что это | Сколько | Как появляется |
 | --- | --- | --- | --- |
-| **A** | ручной профиль: якоря, шаги, проверки | 52 | пишется человеком/агентом по UIA-дампу |
-| **B** | авто-профиль из UIA + подтверждение | 37 | `tools/uia_probe` → кандидаты → подтверждение |
+| **A** | ручной профиль: якоря, шаги, проверки | 54 | пишется человеком/агентом по UIA-дампу |
+| **B** | авто-профиль из UIA + подтверждение | 35 | `tools/uia_probe` → кандидаты → подтверждение |
 | **C** | только визуальный агент (скриншот→OCR/VLM→клик) | 33 | профиля нет, работает универсальный цикл |
 
 Подробно — [`PROFILE-STRATEGY.md`](PROFILE-STRATEGY.md). Правило: приложение без профиля
@@ -143,7 +143,7 @@
 | Notion | `Notion.exe` | api+uia | A | P1 | ✅ | API |
 | Obsidian | `Obsidian.exe` | cli | A | P1 | ✅ | markdown-файлы напрямую |
 | Zotero | `zotero.exe` | api | A | P1 | ✅ | локальная БД + connector |
-| Calibre | `calibre.exe` | cli | B | P2 | — | ebook-convert |
+| Calibre | `calibre.exe` | cli | A | P2 | ✅ | ebook-convert |
 | Joplin | `Joplin.exe` | cli | B | P2 | — | CLI + markdown |
 | OneNote (классический) | `ONENOTE.EXE` | com | B | P2 | — |  |
 | Evernote | `Evernote.exe` | uia | C | P3 | — |  |
@@ -218,7 +218,7 @@
 
 | Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
 | --- | --- | --- | --- | --- | --- | --- |
-| VirtualBox | `VirtualBox.exe` | cli | B | P1 | — | VBoxManage |
+| VirtualBox | `VirtualBox.exe` | cli | A | P1 | ✅ | VBoxManage |
 | Hyper-V Manager | `mmc.exe` | cli | B | P2 | ✅ | PowerShell Hyper-V |
 | VMware Workstation | `vmware.exe` | cli | B | P2 | — | vmrun |
 

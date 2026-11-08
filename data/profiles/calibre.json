@@ -1,0 +1,49 @@
+{
+  "app": "Calibre",
+  "kind": "tool",
+  "exe": ["calibre.exe", "ebook-convert.exe", "calibredb.exe"],
+  "ui_stack": "qt",
+  "version_seen": "8.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "convert": { "by": "api", "value": "ebook-convert in.epub out.mobi --output-profile kindle_pw3 --extra-css <css>" },
+    "metadata": { "by": "api", "value": "ebook-meta file.epub (чтение) / --title --authors --language (запись)" },
+    "db": { "by": "api", "value": "calibredb list --fields title,authors,formats --library-path <lib>; calibredb add <file>" },
+    "content_server": { "by": "api", "value": "calibre-server --port 8080 --library-path <lib> (только локальная сеть, с паролем)" },
+    "toc": { "by": "api", "value": "--level1-toc \"//*[name()='h1']\" --level2-toc \"//*[name()='h2']\" при конвертации" }
+  },
+  "operations": [
+    {
+      "name": "Конвертировать книгу в нужный формат",
+      "registry": "text-docs|конвертировать|формат документа",
+      "steps": ["проверить входной файл (ebook-meta) и его формат", "ebook-convert с профилем устройства (kindle_pw3, tablet) и оглавлением из заголовков", "проверить результат"],
+      "verify": ["выходной файл создан и открывается (ebook-meta читает метаданные)", "оглавление не пустое (≥3 записи)", "картинки встроены, обложка на месте"],
+      "risk": "write-local",
+      "notes": "PDF → EPUB без OCR даёт мусор: если PDF без текстового слоя, сначала распознавание"
+    },
+    {
+      "name": "Исправить метаданные книги",
+      "registry": "music|изменить|теги (ID3) массово",
+      "steps": ["прочитать: ebook-meta <file>", "записать: --title, --authors, --language, --series, --series-index", "перепроверить чтением"],
+      "verify": ["поля читаются обратно с новыми значениями", "кодировка не побита (кириллица в авторе читается)", "обложка не потерялась"],
+      "risk": "write-local",
+      "notes": "та же дисциплина, что с ID3-тегами: сначала копия, потом массовая запись"
+    },
+    {
+      "name": "Добавить книги в библиотеку и убрать дубликаты",
+      "registry": "files|сортировать|по типам/датам",
+      "steps": ["calibredb add <файлы> --library-path <lib>", "calibredb list и поиск по дубликатам (title+author+хэш)", "пометить дубликаты, не удаляя сразу"],
+      "verify": ["число книг в базе выросло на количество новых", "для дубликатов есть отчёт (title, author, formats)", "ни одна книга не удалена без подтверждения"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Сделать локальную библиотеку доступной по сети",
+      "registry": "files|открыть|файл в программе",
+      "steps": ["calibre-server --port 8080 --library-path <lib> с обязательным паролем", "проверить, что порт слушается только локально/LAN", "дать ссылку на чтение"],
+      "verify": ["сервер отвечает на 8080 локально", "без пароля доступа нет", "порт не проброшен в интернет (проверка правил firewall)"],
+      "risk": "external",
+      "on_fail": "если пароль не задан — закрыть сервер немедленно: открытая библиотека = утечка файлов",
+      "notes": "раздача книг другим людям — вопрос авторских прав: по умолчанию только для личного чтения"
+    }
+  ]
+}

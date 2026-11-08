@@ -6,7 +6,7 @@
 
 Файл генерируется `python3 tools/profiles.py`; руками не править.
 
-**Профилей: 55** · операций: **328** · проблем: **0**
+**Профилей: 58** · операций: **344** · проблем: **0**
 
 Правила (проверяются автоматически, ошибка = ненулевой код возврата):
 
@@ -27,6 +27,7 @@
 | Audacity | `app` | `audacity.exe` | win32 | 3.7.x (2026-11) | 2026-11-08 | 6 | 6 | `audacity.json` |
 | Bitwig Studio | `app` | `Bitwig Studio.exe` | win32 | 5.x (2026-11) | 2026-11-08 | 5 | 5 | `bitwig.json` |
 | Blender | `app` | `blender.exe` | qt | 4.x (2026-11) | 2026-11-08 | 3 | 5 | `blender.json` |
+| Calibre | `tool` | `calibre.exe, ebook-convert.exe, calibredb.exe` | qt | 8.x (2026-11) | 2026-11-08 | 5 | 4 | `calibre.json` |
 | CapCut (Desktop) | `app` | `CapCut.exe` | electron | 6.x (2026-11) | 2026-11-08 | 6 | 12 | `capcut.json` |
 | Chrome / Edge / Yandex (Chromium) | `app` | `chrome.exe, msedge.exe, browser.exe` | web | Chrome 131+ / Edge 131+ | 2026-11-08 | 7 | 8 | `browser.json` |
 | DBeaver | `app` | `dbeaver.exe, dbeaverc.exe` | qt | 25.x (2026-11) | 2026-11-08 | 6 | 6 | `dbeaver.json` |
@@ -49,6 +50,7 @@
 | Notion | `app` | `Notion.exe` | electron | 4.x (2026-11) | 2026-11-08 | 5 | 5 | `notion.json` |
 | OBS Studio | `app` | `obs64.exe` | qt | 31.x (2026-11) | 2026-11-08 | 7 | 7 | `obs.json` |
 | Obsidian | `app` | `Obsidian.exe` | electron | 1.9.x (2026-11) | 2026-11-08 | 5 | 5 | `obsidian.json` |
+| Oracle VirtualBox | `app` | `VirtualBox.exe, VBoxManage.exe, VBoxHeadless.exe` | qt | 7.1.x (2026-11) | 2026-11-08 | 5 | 5 | `virtualbox.json` |
 | PowerShell 7 / Windows PowerShell | `app` | `pwsh.exe, powershell.exe` | win32 | 7.5 / 5.1 (2026-11) | 2026-11-08 | 3 | 5 | `powershell.json` |
 | REAPER | `app` | `reaper.exe` | win32 | 7.x (2026-11) | 2026-11-08 | 4 | 9 | `reaper.json` |
 | Slack | `app` | `slack.exe` | electron | 4.4x (2026-11) | 2026-11-08 | 5 | 5 | `slack.json` |
@@ -72,16 +74,17 @@
 | Параметры Windows | `app` | `SystemSettings.exe, ApplicationFrameHost.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `windows-settings.json` |
 | Проводник Windows | `app` | `explorer.exe` | uia | Windows 11 24H2 / Windows 10 22H2 | 2026-11-08 | 6 | 7 | `explorer.json` |
 | Просмотр событий | `app` | `mmc.exe, eventvwr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `eventvwr.json` |
+| Умный дом (Home Assistant / MQTT / Matter) | `system` | `` | web | HA 2026.1 + Matter 1.3 (2026-11) | 2026-11-08 | 6 | 7 | `home-assistant.json` |
 | Устройства Windows (USB / Bluetooth / печать) | `system` | `pnputil.exe, printui.exe, DevicePairingWizard.exe, SystemSettings.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 6 | `devices.json` |
 
-По типу: `app` — 46 · `tool` — 6 · `system` — 3. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
+По типу: `app` — 47 · `tool` — 7 · `system` — 4. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
 
 ## Риск операций
 
-- `write-local` — 186
-- `read` — 104
-- `external` — 20
-- `destructive` — 14
+- `write-local` — 195
+- `read` — 106
+- `external` — 23
+- `destructive` — 16
 - `identity` — 3
 - `money` — 1
 
@@ -90,19 +93,21 @@
 - `video` — 35
 - `music-production` — 26
 - `dev-code` — 26
-- `files` — 21
+- `files` — 23
+- `text-docs` — 18
 - `chat-social` — 17
-- `text-docs` — 17
+- `virtualization-remote` — 14
 - `learning-research` — 13
 - `processes-services` — 11
 - `slides-pdf-print` — 10
 - `audio` — 9
-- `virtualization-remote` — 9
 - `apps-generic` — 8
 - `creative-3d` — 8
 - `web` — 8
 - `images` — 8
+- `music` — 7
 - `apps-windows` — 7
+- `smart-home` — 7
 - `input` — 7
 - `email` — 7
 - `business-finance` — 6
@@ -111,7 +116,6 @@
 - `databases` — 6
 - `devices` — 6
 - `network` — 6
-- `music` — 6
 - `games` — 6
 - `storage-backup` — 6
 - `sheets-data` — 5

@@ -1,0 +1,56 @@
+{
+  "app": "Oracle VirtualBox",
+  "exe": ["VirtualBox.exe", "VBoxManage.exe", "VBoxHeadless.exe"],
+  "ui_stack": "qt",
+  "version_seen": "7.1.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": { "by": "api", "value": "VBoxManage list vms | startvm <vm> --type headless | snapshot <vm> take <name> | showvminfo <vm>" },
+    "guest_add": { "by": "api", "value": "VBoxManage guestcontrol <vm> run --exe <path> --username <u> --password <из secrets>" },
+    "export": { "by": "api", "value": "VBoxManage export <vm> -o <ova> | import <ova>" },
+    "vm_list_ui": { "by": "uia", "value": "Table Name='Список виртуальных машин'", "fallback": "VBoxManage list vms — надёжнее" },
+    "state": { "by": "api", "value": "VBoxManage showvminfo <vm> --machinereadable | Select-String 'VMState='" }
+  },
+  "operations": [
+    {
+      "name": "Запустить виртуалку и дождаться загрузки",
+      "registry": "virtualization-remote|запустить|виртуалку",
+      "steps": ["VBoxManage startvm <vm> --type headless (или gui, если нужен экран)", "ждать не по таймеру, а по state=running и появлению guest IP", "проверить доступность гостя (ping/ssh в зависимости от ОС)"],
+      "verify": ["showvminfo: VMState=running", "guest IP получен (guestproperty get /VirtualBox/GuestInfo/Net/0/V4/IP)", "гость отвечает на сетевой запрос"],
+      "risk": "write-local",
+      "timeouts_ms": 180000,
+      "on_fail": "если VMState=gurumeditation или aborted — прочитать VBox.log, не перезапускать циклом"
+    },
+    {
+      "name": "Снять снапшот перед рискованным изменением",
+      "registry": "virtualization-remote|снять|снапшот ВМ",
+      "steps": ["проверить, что ВМ не в состоянии saving (иначе снапшот битый)", "VBoxManage snapshot <vm> take \"zshelper-<дата>\" --description <что меняем>", "проверить список снапшотов"],
+      "verify": ["VBoxManage snapshot <vm> list показывает новый снапшот", "размер снапшота не нулевой", "описание содержит цель и дату"],
+      "risk": "write-local",
+      "notes": "снапшоты нельзя хранить годами: цепочка диффов растёт и замедляет диск — политика «не больше 5»"
+    },
+    {
+      "name": "Откатить ВМ к снапшоту",
+      "registry": "virtualization-remote|восстановить|ВМ из снапшота",
+      "steps": ["показать пользователю, что будет потеряно (текущее состояние)", "VBoxManage snapshot <vm> restore <name>", "запустить и проверить, что гость загрузился"],
+      "verify": ["после отката ВМ стартует и гость в сети", "изменения после снапшота отсутствуют (проверка контрольным файлом)", "текущее состояние сохранено отдельным снапшотом, если было важным"],
+      "risk": "destructive",
+      "on_fail": "если откат не удался — не удалять текущие диски: сначала копия .vdi/.vhd, потом разбор"
+    },
+    {
+      "name": "Передать файлы внутрь гостя",
+      "registry": "virtualization-remote|передать|файл на сервер",
+      "steps": ["проверить Guest Additions (без них guestcontrol не работает)", "VBoxManage guestcontrol <vm> copyto --target-directory <путь> <локальный файл>", "сверить контрольную сумму в гостевой системе"],
+      "verify": ["файл существует в госте и открывается", "хэш совпадает с локальным", "права файла позволяют чтение нужному пользователю"],
+      "risk": "external",
+      "notes": "передача изолирует от хоста: это безопаснее, чем запускать подозрительный файл на основной системе"
+    },
+    {
+      "name": "Экспортировать ВМ в OVA/импортировать обратно",
+      "registry": "virtualization-remote|синхронизировать|с сервером",
+      "steps": ["VBoxManage export <vm> -o <file.ova> --vsys 0 --description <версия>", "проверить размер и целостность архива", "импорт: VBoxManage import <file.ova> --vsys 0 --vmname <new>"],
+      "verify": ["OVA открывается как zip и содержит .ovf + диски", "после импорта ВМ стартует и гость в сети", "MAC-адреса не конфликтуют с исходной ВМ (по умолчанию создаются новые)"],
+      "risk": "write-local"
+    }
+  ]
+}

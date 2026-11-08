@@ -61,7 +61,7 @@ wireshark|Wireshark|Разработка|Wireshark.exe|cli|A|P2|tshark
 filezilla|FileZilla|Разработка|filezilla.exe|cli+uia|A|P2|
 winscp|WinSCP|Разработка|WinSCP.exe|cli|A|P2|winscp.com скрипты
 putty|PuTTY|Разработка|putty.exe|cli|B|P2|plink
-virtualbox|VirtualBox|Виртуализация|VirtualBox.exe|cli|B|P1|VBoxManage
+virtualbox|VirtualBox|Виртуализация|VirtualBox.exe|cli|A|P1|VBoxManage
 vmware|VMware Workstation|Виртуализация|vmware.exe|cli|B|P2|vmrun
 hyperv|Hyper-V Manager|Виртуализация|mmc.exe|cli|B|P2|PowerShell Hyper-V
 rustdesk|RustDesk|Удалённый доступ|rustdesk.exe|cli+uia|B|P2|
@@ -115,7 +115,7 @@ evernote|Evernote|Знания|Evernote.exe|uia|C|P3|
 onenote-desk|OneNote (классический)|Знания|ONENOTE.EXE|com|B|P2|
 zotero|Zotero|Знания|zotero.exe|api|A|P1|локальная БД + connector
 mendeley|Mendeley|Знания|MendeleyDesktop.exe|uia|C|P3|
-calibre|Calibre|Знания|calibre.exe|cli|B|P2|ebook-convert
+calibre|Calibre|Знания|calibre.exe|cli|A|P2|ebook-convert
 kindle|Kindle|Знания|Kindle.exe|uia|C|P3|
 discord-canary|Discord Canary|Мессенджер|DiscordCanary.exe|api|C|P3|
 windowsterminal-preview|Windows Terminal Preview|Разработка|WindowsTerminal.exe|cli+uia|C|P3|
