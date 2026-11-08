@@ -105,6 +105,8 @@
 ## Как этим пользоваться
 
 ```bash
-python3 tools/dashboard.py    # пересобрать DASHBOARD.md и INDEX.md
-python3 tools/status.py      # обновить блок состояния в AGENTS.md
+python3 tools/check_all.py           # всё и в правильном порядке (то же, что в CI)
+python3 tools/check_all.py --check   # + упасть, если сгенерированное не закоммичено
+python3 tools/dashboard.py           # пересобрать DASHBOARD.md и INDEX.md
+python3 tools/status.py              # обновить блок состояния в AGENTS.md
 ```
