@@ -30,7 +30,8 @@
     "archived": false,
     "pushed_at": "2026-06-25T08:25:03Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/orchestration/AgentOps-AI__agentops/README.md"
   },
   {
     "id": "github:Aider-AI/aider",
@@ -61,7 +62,9 @@
     "archived": false,
     "pushed_at": "2026-05-22T14:02:20Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/Aider-AI__aider/README.md",
+    "_extras": 2
   },
   {
     "id": "github:All-Hands-AI/OpenHands",
@@ -88,7 +91,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:28:36Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/All-Hands-AI__OpenHands/README.md"
   },
   {
     "id": "github:Arize-ai/phoenix",
@@ -121,7 +125,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T05:06:31Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/Arize-ai__phoenix/README.md"
   },
   {
     "id": "github:AutoHotkey/AutoHotkey",
@@ -146,7 +151,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T00:55:18Z",
     "default_branch": "alpha",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/AutoHotkey__AutoHotkey/README.md"
   },
   {
     "id": "github:BerriAI/litellm",
@@ -179,7 +185,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:18:00Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/orchestration/BerriAI__litellm/README.md"
   },
   {
     "id": "github:BrowserMCP/mcp",
@@ -203,7 +210,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T10:48:19Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/BrowserMCP__mcp/README.md"
   },
   {
     "id": "github:BtbN/FFmpeg-Builds",
@@ -220,7 +228,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T20:38:18Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/BtbN__FFmpeg-Builds/README.md"
   },
   {
     "id": "github:EleutherAI/lm-evaluation-harness",
@@ -241,7 +250,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T14:34:40Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/EleutherAI__lm-evaluation-harness/README.md"
   },
   {
     "id": "github:FFmpeg/FFmpeg",
@@ -274,7 +284,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T09:24:41Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/FFmpeg__FFmpeg/README.md"
   },
   {
     "id": "github:FlowiseAI/Flowise",
@@ -307,7 +318,8 @@
     "archived": true,
     "pushed_at": "2026-08-13T12:38:19Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/FlowiseAI__Flowise/README.md"
   },
   {
     "id": "github:FunAudioLLM/SenseVoice",
@@ -340,7 +352,8 @@
     "archived": false,
     "pushed_at": "2026-09-30T10:22:01Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/FunAudioLLM__SenseVoice/README.md"
   },
   {
     "id": "github:IST-DASLab/gptq",
@@ -357,7 +370,8 @@
     "archived": false,
     "pushed_at": "2024-03-27T01:46:02Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/IST-DASLab__gptq/README.md"
   },
   {
     "id": "github:JaidedAI/EasyOCR",
@@ -390,7 +404,8 @@
     "archived": false,
     "pushed_at": "2025-12-05T12:23:12Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/JaidedAI__EasyOCR/README.md"
   },
   {
     "id": "github:LibreHardwareMonitor/LibreHardwareMonitor",
@@ -420,7 +435,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T18:07:18Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/windows-automation/LibreHardwareMonitor__LibreHardwareMonitor/README.md"
   },
   {
     "id": "github:LostRuins/koboldcpp",
@@ -448,7 +464,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T09:41:02Z",
     "default_branch": "concedo",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/LostRuins__koboldcpp/README.md"
   },
   {
     "id": "github:MarkusPfundstein/mcp-obsidian",
@@ -465,7 +482,8 @@
     "archived": false,
     "pushed_at": "2026-08-31T11:49:01Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/MarkusPfundstein__mcp-obsidian/README.md"
   },
   {
     "id": "github:MicrosoftDocs/win32",
@@ -482,7 +500,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T18:05:34Z",
     "default_branch": "docs",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/windows-automation/MicrosoftDocs__win32/README.md"
   },
   {
     "id": "github:Mintplex-Labs/anything-llm",
@@ -515,7 +534,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T02:20:14Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/Mintplex-Labs__anything-llm/README.md"
   },
   {
     "id": "github:Mintplex-Labs/anything-llm",
@@ -548,7 +568,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T02:20:14Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/Mintplex-Labs__anything-llm/README.md"
   },
   {
     "id": "github:NVIDIA/TensorRT-LLM",
@@ -571,7 +592,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T09:16:18Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/NVIDIA__TensorRT-LLM/README.md"
   },
   {
     "id": "github:NVIDIA/go-nvml",
@@ -588,7 +610,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T22:40:45Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/windows-automation/NVIDIA__go-nvml/README.md"
   },
   {
     "id": "github:OpenAdaptAI/OpenAdapt",
@@ -621,7 +644,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:19:04Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/OpenAdaptAI__OpenAdapt/README.md"
   },
   {
     "id": "github:OpenGVLab/InternVL",
@@ -651,7 +675,8 @@
     "archived": false,
     "pushed_at": "2025-09-22T01:36:48Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/OpenGVLab__InternVL/README.md"
   },
   {
     "id": "github:OpenInterpreter/open-interpreter",
@@ -676,7 +701,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:04:06Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/OpenInterpreter__open-interpreter/README.md"
   },
   {
     "id": "github:PaddlePaddle/PaddleOCR",
@@ -707,7 +733,8 @@
     "archived": false,
     "pushed_at": "2026-09-16T03:31:50Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/PaddlePaddle__PaddleOCR/README.md"
   },
   {
     "id": "github:Portkey-AI/gateway",
@@ -740,7 +767,8 @@
     "archived": false,
     "pushed_at": "2026-05-25T13:54:51Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/orchestration/Portkey-AI__gateway/README.md"
   },
   {
     "id": "github:PowerShell/PowerShell",
@@ -766,7 +794,9 @@
     "archived": false,
     "pushed_at": "2026-11-06T19:41:07Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/PowerShell__PowerShell/README.md",
+    "_extras": 1
   },
   {
     "id": "github:QwenLM/Qwen2.5-VL",
@@ -783,7 +813,8 @@
     "archived": false,
     "pushed_at": "2026-01-30T04:47:30Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/QwenLM__Qwen2.5-VL/README.md"
   },
   {
     "id": "github:QwenLM/qwen-code",
@@ -813,7 +844,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:01:42Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/QwenLM__qwen-code/README.md"
   },
   {
     "id": "github:ROCm/ROCm",
@@ -832,7 +864,8 @@
     "archived": true,
     "pushed_at": "2026-10-14T13:27:57Z",
     "default_branch": "develop",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/ROCm__ROCm/README.md"
   },
   {
     "id": "github:RooCodeInc/Roo-Code",
@@ -849,7 +882,8 @@
     "archived": true,
     "pushed_at": "2026-05-15T18:08:47Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/RooCodeInc__Roo-Code/README.md"
   },
   {
     "id": "github:SWE-agent/SWE-agent",
@@ -874,7 +908,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T23:40:08Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/SWE-agent__SWE-agent/README.md"
   },
   {
     "id": "github:SWE-bench/SWE-bench",
@@ -895,7 +930,8 @@
     "archived": false,
     "pushed_at": "2026-09-18T05:08:56Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/benchmarks/SWE-bench__SWE-bench/README.md"
   },
   {
     "id": "github:SWE-bench/SWE-bench",
@@ -916,7 +952,8 @@
     "archived": false,
     "pushed_at": "2026-09-18T05:08:56Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/SWE-bench__SWE-bench/README.md"
   },
   {
     "id": "github:SWivid/F5-TTS",
@@ -933,7 +970,8 @@
     "archived": false,
     "pushed_at": "2026-11-03T15:05:10Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/SWivid__F5-TTS/README.md"
   },
   {
     "id": "github:SYSTRAN/faster-whisper",
@@ -959,7 +997,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T17:24:51Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/SYSTRAN__faster-whisper/README.md"
   },
   {
     "id": "github:ShishirPatil/gorilla",
@@ -985,7 +1024,8 @@
     "archived": false,
     "pushed_at": "2026-10-17T06:06:24Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/benchmarks/ShishirPatil__gorilla/README.md"
   },
   {
     "id": "github:ShishirPatil/gorilla",
@@ -1011,7 +1051,8 @@
     "archived": false,
     "pushed_at": "2026-10-17T06:06:24Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/ShishirPatil__gorilla/README.md"
   },
   {
     "id": "github:Shubhamsaboo/awesome-llm-apps",
@@ -1033,7 +1074,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T05:53:36Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/mcp-and-tools/Shubhamsaboo__awesome-llm-apps/README.md"
   },
   {
     "id": "github:Significant-Gravitas/AutoGPT",
@@ -1062,7 +1104,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T05:56:51Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/Significant-Gravitas__AutoGPT/README.md"
   },
   {
     "id": "github:SnosMe/uiohook-napi",
@@ -1086,7 +1129,8 @@
     "archived": false,
     "pushed_at": "2026-03-21T18:18:41Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/SnosMe__uiohook-napi/README.md"
   },
   {
     "id": "github:SparkAudio/Spark-TTS",
@@ -1103,7 +1147,8 @@
     "archived": false,
     "pushed_at": "2025-04-09T10:18:00Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/SparkAudio__Spark-TTS/README.md"
   },
   {
     "id": "github:THUDM/AgentBench",
@@ -1125,7 +1170,8 @@
     "archived": false,
     "pushed_at": "2026-02-08T17:01:05Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/benchmarks/THUDM__AgentBench/README.md"
   },
   {
     "id": "github:TanStack/query",
@@ -1158,7 +1204,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:56:45Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/TanStack__query/README.md"
   },
   {
     "id": "github:TanStack/table",
@@ -1191,7 +1238,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T21:34:42Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/TanStack__table/README.md"
   },
   {
     "id": "github:Unstructured-IO/unstructured",
@@ -1224,7 +1272,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T21:29:24Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/Unstructured-IO__unstructured/README.md"
   },
   {
     "id": "github:VRSEN/agency-swarm",
@@ -1241,7 +1290,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T00:31:36Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/orchestration/VRSEN__agency-swarm/README.md"
   },
   {
     "id": "github:Vaibhavs10/insanely-fast-whisper",
@@ -1258,7 +1308,8 @@
     "archived": false,
     "pushed_at": "2025-10-25T09:50:57Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/Vaibhavs10__insanely-fast-whisper/README.md"
   },
   {
     "id": "github:VikParuchuri/surya",
@@ -1275,7 +1326,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T01:43:17Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/VikParuchuri__surya/README.md"
   },
   {
     "id": "github:VoltAgent/awesome-agent-skills",
@@ -1305,7 +1357,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T10:43:36Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/mcp-and-tools/VoltAgent__awesome-agent-skills/README.md"
   },
   {
     "id": "github:WiseLibs/better-sqlite3",
@@ -1327,7 +1380,8 @@
     "archived": false,
     "pushed_at": "2026-08-10T03:10:10Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/WiseLibs__better-sqlite3/README.md"
   },
   {
     "id": "github:a2aproject/A2A",
@@ -1352,7 +1406,9 @@
     "archived": false,
     "pushed_at": "2026-11-05T14:47:57Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/a2aproject__A2A/README.md",
+    "_extras": 2
   },
   {
     "id": "github:actions/attest-build-provenance",
@@ -1369,7 +1425,8 @@
     "archived": false,
     "pushed_at": "2026-08-21T19:01:30Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/actions__attest-build-provenance/README.md"
   },
   {
     "id": "github:actions/cache",
@@ -1386,7 +1443,8 @@
     "archived": false,
     "pushed_at": "2026-07-15T18:13:46Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/actions__cache/README.md"
   },
   {
     "id": "github:actions/checkout",
@@ -1403,7 +1461,8 @@
     "archived": false,
     "pushed_at": "2026-10-17T10:14:02Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/actions__checkout/README.md"
   },
   {
     "id": "github:actions/dependency-review-action",
@@ -1420,7 +1479,8 @@
     "archived": false,
     "pushed_at": "2026-10-31T16:34:25Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/packaging-and-ci/actions__dependency-review-action/README.md"
   },
   {
     "id": "github:actions/download-artifact",
@@ -1437,7 +1497,8 @@
     "archived": false,
     "pushed_at": "2026-10-07T10:19:59Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/actions__download-artifact/README.md"
   },
   {
     "id": "github:actions/runner-images",
@@ -1454,7 +1515,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T12:05:21Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/actions__runner-images/README.md"
   },
   {
     "id": "github:actions/setup-node",
@@ -1471,7 +1533,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T02:27:47Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/actions__setup-node/README.md"
   },
   {
     "id": "github:actions/starter-workflows",
@@ -1490,7 +1553,8 @@
     "archived": false,
     "pushed_at": "2026-08-03T14:06:59Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/actions__starter-workflows/README.md"
   },
   {
     "id": "github:actions/upload-artifact",
@@ -1507,7 +1571,8 @@
     "archived": false,
     "pushed_at": "2026-10-07T10:18:23Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/actions__upload-artifact/README.md"
   },
   {
     "id": "github:activepieces/activepieces",
@@ -1538,7 +1603,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:08:14Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/activepieces__activepieces/README.md"
   },
   {
     "id": "github:agno-agi/agno",
@@ -1561,7 +1627,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T22:07:31Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/agno-agi__agno/README.md"
   },
   {
     "id": "github:alex8088/electron-vite",
@@ -1587,7 +1654,8 @@
     "archived": false,
     "pushed_at": "2026-10-14T16:28:56Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/alex8088__electron-vite/README.md"
   },
   {
     "id": "github:alphacep/vosk-api",
@@ -1620,7 +1688,8 @@
     "archived": false,
     "pushed_at": "2026-10-15T08:36:44Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/whisper-and-asr/alphacep__vosk-api/README.md"
   },
   {
     "id": "github:anchore/sbom-action",
@@ -1637,7 +1706,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T18:36:45Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/anchore__sbom-action/README.md"
   },
   {
     "id": "github:anthropics/claude-code-action",
@@ -1654,7 +1724,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T19:21:23Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/anthropics__claude-code-action/README.md"
   },
   {
     "id": "github:anthropics/skills",
@@ -1673,7 +1744,9 @@
     "archived": false,
     "pushed_at": "2026-11-06T22:32:32Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/anthropics__skills/README.md",
+    "_extras": 1
   },
   {
     "id": "github:apache/tika",
@@ -1696,7 +1769,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T01:38:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/apache__tika/README.md"
   },
   {
     "id": "github:aquasecurity/trivy",
@@ -1729,7 +1803,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T11:29:59Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/aquasecurity__trivy/README.md"
   },
   {
     "id": "github:aquasecurity/trivy-action",
@@ -1754,7 +1829,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T12:57:25Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/safety-and-security/aquasecurity__trivy-action/README.md"
   },
   {
     "id": "github:asg017/sqlite-vec",
@@ -1774,7 +1850,8 @@
     "archived": false,
     "pushed_at": "2026-05-18T06:50:45Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/asg017__sqlite-vec/README.md"
   },
   {
     "id": "github:ast-grep/ast-grep",
@@ -1807,7 +1884,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T04:21:18Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/ast-grep__ast-grep/README.md"
   },
   {
     "id": "github:astral-sh/ruff",
@@ -1836,7 +1914,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T09:45:46Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/astral-sh__ruff/README.md"
   },
   {
     "id": "github:astral-sh/uv",
@@ -1858,7 +1937,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T01:33:53Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/astral-sh__uv/README.md"
   },
   {
     "id": "github:axios/axios",
@@ -1881,7 +1961,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T12:05:11Z",
     "default_branch": "v1.x",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/axios__axios/README.md"
   },
   {
     "id": "github:basicmachines-co/basic-memory",
@@ -1914,7 +1995,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T23:12:50Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/basicmachines-co__basic-memory/README.md"
   },
   {
     "id": "github:bencevans/screenshot-desktop",
@@ -1937,7 +2019,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T11:24:17Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/bencevans__screenshot-desktop/README.md"
   },
   {
     "id": "github:block/goose",
@@ -1959,7 +2042,9 @@
     "archived": false,
     "pushed_at": "2026-11-08T00:56:41Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/block__goose/README.md",
+    "_extras": 1
   },
   {
     "id": "github:breejs/bree",
@@ -1992,7 +2077,8 @@
     "archived": false,
     "pushed_at": "2026-02-17T22:09:07Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/breejs__bree/README.md"
   },
   {
     "id": "github:bytedance/UI-TARS",
@@ -2011,7 +2097,8 @@
     "archived": false,
     "pushed_at": "2026-01-27T04:57:26Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/bytedance__UI-TARS/README.md"
   },
   {
     "id": "github:bytedance/UI-TARS-desktop",
@@ -2043,7 +2130,8 @@
     "archived": false,
     "pushed_at": "2026-10-09T01:29:53Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/bytedance__UI-TARS-desktop/README.md"
   },
   {
     "id": "github:camel-ai/camel",
@@ -2070,7 +2158,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T10:15:02Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/camel-ai__camel/README.md"
   },
   {
     "id": "github:casbin/casbin",
@@ -2103,7 +2192,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T17:03:34Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/casbin__casbin/README.md"
   },
   {
     "id": "github:casper-hansen/AutoAWQ",
@@ -2120,7 +2210,8 @@
     "archived": true,
     "pushed_at": "2025-05-11T08:52:59Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/casper-hansen__AutoAWQ/README.md"
   },
   {
     "id": "github:cawa-93/vite-electron-builder",
@@ -2152,7 +2243,8 @@
     "archived": false,
     "pushed_at": "2026-08-03T14:05:16Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/packaging-and-ci/cawa-93__vite-electron-builder/README.md"
   },
   {
     "id": "github:cawa-93/vite-electron-builder",
@@ -2184,7 +2276,8 @@
     "archived": false,
     "pushed_at": "2026-08-03T14:05:16Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/ui-ux/cawa-93__vite-electron-builder/README.md"
   },
   {
     "id": "github:changesets/changesets",
@@ -2201,7 +2294,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T17:55:17Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/changesets__changesets/README.md"
   },
   {
     "id": "github:chatmcp/chatmcp",
@@ -2218,7 +2312,8 @@
     "archived": false,
     "pushed_at": "2024-12-11T08:15:34Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/orchestration/chatmcp__chatmcp/README.md"
   },
   {
     "id": "github:cheeriojs/cheerio",
@@ -2246,7 +2341,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T02:26:26Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/cheeriojs__cheerio/README.md"
   },
   {
     "id": "github:chroma-core/chroma",
@@ -2270,7 +2366,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T04:52:06Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/chroma-core__chroma/README.md"
   },
   {
     "id": "github:cline/cline",
@@ -2287,7 +2384,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T00:08:40Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/cline__cline/README.md"
   },
   {
     "id": "github:coderamp-labs/gitingest",
@@ -2309,7 +2407,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T00:39:27Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/coderamp-labs__gitingest/README.md"
   },
   {
     "id": "github:confident-ai/deepeval",
@@ -2333,7 +2432,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T21:30:17Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/confident-ai__deepeval/README.md"
   },
   {
     "id": "github:continuedev/continue",
@@ -2356,7 +2456,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T15:28:28Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/continuedev__continue/README.md"
   },
   {
     "id": "github:coqui-ai/TTS",
@@ -2389,7 +2490,8 @@
     "archived": false,
     "pushed_at": "2024-08-16T12:07:14Z",
     "default_branch": "dev",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/coqui-ai__TTS/README.md"
   },
   {
     "id": "github:crewAIInc/crewAI",
@@ -2412,7 +2514,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T08:33:48Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/crewAIInc__crewAI/README.md"
   },
   {
     "id": "github:cyanheads/mcp-ts-template",
@@ -2440,7 +2543,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T20:49:42Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/cyanheads__mcp-ts-template/README.md"
   },
   {
     "id": "github:dagu-org/dagu",
@@ -2473,7 +2577,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T03:46:26Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/dagu-org__dagu/README.md"
   },
   {
     "id": "github:dbos-inc/dbos-transact-py",
@@ -2503,7 +2608,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T01:18:17Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/dbos-inc__dbos-transact-py/README.md"
   },
   {
     "id": "github:deepseek-ai/DeepSeek-OCR",
@@ -2520,7 +2626,8 @@
     "archived": false,
     "pushed_at": "2026-01-27T03:45:14Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/deepseek-ai__DeepSeek-OCR/README.md"
   },
   {
     "id": "github:dependabot/fetch-metadata",
@@ -2537,7 +2644,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T23:17:56Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/dependabot__fetch-metadata/README.md"
   },
   {
     "id": "github:discordjs/discord.js",
@@ -2564,7 +2672,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T16:38:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/discordjs__discord.js/README.md"
   },
   {
     "id": "github:docker/mcp-gateway",
@@ -2581,7 +2690,8 @@
     "archived": false,
     "pushed_at": "2026-10-26T18:57:04Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/docker__mcp-gateway/README.md"
   },
   {
     "id": "github:docling-project/docling",
@@ -2614,7 +2724,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T08:34:47Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/docling-project__docling/README.md"
   },
   {
     "id": "github:doobidoo/mcp-memory-service",
@@ -2647,7 +2758,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T08:29:09Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/doobidoo__mcp-memory-service/README.md"
   },
   {
     "id": "github:dorny/paths-filter",
@@ -2669,7 +2781,8 @@
     "archived": false,
     "pushed_at": "2026-09-27T22:03:36Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/dorny__paths-filter/README.md"
   },
   {
     "id": "github:dscripka/openWakeWord",
@@ -2686,7 +2799,8 @@
     "archived": false,
     "pushed_at": "2025-12-30T16:47:27Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/dscripka__openWakeWord/README.md"
   },
   {
     "id": "github:duckdb/duckdb",
@@ -2709,7 +2823,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T20:55:01Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/duckdb__duckdb/README.md"
   },
   {
     "id": "github:e2b-dev/awesome-ai-agents",
@@ -2740,7 +2855,8 @@
     "archived": false,
     "pushed_at": "2026-08-21T18:52:45Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/mcp-and-tools/e2b-dev__awesome-ai-agents/README.md"
   },
   {
     "id": "github:electron-react-boilerplate/electron-react-boilerplate",
@@ -2766,7 +2882,8 @@
     "archived": false,
     "pushed_at": "2026-10-30T03:05:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/electron-react-boilerplate__electron-react-boilerplate/README.md"
   },
   {
     "id": "github:electron-userland/electron-builder",
@@ -2799,7 +2916,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T20:37:01Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/electron-userland__electron-builder/README.md"
   },
   {
     "id": "github:electron/asar",
@@ -2822,7 +2940,8 @@
     "archived": false,
     "pushed_at": "2026-11-01T09:30:34Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/electron__asar/README.md"
   },
   {
     "id": "github:electron/electron",
@@ -2849,7 +2968,9 @@
     "archived": false,
     "pushed_at": "2026-11-08T03:20:41Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/electron__electron/README.md",
+    "_extras": 6
   },
   {
     "id": "github:electron/electron-api-demos",
@@ -2866,7 +2987,8 @@
     "archived": true,
     "pushed_at": "2026-08-02T07:50:52Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/electron__electron-api-demos/README.md"
   },
   {
     "id": "github:electron/electron-docs-linter",
@@ -2883,7 +3005,8 @@
     "archived": true,
     "pushed_at": "2026-08-02T07:51:06Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/electron__electron-docs-linter/README.md"
   },
   {
     "id": "github:electron/electron-quick-start",
@@ -2900,7 +3023,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T18:19:46Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/electron__electron-quick-start/README.md"
   },
   {
     "id": "github:electron/forge",
@@ -2928,7 +3052,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T10:19:23Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/electron__forge/README.md"
   },
   {
     "id": "github:electron/forge",
@@ -2956,7 +3081,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T10:19:23Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/packaging-and-ci/electron__forge/README.md"
   },
   {
     "id": "github:electron/fuses",
@@ -2973,7 +3099,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T01:33:49Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/electron__fuses/README.md"
   },
   {
     "id": "github:electron/osx-sign",
@@ -3001,7 +3128,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T01:35:37Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/electron__osx-sign/README.md"
   },
   {
     "id": "github:electron/packager",
@@ -3023,7 +3151,8 @@
     "archived": false,
     "pushed_at": "2026-11-01T11:19:18Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/electron__packager/README.md"
   },
   {
     "id": "github:electron/rebuild",
@@ -3040,7 +3169,8 @@
     "archived": false,
     "pushed_at": "2026-11-01T09:25:00Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/electron__rebuild/README.md"
   },
   {
     "id": "github:electron/windows-sign",
@@ -3057,7 +3187,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T01:34:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/electron__windows-sign/README.md"
   },
   {
     "id": "github:emilkowalski/sonner",
@@ -3078,7 +3209,8 @@
     "archived": false,
     "pushed_at": "2026-08-10T11:13:03Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/emilkowalski__sonner/README.md"
   },
   {
     "id": "github:espeak-ng/espeak-ng",
@@ -3101,7 +3233,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:53:38Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/espeak-ng__espeak-ng/README.md"
   },
   {
     "id": "github:espnet/espnet",
@@ -3134,7 +3267,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T00:57:55Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/espnet__espnet/README.md"
   },
   {
     "id": "github:eugeneware/ffmpeg-static",
@@ -3151,7 +3285,8 @@
     "archived": false,
     "pushed_at": "2026-03-21T10:28:10Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/eugeneware__ffmpeg-static/README.md"
   },
   {
     "id": "github:evalstate/fast-agent",
@@ -3181,7 +3316,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T07:07:07Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/evalstate__fast-agent/README.md"
   },
   {
     "id": "github:executeautomation/mcp-playwright",
@@ -3198,7 +3334,8 @@
     "archived": false,
     "pushed_at": "2025-12-13T04:28:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/executeautomation__mcp-playwright/README.md"
   },
   {
     "id": "github:explodinggradients/ragas",
@@ -3219,7 +3356,8 @@
     "archived": false,
     "pushed_at": "2026-02-24T07:47:19Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/explodinggradients__ragas/README.md"
   },
   {
     "id": "github:facebook/react",
@@ -3243,7 +3381,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T02:19:03Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/facebook__react/README.md"
   },
   {
     "id": "github:facebookresearch/faiss",
@@ -3260,7 +3399,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T17:39:00Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/facebookresearch__faiss/README.md"
   },
   {
     "id": "github:fishaudio/fish-speech",
@@ -3285,7 +3425,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T20:02:21Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/fishaudio__fish-speech/README.md"
   },
   {
     "id": "github:floating-ui/floating-ui",
@@ -3312,7 +3453,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T07:07:56Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/floating-ui__floating-ui/README.md"
   },
   {
     "id": "github:framer/motion",
@@ -3336,7 +3478,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:18:21Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/framer__motion/README.md"
   },
   {
     "id": "github:geekan/MetaGPT",
@@ -3359,7 +3502,8 @@
     "archived": false,
     "pushed_at": "2026-01-21T10:12:33Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/geekan__MetaGPT/README.md"
   },
   {
     "id": "github:gerardog/gsudo",
@@ -3389,7 +3533,8 @@
     "archived": false,
     "pushed_at": "2026-08-12T04:39:51Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/gerardog__gsudo/README.md"
   },
   {
     "id": "github:getsentry/sentry-javascript",
@@ -3422,7 +3567,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T11:50:01Z",
     "default_branch": "develop",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/getsentry__sentry-javascript/README.md"
   },
   {
     "id": "github:getzep/graphiti",
@@ -3444,7 +3590,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T01:05:18Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/getzep__graphiti/README.md"
   },
   {
     "id": "github:ggml-org/ggml",
@@ -3463,7 +3610,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:24:25Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/ggml-org__ggml/README.md"
   },
   {
     "id": "github:ggml-org/llama.cpp",
@@ -3482,7 +3630,9 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:21:06Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/ggml-org__llama.cpp/README.md",
+    "_extras": 2
   },
   {
     "id": "github:ggml-org/whisper.cpp",
@@ -3506,7 +3656,9 @@
     "archived": false,
     "pushed_at": "2026-11-08T04:01:46Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/ggml-org__whisper.cpp/README.md",
+    "_extras": 1
   },
   {
     "id": "github:github/codeql-action",
@@ -3530,7 +3682,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T18:19:59Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/github__codeql-action/README.md"
   },
   {
     "id": "github:github/github-mcp-server",
@@ -3551,7 +3704,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T23:25:36Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/github__github-mcp-server/README.md"
   },
   {
     "id": "github:gitleaks/gitleaks",
@@ -3584,7 +3738,8 @@
     "archived": false,
     "pushed_at": "2026-10-28T04:14:29Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/gitleaks__gitleaks/README.md"
   },
   {
     "id": "github:gitpython-developers/GitPython",
@@ -3605,7 +3760,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T13:20:52Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/gitpython-developers__GitPython/README.md"
   },
   {
     "id": "github:golang/tools",
@@ -3622,7 +3778,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T21:06:19Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/golang__tools/README.md"
   },
   {
     "id": "github:google-gemini/gemini-cli",
@@ -3647,7 +3804,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T01:08:20Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/google-gemini__gemini-cli/README.md"
   },
   {
     "id": "github:google/gemma.cpp",
@@ -3664,7 +3822,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T15:48:58Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/google__gemma.cpp/README.md"
   },
   {
     "id": "github:google/osv-scanner",
@@ -3686,7 +3845,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T20:57:08Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/google__osv-scanner/README.md"
   },
   {
     "id": "github:google/osv-scanner-action",
@@ -3707,7 +3867,8 @@
     "archived": false,
     "pushed_at": "2026-10-12T01:51:36Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/safety-and-security/google__osv-scanner-action/README.md"
   },
   {
     "id": "github:googleapis/google-api-nodejs-client",
@@ -3730,7 +3891,8 @@
     "archived": false,
     "pushed_at": "2026-10-30T15:41:41Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/googleapis__google-api-nodejs-client/README.md"
   },
   {
     "id": "github:googleapis/release-please",
@@ -3747,7 +3909,8 @@
     "archived": false,
     "pushed_at": "2026-11-03T15:41:46Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/googleapis__release-please/README.md"
   },
   {
     "id": "github:googleworkspace/apps-script-samples",
@@ -3775,7 +3938,8 @@
     "archived": false,
     "pushed_at": "2026-07-30T15:21:47Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/googleworkspace__apps-script-samples/README.md"
   },
   {
     "id": "github:grammyjs/grammY",
@@ -3800,7 +3964,8 @@
     "archived": false,
     "pushed_at": "2026-10-16T15:43:28Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/grammyjs__grammY/README.md"
   },
   {
     "id": "github:hatchet-dev/hatchet",
@@ -3831,7 +3996,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T04:40:04Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/hatchet-dev__hatchet/README.md"
   },
   {
     "id": "github:helix-editor/helix",
@@ -3853,7 +4019,8 @@
     "archived": false,
     "pushed_at": "2026-09-29T02:36:33Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/helix-editor__helix/README.md"
   },
   {
     "id": "github:hesreallyhim/awesome-claude-code",
@@ -3886,7 +4053,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T09:06:01Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/mcp-and-tools/hesreallyhim__awesome-claude-code/README.md"
   },
   {
     "id": "github:hexgrad/kokoro",
@@ -3903,7 +4071,9 @@
     "archived": false,
     "pushed_at": "2025-08-06T22:28:53Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/hexgrad__kokoro/README.md",
+    "_extras": 1
   },
   {
     "id": "github:home-assistant/core",
@@ -3929,7 +4099,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:23:59Z",
     "default_branch": "dev",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/home-assistant__core/README.md"
   },
   {
     "id": "github:huggingface/candle",
@@ -3946,7 +4117,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T12:05:47Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/huggingface__candle/README.md"
   },
   {
     "id": "github:huggingface/parler-tts",
@@ -3963,7 +4135,8 @@
     "archived": false,
     "pushed_at": "2024-12-10T08:28:12Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/huggingface__parler-tts/README.md"
   },
   {
     "id": "github:huggingface/smolagents",
@@ -3980,7 +4153,8 @@
     "archived": false,
     "pushed_at": "2026-11-03T18:36:41Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/huggingface__smolagents/README.md"
   },
   {
     "id": "github:huggingface/speech-to-speech",
@@ -4007,7 +4181,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T07:00:52Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/huggingface__speech-to-speech/README.md"
   },
   {
     "id": "github:huggingface/text-generation-inference",
@@ -4034,7 +4209,8 @@
     "archived": true,
     "pushed_at": "2026-03-21T11:34:22Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/huggingface__text-generation-inference/README.md"
   },
   {
     "id": "github:huggingface/transformers",
@@ -4067,7 +4243,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T00:34:29Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/huggingface__transformers/README.md"
   },
   {
     "id": "github:huggingface/transformers.js",
@@ -4089,7 +4266,8 @@
     "archived": false,
     "pushed_at": "2026-10-30T06:30:43Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/huggingface__transformers.js/README.md"
   },
   {
     "id": "github:humanlayer/humanlayer",
@@ -4117,7 +4295,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T23:04:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/mcp-and-tools/humanlayer__humanlayer/README.md"
   },
   {
     "id": "github:humanlayer/humanlayer",
@@ -4145,7 +4324,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T23:04:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/orchestration/humanlayer__humanlayer/README.md"
   },
   {
     "id": "github:imartinez/privateGPT",
@@ -4166,7 +4346,8 @@
     "archived": false,
     "pushed_at": "2026-11-03T10:20:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/imartinez__privateGPT/README.md"
   },
   {
     "id": "github:index-tts/index-tts",
@@ -4191,7 +4372,8 @@
     "archived": false,
     "pushed_at": "2026-09-29T16:06:53Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/index-tts__index-tts/README.md"
   },
   {
     "id": "github:inngest/inngest",
@@ -4217,7 +4399,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:26:24Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/orchestration/inngest__inngest/README.md"
   },
   {
     "id": "github:intel/neural-compressor",
@@ -4250,7 +4433,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T03:27:05Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/intel__neural-compressor/README.md"
   },
   {
     "id": "github:isomorphic-git/isomorphic-git",
@@ -4275,7 +4459,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T13:03:33Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/isomorphic-git__isomorphic-git/README.md"
   },
   {
     "id": "github:janhq/jan",
@@ -4301,7 +4486,9 @@
     "archived": false,
     "pushed_at": "2026-11-05T13:13:52Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/janhq__jan/README.md",
+    "_extras": 1
   },
   {
     "id": "github:janhq/jan",
@@ -4327,7 +4514,9 @@
     "archived": false,
     "pushed_at": "2026-11-05T13:13:52Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/janhq__jan/README.md",
+    "_extras": 1
   },
   {
     "id": "github:jitsi/jitsi-meet-electron",
@@ -4350,7 +4539,8 @@
     "archived": false,
     "pushed_at": "2026-10-28T17:59:09Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/jitsi__jitsi-meet-electron/README.md"
   },
   {
     "id": "github:jlowin/fastmcp",
@@ -4377,7 +4567,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:13:15Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/jlowin__fastmcp/README.md"
   },
   {
     "id": "github:k2-fsa/sherpa",
@@ -4404,7 +4595,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T02:43:51Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/k2-fsa__sherpa/README.md"
   },
   {
     "id": "github:k2-fsa/sherpa-onnx",
@@ -4437,7 +4629,9 @@
     "archived": false,
     "pushed_at": "2026-11-07T05:49:03Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/k2-fsa__sherpa-onnx/README.md",
+    "_extras": 1
   },
   {
     "id": "github:khoj-ai/khoj",
@@ -4470,7 +4664,8 @@
     "archived": false,
     "pushed_at": "2026-08-02T01:55:40Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/khoj-ai__khoj/README.md"
   },
   {
     "id": "github:khoj-ai/khoj",
@@ -4503,7 +4698,8 @@
     "archived": false,
     "pushed_at": "2026-08-02T01:55:40Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/khoj-ai__khoj/README.md"
   },
   {
     "id": "github:korotovsky/slack-mcp-server",
@@ -4528,7 +4724,8 @@
     "archived": false,
     "pushed_at": "2026-07-16T17:14:22Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/korotovsky__slack-mcp-server/README.md"
   },
   {
     "id": "github:kvcache-ai/ktransformers",
@@ -4545,7 +4742,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T04:49:27Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/kvcache-ai__ktransformers/README.md"
   },
   {
     "id": "github:kyutai-labs/delayed-streams-modeling",
@@ -4562,7 +4760,8 @@
     "archived": false,
     "pushed_at": "2026-01-26T09:28:20Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/kyutai-labs__delayed-streams-modeling/README.md"
   },
   {
     "id": "github:kyutai-labs/moshi",
@@ -4579,7 +4778,8 @@
     "archived": false,
     "pushed_at": "2026-09-09T14:37:00Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/kyutai-labs__moshi/README.md"
   },
   {
     "id": "github:lancedb/lancedb",
@@ -4605,7 +4805,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T06:08:49Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/lancedb__lancedb/README.md"
   },
   {
     "id": "github:langchain-ai/langchain",
@@ -4638,7 +4839,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T08:15:55Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/langchain-ai__langchain/README.md"
   },
   {
     "id": "github:langchain-ai/langgraph",
@@ -4671,7 +4873,9 @@
     "archived": false,
     "pushed_at": "2026-11-08T00:33:40Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/langchain-ai__langgraph/README.md",
+    "_extras": 1
   },
   {
     "id": "github:langchain-ai/langmem",
@@ -4688,7 +4892,8 @@
     "archived": false,
     "pushed_at": "2026-11-03T15:25:34Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/langchain-ai__langmem/README.md"
   },
   {
     "id": "github:langflow-ai/langflow",
@@ -4712,7 +4917,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T04:44:04Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/langflow-ai__langflow/README.md"
   },
   {
     "id": "github:langfuse/langfuse",
@@ -4745,7 +4951,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:59:40Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/langfuse__langfuse/README.md"
   },
   {
     "id": "github:langgenius/dify",
@@ -4778,7 +4985,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T09:45:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/langgenius__dify/README.md"
   },
   {
     "id": "github:langroid/langroid",
@@ -4811,7 +5019,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T09:35:49Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/langroid__langroid/README.md"
   },
   {
     "id": "github:lastmile-ai/mcp-agent",
@@ -4837,7 +5046,8 @@
     "archived": false,
     "pushed_at": "2026-01-25T16:35:16Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/lastmile-ai__mcp-agent/README.md"
   },
   {
     "id": "github:laude-institute/terminal-bench",
@@ -4854,7 +5064,8 @@
     "archived": false,
     "pushed_at": "2026-07-11T05:19:08Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/benchmarks/laude-institute__terminal-bench/README.md"
   },
   {
     "id": "github:laude-institute/terminal-bench",
@@ -4871,7 +5082,8 @@
     "archived": false,
     "pushed_at": "2026-07-11T05:19:08Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/laude-institute__terminal-bench/README.md"
   },
   {
     "id": "github:letta-ai/letta",
@@ -4893,7 +5105,8 @@
     "archived": false,
     "pushed_at": "2026-10-18T22:28:04Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/letta-ai__letta/README.md"
   },
   {
     "id": "github:livekit/agents",
@@ -4917,7 +5130,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T01:41:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/livekit__agents/README.md"
   },
   {
     "id": "github:livekit/livekit",
@@ -4942,7 +5156,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T03:47:52Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/livekit__livekit/README.md"
   },
   {
     "id": "github:lmstudio-ai/lms",
@@ -4964,7 +5179,8 @@
     "archived": false,
     "pushed_at": "2026-10-14T20:50:03Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/lmstudio-ai__lms/README.md"
   },
   {
     "id": "github:lobehub/lobe-chat",
@@ -4992,7 +5208,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:25:51Z",
     "default_branch": "canary",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/lobehub__lobe-chat/README.md"
   },
   {
     "id": "github:lucide-icons/lucide",
@@ -5020,7 +5237,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T14:30:50Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/lucide-icons__lucide/README.md"
   },
   {
     "id": "github:makenotion/notion-mcp-server",
@@ -5037,7 +5255,8 @@
     "archived": false,
     "pushed_at": "2026-10-29T16:10:22Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/makenotion__notion-mcp-server/README.md"
   },
   {
     "id": "github:marktext/marktext",
@@ -5067,7 +5286,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T08:00:42Z",
     "default_branch": "develop",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/marktext__marktext/README.md"
   },
   {
     "id": "github:mastra-ai/mastra",
@@ -5098,7 +5318,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T06:43:26Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/mastra-ai__mastra/README.md"
   },
   {
     "id": "github:mcp-use/mcp-use",
@@ -5131,7 +5352,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T20:09:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/mcp-use__mcp-use/README.md"
   },
   {
     "id": "github:mediar-ai/screenpipe",
@@ -5164,7 +5386,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T03:03:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/mediar-ai__screenpipe/README.md"
   },
   {
     "id": "github:mem0ai/mem0",
@@ -5196,7 +5419,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T16:53:07Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/mem0ai__mem0/README.md"
   },
   {
     "id": "github:memgraph/memgraph",
@@ -5229,7 +5453,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:20:41Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/memory-and-rag/memgraph__memgraph/README.md"
   },
   {
     "id": "github:microsoft/BitNet",
@@ -5246,7 +5471,8 @@
     "archived": false,
     "pushed_at": "2026-07-27T05:52:06Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/microsoft__BitNet/README.md"
   },
   {
     "id": "github:microsoft/CsWin32",
@@ -5263,7 +5489,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T19:55:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/microsoft__CsWin32/README.md"
   },
   {
     "id": "github:microsoft/OmniParser",
@@ -5280,7 +5507,8 @@
     "archived": false,
     "pushed_at": "2026-07-20T01:09:31Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/screen-understanding/microsoft__OmniParser/README.md"
   },
   {
     "id": "github:microsoft/OmniParser",
@@ -5297,7 +5525,8 @@
     "archived": false,
     "pushed_at": "2026-07-20T01:09:31Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/microsoft__OmniParser/README.md"
   },
   {
     "id": "github:microsoft/PowerToys",
@@ -5327,7 +5556,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T22:46:30Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/microsoft__PowerToys/README.md"
   },
   {
     "id": "github:microsoft/TaskWeaver",
@@ -5352,7 +5582,8 @@
     "archived": true,
     "pushed_at": "2026-03-23T06:17:21Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/microsoft__TaskWeaver/README.md"
   },
   {
     "id": "github:microsoft/TypeScript",
@@ -5374,7 +5605,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T08:59:51Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/microsoft__TypeScript/README.md"
   },
   {
     "id": "github:microsoft/UFO",
@@ -5398,7 +5630,8 @@
     "archived": false,
     "pushed_at": "2026-10-30T21:40:57Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/screen-understanding/microsoft__UFO/README.md"
   },
   {
     "id": "github:microsoft/UFO",
@@ -5422,7 +5655,8 @@
     "archived": false,
     "pushed_at": "2026-10-30T21:40:57Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/microsoft__UFO/README.md"
   },
   {
     "id": "github:microsoft/VibeVoice",
@@ -5439,7 +5673,8 @@
     "archived": false,
     "pushed_at": "2026-10-08T05:29:29Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/microsoft__VibeVoice/README.md"
   },
   {
     "id": "github:microsoft/Windows-Sandbox",
@@ -5460,7 +5695,8 @@
     "archived": false,
     "pushed_at": "2024-09-20T21:13:02Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/microsoft__Windows-Sandbox/README.md"
   },
   {
     "id": "github:microsoft/Windows-classic-samples",
@@ -5477,7 +5713,8 @@
     "archived": false,
     "pushed_at": "2026-09-03T20:50:29Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/microsoft__Windows-classic-samples/README.md"
   },
   {
     "id": "github:microsoft/WindowsAgentArena",
@@ -5504,7 +5741,8 @@
     "archived": false,
     "pushed_at": "2026-10-26T18:14:01Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/benchmarks/microsoft__WindowsAgentArena/README.md"
   },
   {
     "id": "github:microsoft/WindowsAgentArena",
@@ -5531,7 +5769,8 @@
     "archived": false,
     "pushed_at": "2026-10-26T18:14:01Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/microsoft__WindowsAgentArena/README.md"
   },
   {
     "id": "github:microsoft/WindowsAppSDK",
@@ -5562,7 +5801,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T01:38:52Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/windows-automation/microsoft__WindowsAppSDK/README.md"
   },
   {
     "id": "github:microsoft/accessibility-insights-web",
@@ -5586,7 +5826,8 @@
     "archived": false,
     "pushed_at": "2026-11-03T05:20:56Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/microsoft__accessibility-insights-web/README.md"
   },
   {
     "id": "github:microsoft/agent-framework",
@@ -5614,7 +5855,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T08:57:06Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/microsoft__agent-framework/README.md"
   },
   {
     "id": "github:microsoft/autogen",
@@ -5642,7 +5884,8 @@
     "archived": false,
     "pushed_at": "2026-10-28T14:45:27Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/microsoft__autogen/README.md"
   },
   {
     "id": "github:microsoft/fluentui",
@@ -5666,7 +5909,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T20:16:26Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/microsoft__fluentui/README.md"
   },
   {
     "id": "github:microsoft/fluentui-system-icons",
@@ -5691,7 +5935,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T20:07:44Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/microsoft__fluentui-system-icons/README.md"
   },
   {
     "id": "github:microsoft/language-server-protocol",
@@ -5708,7 +5953,8 @@
     "archived": false,
     "pushed_at": "2026-11-03T09:18:09Z",
     "default_branch": "gh-pages",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/microsoft__language-server-protocol/README.md"
   },
   {
     "id": "github:microsoft/markitdown",
@@ -5733,7 +5979,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T00:14:01Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/microsoft__markitdown/README.md"
   },
   {
     "id": "github:microsoft/mcp",
@@ -5750,7 +5997,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T07:31:41Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/microsoft__mcp/README.md"
   },
   {
     "id": "github:microsoft/monaco-editor",
@@ -5773,7 +6021,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T08:01:05Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/microsoft__monaco-editor/README.md"
   },
   {
     "id": "github:microsoft/msix-packaging",
@@ -5793,7 +6042,8 @@
     "archived": false,
     "pushed_at": "2026-08-24T23:31:48Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/microsoft__msix-packaging/README.md"
   },
   {
     "id": "github:microsoft/node-pty",
@@ -5818,7 +6068,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T21:27:46Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/microsoft__node-pty/README.md"
   },
   {
     "id": "github:microsoft/onnxruntime",
@@ -5845,7 +6096,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T09:57:26Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/microsoft__onnxruntime/README.md"
   },
   {
     "id": "github:microsoft/onnxruntime-genai",
@@ -5862,7 +6114,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T08:07:01Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/microsoft__onnxruntime-genai/README.md"
   },
   {
     "id": "github:microsoft/playwright",
@@ -5895,7 +6148,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T08:36:03Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/microsoft__playwright/README.md"
   },
   {
     "id": "github:microsoft/playwright-mcp",
@@ -5915,7 +6169,9 @@
     "archived": false,
     "pushed_at": "2026-11-06T22:49:45Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/microsoft__playwright-mcp/README.md",
+    "_extras": 1
   },
   {
     "id": "github:microsoft/presidio",
@@ -5948,7 +6204,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T06:40:46Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/microsoft__presidio/README.md"
   },
   {
     "id": "github:microsoft/pyright",
@@ -5965,7 +6222,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T00:45:28Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/microsoft__pyright/README.md"
   },
   {
     "id": "github:microsoft/security-devops-action",
@@ -5986,7 +6244,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T04:05:41Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/safety-and-security/microsoft__security-devops-action/README.md"
   },
   {
     "id": "github:microsoft/semantic-kernel",
@@ -6009,7 +6268,9 @@
     "archived": false,
     "pushed_at": "2026-11-07T00:59:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/microsoft__semantic-kernel/README.md",
+    "_extras": 1
   },
   {
     "id": "github:microsoft/vscode",
@@ -6032,7 +6293,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:12:14Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/microsoft__vscode/README.md"
   },
   {
     "id": "github:microsoft/win32metadata",
@@ -6049,7 +6311,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T02:50:08Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/microsoft__win32metadata/README.md"
   },
   {
     "id": "github:microsoft/windows-rs",
@@ -6066,7 +6329,9 @@
     "archived": false,
     "pushed_at": "2026-11-07T21:17:23Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/microsoft__windows-rs/README.md",
+    "_extras": 1
   },
   {
     "id": "github:microsoft/winget-cli",
@@ -6088,7 +6353,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T19:59:35Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/microsoft__winget-cli/README.md"
   },
   {
     "id": "github:microsoftgraph/msgraph-sdk-javascript",
@@ -6111,7 +6377,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T23:29:26Z",
     "default_branch": "dev",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/microsoftgraph__msgraph-sdk-javascript/README.md"
   },
   {
     "id": "github:microsoftgraph/msgraph-sdk-python",
@@ -6130,7 +6397,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T05:15:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/connectors/microsoftgraph__msgraph-sdk-python/README.md"
   },
   {
     "id": "github:milvus-io/milvus",
@@ -6163,7 +6431,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T03:05:59Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/memory-and-rag/milvus-io__milvus/README.md"
   },
   {
     "id": "github:mit-han-lab/llm-awq",
@@ -6180,7 +6449,8 @@
     "archived": false,
     "pushed_at": "2025-07-17T19:44:51Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/mit-han-lab__llm-awq/README.md"
   },
   {
     "id": "github:modelcontextprotocol/inspector",
@@ -6204,7 +6474,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T23:07:44Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/modelcontextprotocol__inspector/README.md"
   },
   {
     "id": "github:modelcontextprotocol/modelcontextprotocol",
@@ -6226,7 +6497,9 @@
     "archived": false,
     "pushed_at": "2026-11-08T05:17:05Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/mcp-and-tools/modelcontextprotocol__modelcontextprotocol/README.md",
+    "_extras": 9
   },
   {
     "id": "github:modelcontextprotocol/modelcontextprotocol",
@@ -6248,7 +6521,9 @@
     "archived": false,
     "pushed_at": "2026-11-08T05:17:05Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/modelcontextprotocol__modelcontextprotocol/README.md",
+    "_extras": 9
   },
   {
     "id": "github:modelcontextprotocol/python-sdk",
@@ -6270,7 +6545,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T13:38:56Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/modelcontextprotocol__python-sdk/README.md"
   },
   {
     "id": "github:modelcontextprotocol/registry",
@@ -6290,7 +6566,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T23:21:36Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/modelcontextprotocol__registry/README.md"
   },
   {
     "id": "github:modelcontextprotocol/servers",
@@ -6307,7 +6584,9 @@
     "archived": false,
     "pushed_at": "2026-11-05T06:26:00Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/modelcontextprotocol__servers/README.md",
+    "_extras": 1
   },
   {
     "id": "github:modelcontextprotocol/typescript-sdk",
@@ -6329,7 +6608,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T15:00:35Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/modelcontextprotocol__typescript-sdk/README.md"
   },
   {
     "id": "github:modelscope/FunASR",
@@ -6362,7 +6642,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T05:12:10Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/modelscope__FunASR/README.md"
   },
   {
     "id": "github:mozilla/DeepSpeech",
@@ -6390,7 +6671,8 @@
     "archived": true,
     "pushed_at": "2025-06-19T12:52:51Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/mozilla__DeepSpeech/README.md"
   },
   {
     "id": "github:mudler/LocalAI",
@@ -6423,7 +6705,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T07:19:42Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/orchestration/mudler__LocalAI/README.md"
   },
   {
     "id": "github:mycroftai/mycroft-precise",
@@ -6449,7 +6732,8 @@
     "archived": false,
     "pushed_at": "2023-11-25T01:38:56Z",
     "default_branch": "dev",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/whisper-and-asr/mycroftai__mycroft-precise/README.md"
   },
   {
     "id": "github:myshell-ai/OpenVoice",
@@ -6471,7 +6755,8 @@
     "archived": false,
     "pushed_at": "2025-04-19T16:00:00Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/myshell-ai__OpenVoice/README.md"
   },
   {
     "id": "github:n8n-io/n8n",
@@ -6504,7 +6789,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T09:22:56Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/connectors/n8n-io__n8n/README.md"
   },
   {
     "id": "github:n8n-io/n8n",
@@ -6537,7 +6823,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T09:22:56Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/n8n-io__n8n/README.md"
   },
   {
     "id": "github:nari-labs/dia",
@@ -6558,7 +6845,8 @@
     "archived": false,
     "pushed_at": "2025-11-19T21:11:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/nari-labs__dia/README.md"
   },
   {
     "id": "github:neovim/neovim",
@@ -6583,7 +6871,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T05:16:13Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/neovim__neovim/README.md"
   },
   {
     "id": "github:neuml/txtai",
@@ -6616,7 +6905,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T23:17:03Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/neuml__txtai/README.md"
   },
   {
     "id": "github:nmslib/hnswlib",
@@ -6633,7 +6923,8 @@
     "archived": false,
     "pushed_at": "2026-09-15T11:56:10Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/nmslib__hnswlib/README.md"
   },
   {
     "id": "github:node-schedule/node-schedule",
@@ -6650,7 +6941,8 @@
     "archived": false,
     "pushed_at": "2026-10-24T23:22:32Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/node-schedule__node-schedule/README.md"
   },
   {
     "id": "github:nodegit/nodegit",
@@ -6681,7 +6973,8 @@
     "archived": false,
     "pushed_at": "2026-07-16T18:47:08Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/nodegit__nodegit/README.md"
   },
   {
     "id": "github:nodejs/node",
@@ -6708,7 +7001,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:26:28Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/nodejs__node/README.md"
   },
   {
     "id": "github:nomic-ai/gpt4all",
@@ -6728,7 +7022,8 @@
     "archived": false,
     "pushed_at": "2025-05-27T20:05:19Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/nomic-ai__gpt4all/README.md"
   },
   {
     "id": "github:nomic-ai/gpt4all",
@@ -6748,7 +7043,8 @@
     "archived": false,
     "pushed_at": "2025-05-27T20:05:19Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/nomic-ai__gpt4all/README.md"
   },
   {
     "id": "github:nspady/google-calendar-mcp",
@@ -6765,7 +7061,8 @@
     "archived": false,
     "pushed_at": "2026-10-29T20:51:00Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/nspady__google-calendar-mcp/README.md"
   },
   {
     "id": "github:nvidia/NeMo",
@@ -6793,7 +7090,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T22:21:33Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/nvidia__NeMo/README.md"
   },
   {
     "id": "github:obsidianmd/obsidian-api",
@@ -6810,7 +7108,8 @@
     "archived": false,
     "pushed_at": "2026-10-05T19:06:25Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/obsidianmd__obsidian-api/README.md"
   },
   {
     "id": "github:obsidianmd/obsidian-releases",
@@ -6834,7 +7133,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:20:19Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/obsidianmd__obsidian-releases/README.md"
   },
   {
     "id": "github:obsidianmd/obsidian-releases",
@@ -6858,7 +7158,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:20:19Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/obsidianmd__obsidian-releases/README.md"
   },
   {
     "id": "github:octalmage/robotjs",
@@ -6875,7 +7176,8 @@
     "archived": false,
     "pushed_at": "2026-10-24T11:41:28Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/octalmage__robotjs/README.md"
   },
   {
     "id": "github:ollama/ollama",
@@ -6907,7 +7209,9 @@
     "archived": false,
     "pushed_at": "2026-11-08T00:36:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/ollama__ollama/README.md",
+    "_extras": 1
   },
   {
     "id": "github:open-policy-agent/opa",
@@ -6933,7 +7237,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T03:45:08Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/open-policy-agent__opa/README.md"
   },
   {
     "id": "github:open-telemetry/opentelemetry-js",
@@ -6956,7 +7261,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T21:49:05Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/open-telemetry__opentelemetry-js/README.md"
   },
   {
     "id": "github:open-webui/open-webui",
@@ -6989,7 +7295,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:07:52Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/open-webui__open-webui/README.md"
   },
   {
     "id": "github:open-webui/open-webui",
@@ -7022,7 +7329,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:07:52Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/open-webui__open-webui/README.md"
   },
   {
     "id": "github:openai/codex",
@@ -7039,7 +7347,9 @@
     "archived": false,
     "pushed_at": "2026-11-08T05:59:28Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/openai__codex/README.md",
+    "_extras": 2
   },
   {
     "id": "github:openai/evals",
@@ -7056,7 +7366,8 @@
     "archived": false,
     "pushed_at": "2026-04-14T15:29:57Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/openai__evals/README.md"
   },
   {
     "id": "github:openai/openai-agents-js",
@@ -7079,7 +7390,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:37:22Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/openai__openai-agents-js/README.md"
   },
   {
     "id": "github:openai/openai-agents-python",
@@ -7104,7 +7416,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:21:07Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/openai__openai-agents-python/README.md"
   },
   {
     "id": "github:openai/simple-evals",
@@ -7121,7 +7434,8 @@
     "archived": false,
     "pushed_at": "2026-04-22T22:16:18Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/benchmarks/openai__simple-evals/README.md"
   },
   {
     "id": "github:openai/whisper",
@@ -7138,7 +7452,8 @@
     "archived": false,
     "pushed_at": "2026-08-31T17:19:19Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/openai__whisper/README.md"
   },
   {
     "id": "github:openhardwaremonitor/openhardwaremonitor",
@@ -7155,7 +7470,8 @@
     "archived": false,
     "pushed_at": "2024-07-13T23:17:33Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/windows-automation/openhardwaremonitor__openhardwaremonitor/README.md"
   },
   {
     "id": "github:openvinotoolkit/openvino",
@@ -7188,7 +7504,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T21:58:36Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/openvinotoolkit__openvino/README.md"
   },
   {
     "id": "github:openvinotoolkit/openvino.genai",
@@ -7205,7 +7522,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T16:50:59Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/openvinotoolkit__openvino.genai/README.md"
   },
   {
     "id": "github:oraios/serena",
@@ -7235,7 +7553,8 @@
     "archived": false,
     "pushed_at": "2026-10-28T10:45:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/oraios__serena/README.md"
   },
   {
     "id": "github:ossf/scorecard",
@@ -7255,7 +7574,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:09:44Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/ossf__scorecard/README.md"
   },
   {
     "id": "github:pacocoursey/cmdk",
@@ -7278,7 +7598,8 @@
     "archived": false,
     "pushed_at": "2025-10-29T04:13:58Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/pacocoursey__cmdk/README.md"
   },
   {
     "id": "github:peter-evans/create-pull-request",
@@ -7303,7 +7624,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T11:17:34Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/packaging-and-ci/peter-evans__create-pull-request/README.md"
   },
   {
     "id": "github:pgvector/pgvector",
@@ -7323,7 +7645,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T07:04:51Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/memory-and-rag/pgvector__pgvector/README.md"
   },
   {
     "id": "github:pinojs/pino",
@@ -7346,7 +7669,8 @@
     "archived": false,
     "pushed_at": "2026-10-06T15:34:15Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/pinojs__pino/README.md"
   },
   {
     "id": "github:pipecat-ai/pipecat",
@@ -7370,7 +7694,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T00:09:05Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/pipecat-ai__pipecat/README.md"
   },
   {
     "id": "github:pmndrs/zustand",
@@ -7395,7 +7720,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T13:35:06Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/pmndrs__zustand/README.md"
   },
   {
     "id": "github:pnpm/action-setup",
@@ -7418,7 +7744,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T10:08:57Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/pnpm__action-setup/README.md"
   },
   {
     "id": "github:pnpm/pnpm",
@@ -7444,7 +7771,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:12:37Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/pnpm__pnpm/README.md"
   },
   {
     "id": "github:pre-commit/pre-commit",
@@ -7467,7 +7795,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T20:54:57Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/pre-commit__pre-commit/README.md"
   },
   {
     "id": "github:princeton-nlp/SWE-bench",
@@ -7488,7 +7817,8 @@
     "archived": false,
     "pushed_at": "2026-09-18T05:08:56Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/benchmarks/princeton-nlp__SWE-bench/README.md"
   },
   {
     "id": "github:princeton-nlp/SWE-bench",
@@ -7509,7 +7839,8 @@
     "archived": false,
     "pushed_at": "2026-09-18T05:08:56Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/princeton-nlp__SWE-bench/README.md"
   },
   {
     "id": "github:projectdiscovery/nuclei",
@@ -7538,7 +7869,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T22:50:09Z",
     "default_branch": "dev",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/projectdiscovery__nuclei/README.md"
   },
   {
     "id": "github:promptfoo/promptfoo",
@@ -7571,7 +7903,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:24:53Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/promptfoo__promptfoo/README.md"
   },
   {
     "id": "github:pterm/pterm",
@@ -7604,7 +7937,8 @@
     "archived": false,
     "pushed_at": "2026-10-12T04:47:44Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/pterm__pterm/README.md"
   },
   {
     "id": "github:punkpeye/awesome-mcp-servers",
@@ -7624,7 +7958,9 @@
     "archived": false,
     "pushed_at": "2026-11-06T17:59:03Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/punkpeye__awesome-mcp-servers/README.md",
+    "_extras": 1
   },
   {
     "id": "github:pyannote/pyannote-audio",
@@ -7653,7 +7989,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T13:29:54Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/pyannote__pyannote-audio/README.md"
   },
   {
     "id": "github:pydantic/pydantic-ai",
@@ -7678,7 +8015,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T04:20:33Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/pydantic__pydantic-ai/README.md"
   },
   {
     "id": "github:pytest-dev/pytest",
@@ -7701,7 +8039,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T07:46:54Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/pytest-dev__pytest/README.md"
   },
   {
     "id": "github:python-telegram-bot/python-telegram-bot",
@@ -7724,7 +8063,8 @@
     "archived": false,
     "pushed_at": "2026-11-01T02:46:46Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/python-telegram-bot__python-telegram-bot/README.md"
   },
   {
     "id": "github:pytorch/pytorch",
@@ -7750,7 +8090,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T09:13:18Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/pytorch__pytorch/README.md"
   },
   {
     "id": "github:pywinauto/pywinauto",
@@ -7783,7 +8124,8 @@
     "archived": false,
     "pushed_at": "2026-10-28T18:05:51Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/pywinauto__pywinauto/README.md"
   },
   {
     "id": "github:qdrant/qdrant",
@@ -7816,7 +8158,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:51:45Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/qdrant__qdrant/README.md"
   },
   {
     "id": "github:radix-ui/primitives",
@@ -7843,7 +8186,8 @@
     "archived": false,
     "pushed_at": "2026-10-14T21:52:47Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/radix-ui__primitives/README.md"
   },
   {
     "id": "github:recharts/recharts",
@@ -7871,7 +8215,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T03:16:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/recharts__recharts/README.md"
   },
   {
     "id": "github:renovatebot/renovate",
@@ -7898,7 +8243,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T08:30:01Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/renovatebot__renovate/README.md"
   },
   {
     "id": "github:reorproject/reor",
@@ -7928,7 +8274,8 @@
     "archived": true,
     "pushed_at": "2025-05-13T21:28:59Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/reorproject__reor/README.md"
   },
   {
     "id": "github:reorproject/reor",
@@ -7958,7 +8305,8 @@
     "archived": true,
     "pushed_at": "2025-05-13T21:28:59Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/reorproject__reor/README.md"
   },
   {
     "id": "github:resemble-ai/chatterbox",
@@ -7975,7 +8323,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T18:48:12Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/resemble-ai__chatterbox/README.md"
   },
   {
     "id": "github:reviewdog/reviewdog",
@@ -8006,7 +8355,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T06:28:31Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/reviewdog__reviewdog/README.md"
   },
   {
     "id": "github:rhasspy/piper",
@@ -8027,7 +8377,9 @@
     "archived": true,
     "pushed_at": "2025-08-26T15:01:29Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/rhasspy__piper/README.md",
+    "_extras": 1
   },
   {
     "id": "github:rhasspy/piper",
@@ -8048,7 +8400,9 @@
     "archived": true,
     "pushed_at": "2025-08-26T15:01:29Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/rhasspy__piper/README.md",
+    "_extras": 1
   },
   {
     "id": "github:rhasspy/wyoming",
@@ -8065,7 +8419,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T17:20:36Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/rhasspy__wyoming/README.md"
   },
   {
     "id": "github:run-llama/llama_index",
@@ -8093,7 +8448,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T22:58:11Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/run-llama__llama_index/README.md"
   },
   {
     "id": "github:rust-lang/rust-analyzer",
@@ -8114,7 +8470,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T00:50:57Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/rust-lang__rust-analyzer/README.md"
   },
   {
     "id": "github:screenpipe/screenpipe",
@@ -8147,7 +8504,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T03:03:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/screenpipe__screenpipe/README.md"
   },
   {
     "id": "github:semantic-release/semantic-release",
@@ -8177,7 +8535,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T20:44:31Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/semantic-release__semantic-release/README.md"
   },
   {
     "id": "github:semgrep/semgrep",
@@ -8207,7 +8566,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T00:05:37Z",
     "default_branch": "develop",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/semgrep__semgrep/README.md"
   },
   {
     "id": "github:sentialx/node-window-manager",
@@ -8235,7 +8595,8 @@
     "archived": false,
     "pushed_at": "2024-06-01T17:38:00Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/windows-automation/sentialx__node-window-manager/README.md"
   },
   {
     "id": "github:sgl-project/sglang",
@@ -8268,7 +8629,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:02:41Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/sgl-project__sglang/README.md"
   },
   {
     "id": "github:shadcn-ui/ui",
@@ -8301,7 +8663,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T08:14:58Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/shadcn-ui__ui/README.md"
   },
   {
     "id": "github:showlab/ShowUI",
@@ -8324,7 +8687,8 @@
     "archived": false,
     "pushed_at": "2026-04-24T07:16:50Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/showlab__ShowUI/README.md"
   },
   {
     "id": "github:sierra-research/tau-bench",
@@ -8341,7 +8705,8 @@
     "archived": false,
     "pushed_at": "2026-03-18T17:36:06Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/benchmarks/sierra-research__tau-bench/README.md"
   },
   {
     "id": "github:sigstore/cosign",
@@ -8358,7 +8723,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T00:11:57Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/sigstore__cosign/README.md"
   },
   {
     "id": "github:simular-ai/Agent-S",
@@ -8389,7 +8755,8 @@
     "archived": false,
     "pushed_at": "2026-10-30T20:56:06Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/screen-understanding/simular-ai__Agent-S/README.md"
   },
   {
     "id": "github:sindresorhus/active-win",
@@ -8412,7 +8779,8 @@
     "archived": false,
     "pushed_at": "2026-10-31T09:30:34Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/sindresorhus__active-win/README.md"
   },
   {
     "id": "github:sindresorhus/clipboardy",
@@ -8429,7 +8797,8 @@
     "archived": false,
     "pushed_at": "2026-07-23T11:44:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/sindresorhus__clipboardy/README.md"
   },
   {
     "id": "github:sindresorhus/electron-context-menu",
@@ -8446,7 +8815,8 @@
     "archived": false,
     "pushed_at": "2026-09-20T13:59:39Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/sindresorhus__electron-context-menu/README.md"
   },
   {
     "id": "github:sindresorhus/electron-dl",
@@ -8463,7 +8833,8 @@
     "archived": false,
     "pushed_at": "2026-09-20T08:50:34Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/sindresorhus__electron-dl/README.md"
   },
   {
     "id": "github:sindresorhus/electron-store",
@@ -8489,7 +8860,9 @@
     "archived": false,
     "pushed_at": "2026-10-12T19:53:29Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/sindresorhus__electron-store/README.md",
+    "_extras": 1
   },
   {
     "id": "github:sindresorhus/electron-util",
@@ -8511,7 +8884,8 @@
     "archived": false,
     "pushed_at": "2025-09-09T05:56:08Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/sindresorhus__electron-util/README.md"
   },
   {
     "id": "github:sindresorhus/got",
@@ -8535,7 +8909,8 @@
     "archived": false,
     "pushed_at": "2026-10-30T08:46:04Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/sindresorhus__got/README.md"
   },
   {
     "id": "github:slackapi/bolt-js",
@@ -8562,7 +8937,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T19:13:37Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/slackapi__bolt-js/README.md"
   },
   {
     "id": "github:slackapi/node-slack-sdk",
@@ -8587,7 +8963,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T22:45:05Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/slackapi__node-slack-sdk/README.md"
   },
   {
     "id": "github:snakers4/silero-vad",
@@ -8617,7 +8994,8 @@
     "archived": false,
     "pushed_at": "2026-10-22T02:02:27Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/snakers4__silero-vad/README.md"
   },
   {
     "id": "github:softprops/action-gh-release",
@@ -8637,7 +9015,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T14:25:58Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/softprops__action-gh-release/README.md"
   },
   {
     "id": "github:sourcegraph/scip",
@@ -8654,7 +9033,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T21:30:19Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/sourcegraph__scip/README.md"
   },
   {
     "id": "github:speechbrain/speechbrain",
@@ -8687,7 +9067,8 @@
     "archived": false,
     "pushed_at": "2026-10-14T23:12:55Z",
     "default_branch": "develop",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/speechbrain__speechbrain/README.md"
   },
   {
     "id": "github:spotify/annoy",
@@ -8712,7 +9093,8 @@
     "archived": false,
     "pushed_at": "2025-10-29T14:08:37Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/spotify__annoy/README.md"
   },
   {
     "id": "github:spotify/web-api",
@@ -8729,7 +9111,8 @@
     "archived": true,
     "pushed_at": "2020-05-07T13:23:08Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/spotify__web-api/README.md"
   },
   {
     "id": "github:sqlite/sqlite",
@@ -8746,7 +9129,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:30:21Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/sqlite__sqlite/README.md"
   },
   {
     "id": "github:sst/opencode",
@@ -8763,7 +9147,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:10:59Z",
     "default_branch": "dev",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/orchestration/sst__opencode/README.md"
   },
   {
     "id": "github:standardnotes/app",
@@ -8789,7 +9174,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T03:25:02Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/standardnotes__app/README.md"
   },
   {
     "id": "github:stanfordnlp/dspy",
@@ -8806,7 +9192,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T22:38:13Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/stanfordnlp__dspy/README.md"
   },
   {
     "id": "github:step-security/harden-runner",
@@ -8833,7 +9220,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T16:28:38Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/packaging-and-ci/step-security__harden-runner/README.md"
   },
   {
     "id": "github:steven2358/awesome-generative-ai",
@@ -8859,7 +9247,8 @@
     "archived": false,
     "pushed_at": "2026-10-30T17:31:48Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/mcp-and-tools/steven2358__awesome-generative-ai/README.md"
   },
   {
     "id": "github:storybookjs/storybook",
@@ -8892,7 +9281,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:34:03Z",
     "default_branch": "next",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/storybookjs__storybook/README.md"
   },
   {
     "id": "github:tailwindlabs/headlessui",
@@ -8918,7 +9308,8 @@
     "archived": false,
     "pushed_at": "2026-04-13T16:12:31Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/tailwindlabs__headlessui/README.md"
   },
   {
     "id": "github:tailwindlabs/tailwindcss",
@@ -8943,7 +9334,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T14:50:08Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/tailwindlabs__tailwindcss/README.md"
   },
   {
     "id": "github:taylorwilsdon/google_workspace_mcp",
@@ -8976,7 +9368,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T12:02:02Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/taylorwilsdon__google_workspace_mcp/README.md"
   },
   {
     "id": "github:tdlib/telegram-bot-api",
@@ -8993,7 +9386,8 @@
     "archived": false,
     "pushed_at": "2026-08-26T14:59:19Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/tdlib__telegram-bot-api/README.md"
   },
   {
     "id": "github:telegraf/telegraf",
@@ -9021,7 +9415,8 @@
     "archived": false,
     "pushed_at": "2026-09-24T15:15:55Z",
     "default_branch": "v4",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/telegraf__telegraf/README.md"
   },
   {
     "id": "github:temporalio/temporal",
@@ -9054,7 +9449,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T09:30:33Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/temporalio__temporal/README.md"
   },
   {
     "id": "github:tesseract-ocr/tessdoc",
@@ -9071,7 +9467,8 @@
     "archived": false,
     "pushed_at": "2026-10-29T07:23:56Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/tesseract-ocr__tessdoc/README.md"
   },
   {
     "id": "github:tesseract-ocr/tesseract",
@@ -9096,7 +9493,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T18:20:18Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/screen-understanding/tesseract-ocr__tesseract/README.md"
   },
   {
     "id": "github:th-ch/youtube-music",
@@ -9125,7 +9523,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T01:55:43Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/th-ch__youtube-music/README.md"
   },
   {
     "id": "github:thomasnordquist/MQTT-Explorer",
@@ -9149,7 +9548,8 @@
     "archived": false,
     "pushed_at": "2026-05-08T01:27:42Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/thomasnordquist__MQTT-Explorer/README.md"
   },
   {
     "id": "github:topoteretes/cognee",
@@ -9182,7 +9582,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T10:53:45Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/memory-and-rag/topoteretes__cognee/README.md"
   },
   {
     "id": "github:traceloop/openllmetry",
@@ -9215,7 +9616,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T16:26:50Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/traceloop__openllmetry/README.md"
   },
   {
     "id": "github:tree-sitter/tree-sitter",
@@ -9240,7 +9642,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T05:31:18Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/tree-sitter__tree-sitter/README.md"
   },
   {
     "id": "github:tremorlabs/tremor",
@@ -9265,7 +9668,8 @@
     "archived": false,
     "pushed_at": "2025-10-10T13:08:24Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/ui-ux/tremorlabs__tremor/README.md"
   },
   {
     "id": "github:triggerdotdev/trigger.dev",
@@ -9296,7 +9700,8 @@
     "archived": false,
     "pushed_at": "2026-11-03T11:54:09Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/triggerdotdev__trigger.dev/README.md"
   },
   {
     "id": "github:trufflesecurity/trufflehog",
@@ -9326,7 +9731,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T17:40:43Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/trufflesecurity__trufflehog/README.md"
   },
   {
     "id": "github:unslothai/unsloth",
@@ -9359,7 +9765,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T11:18:53Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/unslothai__unsloth/README.md"
   },
   {
     "id": "github:upstash/context7",
@@ -9381,7 +9788,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T21:31:21Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/upstash__context7/README.md"
   },
   {
     "id": "github:vitejs/vite",
@@ -9404,7 +9812,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T11:40:02Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/electron-shell/vitejs__vite/README.md"
   },
   {
     "id": "github:vitest-dev/vitest",
@@ -9425,7 +9834,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T22:47:35Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/vitest-dev__vitest/README.md"
   },
   {
     "id": "github:vllm-project/vllm",
@@ -9458,7 +9868,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T10:07:15Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/vllm-project__vllm/README.md"
   },
   {
     "id": "github:vocodedev/vocode-core",
@@ -9475,7 +9886,8 @@
     "archived": false,
     "pushed_at": "2024-11-15T22:16:58Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/whisper-and-asr/vocodedev__vocode-core/README.md"
   },
   {
     "id": "github:vuejs/core",
@@ -9492,7 +9904,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T14:53:32Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/vuejs__core/README.md"
   },
   {
     "id": "github:weaviate/weaviate",
@@ -9525,7 +9938,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T17:33:36Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/memory-and-rag/weaviate__weaviate/README.md"
   },
   {
     "id": "github:web-arena-x/webarena",
@@ -9545,7 +9959,8 @@
     "archived": false,
     "pushed_at": "2025-11-26T21:16:00Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/benchmarks/web-arena-x__webarena/README.md"
   },
   {
     "id": "github:webrtc-sdk/webrtc",
@@ -9562,7 +9977,8 @@
     "archived": false,
     "pushed_at": "2026-11-06T03:45:46Z",
     "default_branch": "m150_release",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/tts-and-voice/webrtc-sdk__webrtc/README.md"
   },
   {
     "id": "github:windmill-labs/windmill",
@@ -9593,7 +10009,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T22:47:50Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/windmill-labs__windmill/README.md"
   },
   {
     "id": "github:winstonjs/winston",
@@ -9610,7 +10027,8 @@
     "archived": false,
     "pushed_at": "2026-07-20T19:12:28Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/observability-evals/winstonjs__winston/README.md"
   },
   {
     "id": "github:withcatai/node-llama-cpp",
@@ -9643,7 +10061,9 @@
     "archived": false,
     "pushed_at": "2026-11-05T15:40:53Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/inference-runtimes/withcatai__node-llama-cpp/README.md",
+    "_extras": 1
   },
   {
     "id": "github:wong2/awesome-mcp-servers",
@@ -9660,7 +10080,8 @@
     "archived": false,
     "pushed_at": "2026-07-13T12:44:30Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/mcp-and-tools/wong2__awesome-mcp-servers/README.md"
   },
   {
     "id": "github:wookayin/gpustat",
@@ -9684,7 +10105,8 @@
     "archived": false,
     "pushed_at": "2026-10-08T02:45:45Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/windows-automation/wookayin__gpustat/README.md"
   },
   {
     "id": "github:wshobson/agents",
@@ -9717,7 +10139,8 @@
     "archived": false,
     "pushed_at": "2026-11-05T15:57:30Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:26:32Z"
+    "fetched_at": "2026-11-08T11:26:32Z",
+    "_path": "research/sources/mcp-and-tools/wshobson__agents/README.md"
   },
   {
     "id": "github:xlang-ai/OSWorld",
@@ -9749,7 +10172,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T16:12:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/benchmarks/xlang-ai__OSWorld/README.md"
   },
   {
     "id": "github:xlang-ai/OSWorld",
@@ -9781,7 +10205,8 @@
     "archived": false,
     "pushed_at": "2026-11-02T16:12:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/xlang-ai__OSWorld/README.md"
   },
   {
     "id": "github:xtermjs/xterm.js",
@@ -9811,7 +10236,8 @@
     "archived": false,
     "pushed_at": "2026-10-29T20:34:16Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/xtermjs__xterm.js/README.md"
   },
   {
     "id": "github:yagop/node-telegram-bot-api",
@@ -9835,7 +10261,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T01:07:27Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/connectors/yagop__node-telegram-bot-api/README.md"
   },
   {
     "id": "github:yamadashy/repomix",
@@ -9868,7 +10295,8 @@
     "archived": false,
     "pushed_at": "2026-11-08T08:56:26Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/coding-agents/yamadashy__repomix/README.md"
   },
   {
     "id": "github:yinkaisheng/Python-UIAutomation-for-Windows",
@@ -9891,7 +10319,8 @@
     "archived": false,
     "pushed_at": "2026-06-02T03:43:03Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/windows-automation/yinkaisheng__Python-UIAutomation-for-Windows/README.md"
   },
   {
     "id": "github:yoheinakajima/babyagi",
@@ -9908,7 +10337,8 @@
     "archived": false,
     "pushed_at": "2026-01-31T05:05:45Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/yoheinakajima__babyagi/README.md"
   },
   {
     "id": "github:yt-dlp/yt-dlp",
@@ -9933,7 +10363,8 @@
     "archived": false,
     "pushed_at": "2026-11-04T07:16:27Z",
     "default_branch": "master",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/safety-and-security/yt-dlp__yt-dlp/README.md"
   },
   {
     "id": "github:zed-industries/agent-client-protocol",
@@ -9950,7 +10381,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T05:59:14Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/orchestration/zed-industries__agent-client-protocol/README.md"
   },
   {
     "id": "github:zen-browser/desktop",
@@ -9972,7 +10404,8 @@
     "archived": false,
     "pushed_at": "2026-11-07T23:22:12Z",
     "default_branch": "dev",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/zen-browser__desktop/README.md"
   },
   {
     "id": "github:zylon-ai/private-gpt",
@@ -9993,7 +10426,8 @@
     "archived": false,
     "pushed_at": "2026-11-03T10:20:55Z",
     "default_branch": "main",
-    "fetched_at": "2026-11-08T11:20:04Z"
+    "fetched_at": "2026-11-08T11:20:04Z",
+    "_path": "research/sources/reference-apps/zylon-ai__private-gpt/README.md"
   },
   {
     "id": "npm:@ai-sdk/anthropic",

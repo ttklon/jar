@@ -386,7 +386,13 @@ def load_all_meta() -> list[dict]:
     metas: list[dict] = []
     for p in sorted(SOURCES.rglob("source.json")):
         try:
-            metas.append(json.loads(p.read_text(encoding="utf-8")))
+            meta = json.loads(p.read_text(encoding="utf-8"))
+            readme = p.parent / "README.md"
+            meta["_path"] = str(readme.relative_to(ROOT)) if readme.exists() else str(p.relative_to(ROOT))
+            extras = sorted((p.parent / "files").glob("*")) if (p.parent / "files").exists() else []
+            if extras:
+                meta["_extras"] = len(extras)
+            metas.append(meta)
         except Exception:  # noqa: BLE001
             pass
     for p in sorted(SOURCES.glob("*/*.md")):
@@ -462,6 +468,8 @@ def build_index() -> None:
                 upd = (m.get("pushed_at") or "")[:10]
                 desc = (m.get("description") or "").replace("|", "\\|")[:180]
                 path = m.get("_path") or ""
+                if m.get("_extras"):
+                    path += f" (+{m['_extras']} доп. файлов)"
             else:
                 name = f"[{m.get('kind')}: {m.get('package')}]({m.get('url')})"
                 stars = "-"
