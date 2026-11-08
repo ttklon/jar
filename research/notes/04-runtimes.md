@@ -34,7 +34,7 @@
 
 ```bash
 llama-server \
-  -m "%APPDATA%/ThisHelper/models/qwen3-8b-q4_k_m.gguf" \
+  -m "%APPDATA%/ZShelper/models/qwen3-8b-q4_k_m.gguf" \
   --host 127.0.0.1 --port 0 \                # 0 = свободный порт, узнаём из stdout
   -c 16384 -ngl 999 --flash-attn on \
   --cache-type-k q8_0 --cache-type-v q8_0 \
@@ -100,7 +100,7 @@ export interface InferenceBackend {
 - **Гибридная графика (Optimus)**: приложение может «сесть» на iGPU. Решение: явно выбирать
   адаптер через DXGI/`NvOptimusEnablement`, плюс инструкция пользователю в настройках.
 - **Антивирус/Controlled Folder Access**: запуск бинарников из `%APPDATA%` может блокироваться —
-  ставим в `%LOCALAPPDATA%\Programs\ThisHelper\bin` и подписываем.
+  ставим в `%LOCALAPPDATA%\Programs\ZShelper\bin` и подписываем.
 - **Длинные пути** (>260 символов) в workspace моделей/проектов → префикс `\\?\`.
 - **WSL**: не зависим, но если есть — можем использовать как песочницу для кода.
 - **Windows ML / Foundry Local 2026**: дают «системные» модели без своих весов (Phi Silica,

@@ -190,7 +190,7 @@ CREATE TABLE job_steps (
 Один файл `data.db` (WAL) + папки артефактов:
 
 ```
-%APPDATA%/ThisHelper/
+%APPDATA%/ZShelper/
 ├── data.db              # события, задания, аудит, память, настройки
 ├── models/              # веса (не в git!), манифест model-lock.json
 ├── artifacts/<jobId>/   # скриншоты, логи, транскрипты, диффы

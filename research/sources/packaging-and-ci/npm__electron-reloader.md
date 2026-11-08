@@ -1,0 +1,132 @@
+---
+id: "npm:electron-reloader"
+kind: "npm"
+category: "packaging-and-ci"
+package: "electron-reloader"
+version: "2.0.0"
+url: "https://www.npmjs.com/package/electron-reloader"
+homepage: "https://github.com/sindresorhus/electron-reloader#readme"
+license: "MIT"
+summary: "Simple auto-reloading for Electron apps during development"
+fetched_at: "2026-11-08T12:19:23Z"
+---
+
+# npm: electron-reloader@2.0.0
+
+**Description:** Simple auto-reloading for Electron apps during development
+
+**Homepage:** https://github.com/sindresorhus/electron-reloader#readme
+
+**License:** MIT
+
+## Dependencies
+
+- chalk@^6.0.0
+- chokidar@^5.0.0
+- date-time@^4.0.0
+- electron-is-dev@^3.0.1
+- find-up@^8.0.0
+
+## Peer dependencies
+
+- none
+
+## README (from registry)
+
+# electron-reloader
+
+> Simple auto-reloading for Electron apps during development
+
+It *just works*. When a main process file changes, the app is restarted. When any other file changes, the windows are reloaded.
+
+## Install
+
+```sh
+npm install --save-dev electron-reloader
+```
+
+*Requires an ESM main process and Electron 44 or later.*
+
+## Usage
+
+The following must be included in the app entry file, usually named `index.js`:
+
+```js
+let reloader;
+try {
+	reloader = await import('electron-reloader');
+} catch {}
+
+reloader?.default(import.meta);
+```
+
+You have to pass `import.meta` so we can find the directory to watch.
+
+A main process file is a JavaScript file the main process has loaded. Other files the main process uses, like JSON modules, files read with `fs`, and worker scripts, are not main process files, so a change to them does not restart the app.
+
+The `try/catch` is needed so it doesn't throw `Cannot find package 'electron-reloader'` in production. It only wraps the import, so you still see errors from a wrong setup.
+
+> [!NOTE]
+> The restarted app is a new process. Its output still goes to the terminal, but the `electron` command exits on the first restart, so the terminal prompt comes back and <kbd>Ctrl</kbd>+<kbd>C</kbd> does not quit the app. Quit the app normally instead.
+>
+> If the restarted app fails to load, for example because of a syntax error, it no longer reloads. Quit it and start it again.
+
+## API
+
+### reload(importMeta, options?)
+
+#### importMeta
+
+Type: `object`
+
+The [`import.meta`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import.meta) object of the main process entry file.
+
+#### options
+
+Type: `object`
+
+##### ignore
+
+Type: `Array<string | RegExp | ((path: string) => boolean)>`
+
+Paths, regular expressions, or functions to ignore, passed to [`chokidar`](https://github.com/paulmillr/chokidar#path-filtering). Globs are not supported, and a path must match exactly. Paths are relative to the package directory. Regular expressions are tested against the absolute path, with forward slashes also on Windows, so do not anchor them with `^`. To ignore a directory, use a path like `'src'`, and use a regular expression for patterns like `/\.test\.js$/`. A function receives the absolute path, with forward slashes. Return `true` to ignore the path.
+
+By default, files/directories starting with a `.`, `.map` files, and `node_modules` directories are ignored. This option is additive to those.
+
+##### watchRenderer
+
+Type: `boolean`\
+Default: `true`
+
+Reload the windows when a file that is not a main process file changes.
+
+Setting this to `false` can be useful if you use a different reload strategy in the renderer process, like [`HMR`](https://webpack.js.org/concepts/hot-module-replacement/).
+
+##### debug
+
+Type: `boolean`\
+Default: `false`
+
+Prints watched paths and when files change.
+
+Can be useful to make sure you set it up correctly.
+
+## Tips
+
+### Using it with TypeScript
+
+Compile the main process to ESM (for example, `"module": "nodenext"` in `tsconfig.json` with `"type": "module"` in `package.json`), and put the `reload(import.meta)` call in the source of the entry file. Then add the source directory to the `ignore` option, so it only reacts when the compiled output changes.
+
+### Using it with Webpack watch mode
+
+Just add the source directory to the `ignore` option. The dist directory is already watched, so when a source file changes, webpack will build it and output it to the dist directory, which this module will detect.
+
+## Related
+
+- [electron-util](https://github.com/sindresorhus/electron-util) - Useful utilities for developing Electron apps and modules
+- [electron-debug](https://github.com/sindresorhus/electron-debug) - Adds useful debug features to your Electron app
+- [electron-context-menu](https://github.com/sindresorhus/electron-context-menu) - Context menu for your Electron app
+- [electron-dl](https://github.com/sindresorhus/electron-dl) - Simplified file downloads for your Electron app
+- [electron-unhandled](https://github.com/sindresorhus/electron-unhandled) - Catch unhandled errors and promise rejections in your Electron app
+- [electron-serve](https://github.com/sindresorhus/electron-serve) - Static file serving for Electron apps
+

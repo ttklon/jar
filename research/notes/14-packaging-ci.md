@@ -6,8 +6,8 @@
 
 | Артефакт | Зачем | Инструмент |
 | --- | --- | --- |
-| `ThisHelper-Setup-x.y.z.exe` (NSIS, x64) | основной установщик | electron-builder `nsis` |
-| `ThisHelper-x.y.z-portable.exe` | «запустить без установки» | electron-builder `portable` |
+| `ZShelper-Setup-x.y.z.exe` (NSIS, x64) | основной установщик | electron-builder `nsis` |
+| `ZShelper-x.y.z-portable.exe` | «запустить без установки» | electron-builder `portable` |
 | `.msi`/MSIX (опционально) | корпоративная установка | electron-builder `msi` / `msix` |
 | `*.zip` + `latest.yml` | ручное обновление | electron-builder |
 | SBOM (`sbom.spdx.json`) | прозрачность зависимостей | `anchore/sbom-action` |
@@ -18,13 +18,13 @@
 ## 2. Структура установки
 
 ```
-%LOCALAPPDATA%\Programs\ThisHelper\
-├── ThisHelper.exe
+%LOCALAPPDATA%\Programs\ZShelper\
+├── ZShelper.exe
 ├── resources\app.asar            # код
 ├── resources\bin\{llama-server,whisper,fmpeg}.exe   # нативные бинарники
 ├── resources\models\             # НЕ в установщике — качаются при первом запуске
 └── resources\licenses\           # тексты лицензий всех компонентов
-%APPDATA%\ThisHelper\             # данные пользователя (см. 01-architecture.md)
+%APPDATA%\ZShelper\             # данные пользователя (см. 01-architecture.md)
 ```
 
 Решения:

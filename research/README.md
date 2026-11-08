@@ -1,4 +1,4 @@
-# Research Vault — This Helper
+# Research Vault — ZShelper
 
 Здесь лежит **вся исследовательская база** проекта: скачанные первоисточники + собственные
 конспекты, на которые опираются архитектурные решения.
@@ -14,8 +14,10 @@
 research/
 ├── README.md            ← вы здесь: как пользоваться
 ├── INDEX.md             ← автогенерируемый каталог всех скачанных источников
+├── PENDING.md           ← что ещё не докачано (GitHub-часть, если сеть падала)
 ├── SOURCES.json          ← тот же каталог в машиночитаемом виде
 ├── notes/               ← ЧЕЛОВЕКОЧИТАЕМЫЕ конспекты по темам (главное!)
+│   └── 00…18            ← включая «любое железо» (17) и карту способностей (18)
 ├── sources/             ← скачанные первоисточники (README репозиториев, docs, метаданные)
 │   ├── <категория>/<owner>__<repo>/README.md + source.json
 │   ├── <категория>/pypi__<pkg>.md
@@ -32,7 +34,7 @@ research/
 
 | # | Файл | О чём |
 |---|------|-------|
-| 00 | [`notes/00-vision.md`](notes/00-vision.md) | Что такое This Helper, границы продукта, принципы |
+| 00 | [`notes/00-vision.md`](notes/00-vision.md) | Что такое ZShelper, границы продукта, принципы |
 | 01 | [`notes/01-architecture.md`](notes/01-architecture.md) | Процессы, слои, IPC, шина событий, хранилище |
 | 02 | [`notes/02-hardware-profiler.md`](notes/02-hardware-profiler.md) | Как определить железо и подобрать бюджеты |
 | 03 | [`notes/03-model-catalog.md`](notes/03-model-catalog.md) | Каталог моделей по ролям + размеры/кванты |
@@ -49,6 +51,8 @@ research/
 | 14 | [`notes/14-packaging-ci.md`](notes/14-packaging-ci.md) | Сборка, подпись, автообновление, GitHub Actions |
 | 15 | [`notes/15-evals.md`](notes/15-evals.md) | Как измерять качество и не врать себе |
 | 16 | [`notes/16-open-questions.md`](notes/16-open-questions.md) | Журнал решений и открытых вопросов |
+| 17 | [`notes/17-any-hardware.md`](notes/17-any-hardware.md) | **Оптимизация под любое железо**: физика, 14 рычагов, конфиги T0–T3, ловушки Windows |
+| 18 | [`notes/18-capability-map.md`](notes/18-capability-map.md) | **Карта способностей**: «умеет всё» с границами, рисками и tier'ами |
 
 ## Как пополнять
 

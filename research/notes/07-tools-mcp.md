@@ -128,7 +128,7 @@ tools: [
 `repo.map`, `file.patch` (unified diff с проверкой), `test.run`, `git.commit/push`,
 `workspace.create`, `deps.install` (с явным подтверждением), `lint`.
 
-> Эти же серверы публикуем наружу: This Helper умеет **сам быть MCP-сервером**, чтобы
+> Эти же серверы публикуем наружу: ZShelper умеет **сам быть MCP-сервером**, чтобы
 > Claude Desktop / Cursor / другие агенты могли управлять нашим ПК. Это даёт «совместимость
 > с экосистемой» бесплатно.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-This Helper — research source collector.
+ZShelper — research source collector.
 
 Pulls primary sources (GitHub READMEs + selected docs files, PyPI metadata,
 npm metadata) into a stable, greppable, offline research vault under
@@ -47,7 +47,7 @@ DISCOVERY = RESEARCH / "discovery"
 MANIFEST = Path(__file__).resolve().parent / "sources.json"
 ERRLOG = SOURCES / "_errors.log"
 TOKEN = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN") or ""
-UA = "this-helper-research-collector/1.0 (+https://github.com/ttklon/jar)"
+UA = "zshelper-research-collector/1.0 (+https://github.com/ttklon/jar)"
 NOW = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 REMAINING = {"github": None}
@@ -340,6 +340,34 @@ DISCOVERY_QUERIES = [
     "policy engine permission agent",
 ]
 
+DISCOVERY_QUERIES += [
+    "llm inference optimization cpu",
+    "speculative decoding llm",
+    "constrained decoding json grammar",
+    "gguf quantization imatrix",
+    "onnxruntime directml gpu",
+    "openvino npu llm",
+    "intel ipex llm",
+    "tiny language model edge device",
+    "prompt compression context",
+    "kv cache quantization",
+    "windows process priority performance",
+    "windows power efficiency api",
+    "office automation python excel",
+    "powerpoint automation",
+    "obs websocket automation",
+    "video editing automation ffmpeg",
+    "windows registry powershell automation",
+    "mcp excel office server",
+    "local rag sqlite vector search",
+    "llm observability local tracing",
+    "speculative decoding draft model",
+    "gpu offload layers llama",
+    "audio echo cancellation windows",
+    "screen recording windows api",
+    "windows ui automation accessibility",
+]
+
 
 def discover(force: bool, per_query: int = 12) -> None:
     DISCOVERY.mkdir(parents=True, exist_ok=True)
@@ -440,7 +468,7 @@ def build_index() -> None:
 
     gh = [m for m in metas if m.get("kind") == "github"]
     lines = [
-        "# ИНДЕКС ИСТОЧНИКОВ — This Helper",
+        "# ИНДЕКС ИСТОЧНИКОВ — ZShelper",
         "",
         f"Сгенерировано: `{NOW}` · всего записей: **{len(metas)}** · GitHub-репозиториев: **{len(gh)}**",
         "",
@@ -493,8 +521,9 @@ def build_index() -> None:
 # --------------------------------------------------------------------------- #
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("action", choices=["fetch", "discover", "index", "all"])
+    ap.add_argument("action", choices=["fetch", "discover", "index", "all", "pending"])
     ap.add_argument("--category", default=None)
+    ap.add_argument("--no-github", action="store_true", help="skip GitHub (api down / offline)")
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
 
@@ -508,6 +537,8 @@ def main() -> int:
                 continue
             print(f"[{category}]", flush=True)
             for kind in ("github", "pypi", "npm"):
+                if kind == "github" and args.no_github:
+                    continue
                 for item in spec.get(kind, []):
                     if kind == "github":
                         res = fetch_github(item, category, extras.get(item, []), args.force)
@@ -522,6 +553,29 @@ def main() -> int:
 
     if args.action in ("discover", "all"):
         discover(args.force)
+
+    if args.action == "pending":
+        missing = []
+        for category, spec in manifest["categories"].items():
+            for item in spec.get("github", []):
+                owner, _, name = item.partition("/")
+                if not (SOURCES / category / f"{owner}__{name}" / "README.md").exists():
+                    missing.append(f"github\t{category}\t{item}")
+            for item in spec.get("pypi", []):
+                if not (SOURCES / category / f"pypi__{slugify(item)}.md").exists():
+                    missing.append(f"pypi\t{category}\t{item}")
+            for item in spec.get("npm", []):
+                if not (SOURCES / category / f"npm__{slugify(item)}.md").exists():
+                    missing.append(f"npm\t{category}\t{item}")
+        out = RESEARCH / "PENDING.md"
+        lines = ["# Недокачанное", "", f"Проверено: {NOW}. Всего: {len(missing)}.", "",
+                 "Дозакачать: `GITHUB_TOKEN=$(gh auth token) python3 tools/collect_sources.py fetch`",
+                 "(или `--no-github`, если GitHub недоступен).", "",
+                 "| kind | категория | идентификатор |", "| --- | --- | --- |"]
+        lines += [f"| {m.split(chr(9))[0]} | {m.split(chr(9))[1]} | `{m.split(chr(9))[2]}` |" for m in missing]
+        out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        print(f"pending: {len(missing)} -> {out.relative_to(ROOT)}")
+        return 0
 
     if args.action in ("index", "all"):
         build_index()

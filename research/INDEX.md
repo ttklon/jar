@@ -1,6 +1,6 @@
-# ИНДЕКС ИСТОЧНИКОВ — This Helper
+# ИНДЕКС ИСТОЧНИКОВ — ZShelper
 
-Сгенерировано: `2026-11-08T11:41:03Z` · всего записей: **725** · GitHub-репозиториев: **408**
+Сгенерировано: `2026-11-08T12:20:21Z` · всего записей: **984** · GitHub-репозиториев: **408**
 
 Полные тексты лежат в `research/sources/<категория>/`. Машиночитаемый реестр — `research/SOURCES.json`.
 
@@ -9,20 +9,27 @@
 | Категория | Записей | Звёзд (сумма) |
 | --- | --- | --- |
 | [`benchmarks`](#benchmarks) | 14 | 43,820 |
-| [`coding-agents`](#coding-agents) | 51 | 1,043,500 |
+| [`benchmarks-extra`](#benchmarks-extra) | 4 | 0 |
+| [`coding-agents`](#coding-agents) | 63 | 1,043,500 |
 | [`connectors`](#connectors) | 44 | 591,577 |
+| [`connectors-extra`](#connectors-extra) | 31 | 0 |
 | [`electron-shell`](#electron-shell) | 28 | 381,504 |
 | [`inference-runtimes`](#inference-runtimes) | 45 | 1,169,178 |
+| [`low-end-inference`](#low-end-inference) | 19 | 0 |
 | [`mcp-and-tools`](#mcp-and-tools) | 50 | 956,879 |
+| [`media-production`](#media-production) | 33 | 0 |
 | [`memory-and-rag`](#memory-and-rag) | 50 | 573,502 |
-| [`observability-evals`](#observability-evals) | 29 | 207,602 |
+| [`observability-evals`](#observability-evals) | 32 | 207,602 |
+| [`office-automation`](#office-automation) | 35 | 0 |
 | [`orchestration`](#orchestration) | 93 | 2,896,899 |
-| [`packaging-and-ci`](#packaging-and-ci) | 39 | 171,295 |
+| [`packaging-and-ci`](#packaging-and-ci) | 52 | 171,295 |
+| [`perf-optimization`](#perf-optimization) | 38 | 0 |
 | [`reference-apps`](#reference-apps) | 25 | 1,013,937 |
 | [`safety-and-security`](#safety-and-security) | 38 | 493,731 |
 | [`screen-understanding`](#screen-understanding) | 42 | 700,299 |
+| [`system-control`](#system-control) | 47 | 0 |
 | [`tts-and-voice`](#tts-and-voice) | 28 | 329,740 |
-| [`ui-ux`](#ui-ux) | 42 | 706,173 |
+| [`ui-ux`](#ui-ux) | 66 | 706,173 |
 | [`whisper-and-asr`](#whisper-and-asr) | 52 | 438,275 |
 | [`windows-automation`](#windows-automation) | 55 | 557,351 |
 
@@ -44,6 +51,15 @@
 | [pypi: evaluate](https://pypi.org/project/evaluate/) | - | Apache 2.0 |  | HuggingFace community-driven open-source library of evaluation | `research/sources/benchmarks/pypi__evaluate.md` |
 | [pypi: inspect-ai](https://pypi.org/project/inspect-ai/) | - | MIT License |  | Framework for large language model evaluations | `research/sources/benchmarks/pypi__inspect-ai.md` |
 | [pypi: swebench](https://pypi.org/project/swebench/) | - | MIT License |  | The official SWE-bench package - a benchmark for evaluating LMs on software engineering | `research/sources/benchmarks/pypi__swebench.md` |
+
+## benchmarks-extra
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [pypi: datasets](https://pypi.org/project/datasets/) | - | Apache 2.0 |  | HuggingFace community-driven open-source library of datasets | `research/sources/benchmarks-extra/pypi__datasets.md` |
+| [pypi: evalplus](https://pypi.org/project/evalplus/) | - | Apache-2.0 |  | "EvalPlus for rigourous evaluation of LLM-synthesized code" | `research/sources/benchmarks-extra/pypi__evalplus.md` |
+| [pypi: evaluate](https://pypi.org/project/evaluate/) | - | Apache 2.0 |  | HuggingFace community-driven open-source library of evaluation | `research/sources/benchmarks-extra/pypi__evaluate.md` |
+| [pypi: inspect-ai](https://pypi.org/project/inspect-ai/) | - | MIT License |  | Framework for large language model evaluations | `research/sources/benchmarks-extra/pypi__inspect-ai.md` |
 
 ## coding-agents
 
@@ -77,9 +93,13 @@
 | [gitpython-developers/GitPython](https://github.com/gitpython-developers/GitPython) | 5,190 | BSD-3-Clause | 2026-11-05 | GitPython is a python library used to interact with Git repositories. | `research/sources/coding-agents/gitpython-developers__GitPython/README.md` |
 | [laude-institute/terminal-bench](https://github.com/laude-institute/terminal-bench) | 2,614 | Apache-2.0 | 2026-07-11 | A benchmark for LLMs on complicated tasks in the terminal | `research/sources/coding-agents/laude-institute__terminal-bench/README.md` |
 | [sourcegraph/scip](https://github.com/sourcegraph/scip) | 873 | Apache-2.0 | 2026-11-07 | SCIP Code Intelligence Protocol | `research/sources/coding-agents/sourcegraph__scip/README.md` |
+| [npm: @biomejs/biome](https://www.npmjs.com/package/@biomejs/biome) | - | MIT OR Apache-2.0 |  | Biome is a toolchain for the web: formatter, linter and more | `research/sources/coding-agents/npm__biomejs-biome.md` |
 | [npm: @playwright/test](https://www.npmjs.com/package/@playwright/test) | - | Apache-2.0 |  | A high-level API to automate web browsers | `research/sources/coding-agents/npm__playwright-test.md` |
+| [npm: @types/node](https://www.npmjs.com/package/@types/node) | - | MIT |  | TypeScript definitions for node | `research/sources/coding-agents/npm__types-node.md` |
 | [npm: @xterm/addon-fit](https://www.npmjs.com/package/@xterm/addon-fit) | - | MIT |  | An addon for [xterm.js](https://github.com/xtermjs/xterm.js) that enables fitting the terminal's dimensions to a containing element. This addon requires xterm.js v4+. | `research/sources/coding-agents/npm__xterm-addon-fit.md` |
 | [npm: chokidar](https://www.npmjs.com/package/chokidar) | - | MIT |  | Minimal and efficient cross-platform file watching library | `research/sources/coding-agents/npm__chokidar.md` |
+| [npm: dependency-cruiser](https://www.npmjs.com/package/dependency-cruiser) | - | MIT |  | Validate and visualize dependencies. With your rules. JavaScript, TypeScript, CoffeeScript. ES6, CommonJS, AMD. | `research/sources/coding-agents/npm__dependency-cruiser.md` |
+| [npm: esbuild](https://www.npmjs.com/package/esbuild) | - | MIT |  | An extremely fast JavaScript and CSS bundler and minifier. | `research/sources/coding-agents/npm__esbuild.md` |
 | [npm: eslint](https://www.npmjs.com/package/eslint) | - | MIT |  | An AST-based pattern checker for JavaScript. | `research/sources/coding-agents/npm__eslint.md` |
 | [npm: execa](https://www.npmjs.com/package/execa) | - | MIT |  | Process execution for humans | `research/sources/coding-agents/npm__execa.md` |
 | [npm: monaco-editor](https://www.npmjs.com/package/monaco-editor) | - | MIT |  | A browser based code editor | `research/sources/coding-agents/npm__monaco-editor.md` |
@@ -87,12 +107,20 @@
 | [npm: prettier](https://www.npmjs.com/package/prettier) | - | MIT |  | Prettier is an opinionated code formatter | `research/sources/coding-agents/npm__prettier.md` |
 | [npm: simple-git](https://www.npmjs.com/package/simple-git) | - | MIT |  | Simple GIT interface for node.js | `research/sources/coding-agents/npm__simple-git.md` |
 | [npm: tree-sitter](https://www.npmjs.com/package/tree-sitter) | - | MIT |  | Node.js bindings to the Tree-sitter parsing library | `research/sources/coding-agents/npm__tree-sitter.md` |
+| [npm: tsup](https://www.npmjs.com/package/tsup) | - | MIT |  | Bundle your TypeScript library with no config, powered by esbuild | `research/sources/coding-agents/npm__tsup.md` |
+| [npm: tsx](https://www.npmjs.com/package/tsx) | - | MIT |  | TypeScript Execute (tsx): Node.js enhanced with esbuild to run TypeScript & ESM files | `research/sources/coding-agents/npm__tsx.md` |
 | [npm: typescript](https://www.npmjs.com/package/typescript) | - | Apache-2.0 |  | TypeScript is a language for application scale JavaScript development | `research/sources/coding-agents/npm__typescript.md` |
 | [npm: vitest](https://www.npmjs.com/package/vitest) | - | MIT |  | Next generation testing framework powered by Vite | `research/sources/coding-agents/npm__vitest.md` |
 | [npm: web-tree-sitter](https://www.npmjs.com/package/web-tree-sitter) | - | MIT |  | Tree-sitter bindings for the web | `research/sources/coding-agents/npm__web-tree-sitter.md` |
 | [npm: xterm](https://www.npmjs.com/package/xterm) | - | MIT |  | Full xterm terminal, in your browser | `research/sources/coding-agents/npm__xterm.md` |
+| [pypi: black](https://pypi.org/project/black/) | - | - |  | The uncompromising code formatter. | `research/sources/coding-agents/pypi__black.md` |
+| [pypi: coverage](https://pypi.org/project/coverage/) | - | Apache-2.0 |  | Code coverage measurement for Python | `research/sources/coding-agents/pypi__coverage.md` |
 | [pypi: GitPython](https://pypi.org/project/GitPython/) | - | BSD-3-Clause |  | GitPython is a Python library used to interact with Git repositories | `research/sources/coding-agents/pypi__gitpython.md` |
+| [pypi: hypothesis](https://pypi.org/project/hypothesis/) | - | - |  | The property-based testing library for Python | `research/sources/coding-agents/pypi__hypothesis.md` |
+| [pypi: isort](https://pypi.org/project/isort/) | - | - |  | A Python utility / library to sort Python imports. | `research/sources/coding-agents/pypi__isort.md` |
 | [pypi: jedi](https://pypi.org/project/jedi/) | - | MIT |  | An autocompletion tool for Python that can be used for text editors. | `research/sources/coding-agents/pypi__jedi.md` |
+| [pypi: mypy](https://pypi.org/project/mypy/) | - | - |  | Optional static typing for Python | `research/sources/coding-agents/pypi__mypy.md` |
+| [pypi: pre-commit](https://pypi.org/project/pre-commit/) | - | MIT |  | A framework for managing and maintaining multi-language pre-commit hooks. | `research/sources/coding-agents/pypi__pre-commit.md` |
 | [pypi: pyright](https://pypi.org/project/pyright/) | - | MIT |  | Command line wrapper for pyright | `research/sources/coding-agents/pypi__pyright.md` |
 | [pypi: pytest](https://pypi.org/project/pytest/) | - | - |  | pytest: simple powerful testing with Python | `research/sources/coding-agents/pypi__pytest.md` |
 | [pypi: radon](https://pypi.org/project/radon/) | - | MIT |  | Code Metrics in Python | `research/sources/coding-agents/pypi__radon.md` |
@@ -149,6 +177,42 @@
 | [pypi: notion-client](https://pypi.org/project/notion-client/) | - | - |  | Python client for the official Notion API | `research/sources/connectors/pypi__notion-client.md` |
 | [pypi: python-telegram-bot](https://pypi.org/project/python-telegram-bot/) | - | - |  | We have made you a wrapper you can't refuse | `research/sources/connectors/pypi__python-telegram-bot.md` |
 | [pypi: slack-sdk](https://pypi.org/project/slack-sdk/) | - | MIT |  | The Slack API Platform SDK for Python | `research/sources/connectors/pypi__slack-sdk.md` |
+
+## connectors-extra
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [npm: @googleapis/calendar](https://www.npmjs.com/package/@googleapis/calendar) | - | Apache-2.0 |  | calendar | `research/sources/connectors-extra/npm__googleapis-calendar.md` |
+| [npm: @slack/web-api](https://www.npmjs.com/package/@slack/web-api) | - | MIT |  | Official library for using the Slack Platform's Web API | `research/sources/connectors-extra/npm__slack-web-api.md` |
+| [npm: baileys](https://www.npmjs.com/package/baileys) | - | MIT |  | A WebSockets library for interacting with WhatsApp Web | `research/sources/connectors-extra/npm__baileys.md` |
+| [npm: google-auth-library](https://www.npmjs.com/package/google-auth-library) | - | Apache-2.0 |  | Google APIs Authentication Client Library for Node.js | `research/sources/connectors-extra/npm__google-auth-library.md` |
+| [npm: grammy](https://www.npmjs.com/package/grammy) | - | MIT |  | The Telegram Bot Framework. | `research/sources/connectors-extra/npm__grammy.md` |
+| [npm: ical-generator](https://www.npmjs.com/package/ical-generator) | - | MIT |  | ical-generator is a small piece of code which generates ical calendar files | `research/sources/connectors-extra/npm__ical-generator.md` |
+| [npm: imapflow](https://www.npmjs.com/package/imapflow) | - | MIT |  | IMAP Client for Node | `research/sources/connectors-extra/npm__imapflow.md` |
+| [npm: keyv](https://www.npmjs.com/package/keyv) | - | MIT |  | Simple key-value storage with support for multiple backends | `research/sources/connectors-extra/npm__keyv.md` |
+| [npm: mailparser](https://www.npmjs.com/package/mailparser) | - | MIT |  | Parse e-mails | `research/sources/connectors-extra/npm__mailparser.md` |
+| [npm: mqtt](https://www.npmjs.com/package/mqtt) | - | MIT |  | A library for the MQTT protocol | `research/sources/connectors-extra/npm__mqtt.md` |
+| [npm: node-imap](https://www.npmjs.com/package/node-imap) | - | MIT |  | A fork of the famous and outdated IMAP module for node.js that makes communicating with IMAP servers easy | `research/sources/connectors-extra/npm__node-imap.md` |
+| [npm: nodemailer](https://www.npmjs.com/package/nodemailer) | - | MIT-0 |  | Easy as cake e-mail sending from your Node.js applications | `research/sources/connectors-extra/npm__nodemailer.md` |
+| [npm: open](https://www.npmjs.com/package/open) | - | MIT |  | Open stuff like URLs, files, executables. Cross-platform. | `research/sources/connectors-extra/npm__open.md` |
+| [npm: rss-parser](https://www.npmjs.com/package/rss-parser) | - | MIT |  | A lightweight RSS parser, for Node and the browser | `research/sources/connectors-extra/npm__rss-parser.md` |
+| [pypi: beautifulsoup4](https://pypi.org/project/beautifulsoup4/) | - | MIT License |  | Screen-scraping library | `research/sources/connectors-extra/pypi__beautifulsoup4.md` |
+| [pypi: caldav](https://pypi.org/project/caldav/) | - | - |  | CalDAV (RFC4791) client library | `research/sources/connectors-extra/pypi__caldav.md` |
+| [pypi: feedparser](https://pypi.org/project/feedparser/) | - | BSD-2-Clause |  | Universal feed parser, handles RSS 0.9x, RSS 1.0, RSS 2.0, CDF, Atom 0.3, and Atom 1.0 feeds | `research/sources/connectors-extra/pypi__feedparser.md` |
+| [pypi: google-api-python-client](https://pypi.org/project/google-api-python-client/) | - | Apache 2.0 |  | Google API Client Library for Python | `research/sources/connectors-extra/pypi__google-api-python-client.md` |
+| [pypi: google-auth-oauthlib](https://pypi.org/project/google-auth-oauthlib/) | - | Apache 2.0 |  | Google Authentication Library | `research/sources/connectors-extra/pypi__google-auth-oauthlib.md` |
+| [pypi: httpx](https://pypi.org/project/httpx/) | - | BSD-3-Clause |  | The next generation HTTP client. | `research/sources/connectors-extra/pypi__httpx.md` |
+| [pypi: icalendar](https://pypi.org/project/icalendar/) | - | - |  | RFC 5545 compatible parser and generator of iCalendar files | `research/sources/connectors-extra/pypi__icalendar.md` |
+| [pypi: imap-tools](https://pypi.org/project/imap-tools/) | - | Apache-2.0 |  | Work with email by IMAP | `research/sources/connectors-extra/pypi__imap-tools.md` |
+| [pypi: lxml](https://pypi.org/project/lxml/) | - | BSD-3-Clause |  | Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API. | `research/sources/connectors-extra/pypi__lxml.md` |
+| [pypi: msal](https://pypi.org/project/msal/) | - | MIT |  | The Microsoft Authentication Library (MSAL) for Python library enables your app to access the Microsoft Cloud by supporting authentication of users with Microsoft Azure Active Dire | `research/sources/connectors-extra/pypi__msal.md` |
+| [pypi: notion-client](https://pypi.org/project/notion-client/) | - | - |  | Python client for the official Notion API | `research/sources/connectors-extra/pypi__notion-client.md` |
+| [pypi: paho-mqtt](https://pypi.org/project/paho-mqtt/) | - | - |  | MQTT version 5.0/3.1.1 client class | `research/sources/connectors-extra/pypi__paho-mqtt.md` |
+| [pypi: python-telegram-bot](https://pypi.org/project/python-telegram-bot/) | - | - |  | We have made you a wrapper you can't refuse | `research/sources/connectors-extra/pypi__python-telegram-bot.md` |
+| [pypi: recurring-ical-events](https://pypi.org/project/recurring-ical-events/) | - | - |  | Calculate recurrence times of events, todos, alarms and journals based on icalendar RFC5545. | `research/sources/connectors-extra/pypi__recurring-ical-events.md` |
+| [pypi: requests](https://pypi.org/project/requests/) | - | Apache-2.0 |  | Python HTTP for Humans. | `research/sources/connectors-extra/pypi__requests.md` |
+| [pypi: slack-sdk](https://pypi.org/project/slack-sdk/) | - | MIT |  | The Slack API Platform SDK for Python | `research/sources/connectors-extra/pypi__slack-sdk.md` |
+| [pypi: twilio](https://pypi.org/project/twilio/) | - | MIT |  | Twilio API client and TwiML generator | `research/sources/connectors-extra/pypi__twilio.md` |
 
 ## electron-shell
 
@@ -233,6 +297,30 @@
 | [pypi: transformers](https://pypi.org/project/transformers/) | - | Apache 2.0 License |  | Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training. | `research/sources/inference-runtimes/pypi__transformers.md` |
 | [pypi: vllm](https://pypi.org/project/vllm/) | - | - |  | A high-throughput and memory-efficient inference and serving engine for LLMs | `research/sources/inference-runtimes/pypi__vllm.md` |
 
+## low-end-inference
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [npm: @huggingface/transformers](https://www.npmjs.com/package/@huggingface/transformers) | - | Apache-2.0 |  | State-of-the-art Machine Learning for the web. Run 🤗 Transformers directly in your browser, with no need for a server! | `research/sources/low-end-inference/npm__huggingface-transformers.md` |
+| [npm: kokoro-js](https://www.npmjs.com/package/kokoro-js) | - | Apache-2.0 |  | High-quality text-to-speech for the web | `research/sources/low-end-inference/npm__kokoro-js.md` |
+| [npm: node-llama-cpp](https://www.npmjs.com/package/node-llama-cpp) | - | MIT |  | Run AI models locally on your machine with node.js bindings for llama.cpp. Enforce a JSON schema on the model output on the generation level | `research/sources/low-end-inference/npm__node-llama-cpp.md` |
+| [npm: sherpa-onnx-node](https://www.npmjs.com/package/sherpa-onnx-node) | - | Apache-2.0 |  | Speech-to-text, text-to-speech, speaker diarization, and speech enhancement using Next-gen Kaldi without internet connection | `research/sources/low-end-inference/npm__sherpa-onnx-node.md` |
+| [pypi: accelerate](https://pypi.org/project/accelerate/) | - | Apache |  | Accelerate | `research/sources/low-end-inference/pypi__accelerate.md` |
+| [pypi: bitsandbytes](https://pypi.org/project/bitsandbytes/) | - | - |  | k-bit optimizers and matrix multiplication routines. | `research/sources/low-end-inference/pypi__bitsandbytes.md` |
+| [pypi: ctranslate2](https://pypi.org/project/ctranslate2/) | - | MIT |  | Fast inference engine for Transformer models | `research/sources/low-end-inference/pypi__ctranslate2.md` |
+| [pypi: flatbuffers](https://pypi.org/project/flatbuffers/) | - | Apache 2.0 |  | The FlatBuffers serialization format for Python | `research/sources/low-end-inference/pypi__flatbuffers.md` |
+| [pypi: huggingface-hub](https://pypi.org/project/huggingface-hub/) | - | Apache-2.0 |  | Client library to download and publish models, datasets and other repos on the huggingface.co hub | `research/sources/low-end-inference/pypi__huggingface-hub.md` |
+| [pypi: onnx](https://pypi.org/project/onnx/) | - | - |  | Open Neural Network Exchange | `research/sources/low-end-inference/pypi__onnx.md` |
+| [pypi: onnxruntime](https://pypi.org/project/onnxruntime/) | - | MIT License |  | ONNX Runtime is a runtime accelerator for Machine Learning models | `research/sources/low-end-inference/pypi__onnxruntime.md` |
+| [pypi: openvino](https://pypi.org/project/openvino/) | - | - |  | OpenVINO(TM) Runtime | `research/sources/low-end-inference/pypi__openvino.md` |
+| [pypi: protobuf](https://pypi.org/project/protobuf/) | - | 3-Clause BSD License |  |  | `research/sources/low-end-inference/pypi__protobuf.md` |
+| [pypi: safetensors](https://pypi.org/project/safetensors/) | - | - |  |  | `research/sources/low-end-inference/pypi__safetensors.md` |
+| [pypi: sentencepiece](https://pypi.org/project/sentencepiece/) | - | - |  | Unsupervised text tokenizer and detokenizer. | `research/sources/low-end-inference/pypi__sentencepiece.md` |
+| [pypi: sherpa-onnx](https://pypi.org/project/sherpa-onnx/) | - | Apache licensed, as found in the LICENSE file |  |  | `research/sources/low-end-inference/pypi__sherpa-onnx.md` |
+| [pypi: skl2onnx](https://pypi.org/project/skl2onnx/) | - | Apache License v2.0 |  | Convert scikit-learn models to ONNX | `research/sources/low-end-inference/pypi__skl2onnx.md` |
+| [pypi: tf2onnx](https://pypi.org/project/tf2onnx/) | - | - |  | Tensorflow to ONNX converter | `research/sources/low-end-inference/pypi__tf2onnx.md` |
+| [pypi: transformers](https://pypi.org/project/transformers/) | - | Apache 2.0 License |  | Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training. | `research/sources/low-end-inference/pypi__transformers.md` |
+
 ## mcp-and-tools
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
@@ -287,6 +375,44 @@
 | [pypi: mcp-proxy](https://pypi.org/project/mcp-proxy/) | - | - |  | A MCP server which proxies requests to a remote MCP server over streamable HTTP or SSE. | `research/sources/mcp-and-tools/pypi__mcp-proxy.md` |
 | [pypi: mcp-server-fetch](https://pypi.org/project/mcp-server-fetch/) | - | MIT |  | A Model Context Protocol server providing tools to fetch and convert web content for usage by LLMs | `research/sources/mcp-and-tools/pypi__mcp-server-fetch.md` |
 | [pypi: mcp-server-git](https://pypi.org/project/mcp-server-git/) | - | MIT |  | A Model Context Protocol server providing tools to read, search, and manipulate Git repositories programmatically via LLMs | `research/sources/mcp-and-tools/pypi__mcp-server-git.md` |
+
+## media-production
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [npm: @ffmpeg-installer/ffmpeg](https://www.npmjs.com/package/@ffmpeg-installer/ffmpeg) | - | LGPL-2.1 |  | Platform independent binary installer of FFmpeg for node projects | `research/sources/media-production/npm__ffmpeg-installer-ffmpeg.md` |
+| [npm: audio-context](https://www.npmjs.com/package/audio-context) | - | MIT |  | A WebAudio Context singleton | `research/sources/media-production/npm__audio-context.md` |
+| [npm: ffmpeg-static](https://www.npmjs.com/package/ffmpeg-static) | - | GPL-3.0-or-later |  | ffmpeg binaries for macOS, Linux and Windows | `research/sources/media-production/npm__ffmpeg-static.md` |
+| [npm: ffprobe-static](https://www.npmjs.com/package/ffprobe-static) | - | MIT |  | Static binaries for ffprobe. | `research/sources/media-production/npm__ffprobe-static.md` |
+| [npm: fluent-ffmpeg](https://www.npmjs.com/package/fluent-ffmpeg) | - | MIT |  | A fluent API to FFMPEG (http://www.ffmpeg.org) | `research/sources/media-production/npm__fluent-ffmpeg.md` |
+| [npm: naudiodon](https://www.npmjs.com/package/naudiodon) | - | Apache-2.0 |  | Node Stream bindings for PortAudio. | `research/sources/media-production/npm__naudiodon.md` |
+| [npm: node-wav](https://www.npmjs.com/package/node-wav) | - | MIT |  | High performance WAV file decoder and encoder | `research/sources/media-production/npm__node-wav.md` |
+| [npm: node-web-audio-api](https://www.npmjs.com/package/node-web-audio-api) | - | BSD-3-Clause |  | Web Audio API implementation for Node.js | `research/sources/media-production/npm__node-web-audio-api.md` |
+| [npm: peaks.js](https://www.npmjs.com/package/peaks.js) | - | LGPL-3.0 |  | JavaScript UI component for displaying audio waveforms | `research/sources/media-production/npm__peaks.js.md` |
+| [npm: sharp](https://www.npmjs.com/package/sharp) | - | Apache-2.0 |  | High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images | `research/sources/media-production/npm__sharp.md` |
+| [npm: speaker](https://www.npmjs.com/package/speaker) | - | (MIT AND LGPL-2.1-only) |  | Output PCM audio data to the speakers | `research/sources/media-production/npm__speaker.md` |
+| [npm: wav-decoder](https://www.npmjs.com/package/wav-decoder) | - | MIT |  | promise-based wav decoder | `research/sources/media-production/npm__wav-decoder.md` |
+| [npm: wavefile](https://www.npmjs.com/package/wavefile) | - | MIT |  | Create, read and write wav files according to the specs. | `research/sources/media-production/npm__wavefile.md` |
+| [npm: waveform-data](https://www.npmjs.com/package/waveform-data) | - | LGPL-3.0 |  | Audio Waveform Data Manipulation API – resample, offset and segment waveform data in JavaScript | `research/sources/media-production/npm__waveform-data.md` |
+| [pypi: audioread](https://pypi.org/project/audioread/) | - | - |  | Multi-library, cross-platform audio decoding. | `research/sources/media-production/pypi__audioread.md` |
+| [pypi: av](https://pypi.org/project/av/) | - | - |  | Pythonic bindings for FFmpeg's libraries. | `research/sources/media-production/pypi__av.md` |
+| [pypi: ffmpeg-python](https://pypi.org/project/ffmpeg-python/) | - | - |  | Python bindings for FFmpeg - with complex filtering support | `research/sources/media-production/pypi__ffmpeg-python.md` |
+| [pypi: ImageIO](https://pypi.org/project/ImageIO/) | - | - |  | Read and write images and video across all major formats. Supports scientific and volumetric data. | `research/sources/media-production/pypi__imageio.md` |
+| [pypi: imageio-ffmpeg](https://pypi.org/project/imageio-ffmpeg/) | - | BSD-2-Clause |  | FFMPEG wrapper for Python | `research/sources/media-production/pypi__imageio-ffmpeg.md` |
+| [pypi: librosa](https://pypi.org/project/librosa/) | - | ISC |  | Python module for audio and music processing | `research/sources/media-production/pypi__librosa.md` |
+| [pypi: matplotlib](https://pypi.org/project/matplotlib/) | - | License agreement for matplotlib versions 1.3.0 and later |  | Python plotting package | `research/sources/media-production/pypi__matplotlib.md` |
+| [pypi: moviepy](https://pypi.org/project/moviepy/) | - | MIT License |  | Video editing with Python | `research/sources/media-production/pypi__moviepy.md` |
+| [pypi: mutagen](https://pypi.org/project/mutagen/) | - | - |  | read and write audio tags for many formats | `research/sources/media-production/pypi__mutagen.md` |
+| [pypi: opencv-python-headless](https://pypi.org/project/opencv-python-headless/) | - | Apache 2.0 |  | Wrapper package for OpenCV python bindings. | `research/sources/media-production/pypi__opencv-python-headless.md` |
+| [pypi: plotly](https://pypi.org/project/plotly/) | - | - |  | An open-source interactive data visualization library for Python | `research/sources/media-production/pypi__plotly.md` |
+| [pypi: pydub](https://pypi.org/project/pydub/) | - | MIT |  | Manipulate audio with an simple and easy high level interface | `research/sources/media-production/pypi__pydub.md` |
+| [pypi: scikit-image](https://pypi.org/project/scikit-image/) | - | Files: * |  | Image processing in Python | `research/sources/media-production/pypi__scikit-image.md` |
+| [pypi: soundfile](https://pypi.org/project/soundfile/) | - | BSD 3-Clause License |  | An audio library based on libsndfile, CFFI and NumPy | `research/sources/media-production/pypi__soundfile.md` |
+| [pypi: Wave](https://pypi.org/project/Wave/) | - | MIT |  | Whole architecture verification. | `research/sources/media-production/pypi__wave.md` |
+| [pypi: whisper-timestamped](https://pypi.org/project/whisper-timestamped/) | - | GPLv3 |  | Multi-lingual Automatic Speech Recognition (ASR) based on Whisper models, with accurate word timestamps, access to language detection confidence, several options for Voice Activity | `research/sources/media-production/pypi__whisper-timestamped.md` |
+| [pypi: whisperx](https://pypi.org/project/whisperx/) | - | BSD-2-Clause |  | Time-Accurate Automatic Speech Recognition using Whisper. | `research/sources/media-production/pypi__whisperx.md` |
+| [pypi: youtube-transcript-api](https://pypi.org/project/youtube-transcript-api/) | - | MIT |  | This is a python API which allows you to get the transcripts/subtitles for a given YouTube video. It also works for automatically generated subtitles, supports translating subtitle | `research/sources/media-production/pypi__youtube-transcript-api.md` |
+| [pypi: yt-dlp](https://pypi.org/project/yt-dlp/) | - | - |  | A feature-rich command-line audio/video downloader | `research/sources/media-production/pypi__yt-dlp.md` |
 
 ## memory-and-rag
 
@@ -372,10 +498,53 @@
 | [pypi: langfuse](https://pypi.org/project/langfuse/) | - | - |  | Langfuse Python SDK - LLM observability/tracing, datasets, experiments, LLM-as-a-judge evaluation, and prompt management | `research/sources/observability-evals/pypi__langfuse.md` |
 | [pypi: lm-eval](https://pypi.org/project/lm-eval/) | - | MIT |  | A framework for evaluating language models | `research/sources/observability-evals/pypi__lm-eval.md` |
 | [pypi: openinference-instrumentation](https://pypi.org/project/openinference-instrumentation/) | - | - |  | OpenInference instrumentation utilities | `research/sources/observability-evals/pypi__openinference-instrumentation.md` |
+| [pypi: opentelemetry-exporter-otlp](https://pypi.org/project/opentelemetry-exporter-otlp/) | - | - |  | OpenTelemetry Collector Exporters | `research/sources/observability-evals/pypi__opentelemetry-exporter-otlp.md` |
 | [pypi: opentelemetry-sdk](https://pypi.org/project/opentelemetry-sdk/) | - | - |  | OpenTelemetry Python SDK | `research/sources/observability-evals/pypi__opentelemetry-sdk.md` |
 | [pypi: phoenix](https://pypi.org/project/phoenix/) | - | UNKNOWN |  | MUS Interface for Phoenix Emulator 3.x | `research/sources/observability-evals/pypi__phoenix.md` |
+| [pypi: prometheus-client](https://pypi.org/project/prometheus-client/) | - | - |  | Python client for the Prometheus monitoring system. | `research/sources/observability-evals/pypi__prometheus-client.md` |
 | [pypi: promptfoo](https://pypi.org/project/promptfoo/) | - | MIT |  | Python wrapper for the promptfoo CLI - LLM testing, red teaming, and security evaluation | `research/sources/observability-evals/pypi__promptfoo.md` |
 | [pypi: ragas](https://pypi.org/project/ragas/) | - | Apache License |  | Evaluation framework for RAG and LLM applications | `research/sources/observability-evals/pypi__ragas.md` |
+| [pypi: structlog](https://pypi.org/project/structlog/) | - | - |  | Structured Logging for Python | `research/sources/observability-evals/pypi__structlog.md` |
+
+## office-automation
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [npm: docx](https://www.npmjs.com/package/docx) | - | MIT |  | Easily generate .docx files with JS/TS with a nice declarative API. Works for Node and on the Browser. | `research/sources/office-automation/npm__docx.md` |
+| [npm: docxtemplater](https://www.npmjs.com/package/docxtemplater) | - | MIT |  | Generate docx, pptx, and xlsx from templates (Word, Powerpoint and Excel documents), from Node.js, the Browser and the command line | `research/sources/office-automation/npm__docxtemplater.md` |
+| [npm: exceljs](https://www.npmjs.com/package/exceljs) | - | MIT |  | Excel Workbook Manager - Read and Write xlsx and csv Files. | `research/sources/office-automation/npm__exceljs.md` |
+| [npm: mammoth](https://www.npmjs.com/package/mammoth) | - | BSD-2-Clause |  | Convert Word documents from docx to simple HTML and Markdown | `research/sources/office-automation/npm__mammoth.md` |
+| [npm: node-xlsx](https://www.npmjs.com/package/node-xlsx) | - | Apache-2.0 |  | NodeJS Excel files parser & builder | `research/sources/office-automation/npm__node-xlsx.md` |
+| [npm: officegen](https://www.npmjs.com/package/officegen) | - | MIT |  | Office Open XML Generator using Node.js streams. Supporting Microsoft Office 2007 and later Word (docx), PowerPoint (pptx,ppsx) and Excell (xlsx). This module is for all frameworks | `research/sources/office-automation/npm__officegen.md` |
+| [npm: officeparser](https://www.npmjs.com/package/officeparser) | - | MIT |  | A robust, strictly-typed Node.js and Browser library for parsing office files (.docx, .pptx, .xlsx, .odt, .odp, .ods, .odg, .pdf, .rtf, .csv, .md, .html, .epub, .tex) and generatin | `research/sources/office-automation/npm__officeparser.md` |
+| [npm: pdf-lib](https://www.npmjs.com/package/pdf-lib) | - | MIT |  | Create and modify PDF files with JavaScript | `research/sources/office-automation/npm__pdf-lib.md` |
+| [npm: pdf-parse](https://www.npmjs.com/package/pdf-parse) | - | Apache-2.0 |  | Pure TypeScript, cross-platform module for extracting text, images, and tabular data from PDFs. Run directly in your browser or in Node! | `research/sources/office-automation/npm__pdf-parse.md` |
+| [npm: pdfjs-dist](https://www.npmjs.com/package/pdfjs-dist) | - | Apache-2.0 |  | Generic build of Mozilla's PDF.js library. | `research/sources/office-automation/npm__pdfjs-dist.md` |
+| [npm: pizzip](https://www.npmjs.com/package/pizzip) | - | (MIT OR GPL-3.0) |  | Create, read and edit .zip files synchronously with Javascript | `research/sources/office-automation/npm__pizzip.md` |
+| [npm: xlsx](https://www.npmjs.com/package/xlsx) | - | Apache-2.0 |  | SheetJS Spreadsheet data parser and writer | `research/sources/office-automation/npm__xlsx.md` |
+| [npm: xlsx-populate](https://www.npmjs.com/package/xlsx-populate) | - | MIT |  | Excel XLSX parser/generator written in JavaScript with Node.js and browser support, jQuery/d3-style method chaining, and a focus on keeping existing workbook features and styles in | `research/sources/office-automation/npm__xlsx-populate.md` |
+| [pypi: xlsxwriter](https://pypi.org/project/xlsxwriter/) | - | - |  | A Python module for creating Excel XLSX files. | `research/sources/office-automation/pypi__xlsxwriter.md` |
+| [pypi: camelot-py](https://pypi.org/project/camelot-py/) | - | MIT |  | PDF Table Extraction for Humans. | `research/sources/office-automation/pypi__camelot-py.md` |
+| [pypi: comtypes](https://pypi.org/project/comtypes/) | - | - |  | Pure Python COM package | `research/sources/office-automation/pypi__comtypes.md` |
+| [pypi: docxtpl](https://pypi.org/project/docxtpl/) | - | LGPL-2.1-only |  | Python docx template engine | `research/sources/office-automation/pypi__docxtpl.md` |
+| [pypi: Jinja2](https://pypi.org/project/Jinja2/) | - | - |  | A very fast and expressive template engine. | `research/sources/office-automation/pypi__jinja2.md` |
+| [pypi: Markdown](https://pypi.org/project/Markdown/) | - | - |  | Python implementation of John Gruber's Markdown. | `research/sources/office-automation/pypi__markdown.md` |
+| [pypi: msoffcrypto-tool](https://pypi.org/project/msoffcrypto-tool/) | - | MIT |  | Python tool and library for decrypting and encrypting MS Office files using a password or other keys | `research/sources/office-automation/pypi__msoffcrypto-tool.md` |
+| [pypi: odfpy](https://pypi.org/project/odfpy/) | - | - |  | Python API and tools to manipulate OpenDocument files | `research/sources/office-automation/pypi__odfpy.md` |
+| [pypi: openpyxl](https://pypi.org/project/openpyxl/) | - | MIT |  | A Python library to read/write Excel 2010 xlsx/xlsm files | `research/sources/office-automation/pypi__openpyxl.md` |
+| [pypi: pandas](https://pypi.org/project/pandas/) | - | - |  | Powerful data structures for data analysis, time series, and statistics | `research/sources/office-automation/pypi__pandas.md` |
+| [pypi: pdfkit](https://pypi.org/project/pdfkit/) | - | MIT |  | Wkhtmltopdf python wrapper to convert html to pdf using the webkit rendering engine and qt | `research/sources/office-automation/pypi__pdfkit.md` |
+| [pypi: pdfplumber](https://pypi.org/project/pdfplumber/) | - | - |  | Plumb a PDF for detailed information about each char, rectangle, and line. | `research/sources/office-automation/pypi__pdfplumber.md` |
+| [pypi: pyexcel](https://pypi.org/project/pyexcel/) | - | New BSD |  | A wrapper library that provides one API to read, manipulate and writedata in different excel formats | `research/sources/office-automation/pypi__pyexcel.md` |
+| [pypi: pymupdf](https://pypi.org/project/pymupdf/) | - | Dual Licensed - GNU AFFERO GPL 3.0 or Artifex Commercial License |  | A high performance Python library for data extraction, analysis, conversion & manipulation of PDF (and other) documents. | `research/sources/office-automation/pypi__pymupdf.md` |
+| [pypi: pypdf](https://pypi.org/project/pypdf/) | - | - |  | A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files | `research/sources/office-automation/pypi__pypdf.md` |
+| [pypi: python-docx](https://pypi.org/project/python-docx/) | - | MIT |  | Create, read, and update Microsoft Word .docx files. | `research/sources/office-automation/pypi__python-docx.md` |
+| [pypi: python-pptx](https://pypi.org/project/python-pptx/) | - | MIT |  | Create, read, and update PowerPoint 2007+ (.pptx) files. | `research/sources/office-automation/pypi__python-pptx.md` |
+| [pypi: reportlab](https://pypi.org/project/reportlab/) | - | BSD license (see license.txt for details), Copyright (c) 2000-2025, ReportLab In |  | The Reportlab Toolkit | `research/sources/office-automation/pypi__reportlab.md` |
+| [pypi: tablib](https://pypi.org/project/tablib/) | - | MIT License |  | Format agnostic tabular data library (XLS, JSON, YAML, CSV, etc.) | `research/sources/office-automation/pypi__tablib.md` |
+| [pypi: tabula-py](https://pypi.org/project/tabula-py/) | - | The MIT License (MIT) Copyright (c) 2016 Michiaki Ariga  Permission is hereby gr |  | Simple wrapper for tabula-java, read tables from PDF into DataFrame | `research/sources/office-automation/pypi__tabula-py.md` |
+| [pypi: weasyprint](https://pypi.org/project/weasyprint/) | - | - |  | The Awesome Document Factory | `research/sources/office-automation/pypi__weasyprint.md` |
+| [pypi: xlwings](https://pypi.org/project/xlwings/) | - | BSD 3-clause |  | Make Excel fly: Interact with Excel from Python and vice versa. | `research/sources/office-automation/pypi__xlwings.md` |
 
 ## orchestration
 
@@ -507,17 +676,73 @@
 | [dependabot/fetch-metadata](https://github.com/dependabot/fetch-metadata) | 344 | MIT | 2026-11-07 | Extract information about the dependencies being updated by a Dependabot-generated PR. | `research/sources/packaging-and-ci/dependabot__fetch-metadata/README.md` |
 | [anchore/sbom-action](https://github.com/anchore/sbom-action) | 265 | Apache-2.0 | 2026-11-06 | GitHub Action for creating software bill of materials using Syft. | `research/sources/packaging-and-ci/anchore__sbom-action/README.md` |
 | [npm: @changesets/cli](https://www.npmjs.com/package/@changesets/cli) | - | MIT |  | A tool to manage versioning and changelogs with a focus on monorepos | `research/sources/packaging-and-ci/npm__changesets-cli.md` |
+| [npm: @electron/asar](https://www.npmjs.com/package/@electron/asar) | - | MIT |  | Creating Electron app packages | `research/sources/packaging-and-ci/npm__electron-asar.md` |
 | [npm: @electron/universal](https://www.npmjs.com/package/@electron/universal) | - | MIT |  | Utility for creating Universal macOS applications from two x64 and arm64 Electron applications | `research/sources/packaging-and-ci/npm__electron-universal.md` |
+| [npm: @testing-library/react](https://www.npmjs.com/package/@testing-library/react) | - | MIT |  | Simple and complete React DOM testing utilities that encourage good testing practices. | `research/sources/packaging-and-ci/npm__testing-library-react.md` |
+| [npm: @testing-library/user-event](https://www.npmjs.com/package/@testing-library/user-event) | - | MIT |  | Fire events the same way the user does | `research/sources/packaging-and-ci/npm__testing-library-user-event.md` |
+| [npm: @typescript-eslint/eslint-plugin](https://www.npmjs.com/package/@typescript-eslint/eslint-plugin) | - | MIT |  | TypeScript plugin for ESLint | `research/sources/packaging-and-ci/npm__typescript-eslint-eslint-plugin.md` |
+| [npm: @typescript-eslint/parser](https://www.npmjs.com/package/@typescript-eslint/parser) | - | MIT |  | An ESLint custom parser which leverages TypeScript ESTree | `research/sources/packaging-and-ci/npm__typescript-eslint-parser.md` |
+| [npm: @vitejs/plugin-react](https://www.npmjs.com/package/@vitejs/plugin-react) | - | MIT |  | The default Vite plugin for React projects | `research/sources/packaging-and-ci/npm__vitejs-plugin-react.md` |
 | [npm: conventional-changelog](https://www.npmjs.com/package/conventional-changelog) | - | MIT |  | Generate a changelog from git metadata. | `research/sources/packaging-and-ci/npm__conventional-changelog.md` |
+| [npm: cross-env](https://www.npmjs.com/package/cross-env) | - | MIT |  | Run scripts that set and use environment variables across platforms | `research/sources/packaging-and-ci/npm__cross-env.md` |
 | [npm: electron-builder](https://www.npmjs.com/package/electron-builder) | - | MIT |  | A complete solution to package and build a ready for distribution Electron app for MacOS, Windows and Linux with “auto update” support out of the box | `research/sources/packaging-and-ci/npm__electron-builder.md` |
+| [npm: electron-devtools-installer](https://www.npmjs.com/package/electron-devtools-installer) | - | MIT |  | An easy way to install Dev Tools extensions into Electron applications | `research/sources/packaging-and-ci/npm__electron-devtools-installer.md` |
+| [npm: electron-reloader](https://www.npmjs.com/package/electron-reloader) | - | MIT |  | Simple auto-reloading for Electron apps during development | `research/sources/packaging-and-ci/npm__electron-reloader.md` |
 | [npm: electron-updater](https://www.npmjs.com/package/electron-updater) | - | MIT |  | Cross platform updater for electron applications | `research/sources/packaging-and-ci/npm__electron-updater.md` |
 | [npm: esbuild](https://www.npmjs.com/package/esbuild) | - | MIT |  | An extremely fast JavaScript and CSS bundler and minifier. | `research/sources/packaging-and-ci/npm__esbuild.md` |
+| [npm: eslint](https://www.npmjs.com/package/eslint) | - | MIT |  | An AST-based pattern checker for JavaScript. | `research/sources/packaging-and-ci/npm__eslint.md` |
 | [npm: husky](https://www.npmjs.com/package/husky) | - | MIT |  | Modern native Git hooks | `research/sources/packaging-and-ci/npm__husky.md` |
+| [npm: jsdom](https://www.npmjs.com/package/jsdom) | - | MIT |  | A JavaScript implementation of many web standards | `research/sources/packaging-and-ci/npm__jsdom.md` |
 | [npm: lint-staged](https://www.npmjs.com/package/lint-staged) | - | MIT |  | Lint files staged by git | `research/sources/packaging-and-ci/npm__lint-staged.md` |
 | [npm: npm-run-all2](https://www.npmjs.com/package/npm-run-all2) | - | MIT |  | A CLI tool to run multiple npm-scripts in parallel or sequential. (Maintenance fork) | `research/sources/packaging-and-ci/npm__npm-run-all2.md` |
+| [npm: prettier](https://www.npmjs.com/package/prettier) | - | MIT |  | Prettier is an opinionated code formatter | `research/sources/packaging-and-ci/npm__prettier.md` |
+| [npm: rimraf](https://www.npmjs.com/package/rimraf) | - | BlueOak-1.0.0 |  | A deep deletion module for node (like `rm -rf`) | `research/sources/packaging-and-ci/npm__rimraf.md` |
 | [npm: semantic-release](https://www.npmjs.com/package/semantic-release) | - | MIT |  | Automated semver compliant package publishing | `research/sources/packaging-and-ci/npm__semantic-release.md` |
 | [npm: tsup](https://www.npmjs.com/package/tsup) | - | MIT |  | Bundle your TypeScript library with no config, powered by esbuild | `research/sources/packaging-and-ci/npm__tsup.md` |
 | [npm: typescript](https://www.npmjs.com/package/typescript) | - | Apache-2.0 |  | TypeScript is a language for application scale JavaScript development | `research/sources/packaging-and-ci/npm__typescript.md` |
+
+## perf-optimization
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [npm: @dqbd/tiktoken](https://www.npmjs.com/package/@dqbd/tiktoken) | - | MIT |  | JS/WASM bindings for tiktoken | `research/sources/perf-optimization/npm__dqbd-tiktoken.md` |
+| [npm: @huggingface/transformers](https://www.npmjs.com/package/@huggingface/transformers) | - | Apache-2.0 |  | State-of-the-art Machine Learning for the web. Run 🤗 Transformers directly in your browser, with no need for a server! | `research/sources/perf-optimization/npm__huggingface-transformers.md` |
+| [npm: @napi-rs/canvas](https://www.npmjs.com/package/@napi-rs/canvas) | - | MIT |  | Canvas for Node.js with skia backend | `research/sources/perf-optimization/npm__napi-rs-canvas.md` |
+| [npm: gpt-tokenizer](https://www.npmjs.com/package/gpt-tokenizer) | - | MIT |  | A pure JavaScript BPE tokenizer with model metadata and pricing for GPT-5, GPT-4o, o-series, and other OpenAI models | `research/sources/perf-optimization/npm__gpt-tokenizer.md` |
+| [npm: node-llama-cpp](https://www.npmjs.com/package/node-llama-cpp) | - | MIT |  | Run AI models locally on your machine with node.js bindings for llama.cpp. Enforce a JSON schema on the model output on the generation level | `research/sources/perf-optimization/npm__node-llama-cpp.md` |
+| [npm: onnxruntime-node](https://www.npmjs.com/package/onnxruntime-node) | - | MIT |  | ONNXRuntime Node.js binding | `research/sources/perf-optimization/npm__onnxruntime-node.md` |
+| [npm: piscina](https://www.npmjs.com/package/piscina) | - | MIT |  | A fast, efficient Node.js Worker Thread Pool implementation | `research/sources/perf-optimization/npm__piscina.md` |
+| [npm: re2](https://www.npmjs.com/package/re2) | - | BSD-3-Clause |  | Bindings for RE2: fast, safe alternative to backtracking regular expression engines. | `research/sources/perf-optimization/npm__re2.md` |
+| [npm: sharp](https://www.npmjs.com/package/sharp) | - | Apache-2.0 |  | High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images | `research/sources/perf-optimization/npm__sharp.md` |
+| [npm: workerpool](https://www.npmjs.com/package/workerpool) | - | Apache-2.0 |  | Offload tasks to a pool of workers on node.js and in the browser | `research/sources/perf-optimization/npm__workerpool.md` |
+| [npm: zstd-codec](https://www.npmjs.com/package/zstd-codec) | - | MIT |  | Zstandard codec powered by Emscripten | `research/sources/perf-optimization/npm__zstd-codec.md` |
+| [pypi: ctranslate2](https://pypi.org/project/ctranslate2/) | - | MIT |  | Fast inference engine for Transformer models | `research/sources/perf-optimization/pypi__ctranslate2.md` |
+| [pypi: duckdb](https://pypi.org/project/duckdb/) | - | - |  | DuckDB in-process database | `research/sources/perf-optimization/pypi__duckdb.md` |
+| [pypi: exllamav2](https://pypi.org/project/exllamav2/) | - | MIT |  |  | `research/sources/perf-optimization/pypi__exllamav2.md` |
+| [pypi: guidance](https://pypi.org/project/guidance/) | - | - |  | A guidance language for controlling large language models. | `research/sources/perf-optimization/pypi__guidance.md` |
+| [pypi: hf-transfer](https://pypi.org/project/hf-transfer/) | - | - |  | Speed up file transfers with the Hugging Face Hub. | `research/sources/perf-optimization/pypi__hf-transfer.md` |
+| [pypi: intel-extension-for-pytorch](https://pypi.org/project/intel-extension-for-pytorch/) | - | https://www.apache.org/licenses/LICENSE-2.0 |  | Intel® Extension for PyTorch* | `research/sources/perf-optimization/pypi__intel-extension-for-pytorch.md` |
+| [pypi: intel-openmp](https://pypi.org/project/intel-openmp/) | - | Intel End User License Agreement for Developer Tools |  | Intel OpenMP* Runtime Library | `research/sources/perf-optimization/pypi__intel-openmp.md` |
+| [pypi: llama-cpp-python](https://pypi.org/project/llama-cpp-python/) | - | MIT |  | Python bindings for the llama.cpp library | `research/sources/perf-optimization/pypi__llama-cpp-python.md` |
+| [pypi: llmcompressor](https://pypi.org/project/llmcompressor/) | - | Apache 2.0 |  | A library for compressing large language models utilizing the latest techniques and research in the field for both training aware and post training techniques. The library is desig | `research/sources/perf-optimization/pypi__llmcompressor.md` |
+| [pypi: lm-format-enforcer](https://pypi.org/project/lm-format-enforcer/) | - | MIT |  | Enforce the output format (JSON Schema, Regex etc) of a language model | `research/sources/perf-optimization/pypi__lm-format-enforcer.md` |
+| [pypi: nncf](https://pypi.org/project/nncf/) | - | - |  | Neural Networks Compression Framework | `research/sources/perf-optimization/pypi__nncf.md` |
+| [pypi: numpy](https://pypi.org/project/numpy/) | - | - |  | Fundamental package for array computing in Python | `research/sources/perf-optimization/pypi__numpy.md` |
+| [pypi: nvidia-ml-py](https://pypi.org/project/nvidia-ml-py/) | - | BSD |  | Python Bindings for the NVIDIA Management Library | `research/sources/perf-optimization/pypi__nvidia-ml-py.md` |
+| [pypi: onnxruntime-directml](https://pypi.org/project/onnxruntime-directml/) | - | MIT License |  | ONNX Runtime is a runtime accelerator for Machine Learning models | `research/sources/perf-optimization/pypi__onnxruntime-directml.md` |
+| [pypi: onnxruntime-genai](https://pypi.org/project/onnxruntime-genai/) | - | MIT License |  | ONNX Runtime GenAI | `research/sources/perf-optimization/pypi__onnxruntime-genai.md` |
+| [pypi: openvino-genai](https://pypi.org/project/openvino-genai/) | - | Apache License |  | Library of the most popular Generative AI model pipelines, optimized execution methods, and samples | `research/sources/perf-optimization/pypi__openvino-genai.md` |
+| [pypi: optimum](https://pypi.org/project/optimum/) | - | Apache |  | Optimum Library is an extension of the Hugging Face Transformers library, providing a framework to integrate third-party libraries from Hardware Partners and interface with their s | `research/sources/perf-optimization/pypi__optimum.md` |
+| [pypi: outlines](https://pypi.org/project/outlines/) | - | Apache-2.0 |  | Probabilistic Generative Model Programming | `research/sources/perf-optimization/pypi__outlines.md` |
+| [pypi: polars](https://pypi.org/project/polars/) | - | Copyright (c) 2025 Ritchie Vink |  | Blazingly fast DataFrame library | `research/sources/perf-optimization/pypi__polars.md` |
+| [pypi: psutil](https://pypi.org/project/psutil/) | - | BSD-3-Clause |  | Cross-platform lib for process and system monitoring. | `research/sources/perf-optimization/pypi__psutil.md` |
+| [pypi: py-cpuinfo](https://pypi.org/project/py-cpuinfo/) | - | MIT |  | Get CPU info with pure Python | `research/sources/perf-optimization/pypi__py-cpuinfo.md` |
+| [pypi: pyarrow](https://pypi.org/project/pyarrow/) | - | - |  | Python library for Apache Arrow | `research/sources/perf-optimization/pypi__pyarrow.md` |
+| [pypi: pytest-benchmark](https://pypi.org/project/pytest-benchmark/) | - | - |  | A ``pytest`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer. | `research/sources/perf-optimization/pypi__pytest-benchmark.md` |
+| [pypi: tiktoken](https://pypi.org/project/tiktoken/) | - | MIT License |  | tiktoken is a fast BPE tokeniser for use with OpenAI's models | `research/sources/perf-optimization/pypi__tiktoken.md` |
+| [pypi: tokenizers](https://pypi.org/project/tokenizers/) | - | - |  |  | `research/sources/perf-optimization/pypi__tokenizers.md` |
+| [pypi: torchao](https://pypi.org/project/torchao/) | - | - |  | Package for applying ao techniques to GPU models | `research/sources/perf-optimization/pypi__torchao.md` |
+| [pypi: xgrammar](https://pypi.org/project/xgrammar/) | - | Apache 2.0 |  | Efficient, Flexible and Portable Structured Generation | `research/sources/perf-optimization/pypi__xgrammar.md` |
 
 ## reference-apps
 
@@ -639,6 +864,58 @@
 | [pypi: transformers](https://pypi.org/project/transformers/) | - | Apache 2.0 License |  | Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training. | `research/sources/screen-understanding/pypi__transformers.md` |
 | [pypi: unstructured](https://pypi.org/project/unstructured/) | - | - |  | A library that prepares raw documents for downstream ML tasks. | `research/sources/screen-understanding/pypi__unstructured.md` |
 
+## system-control
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [npm: @napi-rs/keyring](https://www.npmjs.com/package/@napi-rs/keyring) | - | MIT |  | https://github.com/hwchen/keyring-rs Node.js binding via https://napi.rs | `research/sources/system-control/npm__napi-rs-keyring.md` |
+| [npm: active-win](https://www.npmjs.com/package/active-win) | - | MIT |  | Get metadata about the active window and open windows (title, id, bounds, owner, URL, etc) | `research/sources/system-control/npm__active-win.md` |
+| [npm: adm-zip](https://www.npmjs.com/package/adm-zip) | - | MIT |  | Javascript implementation of zip for nodejs with support for electron original-fs. Allows user to create or extract zip files both in memory or to/from disk | `research/sources/system-control/npm__adm-zip.md` |
+| [npm: archiver](https://www.npmjs.com/package/archiver) | - | MIT |  | a streaming interface for archive generation | `research/sources/system-control/npm__archiver.md` |
+| [npm: clipboardy](https://www.npmjs.com/package/clipboardy) | - | MIT |  | Access the system clipboard (copy/paste) | `research/sources/system-control/npm__clipboardy.md` |
+| [npm: fast-glob](https://www.npmjs.com/package/fast-glob) | - | MIT |  | It's a very fast and efficient glob library for Node.js | `research/sources/system-control/npm__fast-glob.md` |
+| [npm: fs-extra](https://www.npmjs.com/package/fs-extra) | - | MIT |  | fs-extra contains methods that aren't included in the vanilla Node.js fs package. Such as recursive mkdir, copy, and remove. | `research/sources/system-control/npm__fs-extra.md` |
+| [npm: globby](https://www.npmjs.com/package/globby) | - | MIT |  | User-friendly glob matching | `research/sources/system-control/npm__globby.md` |
+| [npm: node-pty](https://www.npmjs.com/package/node-pty) | - | MIT |  | Fork pseudoterminals in Node.JS | `research/sources/system-control/npm__node-pty.md` |
+| [npm: node-schedule](https://www.npmjs.com/package/node-schedule) | - | MIT |  | A cron-like and not-cron-like job scheduler for Node. | `research/sources/system-control/npm__node-schedule.md` |
+| [npm: node-window-manager](https://www.npmjs.com/package/node-window-manager) | - | MIT |  | Manage windows in macOS, Windows and Linux | `research/sources/system-control/npm__node-window-manager.md` |
+| [npm: pidusage](https://www.npmjs.com/package/pidusage) | - | MIT |  | Cross-platform process cpu % and memory usage of a PID | `research/sources/system-control/npm__pidusage.md` |
+| [npm: ps-list](https://www.npmjs.com/package/ps-list) | - | MIT |  | Get running processes | `research/sources/system-control/npm__ps-list.md` |
+| [npm: regedit](https://www.npmjs.com/package/regedit) | - | MIT |  | Read, Write, List and do all sorts of funky stuff to the windows registry using node.js and windows script host | `research/sources/system-control/npm__regedit.md` |
+| [npm: screenshot-desktop](https://www.npmjs.com/package/screenshot-desktop) | - | MIT |  | Capture a screenshot of your local machine | `research/sources/system-control/npm__screenshot-desktop.md` |
+| [npm: systeminformation](https://www.npmjs.com/package/systeminformation) | - | MIT |  | Advanced, lightweight system and OS information library | `research/sources/system-control/npm__systeminformation.md` |
+| [npm: tar](https://www.npmjs.com/package/tar) | - | BlueOak-1.0.0 |  | tar for node | `research/sources/system-control/npm__tar.md` |
+| [npm: tasklist](https://www.npmjs.com/package/tasklist) | - | MIT |  | Wrapper for the Windows `tasklist` command. Returns a list of apps and services with their Process ID (PID) for all tasks running on either a local or a remote computer. | `research/sources/system-control/npm__tasklist.md` |
+| [npm: tree-kill](https://www.npmjs.com/package/tree-kill) | - | MIT |  | kill trees of processes | `research/sources/system-control/npm__tree-kill.md` |
+| [npm: windows-release](https://www.npmjs.com/package/windows-release) | - | MIT |  | Get the name of a Windows version from the release number: `5.1.2600` → `XP` | `research/sources/system-control/npm__windows-release.md` |
+| [npm: yauzl](https://www.npmjs.com/package/yauzl) | - | MIT |  | yet another unzip library for node | `research/sources/system-control/npm__yauzl.md` |
+| [pypi: click](https://pypi.org/project/click/) | - | - |  | Composable command line interface toolkit | `research/sources/system-control/pypi__click.md` |
+| [pypi: comtypes](https://pypi.org/project/comtypes/) | - | - |  | Pure Python COM package | `research/sources/system-control/pypi__comtypes.md` |
+| [pypi: keyboard](https://pypi.org/project/keyboard/) | - | MIT |  | Hook and simulate keyboard events on Windows and Linux | `research/sources/system-control/pypi__keyboard.md` |
+| [pypi: keyring](https://pypi.org/project/keyring/) | - | - |  | Store and access your passwords safely. | `research/sources/system-control/pypi__keyring.md` |
+| [pypi: loguru](https://pypi.org/project/loguru/) | - | - |  | Python logging made (stupidly) simple | `research/sources/system-control/pypi__loguru.md` |
+| [pypi: mouse](https://pypi.org/project/mouse/) | - | MIT |  | Hook and simulate mouse events on Windows and Linux | `research/sources/system-control/pypi__mouse.md` |
+| [pypi: psutil](https://pypi.org/project/psutil/) | - | BSD-3-Clause |  | Cross-platform lib for process and system monitoring. | `research/sources/system-control/pypi__psutil.md` |
+| [pypi: PyAutoGUI](https://pypi.org/project/PyAutoGUI/) | - | BSD |  | PyAutoGUI lets Python control the mouse and keyboard, and other GUI automation tasks. For Windows, macOS, and Linux, on Python 3 and 2. | `research/sources/system-control/pypi__pyautogui.md` |
+| [pypi: pycaw](https://pypi.org/project/pycaw/) | - | - |  | Python Core Audio Windows Library | `research/sources/system-control/pypi__pycaw.md` |
+| [pypi: PyGetWindow](https://pypi.org/project/PyGetWindow/) | - | BSD |  | A simple, cross-platform module for obtaining GUI information on application's windows. | `research/sources/system-control/pypi__pygetwindow.md` |
+| [pypi: PyOTP](https://pypi.org/project/PyOTP/) | - | - |  | Python One Time Password Library | `research/sources/system-control/pypi__pyotp.md` |
+| [pypi: pyperclip](https://pypi.org/project/pyperclip/) | - | BSD |  | A cross-platform clipboard module for Python. (Only handles plain text for now.) | `research/sources/system-control/pypi__pyperclip.md` |
+| [pypi: PyScreeze](https://pypi.org/project/PyScreeze/) | - | MIT |  | A simple, cross-platform screenshot module for Python 2 and 3. | `research/sources/system-control/pypi__pyscreeze.md` |
+| [pypi: pyuac](https://pypi.org/project/pyuac/) | - | MIT |  | Python library for Windows User Access Control (UAC) | `research/sources/system-control/pypi__pyuac.md` |
+| [pypi: pywin32](https://pypi.org/project/pywin32/) | - | PSF |  | Python for Windows Extensions | `research/sources/system-control/pypi__pywin32.md` |
+| [pypi: pywinpty](https://pypi.org/project/pywinpty/) | - | - |  | Pseudo terminal support for Windows from Python. | `research/sources/system-control/pypi__pywinpty.md` |
+| [pypi: qrcode](https://pypi.org/project/qrcode/) | - | BSD |  | QR Code image generator | `research/sources/system-control/pypi__qrcode.md` |
+| [pypi: rich](https://pypi.org/project/rich/) | - | MIT |  | Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal | `research/sources/system-control/pypi__rich.md` |
+| [pypi: screeninfo](https://pypi.org/project/screeninfo/) | - | MIT |  | Fetch location and size of physical screens. | `research/sources/system-control/pypi__screeninfo.md` |
+| [pypi: structlog](https://pypi.org/project/structlog/) | - | - |  | Structured Logging for Python | `research/sources/system-control/pypi__structlog.md` |
+| [pypi: tenacity](https://pypi.org/project/tenacity/) | - | - |  | Retry code until it succeeds | `research/sources/system-control/pypi__tenacity.md` |
+| [pypi: typer](https://pypi.org/project/typer/) | - | - |  | Typer, build great CLIs. Easy to code. Based on Python type hints. | `research/sources/system-control/pypi__typer.md` |
+| [pypi: watchdog](https://pypi.org/project/watchdog/) | - | Apache-2.0 |  | Filesystem events monitoring | `research/sources/system-control/pypi__watchdog.md` |
+| [pypi: winrt-runtime](https://pypi.org/project/winrt-runtime/) | - | - |  | The runtime that every PyWinRT projection package runs on | `research/sources/system-control/pypi__winrt-runtime.md` |
+| [pypi: winsdk](https://pypi.org/project/winsdk/) | - | MIT |  | Python bindings for the Windows SDK | `research/sources/system-control/pypi__winsdk.md` |
+| [pypi: WMI](https://pypi.org/project/WMI/) | - | http://www.opensource.org/licenses/mit-license.php |  | Windows Management Instrumentation | `research/sources/system-control/pypi__wmi.md` |
+
 ## tts-and-voice
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
@@ -697,26 +974,50 @@
 | [cawa-93/vite-electron-builder](https://github.com/cawa-93/vite-electron-builder) | 2,988 | MIT | 2026-08-03 | Secure boilerplate for Electron app based on Vite. TypeScript + Vue/React/Angular/Svelte/Vanilla | `research/sources/ui-ux/cawa-93__vite-electron-builder/README.md` |
 | [sindresorhus/electron-context-menu](https://github.com/sindresorhus/electron-context-menu) | 1,477 | MIT | 2026-09-20 | Context menu for your Electron app | `research/sources/ui-ux/sindresorhus__electron-context-menu/README.md` |
 | [sindresorhus/electron-dl](https://github.com/sindresorhus/electron-dl) | 1,208 | MIT | 2026-09-20 | Simplified file downloads for your Electron app | `research/sources/ui-ux/sindresorhus__electron-dl/README.md` |
+| [npm: @dnd-kit/core](https://www.npmjs.com/package/@dnd-kit/core) | - | MIT |  | dnd kit – a lightweight React library for building performant and accessible drag and drop experiences | `research/sources/ui-ux/npm__dnd-kit-core.md` |
+| [npm: @hookform/resolvers](https://www.npmjs.com/package/@hookform/resolvers) | - | MIT |  | React Hook Form validation resolvers: Yup, Joi, Superstruct, Zod, Vest, Class Validator, io-ts, Nope, computed-types, TypeBox, arktype, Typanion, Effect-TS and VineJS | `research/sources/ui-ux/npm__hookform-resolvers.md` |
+| [npm: @radix-ui/react-accordion](https://www.npmjs.com/package/@radix-ui/react-accordion) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-accordion.md` |
+| [npm: @radix-ui/react-avatar](https://www.npmjs.com/package/@radix-ui/react-avatar) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-avatar.md` |
 | [npm: @radix-ui/react-dialog](https://www.npmjs.com/package/@radix-ui/react-dialog) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-dialog.md` |
 | [npm: @radix-ui/react-dropdown-menu](https://www.npmjs.com/package/@radix-ui/react-dropdown-menu) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-dropdown-menu.md` |
+| [npm: @radix-ui/react-popover](https://www.npmjs.com/package/@radix-ui/react-popover) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-popover.md` |
+| [npm: @radix-ui/react-progress](https://www.npmjs.com/package/@radix-ui/react-progress) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-progress.md` |
+| [npm: @radix-ui/react-scroll-area](https://www.npmjs.com/package/@radix-ui/react-scroll-area) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-scroll-area.md` |
+| [npm: @radix-ui/react-select](https://www.npmjs.com/package/@radix-ui/react-select) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-select.md` |
+| [npm: @radix-ui/react-separator](https://www.npmjs.com/package/@radix-ui/react-separator) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-separator.md` |
+| [npm: @radix-ui/react-slider](https://www.npmjs.com/package/@radix-ui/react-slider) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-slider.md` |
+| [npm: @radix-ui/react-switch](https://www.npmjs.com/package/@radix-ui/react-switch) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-switch.md` |
 | [npm: @radix-ui/react-tabs](https://www.npmjs.com/package/@radix-ui/react-tabs) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-tabs.md` |
+| [npm: @radix-ui/react-toast](https://www.npmjs.com/package/@radix-ui/react-toast) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-toast.md` |
 | [npm: @radix-ui/react-tooltip](https://www.npmjs.com/package/@radix-ui/react-tooltip) | - | MIT |  |  | `research/sources/ui-ux/npm__radix-ui-react-tooltip.md` |
 | [npm: @tanstack/react-query](https://www.npmjs.com/package/@tanstack/react-query) | - | MIT |  | Hooks for managing, caching and syncing asynchronous and remote data in React | `research/sources/ui-ux/npm__tanstack-react-query.md` |
 | [npm: @tanstack/react-table](https://www.npmjs.com/package/@tanstack/react-table) | - | MIT |  | Headless UI for building powerful tables & datagrids for React. | `research/sources/ui-ux/npm__tanstack-react-table.md` |
+| [npm: @tanstack/react-virtual](https://www.npmjs.com/package/@tanstack/react-virtual) | - | MIT |  | Headless UI for virtualizing scrollable elements in React | `research/sources/ui-ux/npm__tanstack-react-virtual.md` |
 | [npm: class-variance-authority](https://www.npmjs.com/package/class-variance-authority) | - | Apache-2.0 |  | Class Variance Authority 🧬 | `research/sources/ui-ux/npm__class-variance-authority.md` |
 | [npm: clsx](https://www.npmjs.com/package/clsx) | - | MIT |  | A tiny (239B) utility for constructing className strings conditionally. | `research/sources/ui-ux/npm__clsx.md` |
 | [npm: cmdk](https://www.npmjs.com/package/cmdk) | - | MIT |  | <p align="center"> <img src="./website/public/og.png" /> </p> | `research/sources/ui-ux/npm__cmdk.md` |
+| [npm: date-fns](https://www.npmjs.com/package/date-fns) | - | MIT |  | Modern JavaScript date utility library | `research/sources/ui-ux/npm__date-fns.md` |
+| [npm: dayjs](https://www.npmjs.com/package/dayjs) | - | MIT |  | 2KB immutable date time library alternative to Moment.js with the same modern API | `research/sources/ui-ux/npm__dayjs.md` |
+| [npm: dompurify](https://www.npmjs.com/package/dompurify) | - | (MPL-2.0 OR Apache-2.0) |  | DOMPurify is a DOM-only, super-fast, uber-tolerant XSS sanitizer for HTML, MathML and SVG. It runs as JavaScript and works in all modern browsers, as well as in Node.js (via jsdom) | `research/sources/ui-ux/npm__dompurify.md` |
 | [npm: electron-window-state](https://www.npmjs.com/package/electron-window-state) | - | MIT |  | Simple module that helps to save and restore size and position of Electron windows. | `research/sources/ui-ux/npm__electron-window-state.md` |
+| [npm: fuse.js](https://www.npmjs.com/package/fuse.js) | - | Apache-2.0 |  | Lightweight fuzzy-search | `research/sources/ui-ux/npm__fuse.js.md` |
+| [npm: i18next](https://www.npmjs.com/package/i18next) | - | MIT |  | i18next internationalization framework | `research/sources/ui-ux/npm__i18next.md` |
 | [npm: lucide-react](https://www.npmjs.com/package/lucide-react) | - | ISC |  | A Lucide icon library package for React applications. | `research/sources/ui-ux/npm__lucide-react.md` |
+| [npm: marked](https://www.npmjs.com/package/marked) | - | MIT |  | A markdown parser built for speed | `research/sources/ui-ux/npm__marked.md` |
 | [npm: motion](https://www.npmjs.com/package/motion) | - | MIT |  | An animation library for JavaScript and React. | `research/sources/ui-ux/npm__motion.md` |
 | [npm: react](https://www.npmjs.com/package/react) | - | MIT |  | React is a JavaScript library for building user interfaces. | `research/sources/ui-ux/npm__react.md` |
 | [npm: react-dom](https://www.npmjs.com/package/react-dom) | - | MIT |  | React package for working with the DOM. | `research/sources/ui-ux/npm__react-dom.md` |
+| [npm: react-hook-form](https://www.npmjs.com/package/react-hook-form) | - | MIT |  | Performant, flexible and extensible forms library for React Hooks | `research/sources/ui-ux/npm__react-hook-form.md` |
+| [npm: react-i18next](https://www.npmjs.com/package/react-i18next) | - | MIT |  | Internationalization for react done right. Using the i18next i18n ecosystem. | `research/sources/ui-ux/npm__react-i18next.md` |
 | [npm: react-markdown](https://www.npmjs.com/package/react-markdown) | - | MIT |  | React component to render markdown | `research/sources/ui-ux/npm__react-markdown.md` |
 | [npm: react-syntax-highlighter](https://www.npmjs.com/package/react-syntax-highlighter) | - | MIT |  | syntax highlighting component for react with prismjs or highlightjs ast using inline styles | `research/sources/ui-ux/npm__react-syntax-highlighter.md` |
 | [npm: recharts](https://www.npmjs.com/package/recharts) | - | MIT |  | React charts | `research/sources/ui-ux/npm__recharts.md` |
+| [npm: rehype-highlight](https://www.npmjs.com/package/rehype-highlight) | - | MIT |  | rehype plugin to highlight code blocks with lowlight (highlight.js) | `research/sources/ui-ux/npm__rehype-highlight.md` |
+| [npm: remark-gfm](https://www.npmjs.com/package/remark-gfm) | - | MIT |  | remark plugin to support GFM (autolink literals, footnotes, strikethrough, tables, tasklists) | `research/sources/ui-ux/npm__remark-gfm.md` |
 | [npm: sonner](https://www.npmjs.com/package/sonner) | - | MIT |  | An opinionated toast component for React. | `research/sources/ui-ux/npm__sonner.md` |
 | [npm: tailwind-merge](https://www.npmjs.com/package/tailwind-merge) | - | MIT |  | Merge Tailwind CSS classes without style conflicts | `research/sources/ui-ux/npm__tailwind-merge.md` |
 | [npm: tailwindcss](https://www.npmjs.com/package/tailwindcss) | - | MIT |  | A utility-first CSS framework for rapidly building custom user interfaces. | `research/sources/ui-ux/npm__tailwindcss.md` |
+| [npm: vaul](https://www.npmjs.com/package/vaul) | - | MIT |  | Drawer component for React. | `research/sources/ui-ux/npm__vaul.md` |
 | [npm: zustand](https://www.npmjs.com/package/zustand) | - | MIT |  | 🐻 Bear necessities for state management in React | `research/sources/ui-ux/npm__zustand.md` |
 
 ## whisper-and-asr

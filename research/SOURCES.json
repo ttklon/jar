@@ -10479,6 +10479,19 @@
     "_path": "research/sources/orchestration/npm__anthropic-ai-sdk.md"
   },
   {
+    "id": "npm:@biomejs/biome",
+    "kind": "npm",
+    "category": "coding-agents",
+    "package": "@biomejs/biome",
+    "version": "2.6.6",
+    "url": "https://www.npmjs.com/package/@biomejs/biome",
+    "homepage": "https://biomejs.dev",
+    "license": "MIT OR Apache-2.0",
+    "summary": "Biome is a toolchain for the web: formatter, linter and more",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/npm__biomejs-biome.md"
+  },
+  {
     "id": "npm:@changesets/cli",
     "kind": "npm",
     "category": "packaging-and-ci",
@@ -10503,6 +10516,45 @@
     "summary": "Web api for using VITS based models in the browser!",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/tts-and-voice/npm__diffusionstudio-vits-web.md"
+  },
+  {
+    "id": "npm:@dnd-kit/core",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@dnd-kit/core",
+    "version": "6.3.1",
+    "url": "https://www.npmjs.com/package/@dnd-kit/core",
+    "homepage": "https://github.com/clauderic/dnd-kit#readme",
+    "license": "MIT",
+    "summary": "dnd kit – a lightweight React library for building performant and accessible drag and drop experiences",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__dnd-kit-core.md"
+  },
+  {
+    "id": "npm:@dqbd/tiktoken",
+    "kind": "npm",
+    "category": "perf-optimization",
+    "package": "@dqbd/tiktoken",
+    "version": "1.0.22",
+    "url": "https://www.npmjs.com/package/@dqbd/tiktoken",
+    "homepage": "https://github.com/dqbd/tiktoken#readme",
+    "license": "MIT",
+    "summary": "JS/WASM bindings for tiktoken",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/npm__dqbd-tiktoken.md"
+  },
+  {
+    "id": "npm:@electron/asar",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "@electron/asar",
+    "version": "4.3.1",
+    "url": "https://www.npmjs.com/package/@electron/asar",
+    "homepage": "https://github.com/electron/asar",
+    "license": "MIT",
+    "summary": "Creating Electron app packages",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__electron-asar.md"
   },
   {
     "id": "npm:@electron/fuses",
@@ -10542,6 +10594,71 @@
     "summary": "Utility for creating Universal macOS applications from two x64 and arm64 Electron applications",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/packaging-and-ci/npm__electron-universal.md"
+  },
+  {
+    "id": "npm:@ffmpeg-installer/ffmpeg",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "@ffmpeg-installer/ffmpeg",
+    "version": "1.1.0",
+    "url": "https://www.npmjs.com/package/@ffmpeg-installer/ffmpeg",
+    "homepage": "https://github.com/kribblo/node-ffmpeg-installer#readme",
+    "license": "LGPL-2.1",
+    "summary": "Platform independent binary installer of FFmpeg for node projects",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/npm__ffmpeg-installer-ffmpeg.md"
+  },
+  {
+    "id": "npm:@googleapis/calendar",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "@googleapis/calendar",
+    "version": "20.1.0",
+    "url": "https://www.npmjs.com/package/@googleapis/calendar",
+    "homepage": "https://github.com/googleapis/google-api-nodejs-client",
+    "license": "Apache-2.0",
+    "summary": "calendar",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/npm__googleapis-calendar.md"
+  },
+  {
+    "id": "npm:@hookform/resolvers",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@hookform/resolvers",
+    "version": "7.0.3",
+    "url": "https://www.npmjs.com/package/@hookform/resolvers",
+    "homepage": "https://react-hook-form.com",
+    "license": "MIT",
+    "summary": "React Hook Form validation resolvers: Yup, Joi, Superstruct, Zod, Vest, Class Validator, io-ts, Nope, computed-types, TypeBox, arktype, Typanion, Effect-TS and VineJS",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__hookform-resolvers.md"
+  },
+  {
+    "id": "npm:@huggingface/transformers",
+    "kind": "npm",
+    "category": "low-end-inference",
+    "package": "@huggingface/transformers",
+    "version": "4.3.2",
+    "url": "https://www.npmjs.com/package/@huggingface/transformers",
+    "homepage": "https://github.com/huggingface/transformers.js#readme",
+    "license": "Apache-2.0",
+    "summary": "State-of-the-art Machine Learning for the web. Run 🤗 Transformers directly in your browser, with no need for a server!",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/npm__huggingface-transformers.md"
+  },
+  {
+    "id": "npm:@huggingface/transformers",
+    "kind": "npm",
+    "category": "perf-optimization",
+    "package": "@huggingface/transformers",
+    "version": "4.3.2",
+    "url": "https://www.npmjs.com/package/@huggingface/transformers",
+    "homepage": "https://github.com/huggingface/transformers.js#readme",
+    "license": "Apache-2.0",
+    "summary": "State-of-the-art Machine Learning for the web. Run 🤗 Transformers directly in your browser, with no need for a server!",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/npm__huggingface-transformers.md"
   },
   {
     "id": "npm:@lancedb/lancedb",
@@ -10647,6 +10764,32 @@
     "_path": "research/sources/mcp-and-tools/npm__modelcontextprotocol-server-sequential-thinking.md"
   },
   {
+    "id": "npm:@napi-rs/canvas",
+    "kind": "npm",
+    "category": "perf-optimization",
+    "package": "@napi-rs/canvas",
+    "version": "1.1.0",
+    "url": "https://www.npmjs.com/package/@napi-rs/canvas",
+    "homepage": "https://github.com/Brooooooklyn/canvas#readme",
+    "license": "MIT",
+    "summary": "Canvas for Node.js with skia backend",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/npm__napi-rs-canvas.md"
+  },
+  {
+    "id": "npm:@napi-rs/keyring",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "@napi-rs/keyring",
+    "version": "2.1.2",
+    "url": "https://www.npmjs.com/package/@napi-rs/keyring",
+    "homepage": "https://github.com/Brooooooklyn/keyring-node#readme",
+    "license": "MIT",
+    "summary": "https://github.com/hwchen/keyring-rs Node.js binding via https://napi.rs",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/npm__napi-rs-keyring.md"
+  },
+  {
     "id": "npm:@nut-tree-fork/nut-js",
     "kind": "npm",
     "category": "windows-automation",
@@ -10725,6 +10868,30 @@
     "_path": "research/sources/coding-agents/npm__playwright-test.md"
   },
   {
+    "id": "npm:@radix-ui/react-accordion",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@radix-ui/react-accordion",
+    "version": "1.3.1",
+    "url": "https://www.npmjs.com/package/@radix-ui/react-accordion",
+    "homepage": "https://radix-ui.com/primitives",
+    "license": "MIT",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__radix-ui-react-accordion.md"
+  },
+  {
+    "id": "npm:@radix-ui/react-avatar",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@radix-ui/react-avatar",
+    "version": "1.3.1",
+    "url": "https://www.npmjs.com/package/@radix-ui/react-avatar",
+    "homepage": "https://radix-ui.com/primitives",
+    "license": "MIT",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__radix-ui-react-avatar.md"
+  },
+  {
     "id": "npm:@radix-ui/react-dialog",
     "kind": "npm",
     "category": "ui-ux",
@@ -10749,6 +10916,90 @@
     "_path": "research/sources/ui-ux/npm__radix-ui-react-dropdown-menu.md"
   },
   {
+    "id": "npm:@radix-ui/react-popover",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@radix-ui/react-popover",
+    "version": "1.3.1",
+    "url": "https://www.npmjs.com/package/@radix-ui/react-popover",
+    "homepage": "https://radix-ui.com/primitives",
+    "license": "MIT",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__radix-ui-react-popover.md"
+  },
+  {
+    "id": "npm:@radix-ui/react-progress",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@radix-ui/react-progress",
+    "version": "1.2.1",
+    "url": "https://www.npmjs.com/package/@radix-ui/react-progress",
+    "homepage": "https://radix-ui.com/primitives",
+    "license": "MIT",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__radix-ui-react-progress.md"
+  },
+  {
+    "id": "npm:@radix-ui/react-scroll-area",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@radix-ui/react-scroll-area",
+    "version": "1.4.0",
+    "url": "https://www.npmjs.com/package/@radix-ui/react-scroll-area",
+    "homepage": "https://radix-ui.com/primitives",
+    "license": "MIT",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__radix-ui-react-scroll-area.md"
+  },
+  {
+    "id": "npm:@radix-ui/react-select",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@radix-ui/react-select",
+    "version": "2.4.1",
+    "url": "https://www.npmjs.com/package/@radix-ui/react-select",
+    "homepage": "https://radix-ui.com/primitives",
+    "license": "MIT",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__radix-ui-react-select.md"
+  },
+  {
+    "id": "npm:@radix-ui/react-separator",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@radix-ui/react-separator",
+    "version": "1.2.0",
+    "url": "https://www.npmjs.com/package/@radix-ui/react-separator",
+    "homepage": "https://radix-ui.com/primitives",
+    "license": "MIT",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__radix-ui-react-separator.md"
+  },
+  {
+    "id": "npm:@radix-ui/react-slider",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@radix-ui/react-slider",
+    "version": "1.6.1",
+    "url": "https://www.npmjs.com/package/@radix-ui/react-slider",
+    "homepage": "https://radix-ui.com/primitives",
+    "license": "MIT",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__radix-ui-react-slider.md"
+  },
+  {
+    "id": "npm:@radix-ui/react-switch",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@radix-ui/react-switch",
+    "version": "1.4.1",
+    "url": "https://www.npmjs.com/package/@radix-ui/react-switch",
+    "homepage": "https://radix-ui.com/primitives",
+    "license": "MIT",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__radix-ui-react-switch.md"
+  },
+  {
     "id": "npm:@radix-ui/react-tabs",
     "kind": "npm",
     "category": "ui-ux",
@@ -10759,6 +11010,18 @@
     "license": "MIT",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/ui-ux/npm__radix-ui-react-tabs.md"
+  },
+  {
+    "id": "npm:@radix-ui/react-toast",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@radix-ui/react-toast",
+    "version": "1.3.1",
+    "url": "https://www.npmjs.com/package/@radix-ui/react-toast",
+    "homepage": "https://radix-ui.com/primitives",
+    "license": "MIT",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__radix-ui-react-toast.md"
   },
   {
     "id": "npm:@radix-ui/react-tooltip",
@@ -10812,6 +11075,19 @@
     "_path": "research/sources/connectors/npm__slack-web-api.md"
   },
   {
+    "id": "npm:@slack/web-api",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "@slack/web-api",
+    "version": "8.3.0",
+    "url": "https://www.npmjs.com/package/@slack/web-api",
+    "homepage": "https://docs.slack.dev/tools/node-slack-sdk/web-api/",
+    "license": "MIT",
+    "summary": "Official library for using the Slack Platform's Web API",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/npm__slack-web-api.md"
+  },
+  {
     "id": "npm:@tanstack/react-query",
     "kind": "npm",
     "category": "ui-ux",
@@ -10838,6 +11114,84 @@
     "_path": "research/sources/ui-ux/npm__tanstack-react-table.md"
   },
   {
+    "id": "npm:@tanstack/react-virtual",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "@tanstack/react-virtual",
+    "version": "3.14.26",
+    "url": "https://www.npmjs.com/package/@tanstack/react-virtual",
+    "homepage": "https://tanstack.com/virtual",
+    "license": "MIT",
+    "summary": "Headless UI for virtualizing scrollable elements in React",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__tanstack-react-virtual.md"
+  },
+  {
+    "id": "npm:@testing-library/react",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "@testing-library/react",
+    "version": "16.3.3",
+    "url": "https://www.npmjs.com/package/@testing-library/react",
+    "homepage": "https://github.com/testing-library/react-testing-library#readme",
+    "license": "MIT",
+    "summary": "Simple and complete React DOM testing utilities that encourage good testing practices.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__testing-library-react.md"
+  },
+  {
+    "id": "npm:@testing-library/user-event",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "@testing-library/user-event",
+    "version": "14.6.8",
+    "url": "https://www.npmjs.com/package/@testing-library/user-event",
+    "homepage": "https://github.com/testing-library/user-event#readme",
+    "license": "MIT",
+    "summary": "Fire events the same way the user does",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__testing-library-user-event.md"
+  },
+  {
+    "id": "npm:@types/node",
+    "kind": "npm",
+    "category": "coding-agents",
+    "package": "@types/node",
+    "version": "26.6.6",
+    "url": "https://www.npmjs.com/package/@types/node",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node",
+    "license": "MIT",
+    "summary": "TypeScript definitions for node",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/npm__types-node.md"
+  },
+  {
+    "id": "npm:@typescript-eslint/eslint-plugin",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "@typescript-eslint/eslint-plugin",
+    "version": "8.72.1",
+    "url": "https://www.npmjs.com/package/@typescript-eslint/eslint-plugin",
+    "homepage": "https://typescript-eslint.io/packages/eslint-plugin",
+    "license": "MIT",
+    "summary": "TypeScript plugin for ESLint",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__typescript-eslint-eslint-plugin.md"
+  },
+  {
+    "id": "npm:@typescript-eslint/parser",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "@typescript-eslint/parser",
+    "version": "8.72.1",
+    "url": "https://www.npmjs.com/package/@typescript-eslint/parser",
+    "homepage": "https://typescript-eslint.io/packages/parser",
+    "license": "MIT",
+    "summary": "An ESLint custom parser which leverages TypeScript ESTree",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__typescript-eslint-parser.md"
+  },
+  {
     "id": "npm:@upstash/context7-mcp",
     "kind": "npm",
     "category": "mcp-and-tools",
@@ -10849,6 +11203,19 @@
     "summary": "MCP server for Context7",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/mcp-and-tools/npm__upstash-context7-mcp.md"
+  },
+  {
+    "id": "npm:@vitejs/plugin-react",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "@vitejs/plugin-react",
+    "version": "6.2.1",
+    "url": "https://www.npmjs.com/package/@vitejs/plugin-react",
+    "homepage": "https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#readme",
+    "license": "MIT",
+    "summary": "The default Vite plugin for React projects",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__vitejs-plugin-react.md"
   },
   {
     "id": "npm:@xenova/transformers",
@@ -10892,6 +11259,19 @@
   {
     "id": "npm:active-win",
     "kind": "npm",
+    "category": "system-control",
+    "package": "active-win",
+    "version": "9.0.0",
+    "url": "https://www.npmjs.com/package/active-win",
+    "homepage": "https://github.com/sindresorhus/active-win#readme",
+    "license": "MIT",
+    "summary": "Get metadata about the active window and open windows (title, id, bounds, owner, URL, etc)",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/npm__active-win.md"
+  },
+  {
+    "id": "npm:active-win",
+    "kind": "npm",
     "category": "windows-automation",
     "package": "active-win",
     "version": "9.0.0",
@@ -10901,6 +11281,19 @@
     "summary": "Get metadata about the active window and open windows (title, id, bounds, owner, URL, etc)",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/npm__active-win.md"
+  },
+  {
+    "id": "npm:adm-zip",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "adm-zip",
+    "version": "0.6.1",
+    "url": "https://www.npmjs.com/package/adm-zip",
+    "homepage": "https://github.com/cthackers/adm-zip",
+    "license": "MIT",
+    "summary": "Javascript implementation of zip for nodejs with support for electron original-fs. Allows user to create or extract zip files both in memory or to/from disk",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/npm__adm-zip.md"
   },
   {
     "id": "npm:ai",
@@ -10914,6 +11307,45 @@
     "summary": "AI SDK by Vercel - build apps like ChatGPT, Claude, Gemini, and more with a single interface for any model using the Vercel AI Gateway or go direct to OpenAI, Anthropic, Google, or any other model provider.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/npm__ai.md"
+  },
+  {
+    "id": "npm:archiver",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "archiver",
+    "version": "8.0.0",
+    "url": "https://www.npmjs.com/package/archiver",
+    "homepage": "https://github.com/archiverjs/node-archiver",
+    "license": "MIT",
+    "summary": "a streaming interface for archive generation",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/npm__archiver.md"
+  },
+  {
+    "id": "npm:audio-context",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "audio-context",
+    "version": "1.0.3",
+    "url": "https://www.npmjs.com/package/audio-context",
+    "homepage": "https://github.com/audiojs/audio-context",
+    "license": "MIT",
+    "summary": "A WebAudio Context singleton",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/npm__audio-context.md"
+  },
+  {
+    "id": "npm:baileys",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "baileys",
+    "version": "7.0.0-rc14",
+    "url": "https://www.npmjs.com/package/baileys",
+    "homepage": "https://github.com/WhiskeySockets/Baileys/",
+    "license": "MIT",
+    "summary": "A WebSockets library for interacting with WhatsApp Web",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/npm__baileys.md"
   },
   {
     "id": "npm:bcryptjs",
@@ -11008,6 +11440,19 @@
   {
     "id": "npm:clipboardy",
     "kind": "npm",
+    "category": "system-control",
+    "package": "clipboardy",
+    "version": "5.3.2",
+    "url": "https://www.npmjs.com/package/clipboardy",
+    "homepage": "https://github.com/sindresorhus/clipboardy#readme",
+    "license": "MIT",
+    "summary": "Access the system clipboard (copy/paste)",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/npm__clipboardy.md"
+  },
+  {
+    "id": "npm:clipboardy",
+    "kind": "npm",
     "category": "windows-automation",
     "package": "clipboardy",
     "version": "5.3.2",
@@ -11097,6 +11542,57 @@
     "_path": "research/sources/electron-shell/npm__cross-env.md"
   },
   {
+    "id": "npm:cross-env",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "cross-env",
+    "version": "10.1.0",
+    "url": "https://www.npmjs.com/package/cross-env",
+    "homepage": "https://github.com/kentcdodds/cross-env#readme",
+    "license": "MIT",
+    "summary": "Run scripts that set and use environment variables across platforms",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__cross-env.md"
+  },
+  {
+    "id": "npm:date-fns",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "date-fns",
+    "version": "4.4.0",
+    "url": "https://www.npmjs.com/package/date-fns",
+    "license": "MIT",
+    "summary": "Modern JavaScript date utility library",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__date-fns.md"
+  },
+  {
+    "id": "npm:dayjs",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "dayjs",
+    "version": "1.11.23",
+    "url": "https://www.npmjs.com/package/dayjs",
+    "homepage": "https://day.js.org",
+    "license": "MIT",
+    "summary": "2KB immutable date time library alternative to Moment.js with the same modern API",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__dayjs.md"
+  },
+  {
+    "id": "npm:dependency-cruiser",
+    "kind": "npm",
+    "category": "coding-agents",
+    "package": "dependency-cruiser",
+    "version": "18.7.2",
+    "url": "https://www.npmjs.com/package/dependency-cruiser",
+    "homepage": "https://github.com/sverweij/dependency-cruiser",
+    "license": "MIT",
+    "summary": "Validate and visualize dependencies. With your rules. JavaScript, TypeScript, CoffeeScript. ES6, CommonJS, AMD.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/npm__dependency-cruiser.md"
+  },
+  {
     "id": "npm:discord.js",
     "kind": "npm",
     "category": "connectors",
@@ -11110,6 +11606,32 @@
     "_path": "research/sources/connectors/npm__discord.js.md"
   },
   {
+    "id": "npm:docx",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "docx",
+    "version": "9.15.3",
+    "url": "https://www.npmjs.com/package/docx",
+    "homepage": "https://docx.js.org",
+    "license": "MIT",
+    "summary": "Easily generate .docx files with JS/TS with a nice declarative API. Works for Node and on the Browser.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/npm__docx.md"
+  },
+  {
+    "id": "npm:docxtemplater",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "docxtemplater",
+    "version": "3.71.1",
+    "url": "https://www.npmjs.com/package/docxtemplater",
+    "homepage": "https://github.com/open-xml-templating/docxtemplater#readme",
+    "license": "MIT",
+    "summary": "Generate docx, pptx, and xlsx from templates (Word, Powerpoint and Excel documents), from Node.js, the Browser and the command line",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/npm__docxtemplater.md"
+  },
+  {
     "id": "npm:dompurify",
     "kind": "npm",
     "category": "safety-and-security",
@@ -11121,6 +11643,19 @@
     "summary": "DOMPurify is a DOM-only, super-fast, uber-tolerant XSS sanitizer for HTML, MathML and SVG. It runs as JavaScript and works in all modern browsers, as well as in Node.js (via jsdom). DOMPurify is written by security people who have vast background in web a",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/npm__dompurify.md"
+  },
+  {
+    "id": "npm:dompurify",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "dompurify",
+    "version": "3.4.17",
+    "url": "https://www.npmjs.com/package/dompurify",
+    "homepage": "https://github.com/cure53/DOMPurify",
+    "license": "(MPL-2.0 OR Apache-2.0)",
+    "summary": "DOMPurify is a DOM-only, super-fast, uber-tolerant XSS sanitizer for HTML, MathML and SVG. It runs as JavaScript and works in all modern browsers, as well as in Node.js (via jsdom). DOMPurify is written by security people who have vast background in web a",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__dompurify.md"
   },
   {
     "id": "npm:dotenv",
@@ -11213,6 +11748,19 @@
     "_path": "research/sources/reference-apps/npm__electron-context-menu.md"
   },
   {
+    "id": "npm:electron-devtools-installer",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "electron-devtools-installer",
+    "version": "4.0.0",
+    "url": "https://www.npmjs.com/package/electron-devtools-installer",
+    "homepage": "https://github.com/MarshallOfSound/electron-devtools-installer#readme",
+    "license": "MIT",
+    "summary": "An easy way to install Dev Tools extensions into Electron applications",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__electron-devtools-installer.md"
+  },
+  {
     "id": "npm:electron-dl",
     "kind": "npm",
     "category": "reference-apps",
@@ -11263,6 +11811,19 @@
     "summary": "Electron supporting package to rebuild native node modules against the currently installed electron",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/electron-shell/npm__electron-rebuild.md"
+  },
+  {
+    "id": "npm:electron-reloader",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "electron-reloader",
+    "version": "2.0.0",
+    "url": "https://www.npmjs.com/package/electron-reloader",
+    "homepage": "https://github.com/sindresorhus/electron-reloader#readme",
+    "license": "MIT",
+    "summary": "Simple auto-reloading for Electron apps during development",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__electron-reloader.md"
   },
   {
     "id": "npm:electron-store",
@@ -11358,6 +11919,19 @@
   {
     "id": "npm:esbuild",
     "kind": "npm",
+    "category": "coding-agents",
+    "package": "esbuild",
+    "version": "0.28.2",
+    "url": "https://www.npmjs.com/package/esbuild",
+    "homepage": "https://github.com/evanw/esbuild#readme",
+    "license": "MIT",
+    "summary": "An extremely fast JavaScript and CSS bundler and minifier.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/npm__esbuild.md"
+  },
+  {
+    "id": "npm:esbuild",
+    "kind": "npm",
     "category": "packaging-and-ci",
     "package": "esbuild",
     "version": "0.28.2",
@@ -11382,6 +11956,19 @@
     "_path": "research/sources/coding-agents/npm__eslint.md"
   },
   {
+    "id": "npm:eslint",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "eslint",
+    "version": "10.14.0",
+    "url": "https://www.npmjs.com/package/eslint",
+    "homepage": "https://eslint.org",
+    "license": "MIT",
+    "summary": "An AST-based pattern checker for JavaScript.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__eslint.md"
+  },
+  {
     "id": "npm:eventsource",
     "kind": "npm",
     "category": "orchestration",
@@ -11393,6 +11980,19 @@
     "summary": "WhatWG/W3C compliant EventSource client for Node.js and browsers",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/npm__eventsource.md"
+  },
+  {
+    "id": "npm:exceljs",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "exceljs",
+    "version": "4.4.0",
+    "url": "https://www.npmjs.com/package/exceljs",
+    "homepage": "https://github.com/exceljs/exceljs#readme",
+    "license": "MIT",
+    "summary": "Excel Workbook Manager - Read and Write xlsx and csv Files.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/npm__exceljs.md"
   },
   {
     "id": "npm:execa",
@@ -11419,6 +12019,19 @@
     "summary": "Process execution for humans",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/npm__execa.md"
+  },
+  {
+    "id": "npm:fast-glob",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "fast-glob",
+    "version": "3.3.3",
+    "url": "https://www.npmjs.com/package/fast-glob",
+    "homepage": "https://github.com/mrmlnc/fast-glob#readme",
+    "license": "MIT",
+    "summary": "It's a very fast and efficient glob library for Node.js",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/npm__fast-glob.md"
   },
   {
     "id": "npm:fast-json-stringify",
@@ -11462,6 +12075,19 @@
   {
     "id": "npm:ffmpeg-static",
     "kind": "npm",
+    "category": "media-production",
+    "package": "ffmpeg-static",
+    "version": "5.3.0",
+    "url": "https://www.npmjs.com/package/ffmpeg-static",
+    "homepage": "https://github.com/eugeneware/ffmpeg-static#readme",
+    "license": "GPL-3.0-or-later",
+    "summary": "ffmpeg binaries for macOS, Linux and Windows",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/npm__ffmpeg-static.md"
+  },
+  {
+    "id": "npm:ffmpeg-static",
+    "kind": "npm",
     "category": "whisper-and-asr",
     "package": "ffmpeg-static",
     "version": "5.3.0",
@@ -11471,6 +12097,19 @@
     "summary": "ffmpeg binaries for macOS, Linux and Windows",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/whisper-and-asr/npm__ffmpeg-static.md"
+  },
+  {
+    "id": "npm:ffprobe-static",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "ffprobe-static",
+    "version": "3.1.0",
+    "url": "https://www.npmjs.com/package/ffprobe-static",
+    "homepage": "https://github.com/joshwnj/ffprobe-static#readme",
+    "license": "MIT",
+    "summary": "Static binaries for ffprobe.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/npm__ffprobe-static.md"
   },
   {
     "id": "npm:flexsearch",
@@ -11484,6 +12123,71 @@
     "summary": "Next-Generation full-text search library for Browser and Node.js",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/memory-and-rag/npm__flexsearch.md"
+  },
+  {
+    "id": "npm:fluent-ffmpeg",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "fluent-ffmpeg",
+    "version": "2.1.3",
+    "url": "https://www.npmjs.com/package/fluent-ffmpeg",
+    "homepage": "https://github.com/fluent-ffmpeg/node-fluent-ffmpeg#readme",
+    "license": "MIT",
+    "summary": "A fluent API to FFMPEG (http://www.ffmpeg.org)",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/npm__fluent-ffmpeg.md"
+  },
+  {
+    "id": "npm:fs-extra",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "fs-extra",
+    "version": "11.4.1",
+    "url": "https://www.npmjs.com/package/fs-extra",
+    "homepage": "https://github.com/jprichardson/node-fs-extra",
+    "license": "MIT",
+    "summary": "fs-extra contains methods that aren't included in the vanilla Node.js fs package. Such as recursive mkdir, copy, and remove.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/npm__fs-extra.md"
+  },
+  {
+    "id": "npm:fuse.js",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "fuse.js",
+    "version": "7.5.0",
+    "url": "https://www.npmjs.com/package/fuse.js",
+    "homepage": "http://fusejs.io",
+    "license": "Apache-2.0",
+    "summary": "Lightweight fuzzy-search",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__fuse.js.md"
+  },
+  {
+    "id": "npm:globby",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "globby",
+    "version": "16.2.4",
+    "url": "https://www.npmjs.com/package/globby",
+    "homepage": "https://github.com/sindresorhus/globby#readme",
+    "license": "MIT",
+    "summary": "User-friendly glob matching",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/npm__globby.md"
+  },
+  {
+    "id": "npm:google-auth-library",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "google-auth-library",
+    "version": "11.3.3",
+    "url": "https://www.npmjs.com/package/google-auth-library",
+    "homepage": "https://github.com/googleapis/google-cloud-node/tree/main/core/packages/google-auth-library-nodejs",
+    "license": "Apache-2.0",
+    "summary": "Google APIs Authentication Client Library for Node.js",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/npm__google-auth-library.md"
   },
   {
     "id": "npm:googleapis",
@@ -11512,6 +12216,19 @@
     "_path": "research/sources/connectors/npm__got.md"
   },
   {
+    "id": "npm:gpt-tokenizer",
+    "kind": "npm",
+    "category": "perf-optimization",
+    "package": "gpt-tokenizer",
+    "version": "4.1.0",
+    "url": "https://www.npmjs.com/package/gpt-tokenizer",
+    "homepage": "https://github.com/niieani/gpt-tokenizer#readme",
+    "license": "MIT",
+    "summary": "A pure JavaScript BPE tokenizer with model metadata and pricing for GPT-5, GPT-4o, o-series, and other OpenAI models",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/npm__gpt-tokenizer.md"
+  },
+  {
     "id": "npm:grammy",
     "kind": "npm",
     "category": "connectors",
@@ -11523,6 +12240,19 @@
     "summary": "The Telegram Bot Framework.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/connectors/npm__grammy.md"
+  },
+  {
+    "id": "npm:grammy",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "grammy",
+    "version": "1.46.0",
+    "url": "https://www.npmjs.com/package/grammy",
+    "homepage": "https://grammy.dev/",
+    "license": "MIT",
+    "summary": "The Telegram Bot Framework.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/npm__grammy.md"
   },
   {
     "id": "npm:helmet",
@@ -11564,6 +12294,19 @@
     "_path": "research/sources/packaging-and-ci/npm__husky.md"
   },
   {
+    "id": "npm:i18next",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "i18next",
+    "version": "27.0.1",
+    "url": "https://www.npmjs.com/package/i18next",
+    "homepage": "https://www.i18next.com",
+    "license": "MIT",
+    "summary": "i18next internationalization framework",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__i18next.md"
+  },
+  {
     "id": "npm:ical-generator",
     "kind": "npm",
     "category": "connectors",
@@ -11575,6 +12318,19 @@
     "summary": "ical-generator is a small piece of code which generates ical calendar files",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/connectors/npm__ical-generator.md"
+  },
+  {
+    "id": "npm:ical-generator",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "ical-generator",
+    "version": "11.1.3",
+    "url": "https://www.npmjs.com/package/ical-generator",
+    "homepage": "https://github.com/sebbo2002/ical-generator",
+    "license": "MIT",
+    "summary": "ical-generator is a small piece of code which generates ical calendar files",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/npm__ical-generator.md"
   },
   {
     "id": "npm:imapflow",
@@ -11590,6 +12346,19 @@
     "_path": "research/sources/connectors/npm__imapflow.md"
   },
   {
+    "id": "npm:imapflow",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "imapflow",
+    "version": "2.11.0",
+    "url": "https://www.npmjs.com/package/imapflow",
+    "homepage": "https://imapflow.com/",
+    "license": "MIT",
+    "summary": "IMAP Client for Node",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/npm__imapflow.md"
+  },
+  {
     "id": "npm:jimp",
     "kind": "npm",
     "category": "screen-understanding",
@@ -11601,6 +12370,19 @@
     "summary": "An image processing library written entirely in JavaScript.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/screen-understanding/npm__jimp.md"
+  },
+  {
+    "id": "npm:jsdom",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "jsdom",
+    "version": "31.0.0",
+    "url": "https://www.npmjs.com/package/jsdom",
+    "homepage": "https://github.com/jsdom/jsdom#readme",
+    "license": "MIT",
+    "summary": "A JavaScript implementation of many web standards",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__jsdom.md"
   },
   {
     "id": "npm:jsonwebtoken",
@@ -11629,6 +12411,19 @@
     "_path": "research/sources/safety-and-security/npm__keytar.md"
   },
   {
+    "id": "npm:keyv",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "keyv",
+    "version": "6.1.0",
+    "url": "https://www.npmjs.com/package/keyv",
+    "homepage": "https://github.com/jaredwray/keyv",
+    "license": "MIT",
+    "summary": "Simple key-value storage with support for multiple backends",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/npm__keyv.md"
+  },
+  {
     "id": "npm:koffi",
     "kind": "npm",
     "category": "windows-automation",
@@ -11640,6 +12435,19 @@
     "summary": "Fast and easy-to-use dynamic C FFI (foreign function interface) for Node.js",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/npm__koffi.md"
+  },
+  {
+    "id": "npm:kokoro-js",
+    "kind": "npm",
+    "category": "low-end-inference",
+    "package": "kokoro-js",
+    "version": "1.2.1",
+    "url": "https://www.npmjs.com/package/kokoro-js",
+    "homepage": "https://github.com/hexgrad/kokoro",
+    "license": "Apache-2.0",
+    "summary": "High-quality text-to-speech for the web",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/npm__kokoro-js.md"
   },
   {
     "id": "npm:kokoro-js",
@@ -11746,6 +12554,45 @@
     "_path": "research/sources/memory-and-rag/npm__lunr.md"
   },
   {
+    "id": "npm:mailparser",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "mailparser",
+    "version": "3.14.2",
+    "url": "https://www.npmjs.com/package/mailparser",
+    "homepage": "https://github.com/nodemailer/mailparser#readme",
+    "license": "MIT",
+    "summary": "Parse e-mails",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/npm__mailparser.md"
+  },
+  {
+    "id": "npm:mammoth",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "mammoth",
+    "version": "1.13.0",
+    "url": "https://www.npmjs.com/package/mammoth",
+    "homepage": "https://github.com/mwilliamson/mammoth.js#readme",
+    "license": "BSD-2-Clause",
+    "summary": "Convert Word documents from docx to simple HTML and Markdown",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/npm__mammoth.md"
+  },
+  {
+    "id": "npm:marked",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "marked",
+    "version": "18.1.3",
+    "url": "https://www.npmjs.com/package/marked",
+    "homepage": "https://marked.js.org",
+    "license": "MIT",
+    "summary": "A markdown parser built for speed",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__marked.md"
+  },
+  {
     "id": "npm:mastra",
     "kind": "npm",
     "category": "orchestration",
@@ -11811,6 +12658,32 @@
     "_path": "research/sources/ui-ux/npm__motion.md"
   },
   {
+    "id": "npm:mqtt",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "mqtt",
+    "version": "5.16.1",
+    "url": "https://www.npmjs.com/package/mqtt",
+    "homepage": "https://github.com/mqttjs/MQTT.js#readme",
+    "license": "MIT",
+    "summary": "A library for the MQTT protocol",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/npm__mqtt.md"
+  },
+  {
+    "id": "npm:naudiodon",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "naudiodon",
+    "version": "2.3.6",
+    "url": "https://www.npmjs.com/package/naudiodon",
+    "homepage": "https://github.com/Streampunk/naudiodon#readme",
+    "license": "Apache-2.0",
+    "summary": "Node Stream bindings for PortAudio.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/npm__naudiodon.md"
+  },
+  {
     "id": "npm:naudiodon",
     "kind": "npm",
     "category": "whisper-and-asr",
@@ -11850,6 +12723,19 @@
     "_path": "research/sources/orchestration/npm__node-cron.md"
   },
   {
+    "id": "npm:node-imap",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "node-imap",
+    "version": "0.9.6",
+    "url": "https://www.npmjs.com/package/node-imap",
+    "homepage": "https://github.com/mikebevz/node-imap#readme",
+    "license": "MIT",
+    "summary": "A fork of the famous and outdated IMAP module for node.js that makes communicating with IMAP servers easy",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/npm__node-imap.md"
+  },
+  {
     "id": "npm:node-key-sender",
     "kind": "npm",
     "category": "windows-automation",
@@ -11874,6 +12760,45 @@
     "summary": "Run AI models locally on your machine with node.js bindings for llama.cpp. Enforce a JSON schema on the model output on the generation level",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/npm__node-llama-cpp.md"
+  },
+  {
+    "id": "npm:node-llama-cpp",
+    "kind": "npm",
+    "category": "low-end-inference",
+    "package": "node-llama-cpp",
+    "version": "3.22.3",
+    "url": "https://www.npmjs.com/package/node-llama-cpp",
+    "homepage": "https://node-llama-cpp.withcat.ai",
+    "license": "MIT",
+    "summary": "Run AI models locally on your machine with node.js bindings for llama.cpp. Enforce a JSON schema on the model output on the generation level",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/npm__node-llama-cpp.md"
+  },
+  {
+    "id": "npm:node-llama-cpp",
+    "kind": "npm",
+    "category": "perf-optimization",
+    "package": "node-llama-cpp",
+    "version": "3.22.3",
+    "url": "https://www.npmjs.com/package/node-llama-cpp",
+    "homepage": "https://node-llama-cpp.withcat.ai",
+    "license": "MIT",
+    "summary": "Run AI models locally on your machine with node.js bindings for llama.cpp. Enforce a JSON schema on the model output on the generation level",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/npm__node-llama-cpp.md"
+  },
+  {
+    "id": "npm:node-pty",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "node-pty",
+    "version": "1.1.0",
+    "url": "https://www.npmjs.com/package/node-pty",
+    "homepage": "https://github.com/microsoft/node-pty",
+    "license": "MIT",
+    "summary": "Fork pseudoterminals in Node.JS",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/npm__node-pty.md"
   },
   {
     "id": "npm:node-pty",
@@ -11902,6 +12827,58 @@
     "_path": "research/sources/whisper-and-asr/npm__node-record-lpcm16.md"
   },
   {
+    "id": "npm:node-schedule",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "node-schedule",
+    "version": "2.1.2",
+    "url": "https://www.npmjs.com/package/node-schedule",
+    "homepage": "https://github.com/node-schedule/node-schedule#readme",
+    "license": "MIT",
+    "summary": "A cron-like and not-cron-like job scheduler for Node.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/npm__node-schedule.md"
+  },
+  {
+    "id": "npm:node-wav",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "node-wav",
+    "version": "0.0.2",
+    "url": "https://www.npmjs.com/package/node-wav",
+    "homepage": "https://github.com/andreasgal/node-wav",
+    "license": "MIT",
+    "summary": "High performance WAV file decoder and encoder",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/npm__node-wav.md"
+  },
+  {
+    "id": "npm:node-web-audio-api",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "node-web-audio-api",
+    "version": "2.2.0",
+    "url": "https://www.npmjs.com/package/node-web-audio-api",
+    "homepage": "https://github.com/ircam-ismm/node-web-audio-api#readme",
+    "license": "BSD-3-Clause",
+    "summary": "Web Audio API implementation for Node.js",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/npm__node-web-audio-api.md"
+  },
+  {
+    "id": "npm:node-window-manager",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "node-window-manager",
+    "version": "2.2.4",
+    "url": "https://www.npmjs.com/package/node-window-manager",
+    "homepage": "https://github.com/sentialx/node-window-manager#readme",
+    "license": "MIT",
+    "summary": "Manage windows in macOS, Windows and Linux",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/npm__node-window-manager.md"
+  },
+  {
     "id": "npm:node-window-manager",
     "kind": "npm",
     "category": "windows-automation",
@@ -11913,6 +12890,19 @@
     "summary": "Manage windows in macOS, Windows and Linux",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/npm__node-window-manager.md"
+  },
+  {
+    "id": "npm:node-xlsx",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "node-xlsx",
+    "version": "0.24.0",
+    "url": "https://www.npmjs.com/package/node-xlsx",
+    "homepage": "https://github.com/mgcrea/node-xlsx#readme",
+    "license": "Apache-2.0",
+    "summary": "NodeJS Excel files parser & builder",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/npm__node-xlsx.md"
   },
   {
     "id": "npm:nodejs-whisper",
@@ -11941,6 +12931,19 @@
     "_path": "research/sources/connectors/npm__nodemailer.md"
   },
   {
+    "id": "npm:nodemailer",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "nodemailer",
+    "version": "10.4.0",
+    "url": "https://www.npmjs.com/package/nodemailer",
+    "homepage": "https://nodemailer.com/",
+    "license": "MIT-0",
+    "summary": "Easy as cake e-mail sending from your Node.js applications",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/npm__nodemailer.md"
+  },
+  {
     "id": "npm:npm-run-all2",
     "kind": "npm",
     "category": "packaging-and-ci",
@@ -11954,6 +12957,32 @@
     "_path": "research/sources/packaging-and-ci/npm__npm-run-all2.md"
   },
   {
+    "id": "npm:officegen",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "officegen",
+    "version": "0.6.5",
+    "url": "https://www.npmjs.com/package/officegen",
+    "homepage": "https://github.com/Ziv-Barber/officegen#readme",
+    "license": "MIT",
+    "summary": "Office Open XML Generator using Node.js streams. Supporting Microsoft Office 2007 and later Word (docx), PowerPoint (pptx,ppsx) and Excell (xlsx). This module is for all frameworks and environments. No need for any commandline tool - this module is doing",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/npm__officegen.md"
+  },
+  {
+    "id": "npm:officeparser",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "officeparser",
+    "version": "8.6.0",
+    "url": "https://www.npmjs.com/package/officeparser",
+    "homepage": "https://officeparser.harshankur.com",
+    "license": "MIT",
+    "summary": "A robust, strictly-typed Node.js and Browser library for parsing office files (.docx, .pptx, .xlsx, .odt, .odp, .ods, .odg, .pdf, .rtf, .csv, .md, .html, .epub, .tex) and generating high-fidelity outputs in DOCX, ODT, XLSX, ODS, PPTX, ODP, LaTeX, Markdown",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/npm__officeparser.md"
+  },
+  {
     "id": "npm:onnxruntime-node",
     "kind": "npm",
     "category": "inference-runtimes",
@@ -11965,6 +12994,19 @@
     "summary": "ONNXRuntime Node.js binding",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/npm__onnxruntime-node.md"
+  },
+  {
+    "id": "npm:onnxruntime-node",
+    "kind": "npm",
+    "category": "perf-optimization",
+    "package": "onnxruntime-node",
+    "version": "1.31.1",
+    "url": "https://www.npmjs.com/package/onnxruntime-node",
+    "homepage": "https://github.com/Microsoft/onnxruntime#readme",
+    "license": "MIT",
+    "summary": "ONNXRuntime Node.js binding",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/npm__onnxruntime-node.md"
   },
   {
     "id": "npm:onnxruntime-node",
@@ -11991,6 +13033,19 @@
     "summary": "A Javascript library for running ONNX models on browsers",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/npm__onnxruntime-web.md"
+  },
+  {
+    "id": "npm:open",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "open",
+    "version": "11.0.4",
+    "url": "https://www.npmjs.com/package/open",
+    "homepage": "https://github.com/sindresorhus/open#readme",
+    "license": "MIT",
+    "summary": "Open stuff like URLs, files, executables. Cross-platform.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/npm__open.md"
   },
   {
     "id": "npm:openai",
@@ -12032,6 +13087,70 @@
     "_path": "research/sources/orchestration/npm__p-retry.md"
   },
   {
+    "id": "npm:pdf-lib",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "pdf-lib",
+    "version": "1.17.1",
+    "url": "https://www.npmjs.com/package/pdf-lib",
+    "homepage": "https://pdf-lib.js.org/",
+    "license": "MIT",
+    "summary": "Create and modify PDF files with JavaScript",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/npm__pdf-lib.md"
+  },
+  {
+    "id": "npm:pdf-parse",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "pdf-parse",
+    "version": "2.4.5",
+    "url": "https://www.npmjs.com/package/pdf-parse",
+    "homepage": "https://mehmet-kozan.github.io/pdf-parse/",
+    "license": "Apache-2.0",
+    "summary": "Pure TypeScript, cross-platform module for extracting text, images, and tabular data from PDFs. Run directly in your browser or in Node!",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/npm__pdf-parse.md"
+  },
+  {
+    "id": "npm:pdfjs-dist",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "pdfjs-dist",
+    "version": "6.5.438",
+    "url": "https://www.npmjs.com/package/pdfjs-dist",
+    "homepage": "https://mozilla.github.io/pdf.js/",
+    "license": "Apache-2.0",
+    "summary": "Generic build of Mozilla's PDF.js library.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/npm__pdfjs-dist.md"
+  },
+  {
+    "id": "npm:peaks.js",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "peaks.js",
+    "version": "4.0.0",
+    "url": "https://www.npmjs.com/package/peaks.js",
+    "license": "LGPL-3.0",
+    "summary": "JavaScript UI component for displaying audio waveforms",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/npm__peaks.js.md"
+  },
+  {
+    "id": "npm:pidusage",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "pidusage",
+    "version": "4.1.0",
+    "url": "https://www.npmjs.com/package/pidusage",
+    "homepage": "https://github.com/soyuka/pidusage",
+    "license": "MIT",
+    "summary": "Cross-platform process cpu % and memory usage of a PID",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/npm__pidusage.md"
+  },
+  {
     "id": "npm:pino",
     "kind": "npm",
     "category": "observability-evals",
@@ -12071,6 +13190,32 @@
     "_path": "research/sources/safety-and-security/npm__pino-pretty.md"
   },
   {
+    "id": "npm:piscina",
+    "kind": "npm",
+    "category": "perf-optimization",
+    "package": "piscina",
+    "version": "5.3.2",
+    "url": "https://www.npmjs.com/package/piscina",
+    "homepage": "https://github.com/piscinajs/piscina#readme",
+    "license": "MIT",
+    "summary": "A fast, efficient Node.js Worker Thread Pool implementation",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/npm__piscina.md"
+  },
+  {
+    "id": "npm:pizzip",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "pizzip",
+    "version": "3.3.0",
+    "url": "https://www.npmjs.com/package/pizzip",
+    "homepage": "https://github.com/open-xml-templating/pizzip#readme",
+    "license": "(MIT OR GPL-3.0)",
+    "summary": "Create, read and edit .zip files synchronously with Javascript",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/npm__pizzip.md"
+  },
+  {
     "id": "npm:playwright",
     "kind": "npm",
     "category": "coding-agents",
@@ -12097,6 +13242,19 @@
     "_path": "research/sources/coding-agents/npm__prettier.md"
   },
   {
+    "id": "npm:prettier",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "prettier",
+    "version": "3.9.10",
+    "url": "https://www.npmjs.com/package/prettier",
+    "homepage": "https://prettier.io",
+    "license": "MIT",
+    "summary": "Prettier is an opinionated code formatter",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__prettier.md"
+  },
+  {
     "id": "npm:prom-client",
     "kind": "npm",
     "category": "observability-evals",
@@ -12108,6 +13266,32 @@
     "summary": "Client for prometheus",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/observability-evals/npm__prom-client.md"
+  },
+  {
+    "id": "npm:ps-list",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "ps-list",
+    "version": "9.0.0",
+    "url": "https://www.npmjs.com/package/ps-list",
+    "homepage": "https://github.com/sindresorhus/ps-list#readme",
+    "license": "MIT",
+    "summary": "Get running processes",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/npm__ps-list.md"
+  },
+  {
+    "id": "npm:re2",
+    "kind": "npm",
+    "category": "perf-optimization",
+    "package": "re2",
+    "version": "1.27.0",
+    "url": "https://www.npmjs.com/package/re2",
+    "homepage": "https://github.com/uhop/node-re2",
+    "license": "BSD-3-Clause",
+    "summary": "Bindings for RE2: fast, safe alternative to backtracking regular expression engines.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/npm__re2.md"
   },
   {
     "id": "npm:react",
@@ -12134,6 +13318,32 @@
     "summary": "React package for working with the DOM.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/ui-ux/npm__react-dom.md"
+  },
+  {
+    "id": "npm:react-hook-form",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "react-hook-form",
+    "version": "7.91.0",
+    "url": "https://www.npmjs.com/package/react-hook-form",
+    "homepage": "https://react-hook-form.com",
+    "license": "MIT",
+    "summary": "Performant, flexible and extensible forms library for React Hooks",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__react-hook-form.md"
+  },
+  {
+    "id": "npm:react-i18next",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "react-i18next",
+    "version": "18.0.0",
+    "url": "https://www.npmjs.com/package/react-i18next",
+    "homepage": "https://github.com/i18next/react-i18next",
+    "license": "MIT",
+    "summary": "Internationalization for react done right. Using the i18next i18n ecosystem.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__react-i18next.md"
   },
   {
     "id": "npm:react-markdown",
@@ -12175,6 +13385,58 @@
     "_path": "research/sources/ui-ux/npm__recharts.md"
   },
   {
+    "id": "npm:regedit",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "regedit",
+    "version": "5.1.4",
+    "url": "https://www.npmjs.com/package/regedit",
+    "homepage": "https://github.com/kessler/node-regedit",
+    "license": "MIT",
+    "summary": "Read, Write, List and do all sorts of funky stuff to the windows registry using node.js and windows script host",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/npm__regedit.md"
+  },
+  {
+    "id": "npm:rehype-highlight",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "rehype-highlight",
+    "version": "7.0.2",
+    "url": "https://www.npmjs.com/package/rehype-highlight",
+    "homepage": "https://github.com/rehypejs/rehype-highlight#readme",
+    "license": "MIT",
+    "summary": "rehype plugin to highlight code blocks with lowlight (highlight.js)",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__rehype-highlight.md"
+  },
+  {
+    "id": "npm:remark-gfm",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "remark-gfm",
+    "version": "4.0.1",
+    "url": "https://www.npmjs.com/package/remark-gfm",
+    "homepage": "https://github.com/remarkjs/remark-gfm#readme",
+    "license": "MIT",
+    "summary": "remark plugin to support GFM (autolink literals, footnotes, strikethrough, tables, tasklists)",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__remark-gfm.md"
+  },
+  {
+    "id": "npm:rimraf",
+    "kind": "npm",
+    "category": "packaging-and-ci",
+    "package": "rimraf",
+    "version": "6.1.4",
+    "url": "https://www.npmjs.com/package/rimraf",
+    "homepage": "https://github.com/isaacs/rimraf#readme",
+    "license": "BlueOak-1.0.0",
+    "summary": "A deep deletion module for node (like `rm -rf`)",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/packaging-and-ci/npm__rimraf.md"
+  },
+  {
     "id": "npm:rss-parser",
     "kind": "npm",
     "category": "connectors",
@@ -12186,6 +13448,19 @@
     "summary": "A lightweight RSS parser, for Node and the browser",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/connectors/npm__rss-parser.md"
+  },
+  {
+    "id": "npm:rss-parser",
+    "kind": "npm",
+    "category": "connectors-extra",
+    "package": "rss-parser",
+    "version": "3.13.0",
+    "url": "https://www.npmjs.com/package/rss-parser",
+    "homepage": "https://github.com/bobby-brennan/rss-parser#readme",
+    "license": "MIT",
+    "summary": "A lightweight RSS parser, for Node and the browser",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/npm__rss-parser.md"
   },
   {
     "id": "npm:safe-regex",
@@ -12229,6 +13504,19 @@
   {
     "id": "npm:screenshot-desktop",
     "kind": "npm",
+    "category": "system-control",
+    "package": "screenshot-desktop",
+    "version": "1.15.8",
+    "url": "https://www.npmjs.com/package/screenshot-desktop",
+    "homepage": "https://github.com/bencevans/screenshot-desktop#readme",
+    "license": "MIT",
+    "summary": "Capture a screenshot of your local machine",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/npm__screenshot-desktop.md"
+  },
+  {
+    "id": "npm:screenshot-desktop",
+    "kind": "npm",
     "category": "windows-automation",
     "package": "screenshot-desktop",
     "version": "1.15.8",
@@ -12255,6 +13543,32 @@
   {
     "id": "npm:sharp",
     "kind": "npm",
+    "category": "media-production",
+    "package": "sharp",
+    "version": "0.35.5",
+    "url": "https://www.npmjs.com/package/sharp",
+    "homepage": "https://sharp.pixelplumbing.com",
+    "license": "Apache-2.0",
+    "summary": "High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/npm__sharp.md"
+  },
+  {
+    "id": "npm:sharp",
+    "kind": "npm",
+    "category": "perf-optimization",
+    "package": "sharp",
+    "version": "0.35.5",
+    "url": "https://www.npmjs.com/package/sharp",
+    "homepage": "https://sharp.pixelplumbing.com",
+    "license": "Apache-2.0",
+    "summary": "High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/npm__sharp.md"
+  },
+  {
+    "id": "npm:sharp",
+    "kind": "npm",
     "category": "screen-understanding",
     "package": "sharp",
     "version": "0.35.5",
@@ -12264,6 +13578,19 @@
     "summary": "High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/screen-understanding/npm__sharp.md"
+  },
+  {
+    "id": "npm:sherpa-onnx-node",
+    "kind": "npm",
+    "category": "low-end-inference",
+    "package": "sherpa-onnx-node",
+    "version": "2.0.1",
+    "url": "https://www.npmjs.com/package/sherpa-onnx-node",
+    "homepage": "https://github.com/csukuangfj/sherpa-onnx#readme",
+    "license": "Apache-2.0",
+    "summary": "Speech-to-text, text-to-speech, speaker diarization, and speech enhancement using Next-gen Kaldi without internet connection",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/npm__sherpa-onnx-node.md"
   },
   {
     "id": "npm:sherpa-onnx-node",
@@ -12317,6 +13644,19 @@
     "_path": "research/sources/ui-ux/npm__sonner.md"
   },
   {
+    "id": "npm:speaker",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "speaker",
+    "version": "0.5.5",
+    "url": "https://www.npmjs.com/package/speaker",
+    "homepage": "https://github.com/TooTallNate/node-speaker#readme",
+    "license": "(MIT AND LGPL-2.1-only)",
+    "summary": "Output PCM audio data to the speakers",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/npm__speaker.md"
+  },
+  {
     "id": "npm:sql.js",
     "kind": "npm",
     "category": "memory-and-rag",
@@ -12341,6 +13681,19 @@
     "summary": "A vector search SQLite extension.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/memory-and-rag/npm__sqlite-vec.md"
+  },
+  {
+    "id": "npm:systeminformation",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "systeminformation",
+    "version": "5.33.19",
+    "url": "https://www.npmjs.com/package/systeminformation",
+    "homepage": "https://systeminformation.io",
+    "license": "MIT",
+    "summary": "Advanced, lightweight system and OS information library",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/npm__systeminformation.md"
   },
   {
     "id": "npm:systeminformation",
@@ -12382,6 +13735,32 @@
     "_path": "research/sources/ui-ux/npm__tailwindcss.md"
   },
   {
+    "id": "npm:tar",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "tar",
+    "version": "7.5.22",
+    "url": "https://www.npmjs.com/package/tar",
+    "homepage": "https://github.com/isaacs/node-tar#readme",
+    "license": "BlueOak-1.0.0",
+    "summary": "tar for node",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/npm__tar.md"
+  },
+  {
+    "id": "npm:tasklist",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "tasklist",
+    "version": "6.0.0",
+    "url": "https://www.npmjs.com/package/tasklist",
+    "homepage": "https://github.com/sindresorhus/tasklist#readme",
+    "license": "MIT",
+    "summary": "Wrapper for the Windows `tasklist` command. Returns a list of apps and services with their Process ID (PID) for all tasks running on either a local or a remote computer.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/npm__tasklist.md"
+  },
+  {
     "id": "npm:telegraf",
     "kind": "npm",
     "category": "connectors",
@@ -12408,6 +13787,19 @@
     "_path": "research/sources/screen-understanding/npm__tesseract.js.md"
   },
   {
+    "id": "npm:tree-kill",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "tree-kill",
+    "version": "1.2.2",
+    "url": "https://www.npmjs.com/package/tree-kill",
+    "homepage": "https://github.com/pkrumins/node-tree-kill",
+    "license": "MIT",
+    "summary": "kill trees of processes",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/npm__tree-kill.md"
+  },
+  {
     "id": "npm:tree-sitter",
     "kind": "npm",
     "category": "coding-agents",
@@ -12423,6 +13815,19 @@
   {
     "id": "npm:tsup",
     "kind": "npm",
+    "category": "coding-agents",
+    "package": "tsup",
+    "version": "9.0.0",
+    "url": "https://www.npmjs.com/package/tsup",
+    "homepage": "https://tsup.egoist.dev/",
+    "license": "MIT",
+    "summary": "Bundle your TypeScript library with no config, powered by esbuild",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/npm__tsup.md"
+  },
+  {
+    "id": "npm:tsup",
+    "kind": "npm",
     "category": "packaging-and-ci",
     "package": "tsup",
     "version": "9.0.0",
@@ -12432,6 +13837,19 @@
     "summary": "Bundle your TypeScript library with no config, powered by esbuild",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/packaging-and-ci/npm__tsup.md"
+  },
+  {
+    "id": "npm:tsx",
+    "kind": "npm",
+    "category": "coding-agents",
+    "package": "tsx",
+    "version": "4.23.15",
+    "url": "https://www.npmjs.com/package/tsx",
+    "homepage": "https://tsx.hirok.io",
+    "license": "MIT",
+    "summary": "TypeScript Execute (tsx): Node.js enhanced with esbuild to run TypeScript & ESM files",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/npm__tsx.md"
   },
   {
     "id": "npm:typescript",
@@ -12499,6 +13917,19 @@
     "_path": "research/sources/reference-apps/npm__update-electron-app.md"
   },
   {
+    "id": "npm:vaul",
+    "kind": "npm",
+    "category": "ui-ux",
+    "package": "vaul",
+    "version": "1.1.2",
+    "url": "https://www.npmjs.com/package/vaul",
+    "homepage": "https://vaul.emilkowal.ski/",
+    "license": "MIT",
+    "summary": "Drawer component for React.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/ui-ux/npm__vaul.md"
+  },
+  {
     "id": "npm:vectra",
     "kind": "npm",
     "category": "memory-and-rag",
@@ -12551,6 +13982,45 @@
     "_path": "research/sources/whisper-and-asr/npm__wav.md"
   },
   {
+    "id": "npm:wav-decoder",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "wav-decoder",
+    "version": "1.3.0",
+    "url": "https://www.npmjs.com/package/wav-decoder",
+    "homepage": "https://github.com/mohayonao/wav-decoder/",
+    "license": "MIT",
+    "summary": "promise-based wav decoder",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/npm__wav-decoder.md"
+  },
+  {
+    "id": "npm:wavefile",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "wavefile",
+    "version": "11.0.0",
+    "url": "https://www.npmjs.com/package/wavefile",
+    "homepage": "https://github.com/rochars/wavefile",
+    "license": "MIT",
+    "summary": "Create, read and write wav files according to the specs.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/npm__wavefile.md"
+  },
+  {
+    "id": "npm:waveform-data",
+    "kind": "npm",
+    "category": "media-production",
+    "package": "waveform-data",
+    "version": "4.5.2",
+    "url": "https://www.npmjs.com/package/waveform-data",
+    "homepage": "https://github.com/bbc/waveform-data.js",
+    "license": "LGPL-3.0",
+    "summary": "Audio Waveform Data Manipulation API – resample, offset and segment waveform data in JavaScript",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/npm__waveform-data.md"
+  },
+  {
     "id": "npm:web-tree-sitter",
     "kind": "npm",
     "category": "coding-agents",
@@ -12577,6 +14047,19 @@
     "_path": "research/sources/whisper-and-asr/npm__whisper-node.md"
   },
   {
+    "id": "npm:windows-release",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "windows-release",
+    "version": "7.1.1",
+    "url": "https://www.npmjs.com/package/windows-release",
+    "homepage": "https://github.com/sindresorhus/windows-release#readme",
+    "license": "MIT",
+    "summary": "Get the name of a Windows version from the release number: `5.1.2600` → `XP`",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/npm__windows-release.md"
+  },
+  {
     "id": "npm:winston",
     "kind": "npm",
     "category": "observability-evals",
@@ -12588,6 +14071,19 @@
     "summary": "A logger for just about everything.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/observability-evals/npm__winston.md"
+  },
+  {
+    "id": "npm:workerpool",
+    "kind": "npm",
+    "category": "perf-optimization",
+    "package": "workerpool",
+    "version": "10.0.3",
+    "url": "https://www.npmjs.com/package/workerpool",
+    "homepage": "https://github.com/josdejong/workerpool",
+    "license": "Apache-2.0",
+    "summary": "Offload tasks to a pool of workers on node.js and in the browser",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/npm__workerpool.md"
   },
   {
     "id": "npm:ws",
@@ -12603,6 +14099,32 @@
     "_path": "research/sources/connectors/npm__ws.md"
   },
   {
+    "id": "npm:xlsx",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "xlsx",
+    "version": "0.18.5",
+    "url": "https://www.npmjs.com/package/xlsx",
+    "homepage": "https://sheetjs.com/",
+    "license": "Apache-2.0",
+    "summary": "SheetJS Spreadsheet data parser and writer",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/npm__xlsx.md"
+  },
+  {
+    "id": "npm:xlsx-populate",
+    "kind": "npm",
+    "category": "office-automation",
+    "package": "xlsx-populate",
+    "version": "1.21.0",
+    "url": "https://www.npmjs.com/package/xlsx-populate",
+    "homepage": "https://github.com/dtjohnson/xlsx-populate#readme",
+    "license": "MIT",
+    "summary": "Excel XLSX parser/generator written in JavaScript with Node.js and browser support, jQuery/d3-style method chaining, and a focus on keeping existing workbook features and styles in tact.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/npm__xlsx-populate.md"
+  },
+  {
     "id": "npm:xterm",
     "kind": "npm",
     "category": "coding-agents",
@@ -12614,6 +14136,19 @@
     "summary": "Full xterm terminal, in your browser",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/coding-agents/npm__xterm.md"
+  },
+  {
+    "id": "npm:yauzl",
+    "kind": "npm",
+    "category": "system-control",
+    "package": "yauzl",
+    "version": "3.4.0",
+    "url": "https://www.npmjs.com/package/yauzl",
+    "homepage": "https://github.com/thejoshwolfe/yauzl",
+    "license": "MIT",
+    "summary": "yet another unzip library for node",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/npm__yauzl.md"
   },
   {
     "id": "npm:zod",
@@ -12655,6 +14190,19 @@
     "_path": "research/sources/safety-and-security/npm__zod.md"
   },
   {
+    "id": "npm:zstd-codec",
+    "kind": "npm",
+    "category": "perf-optimization",
+    "package": "zstd-codec",
+    "version": "0.1.5",
+    "url": "https://www.npmjs.com/package/zstd-codec",
+    "homepage": "https://github.com/yoshihitoh/zstd-codec#readme",
+    "license": "MIT",
+    "summary": "Zstandard codec powered by Emscripten",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/npm__zstd-codec.md"
+  },
+  {
     "id": "npm:zustand",
     "kind": "npm",
     "category": "ui-ux",
@@ -12694,6 +14242,18 @@
     "_path": "research/sources/tts-and-voice/pypi__tts.md"
   },
   {
+    "id": "pypi:XlsxWriter",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "xlsxwriter",
+    "version": "3.3.1",
+    "url": "https://pypi.org/project/xlsxwriter/",
+    "requires_python": ">=3.8",
+    "summary": "A Python module for creating Excel XLSX files.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__xlsxwriter.md"
+  },
+  {
     "id": "pypi:a2a-sdk",
     "kind": "pypi",
     "category": "orchestration",
@@ -12718,6 +14278,20 @@
     "summary": "Accelerate",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/pypi__accelerate.md"
+  },
+  {
+    "id": "pypi:accelerate",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "accelerate",
+    "version": "1.15.0",
+    "url": "https://pypi.org/project/accelerate/",
+    "home_page": "https://github.com/huggingface/accelerate",
+    "license": "Apache",
+    "requires_python": ">=3.10.0",
+    "summary": "Accelerate",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/pypi__accelerate.md"
   },
   {
     "id": "pypi:apscheduler",
@@ -12747,6 +14321,18 @@
     "_path": "research/sources/memory-and-rag/pypi__apsw.md"
   },
   {
+    "id": "pypi:audioread",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "audioread",
+    "version": "3.1.0",
+    "url": "https://pypi.org/project/audioread/",
+    "requires_python": ">=3.9",
+    "summary": "Multi-library, cross-platform audio decoding.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/pypi__audioread.md"
+  },
+  {
     "id": "pypi:autogen-agentchat",
     "kind": "pypi",
     "category": "orchestration",
@@ -12758,6 +14344,18 @@
     "summary": "AutoGen agents and teams library",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/pypi__autogen-agentchat.md"
+  },
+  {
+    "id": "pypi:av",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "av",
+    "version": "19.0.2",
+    "url": "https://pypi.org/project/av/",
+    "requires_python": ">=3.12",
+    "summary": "Pythonic bindings for FFmpeg's libraries.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/pypi__av.md"
   },
   {
     "id": "pypi:bandit",
@@ -12787,6 +14385,19 @@
     "_path": "research/sources/connectors/pypi__beautifulsoup4.md"
   },
   {
+    "id": "pypi:beautifulsoup4",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "beautifulsoup4",
+    "version": "4.15.0",
+    "url": "https://pypi.org/project/beautifulsoup4/",
+    "license": "MIT License",
+    "requires_python": ">=3.7.0",
+    "summary": "Screen-scraping library",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/pypi__beautifulsoup4.md"
+  },
+  {
     "id": "pypi:bitsandbytes",
     "kind": "pypi",
     "category": "inference-runtimes",
@@ -12797,6 +14408,55 @@
     "summary": "k-bit optimizers and matrix multiplication routines.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/pypi__bitsandbytes.md"
+  },
+  {
+    "id": "pypi:bitsandbytes",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "bitsandbytes",
+    "version": "0.50.2",
+    "url": "https://pypi.org/project/bitsandbytes/",
+    "requires_python": ">=3.10",
+    "summary": "k-bit optimizers and matrix multiplication routines.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/pypi__bitsandbytes.md"
+  },
+  {
+    "id": "pypi:black",
+    "kind": "pypi",
+    "category": "coding-agents",
+    "package": "black",
+    "version": "26.10.1",
+    "url": "https://pypi.org/project/black/",
+    "requires_python": ">=3.10",
+    "summary": "The uncompromising code formatter.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/pypi__black.md"
+  },
+  {
+    "id": "pypi:caldav",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "caldav",
+    "version": "3.7.0",
+    "url": "https://pypi.org/project/caldav/",
+    "requires_python": ">=3.10",
+    "summary": "CalDAV (RFC4791) client library",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/pypi__caldav.md"
+  },
+  {
+    "id": "pypi:camelot-py",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "camelot-py",
+    "version": "2.0.0",
+    "url": "https://pypi.org/project/camelot-py/",
+    "license": "MIT",
+    "requires_python": ">=3.10",
+    "summary": "PDF Table Extraction for Humans.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__camelot-py.md"
   },
   {
     "id": "pypi:celery",
@@ -12838,6 +14498,18 @@
     "_path": "research/sources/memory-and-rag/pypi__chromadb.md"
   },
   {
+    "id": "pypi:click",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "click",
+    "version": "8.5.1",
+    "url": "https://pypi.org/project/click/",
+    "requires_python": ">=3.10",
+    "summary": "Composable command line interface toolkit",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__click.md"
+  },
+  {
     "id": "pypi:cognee",
     "kind": "pypi",
     "category": "memory-and-rag",
@@ -12852,6 +14524,30 @@
   {
     "id": "pypi:comtypes",
     "kind": "pypi",
+    "category": "office-automation",
+    "package": "comtypes",
+    "version": "1.4.17",
+    "url": "https://pypi.org/project/comtypes/",
+    "requires_python": ">=3.9",
+    "summary": "Pure Python COM package",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__comtypes.md"
+  },
+  {
+    "id": "pypi:comtypes",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "comtypes",
+    "version": "1.4.17",
+    "url": "https://pypi.org/project/comtypes/",
+    "requires_python": ">=3.9",
+    "summary": "Pure Python COM package",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__comtypes.md"
+  },
+  {
+    "id": "pypi:comtypes",
+    "kind": "pypi",
     "category": "windows-automation",
     "package": "comtypes",
     "version": "1.4.17",
@@ -12860,6 +14556,20 @@
     "summary": "Pure Python COM package",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/pypi__comtypes.md"
+  },
+  {
+    "id": "pypi:coverage",
+    "kind": "pypi",
+    "category": "coding-agents",
+    "package": "coverage",
+    "version": "7.17.2",
+    "url": "https://pypi.org/project/coverage/",
+    "home_page": "https://github.com/coveragepy/coveragepy",
+    "license": "Apache-2.0",
+    "requires_python": ">=3.11",
+    "summary": "Code coverage measurement for Python",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/pypi__coverage.md"
   },
   {
     "id": "pypi:crewai",
@@ -12886,6 +14596,34 @@
     "_path": "research/sources/safety-and-security/pypi__cryptography.md"
   },
   {
+    "id": "pypi:ctranslate2",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "ctranslate2",
+    "version": "4.8.5",
+    "url": "https://pypi.org/project/ctranslate2/",
+    "home_page": "https://opennmt.net",
+    "license": "MIT",
+    "requires_python": ">=3.9",
+    "summary": "Fast inference engine for Transformer models",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/pypi__ctranslate2.md"
+  },
+  {
+    "id": "pypi:ctranslate2",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "ctranslate2",
+    "version": "4.8.5",
+    "url": "https://pypi.org/project/ctranslate2/",
+    "home_page": "https://opennmt.net",
+    "license": "MIT",
+    "requires_python": ">=3.9",
+    "summary": "Fast inference engine for Transformer models",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__ctranslate2.md"
+  },
+  {
     "id": "pypi:datasets",
     "kind": "pypi",
     "category": "benchmarks",
@@ -12898,6 +14636,20 @@
     "summary": "HuggingFace community-driven open-source library of datasets",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/benchmarks/pypi__datasets.md"
+  },
+  {
+    "id": "pypi:datasets",
+    "kind": "pypi",
+    "category": "benchmarks-extra",
+    "package": "datasets",
+    "version": "5.1.0",
+    "url": "https://pypi.org/project/datasets/",
+    "home_page": "https://github.com/huggingface/datasets",
+    "license": "Apache 2.0",
+    "requires_python": ">=3.10.0",
+    "summary": "HuggingFace community-driven open-source library of datasets",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/benchmarks-extra/pypi__datasets.md"
   },
   {
     "id": "pypi:deepeval",
@@ -12938,6 +14690,20 @@
     "_path": "research/sources/screen-understanding/pypi__docling.md"
   },
   {
+    "id": "pypi:docxtpl",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "docxtpl",
+    "version": "0.20.2",
+    "url": "https://pypi.org/project/docxtpl/",
+    "home_page": "https://github.com/elapouya/python-docx-template",
+    "license": "LGPL-2.1-only",
+    "requires_python": ">=3.7",
+    "summary": "Python docx template engine",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__docxtpl.md"
+  },
+  {
     "id": "pypi:dspy",
     "kind": "pypi",
     "category": "orchestration",
@@ -12961,6 +14727,18 @@
     "summary": "DuckDB in-process database",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/memory-and-rag/pypi__duckdb.md"
+  },
+  {
+    "id": "pypi:duckdb",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "duckdb",
+    "version": "2.0.0",
+    "url": "https://pypi.org/project/duckdb/",
+    "requires_python": ">=3.11.0",
+    "summary": "DuckDB in-process database",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/pypi__duckdb.md"
   },
   {
     "id": "pypi:easyocr",
@@ -12989,6 +14767,20 @@
     "_path": "research/sources/tts-and-voice/pypi__edge-tts.md"
   },
   {
+    "id": "pypi:evalplus",
+    "kind": "pypi",
+    "category": "benchmarks-extra",
+    "package": "evalplus",
+    "version": "0.3.1",
+    "url": "https://pypi.org/project/evalplus/",
+    "home_page": "https://github.com/evalplus/evalplus",
+    "license": "Apache-2.0",
+    "requires_python": ">=3.9",
+    "summary": "\"EvalPlus for rigourous evaluation of LLM-synthesized code\"",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/benchmarks-extra/pypi__evalplus.md"
+  },
+  {
     "id": "pypi:evaluate",
     "kind": "pypi",
     "category": "benchmarks",
@@ -13001,6 +14793,32 @@
     "summary": "HuggingFace community-driven open-source library of evaluation",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/benchmarks/pypi__evaluate.md"
+  },
+  {
+    "id": "pypi:evaluate",
+    "kind": "pypi",
+    "category": "benchmarks-extra",
+    "package": "evaluate",
+    "version": "0.4.6",
+    "url": "https://pypi.org/project/evaluate/",
+    "home_page": "https://github.com/huggingface/evaluate",
+    "license": "Apache 2.0",
+    "requires_python": ">=3.8.0",
+    "summary": "HuggingFace community-driven open-source library of evaluation",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/benchmarks-extra/pypi__evaluate.md"
+  },
+  {
+    "id": "pypi:exllamav2",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "exllamav2",
+    "version": "0.3.2",
+    "url": "https://pypi.org/project/exllamav2/",
+    "home_page": "https://github.com/turboderp/exllamav2",
+    "license": "MIT",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__exllamav2.md"
   },
   {
     "id": "pypi:f5-tts",
@@ -13079,6 +14897,45 @@
     "_path": "research/sources/connectors/pypi__feedparser.md"
   },
   {
+    "id": "pypi:feedparser",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "feedparser",
+    "version": "6.0.14",
+    "url": "https://pypi.org/project/feedparser/",
+    "home_page": "https://github.com/kurtmckee/feedparser",
+    "license": "BSD-2-Clause",
+    "requires_python": ">=3.10",
+    "summary": "Universal feed parser, handles RSS 0.9x, RSS 1.0, RSS 2.0, CDF, Atom 0.3, and Atom 1.0 feeds",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/pypi__feedparser.md"
+  },
+  {
+    "id": "pypi:ffmpeg-python",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "ffmpeg-python",
+    "version": "0.2.0",
+    "url": "https://pypi.org/project/ffmpeg-python/",
+    "home_page": "https://github.com/kkroening/ffmpeg-python",
+    "summary": "Python bindings for FFmpeg - with complex filtering support",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/pypi__ffmpeg-python.md"
+  },
+  {
+    "id": "pypi:flatbuffers",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "flatbuffers",
+    "version": "25.12.19",
+    "url": "https://pypi.org/project/flatbuffers/",
+    "home_page": "https://google.github.io/flatbuffers/",
+    "license": "Apache 2.0",
+    "summary": "The FlatBuffers serialization format for Python",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/low-end-inference/pypi__flatbuffers.md"
+  },
+  {
     "id": "pypi:funasr",
     "kind": "pypi",
     "category": "whisper-and-asr",
@@ -13120,6 +14977,20 @@
     "_path": "research/sources/connectors/pypi__google-api-python-client.md"
   },
   {
+    "id": "pypi:google-api-python-client",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "google-api-python-client",
+    "version": "2.201.0",
+    "url": "https://pypi.org/project/google-api-python-client/",
+    "home_page": "https://github.com/googleapis/google-api-python-client/",
+    "license": "Apache 2.0",
+    "requires_python": ">=3.10",
+    "summary": "Google API Client Library for Python",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/pypi__google-api-python-client.md"
+  },
+  {
     "id": "pypi:google-auth",
     "kind": "pypi",
     "category": "connectors",
@@ -13132,6 +15003,20 @@
     "summary": "Google Authentication Library",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/connectors/pypi__google-auth.md"
+  },
+  {
+    "id": "pypi:google-auth-oauthlib",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "google-auth-oauthlib",
+    "version": "1.5.0",
+    "url": "https://pypi.org/project/google-auth-oauthlib/",
+    "home_page": "https://github.com/googleapis/google-cloud-python/tree/main/packages/google-auth-oauthlib",
+    "license": "Apache 2.0",
+    "requires_python": ">=3.10",
+    "summary": "Google Authentication Library",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/pypi__google-auth-oauthlib.md"
   },
   {
     "id": "pypi:gpustat",
@@ -13160,6 +15045,31 @@
     "_path": "research/sources/memory-and-rag/pypi__graphiti-core.md"
   },
   {
+    "id": "pypi:guidance",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "guidance",
+    "version": "0.3.1",
+    "url": "https://pypi.org/project/guidance/",
+    "home_page": "https://github.com/guidance-ai/guidance",
+    "requires_python": ">=3.10",
+    "summary": "A guidance language for controlling large language models.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__guidance.md"
+  },
+  {
+    "id": "pypi:hf-transfer",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "hf-transfer",
+    "version": "0.1.9",
+    "url": "https://pypi.org/project/hf-transfer/",
+    "requires_python": ">=3.7",
+    "summary": "Speed up file transfers with the Hugging Face Hub.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__hf-transfer.md"
+  },
+  {
     "id": "pypi:hnswlib",
     "kind": "pypi",
     "category": "memory-and-rag",
@@ -13170,6 +15080,19 @@
     "summary": "hnswlib",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/memory-and-rag/pypi__hnswlib.md"
+  },
+  {
+    "id": "pypi:httpx",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "httpx",
+    "version": "0.28.1",
+    "url": "https://pypi.org/project/httpx/",
+    "license": "BSD-3-Clause",
+    "requires_python": ">=3.8",
+    "summary": "The next generation HTTP client.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/pypi__httpx.md"
   },
   {
     "id": "pypi:huggingface-hub",
@@ -13184,6 +15107,84 @@
     "summary": "Client library to download and publish models, datasets and other repos on the huggingface.co hub",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/pypi__huggingface-hub.md"
+  },
+  {
+    "id": "pypi:huggingface-hub",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "huggingface-hub",
+    "version": "2.4.0",
+    "url": "https://pypi.org/project/huggingface-hub/",
+    "home_page": "https://github.com/huggingface/huggingface_hub",
+    "license": "Apache-2.0",
+    "requires_python": ">=3.10.0",
+    "summary": "Client library to download and publish models, datasets and other repos on the huggingface.co hub",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/pypi__huggingface-hub.md"
+  },
+  {
+    "id": "pypi:hypothesis",
+    "kind": "pypi",
+    "category": "coding-agents",
+    "package": "hypothesis",
+    "version": "6.170.15",
+    "url": "https://pypi.org/project/hypothesis/",
+    "requires_python": ">=3.11",
+    "summary": "The property-based testing library for Python",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/pypi__hypothesis.md"
+  },
+  {
+    "id": "pypi:icalendar",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "icalendar",
+    "version": "7.3.0",
+    "url": "https://pypi.org/project/icalendar/",
+    "requires_python": ">=3.10",
+    "summary": "RFC 5545 compatible parser and generator of iCalendar files",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/pypi__icalendar.md"
+  },
+  {
+    "id": "pypi:imageio",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "ImageIO",
+    "version": "2.38.1",
+    "url": "https://pypi.org/project/ImageIO/",
+    "requires_python": ">=3.11",
+    "summary": "Read and write images and video across all major formats. Supports scientific and volumetric data.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/pypi__imageio.md"
+  },
+  {
+    "id": "pypi:imageio-ffmpeg",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "imageio-ffmpeg",
+    "version": "0.8.1",
+    "url": "https://pypi.org/project/imageio-ffmpeg/",
+    "home_page": "https://github.com/imageio/imageio-ffmpeg",
+    "license": "BSD-2-Clause",
+    "requires_python": ">=3.10",
+    "summary": "FFMPEG wrapper for Python",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/pypi__imageio-ffmpeg.md"
+  },
+  {
+    "id": "pypi:imap-tools",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "imap-tools",
+    "version": "1.16.0",
+    "url": "https://pypi.org/project/imap-tools/",
+    "home_page": "https://github.com/ikvk/imap_tools",
+    "license": "Apache-2.0",
+    "requires_python": ">=3.8",
+    "summary": "Work with email by IMAP",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/pypi__imap-tools.md"
   },
   {
     "id": "pypi:imaplib2",
@@ -13213,6 +15214,57 @@
     "_path": "research/sources/benchmarks/pypi__inspect-ai.md"
   },
   {
+    "id": "pypi:inspect-ai",
+    "kind": "pypi",
+    "category": "benchmarks-extra",
+    "package": "inspect-ai",
+    "version": "0.3.288",
+    "url": "https://pypi.org/project/inspect-ai/",
+    "license": "MIT License",
+    "requires_python": ">=3.11",
+    "summary": "Framework for large language model evaluations",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/benchmarks-extra/pypi__inspect-ai.md"
+  },
+  {
+    "id": "pypi:intel-extension-for-pytorch",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "intel-extension-for-pytorch",
+    "version": "2.8.0",
+    "url": "https://pypi.org/project/intel-extension-for-pytorch/",
+    "home_page": "https://github.com/intel/intel-extension-for-pytorch",
+    "license": "https://www.apache.org/licenses/LICENSE-2.0",
+    "summary": "Intel® Extension for PyTorch*",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__intel-extension-for-pytorch.md"
+  },
+  {
+    "id": "pypi:intel-openmp",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "intel-openmp",
+    "version": "2026.2.0",
+    "url": "https://pypi.org/project/intel-openmp/",
+    "home_page": "https://www.intel.com/content/www/us/en/developer/tools/oneapi/dpc-compiler.html",
+    "license": "Intel End User License Agreement for Developer Tools",
+    "summary": "Intel OpenMP* Runtime Library",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/pypi__intel-openmp.md"
+  },
+  {
+    "id": "pypi:isort",
+    "kind": "pypi",
+    "category": "coding-agents",
+    "package": "isort",
+    "version": "9.0.2",
+    "url": "https://pypi.org/project/isort/",
+    "requires_python": ">=3.10.0",
+    "summary": "A Python utility / library to sort Python imports.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/pypi__isort.md"
+  },
+  {
     "id": "pypi:jedi",
     "kind": "pypi",
     "category": "coding-agents",
@@ -13225,6 +15277,31 @@
     "summary": "An autocompletion tool for Python that can be used for text editors.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/coding-agents/pypi__jedi.md"
+  },
+  {
+    "id": "pypi:jinja2",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "Jinja2",
+    "version": "3.1.6",
+    "url": "https://pypi.org/project/Jinja2/",
+    "requires_python": ">=3.7",
+    "summary": "A very fast and expressive template engine.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/pypi__jinja2.md"
+  },
+  {
+    "id": "pypi:keyboard",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "keyboard",
+    "version": "0.13.5",
+    "url": "https://pypi.org/project/keyboard/",
+    "home_page": "https://github.com/boppreh/keyboard",
+    "license": "MIT",
+    "summary": "Hook and simulate keyboard events on Windows and Linux",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__keyboard.md"
   },
   {
     "id": "pypi:keyboard",
@@ -13250,6 +15327,18 @@
     "summary": "Store and access your passwords safely.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/pypi__keyring.md"
+  },
+  {
+    "id": "pypi:keyring",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "keyring",
+    "version": "25.7.0",
+    "url": "https://pypi.org/project/keyring/",
+    "requires_python": ">=3.9",
+    "summary": "Store and access your passwords safely.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__keyring.md"
   },
   {
     "id": "pypi:kokoro",
@@ -13351,6 +15440,20 @@
     "_path": "research/sources/memory-and-rag/pypi__letta.md"
   },
   {
+    "id": "pypi:librosa",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "librosa",
+    "version": "1.0.0",
+    "url": "https://pypi.org/project/librosa/",
+    "home_page": "https://librosa.org",
+    "license": "ISC",
+    "requires_python": ">=3.12",
+    "summary": "Python module for audio and music processing",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/pypi__librosa.md"
+  },
+  {
     "id": "pypi:llama-cpp-python",
     "kind": "pypi",
     "category": "inference-runtimes",
@@ -13362,6 +15465,19 @@
     "summary": "Python bindings for the llama.cpp library",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/pypi__llama-cpp-python.md"
+  },
+  {
+    "id": "pypi:llama-cpp-python",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "llama-cpp-python",
+    "version": "0.3.36",
+    "url": "https://pypi.org/project/llama-cpp-python/",
+    "license": "MIT",
+    "requires_python": ">=3.8",
+    "summary": "Python bindings for the llama.cpp library",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__llama-cpp-python.md"
   },
   {
     "id": "pypi:llama-index",
@@ -13376,6 +15492,20 @@
     "_path": "research/sources/memory-and-rag/pypi__llama-index.md"
   },
   {
+    "id": "pypi:llmcompressor",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "llmcompressor",
+    "version": "0.15.0",
+    "url": "https://pypi.org/project/llmcompressor/",
+    "home_page": "https://github.com/vllm-project/llm-compressor",
+    "license": "Apache 2.0",
+    "requires_python": ">=3.11",
+    "summary": "A library for compressing large language models utilizing the latest techniques and research in the field for both training aware and post training techniques. The library is designed to be flexible and easy to use on top of PyTorch and HuggingFace Transformers, allowing for quick experimentation.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__llmcompressor.md"
+  },
+  {
     "id": "pypi:lm-eval",
     "kind": "pypi",
     "category": "observability-evals",
@@ -13387,6 +15517,71 @@
     "summary": "A framework for evaluating language models",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/observability-evals/pypi__lm-eval.md"
+  },
+  {
+    "id": "pypi:lm-format-enforcer",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "lm-format-enforcer",
+    "version": "0.11.3",
+    "url": "https://pypi.org/project/lm-format-enforcer/",
+    "home_page": "https://github.com/noamgat/lm-format-enforcer",
+    "license": "MIT",
+    "requires_python": "<4.0,>=3.8",
+    "summary": "Enforce the output format (JSON Schema, Regex etc) of a language model",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__lm-format-enforcer.md"
+  },
+  {
+    "id": "pypi:loguru",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "loguru",
+    "version": "0.7.3",
+    "url": "https://pypi.org/project/loguru/",
+    "requires_python": "<4.0,>=3.5",
+    "summary": "Python logging made (stupidly) simple",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__loguru.md"
+  },
+  {
+    "id": "pypi:lxml",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "lxml",
+    "version": "6.1.3",
+    "url": "https://pypi.org/project/lxml/",
+    "home_page": "https://lxml.de/",
+    "license": "BSD-3-Clause",
+    "requires_python": ">=3.8",
+    "summary": "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/pypi__lxml.md"
+  },
+  {
+    "id": "pypi:markdown",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "Markdown",
+    "version": "3.11.3",
+    "url": "https://pypi.org/project/Markdown/",
+    "requires_python": ">=3.11",
+    "summary": "Python implementation of John Gruber's Markdown.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/pypi__markdown.md"
+  },
+  {
+    "id": "pypi:matplotlib",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "matplotlib",
+    "version": "3.11.2",
+    "url": "https://pypi.org/project/matplotlib/",
+    "license": "License agreement for matplotlib versions 1.3.0 and later",
+    "requires_python": ">=3.11",
+    "summary": "Python plotting package",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/pypi__matplotlib.md"
   },
   {
     "id": "pypi:mcp",
@@ -13467,6 +15662,19 @@
   {
     "id": "pypi:mouse",
     "kind": "pypi",
+    "category": "system-control",
+    "package": "mouse",
+    "version": "0.7.1",
+    "url": "https://pypi.org/project/mouse/",
+    "home_page": "https://github.com/boppreh/mouse",
+    "license": "MIT",
+    "summary": "Hook and simulate mouse events on Windows and Linux",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__mouse.md"
+  },
+  {
+    "id": "pypi:mouse",
+    "kind": "pypi",
     "category": "windows-automation",
     "package": "mouse",
     "version": "0.7.1",
@@ -13476,6 +15684,45 @@
     "summary": "Hook and simulate mouse events on Windows and Linux",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/pypi__mouse.md"
+  },
+  {
+    "id": "pypi:moviepy",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "moviepy",
+    "version": "2.2.1",
+    "url": "https://pypi.org/project/moviepy/",
+    "license": "MIT License",
+    "summary": "Video editing with Python",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/pypi__moviepy.md"
+  },
+  {
+    "id": "pypi:msal",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "msal",
+    "version": "1.39.0",
+    "url": "https://pypi.org/project/msal/",
+    "home_page": "https://github.com/AzureAD/microsoft-authentication-library-for-python",
+    "license": "MIT",
+    "requires_python": ">=3.9",
+    "summary": "The Microsoft Authentication Library (MSAL) for Python library enables your app to access the Microsoft Cloud by supporting authentication of users with Microsoft Azure Active Directory accounts (AAD) and Microsoft Accounts (MSA) using industry standard OAuth2 and OpenID Connect.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/pypi__msal.md"
+  },
+  {
+    "id": "pypi:msoffcrypto-tool",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "msoffcrypto-tool",
+    "version": "6.1.0",
+    "url": "https://pypi.org/project/msoffcrypto-tool/",
+    "license": "MIT",
+    "requires_python": "<4.0,>=3.11",
+    "summary": "Python tool and library for decrypting and encrypting MS Office files using a password or other keys",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__msoffcrypto-tool.md"
   },
   {
     "id": "pypi:mss",
@@ -13491,6 +15738,42 @@
     "_path": "research/sources/windows-automation/pypi__mss.md"
   },
   {
+    "id": "pypi:mutagen",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "mutagen",
+    "version": "1.48.1",
+    "url": "https://pypi.org/project/mutagen/",
+    "requires_python": "<4,>=3.10",
+    "summary": "read and write audio tags for many formats",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/pypi__mutagen.md"
+  },
+  {
+    "id": "pypi:mypy",
+    "kind": "pypi",
+    "category": "coding-agents",
+    "package": "mypy",
+    "version": "2.4.1",
+    "url": "https://pypi.org/project/mypy/",
+    "requires_python": ">=3.10",
+    "summary": "Optional static typing for Python",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/pypi__mypy.md"
+  },
+  {
+    "id": "pypi:nncf",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "nncf",
+    "version": "3.4.0",
+    "url": "https://pypi.org/project/nncf/",
+    "requires_python": ">=3.10",
+    "summary": "Neural Networks Compression Framework",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__nncf.md"
+  },
+  {
     "id": "pypi:notion-client",
     "kind": "pypi",
     "category": "connectors",
@@ -13502,6 +15785,44 @@
     "summary": "Python client for the official Notion API",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/connectors/pypi__notion-client.md"
+  },
+  {
+    "id": "pypi:notion-client",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "notion-client",
+    "version": "3.1.0",
+    "url": "https://pypi.org/project/notion-client/",
+    "home_page": "https://github.com/ramnes/notion-sdk-py",
+    "requires_python": "<4,>=3.8",
+    "summary": "Python client for the official Notion API",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/pypi__notion-client.md"
+  },
+  {
+    "id": "pypi:numpy",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "numpy",
+    "version": "2.5.4",
+    "url": "https://pypi.org/project/numpy/",
+    "requires_python": ">=3.12",
+    "summary": "Fundamental package for array computing in Python",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/pypi__numpy.md"
+  },
+  {
+    "id": "pypi:nvidia-ml-py",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "nvidia-ml-py",
+    "version": "13.615.71",
+    "url": "https://pypi.org/project/nvidia-ml-py/",
+    "home_page": "https://forums.developer.nvidia.com",
+    "license": "BSD",
+    "summary": "Python Bindings for the NVIDIA Management Library",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__nvidia-ml-py.md"
   },
   {
     "id": "pypi:nvidia-ml-py",
@@ -13517,6 +15838,30 @@
     "_path": "research/sources/windows-automation/pypi__nvidia-ml-py.md"
   },
   {
+    "id": "pypi:odfpy",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "odfpy",
+    "version": "1.4.1",
+    "url": "https://pypi.org/project/odfpy/",
+    "home_page": "https://github.com/eea/odfpy",
+    "summary": "Python API and tools to manipulate OpenDocument files",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__odfpy.md"
+  },
+  {
+    "id": "pypi:onnx",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "onnx",
+    "version": "1.23.2",
+    "url": "https://pypi.org/project/onnx/",
+    "requires_python": ">=3.10",
+    "summary": "Open Neural Network Exchange",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/low-end-inference/pypi__onnx.md"
+  },
+  {
     "id": "pypi:onnxruntime",
     "kind": "pypi",
     "category": "inference-runtimes",
@@ -13529,6 +15874,20 @@
     "summary": "ONNX Runtime is a runtime accelerator for Machine Learning models",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/pypi__onnxruntime.md"
+  },
+  {
+    "id": "pypi:onnxruntime",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "onnxruntime",
+    "version": "1.31.1",
+    "url": "https://pypi.org/project/onnxruntime/",
+    "home_page": "https://onnxruntime.ai",
+    "license": "MIT License",
+    "requires_python": ">=3.11",
+    "summary": "ONNX Runtime is a runtime accelerator for Machine Learning models",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/pypi__onnxruntime.md"
   },
   {
     "id": "pypi:onnxruntime",
@@ -13559,6 +15918,20 @@
     "_path": "research/sources/whisper-and-asr/pypi__onnxruntime.md"
   },
   {
+    "id": "pypi:onnxruntime-directml",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "onnxruntime-directml",
+    "version": "1.24.4",
+    "url": "https://pypi.org/project/onnxruntime-directml/",
+    "home_page": "https://onnxruntime.ai",
+    "license": "MIT License",
+    "requires_python": ">=3.11",
+    "summary": "ONNX Runtime is a runtime accelerator for Machine Learning models",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__onnxruntime-directml.md"
+  },
+  {
     "id": "pypi:onnxruntime-genai",
     "kind": "pypi",
     "category": "inference-runtimes",
@@ -13569,6 +15942,18 @@
     "summary": "ONNX Runtime GenAI",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/pypi__onnxruntime-genai.md"
+  },
+  {
+    "id": "pypi:onnxruntime-genai",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "onnxruntime-genai",
+    "version": "0.19.0",
+    "url": "https://pypi.org/project/onnxruntime-genai/",
+    "license": "MIT License",
+    "summary": "ONNX Runtime GenAI",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__onnxruntime-genai.md"
   },
   {
     "id": "pypi:onnxruntime-genai",
@@ -13622,6 +16007,20 @@
     "_path": "research/sources/screen-understanding/pypi__opencv-python.md"
   },
   {
+    "id": "pypi:opencv-python-headless",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "opencv-python-headless",
+    "version": "5.0.0.93",
+    "url": "https://pypi.org/project/opencv-python-headless/",
+    "home_page": "https://github.com/opencv/opencv-python",
+    "license": "Apache 2.0",
+    "requires_python": ">=3.6",
+    "summary": "Wrapper package for OpenCV python bindings.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/pypi__opencv-python-headless.md"
+  },
+  {
     "id": "pypi:openinference-instrumentation",
     "kind": "pypi",
     "category": "observability-evals",
@@ -13632,6 +16031,32 @@
     "summary": "OpenInference instrumentation utilities",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/observability-evals/pypi__openinference-instrumentation.md"
+  },
+  {
+    "id": "pypi:openpyxl",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "openpyxl",
+    "version": "3.1.5",
+    "url": "https://pypi.org/project/openpyxl/",
+    "home_page": "https://openpyxl.readthedocs.io",
+    "license": "MIT",
+    "requires_python": ">=3.8",
+    "summary": "A Python library to read/write Excel 2010 xlsx/xlsm files",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__openpyxl.md"
+  },
+  {
+    "id": "pypi:opentelemetry-exporter-otlp",
+    "kind": "pypi",
+    "category": "observability-evals",
+    "package": "opentelemetry-exporter-otlp",
+    "version": "1.45.2",
+    "url": "https://pypi.org/project/opentelemetry-exporter-otlp/",
+    "requires_python": ">=3.10",
+    "summary": "OpenTelemetry Collector Exporters",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/observability-evals/pypi__opentelemetry-exporter-otlp.md"
   },
   {
     "id": "pypi:opentelemetry-sdk",
@@ -13659,6 +16084,19 @@
     "_path": "research/sources/inference-runtimes/pypi__openvino.md"
   },
   {
+    "id": "pypi:openvino",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "openvino",
+    "version": "2026.4.1",
+    "url": "https://pypi.org/project/openvino/",
+    "home_page": "https://docs.openvino.ai/2023.0/index.html",
+    "requires_python": ">=3.10",
+    "summary": "OpenVINO(TM) Runtime",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/pypi__openvino.md"
+  },
+  {
     "id": "pypi:openvino-genai",
     "kind": "pypi",
     "category": "inference-runtimes",
@@ -13670,6 +16108,19 @@
     "summary": "Library of the most popular Generative AI model pipelines, optimized execution methods, and samples",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/pypi__openvino-genai.md"
+  },
+  {
+    "id": "pypi:openvino-genai",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "openvino-genai",
+    "version": "2026.4.1.0",
+    "url": "https://pypi.org/project/openvino-genai/",
+    "license": "Apache License",
+    "requires_python": ">=3.10",
+    "summary": "Library of the most popular Generative AI model pipelines, optimized execution methods, and samples",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__openvino-genai.md"
   },
   {
     "id": "pypi:openwakeword",
@@ -13699,6 +16150,33 @@
     "_path": "research/sources/inference-runtimes/pypi__optimum.md"
   },
   {
+    "id": "pypi:optimum",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "optimum",
+    "version": "2.3.0",
+    "url": "https://pypi.org/project/optimum/",
+    "home_page": "https://github.com/huggingface/optimum",
+    "license": "Apache",
+    "requires_python": ">=3.9.0",
+    "summary": "Optimum Library is an extension of the Hugging Face Transformers library, providing a framework to integrate third-party libraries from Hardware Partners and interface with their specific functionality.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__optimum.md"
+  },
+  {
+    "id": "pypi:outlines",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "outlines",
+    "version": "1.3.3",
+    "url": "https://pypi.org/project/outlines/",
+    "license": "Apache-2.0",
+    "requires_python": "<3.14,>=3.10",
+    "summary": "Probabilistic Generative Model Programming",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__outlines.md"
+  },
+  {
     "id": "pypi:paddleocr",
     "kind": "pypi",
     "category": "screen-understanding",
@@ -13723,6 +16201,55 @@
     "summary": "Parallel Distributed Deep Learning",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/screen-understanding/pypi__paddlepaddle.md"
+  },
+  {
+    "id": "pypi:paho-mqtt",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "paho-mqtt",
+    "version": "2.2.0",
+    "url": "https://pypi.org/project/paho-mqtt/",
+    "requires_python": ">=3.9",
+    "summary": "MQTT version 5.0/3.1.1 client class",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/pypi__paho-mqtt.md"
+  },
+  {
+    "id": "pypi:pandas",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "pandas",
+    "version": "3.1.1",
+    "url": "https://pypi.org/project/pandas/",
+    "requires_python": ">=3.11",
+    "summary": "Powerful data structures for data analysis, time series, and statistics",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/pypi__pandas.md"
+  },
+  {
+    "id": "pypi:pdfkit",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "pdfkit",
+    "version": "1.0.0",
+    "url": "https://pypi.org/project/pdfkit/",
+    "license": "MIT",
+    "summary": "Wkhtmltopdf python wrapper to convert html to pdf using the webkit rendering engine and qt",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/pypi__pdfkit.md"
+  },
+  {
+    "id": "pypi:pdfplumber",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "pdfplumber",
+    "version": "0.11.10",
+    "url": "https://pypi.org/project/pdfplumber/",
+    "home_page": "https://github.com/jsvine/pdfplumber",
+    "requires_python": ">=3.8",
+    "summary": "Plumb a PDF for detailed information about each char, rectangle, and line.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__pdfplumber.md"
   },
   {
     "id": "pypi:phoenix",
@@ -13776,6 +16303,45 @@
     "_path": "research/sources/tts-and-voice/pypi__piper-tts.md"
   },
   {
+    "id": "pypi:plotly",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "plotly",
+    "version": "7.1.0",
+    "url": "https://pypi.org/project/plotly/",
+    "requires_python": ">=3.8",
+    "summary": "An open-source interactive data visualization library for Python",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/pypi__plotly.md"
+  },
+  {
+    "id": "pypi:polars",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "polars",
+    "version": "2.1.0",
+    "url": "https://pypi.org/project/polars/",
+    "license": "Copyright (c) 2025 Ritchie Vink",
+    "requires_python": ">=3.11",
+    "summary": "Blazingly fast DataFrame library",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/pypi__polars.md"
+  },
+  {
+    "id": "pypi:pre-commit",
+    "kind": "pypi",
+    "category": "coding-agents",
+    "package": "pre-commit",
+    "version": "4.7.0",
+    "url": "https://pypi.org/project/pre-commit/",
+    "home_page": "https://github.com/pre-commit/pre-commit",
+    "license": "MIT",
+    "requires_python": ">=3.11",
+    "summary": "A framework for managing and maintaining multi-language pre-commit hooks.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/coding-agents/pypi__pre-commit.md"
+  },
+  {
     "id": "pypi:prefect",
     "kind": "pypi",
     "category": "orchestration",
@@ -13813,6 +16379,18 @@
     "_path": "research/sources/safety-and-security/pypi__presidio-anonymizer.md"
   },
   {
+    "id": "pypi:prometheus-client",
+    "kind": "pypi",
+    "category": "observability-evals",
+    "package": "prometheus-client",
+    "version": "0.26.0",
+    "url": "https://pypi.org/project/prometheus-client/",
+    "requires_python": ">=3.9",
+    "summary": "Python client for the Prometheus monitoring system.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/observability-evals/pypi__prometheus-client.md"
+  },
+  {
     "id": "pypi:promptfoo",
     "kind": "pypi",
     "category": "observability-evals",
@@ -13824,6 +16402,47 @@
     "summary": "Python wrapper for the promptfoo CLI - LLM testing, red teaming, and security evaluation",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/observability-evals/pypi__promptfoo.md"
+  },
+  {
+    "id": "pypi:protobuf",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "protobuf",
+    "version": "7.36.2",
+    "url": "https://pypi.org/project/protobuf/",
+    "home_page": "https://developers.google.com/protocol-buffers/",
+    "license": "3-Clause BSD License",
+    "requires_python": ">=3.10",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/low-end-inference/pypi__protobuf.md"
+  },
+  {
+    "id": "pypi:psutil",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "psutil",
+    "version": "7.2.2",
+    "url": "https://pypi.org/project/psutil/",
+    "home_page": "https://github.com/giampaolo/psutil",
+    "license": "BSD-3-Clause",
+    "requires_python": ">=3.6",
+    "summary": "Cross-platform lib for process and system monitoring.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__psutil.md"
+  },
+  {
+    "id": "pypi:psutil",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "psutil",
+    "version": "7.2.2",
+    "url": "https://pypi.org/project/psutil/",
+    "home_page": "https://github.com/giampaolo/psutil",
+    "license": "BSD-3-Clause",
+    "requires_python": ">=3.6",
+    "summary": "Cross-platform lib for process and system monitoring.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__psutil.md"
   },
   {
     "id": "pypi:psutil",
@@ -13853,6 +16472,19 @@
     "_path": "research/sources/whisper-and-asr/pypi__pvporcupine.md"
   },
   {
+    "id": "pypi:py-cpuinfo",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "py-cpuinfo",
+    "version": "9.0.0",
+    "url": "https://pypi.org/project/py-cpuinfo/",
+    "home_page": "https://github.com/workhorsy/py-cpuinfo",
+    "license": "MIT",
+    "summary": "Get CPU info with pure Python",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__py-cpuinfo.md"
+  },
+  {
     "id": "pypi:pyannote.audio",
     "kind": "pypi",
     "category": "whisper-and-asr",
@@ -13863,6 +16495,31 @@
     "summary": "State-of-the-art speaker diarization toolkit",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/whisper-and-asr/pypi__pyannote.audio.md"
+  },
+  {
+    "id": "pypi:pyarrow",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "pyarrow",
+    "version": "26.0.1",
+    "url": "https://pypi.org/project/pyarrow/",
+    "requires_python": ">=3.11",
+    "summary": "Python library for Apache Arrow",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/pypi__pyarrow.md"
+  },
+  {
+    "id": "pypi:pyautogui",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "PyAutoGUI",
+    "version": "0.9.54",
+    "url": "https://pypi.org/project/PyAutoGUI/",
+    "home_page": "https://github.com/asweigart/pyautogui",
+    "license": "BSD",
+    "summary": "PyAutoGUI lets Python control the mouse and keyboard, and other GUI automation tasks. For Windows, macOS, and Linux, on Python 3 and 2.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__pyautogui.md"
   },
   {
     "id": "pypi:pyautogui",
@@ -13876,6 +16533,18 @@
     "summary": "PyAutoGUI lets Python control the mouse and keyboard, and other GUI automation tasks. For Windows, macOS, and Linux, on Python 3 and 2.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/pypi__pyautogui.md"
+  },
+  {
+    "id": "pypi:pycaw",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "pycaw",
+    "version": "20260927",
+    "url": "https://pypi.org/project/pycaw/",
+    "requires_python": ">=3.10",
+    "summary": "Python Core Audio Windows Library",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__pycaw.md"
   },
   {
     "id": "pypi:pydantic",
@@ -13914,6 +16583,59 @@
     "_path": "research/sources/safety-and-security/pypi__pydantic-settings.md"
   },
   {
+    "id": "pypi:pydub",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "pydub",
+    "version": "0.25.1",
+    "url": "https://pypi.org/project/pydub/",
+    "home_page": "http://pydub.com",
+    "license": "MIT",
+    "summary": "Manipulate audio with an simple and easy high level interface",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/pypi__pydub.md"
+  },
+  {
+    "id": "pypi:pyexcel",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "pyexcel",
+    "version": "0.7.6",
+    "url": "https://pypi.org/project/pyexcel/",
+    "home_page": "https://github.com/pyexcel/pyexcel",
+    "license": "New BSD",
+    "requires_python": ">=3.6",
+    "summary": "A wrapper library that provides one API to read, manipulate and writedata in different excel formats",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__pyexcel.md"
+  },
+  {
+    "id": "pypi:pygetwindow",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "PyGetWindow",
+    "version": "0.0.9",
+    "url": "https://pypi.org/project/PyGetWindow/",
+    "home_page": "https://github.com/asweigart/pygetwindow",
+    "license": "BSD",
+    "summary": "A simple, cross-platform module for obtaining GUI information on application's windows.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__pygetwindow.md"
+  },
+  {
+    "id": "pypi:pymupdf",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "pymupdf",
+    "version": "2.1",
+    "url": "https://pypi.org/project/pymupdf/",
+    "license": "Dual Licensed - GNU AFFERO GPL 3.0 or Artifex Commercial License",
+    "requires_python": ">=3.11",
+    "summary": "A high performance Python library for data extraction, analysis, conversion & manipulation of PDF (and other) documents.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__pymupdf.md"
+  },
+  {
     "id": "pypi:pynput",
     "kind": "pypi",
     "category": "windows-automation",
@@ -13925,6 +16647,42 @@
     "summary": "Monitor and control user input devices",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/pypi__pynput.md"
+  },
+  {
+    "id": "pypi:pyotp",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "PyOTP",
+    "version": "2.10.0",
+    "url": "https://pypi.org/project/PyOTP/",
+    "requires_python": ">=3.8",
+    "summary": "Python One Time Password Library",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__pyotp.md"
+  },
+  {
+    "id": "pypi:pypdf",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "pypdf",
+    "version": "7.0.0",
+    "url": "https://pypi.org/project/pypdf/",
+    "requires_python": ">=3.10",
+    "summary": "A pure-python PDF library capable of splitting, merging, cropping, and transforming PDF files",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__pypdf.md"
+  },
+  {
+    "id": "pypi:pyperclip",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "pyperclip",
+    "version": "1.11.0",
+    "url": "https://pypi.org/project/pyperclip/",
+    "license": "BSD",
+    "summary": "A cross-platform clipboard module for Python. (Only handles plain text for now.)",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__pyperclip.md"
   },
   {
     "id": "pypi:pyright",
@@ -13939,6 +16697,19 @@
     "summary": "Command line wrapper for pyright",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/coding-agents/pypi__pyright.md"
+  },
+  {
+    "id": "pypi:pyscreeze",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "PyScreeze",
+    "version": "1.0.1",
+    "url": "https://pypi.org/project/PyScreeze/",
+    "home_page": "https://github.com/asweigart/pyscreeze",
+    "license": "MIT",
+    "summary": "A simple, cross-platform screenshot module for Python 2 and 3.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__pyscreeze.md"
   },
   {
     "id": "pypi:pytesseract",
@@ -13967,6 +16738,31 @@
     "_path": "research/sources/coding-agents/pypi__pytest.md"
   },
   {
+    "id": "pypi:pytest-benchmark",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "pytest-benchmark",
+    "version": "5.3.1",
+    "url": "https://pypi.org/project/pytest-benchmark/",
+    "requires_python": ">=3.10",
+    "summary": "A ``pytest`` fixture for benchmarking code. It will group the tests into rounds that are calibrated to the chosen timer.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/pypi__pytest-benchmark.md"
+  },
+  {
+    "id": "pypi:python-docx",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "python-docx",
+    "version": "1.2.0",
+    "url": "https://pypi.org/project/python-docx/",
+    "license": "MIT",
+    "requires_python": ">=3.9",
+    "summary": "Create, read, and update Microsoft Word .docx files.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__python-docx.md"
+  },
+  {
     "id": "pypi:python-dotenv",
     "kind": "pypi",
     "category": "safety-and-security",
@@ -13978,6 +16774,19 @@
     "summary": "Read key-value pairs from a .env file and set them as environment variables",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/pypi__python-dotenv.md"
+  },
+  {
+    "id": "pypi:python-pptx",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "python-pptx",
+    "version": "1.0.2",
+    "url": "https://pypi.org/project/python-pptx/",
+    "license": "MIT",
+    "requires_python": ">=3.8",
+    "summary": "Create, read, and update PowerPoint 2007+ (.pptx) files.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__python-pptx.md"
   },
   {
     "id": "pypi:python-telegram-bot",
@@ -13992,6 +16801,18 @@
     "_path": "research/sources/connectors/pypi__python-telegram-bot.md"
   },
   {
+    "id": "pypi:python-telegram-bot",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "python-telegram-bot",
+    "version": "22.8",
+    "url": "https://pypi.org/project/python-telegram-bot/",
+    "requires_python": ">=3.10",
+    "summary": "We have made you a wrapper you can't refuse",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/pypi__python-telegram-bot.md"
+  },
+  {
     "id": "pypi:pythonnet",
     "kind": "pypi",
     "category": "windows-automation",
@@ -14002,6 +16823,33 @@
     "summary": ".NET and Mono integration for Python",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/pypi__pythonnet.md"
+  },
+  {
+    "id": "pypi:pyuac",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "pyuac",
+    "version": "0.0.3",
+    "url": "https://pypi.org/project/pyuac/",
+    "home_page": "https://github.com/Preston-Landers/pyuac",
+    "license": "MIT",
+    "requires_python": ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*",
+    "summary": "Python library for Windows User Access Control (UAC)",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__pyuac.md"
+  },
+  {
+    "id": "pypi:pywin32",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "pywin32",
+    "version": "312",
+    "url": "https://pypi.org/project/pywin32/",
+    "license": "PSF",
+    "requires_python": ">=3.9",
+    "summary": "Python for Windows Extensions",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__pywin32.md"
   },
   {
     "id": "pypi:pywin32",
@@ -14030,6 +16878,18 @@
     "_path": "research/sources/windows-automation/pypi__pywinauto.md"
   },
   {
+    "id": "pypi:pywinpty",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "pywinpty",
+    "version": "3.1.2",
+    "url": "https://pypi.org/project/pywinpty/",
+    "requires_python": ">=3.10",
+    "summary": "Pseudo terminal support for Windows from Python.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__pywinpty.md"
+  },
+  {
     "id": "pypi:qdrant-client",
     "kind": "pypi",
     "category": "memory-and-rag",
@@ -14041,6 +16901,20 @@
     "summary": "Client library for the Qdrant vector search engine",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/memory-and-rag/pypi__qdrant-client.md"
+  },
+  {
+    "id": "pypi:qrcode",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "qrcode",
+    "version": "8.2",
+    "url": "https://pypi.org/project/qrcode/",
+    "home_page": "https://github.com/lincolnloop/python-qrcode",
+    "license": "BSD",
+    "requires_python": "<4.0,>=3.9",
+    "summary": "QR Code image generator",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__qrcode.md"
   },
   {
     "id": "pypi:radon",
@@ -14096,6 +16970,58 @@
     "_path": "research/sources/screen-understanding/pypi__rapidocr-onnxruntime.md"
   },
   {
+    "id": "pypi:recurring-ical-events",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "recurring-ical-events",
+    "version": "3.8.2",
+    "url": "https://pypi.org/project/recurring-ical-events/",
+    "requires_python": ">=3.8",
+    "summary": "Calculate recurrence times of events, todos, alarms and journals based on icalendar RFC5545.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/pypi__recurring-ical-events.md"
+  },
+  {
+    "id": "pypi:reportlab",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "reportlab",
+    "version": "5.1.0",
+    "url": "https://pypi.org/project/reportlab/",
+    "home_page": "https://www.reportlab.com/",
+    "license": "BSD license (see license.txt for details), Copyright (c) 2000-2025, ReportLab In",
+    "requires_python": "<4,>=3.9",
+    "summary": "The Reportlab Toolkit",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/pypi__reportlab.md"
+  },
+  {
+    "id": "pypi:requests",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "requests",
+    "version": "2.34.2",
+    "url": "https://pypi.org/project/requests/",
+    "license": "Apache-2.0",
+    "requires_python": ">=3.10",
+    "summary": "Python HTTP for Humans.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/connectors-extra/pypi__requests.md"
+  },
+  {
+    "id": "pypi:rich",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "rich",
+    "version": "15.0.0",
+    "url": "https://pypi.org/project/rich/",
+    "license": "MIT",
+    "requires_python": ">=3.9.0",
+    "summary": "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__rich.md"
+  },
+  {
     "id": "pypi:ruff",
     "kind": "pypi",
     "category": "coding-agents",
@@ -14109,6 +17035,17 @@
     "_path": "research/sources/coding-agents/pypi__ruff.md"
   },
   {
+    "id": "pypi:safetensors",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "safetensors",
+    "version": "0.8.0",
+    "url": "https://pypi.org/project/safetensors/",
+    "requires_python": ">=3.10",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/pypi__safetensors.md"
+  },
+  {
     "id": "pypi:safety",
     "kind": "pypi",
     "category": "safety-and-security",
@@ -14119,6 +17056,33 @@
     "summary": "Scan dependencies for known vulnerabilities and licenses.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/pypi__safety.md"
+  },
+  {
+    "id": "pypi:scikit-image",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "scikit-image",
+    "version": "0.26.0",
+    "url": "https://pypi.org/project/scikit-image/",
+    "license": "Files: *",
+    "requires_python": ">=3.11",
+    "summary": "Image processing in Python",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/pypi__scikit-image.md"
+  },
+  {
+    "id": "pypi:screeninfo",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "screeninfo",
+    "version": "0.8.1",
+    "url": "https://pypi.org/project/screeninfo/",
+    "home_page": "https://github.com/rr-/screeninfo",
+    "license": "MIT",
+    "requires_python": ">=3.6.2,<4.0.0",
+    "summary": "Fetch location and size of physical screens.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__screeninfo.md"
   },
   {
     "id": "pypi:semantic-kernel",
@@ -14171,6 +17135,31 @@
     "_path": "research/sources/memory-and-rag/pypi__sentence-transformers.md"
   },
   {
+    "id": "pypi:sentencepiece",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "sentencepiece",
+    "version": "0.2.3",
+    "url": "https://pypi.org/project/sentencepiece/",
+    "requires_python": ">=3.10",
+    "summary": "Unsupervised text tokenizer and detokenizer.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/pypi__sentencepiece.md"
+  },
+  {
+    "id": "pypi:sherpa-onnx",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "sherpa-onnx",
+    "version": "2.0.1",
+    "url": "https://pypi.org/project/sherpa-onnx/",
+    "home_page": "https://github.com/k2-fsa/sherpa-onnx",
+    "license": "Apache licensed, as found in the LICENSE file",
+    "requires_python": ">=3.7",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/pypi__sherpa-onnx.md"
+  },
+  {
     "id": "pypi:sherpa-onnx",
     "kind": "pypi",
     "category": "whisper-and-asr",
@@ -14196,6 +17185,19 @@
     "_path": "research/sources/whisper-and-asr/pypi__silero-vad.md"
   },
   {
+    "id": "pypi:skl2onnx",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "skl2onnx",
+    "version": "1.20.0",
+    "url": "https://pypi.org/project/skl2onnx/",
+    "license": "Apache License v2.0",
+    "requires_python": ">=3.8",
+    "summary": "Convert scikit-learn models to ONNX",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/low-end-inference/pypi__skl2onnx.md"
+  },
+  {
     "id": "pypi:slack-sdk",
     "kind": "pypi",
     "category": "connectors",
@@ -14208,6 +17210,20 @@
     "summary": "The Slack API Platform SDK for Python",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/connectors/pypi__slack-sdk.md"
+  },
+  {
+    "id": "pypi:slack-sdk",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "slack-sdk",
+    "version": "3.46.0",
+    "url": "https://pypi.org/project/slack-sdk/",
+    "home_page": "https://github.com/slackapi/python-slack-sdk",
+    "license": "MIT",
+    "requires_python": ">=3.7",
+    "summary": "The Slack API Platform SDK for Python",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/pypi__slack-sdk.md"
   },
   {
     "id": "pypi:smolagents",
@@ -14248,6 +17264,20 @@
   {
     "id": "pypi:soundfile",
     "kind": "pypi",
+    "category": "media-production",
+    "package": "soundfile",
+    "version": "0.14.0",
+    "url": "https://pypi.org/project/soundfile/",
+    "home_page": "https://github.com/bastibe/python-soundfile",
+    "license": "BSD 3-Clause License",
+    "requires_python": ">=3.10",
+    "summary": "An audio library based on libsndfile, CFFI and NumPy",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/pypi__soundfile.md"
+  },
+  {
+    "id": "pypi:soundfile",
+    "kind": "pypi",
     "category": "whisper-and-asr",
     "package": "soundfile",
     "version": "0.14.0",
@@ -14270,6 +17300,30 @@
     "license": "MIT License, Apache License, Version 2.0",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/memory-and-rag/pypi__sqlite-vec.md"
+  },
+  {
+    "id": "pypi:structlog",
+    "kind": "pypi",
+    "category": "observability-evals",
+    "package": "structlog",
+    "version": "26.1.0",
+    "url": "https://pypi.org/project/structlog/",
+    "requires_python": ">=3.10",
+    "summary": "Structured Logging for Python",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/observability-evals/pypi__structlog.md"
+  },
+  {
+    "id": "pypi:structlog",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "structlog",
+    "version": "26.1.0",
+    "url": "https://pypi.org/project/structlog/",
+    "requires_python": ">=3.10",
+    "summary": "Structured Logging for Python",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__structlog.md"
   },
   {
     "id": "pypi:surya-ocr",
@@ -14298,6 +17352,32 @@
     "_path": "research/sources/benchmarks/pypi__swebench.md"
   },
   {
+    "id": "pypi:tablib",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "tablib",
+    "version": "3.10.0",
+    "url": "https://pypi.org/project/tablib/",
+    "license": "MIT License",
+    "requires_python": ">=3.10",
+    "summary": "Format agnostic tabular data library (XLS, JSON, YAML, CSV, etc.)",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__tablib.md"
+  },
+  {
+    "id": "pypi:tabula-py",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "tabula-py",
+    "version": "2.10.0",
+    "url": "https://pypi.org/project/tabula-py/",
+    "license": "The MIT License (MIT) Copyright (c) 2016 Michiaki Ariga  Permission is hereby gr",
+    "requires_python": ">=3.9",
+    "summary": "Simple wrapper for tabula-java, read tables from PDF into DataFrame",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/pypi__tabula-py.md"
+  },
+  {
     "id": "pypi:temporalio",
     "kind": "pypi",
     "category": "orchestration",
@@ -14308,6 +17388,54 @@
     "summary": "Temporal.io Python SDK",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/pypi__temporalio.md"
+  },
+  {
+    "id": "pypi:tenacity",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "tenacity",
+    "version": "9.2.1",
+    "url": "https://pypi.org/project/tenacity/",
+    "requires_python": ">=3.10",
+    "summary": "Retry code until it succeeds",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__tenacity.md"
+  },
+  {
+    "id": "pypi:tf2onnx",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "tf2onnx",
+    "version": "1.17.0",
+    "url": "https://pypi.org/project/tf2onnx/",
+    "requires_python": ">=3.10",
+    "summary": "Tensorflow to ONNX converter",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/low-end-inference/pypi__tf2onnx.md"
+  },
+  {
+    "id": "pypi:tiktoken",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "tiktoken",
+    "version": "0.14.0",
+    "url": "https://pypi.org/project/tiktoken/",
+    "license": "MIT License",
+    "requires_python": ">=3.9",
+    "summary": "tiktoken is a fast BPE tokeniser for use with OpenAI's models",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/perf-optimization/pypi__tiktoken.md"
+  },
+  {
+    "id": "pypi:tokenizers",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "tokenizers",
+    "version": "0.23.3",
+    "url": "https://pypi.org/project/tokenizers/",
+    "requires_python": ">=3.10",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__tokenizers.md"
   },
   {
     "id": "pypi:torch",
@@ -14322,6 +17450,18 @@
     "_path": "research/sources/inference-runtimes/pypi__torch.md"
   },
   {
+    "id": "pypi:torchao",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "torchao",
+    "version": "0.18.0",
+    "url": "https://pypi.org/project/torchao/",
+    "home_page": "https://github.com/pytorch/ao",
+    "summary": "Package for applying ao techniques to GPU models",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__torchao.md"
+  },
+  {
     "id": "pypi:transformers",
     "kind": "pypi",
     "category": "inference-runtimes",
@@ -14334,6 +17474,20 @@
     "summary": "Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/pypi__transformers.md"
+  },
+  {
+    "id": "pypi:transformers",
+    "kind": "pypi",
+    "category": "low-end-inference",
+    "package": "transformers",
+    "version": "5.22.2",
+    "url": "https://pypi.org/project/transformers/",
+    "home_page": "https://github.com/huggingface/transformers",
+    "license": "Apache 2.0 License",
+    "requires_python": ">=3.11.0",
+    "summary": "Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/low-end-inference/pypi__transformers.md"
   },
   {
     "id": "pypi:transformers",
@@ -14372,6 +17526,32 @@
     "summary": "Pre-compiled tree-sitter grammars for 371 programming languages",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/coding-agents/pypi__tree-sitter-language-pack.md"
+  },
+  {
+    "id": "pypi:twilio",
+    "kind": "pypi",
+    "category": "connectors-extra",
+    "package": "twilio",
+    "version": "9.13.0",
+    "url": "https://pypi.org/project/twilio/",
+    "home_page": "https://github.com/twilio/twilio-python/",
+    "license": "MIT",
+    "requires_python": ">=3.7.0",
+    "summary": "Twilio API client and TwiML generator",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/connectors-extra/pypi__twilio.md"
+  },
+  {
+    "id": "pypi:typer",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "typer",
+    "version": "0.28.0",
+    "url": "https://pypi.org/project/typer/",
+    "requires_python": ">=3.10",
+    "summary": "Typer, build great CLIs. Easy to code. Based on Python type hints.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__typer.md"
   },
   {
     "id": "pypi:uiautomation",
@@ -14436,6 +17616,45 @@
     "_path": "research/sources/inference-runtimes/pypi__vllm.md"
   },
   {
+    "id": "pypi:watchdog",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "watchdog",
+    "version": "7.1.0",
+    "url": "https://pypi.org/project/watchdog/",
+    "home_page": "https://github.com/gorakhargosh/watchdog",
+    "license": "Apache-2.0",
+    "requires_python": ">=3.11",
+    "summary": "Filesystem events monitoring",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/system-control/pypi__watchdog.md"
+  },
+  {
+    "id": "pypi:wave",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "Wave",
+    "version": "0.1.0",
+    "url": "https://pypi.org/project/Wave/",
+    "license": "MIT",
+    "requires_python": ">=3.10,<4.0",
+    "summary": "Whole architecture verification.",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/media-production/pypi__wave.md"
+  },
+  {
+    "id": "pypi:weasyprint",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "weasyprint",
+    "version": "70.0",
+    "url": "https://pypi.org/project/weasyprint/",
+    "requires_python": ">=3.10",
+    "summary": "The Awesome Document Factory",
+    "fetched_at": "2026-11-08T12:19:23Z",
+    "_path": "research/sources/office-automation/pypi__weasyprint.md"
+  },
+  {
     "id": "pypi:webrtcvad",
     "kind": "pypi",
     "category": "whisper-and-asr",
@@ -14463,6 +17682,33 @@
     "_path": "research/sources/whisper-and-asr/pypi__webrtcvad-wheels.md"
   },
   {
+    "id": "pypi:whisper-timestamped",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "whisper-timestamped",
+    "version": "1.15.9",
+    "url": "https://pypi.org/project/whisper-timestamped/",
+    "home_page": "https://github.com/linto-ai/whisper-timestamped",
+    "license": "GPLv3",
+    "requires_python": ">=3.7",
+    "summary": "Multi-lingual Automatic Speech Recognition (ASR) based on Whisper models, with accurate word timestamps, access to language detection confidence, several options for Voice Activity Detection (VAD), and more.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/pypi__whisper-timestamped.md"
+  },
+  {
+    "id": "pypi:whisperx",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "whisperx",
+    "version": "3.8.6",
+    "url": "https://pypi.org/project/whisperx/",
+    "license": "BSD-2-Clause",
+    "requires_python": "<3.14,>=3.10",
+    "summary": "Time-Accurate Automatic Speech Recognition using Whisper.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/pypi__whisperx.md"
+  },
+  {
     "id": "pypi:whisperx",
     "kind": "pypi",
     "category": "whisper-and-asr",
@@ -14474,6 +17720,45 @@
     "summary": "Time-Accurate Automatic Speech Recognition using Whisper.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/whisper-and-asr/pypi__whisperx.md"
+  },
+  {
+    "id": "pypi:winrt-runtime",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "winrt-runtime",
+    "version": "4.1.0",
+    "url": "https://pypi.org/project/winrt-runtime/",
+    "requires_python": ">=3.11",
+    "summary": "The runtime that every PyWinRT projection package runs on",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__winrt-runtime.md"
+  },
+  {
+    "id": "pypi:winsdk",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "winsdk",
+    "version": "1.0.0b10",
+    "url": "https://pypi.org/project/winsdk/",
+    "home_page": "https://github.com/pywinrt/python-winsdk",
+    "license": "MIT",
+    "requires_python": ">=3.8",
+    "summary": "Python bindings for the Windows SDK",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__winsdk.md"
+  },
+  {
+    "id": "pypi:wmi",
+    "kind": "pypi",
+    "category": "system-control",
+    "package": "WMI",
+    "version": "1.5.1",
+    "url": "https://pypi.org/project/WMI/",
+    "home_page": "http://timgolden.me.uk/python/wmi.html",
+    "license": "http://www.opensource.org/licenses/mit-license.php",
+    "summary": "Windows Management Instrumentation",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/system-control/pypi__wmi.md"
   },
   {
     "id": "pypi:wmi",
@@ -14489,6 +17774,46 @@
     "_path": "research/sources/windows-automation/pypi__wmi.md"
   },
   {
+    "id": "pypi:xgrammar",
+    "kind": "pypi",
+    "category": "perf-optimization",
+    "package": "xgrammar",
+    "version": "0.2.8",
+    "url": "https://pypi.org/project/xgrammar/",
+    "license": "Apache 2.0",
+    "requires_python": "<4,>=3.8",
+    "summary": "Efficient, Flexible and Portable Structured Generation",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/perf-optimization/pypi__xgrammar.md"
+  },
+  {
+    "id": "pypi:xlwings",
+    "kind": "pypi",
+    "category": "office-automation",
+    "package": "xlwings",
+    "version": "0.37.8",
+    "url": "https://pypi.org/project/xlwings/",
+    "license": "BSD 3-clause",
+    "requires_python": ">=3.11",
+    "summary": "Make Excel fly: Interact with Excel from Python and vice versa.",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/office-automation/pypi__xlwings.md"
+  },
+  {
+    "id": "pypi:youtube-transcript-api",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "youtube-transcript-api",
+    "version": "1.2.5",
+    "url": "https://pypi.org/project/youtube-transcript-api/",
+    "home_page": "https://github.com/jdepoix/youtube-transcript-api",
+    "license": "MIT",
+    "requires_python": "<3.16,>=3.8",
+    "summary": "This is a python API which allows you to get the transcripts/subtitles for a given YouTube video. It also works for automatically generated subtitles, supports translating subtitles and it does not require a headless browser, like other selenium based solutions do!",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/pypi__youtube-transcript-api.md"
+  },
+  {
     "id": "pypi:youtube-transcript-api",
     "kind": "pypi",
     "category": "whisper-and-asr",
@@ -14501,6 +17826,18 @@
     "summary": "This is a python API which allows you to get the transcripts/subtitles for a given YouTube video. It also works for automatically generated subtitles, supports translating subtitles and it does not require a headless browser, like other selenium based solutions do!",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/whisper-and-asr/pypi__youtube-transcript-api.md"
+  },
+  {
+    "id": "pypi:yt-dlp",
+    "kind": "pypi",
+    "category": "media-production",
+    "package": "yt-dlp",
+    "version": "2026.10.26",
+    "url": "https://pypi.org/project/yt-dlp/",
+    "requires_python": ">=3.11",
+    "summary": "A feature-rich command-line audio/video downloader",
+    "fetched_at": "2026-11-08T11:47:22Z",
+    "_path": "research/sources/media-production/pypi__yt-dlp.md"
   },
   {
     "id": "pypi:yt-dlp",

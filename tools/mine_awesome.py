@@ -31,7 +31,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DISCOVERY = ROOT / "research" / "discovery"
 TOKEN = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN") or ""
-UA = "this-helper-research-collector/1.0"
+UA = "zshelper-research-collector/1.0"
 NOW = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 LINK_RE = re.compile(r"\[([^\]]{0,120})\]\((https://github\.com/([A-Za-z0-9_.\-]+)/([A-Za-z0-9_.\-]+))[^)]*\)(.*)")
