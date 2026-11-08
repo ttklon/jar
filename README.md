@@ -29,9 +29,11 @@
 | [`docs/PROFILES.md`](docs/PROFILES.md) | **Профили приложений**: 32 операции в CapCut/Excel/Проводнике/браузере — якоря, шаги, проверки |
 | [`data/profiles/`](data/profiles) | Профили как данные: `app`, `anchors`, `operations` + валидатор инвариантов |
 | [`docs/COVERAGE.md`](docs/COVERAGE.md) | **Аудит покрытия**: тонкие домены, дырки по семействам действий, домены без профиля |
+| [`docs/EVALS.md`](docs/EVALS.md) | **План проверок**: 613 сценариев из реестра + 15 обязательных P0/P1 до релиза |
 | [`research/notes/18-capability-map.md`](research/notes/18-capability-map.md) | Обзор по доменам: ~180 строк способностей, риск, tier, границы |
 | [`research/notes/24-action-taxonomy.md`](research/notes/24-action-taxonomy.md) | Метод: как перечислять «всё» системно (объект × глагол × контекст × масштаб × риск) |
 | [`research/notes/25-app-profiles.md`](research/notes/25-app-profiles.md) | Профили: иерархия якорей, обязательные проверки, дрейф интерфейса, self-healing |
+| [`tools/actions.py`](tools/actions.py) · [`tools/profiles.py`](tools/profiles.py) · [`tools/audit_actions.py`](tools/audit_actions.py) · [`tools/evals.py`](tools/evals.py) | Реестр → каталог, профили → проверка, покрытие → дырки, реестр → тест-план. Всё генерируется и проверяется в CI |
 | [`tools/collect_sources.py`](tools/collect_sources.py) | Скачивание/обновление источников (идемпотентно) |
 | [`tools/mine_awesome.py`](tools/mine_awesome.py) | Разбор awesome-листов в инвентаризацию с метаданными |
 | [`tools/shortlist.py`](tools/shortlist.py) | Раскладка инвентаризации по 9 доменам способностей |

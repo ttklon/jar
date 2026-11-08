@@ -69,6 +69,7 @@
 
 ```
 data/actions.json
+   ├──► data/evals.json       — по одному сценарию на действие (docs/EVALS.md)
    ├──► Capability Registry   — id, risk, permissions, tier, undo
    ├──► Planner tool cards    — title + whenToUse (что видит LLM)
    ├──► Policy engine         — по risk и объекту (папки, домены, службы)

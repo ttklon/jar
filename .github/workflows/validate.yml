@@ -29,9 +29,12 @@ jobs:
       - name: Coverage audit (thin domains, family gaps, orphan verbs)
         run: python3 tools/audit_actions.py
 
+      - name: Eval plan is generated for every action
+        run: python3 tools/evals.py
+
       - name: Generated artefacts are committed and up to date
         run: |
-          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md \
+          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md docs/EVALS.md data/evals.json \
             || { echo "::error::generated files are stale — run tools/actions.py, tools/profiles.py, tools/audit_actions.py and commit"; exit 1; }
 
       - name: Summary
