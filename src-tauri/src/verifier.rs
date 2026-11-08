@@ -104,11 +104,18 @@ fn describe_failure(expectation: &Expectation, output: &ExecOutput, ok: bool) ->
         return "отменено пользователем".to_string();
     }
     if output.timed_out {
-        return format!("истекло время ожидания; ожидалось: {}", expectation.describe());
+        return format!(
+            "истекло время ожидания; ожидалось: {}",
+            expectation.describe()
+        );
     }
     let stderr = output.stderr.trim();
     if !stderr.is_empty() {
-        return format!("не подтверждено ({}): {}", expectation.describe(), tail(stderr, 400));
+        return format!(
+            "не подтверждено ({}): {}",
+            expectation.describe(),
+            tail(stderr, 400)
+        );
     }
     format!(
         "не подтверждено: {}; код возврата {:?}",
@@ -172,21 +179,37 @@ mod tests {
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.to_string_lossy().to_string();
 
-        let exists = check("k", &Expectation::PathExists(path.clone()), &output(Some(0), "", ""));
+        let exists = check(
+            "k",
+            &Expectation::PathExists(path.clone()),
+            &output(Some(0), "", ""),
+        );
         assert!(exists.ok);
         assert_eq!(exists.evidence.kind(), "path_exists");
 
-        let absent = check("k", &Expectation::PathAbsent(path.clone()), &output(Some(0), "", ""));
+        let absent = check(
+            "k",
+            &Expectation::PathAbsent(path.clone()),
+            &output(Some(0), "", ""),
+        );
         assert!(!absent.ok, "папка ещё существует — успех невозможен");
 
         std::fs::remove_dir_all(&dir).unwrap();
-        let gone = check("k", &Expectation::PathAbsent(path), &output(Some(0), "", ""));
+        let gone = check(
+            "k",
+            &Expectation::PathAbsent(path),
+            &output(Some(0), "", ""),
+        );
         assert!(gone.ok);
     }
 
     #[test]
     fn stderr_becomes_the_reason() {
-        let result = check("k", &Expectation::ExitZero, &output(Some(2), "", "нет доступа"));
+        let result = check(
+            "k",
+            &Expectation::ExitZero,
+            &output(Some(2), "", "нет доступа"),
+        );
         assert!(result.reason.contains("нет доступа"));
     }
 

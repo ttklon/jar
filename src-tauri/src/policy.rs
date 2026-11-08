@@ -220,7 +220,10 @@ mod tests {
 
     #[test]
     fn read_runs_without_question() {
-        assert_eq!(decide(&action(Risk::Read, ActionStatus::V1)), Decision::Allow);
+        assert_eq!(
+            decide(&action(Risk::Read, ActionStatus::V1)),
+            Decision::Allow
+        );
     }
 
     #[test]
@@ -233,8 +236,14 @@ mod tests {
 
     #[test]
     fn money_and_identity_are_denied() {
-        assert!(matches!(decide(&action(Risk::Money, ActionStatus::V1)), Decision::Deny(_)));
-        assert!(matches!(decide(&action(Risk::Identity, ActionStatus::V1)), Decision::Deny(_)));
+        assert!(matches!(
+            decide(&action(Risk::Money, ActionStatus::V1)),
+            Decision::Deny(_)
+        ));
+        assert!(matches!(
+            decide(&action(Risk::Identity, ActionStatus::V1)),
+            Decision::Deny(_)
+        ));
     }
 
     #[test]
@@ -247,7 +256,9 @@ mod tests {
     fn token_is_single_use() {
         let state = PolicyState::new();
         let token = state.issue("files|создать|папку", &args("C:\\tmp"));
-        assert!(state.consume(token, "files|создать|папку", &args("C:\\tmp")).is_ok());
+        assert!(state
+            .consume(token, "files|создать|папку", &args("C:\\tmp"))
+            .is_ok());
         assert_eq!(
             state.consume(token, "files|создать|папку", &args("C:\\tmp")),
             Err(TokenError::Unknown)

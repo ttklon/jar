@@ -89,16 +89,26 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
     match registry {
         "files|создать|папку" => create_folder(registry, params),
         "files|удалить|в корзину" => recycle(registry, params, cancel),
-        "files|проверить|размеры и место" => folder_sizes(registry, params, cancel),
+        "files|проверить|размеры и место" => {
+            folder_sizes(registry, params, cancel)
+        }
         "files|найти|по имени" => find_by_name(registry, params, cancel),
-        "files|проверить|дубликаты по хэшу" => duplicates(registry, params, cancel),
+        "files|проверить|дубликаты по хэшу" => {
+            duplicates(registry, params, cancel)
+        }
         "processes-services|показать|топ по нагрузке" => {
             simple(registry, TOP_PROCESSES, 30, cancel)
         }
-        "storage-backup|проверить|свободное место" => simple(registry, FREE_SPACE, 30, cancel),
+        "storage-backup|проверить|свободное место" => {
+            simple(registry, FREE_SPACE, 30, cancel)
+        }
         "storage-backup|проверить|SMART диска" => simple(registry, SMART, 30, cancel),
-        "network|проверить|подключение" => simple(registry, CONNECTIVITY, 60, cancel),
-        "network|проверить|открытые порты" => simple(registry, OPEN_PORTS, 60, cancel),
+        "network|проверить|подключение" => {
+            simple(registry, CONNECTIVITY, 60, cancel)
+        }
+        "network|проверить|открытые порты" => {
+            simple(registry, OPEN_PORTS, 60, cancel)
+        }
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
     }
 }
@@ -197,7 +207,11 @@ $files | Group-Object Extension | Sort-Object Count -Descending | Select-Object 
   Write-Output ('{0} {1}' -f $(if ($_.Name) { $_.Name } else { '(без расширения)' }), $_.Count)
 }"#;
 
-fn folder_sizes(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+fn folder_sizes(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
     let path = clean_path(param(params, "path"));
     run_script(
         registry,
@@ -215,7 +229,11 @@ $found = @(Get-ChildItem -LiteralPath $target -Recurse -File -Filter $env:ZS_QUE
 Write-Output ('ZSHELPER-OK found={0}' -f $found.Count)
 $found | ForEach-Object { Write-Output $_.FullName }"#;
 
-fn find_by_name(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+fn find_by_name(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
     let path = clean_path(param(params, "path"));
     let query = param(params, "query").trim().to_string();
     run_script(
@@ -239,7 +257,11 @@ foreach ($group in $groups) {
   $group.Group | ForEach-Object { Write-Output $_.Path }
 }"#;
 
-fn duplicates(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+fn duplicates(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
     let path = clean_path(param(params, "path"));
     run_script(
         registry,
@@ -309,8 +331,16 @@ mod tests {
         let tools = all();
         assert_eq!(tools.len(), 10, "на этом этапе «рук» ровно десять");
         for tool in tools {
-            assert!(!tool.title.trim().is_empty(), "у {} нет названия", tool.registry);
-            assert!(!tool.summary.trim().is_empty(), "у {} нет описания", tool.registry);
+            assert!(
+                !tool.title.trim().is_empty(),
+                "у {} нет названия",
+                tool.registry
+            );
+            assert!(
+                !tool.summary.trim().is_empty(),
+                "у {} нет описания",
+                tool.registry
+            );
             assert!(
                 !tool.implementation.trim().is_empty(),
                 "у {} не сказано, чем выполняется",
@@ -340,10 +370,17 @@ mod tests {
     fn tools_and_param_names_are_unique() {
         let mut seen = std::collections::HashSet::new();
         for tool in all() {
-            assert!(seen.insert(tool.registry.clone()), "дубль {}", tool.registry);
+            assert!(
+                seen.insert(tool.registry.clone()),
+                "дубль {}",
+                tool.registry
+            );
             for param in &tool.params {
                 assert!(
-                    param.name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_'),
+                    param
+                        .name
+                        .chars()
+                        .all(|c| c.is_ascii_alphanumeric() || c == '_'),
                     "имя параметра {} должно быть латиницей: оно идёт в переменную окружения",
                     param.name
                 );
