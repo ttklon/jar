@@ -1,0 +1,145 @@
+{
+  "app": "Microsoft Excel",
+  "exe": [
+    "EXCEL.EXE"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Microsoft 365 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "grid": {
+      "by": "uia",
+      "value": "ControlType=DataGrid",
+      "fallback": "клик по ячейке A1 через Name Box"
+    },
+    "name_box": {
+      "by": "hotkey",
+      "value": "Ctrl+G",
+      "fallback": "поле слева от строки формул"
+    },
+    "save": {
+      "by": "hotkey",
+      "value": "Ctrl+S"
+    },
+    "formula_bar": {
+      "by": "uia",
+      "value": "Name~«Строка формул»"
+    }
+  },
+  "operations": [
+    {
+      "name": "Открыть книгу и прочитать диапазон",
+      "registry": "files|открыть|файл в программе",
+      "steps": [
+        "start:excel / файл.xlsx",
+        "anchor:name_box",
+        "type:A1:D100",
+        "hotkey:Ctrl+C",
+        "read:clipboard"
+      ],
+      "verify": [
+        "в буфере табличный текст с ожидаемым числом строк"
+      ],
+      "risk": "read"
+    },
+    {
+      "name": "Вставить данные из CSV/JSON",
+      "registry": "sheets-data|заполнить|данные",
+      "steps": [
+        "open:новый лист",
+        "paste:TSV-данные",
+        "автоширина столбцов"
+      ],
+      "verify": [
+        "число строк = числу записей",
+        "первая строка — заголовки"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Поставить формулу в диапазон",
+      "registry": "sheets-data|заполнить|данные",
+      "steps": [
+        "anchor:name_box",
+        "type:B2:B1000",
+        "type:=A2*1.2",
+        "hotkey:Ctrl+Enter"
+      ],
+      "verify": [
+        "в B2 число, не #NAME?",
+        "нет #VALUE! в диапазоне"
+      ],
+      "risk": "write-local",
+      "on_fail": "отмена Ctrl+Z, отчёт в чат"
+    },
+    {
+      "name": "Сводная таблица",
+      "registry": "sheets-data|посчитать|сводную",
+      "steps": [
+        "выделить таблицу",
+        "Alt+N+V",
+        "перетащить поля по инструкции",
+        "OK"
+      ],
+      "verify": [
+        "появился лист с pivot",
+        "суммы сходятся с контрольной суммой"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Диаграмма по диапазону",
+      "registry": "sheets-data|построить|график",
+      "steps": [
+        "выделить диапазон",
+        "Alt+N+C",
+        "выбрать тип"
+      ],
+      "verify": [
+        "на листе появился объект диаграммы"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Автофильтр и отбор",
+      "registry": "sheets-data|фильтровать|строки",
+      "steps": [
+        "выделить таблицу",
+        "Ctrl+Shift+L",
+        "задать условие"
+      ],
+      "verify": [
+        "число видимых строк соответствует условию"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Сохранить и экспортировать в PDF",
+      "registry": "slides-pdf-print|печатать|документ",
+      "steps": [
+        "anchor:save",
+        "Файл → Экспорт → PDF",
+        "выбрать область"
+      ],
+      "verify": [
+        "PDF существует, размер > 10 КБ, страниц = ожидаемому"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Записать макрос с моих действий",
+      "registry": "automation|создать|макрос приложения",
+      "steps": [
+        "Вид → Макросы → Записать",
+        "выполнить шаги",
+        "Остановить"
+      ],
+      "verify": [
+        "макрос в списке",
+        "повторный запуск даёт тот же результат"
+      ],
+      "risk": "write-local",
+      "notes": "макросы .xlsm — исполняемый код: запускать только свои, подписанные"
+    }
+  ]
+}

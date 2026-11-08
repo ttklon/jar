@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ttklon/jar/data/profiles/_schema.json",
+  "title": "ZShelper app profile",
+  "description": "Слой «как именно в конкретной программе». Реестр действий (data/actions.psv) отвечает на вопрос ЧТО умеет ZShelper; профиль отвечает на вопрос КАК это сделать в конкретном приложении: чем находить элементы, какие шаги, чем проверять успех, что делать если разметка изменилась.",
+  "type": "object",
+  "required": ["app", "exe", "version_seen", "verified_at", "anchors", "operations"],
+  "additionalProperties": false,
+  "properties": {
+    "app": { "type": "string", "description": "Человеческое имя приложения" },
+    "exe": { "type": "array", "items": { "type": "string" }, "description": "Имена процессов/исполняемых файлов для детекта запуска" },
+    "version_seen": { "type": "string", "description": "Версия, на которой профиль проверялся" },
+    "verified_at": { "type": "string", "description": "Дата последней ручной проверки (YYYY-MM-DD)" },
+    "ui_stack": { "type": "string", "enum": ["uia", "electron", "win32", "qt", "web"], "description": "Основной способ адресации элементов" },
+    "anchors": {
+      "type": "object",
+      "description": "Именованные якоря: имя -> описание, как найти элемент (UIA AutomationId/Name, горячая клавиша, текст на экране)",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["by"],
+        "properties": {
+          "by": { "type": "string", "enum": ["uia", "hotkey", "menu", "ocr", "image", "js", "api"] },
+          "value": { "type": "string" },
+          "fallback": { "type": "string" }
+        }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "registry", "steps", "verify", "risk"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "description": "Что делает операция, глаголом пользователя" },
+          "registry": { "type": "string", "pattern": "^[a-z0-9-]+\\|.+$", "description": "Строка реестра действий: domain|verb — обязательна, иначе фичи не существует" },
+          "steps": { "type": "array", "minItems": 1, "items": { "type": "string" }, "description": "Шаги: anchor, hotkey:..., type:..., wait:..., menu:..." },
+          "verify": { "type": "array", "minItems": 1, "items": { "type": "string" }, "description": "Как убедиться, что получилось (иначе шаг считается неудавшимся)" },
+          "risk": { "type": "string", "enum": ["read", "write-local", "external", "destructive", "identity", "money"], "description": "Не может быть ниже риска строки реестра" },
+          "timeouts_ms": { "type": "integer", "default": 15000 },
+          "on_fail": { "type": "string", "description": "Что делать при провале верификации" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

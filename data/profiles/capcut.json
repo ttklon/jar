@@ -1,0 +1,174 @@
+{
+  "app": "CapCut (Desktop)",
+  "exe": [
+    "CapCut.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "6.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "import_btn": {
+      "by": "hotkey",
+      "value": "Ctrl+I",
+      "fallback": "кнопка «Импорт» слева сверху"
+    },
+    "timeline": {
+      "by": "uia",
+      "value": "Name~«Таймлайн»",
+      "fallback": "клик в нижнюю треть окна"
+    },
+    "playhead": {
+      "by": "ocr",
+      "value": "таймкод текущей позиции",
+      "fallback": "Ctrl+Home в начало"
+    },
+    "export_btn": {
+      "by": "hotkey",
+      "value": "Ctrl+E",
+      "fallback": "кнопка «Экспорт» справа сверху"
+    },
+    "text_btn": {
+      "by": "uia",
+      "value": "Name~«Текст»",
+      "fallback": "меню «Текст» → «Добавить текст»"
+    },
+    "captions_btn": {
+      "by": "uia",
+      "value": "Name~«Субтитры»",
+      "fallback": "вкладка «Текст» → «Автосубтитры»"
+    }
+  },
+  "operations": [
+    {
+      "name": "Импортировать медиа в проект",
+      "registry": "video|монтировать|CapCut",
+      "steps": [
+        "anchor:import_btn",
+        "wait:800",
+        "type:путь к файлам",
+        "hotkey:Enter",
+        "verify:в медиатеке появилось N элементов"
+      ],
+      "verify": [
+        "в медиатеке видно N объектов",
+        "название файла видно в списке"
+      ],
+      "risk": "write-local",
+      "on_fail": "скриншот + повтор через drag&drop из Проводника"
+    },
+    {
+      "name": "Добавить клип на таймлайн",
+      "registry": "video|монтировать|CapCut",
+      "steps": [
+        "anchor:import_btn",
+        "выбрать первый элемент медиатеки",
+        "drag:медиатека→таймлайн",
+        "wait:500"
+      ],
+      "verify": [
+        "на таймлайне появился блок",
+        "длительность > 0"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Разрезать клип в позиции курсора",
+      "registry": "video|нарезать|фрагменты",
+      "steps": [
+        "anchor:playhead",
+        "hotkey:Ctrl+B",
+        "wait:300"
+      ],
+      "verify": [
+        "количество блоков на таймлайне увеличилось на 1"
+      ],
+      "risk": "write-local",
+      "on_fail": "отмена Ctrl+Z, затем повтор через контекстное меню «Разделить»"
+    },
+    {
+      "name": "Автосубтитры с распознаванием речи",
+      "registry": "video-production|субтитрировать|автоматически",
+      "steps": [
+        "anchor:captions_btn",
+        "выбрать язык ru",
+        "нажать «Создать»",
+        "wait:до 5 мин по прогрессу"
+      ],
+      "verify": [
+        "на таймлайне появилась дорожка субтитров",
+        "OCR: на превью есть текст"
+      ],
+      "risk": "write-local",
+      "timeouts_ms": 300000
+    },
+    {
+      "name": "Добавить текстовый титр",
+      "registry": "video|добавить|субтитры",
+      "steps": [
+        "anchor:text_btn",
+        "type:текст титра",
+        "drag:титр→таймлайн"
+      ],
+      "verify": [
+        "на превью читается текст (OCR)"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Экспорт 1080p MP4",
+      "registry": "video|сжать|размер",
+      "steps": [
+        "anchor:export_btn",
+        "выбрать 1080p / 30 fps",
+        "type:имя файла",
+        "hotkey:Enter",
+        "wait:по прогрессу до 100%"
+      ],
+      "verify": [
+        "файл существует и ffprobe даёт 1920x1080",
+        "размер > 1 МБ"
+      ],
+      "risk": "write-local",
+      "on_fail": "не закрывать окно; скриншот ошибки в Telegram, ждать человека"
+    },
+    {
+      "name": "Вырезать паузы (тишину)",
+      "registry": "video-production|нарезать|по тишине",
+      "steps": [
+        "выделить клип",
+        "правый клик → «Удалить тишину»",
+        "wait:по прогрессу"
+      ],
+      "verify": [
+        "длительность проекта уменьшилась"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Изменить скорость участка",
+      "registry": "video|монтировать|CapCut",
+      "steps": [
+        "выделить участок",
+        "правый клик → «Скорость»",
+        "type:значение",
+        "Enter"
+      ],
+      "verify": [
+        "на блоке видна метка скорости"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Сохранить проект",
+      "registry": "video|монтировать|CapCut",
+      "steps": [
+        "hotkey:Ctrl+S",
+        "wait:800"
+      ],
+      "verify": [
+        "в заголовке окна исчезла звёздочка изменений"
+      ],
+      "risk": "write-local"
+    }
+  ]
+}

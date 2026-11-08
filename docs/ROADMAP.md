@@ -18,7 +18,8 @@
 - [ ] Electron + electron-vite + TS strict, окно, трей, хоткеи, `utilityProcess`-ядро
 - [ ] SQLite-схема (events/jobs/steps/audit/facts), миграции
 - [ ] Нативный слой: скриншот, UIA-дамп, клик/ввод, проверка после действия (**прототип Rust**)
-- [ ] Capability registry, сгенерированный из `data/actions.json` (436 действий) + первые 10 инструментов
+- [ ] Capability registry, сгенерированный из `data/actions.json` (562 действия) + первые 10 инструментов
+- [ ] Загрузчик профилей `data/profiles/*.json` + движение по шагам с обязательной верификацией (`tools/profiles.py` уже валидирует данные)
 - [ ] Policy engine (3 режима) + аудит + подтверждение в UI
 - [ ] Профилировщик железа (статика + калибровка)
 
