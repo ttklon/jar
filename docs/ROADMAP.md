@@ -102,12 +102,18 @@
 
 - [x] Каталог 122 приложений с каналом, tier и приоритетом (`data/app_targets.psv`)
 - [x] Генератор авто-профилей `tools/uia_probe.py` (dump → draft), классификация интерфейса
-- [ ] Профили P0: Диспетчер задач, Службы, Планировщик, Windows Terminal *(сделано в v1)*
-- [ ] Профили P1: Панель управления, Параметры Windows, Просмотр событий, Firefox, WhatsApp,
-      Docker, VirtualBox, Everything, HWiNFO, CrystalDiskInfo *(Docker и Everything — сделано)*
-- [ ] Профили P2: DaVinci Resolve, Visual Studio, JetBrains, WinSCP, FileZilla, DBeaver, Steam-углубление
+- [x] Профили P0: Диспетчер задач, Windows Terminal, Everything (Службы и Планировщик — через
+      `sc.exe` / `schtasks`, в профиле диспетчера)
+- [~] Профили P1: Параметры Windows, Просмотр событий, Docker — **готовы**; Панель управления,
+      Firefox, WhatsApp, VirtualBox, HWiNFO, CrystalDiskInfo — очередь
+- [x] Профили P2: DaVinci Resolve, Visual Studio, JetBrains (IDEA/PyCharm/Android Studio),
+      WinSCP, FileZilla, DBeaver, tshark, robocopy/smartctl
+- [ ] Профили P2 остаток: Steam-углубление, Slack, LibreOffice, Acrobat, CapCut-углубление
 - [ ] Tier C: список приложений-канвасов + политика «визуальный агент с проверкой по скриншоту»
 - [ ] Дрейф: пере-проверка якорей по `verified_at` старше 90 дней, отчёт в CI
+- [ ] Домены без профиля: остались 16 (health-daily, superhuman, devices, security-access, input,
+      travel, smart-home, music, home-daily, languages, career, calendar-tasks, ai-ml, legal-docs,
+      licensing, apps-generic) — закрывать через профили приложений, а не строками реестра
 
 **Критерий выхода линии:** ≥60 профилей tier A + ≥30 приложений, прошедших авто-профиль с
 подтверждением вручную; ни одного приложения из P0 без профиля.
