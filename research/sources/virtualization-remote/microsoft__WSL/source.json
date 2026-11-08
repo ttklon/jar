@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/WSL",
+  "kind": "github",
+  "category": "virtualization-remote",
+  "repo": "microsoft/WSL",
+  "url": "https://github.com/microsoft/WSL",
+  "description": "Windows Subsystem for Linux",
+  "stars": 34316,
+  "forks": 1882,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:03:27Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

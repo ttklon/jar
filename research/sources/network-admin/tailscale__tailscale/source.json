@@ -1,0 +1,24 @@
+{
+  "id": "github:tailscale/tailscale",
+  "kind": "github",
+  "category": "network-admin",
+  "repo": "tailscale/tailscale",
+  "url": "https://github.com/tailscale/tailscale",
+  "description": "The easiest, most secure way to use WireGuard and 2FA.",
+  "stars": 38791,
+  "forks": 3439,
+  "language": "Go",
+  "license": "BSD-3-Clause",
+  "topics": [
+    "2fa",
+    "oauth",
+    "sso",
+    "tailscale",
+    "vpn",
+    "wireguard"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T20:29:03Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

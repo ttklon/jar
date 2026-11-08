@@ -1,0 +1,33 @@
+{
+  "id": "github:casbin/casbin",
+  "kind": "github",
+  "category": "security-ops",
+  "repo": "casbin/casbin",
+  "url": "https://github.com/casbin/casbin",
+  "description": "Apache Casbin: an authorization library that supports access control models like ACL, RBAC, ABAC.",
+  "stars": 20486,
+  "forks": 1766,
+  "language": "Go",
+  "license": "Apache-2.0",
+  "topics": [
+    "abac",
+    "access-control",
+    "acl",
+    "apache",
+    "auth",
+    "authentication",
+    "authn",
+    "authorization",
+    "authz",
+    "cas",
+    "casbin",
+    "iam",
+    "oauth",
+    "oidc",
+    "permission"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T17:03:34Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

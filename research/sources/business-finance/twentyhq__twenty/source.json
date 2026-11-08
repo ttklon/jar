@@ -1,0 +1,33 @@
+{
+  "id": "github:twentyhq/twenty",
+  "kind": "github",
+  "category": "business-finance",
+  "repo": "twentyhq/twenty",
+  "url": "https://github.com/twentyhq/twenty",
+  "description": "The open alternative to Salesforce, designed for AI.",
+  "stars": 60631,
+  "forks": 10013,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "crm",
+    "crm-system",
+    "customer",
+    "good-first-issue",
+    "graphql",
+    "hacktoberfest",
+    "javascript",
+    "marketing",
+    "monorepo",
+    "nestjs",
+    "open-source",
+    "postgresql",
+    "react",
+    "reactjs",
+    "sales"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T12:31:23Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

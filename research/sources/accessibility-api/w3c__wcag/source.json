@@ -1,0 +1,17 @@
+{
+  "id": "github:w3c/wcag",
+  "kind": "github",
+  "category": "accessibility-api",
+  "repo": "w3c/wcag",
+  "url": "https://github.com/w3c/wcag",
+  "description": "Web Content Accessibility Guidelines",
+  "stars": 1522,
+  "forks": 568,
+  "language": "HTML",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T23:57:44Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

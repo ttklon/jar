@@ -1,0 +1,27 @@
+{
+  "id": "github:Genymobile/scrcpy",
+  "kind": "github",
+  "category": "devices-peripherals",
+  "repo": "Genymobile/scrcpy",
+  "url": "https://github.com/Genymobile/scrcpy",
+  "description": "Display and control your Android device",
+  "stars": 154300,
+  "forks": 14169,
+  "language": "C",
+  "license": "Apache-2.0",
+  "topics": [
+    "android",
+    "c",
+    "ffmpeg",
+    "genyteam-system",
+    "libav",
+    "mirroring",
+    "recording",
+    "screen",
+    "sdl2"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T21:30:53Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

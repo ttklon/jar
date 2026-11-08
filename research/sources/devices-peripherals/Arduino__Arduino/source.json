@@ -1,0 +1,20 @@
+{
+  "id": "github:Arduino/Arduino",
+  "kind": "github",
+  "category": "devices-peripherals",
+  "repo": "Arduino/Arduino",
+  "url": "https://github.com/Arduino/Arduino",
+  "description": "Arduino IDE 1.x",
+  "stars": 14703,
+  "forks": 6944,
+  "language": "Java",
+  "license": "NOASSERTION",
+  "topics": [
+    "arduino",
+    "ide"
+  ],
+  "archived": false,
+  "pushed_at": "2025-10-11T09:27:40Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

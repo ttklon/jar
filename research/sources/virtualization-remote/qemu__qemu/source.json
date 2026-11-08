@@ -1,0 +1,21 @@
+{
+  "id": "github:qemu/qemu",
+  "kind": "github",
+  "category": "virtualization-remote",
+  "repo": "qemu/qemu",
+  "url": "https://github.com/qemu/qemu",
+  "description": "Official QEMU mirror. Please see https://www.qemu.org/contribute/ for how to submit changes to QEMU. Pull Requests are disabled. Please only use release tarballs from the QEMU website.",
+  "stars": 13996,
+  "forks": 7431,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [
+    "emulation",
+    "qemu",
+    "virtualization"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T22:51:03Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

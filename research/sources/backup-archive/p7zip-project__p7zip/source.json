@@ -1,0 +1,31 @@
+{
+  "id": "github:p7zip-project/p7zip",
+  "kind": "github",
+  "category": "backup-archive",
+  "repo": "p7zip-project/p7zip",
+  "url": "https://github.com/p7zip-project/p7zip",
+  "description": "A new p7zip fork with additional codecs and improvements (forked from https://sourceforge.net/projects/sevenzip/ AND https://sourceforge.net/projects/p7zip/).",
+  "stars": 966,
+  "forks": 119,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [
+    "7zip",
+    "archive",
+    "brotli",
+    "compression",
+    "fastlzma2",
+    "lizard",
+    "lz4",
+    "lz5",
+    "lzham",
+    "lzma",
+    "lzma2",
+    "p7zip",
+    "zstd"
+  ],
+  "archived": false,
+  "pushed_at": "2025-05-20T11:31:27Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

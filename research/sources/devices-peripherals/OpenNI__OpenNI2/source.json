@@ -1,0 +1,17 @@
+{
+  "id": "github:OpenNI/OpenNI2",
+  "kind": "github",
+  "category": "devices-peripherals",
+  "repo": "OpenNI/OpenNI2",
+  "url": "https://github.com/OpenNI/OpenNI2",
+  "description": "OpenNI2",
+  "stars": 442,
+  "forks": 882,
+  "language": "C",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2019-04-04T17:27:40Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

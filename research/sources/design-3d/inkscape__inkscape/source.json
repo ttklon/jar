@@ -1,0 +1,17 @@
+{
+  "id": "github:inkscape/inkscape",
+  "kind": "github",
+  "category": "design-3d",
+  "repo": "inkscape/inkscape",
+  "url": "https://github.com/inkscape/inkscape",
+  "description": "Project Website: https://inkscape.org - Code Repository: https://gitlab.com/inkscape/inkscape - Draw freely. 🖌",
+  "stars": 4102,
+  "forks": 314,
+  "language": "",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2022-03-03T20:52:00Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

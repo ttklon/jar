@@ -1,0 +1,21 @@
+{
+  "id": "github:nvaccess/nvda",
+  "kind": "github",
+  "category": "accessibility-api",
+  "repo": "nvaccess/nvda",
+  "url": "https://github.com/nvaccess/nvda",
+  "description": "NVDA, the free and open source Screen Reader for Microsoft Windows",
+  "stars": 2684,
+  "forks": 865,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "accessibility",
+    "blind",
+    "screen-reader"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T09:06:41Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

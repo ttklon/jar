@@ -1,0 +1,32 @@
+{
+  "id": "github:ntop/ntopng",
+  "kind": "github",
+  "category": "network-admin",
+  "repo": "ntop/ntopng",
+  "url": "https://github.com/ntop/ntopng",
+  "description": "Web-based Traffic and Cybersecurity Network Traffic Monitoring",
+  "stars": 8339,
+  "forks": 775,
+  "language": "Lua",
+  "license": "GPL-3.0",
+  "topics": [
+    "cybersecurity",
+    "docker",
+    "ebpf",
+    "ipfix",
+    "kubernetes",
+    "netflow",
+    "network",
+    "ntopng",
+    "packet-analyser",
+    "packet-processing",
+    "realtime",
+    "sflow",
+    "snmp",
+    "traffic-monitoring"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:15:13Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

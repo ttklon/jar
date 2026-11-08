@@ -1,0 +1,19 @@
+{
+  "id": "github:jqlang/jq",
+  "kind": "github",
+  "category": "network-admin",
+  "repo": "jqlang/jq",
+  "url": "https://github.com/jqlang/jq",
+  "description": "Command-line JSON processor",
+  "stars": 36068,
+  "forks": 3067,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [
+    "jq"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-02T07:08:10Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

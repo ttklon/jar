@@ -95,6 +95,27 @@
     "_path": "research/sources/orchestration/All-Hands-AI__OpenHands/README.md"
   },
   {
+    "id": "github:Arduino/Arduino",
+    "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "Arduino/Arduino",
+    "url": "https://github.com/Arduino/Arduino",
+    "description": "Arduino IDE 1.x",
+    "stars": 14703,
+    "forks": 6944,
+    "language": "Java",
+    "license": "NOASSERTION",
+    "topics": [
+      "arduino",
+      "ide"
+    ],
+    "archived": false,
+    "pushed_at": "2025-10-11T09:27:40Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/Arduino__Arduino/README.md"
+  },
+  {
     "id": "github:Arize-ai/phoenix",
     "kind": "github",
     "category": "observability-evals",
@@ -482,6 +503,40 @@
     "_path": "research/sources/orchestration/FlowiseAI__Flowise/README.md"
   },
   {
+    "id": "github:FreeCAD/FreeCAD",
+    "kind": "github",
+    "category": "design-3d",
+    "repo": "FreeCAD/FreeCAD",
+    "url": "https://github.com/FreeCAD/FreeCAD",
+    "description": "Official source code of FreeCAD, a free and opensource multiplatform 3D parametric modeler.",
+    "stars": 35249,
+    "forks": 6366,
+    "language": "C++",
+    "license": "LGPL-2.1",
+    "topics": [
+      "3d",
+      "3d-printing",
+      "architecture",
+      "bim",
+      "cad",
+      "cam",
+      "civil-engineering",
+      "coin",
+      "engineering",
+      "fem",
+      "freecad",
+      "linux",
+      "macos",
+      "mechanical-engineering",
+      "opencascade"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T10:45:34Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/FreeCAD__FreeCAD/README.md"
+  },
+  {
     "id": "github:FunAudioLLM/SenseVoice",
     "kind": "github",
     "category": "whisper-and-asr",
@@ -514,6 +569,34 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/whisper-and-asr/FunAudioLLM__SenseVoice/README.md"
+  },
+  {
+    "id": "github:Genymobile/scrcpy",
+    "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "Genymobile/scrcpy",
+    "url": "https://github.com/Genymobile/scrcpy",
+    "description": "Display and control your Android device",
+    "stars": 154300,
+    "forks": 14169,
+    "language": "C",
+    "license": "Apache-2.0",
+    "topics": [
+      "android",
+      "c",
+      "ffmpeg",
+      "genyteam-system",
+      "libav",
+      "mirroring",
+      "recording",
+      "screen",
+      "sdl2"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T21:30:53Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/Genymobile__scrcpy/README.md"
   },
   {
     "id": "github:HKUDS/Auto-Deep-Research",
@@ -606,6 +689,42 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/screen-understanding/JaidedAI__EasyOCR/README.md"
+  },
+  {
+    "id": "github:KDE/kio-extras",
+    "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "KDE/kio-extras",
+    "url": "https://github.com/KDE/kio-extras",
+    "description": "Additional components to increase the functionality of KIO",
+    "stars": 32,
+    "forks": 18,
+    "language": "C++",
+    "license": "NOASSERTION",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-08T06:11:25Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/KDE__kio-extras/README.md"
+  },
+  {
+    "id": "github:KhronosGroup/glTF",
+    "kind": "github",
+    "category": "design-3d",
+    "repo": "KhronosGroup/glTF",
+    "url": "https://github.com/KhronosGroup/glTF",
+    "description": "glTF – Runtime 3D Asset Delivery",
+    "stars": 7885,
+    "forks": 1207,
+    "language": "HTML",
+    "license": "NOASSERTION",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-07T23:43:33Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/KhronosGroup__glTF/README.md"
   },
   {
     "id": "github:LibreHardwareMonitor/LibreHardwareMonitor",
@@ -790,6 +909,24 @@
     "default_branch": "concedo",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/low-end-inference/LostRuins__koboldcpp/README.md"
+  },
+  {
+    "id": "github:M66B/NetGuard",
+    "kind": "github",
+    "category": "network-admin",
+    "repo": "M66B/NetGuard",
+    "url": "https://github.com/M66B/NetGuard",
+    "description": "A simple way to block access to the internet per app",
+    "stars": 3969,
+    "forks": 374,
+    "language": "Java",
+    "license": "GPL-3.0",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-08-01T21:29:40Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/M66B__NetGuard/README.md"
   },
   {
     "id": "github:MarkusPfundstein/mcp-obsidian",
@@ -985,6 +1122,32 @@
     "_path": "research/sources/windows-automation/NVIDIA__go-nvml/README.md"
   },
   {
+    "id": "github:OWASP/CheatSheetSeries",
+    "kind": "github",
+    "category": "security-ops",
+    "repo": "OWASP/CheatSheetSeries",
+    "url": "https://github.com/OWASP/CheatSheetSeries",
+    "description": "The OWASP Cheat Sheet Series was created to provide a concise collection of high value information on specific application security topics.",
+    "stars": 33940,
+    "forks": 4716,
+    "language": "JavaScript",
+    "license": "CC-BY-SA-4.0",
+    "topics": [
+      "application-security",
+      "appsec",
+      "best-practices",
+      "cheatsheets",
+      "code",
+      "owasp",
+      "security"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-05T16:43:10Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/OWASP__CheatSheetSeries/README.md"
+  },
+  {
     "id": "github:OpenAdaptAI/OpenAdapt",
     "kind": "github",
     "category": "windows-automation",
@@ -1076,6 +1239,58 @@
     "_path": "research/sources/orchestration/OpenInterpreter__open-interpreter/README.md"
   },
   {
+    "id": "github:OpenNI/OpenNI2",
+    "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "OpenNI/OpenNI2",
+    "url": "https://github.com/OpenNI/OpenNI2",
+    "description": "OpenNI2",
+    "stars": 442,
+    "forks": 882,
+    "language": "C",
+    "license": "Apache-2.0",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2019-04-04T17:27:40Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/OpenNI__OpenNI2/README.md"
+  },
+  {
+    "id": "github:PSAppDeployToolkit/PSAppDeployToolkit",
+    "kind": "github",
+    "category": "deployment-admin",
+    "repo": "PSAppDeployToolkit/PSAppDeployToolkit",
+    "url": "https://github.com/PSAppDeployToolkit/PSAppDeployToolkit",
+    "description": "Project Homepage & Forums",
+    "stars": 2441,
+    "forks": 565,
+    "language": "C#",
+    "license": "LGPL-3.0",
+    "topics": [
+      "appdeploy",
+      "appdeploytoolkit",
+      "application-deployment",
+      "configmgr",
+      "configuration-manager",
+      "intune",
+      "memcm",
+      "microsoft-intune",
+      "osd",
+      "patch-management",
+      "powershell",
+      "powershell-module",
+      "psadt",
+      "psappdeploytoolkit",
+      "sccm"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-05T15:24:59Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/PSAppDeployToolkit__PSAppDeployToolkit/README.md"
+  },
+  {
     "id": "github:PaddlePaddle/PaddleOCR",
     "kind": "github",
     "category": "screen-understanding",
@@ -1140,6 +1355,33 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:26:32Z",
     "_path": "research/sources/orchestration/Portkey-AI__gateway/README.md"
+  },
+  {
+    "id": "github:PowerShell/PowerShell",
+    "kind": "github",
+    "category": "deployment-admin",
+    "repo": "PowerShell/PowerShell",
+    "url": "https://github.com/PowerShell/PowerShell",
+    "description": "PowerShell for every system!",
+    "stars": 56054,
+    "forks": 8530,
+    "language": "C#",
+    "license": "MIT",
+    "topics": [
+      "command-line",
+      "hacktoberfest",
+      "linux",
+      "macos",
+      "netcore",
+      "powershell",
+      "shell",
+      "windows"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T19:41:07Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/PowerShell__PowerShell/README.md"
   },
   {
     "id": "github:PowerShell/PowerShell",
@@ -1608,6 +1850,29 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/academic-writing/SamuelSchmidgall__AgentLaboratory/README.md"
+  },
+  {
+    "id": "github:ScoopInstaller/Scoop",
+    "kind": "github",
+    "category": "deployment-admin",
+    "repo": "ScoopInstaller/Scoop",
+    "url": "https://github.com/ScoopInstaller/Scoop",
+    "description": "A command-line installer for Windows.",
+    "stars": 24803,
+    "forks": 1546,
+    "language": "PowerShell",
+    "license": "NOASSERTION",
+    "topics": [
+      "installer",
+      "powershell",
+      "scoop",
+      "windows"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T08:05:16Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/ScoopInstaller__Scoop/README.md"
   },
   {
     "id": "github:ScoopInstaller/Scoop",
@@ -2180,6 +2445,24 @@
     "_path": "research/sources/system-triage/W4RH4WK__Debloat-Windows-10/README.md"
   },
   {
+    "id": "github:WireGuard/wireguard-windows",
+    "kind": "github",
+    "category": "network-admin",
+    "repo": "WireGuard/wireguard-windows",
+    "url": "https://github.com/WireGuard/wireguard-windows",
+    "description": "Download WireGuard for Windows at https://www.wireguard.com/install . This repo is a mirror only. Official repository is at https://git.zx2c4.com/wireguard-windows",
+    "stars": 2885,
+    "forks": 700,
+    "language": "Go",
+    "license": "MIT",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-09-26T07:07:38Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/WireGuard__wireguard-windows/README.md"
+  },
+  {
     "id": "github:WiseLibs/better-sqlite3",
     "kind": "github",
     "category": "memory-and-rag",
@@ -2201,6 +2484,24 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/memory-and-rag/WiseLibs__better-sqlite3/README.md"
+  },
+  {
+    "id": "github:Yelp/detect-secrets",
+    "kind": "github",
+    "category": "security-ops",
+    "repo": "Yelp/detect-secrets",
+    "url": "https://github.com/Yelp/detect-secrets",
+    "description": "An enterprise friendly way of detecting and preventing secrets in code.",
+    "stars": 4667,
+    "forks": 582,
+    "language": "Python",
+    "license": "Apache-2.0",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-04-02T17:10:40Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/Yelp__detect-secrets/README.md"
   },
   {
     "id": "github:Zulko/moviepy",
@@ -2497,6 +2798,29 @@
     "_path": "research/sources/orchestration/activepieces__activepieces/README.md"
   },
   {
+    "id": "github:actualbudget/actual",
+    "kind": "github",
+    "category": "business-finance",
+    "repo": "actualbudget/actual",
+    "url": "https://github.com/actualbudget/actual",
+    "description": "A local-first personal finance app",
+    "stars": 30079,
+    "forks": 3259,
+    "language": "TypeScript",
+    "license": "MIT",
+    "topics": [
+      "budgeting",
+      "finance",
+      "money",
+      "personal-finance"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T11:02:31Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/actualbudget__actual/README.md"
+  },
+  {
     "id": "github:adbar/trafilatura",
     "kind": "github",
     "category": "academic-writing",
@@ -2575,6 +2899,40 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/configuration/ajv-validator__ajv/README.md"
+  },
+  {
+    "id": "github:akaunting/akaunting",
+    "kind": "github",
+    "category": "business-finance",
+    "repo": "akaunting/akaunting",
+    "url": "https://github.com/akaunting/akaunting",
+    "description": "Online Accounting Software",
+    "stars": 10287,
+    "forks": 3017,
+    "language": "PHP",
+    "license": "NOASSERTION",
+    "topics": [
+      "accounting",
+      "akaunting",
+      "balance",
+      "billing",
+      "bookkeeping",
+      "budget",
+      "crm",
+      "erp",
+      "expenses",
+      "finance",
+      "fintech",
+      "invoices",
+      "invoicing",
+      "laravel",
+      "laravel-application"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T15:14:05Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/akaunting__akaunting/README.md"
   },
   {
     "id": "github:alex8088/electron-vite",
@@ -2706,6 +3064,27 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/updates/anchore__sbom-action/README.md"
+  },
+  {
+    "id": "github:ansible/ansible",
+    "kind": "github",
+    "category": "deployment-admin",
+    "repo": "ansible/ansible",
+    "url": "https://github.com/ansible/ansible",
+    "description": "Ansible is a radically simple IT automation platform that makes your applications and systems easier to deploy and maintain. Automate everything from code deployment to network configuration to cloud management, in a language that approaches plain English, using SSH, with no agents to install on remote systems. https://docs.ansible.com.",
+    "stars": 71275,
+    "forks": 24441,
+    "language": "Python",
+    "license": "GPL-3.0",
+    "topics": [
+      "ansible",
+      "python"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T20:37:11Z",
+    "default_branch": "devel",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/ansible__ansible/README.md"
   },
   {
     "id": "github:anthropics/claude-code-action",
@@ -2923,6 +3302,40 @@
     "_path": "research/sources/academic-writing/assafelovic__gpt-researcher/README.md"
   },
   {
+    "id": "github:assimp/assimp",
+    "kind": "github",
+    "category": "design-3d",
+    "repo": "assimp/assimp",
+    "url": "https://github.com/assimp/assimp",
+    "description": "The official Open-Asset-Importer-Library Repository. Loads 40+ 3D-file-formats into one unified and clean data structure.",
+    "stars": 13312,
+    "forks": 3272,
+    "language": "C++",
+    "license": "NOASSERTION",
+    "topics": [
+      "3mf",
+      "android",
+      "asset-pipeline",
+      "assets",
+      "assimp",
+      "c-plus-plus",
+      "collada",
+      "dae",
+      "fbx",
+      "fbx-exporter",
+      "game-development",
+      "gamedev-tool",
+      "gamedevelopment",
+      "gltf",
+      "gltf2"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T23:11:07Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/assimp__assimp/README.md"
+  },
+  {
     "id": "github:ast-grep/ast-grep",
     "kind": "github",
     "category": "coding-agents",
@@ -3068,6 +3481,26 @@
     "_path": "research/sources/mcp-and-tools/basicmachines-co__basic-memory/README.md"
   },
   {
+    "id": "github:beancount/beancount",
+    "kind": "github",
+    "category": "business-finance",
+    "repo": "beancount/beancount",
+    "url": "https://github.com/beancount/beancount",
+    "description": "Beancount: Double-Entry Accounting from Text Files.",
+    "stars": 6153,
+    "forks": 486,
+    "language": "Python",
+    "license": "GPL-2.0",
+    "topics": [
+      "beancount"
+    ],
+    "archived": false,
+    "pushed_at": "2026-08-23T20:17:45Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/beancount__beancount/README.md"
+  },
+  {
     "id": "github:bencevans/screenshot-desktop",
     "kind": "github",
     "category": "windows-automation",
@@ -3126,6 +3559,31 @@
     "_path": "research/sources/system-triage/bleachbit__bleachbit/README.md"
   },
   {
+    "id": "github:blender/blender",
+    "kind": "github",
+    "category": "design-3d",
+    "repo": "blender/blender",
+    "url": "https://github.com/blender/blender",
+    "description": "Official mirror of Blender",
+    "stars": 21754,
+    "forks": 3536,
+    "language": "C++",
+    "license": "NOASSERTION",
+    "topics": [
+      "3d",
+      "animation",
+      "b3d",
+      "computer-graphics",
+      "modeling",
+      "rendering"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T20:31:50Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/blender__blender/README.md"
+  },
+  {
     "id": "github:block/goose",
     "kind": "github",
     "category": "orchestration",
@@ -3148,6 +3606,32 @@
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/block__goose/README.md",
     "_extras": 1
+  },
+  {
+    "id": "github:borgbackup/borg",
+    "kind": "github",
+    "category": "backup-archive",
+    "repo": "borgbackup/borg",
+    "url": "https://github.com/borgbackup/borg",
+    "description": "Deduplicating archiver with compression and authenticated encryption.",
+    "stars": 13915,
+    "forks": 882,
+    "language": "Python",
+    "license": "NOASSERTION",
+    "topics": [
+      "backup",
+      "borgbackup",
+      "compression",
+      "deduplication",
+      "encryption",
+      "python",
+      "ssh"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T00:23:01Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/borgbackup__borg/README.md"
   },
   {
     "id": "github:breejs/bree",
@@ -3320,6 +3804,40 @@
     "_path": "research/sources/safety-and-security/casbin__casbin/README.md"
   },
   {
+    "id": "github:casbin/casbin",
+    "kind": "github",
+    "category": "security-ops",
+    "repo": "casbin/casbin",
+    "url": "https://github.com/casbin/casbin",
+    "description": "Apache Casbin: an authorization library that supports access control models like ACL, RBAC, ABAC.",
+    "stars": 20486,
+    "forks": 1766,
+    "language": "Go",
+    "license": "Apache-2.0",
+    "topics": [
+      "abac",
+      "access-control",
+      "acl",
+      "apache",
+      "auth",
+      "authentication",
+      "authn",
+      "authorization",
+      "authz",
+      "cas",
+      "casbin",
+      "iam",
+      "oauth",
+      "oidc",
+      "permission"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-04T17:03:34Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/casbin__casbin/README.md"
+  },
+  {
     "id": "github:casper-hansen/AutoAWQ",
     "kind": "github",
     "category": "inference-runtimes",
@@ -3467,6 +3985,63 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/connectors/cheeriojs__cheerio/README.md"
+  },
+  {
+    "id": "github:chef/chef",
+    "kind": "github",
+    "category": "deployment-admin",
+    "repo": "chef/chef",
+    "url": "https://github.com/chef/chef",
+    "description": "Chef Infra, a powerful automation platform that transforms infrastructure into code automating how infrastructure is configured, deployed and managed across any environment, at any scale",
+    "stars": 8260,
+    "forks": 2519,
+    "language": "Ruby",
+    "license": "Apache-2.0",
+    "topics": [
+      "automation",
+      "cfgmgt",
+      "chef",
+      "deployment",
+      "devops",
+      "hacktoberfest",
+      "infrastructure"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T22:25:48Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/chef__chef/README.md"
+  },
+  {
+    "id": "github:chocolatey/choco",
+    "kind": "github",
+    "category": "deployment-admin",
+    "repo": "chocolatey/choco",
+    "url": "https://github.com/chocolatey/choco",
+    "description": "Chocolatey - the package manager for Windows",
+    "stars": 11562,
+    "forks": 967,
+    "language": "C#",
+    "license": "NOASSERTION",
+    "topics": [
+      "c-sharp",
+      "chocolatey",
+      "hacktoberfest",
+      "package-management",
+      "package-manager",
+      "package-manager-tool",
+      "powershell",
+      "software",
+      "software-management",
+      "softwareautomation",
+      "windows",
+      "windows-server"
+    ],
+    "archived": false,
+    "pushed_at": "2026-10-28T20:28:35Z",
+    "default_branch": "develop",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/chocolatey__choco/README.md"
   },
   {
     "id": "github:chocolatey/choco",
@@ -3698,6 +4273,40 @@
     "_path": "research/sources/orchestration/crewAIInc__crewAI/README.md"
   },
   {
+    "id": "github:curl/curl",
+    "kind": "github",
+    "category": "network-admin",
+    "repo": "curl/curl",
+    "url": "https://github.com/curl/curl",
+    "description": "A command line tool and library for transferring data with URL syntax, supporting DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, MQTTS, POP3, POP3S, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET, TFTP, WS and WSS. libcurl offers a myriad of powerful features",
+    "stars": 43429,
+    "forks": 7490,
+    "language": "C",
+    "license": "NOASSERTION",
+    "topics": [
+      "c",
+      "client",
+      "curl",
+      "ftp",
+      "gopher",
+      "hacktoberfest",
+      "http",
+      "https",
+      "imaps",
+      "ldap",
+      "libcurl",
+      "library",
+      "mqtt",
+      "pop3",
+      "scp"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T10:58:05Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/curl__curl/README.md"
+  },
+  {
     "id": "github:cyanheads/mcp-ts-template",
     "kind": "github",
     "category": "mcp-and-tools",
@@ -3852,6 +4461,28 @@
     "_path": "research/sources/packaging-and-ci/dependabot__fetch-metadata/README.md"
   },
   {
+    "id": "github:dequelabs/axe-core",
+    "kind": "github",
+    "category": "accessibility-api",
+    "repo": "dequelabs/axe-core",
+    "url": "https://github.com/dequelabs/axe-core",
+    "description": "Accessibility engine for automated Web UI testing",
+    "stars": 7777,
+    "forks": 982,
+    "language": "HTML",
+    "license": "MPL-2.0",
+    "topics": [
+      "a11y",
+      "accessibility",
+      "axe"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-05T16:47:50Z",
+    "default_branch": "develop",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/dequelabs__axe-core/README.md"
+  },
+  {
     "id": "github:discordjs/discord.js",
     "kind": "github",
     "category": "connectors",
@@ -3878,6 +4509,30 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/connectors/discordjs__discord.js/README.md"
+  },
+  {
+    "id": "github:docker/compose",
+    "kind": "github",
+    "category": "virtualization-remote",
+    "repo": "docker/compose",
+    "url": "https://github.com/docker/compose",
+    "description": "Define and run multi-container applications with Docker",
+    "stars": 38644,
+    "forks": 5900,
+    "language": "Go",
+    "license": "Apache-2.0",
+    "topics": [
+      "docker",
+      "docker-compose",
+      "go",
+      "golang",
+      "orchestration"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T09:02:49Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/docker__compose/README.md"
   },
   {
     "id": "github:docker/mcp-gateway",
@@ -4074,6 +4729,36 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/memory-and-rag/duckdb__duckdb/README.md"
+  },
+  {
+    "id": "github:duplicati/duplicati",
+    "kind": "github",
+    "category": "backup-archive",
+    "repo": "duplicati/duplicati",
+    "url": "https://github.com/duplicati/duplicati",
+    "description": "Store securely encrypted backups in the cloud!",
+    "stars": 15189,
+    "forks": 1090,
+    "language": "C#",
+    "license": "NOASSERTION",
+    "topics": [
+      "backup",
+      "c-sharp",
+      "client-only-backup",
+      "cloud-backup",
+      "cloud-storage-services",
+      "duplicati",
+      "encryption",
+      "sftp",
+      "tno-backup",
+      "trust-no-one-backup",
+      "webdav"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T08:29:42Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/duplicati__duplicati/README.md"
   },
   {
     "id": "github:dzhng/deep-research",
@@ -4682,6 +5367,24 @@
     "_path": "research/sources/whisper-and-asr/espnet__espnet/README.md"
   },
   {
+    "id": "github:espressif/esptool",
+    "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "espressif/esptool",
+    "url": "https://github.com/espressif/esptool",
+    "description": "Serial utility for flashing, provisioning, and interacting with Espressif SoCs",
+    "stars": 6542,
+    "forks": 1508,
+    "language": "Python",
+    "license": "GPL-2.0",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-03T23:05:04Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/espressif__esptool/README.md"
+  },
+  {
     "id": "github:eugeneware/ffmpeg-static",
     "kind": "github",
     "category": "media-production",
@@ -4882,6 +5585,40 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/system-triage/farag2__Sophia-Script-for-Windows/README.md"
+  },
+  {
+    "id": "github:firefly-iii/firefly-iii",
+    "kind": "github",
+    "category": "business-finance",
+    "repo": "firefly-iii/firefly-iii",
+    "url": "https://github.com/firefly-iii/firefly-iii",
+    "description": "Firefly III: a personal finances manager",
+    "stars": 25172,
+    "forks": 2373,
+    "language": "PHP",
+    "license": "AGPL-3.0",
+    "topics": [
+      "accounting",
+      "budget",
+      "budgeting",
+      "budgets",
+      "cash-flow",
+      "cashflow",
+      "credit-card",
+      "docker",
+      "expenses",
+      "finance",
+      "finances",
+      "financial",
+      "linux",
+      "money",
+      "paycheck"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T20:38:33Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/firefly-iii__firefly-iii/README.md"
   },
   {
     "id": "github:fishaudio/fish-speech",
@@ -5209,6 +5946,24 @@
     "_extras": 1
   },
   {
+    "id": "github:gilbertchen/duplicacy",
+    "kind": "github",
+    "category": "backup-archive",
+    "repo": "gilbertchen/duplicacy",
+    "url": "https://github.com/gilbertchen/duplicacy",
+    "description": "A new generation cloud backup tool",
+    "stars": 5699,
+    "forks": 360,
+    "language": "Go",
+    "license": "NOASSERTION",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-10-27T00:54:07Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/gilbertchen__duplicacy/README.md"
+  },
+  {
     "id": "github:github/codeql-action",
     "kind": "github",
     "category": "packaging-and-ci",
@@ -5290,6 +6045,40 @@
     "_path": "research/sources/safety-and-security/gitleaks__gitleaks/README.md"
   },
   {
+    "id": "github:gitleaks/gitleaks",
+    "kind": "github",
+    "category": "security-ops",
+    "repo": "gitleaks/gitleaks",
+    "url": "https://github.com/gitleaks/gitleaks",
+    "description": "Find secrets with Gitleaks 🔑",
+    "stars": 30772,
+    "forks": 2350,
+    "language": "Go",
+    "license": "MIT",
+    "topics": [
+      "ai-powered",
+      "ci-cd",
+      "cicd",
+      "cli",
+      "data-loss-prevention",
+      "devsecops",
+      "dlp",
+      "git",
+      "gitleaks",
+      "go",
+      "golang",
+      "hacktoberfest",
+      "llm",
+      "llm-inference",
+      "llm-training"
+    ],
+    "archived": false,
+    "pushed_at": "2026-10-28T04:14:29Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/gitleaks__gitleaks/README.md"
+  },
+  {
     "id": "github:gitpython-developers/GitPython",
     "kind": "github",
     "category": "coding-agents",
@@ -5310,6 +6099,24 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/coding-agents/gitpython-developers__GitPython/README.md"
+  },
+  {
+    "id": "github:gnucash/gnucash",
+    "kind": "github",
+    "category": "business-finance",
+    "repo": "gnucash/gnucash",
+    "url": "https://github.com/gnucash/gnucash",
+    "description": "GnuCash Double-Entry Accounting Program.",
+    "stars": 4402,
+    "forks": 1005,
+    "language": "C",
+    "license": "NOASSERTION",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-08T05:45:15Z",
+    "default_branch": "stable",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/gnucash__gnucash/README.md"
   },
   {
     "id": "github:golang/tools",
@@ -5752,6 +6559,34 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/system-triage/henrypp__memreduct/README.md"
+  },
+  {
+    "id": "github:henrypp/simplewall",
+    "kind": "github",
+    "category": "network-admin",
+    "repo": "henrypp/simplewall",
+    "url": "https://github.com/henrypp/simplewall",
+    "description": "Simple tool to configure Windows Filtering Platform (WFP) which can configure network activity on your computer.",
+    "stars": 9264,
+    "forks": 671,
+    "language": "C",
+    "license": "GPL-3.0",
+    "topics": [
+      "arm64",
+      "firewall",
+      "foss",
+      "network",
+      "simplewall",
+      "wfp",
+      "win64",
+      "windows",
+      "windows-firewall"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T10:38:27Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/henrypp__simplewall/README.md"
   },
   {
     "id": "github:henrypp/simplewall",
@@ -6203,6 +7038,33 @@
     "_path": "research/sources/perf-optimization/ikawrakow__ik_llama.cpp/README.md"
   },
   {
+    "id": "github:imagemagick/imagemagick",
+    "kind": "github",
+    "category": "design-3d",
+    "repo": "imagemagick/imagemagick",
+    "url": "https://github.com/imagemagick/imagemagick",
+    "description": "ImageMagick is a free, open-source software suite for creating, editing, converting, and displaying images. It supports 200+ formats and offers powerful command-line tools and APIs for automation, scripting, and integration across platforms.",
+    "stars": 17816,
+    "forks": 1699,
+    "language": "C",
+    "license": "NOASSERTION",
+    "topics": [
+      "command-line-image-tool",
+      "digital-image-editing",
+      "image-conversion",
+      "image-manipulation",
+      "image-processing",
+      "imagemagick",
+      "mastering-digital-image-alchemy",
+      "open-source-software"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T12:24:45Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/imagemagick__imagemagick/README.md"
+  },
+  {
     "id": "github:imartinez/privateGPT",
     "kind": "github",
     "category": "reference-apps",
@@ -6249,6 +7111,24 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/tts-and-voice/index-tts__index-tts/README.md"
+  },
+  {
+    "id": "github:inkscape/inkscape",
+    "kind": "github",
+    "category": "design-3d",
+    "repo": "inkscape/inkscape",
+    "url": "https://github.com/inkscape/inkscape",
+    "description": "Project Website: https://inkscape.org - Code Repository: https://gitlab.com/inkscape/inkscape - Draw freely. 🖌",
+    "stars": 4102,
+    "forks": 314,
+    "language": "",
+    "license": "NOASSERTION",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2022-03-03T20:52:00Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/inkscape__inkscape/README.md"
   },
   {
     "id": "github:inngest/inngest",
@@ -6333,6 +7213,33 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/inference-runtimes/intel__neural-compressor/README.md"
+  },
+  {
+    "id": "github:invoiceplane/invoiceplane",
+    "kind": "github",
+    "category": "business-finance",
+    "repo": "invoiceplane/invoiceplane",
+    "url": "https://github.com/invoiceplane/invoiceplane",
+    "description": "A self-hosted open source application for managing your invoices, clients and payments.",
+    "stars": 3280,
+    "forks": 890,
+    "language": "PHP",
+    "license": "NOASSERTION",
+    "topics": [
+      "billing",
+      "codeigniter",
+      "crm",
+      "invoiceplane",
+      "invoices",
+      "invoicing",
+      "open-source",
+      "php"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T10:59:57Z",
+    "default_branch": "develop",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/invoiceplane__invoiceplane/README.md"
   },
   {
     "id": "github:isomorphic-git/isomorphic-git",
@@ -6656,6 +7563,26 @@
     "_path": "research/sources/office-automation/jmcnamara__XlsxWriter/README.md"
   },
   {
+    "id": "github:jqlang/jq",
+    "kind": "github",
+    "category": "network-admin",
+    "repo": "jqlang/jq",
+    "url": "https://github.com/jqlang/jq",
+    "description": "Command-line JSON processor",
+    "stars": 36068,
+    "forks": 3067,
+    "language": "C",
+    "license": "NOASSERTION",
+    "topics": [
+      "jq"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-02T07:08:10Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/jqlang__jq/README.md"
+  },
+  {
     "id": "github:json-schema-org/json-schema-spec",
     "kind": "github",
     "category": "configuration",
@@ -6892,6 +7819,30 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/media-production/kkroening__ffmpeg-python/README.md"
+  },
+  {
+    "id": "github:kopia/kopia",
+    "kind": "github",
+    "category": "backup-archive",
+    "repo": "kopia/kopia",
+    "url": "https://github.com/kopia/kopia",
+    "description": "Cross-platform backup tool for Windows, macOS & Linux with fast, incremental backups, client-side end-to-end encryption, compression and data deduplication. CLI and GUI included.",
+    "stars": 14607,
+    "forks": 792,
+    "language": "Go",
+    "license": "Apache-2.0",
+    "topics": [
+      "backup",
+      "cloud",
+      "deduplication",
+      "encryption",
+      "google-cloud-storage"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T12:23:49Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/kopia__kopia/README.md"
   },
   {
     "id": "github:korotovsky/slack-mcp-server",
@@ -7387,6 +8338,29 @@
     "_path": "research/sources/coding-agents/laude-institute__terminal-bench/README.md"
   },
   {
+    "id": "github:ledger/ledger",
+    "kind": "github",
+    "category": "business-finance",
+    "repo": "ledger/ledger",
+    "url": "https://github.com/ledger/ledger",
+    "description": "Double-entry accounting system with a command-line reporting interface",
+    "stars": 6067,
+    "forks": 553,
+    "language": "C++",
+    "license": "NOASSERTION",
+    "topics": [
+      "accounting",
+      "command-line-tool",
+      "ledger",
+      "plaintext-accounting"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T01:30:47Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/ledger__ledger/README.md"
+  },
+  {
     "id": "github:letta-ai/letta",
     "kind": "github",
     "category": "memory-and-rag",
@@ -7408,6 +8382,112 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/memory-and-rag/letta-ai__letta/README.md"
+  },
+  {
+    "id": "github:libimobiledevice/libimobiledevice",
+    "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "libimobiledevice/libimobiledevice",
+    "url": "https://github.com/libimobiledevice/libimobiledevice",
+    "description": "A cross-platform protocol library to communicate with iOS devices",
+    "stars": 8326,
+    "forks": 1539,
+    "language": "C",
+    "license": "LGPL-2.1",
+    "topics": [
+      "c",
+      "ios",
+      "library",
+      "lockdownd",
+      "protocol"
+    ],
+    "archived": false,
+    "pushed_at": "2026-06-10T07:52:18Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/libimobiledevice__libimobiledevice/README.md"
+  },
+  {
+    "id": "github:libimobiledevice/usbmuxd",
+    "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "libimobiledevice/usbmuxd",
+    "url": "https://github.com/libimobiledevice/usbmuxd",
+    "description": "A socket daemon to multiplex connections from and to iOS devices",
+    "stars": 1794,
+    "forks": 406,
+    "language": "C",
+    "license": "GPL-2.0",
+    "topics": [
+      "c",
+      "daemon",
+      "ios",
+      "libimobiledevice",
+      "library",
+      "usb",
+      "usbmuxd"
+    ],
+    "archived": false,
+    "pushed_at": "2025-12-06T01:14:51Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/libimobiledevice__usbmuxd/README.md"
+  },
+  {
+    "id": "github:libusb/libusb",
+    "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "libusb/libusb",
+    "url": "https://github.com/libusb/libusb",
+    "description": "A cross-platform library to access USB devices",
+    "stars": 6191,
+    "forks": 2092,
+    "language": "C",
+    "license": "LGPL-2.1",
+    "topics": [
+      "c",
+      "libusb",
+      "usb"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T22:15:02Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/libusb__libusb/README.md"
+  },
+  {
+    "id": "github:libvips/libvips",
+    "kind": "github",
+    "category": "design-3d",
+    "repo": "libvips/libvips",
+    "url": "https://github.com/libvips/libvips",
+    "description": "A fast image processing library with low memory needs.",
+    "stars": 11792,
+    "forks": 802,
+    "language": "C",
+    "license": "LGPL-2.1",
+    "topics": [
+      "c",
+      "cpp",
+      "gif",
+      "graphicsmagick",
+      "hdr",
+      "heic",
+      "image-processing",
+      "imagemagick",
+      "jpeg",
+      "libvips",
+      "nifti",
+      "openexr",
+      "openslide",
+      "pdf",
+      "pdfium"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T18:23:03Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/libvips__libvips/README.md"
   },
   {
     "id": "github:lierdakil/pandoc-crossref",
@@ -7621,6 +8701,33 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/media-production/m-bain__whisperX/README.md"
+  },
+  {
+    "id": "github:mRemoteNG/mRemoteNG",
+    "kind": "github",
+    "category": "virtualization-remote",
+    "repo": "mRemoteNG/mRemoteNG",
+    "url": "https://github.com/mRemoteNG/mRemoteNG",
+    "description": "mRemoteNG is the next generation of mRemote, open source, tabbed, multi-protocol, remote connections manager.",
+    "stars": 11192,
+    "forks": 1640,
+    "language": "C#",
+    "license": "GPL-2.0",
+    "topics": [
+      "c-sharp",
+      "mremoteng",
+      "multi-protocol",
+      "rdp",
+      "remote-access",
+      "remote-desktop",
+      "ssh",
+      "windows"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T22:01:00Z",
+    "default_branch": "v1.78.2-dev",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/mRemoteNG__mRemoteNG/README.md"
   },
   {
     "id": "github:makenotion/notion-mcp-server",
@@ -7881,6 +8988,40 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/office-automation/mhammond__pywin32/README.md"
+  },
+  {
+    "id": "github:mholt/archiver",
+    "kind": "github",
+    "category": "backup-archive",
+    "repo": "mholt/archiver",
+    "url": "https://github.com/mholt/archiver",
+    "description": "DEPRECATED. Please use mholt/archives instead.",
+    "stars": 4371,
+    "forks": 395,
+    "language": "Go",
+    "license": "MIT",
+    "topics": [
+      "7zip",
+      "archives",
+      "brotli",
+      "bzip2",
+      "compression",
+      "decompression",
+      "extract",
+      "go",
+      "golang",
+      "gzip",
+      "lz4",
+      "rar",
+      "snappy",
+      "streaming",
+      "streams"
+    ],
+    "archived": true,
+    "pushed_at": "2024-11-19T16:52:17Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/mholt__archiver/README.md"
   },
   {
     "id": "github:michaellatman/mcp-get",
@@ -8316,6 +9457,24 @@
     "_path": "research/sources/tts-and-voice/microsoft__VibeVoice/README.md"
   },
   {
+    "id": "github:microsoft/WSL",
+    "kind": "github",
+    "category": "virtualization-remote",
+    "repo": "microsoft/WSL",
+    "url": "https://github.com/microsoft/WSL",
+    "description": "Windows Subsystem for Linux",
+    "stars": 34316,
+    "forks": 1882,
+    "language": "C++",
+    "license": "MIT",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-08T08:03:27Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/microsoft__WSL/README.md"
+  },
+  {
     "id": "github:microsoft/Windows-Machine-Learning",
     "kind": "github",
     "category": "perf-optimization",
@@ -8369,6 +9528,60 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/microsoft__Windows-Sandbox/README.md"
+  },
+  {
+    "id": "github:microsoft/Windows-classic-samples",
+    "kind": "github",
+    "category": "accessibility-api",
+    "repo": "microsoft/Windows-classic-samples",
+    "url": "https://github.com/microsoft/Windows-classic-samples",
+    "description": "This repo contains samples that demonstrate the API used in Windows classic desktop applications.",
+    "stars": 5688,
+    "forks": 3292,
+    "language": "",
+    "license": "NOASSERTION",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-09-03T20:50:29Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/microsoft__Windows-classic-samples/README.md"
+  },
+  {
+    "id": "github:microsoft/Windows-classic-samples",
+    "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "microsoft/Windows-classic-samples",
+    "url": "https://github.com/microsoft/Windows-classic-samples",
+    "description": "This repo contains samples that demonstrate the API used in Windows classic desktop applications.",
+    "stars": 5688,
+    "forks": 3292,
+    "language": "",
+    "license": "NOASSERTION",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-09-03T20:50:29Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/microsoft__Windows-classic-samples/README.md"
+  },
+  {
+    "id": "github:microsoft/Windows-classic-samples",
+    "kind": "github",
+    "category": "security-ops",
+    "repo": "microsoft/Windows-classic-samples",
+    "url": "https://github.com/microsoft/Windows-classic-samples",
+    "description": "This repo contains samples that demonstrate the API used in Windows classic desktop applications.",
+    "stars": 5688,
+    "forks": 3292,
+    "language": "",
+    "license": "NOASSERTION",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-09-03T20:50:29Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/microsoft__Windows-classic-samples/README.md"
   },
   {
     "id": "github:microsoft/Windows-classic-samples",
@@ -8493,6 +9706,38 @@
   {
     "id": "github:microsoft/WindowsAppSDK",
     "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "microsoft/WindowsAppSDK",
+    "url": "https://github.com/microsoft/WindowsAppSDK",
+    "description": "The Windows App SDK empowers all Windows desktop apps with modern Windows UI, APIs, and platform features, including back-compat support, shipped via NuGet.",
+    "stars": 4725,
+    "forks": 482,
+    "language": "C++",
+    "license": "MIT",
+    "topics": [
+      "cpp",
+      "csharp",
+      "desktop",
+      "project-reunion",
+      "win32",
+      "winappsdk",
+      "windows",
+      "windows-10",
+      "windows-11",
+      "windows-app-sdk",
+      "winui",
+      "winui3",
+      "wpf"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T01:38:52Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/microsoft__WindowsAppSDK/README.md"
+  },
+  {
+    "id": "github:microsoft/WindowsAppSDK",
+    "kind": "github",
     "category": "windows-automation",
     "repo": "microsoft/WindowsAppSDK",
     "url": "https://github.com/microsoft/WindowsAppSDK",
@@ -8521,6 +9766,31 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:26:32Z",
     "_path": "research/sources/windows-automation/microsoft__WindowsAppSDK/README.md"
+  },
+  {
+    "id": "github:microsoft/accessibility-insights-web",
+    "kind": "github",
+    "category": "accessibility-api",
+    "repo": "microsoft/accessibility-insights-web",
+    "url": "https://github.com/microsoft/accessibility-insights-web",
+    "description": "Accessibility Insights for Web",
+    "stars": 961,
+    "forks": 183,
+    "language": "TypeScript",
+    "license": "MIT",
+    "topics": [
+      "accessibility",
+      "accessibility-insights",
+      "chromeextension",
+      "hacktoberfest",
+      "reactjs",
+      "typescript"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-03T05:20:56Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/microsoft__accessibility-insights-web/README.md"
   },
   {
     "id": "github:microsoft/accessibility-insights-web",
@@ -8633,6 +9903,31 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/microsoft__autogen/README.md"
+  },
+  {
+    "id": "github:microsoft/fluentui",
+    "kind": "github",
+    "category": "accessibility-api",
+    "repo": "microsoft/fluentui",
+    "url": "https://github.com/microsoft/fluentui",
+    "description": "Fluent UI web represents a collection of utilities, React components, and web components for building web applications.",
+    "stars": 20391,
+    "forks": 2959,
+    "language": "TypeScript",
+    "license": "NOASSERTION",
+    "topics": [
+      "components",
+      "fluent",
+      "microsoft",
+      "office-ui-fabric",
+      "react",
+      "react-components"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T20:16:26Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/microsoft__fluentui/README.md"
   },
   {
     "id": "github:microsoft/fluentui",
@@ -8770,6 +10065,27 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/coding-agents/microsoft__monaco-editor/README.md"
+  },
+  {
+    "id": "github:microsoft/msix-packaging",
+    "kind": "github",
+    "category": "deployment-admin",
+    "repo": "microsoft/msix-packaging",
+    "url": "https://github.com/microsoft/msix-packaging",
+    "description": "MSIX SDK",
+    "stars": 1072,
+    "forks": 193,
+    "language": "C",
+    "license": "MIT",
+    "topics": [
+      "msix",
+      "uwp"
+    ],
+    "archived": false,
+    "pushed_at": "2026-08-24T23:31:48Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/microsoft__msix-packaging/README.md"
   },
   {
     "id": "github:microsoft/msix-packaging",
@@ -9022,6 +10338,40 @@
     "_path": "research/sources/safety-and-security/microsoft__presidio/README.md"
   },
   {
+    "id": "github:microsoft/presidio",
+    "kind": "github",
+    "category": "security-ops",
+    "repo": "microsoft/presidio",
+    "url": "https://github.com/microsoft/presidio",
+    "description": "An open-source framework for detecting, redacting, masking, and anonymizing sensitive data (PII) across text, images, and structured data. Supports NLP, pattern matching, and customizable pipelines.",
+    "stars": 11776,
+    "forks": 1418,
+    "language": "Python",
+    "license": "MIT",
+    "topics": [
+      "anonymization",
+      "data-anonymization",
+      "data-masking",
+      "data-obfuscation",
+      "data-privacy",
+      "data-redaction",
+      "de-identification",
+      "guardrails",
+      "image-redactor",
+      "named-entity-recognition",
+      "nlp",
+      "personally-identifiable-information",
+      "phi",
+      "pii",
+      "pii-detection"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T06:40:46Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/microsoft__presidio/README.md"
+  },
+  {
     "id": "github:microsoft/pyright",
     "kind": "github",
     "category": "coding-agents",
@@ -9176,6 +10526,29 @@
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/microsoft__windows-rs/README.md",
     "_extras": 1
+  },
+  {
+    "id": "github:microsoft/winget-cli",
+    "kind": "github",
+    "category": "deployment-admin",
+    "repo": "microsoft/winget-cli",
+    "url": "https://github.com/microsoft/winget-cli",
+    "description": "WinGet is the Windows Package Manager. This project includes a CLI (Command Line Interface), PowerShell modules, and a COM (Component Object Model) API (Application Programming Interface).",
+    "stars": 26568,
+    "forks": 1815,
+    "language": "C++",
+    "license": "MIT",
+    "topics": [
+      "command-line",
+      "package-manager",
+      "windows",
+      "winget"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T19:59:35Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/microsoft__winget-cli/README.md"
   },
   {
     "id": "github:microsoft/winget-cli",
@@ -9394,6 +10767,36 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/perf-optimization/mit-han-lab__streaming-llm/README.md"
+  },
+  {
+    "id": "github:mitmproxy/mitmproxy",
+    "kind": "github",
+    "category": "network-admin",
+    "repo": "mitmproxy/mitmproxy",
+    "url": "https://github.com/mitmproxy/mitmproxy",
+    "description": "An interactive TLS-capable intercepting HTTP proxy for penetration testers and software developers.",
+    "stars": 46727,
+    "forks": 4945,
+    "language": "Python",
+    "license": "MIT",
+    "topics": [
+      "debugging",
+      "http",
+      "http2",
+      "man-in-the-middle",
+      "mitmproxy",
+      "proxy",
+      "python",
+      "security",
+      "ssl",
+      "tls",
+      "websocket"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-04T23:01:46Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/mitmproxy__mitmproxy/README.md"
   },
   {
     "id": "github:mlc-ai/mlc-llm",
@@ -9756,6 +11159,37 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/connectors-extra/mqttjs__MQTT.js/README.md"
+  },
+  {
+    "id": "github:mrdoob/three.js",
+    "kind": "github",
+    "category": "design-3d",
+    "repo": "mrdoob/three.js",
+    "url": "https://github.com/mrdoob/three.js",
+    "description": "JavaScript 3D Library.",
+    "stars": 117864,
+    "forks": 36910,
+    "language": "JavaScript",
+    "license": "MIT",
+    "topics": [
+      "3d",
+      "augmented-reality",
+      "canvas",
+      "html5",
+      "javascript",
+      "svg",
+      "virtual-reality",
+      "webaudio",
+      "webgl",
+      "webgl2",
+      "webgpu",
+      "webxr"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T10:14:27Z",
+    "default_branch": "dev",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/mrdoob__three.js/README.md"
   },
   {
     "id": "github:mudler/LocalAI",
@@ -10254,6 +11688,39 @@
     "_path": "research/sources/mcp-and-tools/nspady__google-calendar-mcp/README.md"
   },
   {
+    "id": "github:ntop/ntopng",
+    "kind": "github",
+    "category": "network-admin",
+    "repo": "ntop/ntopng",
+    "url": "https://github.com/ntop/ntopng",
+    "description": "Web-based Traffic and Cybersecurity Network Traffic Monitoring",
+    "stars": 8339,
+    "forks": 775,
+    "language": "Lua",
+    "license": "GPL-3.0",
+    "topics": [
+      "cybersecurity",
+      "docker",
+      "ebpf",
+      "ipfix",
+      "kubernetes",
+      "netflow",
+      "network",
+      "ntopng",
+      "packet-analyser",
+      "packet-processing",
+      "realtime",
+      "sflow",
+      "snmp",
+      "traffic-monitoring"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T11:15:13Z",
+    "default_branch": "dev",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/ntop__ntopng/README.md"
+  },
+  {
     "id": "github:nut-tree/nut.js",
     "kind": "github",
     "category": "windows-automation",
@@ -10280,6 +11747,28 @@
     "default_branch": "develop",
     "fetched_at": "2026-11-08T12:33:56Z",
     "_path": "research/sources/windows-automation/nut-tree__nut.js/README.md"
+  },
+  {
+    "id": "github:nvaccess/nvda",
+    "kind": "github",
+    "category": "accessibility-api",
+    "repo": "nvaccess/nvda",
+    "url": "https://github.com/nvaccess/nvda",
+    "description": "NVDA, the free and open source Screen Reader for Microsoft Windows",
+    "stars": 2684,
+    "forks": 865,
+    "language": "Python",
+    "license": "NOASSERTION",
+    "topics": [
+      "accessibility",
+      "blind",
+      "screen-reader"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T09:06:41Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/nvaccess__nvda/README.md"
   },
   {
     "id": "github:nvidia/NeMo",
@@ -10381,6 +11870,36 @@
   {
     "id": "github:obsproject/obs-studio",
     "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "obsproject/obs-studio",
+    "url": "https://github.com/obsproject/obs-studio",
+    "description": "OBS Studio - Free and open source software for live streaming and screen recording",
+    "stars": 79160,
+    "forks": 11119,
+    "language": "C",
+    "license": "GPL-2.0",
+    "topics": [
+      "c",
+      "c-plus-plus",
+      "directshow",
+      "facebook-live",
+      "ffmpeg",
+      "game-capture",
+      "live-streaming",
+      "screen-capture",
+      "twitch-tv",
+      "video-recording",
+      "youtube-live"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T00:42:53Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/obsproject__obs-studio/README.md"
+  },
+  {
+    "id": "github:obsproject/obs-studio",
+    "kind": "github",
     "category": "system-control",
     "repo": "obsproject/obs-studio",
     "url": "https://github.com/obsproject/obs-studio",
@@ -10448,6 +11967,32 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/octalmage__robotjs/README.md"
+  },
+  {
+    "id": "github:odoo/odoo",
+    "kind": "github",
+    "category": "business-finance",
+    "repo": "odoo/odoo",
+    "url": "https://github.com/odoo/odoo",
+    "description": "Odoo. Open Source Apps To Grow Your Business.",
+    "stars": 55637,
+    "forks": 34245,
+    "language": "Python",
+    "license": "NOASSERTION",
+    "topics": [
+      "apps",
+      "business",
+      "erp",
+      "management",
+      "odoo",
+      "odoo-apps",
+      "python"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T11:44:02Z",
+    "default_branch": "20.0",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/odoo__odoo/README.md"
   },
   {
     "id": "github:olafhartong/sysmon-modular",
@@ -10568,6 +12113,33 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/open-policy-agent__opa/README.md"
+  },
+  {
+    "id": "github:open-policy-agent/opa",
+    "kind": "github",
+    "category": "security-ops",
+    "repo": "open-policy-agent/opa",
+    "url": "https://github.com/open-policy-agent/opa",
+    "description": "Open Policy Agent (OPA) is an open source, general-purpose policy engine.",
+    "stars": 12446,
+    "forks": 1708,
+    "language": "Go",
+    "license": "Apache-2.0",
+    "topics": [
+      "authorization",
+      "cloud-native",
+      "compliance",
+      "declarative",
+      "json",
+      "opa",
+      "open-policy-agent",
+      "policy"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T03:45:08Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/open-policy-agent__opa/README.md"
   },
   {
     "id": "github:open-telemetry/opentelemetry-js",
@@ -10847,6 +12419,30 @@
     "_path": "research/sources/low-end-inference/openbmb__MiniCPM/README.md"
   },
   {
+    "id": "github:opencv/opencv",
+    "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "opencv/opencv",
+    "url": "https://github.com/opencv/opencv",
+    "description": "Open Source Computer Vision Library",
+    "stars": 91484,
+    "forks": 57082,
+    "language": "C++",
+    "license": "Apache-2.0",
+    "topics": [
+      "c-plus-plus",
+      "computer-vision",
+      "deep-learning",
+      "image-processing",
+      "opencv"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T08:47:12Z",
+    "default_branch": "5.x",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/opencv__opencv/README.md"
+  },
+  {
     "id": "github:openhardwaremonitor/openhardwaremonitor",
     "kind": "github",
     "category": "windows-automation",
@@ -10863,6 +12459,40 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:26:32Z",
     "_path": "research/sources/windows-automation/openhardwaremonitor__openhardwaremonitor/README.md"
+  },
+  {
+    "id": "github:openscad/openscad",
+    "kind": "github",
+    "category": "design-3d",
+    "repo": "openscad/openscad",
+    "url": "https://github.com/openscad/openscad",
+    "description": "OpenSCAD - The Programmers Solid 3D CAD Modeller",
+    "stars": 10616,
+    "forks": 1790,
+    "language": "C++",
+    "license": "NOASSERTION",
+    "topics": [
+      "3d",
+      "3d-graphics",
+      "3d-models",
+      "3d-printing",
+      "c-plus-plus",
+      "c-plus-plus-17",
+      "cad",
+      "dxf-files",
+      "linux",
+      "macos",
+      "opengl",
+      "openscad",
+      "qt5",
+      "qt6",
+      "windows"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T18:46:26Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/openscad__openscad/README.md"
   },
   {
     "id": "github:openvinotoolkit/nncf",
@@ -11001,6 +12631,38 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/packaging-and-ci/ossf__scorecard/README.md"
+  },
+  {
+    "id": "github:p7zip-project/p7zip",
+    "kind": "github",
+    "category": "backup-archive",
+    "repo": "p7zip-project/p7zip",
+    "url": "https://github.com/p7zip-project/p7zip",
+    "description": "A new p7zip fork with additional codecs and improvements (forked from https://sourceforge.net/projects/sevenzip/ AND https://sourceforge.net/projects/p7zip/).",
+    "stars": 966,
+    "forks": 119,
+    "language": "C",
+    "license": "NOASSERTION",
+    "topics": [
+      "7zip",
+      "archive",
+      "brotli",
+      "compression",
+      "fastlzma2",
+      "lizard",
+      "lz4",
+      "lz5",
+      "lzham",
+      "lzma",
+      "lzma2",
+      "p7zip",
+      "zstd"
+    ],
+    "archived": false,
+    "pushed_at": "2025-05-20T11:31:27Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/p7zip-project__p7zip/README.md"
   },
   {
     "id": "github:pacocoursey/cmdk",
@@ -11514,6 +13176,24 @@
     "_path": "research/sources/self-extension/punkpeye__awesome-mcp-servers/README.md"
   },
   {
+    "id": "github:puppetlabs/puppet",
+    "kind": "github",
+    "category": "deployment-admin",
+    "repo": "puppetlabs/puppet",
+    "url": "https://github.com/puppetlabs/puppet",
+    "description": "Server automation framework and application",
+    "stars": 7972,
+    "forks": 2201,
+    "language": "Ruby",
+    "license": "Apache-2.0",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-08-06T13:05:18Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/puppetlabs__puppet/README.md"
+  },
+  {
     "id": "github:pyannote/pyannote-audio",
     "kind": "github",
     "category": "whisper-and-asr",
@@ -11762,6 +13442,28 @@
     "_path": "research/sources/memory-and-rag/qdrant__qdrant/README.md"
   },
   {
+    "id": "github:qemu/qemu",
+    "kind": "github",
+    "category": "virtualization-remote",
+    "repo": "qemu/qemu",
+    "url": "https://github.com/qemu/qemu",
+    "description": "Official QEMU mirror. Please see https://www.qemu.org/contribute/ for how to submit changes to QEMU. Pull Requests are disabled. Please only use release tarballs from the QEMU website.",
+    "stars": 13996,
+    "forks": 7431,
+    "language": "C",
+    "license": "NOASSERTION",
+    "topics": [
+      "emulation",
+      "qemu",
+      "virtualization"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T22:51:03Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/qemu__qemu/README.md"
+  },
+  {
     "id": "github:qpdf/qpdf",
     "kind": "github",
     "category": "office-automation",
@@ -11827,6 +13529,40 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/ui-ux/radix-ui__primitives/README.md"
+  },
+  {
+    "id": "github:rclone/rclone",
+    "kind": "github",
+    "category": "backup-archive",
+    "repo": "rclone/rclone",
+    "url": "https://github.com/rclone/rclone",
+    "description": "\"rsync for cloud storage\" - Google Drive, S3, Dropbox, Backblaze B2, One Drive, Swift, Hubic, Wasabi, Google Cloud Storage, Azure Blob, Azure Files, Yandex Files",
+    "stars": 60862,
+    "forks": 5663,
+    "language": "Go",
+    "license": "MIT",
+    "topics": [
+      "azure-blob",
+      "azure-blob-storage",
+      "azure-files",
+      "backblaze-b2",
+      "cloud-storage",
+      "dropbox",
+      "encryption",
+      "ftp",
+      "fuse-filesystem",
+      "go",
+      "golang",
+      "google-cloud-storage",
+      "google-drive",
+      "onedrive",
+      "openstack-swift"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T19:01:38Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/rclone__rclone/README.md"
   },
   {
     "id": "github:recharts/recharts",
@@ -11986,6 +13722,31 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/tts-and-voice/resemble-ai__chatterbox/README.md"
+  },
+  {
+    "id": "github:restic/restic",
+    "kind": "github",
+    "category": "backup-archive",
+    "repo": "restic/restic",
+    "url": "https://github.com/restic/restic",
+    "description": "Fast, secure, efficient backup program",
+    "stars": 37069,
+    "forks": 1956,
+    "language": "Go",
+    "license": "BSD-2-Clause",
+    "topics": [
+      "backup",
+      "dedupe",
+      "deduplication",
+      "go",
+      "restic",
+      "secure-by-default"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-06T20:42:11Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/restic__restic/README.md"
   },
   {
     "id": "github:retextjs/retext",
@@ -12209,6 +13970,40 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/coding-agents/rust-lang__rust-analyzer/README.md"
+  },
+  {
+    "id": "github:rustdesk/rustdesk",
+    "kind": "github",
+    "category": "virtualization-remote",
+    "repo": "rustdesk/rustdesk",
+    "url": "https://github.com/rustdesk/rustdesk",
+    "description": "An open-source remote desktop application designed for self-hosting, as an alternative to TeamViewer.",
+    "stars": 128632,
+    "forks": 20441,
+    "language": "Rust",
+    "license": "AGPL-3.0",
+    "topics": [
+      "android",
+      "anydesk",
+      "dart",
+      "flatpak",
+      "flutter",
+      "flutter-apps",
+      "ios",
+      "linux",
+      "macos",
+      "p2p",
+      "rdp",
+      "remote-control",
+      "remote-desktop",
+      "rust",
+      "rust-lang"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T11:15:20Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/rustdesk__rustdesk/README.md"
   },
   {
     "id": "github:screenpipe/screenpipe",
@@ -12477,6 +14272,24 @@
     "_path": "research/sources/benchmarks/sierra-research__tau-bench/README.md"
   },
   {
+    "id": "github:sigrokproject/pulseview",
+    "kind": "github",
+    "category": "devices-peripherals",
+    "repo": "sigrokproject/pulseview",
+    "url": "https://github.com/sigrokproject/pulseview",
+    "description": "Read-only mirror of the official repo at git://sigrok.org/pulseview. Pull requests welcome. Please file bugreports at sigrok.org/bugzilla.",
+    "stars": 815,
+    "forks": 256,
+    "language": "C++",
+    "license": "GPL-3.0",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2025-11-10T00:51:54Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/sigrokproject__pulseview/README.md"
+  },
+  {
     "id": "github:sigstore/cosign",
     "kind": "github",
     "category": "packaging-and-ci",
@@ -12493,6 +14306,24 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/packaging-and-ci/sigstore__cosign/README.md"
+  },
+  {
+    "id": "github:sigstore/cosign",
+    "kind": "github",
+    "category": "security-ops",
+    "repo": "sigstore/cosign",
+    "url": "https://github.com/sigstore/cosign",
+    "description": "Code signing and transparency for containers and binaries",
+    "stars": 6419,
+    "forks": 838,
+    "language": "Go",
+    "license": "Apache-2.0",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-05T00:11:57Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/sigstore__cosign/README.md"
   },
   {
     "id": "github:sigstore/cosign",
@@ -13194,6 +15025,90 @@
     "_path": "research/sources/ui-ux/storybookjs__storybook/README.md"
   },
   {
+    "id": "github:swisskyrepo/PayloadsAllTheThings",
+    "kind": "github",
+    "category": "security-ops",
+    "repo": "swisskyrepo/PayloadsAllTheThings",
+    "url": "https://github.com/swisskyrepo/PayloadsAllTheThings",
+    "description": "A list of useful payloads and bypass for Web Application Security and Pentest/CTF",
+    "stars": 82487,
+    "forks": 17568,
+    "language": "Python",
+    "license": "MIT",
+    "topics": [
+      "bounty",
+      "bugbounty",
+      "bypass",
+      "cheatsheet",
+      "enumeration",
+      "hacking",
+      "hacktoberfest",
+      "methodology",
+      "payload",
+      "payloads",
+      "penetration-testing",
+      "pentest",
+      "privilege-escalation",
+      "redteam",
+      "security"
+    ],
+    "archived": false,
+    "pushed_at": "2026-10-30T15:58:03Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/swisskyrepo__PayloadsAllTheThings/README.md"
+  },
+  {
+    "id": "github:tailscale/tailscale",
+    "kind": "github",
+    "category": "network-admin",
+    "repo": "tailscale/tailscale",
+    "url": "https://github.com/tailscale/tailscale",
+    "description": "The easiest, most secure way to use WireGuard and 2FA.",
+    "stars": 38791,
+    "forks": 3439,
+    "language": "Go",
+    "license": "BSD-3-Clause",
+    "topics": [
+      "2fa",
+      "oauth",
+      "sso",
+      "tailscale",
+      "vpn",
+      "wireguard"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T20:29:03Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/tailscale__tailscale/README.md"
+  },
+  {
+    "id": "github:tailscale/tailscale",
+    "kind": "github",
+    "category": "virtualization-remote",
+    "repo": "tailscale/tailscale",
+    "url": "https://github.com/tailscale/tailscale",
+    "description": "The easiest, most secure way to use WireGuard and 2FA.",
+    "stars": 38791,
+    "forks": 3439,
+    "language": "Go",
+    "license": "BSD-3-Clause",
+    "topics": [
+      "2fa",
+      "oauth",
+      "sso",
+      "tailscale",
+      "vpn",
+      "wireguard"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-07T20:29:03Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/tailscale__tailscale/README.md"
+  },
+  {
     "id": "github:tailwindlabs/headlessui",
     "kind": "github",
     "category": "ui-ux",
@@ -13696,6 +15611,37 @@
     "_path": "research/sources/safety-and-security/trufflesecurity__trufflehog/README.md"
   },
   {
+    "id": "github:trufflesecurity/trufflehog",
+    "kind": "github",
+    "category": "security-ops",
+    "repo": "trufflesecurity/trufflehog",
+    "url": "https://github.com/trufflesecurity/trufflehog",
+    "description": "Find, verify, and analyze leaked credentials",
+    "stars": 28959,
+    "forks": 2699,
+    "language": "Go",
+    "license": "AGPL-3.0",
+    "topics": [
+      "credentials",
+      "devsecops",
+      "dynamic-analysis",
+      "precommit",
+      "scanning",
+      "secret",
+      "secret-management",
+      "secrets",
+      "security",
+      "security-tools",
+      "trufflehog",
+      "verification"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-05T17:40:43Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/trufflesecurity__trufflehog/README.md"
+  },
+  {
     "id": "github:turboderp-org/exllamav2",
     "kind": "github",
     "category": "perf-optimization",
@@ -13712,6 +15658,40 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/perf-optimization/turboderp-org__exllamav2/README.md"
+  },
+  {
+    "id": "github:twentyhq/twenty",
+    "kind": "github",
+    "category": "business-finance",
+    "repo": "twentyhq/twenty",
+    "url": "https://github.com/twentyhq/twenty",
+    "description": "The open alternative to Salesforce, designed for AI.",
+    "stars": 60631,
+    "forks": 10013,
+    "language": "TypeScript",
+    "license": "NOASSERTION",
+    "topics": [
+      "crm",
+      "crm-system",
+      "customer",
+      "good-first-issue",
+      "graphql",
+      "hacktoberfest",
+      "javascript",
+      "marketing",
+      "monorepo",
+      "nestjs",
+      "open-source",
+      "postgresql",
+      "react",
+      "reactjs",
+      "sales"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T12:31:23Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/twentyhq__twenty/README.md"
   },
   {
     "id": "github:typst/typst",
@@ -13910,6 +15890,40 @@
     "_path": "research/sources/system-control/videolan__vlc/README.md"
   },
   {
+    "id": "github:virtio-win/kvm-guest-drivers-windows",
+    "kind": "github",
+    "category": "virtualization-remote",
+    "repo": "virtio-win/kvm-guest-drivers-windows",
+    "url": "https://github.com/virtio-win/kvm-guest-drivers-windows",
+    "description": "Windows paravirtualized drivers for QEMU\\KVM",
+    "stars": 2753,
+    "forks": 500,
+    "language": "C",
+    "license": "BSD-3-Clause",
+    "topics": [
+      "c",
+      "c-plus-plus",
+      "drivers",
+      "guest",
+      "guest-agent",
+      "kernel-driver",
+      "kvm",
+      "kvm-hypervisor",
+      "ndis",
+      "qemu",
+      "qemu-kvm",
+      "storport",
+      "virtio",
+      "virtio-win",
+      "virtualization"
+    ],
+    "archived": false,
+    "pushed_at": "2026-10-29T10:16:12Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/virtio-win__kvm-guest-drivers-windows/README.md"
+  },
+  {
     "id": "github:vitejs/vite",
     "kind": "github",
     "category": "electron-shell",
@@ -14081,6 +16095,46 @@
     "_path": "research/sources/coding-agents/vuejs__core/README.md"
   },
   {
+    "id": "github:w3c/aria-practices",
+    "kind": "github",
+    "category": "accessibility-api",
+    "repo": "w3c/aria-practices",
+    "url": "https://github.com/w3c/aria-practices",
+    "description": "WAI-ARIA Authoring Practices Guide (APG)",
+    "stars": 1361,
+    "forks": 495,
+    "language": "HTML",
+    "license": "NOASSERTION",
+    "topics": [
+      "aria",
+      "css",
+      "html"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-04T16:57:53Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/w3c__aria-practices/README.md"
+  },
+  {
+    "id": "github:w3c/wcag",
+    "kind": "github",
+    "category": "accessibility-api",
+    "repo": "w3c/wcag",
+    "url": "https://github.com/w3c/wcag",
+    "description": "Web Content Accessibility Guidelines",
+    "stars": 1522,
+    "forks": 568,
+    "language": "HTML",
+    "license": "NOASSERTION",
+    "topics": [],
+    "archived": false,
+    "pushed_at": "2026-11-06T23:57:44Z",
+    "default_branch": "main",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/w3c__wcag/README.md"
+  },
+  {
     "id": "github:weaviate/weaviate",
     "kind": "github",
     "category": "memory-and-rag",
@@ -14202,6 +16256,29 @@
     "default_branch": "master",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/observability-evals/winstonjs__winston/README.md"
+  },
+  {
+    "id": "github:wireshark/wireshark",
+    "kind": "github",
+    "category": "network-admin",
+    "repo": "wireshark/wireshark",
+    "url": "https://github.com/wireshark/wireshark",
+    "description": "Read-only mirror of Wireshark's Git repository at https://gitlab.com/wireshark/wireshark. You're welcome to submit pull requests there.",
+    "stars": 10176,
+    "forks": 2256,
+    "language": "C",
+    "license": "GPL-2.0",
+    "topics": [
+      "packet-capture",
+      "stratoshark",
+      "tshark",
+      "wireshark"
+    ],
+    "archived": false,
+    "pushed_at": "2026-11-08T12:35:04Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/wireshark__wireshark/README.md"
   },
   {
     "id": "github:withcatai/node-llama-cpp",
@@ -14697,6 +16774,32 @@
     "_path": "research/sources/reference-apps/zen-browser__desktop/README.md"
   },
   {
+    "id": "github:zerotier/ZeroTierOne",
+    "kind": "github",
+    "category": "network-admin",
+    "repo": "zerotier/ZeroTierOne",
+    "url": "https://github.com/zerotier/ZeroTierOne",
+    "description": "A Smart Ethernet Switch for Earth",
+    "stars": 17239,
+    "forks": 1992,
+    "language": "C++",
+    "license": "NOASSERTION",
+    "topics": [
+      "decentralization",
+      "networking",
+      "peer-to-peer",
+      "sd-wan",
+      "sdn",
+      "virtual-network",
+      "vpn"
+    ],
+    "archived": false,
+    "pushed_at": "2026-09-03T17:04:55Z",
+    "default_branch": "dev",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/zerotier__ZeroTierOne/README.md"
+  },
+  {
     "id": "github:zotero/zotero",
     "kind": "github",
     "category": "academic-writing",
@@ -14713,6 +16816,40 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/academic-writing/zotero__zotero/README.md"
+  },
+  {
+    "id": "github:zricethezav/gitleaks",
+    "kind": "github",
+    "category": "security-ops",
+    "repo": "zricethezav/gitleaks",
+    "url": "https://github.com/zricethezav/gitleaks",
+    "description": "Find secrets with Gitleaks 🔑",
+    "stars": 30772,
+    "forks": 2350,
+    "language": "Go",
+    "license": "MIT",
+    "topics": [
+      "ai-powered",
+      "ci-cd",
+      "cicd",
+      "cli",
+      "data-loss-prevention",
+      "devsecops",
+      "dlp",
+      "git",
+      "gitleaks",
+      "go",
+      "golang",
+      "hacktoberfest",
+      "llm",
+      "llm-inference",
+      "llm-training"
+    ],
+    "archived": false,
+    "pushed_at": "2026-10-28T04:14:29Z",
+    "default_branch": "master",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/zricethezav__gitleaks/README.md"
   },
   {
     "id": "github:zylon-ai/private-gpt",
@@ -14735,6 +16872,31 @@
     "default_branch": "main",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/reference-apps/zylon-ai__private-gpt/README.md"
+  },
+  {
+    "id": "npm:7zip-bin",
+    "kind": "npm",
+    "category": "backup-archive",
+    "package": "7zip-bin",
+    "version": "5.2.0",
+    "url": "https://www.npmjs.com/package/7zip-bin",
+    "homepage": "https://github.com/develar/7zip-bin#readme",
+    "license": "MIT",
+    "summary": "7-Zip precompiled binaries",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/npm__7zip-bin.md"
+  },
+  {
+    "id": "npm:@abandonware/noble",
+    "kind": "npm",
+    "category": "devices-peripherals",
+    "package": "@abandonware/noble",
+    "version": "1.9.2-26",
+    "url": "https://www.npmjs.com/package/@abandonware/noble",
+    "license": "MIT",
+    "summary": "A Node.js BLE (Bluetooth Low Energy) central library.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/npm__abandonware-noble.md"
   },
   {
     "id": "npm:@ai-sdk/anthropic",
@@ -14784,6 +16946,19 @@
     "summary": "The official TypeScript library for the Anthropic API",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/npm__anthropic-ai-sdk.md"
+  },
+  {
+    "id": "npm:@axe-core/playwright",
+    "kind": "npm",
+    "category": "accessibility-api",
+    "package": "@axe-core/playwright",
+    "version": "4.14.0",
+    "url": "https://www.npmjs.com/package/@axe-core/playwright",
+    "homepage": "https://github.com/dequelabs/axe-core-npm#readme",
+    "license": "MPL-2.0",
+    "summary": "Provides a method to inject and analyze web pages using axe",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/npm__axe-core-playwright.md"
   },
   {
     "id": "npm:@biomejs/biome",
@@ -14940,6 +17115,19 @@
     "summary": "Platform independent binary installer of FFmpeg for node projects",
     "fetched_at": "2026-11-08T11:47:22Z",
     "_path": "research/sources/media-production/npm__ffmpeg-installer-ffmpeg.md"
+  },
+  {
+    "id": "npm:@gltf-transform/core",
+    "kind": "npm",
+    "category": "design-3d",
+    "package": "@gltf-transform/core",
+    "version": "4.5.1",
+    "url": "https://www.npmjs.com/package/@gltf-transform/core",
+    "homepage": "https://gltf-transform.dev/",
+    "license": "MIT",
+    "summary": "glTF 2.0 SDK for JavaScript and TypeScript, on Web and Node.js.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/npm__gltf-transform-core.md"
   },
   {
     "id": "npm:@googleapis/calendar",
@@ -15683,6 +17871,19 @@
   {
     "id": "npm:adm-zip",
     "kind": "npm",
+    "category": "backup-archive",
+    "package": "adm-zip",
+    "version": "0.6.1",
+    "url": "https://www.npmjs.com/package/adm-zip",
+    "homepage": "https://github.com/cthackers/adm-zip",
+    "license": "MIT",
+    "summary": "Javascript implementation of zip for nodejs with support for electron original-fs. Allows user to create or extract zip files both in memory or to/from disk",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/npm__adm-zip.md"
+  },
+  {
+    "id": "npm:adm-zip",
+    "kind": "npm",
     "category": "system-control",
     "package": "adm-zip",
     "version": "0.6.1",
@@ -15735,6 +17936,19 @@
   {
     "id": "npm:archiver",
     "kind": "npm",
+    "category": "backup-archive",
+    "package": "archiver",
+    "version": "8.0.0",
+    "url": "https://www.npmjs.com/package/archiver",
+    "homepage": "https://github.com/archiverjs/node-archiver",
+    "license": "MIT",
+    "summary": "a streaming interface for archive generation",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/npm__archiver.md"
+  },
+  {
+    "id": "npm:archiver",
+    "kind": "npm",
     "category": "system-control",
     "package": "archiver",
     "version": "8.0.0",
@@ -15759,6 +17973,19 @@
     "_path": "research/sources/media-production/npm__audio-context.md"
   },
   {
+    "id": "npm:axe-core",
+    "kind": "npm",
+    "category": "accessibility-api",
+    "package": "axe-core",
+    "version": "4.14.0",
+    "url": "https://www.npmjs.com/package/axe-core",
+    "homepage": "https://www.deque.com/axe/",
+    "license": "MPL-2.0",
+    "summary": "Accessibility engine for automated Web UI testing",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/npm__axe-core.md"
+  },
+  {
     "id": "npm:baileys",
     "kind": "npm",
     "category": "connectors-extra",
@@ -15772,6 +17999,19 @@
     "_path": "research/sources/connectors-extra/npm__baileys.md"
   },
   {
+    "id": "npm:basic-ftp",
+    "kind": "npm",
+    "category": "network-admin",
+    "package": "basic-ftp",
+    "version": "6.2.6",
+    "url": "https://www.npmjs.com/package/basic-ftp",
+    "homepage": "https://github.com/patrickjuchli/basic-ftp#readme",
+    "license": "MIT",
+    "summary": "FTP client for Node.js, supports FTPS over TLS, IPv6, Async/Await, and Typescript.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/npm__basic-ftp.md"
+  },
+  {
     "id": "npm:bcryptjs",
     "kind": "npm",
     "category": "safety-and-security",
@@ -15783,6 +18023,19 @@
     "summary": "Optimized bcrypt in plain JavaScript with zero dependencies, with TypeScript support. Compatible to 'bcrypt'.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/npm__bcryptjs.md"
+  },
+  {
+    "id": "npm:bcryptjs",
+    "kind": "npm",
+    "category": "security-ops",
+    "package": "bcryptjs",
+    "version": "3.0.3",
+    "url": "https://www.npmjs.com/package/bcryptjs",
+    "homepage": "https://github.com/dcodeIO/bcrypt.js#readme",
+    "license": "BSD-3-Clause",
+    "summary": "Optimized bcrypt in plain JavaScript with zero dependencies, with TypeScript support. Compatible to 'bcrypt'.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/npm__bcryptjs.md"
   },
   {
     "id": "npm:better-sqlite3",
@@ -15809,6 +18062,19 @@
     "summary": "The best job scheduler for Node.js and JavaScript with cron, dates, ms, later, and human-friendly support.  Works in Node v12.17.0+, uses worker threads to spawn sandboxed processes, and supports async/await, retries, throttling, concurrency, and cancelab",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/npm__bree.md"
+  },
+  {
+    "id": "npm:canvas",
+    "kind": "npm",
+    "category": "design-3d",
+    "package": "canvas",
+    "version": "3.2.3",
+    "url": "https://www.npmjs.com/package/canvas",
+    "homepage": "https://github.com/Automattic/node-canvas",
+    "license": "MIT",
+    "summary": "Canvas graphics API backed by Cairo",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/npm__canvas.md"
   },
   {
     "id": "npm:cheerio",
@@ -16018,6 +18284,45 @@
     "_path": "research/sources/packaging-and-ci/npm__cross-env.md"
   },
   {
+    "id": "npm:cross-spawn",
+    "kind": "npm",
+    "category": "deployment-admin",
+    "package": "cross-spawn",
+    "version": "7.0.6",
+    "url": "https://www.npmjs.com/package/cross-spawn",
+    "homepage": "https://github.com/moxystudio/node-cross-spawn",
+    "license": "MIT",
+    "summary": "Cross platform child_process#spawn and child_process#spawnSync",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/npm__cross-spawn.md"
+  },
+  {
+    "id": "npm:csv-stringify",
+    "kind": "npm",
+    "category": "business-finance",
+    "package": "csv-stringify",
+    "version": "6.9.0",
+    "url": "https://www.npmjs.com/package/csv-stringify",
+    "homepage": "https://csv.js.org/stringify",
+    "license": "MIT",
+    "summary": "CSV stringifier implementing the Node.js `stream.Transform` API",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/npm__csv-stringify.md"
+  },
+  {
+    "id": "npm:currency.js",
+    "kind": "npm",
+    "category": "business-finance",
+    "package": "currency.js",
+    "version": "2.0.4",
+    "url": "https://www.npmjs.com/package/currency.js",
+    "homepage": "http://scurker.github.io/currency.js",
+    "license": "MIT",
+    "summary": "A small, lightweight javascript library for working with currency values.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/npm__currency.js.md"
+  },
+  {
     "id": "npm:date-fns",
     "kind": "npm",
     "category": "ui-ux",
@@ -16082,6 +18387,44 @@
     "_path": "research/sources/system-triage/npm__diskusage.md"
   },
   {
+    "id": "npm:dns",
+    "kind": "npm",
+    "category": "network-admin",
+    "package": "dns",
+    "version": "0.2.2",
+    "url": "https://www.npmjs.com/package/dns",
+    "homepage": "https://github.com/hbouvier/dns",
+    "summary": "A DNS Server with a REST API",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/npm__dns.md"
+  },
+  {
+    "id": "npm:dockerode",
+    "kind": "npm",
+    "category": "virtualization-remote",
+    "package": "dockerode",
+    "version": "5.0.1",
+    "url": "https://www.npmjs.com/package/dockerode",
+    "homepage": "https://github.com/apocas/dockerode#readme",
+    "license": "Apache-2.0",
+    "summary": "Docker Remote API module.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/npm__dockerode.md"
+  },
+  {
+    "id": "npm:docx",
+    "kind": "npm",
+    "category": "business-finance",
+    "package": "docx",
+    "version": "9.15.3",
+    "url": "https://www.npmjs.com/package/docx",
+    "homepage": "https://docx.js.org",
+    "license": "MIT",
+    "summary": "Easily generate .docx files with JS/TS with a nice declarative API. Works for Node and on the Browser.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/npm__docx.md"
+  },
+  {
     "id": "npm:docx",
     "kind": "npm",
     "category": "office-automation",
@@ -16123,6 +18466,19 @@
   {
     "id": "npm:dompurify",
     "kind": "npm",
+    "category": "security-ops",
+    "package": "dompurify",
+    "version": "3.4.17",
+    "url": "https://www.npmjs.com/package/dompurify",
+    "homepage": "https://github.com/cure53/DOMPurify",
+    "license": "(MPL-2.0 OR Apache-2.0)",
+    "summary": "DOMPurify is a DOM-only, super-fast, uber-tolerant XSS sanitizer for HTML, MathML and SVG. It runs as JavaScript and works in all modern browsers, as well as in Node.js (via jsdom). DOMPurify is written by security people who have vast background in web a",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/npm__dompurify.md"
+  },
+  {
+    "id": "npm:dompurify",
+    "kind": "npm",
     "category": "ui-ux",
     "package": "dompurify",
     "version": "3.4.17",
@@ -16158,6 +18514,19 @@
     "summary": "Loads environment variables from .env file",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/npm__dotenv.md"
+  },
+  {
+    "id": "npm:drivelist",
+    "kind": "npm",
+    "category": "devices-peripherals",
+    "package": "drivelist",
+    "version": "12.0.2",
+    "url": "https://www.npmjs.com/package/drivelist",
+    "homepage": "https://github.com/balena-io-modules/drivelist",
+    "license": "Apache-2.0",
+    "summary": "List all connected drives in your computer, in all major operating systems",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/npm__drivelist.md"
   },
   {
     "id": "npm:drizzle-orm",
@@ -16499,6 +18868,19 @@
   {
     "id": "npm:exceljs",
     "kind": "npm",
+    "category": "business-finance",
+    "package": "exceljs",
+    "version": "4.4.0",
+    "url": "https://www.npmjs.com/package/exceljs",
+    "homepage": "https://github.com/exceljs/exceljs#readme",
+    "license": "MIT",
+    "summary": "Excel Workbook Manager - Read and Write xlsx and csv Files.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/npm__exceljs.md"
+  },
+  {
+    "id": "npm:exceljs",
+    "kind": "npm",
     "category": "office-automation",
     "package": "exceljs",
     "version": "4.4.0",
@@ -16525,6 +18907,19 @@
   {
     "id": "npm:execa",
     "kind": "npm",
+    "category": "deployment-admin",
+    "package": "execa",
+    "version": "10.2.1",
+    "url": "https://www.npmjs.com/package/execa",
+    "homepage": "https://github.com/sindresorhus/execa#readme",
+    "license": "MIT",
+    "summary": "Process execution for humans",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/npm__execa.md"
+  },
+  {
+    "id": "npm:execa",
+    "kind": "npm",
     "category": "orchestration",
     "package": "execa",
     "version": "10.2.1",
@@ -16547,6 +18942,32 @@
     "summary": "Process execution for humans",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/self-extension/npm__execa.md"
+  },
+  {
+    "id": "npm:fast-csv",
+    "kind": "npm",
+    "category": "business-finance",
+    "package": "fast-csv",
+    "version": "5.0.8",
+    "url": "https://www.npmjs.com/package/fast-csv",
+    "homepage": "https://c2fo.github.io/fast-csv",
+    "license": "MIT",
+    "summary": "CSV parser and writer",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/npm__fast-csv.md"
+  },
+  {
+    "id": "npm:fast-glob",
+    "kind": "npm",
+    "category": "backup-archive",
+    "package": "fast-glob",
+    "version": "3.3.3",
+    "url": "https://www.npmjs.com/package/fast-glob",
+    "homepage": "https://github.com/mrmlnc/fast-glob#readme",
+    "license": "MIT",
+    "summary": "It's a very fast and efficient glob library for Node.js",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/npm__fast-glob.md"
   },
   {
     "id": "npm:fast-glob",
@@ -16664,6 +19085,19 @@
     "summary": "A fluent API to FFMPEG (http://www.ffmpeg.org)",
     "fetched_at": "2026-11-08T11:47:22Z",
     "_path": "research/sources/media-production/npm__fluent-ffmpeg.md"
+  },
+  {
+    "id": "npm:focus-trap",
+    "kind": "npm",
+    "category": "accessibility-api",
+    "package": "focus-trap",
+    "version": "8.2.4",
+    "url": "https://www.npmjs.com/package/focus-trap",
+    "homepage": "https://github.com/focus-trap/focus-trap#readme",
+    "license": "MIT",
+    "summary": "Trap focus within a DOM node.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/npm__focus-trap.md"
   },
   {
     "id": "npm:fs-extra",
@@ -16796,6 +19230,19 @@
     "_path": "research/sources/safety-and-security/npm__helmet.md"
   },
   {
+    "id": "npm:helmet",
+    "kind": "npm",
+    "category": "security-ops",
+    "package": "helmet",
+    "version": "8.3.0",
+    "url": "https://www.npmjs.com/package/helmet",
+    "homepage": "https://helmet.js.org/",
+    "license": "MIT",
+    "summary": "help secure Express/Connect apps with various HTTP headers",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/npm__helmet.md"
+  },
+  {
     "id": "npm:hnswlib-node",
     "kind": "npm",
     "category": "memory-and-rag",
@@ -16887,6 +19334,32 @@
     "_path": "research/sources/connectors-extra/npm__imapflow.md"
   },
   {
+    "id": "npm:ip",
+    "kind": "npm",
+    "category": "network-admin",
+    "package": "ip",
+    "version": "2.0.1",
+    "url": "https://www.npmjs.com/package/ip",
+    "homepage": "https://github.com/indutny/node-ip",
+    "license": "MIT",
+    "summary": "[![](https://badge.fury.io/js/ip.svg)](https://www.npmjs.com/package/ip)",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/npm__ip.md"
+  },
+  {
+    "id": "npm:jimp",
+    "kind": "npm",
+    "category": "design-3d",
+    "package": "jimp",
+    "version": "1.6.1",
+    "url": "https://www.npmjs.com/package/jimp",
+    "homepage": "https://github.com/jimp-dev/jimp#readme",
+    "license": "MIT",
+    "summary": "An image processing library written entirely in JavaScript.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/npm__jimp.md"
+  },
+  {
     "id": "npm:jimp",
     "kind": "npm",
     "category": "screen-understanding",
@@ -16937,6 +19410,19 @@
     "summary": "JSON Web Token implementation (symmetric and asymmetric)",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/npm__jsonwebtoken.md"
+  },
+  {
+    "id": "npm:jsonwebtoken",
+    "kind": "npm",
+    "category": "security-ops",
+    "package": "jsonwebtoken",
+    "version": "9.0.3",
+    "url": "https://www.npmjs.com/package/jsonwebtoken",
+    "homepage": "https://github.com/auth0/node-jsonwebtoken#readme",
+    "license": "MIT",
+    "summary": "JSON Web Token implementation (symmetric and asymmetric)",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/npm__jsonwebtoken.md"
   },
   {
     "id": "npm:keytar",
@@ -17264,6 +19750,32 @@
     "_path": "research/sources/whisper-and-asr/npm__naudiodon2.md"
   },
   {
+    "id": "npm:net-snmp",
+    "kind": "npm",
+    "category": "network-admin",
+    "package": "net-snmp",
+    "version": "3.29.2",
+    "url": "https://www.npmjs.com/package/net-snmp",
+    "homepage": "https://github.com/markabrahams/node-net-snmp#readme",
+    "license": "MIT",
+    "summary": "JavaScript implementation of the Simple Network Management Protocol (SNMP)",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/npm__net-snmp.md"
+  },
+  {
+    "id": "npm:node-7z",
+    "kind": "npm",
+    "category": "backup-archive",
+    "package": "node-7z",
+    "version": "3.0.0",
+    "url": "https://www.npmjs.com/package/node-7z",
+    "homepage": "https://github.com/quentinrossetti/node-7zip.git",
+    "license": "ISC",
+    "summary": "A Node.js wrapper for 7-Zip with platform binaries",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/npm__node-7z.md"
+  },
+  {
     "id": "npm:node-cron",
     "kind": "npm",
     "category": "orchestration",
@@ -17275,6 +19787,44 @@
     "summary": "Job scheduling for Node.js with overlap prevention, distributed coordination, and background tasks. Zero dependencies, written in TypeScript.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/orchestration/npm__node-cron.md"
+  },
+  {
+    "id": "npm:node-forge",
+    "kind": "npm",
+    "category": "security-ops",
+    "package": "node-forge",
+    "version": "1.4.3",
+    "url": "https://www.npmjs.com/package/node-forge",
+    "homepage": "https://github.com/digitalbazaar/forge",
+    "license": "(BSD-3-Clause OR GPL-2.0)",
+    "summary": "JavaScript implementations of network transports, cryptography, ciphers, PKI, message digests, and various utilities.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/npm__node-forge.md"
+  },
+  {
+    "id": "npm:node-ftp",
+    "kind": "npm",
+    "category": "network-admin",
+    "package": "node-ftp",
+    "version": "0.0.1-security",
+    "url": "https://www.npmjs.com/package/node-ftp",
+    "homepage": "https://github.com/npm/security-holder#readme",
+    "summary": "security holding package",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/npm__node-ftp.md"
+  },
+  {
+    "id": "npm:node-hid",
+    "kind": "npm",
+    "category": "devices-peripherals",
+    "package": "node-hid",
+    "version": "3.4.0",
+    "url": "https://www.npmjs.com/package/node-hid",
+    "homepage": "https://github.com/node-hid/node-hid#readme",
+    "license": "(MIT OR X11)",
+    "summary": "USB HID device access library",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/npm__node-hid.md"
   },
   {
     "id": "npm:node-imap",
@@ -17357,6 +19907,19 @@
   {
     "id": "npm:node-pty",
     "kind": "npm",
+    "category": "deployment-admin",
+    "package": "node-pty",
+    "version": "1.1.0",
+    "url": "https://www.npmjs.com/package/node-pty",
+    "homepage": "https://github.com/microsoft/node-pty",
+    "license": "MIT",
+    "summary": "Fork pseudoterminals in Node.JS",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/npm__node-pty.md"
+  },
+  {
+    "id": "npm:node-pty",
+    "kind": "npm",
     "category": "system-control",
     "package": "node-pty",
     "version": "1.1.0",
@@ -17405,6 +19968,19 @@
     "summary": "A cron-like and not-cron-like job scheduler for Node.",
     "fetched_at": "2026-11-08T11:47:22Z",
     "_path": "research/sources/system-control/npm__node-schedule.md"
+  },
+  {
+    "id": "npm:node-ssh",
+    "kind": "npm",
+    "category": "virtualization-remote",
+    "package": "node-ssh",
+    "version": "13.2.1",
+    "url": "https://www.npmjs.com/package/node-ssh",
+    "homepage": "https://node-ssh.com",
+    "license": "MIT",
+    "summary": "SSH2 with Promises",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/npm__node-ssh.md"
   },
   {
     "id": "npm:node-stream-zip",
@@ -17641,6 +20217,19 @@
     "_path": "research/sources/orchestration/npm__openai.md"
   },
   {
+    "id": "npm:otplib",
+    "kind": "npm",
+    "category": "security-ops",
+    "package": "otplib",
+    "version": "13.6.0",
+    "url": "https://www.npmjs.com/package/otplib",
+    "homepage": "https://otplib.yeojz.dev",
+    "license": "MIT",
+    "summary": "TypeScript-first library for TOTP and HOTP with multi-runtime and plugin support",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/npm__otplib.md"
+  },
+  {
     "id": "npm:p-queue",
     "kind": "npm",
     "category": "orchestration",
@@ -17682,6 +20271,19 @@
   {
     "id": "npm:pdf-lib",
     "kind": "npm",
+    "category": "design-3d",
+    "package": "pdf-lib",
+    "version": "1.17.1",
+    "url": "https://www.npmjs.com/package/pdf-lib",
+    "homepage": "https://pdf-lib.js.org/",
+    "license": "MIT",
+    "summary": "Create and modify PDF files with JavaScript",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/npm__pdf-lib.md"
+  },
+  {
+    "id": "npm:pdf-lib",
+    "kind": "npm",
     "category": "office-automation",
     "package": "pdf-lib",
     "version": "1.17.1",
@@ -17717,6 +20319,19 @@
     "summary": "Generic build of Mozilla's PDF.js library.",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/office-automation/npm__pdfjs-dist.md"
+  },
+  {
+    "id": "npm:pdfkit",
+    "kind": "npm",
+    "category": "business-finance",
+    "package": "pdfkit",
+    "version": "0.20.2",
+    "url": "https://www.npmjs.com/package/pdfkit",
+    "homepage": "http://pdfkit.org/",
+    "license": "MIT",
+    "summary": "A JavaScript PDF generation library",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/npm__pdfkit.md"
   },
   {
     "id": "npm:peaks.js",
@@ -18225,6 +20840,19 @@
     "_path": "research/sources/updates/npm__semver.md"
   },
   {
+    "id": "npm:serialport",
+    "kind": "npm",
+    "category": "devices-peripherals",
+    "package": "serialport",
+    "version": "13.0.0",
+    "url": "https://www.npmjs.com/package/serialport",
+    "homepage": "https://github.com/serialport/node-serialport#readme",
+    "license": "MIT",
+    "summary": "Node.js package to access serial ports. Linux, OSX and Windows. Welcome your robotic JavaScript overlords. Better yet, program them!",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/npm__serialport.md"
+  },
+  {
     "id": "npm:set-value",
     "kind": "npm",
     "category": "configuration",
@@ -18236,6 +20864,19 @@
     "summary": "Create nested values and any intermediaries using dot notation (`'a.b.c'`) paths.",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/configuration/npm__set-value.md"
+  },
+  {
+    "id": "npm:sharp",
+    "kind": "npm",
+    "category": "design-3d",
+    "package": "sharp",
+    "version": "0.35.5",
+    "url": "https://www.npmjs.com/package/sharp",
+    "homepage": "https://sharp.pixelplumbing.com",
+    "license": "Apache-2.0",
+    "summary": "High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/npm__sharp.md"
   },
   {
     "id": "npm:sharp",
@@ -18275,6 +20916,19 @@
     "summary": "High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/screen-understanding/npm__sharp.md"
+  },
+  {
+    "id": "npm:shelljs",
+    "kind": "npm",
+    "category": "deployment-admin",
+    "package": "shelljs",
+    "version": "0.10.0",
+    "url": "https://www.npmjs.com/package/shelljs",
+    "homepage": "http://github.com/shelljs/shelljs",
+    "license": "BSD-3-Clause",
+    "summary": "Portable Unix shell commands for Node.js",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/npm__shelljs.md"
   },
   {
     "id": "npm:sherpa-onnx-node",
@@ -18380,6 +21034,43 @@
     "_path": "research/sources/memory-and-rag/npm__sqlite-vec.md"
   },
   {
+    "id": "npm:ssh2",
+    "kind": "npm",
+    "category": "network-admin",
+    "package": "ssh2",
+    "version": "1.17.0",
+    "url": "https://www.npmjs.com/package/ssh2",
+    "homepage": "https://github.com/mscdex/ssh2#readme",
+    "summary": "SSH2 client and server modules written in pure JavaScript for node.js",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/npm__ssh2.md"
+  },
+  {
+    "id": "npm:ssh2",
+    "kind": "npm",
+    "category": "virtualization-remote",
+    "package": "ssh2",
+    "version": "1.17.0",
+    "url": "https://www.npmjs.com/package/ssh2",
+    "homepage": "https://github.com/mscdex/ssh2#readme",
+    "summary": "SSH2 client and server modules written in pure JavaScript for node.js",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/npm__ssh2.md"
+  },
+  {
+    "id": "npm:svg2png",
+    "kind": "npm",
+    "category": "design-3d",
+    "package": "svg2png",
+    "version": "4.1.1",
+    "url": "https://www.npmjs.com/package/svg2png",
+    "homepage": "https://github.com/domenic/svg2png#readme",
+    "license": "WTFPL",
+    "summary": "Converts SVGs to PNGs, using PhantomJS",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/npm__svg2png.md"
+  },
+  {
     "id": "npm:systeminformation",
     "kind": "npm",
     "category": "system-control",
@@ -18419,6 +21110,19 @@
     "_path": "research/sources/windows-automation/npm__systeminformation.md"
   },
   {
+    "id": "npm:tabbable",
+    "kind": "npm",
+    "category": "accessibility-api",
+    "package": "tabbable",
+    "version": "6.5.1",
+    "url": "https://www.npmjs.com/package/tabbable",
+    "homepage": "https://github.com/focus-trap/tabbable#readme",
+    "license": "MIT",
+    "summary": "Returns an array of all tabbable DOM nodes within a containing node.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/npm__tabbable.md"
+  },
+  {
     "id": "npm:tailwind-merge",
     "kind": "npm",
     "category": "ui-ux",
@@ -18443,6 +21147,19 @@
     "summary": "A utility-first CSS framework for rapidly building custom user interfaces.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/ui-ux/npm__tailwindcss.md"
+  },
+  {
+    "id": "npm:tar",
+    "kind": "npm",
+    "category": "backup-archive",
+    "package": "tar",
+    "version": "7.5.22",
+    "url": "https://www.npmjs.com/package/tar",
+    "homepage": "https://github.com/isaacs/node-tar#readme",
+    "license": "BlueOak-1.0.0",
+    "summary": "tar for node",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/npm__tar.md"
   },
   {
     "id": "npm:tar",
@@ -18547,6 +21264,32 @@
     "summary": "The pluggable linting tool for natural language.",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/academic-writing/npm__textlint.md"
+  },
+  {
+    "id": "npm:three",
+    "kind": "npm",
+    "category": "design-3d",
+    "package": "three",
+    "version": "0.187.0",
+    "url": "https://www.npmjs.com/package/three",
+    "homepage": "https://threejs.org/",
+    "license": "MIT",
+    "summary": "JavaScript 3D library",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/npm__three.md"
+  },
+  {
+    "id": "npm:tree-kill",
+    "kind": "npm",
+    "category": "deployment-admin",
+    "package": "tree-kill",
+    "version": "1.2.2",
+    "url": "https://www.npmjs.com/package/tree-kill",
+    "homepage": "https://github.com/pkrumins/node-tree-kill",
+    "license": "MIT",
+    "summary": "kill trees of processes",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/npm__tree-kill.md"
   },
   {
     "id": "npm:tree-kill",
@@ -18681,6 +21424,19 @@
   {
     "id": "npm:undici",
     "kind": "npm",
+    "category": "network-admin",
+    "package": "undici",
+    "version": "8.12.4",
+    "url": "https://www.npmjs.com/package/undici",
+    "homepage": "https://undici.nodejs.org",
+    "license": "MIT",
+    "summary": "An HTTP/1.1 client, written from scratch for Node.js",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/npm__undici.md"
+  },
+  {
+    "id": "npm:undici",
+    "kind": "npm",
     "category": "self-extension",
     "package": "undici",
     "version": "8.12.4",
@@ -18716,6 +21472,19 @@
     "summary": "A drop-in module that adds autoUpdating capabilities to Electron apps",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/reference-apps/npm__update-electron-app.md"
+  },
+  {
+    "id": "npm:usb",
+    "kind": "npm",
+    "category": "devices-peripherals",
+    "package": "usb",
+    "version": "3.2.1",
+    "url": "https://www.npmjs.com/package/usb",
+    "homepage": "https://github.com/node-usb/node-usb-rs#readme",
+    "license": "MIT",
+    "summary": "Library to access USB devices",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/npm__usb.md"
   },
   {
     "id": "npm:vaul",
@@ -18835,6 +21604,32 @@
     "_path": "research/sources/coding-agents/npm__web-tree-sitter.md"
   },
   {
+    "id": "npm:webbluetooth",
+    "kind": "npm",
+    "category": "devices-peripherals",
+    "package": "webbluetooth",
+    "version": "7.1.0",
+    "url": "https://www.npmjs.com/package/webbluetooth",
+    "homepage": "https://github.com/thegecko/webbluetooth-rs#readme",
+    "license": "MIT",
+    "summary": "Node.js implementation of the Web Bluetooth Specification",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/npm__webbluetooth.md"
+  },
+  {
+    "id": "npm:which",
+    "kind": "npm",
+    "category": "deployment-admin",
+    "package": "which",
+    "version": "7.0.0",
+    "url": "https://www.npmjs.com/package/which",
+    "homepage": "https://github.com/npm/node-which#readme",
+    "license": "ISC",
+    "summary": "Like which(1) unix command. Find the first instance of an executable in the PATH.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/npm__which.md"
+  },
+  {
     "id": "npm:whisper-node",
     "kind": "npm",
     "category": "whisper-and-asr",
@@ -18872,6 +21667,19 @@
     "summary": "Get the name of a Windows version from the release number: `5.1.2600` → `XP`",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/system-triage/npm__windows-release.md"
+  },
+  {
+    "id": "npm:winrm-client",
+    "kind": "npm",
+    "category": "virtualization-remote",
+    "package": "winrm-client",
+    "version": "0.0.12",
+    "url": "https://www.npmjs.com/package/winrm-client",
+    "homepage": "https://github.com/shide1989/winrm-client#readme",
+    "license": "MIT",
+    "summary": "Make WinRM service calls from NodeJS",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/npm__winrm-client.md"
   },
   {
     "id": "npm:winston",
@@ -18926,6 +21734,19 @@
     "_path": "research/sources/connectors/npm__ws.md"
   },
   {
+    "id": "npm:ws",
+    "kind": "npm",
+    "category": "network-admin",
+    "package": "ws",
+    "version": "8.22.1",
+    "url": "https://www.npmjs.com/package/ws",
+    "homepage": "https://github.com/websockets/ws",
+    "license": "MIT",
+    "summary": "Simple to use, blazing fast and thoroughly tested websocket client and server for Node.js",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/npm__ws.md"
+  },
+  {
     "id": "npm:xlsx",
     "kind": "npm",
     "category": "office-automation",
@@ -18963,6 +21784,19 @@
     "summary": "Full xterm terminal, in your browser",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/coding-agents/npm__xterm.md"
+  },
+  {
+    "id": "npm:yauzl",
+    "kind": "npm",
+    "category": "backup-archive",
+    "package": "yauzl",
+    "version": "3.4.0",
+    "url": "https://www.npmjs.com/package/yauzl",
+    "homepage": "https://github.com/thejoshwolfe/yauzl",
+    "license": "MIT",
+    "summary": "yet another unzip library for node",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/npm__yauzl.md"
   },
   {
     "id": "npm:yauzl",
@@ -19159,6 +21993,31 @@
     "_path": "research/sources/low-end-inference/pypi__accelerate.md"
   },
   {
+    "id": "pypi:accessible-output2",
+    "kind": "pypi",
+    "category": "accessibility-api",
+    "package": "accessible-output2",
+    "version": "0.17",
+    "url": "https://pypi.org/project/accessible-output2/",
+    "summary": "Library to provide speech and braille output to a variety of different screen readers and other accessibility solutions.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/pypi__accessible-output2.md"
+  },
+  {
+    "id": "pypi:ansible",
+    "kind": "pypi",
+    "category": "deployment-admin",
+    "package": "ansible",
+    "version": "14.6.0",
+    "url": "https://pypi.org/project/ansible/",
+    "home_page": "https://ansible.com/",
+    "license": "GPL-3.0-or-later",
+    "requires_python": ">=3.12",
+    "summary": "Radically simple IT automation",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/pypi__ansible.md"
+  },
+  {
     "id": "pypi:apscheduler",
     "kind": "pypi",
     "category": "orchestration",
@@ -19249,6 +22108,33 @@
     "_path": "research/sources/safety-and-security/pypi__bandit.md"
   },
   {
+    "id": "pypi:bandit",
+    "kind": "pypi",
+    "category": "security-ops",
+    "package": "bandit",
+    "version": "1.9.4",
+    "url": "https://pypi.org/project/bandit/",
+    "home_page": "https://bandit.readthedocs.io/",
+    "license": "Apache-2.0",
+    "requires_python": ">=3.10",
+    "summary": "Security oriented static analyser for python code.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/pypi__bandit.md"
+  },
+  {
+    "id": "pypi:beancount",
+    "kind": "pypi",
+    "category": "business-finance",
+    "package": "beancount",
+    "version": "3.2.3",
+    "url": "https://pypi.org/project/beancount/",
+    "license": "GPL-2.0-only",
+    "requires_python": ">=3.9",
+    "summary": "Command-line Double-Entry Accounting",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/pypi__beancount.md"
+  },
+  {
     "id": "pypi:beautifulsoup4",
     "kind": "pypi",
     "category": "connectors",
@@ -19321,6 +22207,60 @@
     "summary": "The uncompromising code formatter.",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/coding-agents/pypi__black.md"
+  },
+  {
+    "id": "pypi:bleak",
+    "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "bleak",
+    "version": "3.1.0",
+    "url": "https://pypi.org/project/bleak/",
+    "requires_python": ">=3.10",
+    "summary": "Bluetooth Low Energy platform Agnostic Klient",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__bleak.md"
+  },
+  {
+    "id": "pypi:boto3",
+    "kind": "pypi",
+    "category": "backup-archive",
+    "package": "boto3",
+    "version": "1.43.126",
+    "url": "https://pypi.org/project/boto3/",
+    "home_page": "https://github.com/boto/boto3",
+    "license": "Apache-2.0",
+    "requires_python": ">=3.10",
+    "summary": "The AWS SDK for Python (Boto3)",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/pypi__boto3.md"
+  },
+  {
+    "id": "pypi:cadquery",
+    "kind": "pypi",
+    "category": "design-3d",
+    "package": "cadquery",
+    "version": "2.8.0",
+    "url": "https://pypi.org/project/cadquery/",
+    "home_page": "https://github.com/CadQuery/cadquery",
+    "license": "Apache Public License 2.0",
+    "requires_python": ">=3.11",
+    "summary": "CadQuery is a parametric  scripting language for creating and traversing CAD models",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/pypi__cadquery.md"
+  },
+  {
+    "id": "pypi:cairosvg",
+    "kind": "pypi",
+    "category": "design-3d",
+    "package": "CairoSVG",
+    "version": "2.9.1",
+    "url": "https://pypi.org/project/CairoSVG/",
+    "home_page": "https://courtbouillon.org/cairosvg",
+    "license": "LGPL-3.0-or-later",
+    "requires_python": ">=3.10",
+    "summary": "A Simple SVG Converter based on Cairo",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/pypi__cairosvg.md"
   },
   {
     "id": "pypi:caldav",
@@ -19425,6 +22365,18 @@
   {
     "id": "pypi:comtypes",
     "kind": "pypi",
+    "category": "accessibility-api",
+    "package": "comtypes",
+    "version": "1.4.17",
+    "url": "https://pypi.org/project/comtypes/",
+    "requires_python": ">=3.9",
+    "summary": "Pure Python COM package",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/pypi__comtypes.md"
+  },
+  {
+    "id": "pypi:comtypes",
+    "kind": "pypi",
     "category": "office-automation",
     "package": "comtypes",
     "version": "1.4.17",
@@ -19495,6 +22447,18 @@
     "summary": "cryptography is a package which provides cryptographic recipes and primitives to Python developers.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/pypi__cryptography.md"
+  },
+  {
+    "id": "pypi:cryptography",
+    "kind": "pypi",
+    "category": "security-ops",
+    "package": "cryptography",
+    "version": "50.0.2",
+    "url": "https://pypi.org/project/cryptography/",
+    "requires_python": "!=3.9.0,!=3.9.1,>=3.9",
+    "summary": "cryptography is a package which provides cryptographic recipes and primitives to Python developers.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/pypi__cryptography.md"
   },
   {
     "id": "pypi:ctranslate2",
@@ -19603,6 +22567,30 @@
     "summary": "Distro - an OS platform information API",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/system-triage/pypi__distro.md"
+  },
+  {
+    "id": "pypi:dnspython",
+    "kind": "pypi",
+    "category": "network-admin",
+    "package": "dnspython",
+    "version": "2.9.2",
+    "url": "https://pypi.org/project/dnspython/",
+    "requires_python": ">=3.11",
+    "summary": "DNS toolkit",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/pypi__dnspython.md"
+  },
+  {
+    "id": "pypi:docker",
+    "kind": "pypi",
+    "category": "virtualization-remote",
+    "package": "docker",
+    "version": "7.2.0",
+    "url": "https://pypi.org/project/docker/",
+    "requires_python": ">=3.8",
+    "summary": "A Python library for the Docker Engine API.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/pypi__docker.md"
   },
   {
     "id": "pypi:docling",
@@ -19786,6 +22774,18 @@
     "_path": "research/sources/perf-optimization/pypi__exllamav2.md"
   },
   {
+    "id": "pypi:ezdxf",
+    "kind": "pypi",
+    "category": "design-3d",
+    "package": "ezdxf",
+    "version": "1.4.5",
+    "url": "https://pypi.org/project/ezdxf/",
+    "requires_python": ">=3.10",
+    "summary": "A Python package to create/manipulate DXF drawings.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/pypi__ezdxf.md"
+  },
+  {
     "id": "pypi:f5-tts",
     "kind": "pypi",
     "category": "tts-and-voice",
@@ -19796,6 +22796,19 @@
     "summary": "F5-TTS: A Fairytaler that Fakes Fluent and Faithful Speech with Flow Matching",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/tts-and-voice/pypi__f5-tts.md"
+  },
+  {
+    "id": "pypi:fabric",
+    "kind": "pypi",
+    "category": "deployment-admin",
+    "package": "fabric",
+    "version": "3.2.3",
+    "url": "https://pypi.org/project/fabric/",
+    "home_page": "https://fabfile.org",
+    "license": "BSD",
+    "summary": "High level SSH command execution",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/pypi__fabric.md"
   },
   {
     "id": "pypi:faiss-cpu",
@@ -19923,6 +22936,19 @@
     "summary": "The FlatBuffers serialization format for Python",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/low-end-inference/pypi__flatbuffers.md"
+  },
+  {
+    "id": "pypi:forex-python",
+    "kind": "pypi",
+    "category": "business-finance",
+    "package": "forex-python",
+    "version": "1.9.2",
+    "url": "https://pypi.org/project/forex-python/",
+    "home_page": "https://github.com/MicroPyramid/forex-python",
+    "requires_python": "!=3.0.*,!=3.1.*,!=3.2.*,<4,>=2.7",
+    "summary": "Free foreign exchange rates and currency conversion.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/pypi__forex-python.md"
   },
   {
     "id": "pypi:funasr",
@@ -20083,6 +23109,18 @@
     "_path": "research/sources/perf-optimization/pypi__hf-transfer.md"
   },
   {
+    "id": "pypi:hidapi",
+    "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "hidapi",
+    "version": "0.15.0",
+    "url": "https://pypi.org/project/hidapi/",
+    "home_page": "https://github.com/trezor/cython-hidapi",
+    "summary": "A Cython interface to the hidapi from https://github.com/libusb/hidapi",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__hidapi.md"
+  },
+  {
     "id": "pypi:hnswlib",
     "kind": "pypi",
     "category": "memory-and-rag",
@@ -20106,6 +23144,19 @@
     "summary": "The next generation HTTP client.",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/connectors-extra/pypi__httpx.md"
+  },
+  {
+    "id": "pypi:httpx",
+    "kind": "pypi",
+    "category": "network-admin",
+    "package": "httpx",
+    "version": "0.28.1",
+    "url": "https://pypi.org/project/httpx/",
+    "license": "BSD-3-Clause",
+    "requires_python": ">=3.8",
+    "summary": "The next generation HTTP client.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/pypi__httpx.md"
   },
   {
     "id": "pypi:huggingface-hub",
@@ -20292,6 +23343,18 @@
     "_path": "research/sources/perf-optimization/pypi__intel-openmp.md"
   },
   {
+    "id": "pypi:invoke",
+    "kind": "pypi",
+    "category": "deployment-admin",
+    "package": "invoke",
+    "version": "3.0.3",
+    "url": "https://pypi.org/project/invoke/",
+    "requires_python": ">=3.9",
+    "summary": "Pythonic task execution",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/pypi__invoke.md"
+  },
+  {
     "id": "pypi:isort",
     "kind": "pypi",
     "category": "coding-agents",
@@ -20391,6 +23454,18 @@
     "summary": "Store and access your passwords safely.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/safety-and-security/pypi__keyring.md"
+  },
+  {
+    "id": "pypi:keyring",
+    "kind": "pypi",
+    "category": "security-ops",
+    "package": "keyring",
+    "version": "25.7.0",
+    "url": "https://pypi.org/project/keyring/",
+    "requires_python": ">=3.9",
+    "summary": "Store and access your passwords safely.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/pypi__keyring.md"
   },
   {
     "id": "pypi:keyring",
@@ -20530,6 +23605,20 @@
     "_path": "research/sources/media-production/pypi__librosa.md"
   },
   {
+    "id": "pypi:libvirt-python",
+    "kind": "pypi",
+    "category": "virtualization-remote",
+    "package": "libvirt-python",
+    "version": "12.9.0",
+    "url": "https://pypi.org/project/libvirt-python/",
+    "home_page": "http://www.libvirt.org",
+    "license": "LGPL-v2.0-or-later",
+    "requires_python": ">=3.9",
+    "summary": "The libvirt virtualization API python binding",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/pypi__libvirt-python.md"
+  },
+  {
     "id": "pypi:llama-cpp-python",
     "kind": "pypi",
     "category": "inference-runtimes",
@@ -20659,6 +23748,19 @@
     "summary": "A fast and complete Python implementation of Markdown",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/academic-writing/pypi__markdown2.md"
+  },
+  {
+    "id": "pypi:matplotlib",
+    "kind": "pypi",
+    "category": "design-3d",
+    "package": "matplotlib",
+    "version": "3.11.2",
+    "url": "https://pypi.org/project/matplotlib/",
+    "license": "License agreement for matplotlib versions 1.3.0 and later",
+    "requires_python": ">=3.11",
+    "summary": "Python plotting package",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/pypi__matplotlib.md"
   },
   {
     "id": "pypi:matplotlib",
@@ -20865,6 +23967,19 @@
     "_path": "research/sources/coding-agents/pypi__mypy.md"
   },
   {
+    "id": "pypi:netifaces",
+    "kind": "pypi",
+    "category": "network-admin",
+    "package": "netifaces",
+    "version": "0.11.0",
+    "url": "https://pypi.org/project/netifaces/",
+    "home_page": "https://github.com/al45tair/netifaces",
+    "license": "MIT License",
+    "summary": "Portable network interface information.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/pypi__netifaces.md"
+  },
+  {
     "id": "pypi:newspaper3k",
     "kind": "pypi",
     "category": "academic-writing",
@@ -20928,6 +24043,18 @@
     "_path": "research/sources/perf-optimization/pypi__numpy.md"
   },
   {
+    "id": "pypi:numpy-stl",
+    "kind": "pypi",
+    "category": "design-3d",
+    "package": "numpy-stl",
+    "version": "4.1.3",
+    "url": "https://pypi.org/project/numpy-stl/",
+    "requires_python": ">=3.10",
+    "summary": "Library to make reading, writing and modifying both binary and ascii STL files easy.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/pypi__numpy-stl.md"
+  },
+  {
     "id": "pypi:nvidia-ml-py",
     "kind": "pypi",
     "category": "perf-optimization",
@@ -20964,6 +24091,19 @@
     "summary": "Python API and tools to manipulate OpenDocument files",
     "fetched_at": "2026-11-08T11:47:22Z",
     "_path": "research/sources/office-automation/pypi__odfpy.md"
+  },
+  {
+    "id": "pypi:ofxparse",
+    "kind": "pypi",
+    "category": "business-finance",
+    "package": "ofxparse",
+    "version": "0.21",
+    "url": "https://pypi.org/project/ofxparse/",
+    "home_page": "http://sites.google.com/site/ofxparse",
+    "license": "MIT License",
+    "summary": "Tools for working with the OFX (Open Financial Exchange) file format",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/pypi__ofxparse.md"
   },
   {
     "id": "pypi:onnx",
@@ -21124,6 +24264,20 @@
   {
     "id": "pypi:opencv-python",
     "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "opencv-python",
+    "version": "5.0.0.93",
+    "url": "https://pypi.org/project/opencv-python/",
+    "home_page": "https://github.com/opencv/opencv-python",
+    "license": "Apache 2.0",
+    "requires_python": ">=3.6",
+    "summary": "Wrapper package for OpenCV python bindings.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__opencv-python.md"
+  },
+  {
+    "id": "pypi:opencv-python",
+    "kind": "pypi",
     "category": "screen-understanding",
     "package": "opencv-python",
     "version": "5.0.0.93",
@@ -21160,6 +24314,20 @@
     "summary": "OpenInference instrumentation utilities",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/observability-evals/pypi__openinference-instrumentation.md"
+  },
+  {
+    "id": "pypi:openpyxl",
+    "kind": "pypi",
+    "category": "business-finance",
+    "package": "openpyxl",
+    "version": "3.1.5",
+    "url": "https://pypi.org/project/openpyxl/",
+    "home_page": "https://openpyxl.readthedocs.io",
+    "license": "MIT",
+    "requires_python": ">=3.8",
+    "summary": "A Python library to read/write Excel 2010 xlsx/xlsm files",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/pypi__openpyxl.md"
   },
   {
     "id": "pypi:openpyxl",
@@ -21392,6 +24560,42 @@
     "_path": "research/sources/office-automation/pypi__pandas.md"
   },
   {
+    "id": "pypi:pandas-datareader",
+    "kind": "pypi",
+    "category": "business-finance",
+    "package": "pandas-datareader",
+    "version": "0.11.1",
+    "url": "https://pypi.org/project/pandas-datareader/",
+    "requires_python": ">=3.11",
+    "summary": "Pandas-compatible data readers. Formerly a component of pandas.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/pypi__pandas-datareader.md"
+  },
+  {
+    "id": "pypi:paramiko",
+    "kind": "pypi",
+    "category": "network-admin",
+    "package": "paramiko",
+    "version": "5.1.0",
+    "url": "https://pypi.org/project/paramiko/",
+    "requires_python": ">=3.9",
+    "summary": "SSH2 protocol library",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/pypi__paramiko.md"
+  },
+  {
+    "id": "pypi:paramiko",
+    "kind": "pypi",
+    "category": "virtualization-remote",
+    "package": "paramiko",
+    "version": "5.1.0",
+    "url": "https://pypi.org/project/paramiko/",
+    "requires_python": ">=3.9",
+    "summary": "SSH2 protocol library",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/pypi__paramiko.md"
+  },
+  {
     "id": "pypi:pdfkit",
     "kind": "pypi",
     "category": "office-automation",
@@ -21444,6 +24648,18 @@
   {
     "id": "pypi:pillow",
     "kind": "pypi",
+    "category": "design-3d",
+    "package": "pillow",
+    "version": "13.0.0",
+    "url": "https://pypi.org/project/pillow/",
+    "requires_python": ">=3.11",
+    "summary": "Python Imaging Library (fork)",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/pypi__pillow.md"
+  },
+  {
+    "id": "pypi:pillow",
+    "kind": "pypi",
     "category": "screen-understanding",
     "package": "pillow",
     "version": "13.0.0",
@@ -21478,6 +24694,18 @@
     "_path": "research/sources/safety-and-security/pypi__pip-audit.md"
   },
   {
+    "id": "pypi:pip-audit",
+    "kind": "pypi",
+    "category": "security-ops",
+    "package": "pip-audit",
+    "version": "2.10.1",
+    "url": "https://pypi.org/project/pip-audit/",
+    "requires_python": ">=3.10",
+    "summary": "A tool for scanning Python environments for known vulnerabilities",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/pypi__pip-audit.md"
+  },
+  {
     "id": "pypi:piper-tts",
     "kind": "pypi",
     "category": "tts-and-voice",
@@ -21494,6 +24722,18 @@
   {
     "id": "pypi:plotly",
     "kind": "pypi",
+    "category": "design-3d",
+    "package": "plotly",
+    "version": "7.1.0",
+    "url": "https://pypi.org/project/plotly/",
+    "requires_python": ">=3.8",
+    "summary": "An open-source interactive data visualization library for Python",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/pypi__plotly.md"
+  },
+  {
+    "id": "pypi:plotly",
+    "kind": "pypi",
     "category": "media-production",
     "package": "plotly",
     "version": "7.1.0",
@@ -21502,6 +24742,18 @@
     "summary": "An open-source interactive data visualization library for Python",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/media-production/pypi__plotly.md"
+  },
+  {
+    "id": "pypi:plumbum",
+    "kind": "pypi",
+    "category": "deployment-admin",
+    "package": "plumbum",
+    "version": "2.0.2",
+    "url": "https://pypi.org/project/plumbum/",
+    "requires_python": ">=3.9",
+    "summary": "Plumbum: shell combinators library",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/pypi__plumbum.md"
   },
   {
     "id": "pypi:polars",
@@ -21556,6 +24808,18 @@
     "_path": "research/sources/safety-and-security/pypi__presidio-analyzer.md"
   },
   {
+    "id": "pypi:presidio-analyzer",
+    "kind": "pypi",
+    "category": "security-ops",
+    "package": "presidio-analyzer",
+    "version": "2.2.366",
+    "url": "https://pypi.org/project/presidio-analyzer/",
+    "requires_python": "<3.15,>=3.11",
+    "summary": "Presidio Analyzer package",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/pypi__presidio-analyzer.md"
+  },
+  {
     "id": "pypi:presidio-anonymizer",
     "kind": "pypi",
     "category": "safety-and-security",
@@ -21604,6 +24868,20 @@
     "requires_python": ">=3.10",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/low-end-inference/pypi__protobuf.md"
+  },
+  {
+    "id": "pypi:psutil",
+    "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "psutil",
+    "version": "7.2.2",
+    "url": "https://pypi.org/project/psutil/",
+    "home_page": "https://github.com/giampaolo/psutil",
+    "license": "BSD-3-Clause",
+    "requires_python": ">=3.6",
+    "summary": "Cross-platform lib for process and system monitoring.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__psutil.md"
   },
   {
     "id": "pypi:psutil",
@@ -21701,6 +24979,18 @@
     "_path": "research/sources/system-triage/pypi__py-cpuinfo.md"
   },
   {
+    "id": "pypi:py7zr",
+    "kind": "pypi",
+    "category": "backup-archive",
+    "package": "py7zr",
+    "version": "1.1.4",
+    "url": "https://pypi.org/project/py7zr/",
+    "requires_python": ">=3.10",
+    "summary": "Pure python 7-zip library",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/pypi__py7zr.md"
+  },
+  {
     "id": "pypi:pyalex",
     "kind": "pypi",
     "category": "academic-writing",
@@ -21724,6 +25014,18 @@
     "summary": "State-of-the-art speaker diarization toolkit",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/whisper-and-asr/pypi__pyannote.audio.md"
+  },
+  {
+    "id": "pypi:pyarrow",
+    "kind": "pypi",
+    "category": "backup-archive",
+    "package": "pyarrow",
+    "version": "26.0.1",
+    "url": "https://pypi.org/project/pyarrow/",
+    "requires_python": ">=3.11",
+    "summary": "Python library for Apache Arrow",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/pypi__pyarrow.md"
   },
   {
     "id": "pypi:pyarrow",
@@ -21929,6 +25231,18 @@
   {
     "id": "pypi:pyotp",
     "kind": "pypi",
+    "category": "security-ops",
+    "package": "PyOTP",
+    "version": "2.10.0",
+    "url": "https://pypi.org/project/PyOTP/",
+    "requires_python": ">=3.8",
+    "summary": "Python One Time Password Library",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/pypi__pyotp.md"
+  },
+  {
+    "id": "pypi:pyotp",
+    "kind": "pypi",
     "category": "system-control",
     "package": "PyOTP",
     "version": "2.10.0",
@@ -22000,6 +25314,57 @@
     "summary": "A simple, cross-platform screenshot module for Python 2 and 3.",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/system-control/pypi__pyscreeze.md"
+  },
+  {
+    "id": "pypi:pyserial",
+    "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "pyserial",
+    "version": "3.5",
+    "url": "https://pypi.org/project/pyserial/",
+    "home_page": "https://github.com/pyserial/pyserial",
+    "license": "BSD",
+    "summary": "Python Serial Port Extension",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__pyserial.md"
+  },
+  {
+    "id": "pypi:pyserial-asyncio",
+    "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "pyserial-asyncio",
+    "version": "0.6",
+    "url": "https://pypi.org/project/pyserial-asyncio/",
+    "home_page": "https://github.com/pyserial/pyserial-asyncio",
+    "license": "BSD",
+    "summary": "Python Serial Port Extension - Asynchronous I/O support",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__pyserial-asyncio.md"
+  },
+  {
+    "id": "pypi:pysmartdl",
+    "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "pySmartDL",
+    "version": "1.3.4",
+    "url": "https://pypi.org/project/pySmartDL/",
+    "home_page": "http://pypi.python.org/pypi/pySmartDL/",
+    "license": "Public Domain",
+    "summary": "A Smart Download Manager for Python",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__pysmartdl.md"
+  },
+  {
+    "id": "pypi:pysnmp",
+    "kind": "pypi",
+    "category": "network-admin",
+    "package": "pysnmp",
+    "version": "7.1.32",
+    "url": "https://pypi.org/project/pysnmp/",
+    "requires_python": ">=3.11",
+    "summary": "A Python library for SNMP",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/pypi__pysnmp.md"
   },
   {
     "id": "pypi:pyspellchecker",
@@ -22093,6 +25458,19 @@
   {
     "id": "pypi:python-pptx",
     "kind": "pypi",
+    "category": "business-finance",
+    "package": "python-pptx",
+    "version": "1.0.2",
+    "url": "https://pypi.org/project/python-pptx/",
+    "license": "MIT",
+    "requires_python": ">=3.8",
+    "summary": "Create, read, and update PowerPoint 2007+ (.pptx) files.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/pypi__python-pptx.md"
+  },
+  {
+    "id": "pypi:python-pptx",
+    "kind": "pypi",
     "category": "office-automation",
     "package": "python-pptx",
     "version": "1.0.2",
@@ -22130,6 +25508,18 @@
   {
     "id": "pypi:pythonnet",
     "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "pythonnet",
+    "version": "3.2.1",
+    "url": "https://pypi.org/project/pythonnet/",
+    "requires_python": "<3.16,>=3.11",
+    "summary": ".NET and Mono integration for Python",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__pythonnet.md"
+  },
+  {
+    "id": "pypi:pythonnet",
+    "kind": "pypi",
     "category": "windows-automation",
     "package": "pythonnet",
     "version": "3.2.1",
@@ -22138,6 +25528,17 @@
     "summary": ".NET and Mono integration for Python",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/windows-automation/pypi__pythonnet.md"
+  },
+  {
+    "id": "pypi:pyttsx3",
+    "kind": "pypi",
+    "category": "accessibility-api",
+    "package": "pyttsx3",
+    "version": "2.99",
+    "url": "https://pypi.org/project/pyttsx3/",
+    "summary": "Text to Speech (TTS) library for Python 3. Works without internet connection or delay. Supports multiple TTS engines, including Sapi5, nsss, and espeak.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/pypi__pyttsx3.md"
   },
   {
     "id": "pypi:pyuac",
@@ -22152,6 +25553,44 @@
     "summary": "Python library for Windows User Access Control (UAC)",
     "fetched_at": "2026-11-08T11:47:22Z",
     "_path": "research/sources/system-control/pypi__pyuac.md"
+  },
+  {
+    "id": "pypi:pyusb",
+    "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "pyusb",
+    "version": "1.3.1",
+    "url": "https://pypi.org/project/pyusb/",
+    "home_page": "https://pyusb.github.io/pyusb",
+    "requires_python": ">=3.9.0",
+    "summary": "Easy USB access for Python",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__pyusb.md"
+  },
+  {
+    "id": "pypi:pyvmomi",
+    "kind": "pypi",
+    "category": "virtualization-remote",
+    "package": "pyvmomi",
+    "version": "9.1.1.0",
+    "url": "https://pypi.org/project/pyvmomi/",
+    "license": "License :: OSI Approved :: Apache Software License",
+    "summary": "VMware vSphere Python SDK",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/pypi__pyvmomi.md"
+  },
+  {
+    "id": "pypi:pywin32",
+    "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "pywin32",
+    "version": "312",
+    "url": "https://pypi.org/project/pywin32/",
+    "license": "PSF",
+    "requires_python": ">=3.9",
+    "summary": "Python for Windows Extensions",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__pywin32.md"
   },
   {
     "id": "pypi:pywin32",
@@ -22218,6 +25657,32 @@
     "_path": "research/sources/system-control/pypi__pywinpty.md"
   },
   {
+    "id": "pypi:pywinrm",
+    "kind": "pypi",
+    "category": "deployment-admin",
+    "package": "pywinrm",
+    "version": "0.5.0",
+    "url": "https://pypi.org/project/pywinrm/",
+    "license": "Copyright (c) 2013 Alexey Diyan  Permission is hereby granted, free of charge, t",
+    "requires_python": ">=3.8",
+    "summary": "Python library for Windows Remote Management",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/pypi__pywinrm.md"
+  },
+  {
+    "id": "pypi:pywinrm",
+    "kind": "pypi",
+    "category": "virtualization-remote",
+    "package": "pywinrm",
+    "version": "0.5.0",
+    "url": "https://pypi.org/project/pywinrm/",
+    "license": "Copyright (c) 2013 Alexey Diyan  Permission is hereby granted, free of charge, t",
+    "requires_python": ">=3.8",
+    "summary": "Python library for Windows Remote Management",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/virtualization-remote/pypi__pywinrm.md"
+  },
+  {
     "id": "pypi:qdrant-client",
     "kind": "pypi",
     "category": "memory-and-rag",
@@ -22243,6 +25708,19 @@
     "summary": "QR Code image generator",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/system-control/pypi__qrcode.md"
+  },
+  {
+    "id": "pypi:quantlib",
+    "kind": "pypi",
+    "category": "business-finance",
+    "package": "QuantLib",
+    "version": "1.44",
+    "url": "https://pypi.org/project/QuantLib/",
+    "home_page": "https://www.quantlib.org",
+    "license": "BSD-3-Clause",
+    "summary": "Python bindings for the QuantLib library",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/business-finance/pypi__quantlib.md"
   },
   {
     "id": "pypi:radon",
@@ -22298,6 +25776,33 @@
     "_path": "research/sources/screen-understanding/pypi__rapidocr-onnxruntime.md"
   },
   {
+    "id": "pypi:rarfile",
+    "kind": "pypi",
+    "category": "backup-archive",
+    "package": "rarfile",
+    "version": "4.5",
+    "url": "https://pypi.org/project/rarfile/",
+    "home_page": "https://github.com/markokr/rarfile",
+    "license": "ISC",
+    "requires_python": ">=3.10",
+    "summary": "RAR archive reader for Python",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/pypi__rarfile.md"
+  },
+  {
+    "id": "pypi:rclone-python",
+    "kind": "pypi",
+    "category": "backup-archive",
+    "package": "rclone-python",
+    "version": "0.1.25",
+    "url": "https://pypi.org/project/rclone-python/",
+    "home_page": "https://github.com/Johannes11833/rclone_python",
+    "requires_python": ">=3.6",
+    "summary": "A python wrapper for rclone.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/pypi__rclone-python.md"
+  },
+  {
     "id": "pypi:readability-lxml",
     "kind": "pypi",
     "category": "academic-writing",
@@ -22325,6 +25830,20 @@
   {
     "id": "pypi:reportlab",
     "kind": "pypi",
+    "category": "design-3d",
+    "package": "reportlab",
+    "version": "5.1.0",
+    "url": "https://pypi.org/project/reportlab/",
+    "home_page": "https://www.reportlab.com/",
+    "license": "BSD license (see license.txt for details), Copyright (c) 2000-2025, ReportLab In",
+    "requires_python": "<4,>=3.9",
+    "summary": "The Reportlab Toolkit",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/pypi__reportlab.md"
+  },
+  {
+    "id": "pypi:reportlab",
+    "kind": "pypi",
     "category": "office-automation",
     "package": "reportlab",
     "version": "5.1.0",
@@ -22348,6 +25867,19 @@
     "summary": "Python HTTP for Humans.",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/connectors-extra/pypi__requests.md"
+  },
+  {
+    "id": "pypi:requests",
+    "kind": "pypi",
+    "category": "network-admin",
+    "package": "requests",
+    "version": "2.34.2",
+    "url": "https://pypi.org/project/requests/",
+    "license": "Apache-2.0",
+    "requires_python": ">=3.10",
+    "summary": "Python HTTP for Humans.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/pypi__requests.md"
   },
   {
     "id": "pypi:requests",
@@ -22386,6 +25918,18 @@
     "summary": "Resolve abstract dependencies into concrete ones",
     "fetched_at": "2026-11-08T12:31:02Z",
     "_path": "research/sources/self-extension/pypi__resolvelib.md"
+  },
+  {
+    "id": "pypi:restic",
+    "kind": "pypi",
+    "category": "backup-archive",
+    "package": "restic",
+    "version": "0.1.0a0",
+    "url": "https://pypi.org/project/restic/",
+    "requires_python": ">=3.10",
+    "summary": "A modern, type-safe Python library for building robust REST API clients with automatic Pydantic validation, async support, and extensible route patterns.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/pypi__restic.md"
   },
   {
     "id": "pypi:rich",
@@ -22450,6 +25994,30 @@
     "_path": "research/sources/safety-and-security/pypi__safety.md"
   },
   {
+    "id": "pypi:safety",
+    "kind": "pypi",
+    "category": "security-ops",
+    "package": "safety",
+    "version": "3.8.1",
+    "url": "https://pypi.org/project/safety/",
+    "requires_python": ">=3.9",
+    "summary": "Scan dependencies for known vulnerabilities and licenses.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/pypi__safety.md"
+  },
+  {
+    "id": "pypi:scapy",
+    "kind": "pypi",
+    "category": "network-admin",
+    "package": "scapy",
+    "version": "2.8.0",
+    "url": "https://pypi.org/project/scapy/",
+    "requires_python": "<4,>=3.7",
+    "summary": "Scapy: interactive packet manipulation tool",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/pypi__scapy.md"
+  },
+  {
     "id": "pypi:scholarly",
     "kind": "pypi",
     "category": "academic-writing",
@@ -22474,6 +26042,20 @@
     "summary": "Image processing in Python",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/media-production/pypi__scikit-image.md"
+  },
+  {
+    "id": "pypi:screeninfo",
+    "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "screeninfo",
+    "version": "0.8.1",
+    "url": "https://pypi.org/project/screeninfo/",
+    "home_page": "https://github.com/rr-/screeninfo",
+    "license": "MIT",
+    "requires_python": ">=3.6.2,<4.0.0",
+    "summary": "Fetch location and size of physical screens.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__screeninfo.md"
   },
   {
     "id": "pypi:screeninfo",
@@ -22592,6 +26174,19 @@
     "_path": "research/sources/low-end-inference/pypi__sentencepiece.md"
   },
   {
+    "id": "pypi:sh",
+    "kind": "pypi",
+    "category": "deployment-admin",
+    "package": "sh",
+    "version": "2.4.0",
+    "url": "https://pypi.org/project/sh/",
+    "license": "MIT",
+    "requires_python": "<4.0,>=3.10",
+    "summary": "Python subprocess replacement",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/deployment-admin/pypi__sh.md"
+  },
+  {
     "id": "pypi:sherpa-onnx",
     "kind": "pypi",
     "category": "low-end-inference",
@@ -22685,6 +26280,18 @@
   {
     "id": "pypi:sounddevice",
     "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "sounddevice",
+    "version": "0.5.6",
+    "url": "https://pypi.org/project/sounddevice/",
+    "requires_python": ">=3.7",
+    "summary": "Play and Record Sound with Python",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__sounddevice.md"
+  },
+  {
+    "id": "pypi:sounddevice",
+    "kind": "pypi",
     "category": "tts-and-voice",
     "package": "sounddevice",
     "version": "0.5.6",
@@ -22733,6 +26340,19 @@
     "summary": "An audio library based on libsndfile, CFFI and NumPy",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/whisper-and-asr/pypi__soundfile.md"
+  },
+  {
+    "id": "pypi:speedtest-cli",
+    "kind": "pypi",
+    "category": "network-admin",
+    "package": "speedtest-cli",
+    "version": "2.1.3",
+    "url": "https://pypi.org/project/speedtest-cli/",
+    "home_page": "https://github.com/sivel/speedtest-cli",
+    "license": "Apache License, Version 2.0",
+    "summary": "Command line interface for testing internet bandwidth using speedtest.net",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/network-admin/pypi__speedtest-cli.md"
   },
   {
     "id": "pypi:sqlite-vec",
@@ -22795,6 +26415,18 @@
     "summary": "OCR, layout, reading order, and table recognition in 90+ languages.",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/screen-understanding/pypi__surya-ocr.md"
+  },
+  {
+    "id": "pypi:svglib",
+    "kind": "pypi",
+    "category": "design-3d",
+    "package": "svglib",
+    "version": "2.4.0",
+    "url": "https://pypi.org/project/svglib/",
+    "requires_python": ">=3.10",
+    "summary": "A pure-Python library for reading and converting SVG",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/pypi__svglib.md"
   },
   {
     "id": "pypi:swebench",
@@ -23062,6 +26694,19 @@
     "_path": "research/sources/coding-agents/pypi__tree-sitter-language-pack.md"
   },
   {
+    "id": "pypi:trimesh",
+    "kind": "pypi",
+    "category": "design-3d",
+    "package": "trimesh",
+    "version": "5.2.0",
+    "url": "https://pypi.org/project/trimesh/",
+    "license": "The MIT License (MIT)",
+    "requires_python": ">=3.10",
+    "summary": "Import, export, process, analyze and view triangular meshes.",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/design-3d/pypi__trimesh.md"
+  },
+  {
     "id": "pypi:twilio",
     "kind": "pypi",
     "category": "connectors-extra",
@@ -23086,6 +26731,19 @@
     "summary": "Typer, build great CLIs. Easy to code. Based on Python type hints.",
     "fetched_at": "2026-11-08T12:19:23Z",
     "_path": "research/sources/system-control/pypi__typer.md"
+  },
+  {
+    "id": "pypi:uiautomation",
+    "kind": "pypi",
+    "category": "accessibility-api",
+    "package": "uiautomation",
+    "version": "2.0.29",
+    "url": "https://pypi.org/project/uiautomation/",
+    "home_page": "https://github.com/yinkaisheng/Python-UIAutomation-for-Windows",
+    "license": "Apache 2.0",
+    "summary": "Python UIAutomation for Windows",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/accessibility-api/pypi__uiautomation.md"
   },
   {
     "id": "pypi:uiautomation",
@@ -23310,6 +26968,19 @@
   {
     "id": "pypi:wmi",
     "kind": "pypi",
+    "category": "devices-peripherals",
+    "package": "WMI",
+    "version": "1.5.1",
+    "url": "https://pypi.org/project/WMI/",
+    "home_page": "http://timgolden.me.uk/python/wmi.html",
+    "license": "http://www.opensource.org/licenses/mit-license.php",
+    "summary": "Windows Management Instrumentation",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/devices-peripherals/pypi__wmi.md"
+  },
+  {
+    "id": "pypi:wmi",
+    "kind": "pypi",
     "category": "system-control",
     "package": "WMI",
     "version": "1.5.1",
@@ -23373,6 +27044,19 @@
     "_path": "research/sources/office-automation/pypi__xlwings.md"
   },
   {
+    "id": "pypi:yara-python",
+    "kind": "pypi",
+    "category": "security-ops",
+    "package": "yara-python",
+    "version": "4.5.4",
+    "url": "https://pypi.org/project/yara-python/",
+    "home_page": "https://github.com/VirusTotal/yara-python",
+    "license": "Apache 2.0",
+    "summary": "Python interface for YARA",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/security-ops/pypi__yara-python.md"
+  },
+  {
     "id": "pypi:youtube-transcript-api",
     "kind": "pypi",
     "category": "media-production",
@@ -23423,6 +27107,18 @@
     "summary": "A feature-rich command-line audio/video downloader",
     "fetched_at": "2026-11-08T11:20:04Z",
     "_path": "research/sources/whisper-and-asr/pypi__yt-dlp.md"
+  },
+  {
+    "id": "pypi:zstandard",
+    "kind": "pypi",
+    "category": "backup-archive",
+    "package": "zstandard",
+    "version": "0.25.0",
+    "url": "https://pypi.org/project/zstandard/",
+    "requires_python": ">=3.9",
+    "summary": "Zstandard bindings for Python",
+    "fetched_at": "2026-11-08T12:43:21Z",
+    "_path": "research/sources/backup-archive/pypi__zstandard.md"
   },
   {
     "id": "pypi:zstandard",

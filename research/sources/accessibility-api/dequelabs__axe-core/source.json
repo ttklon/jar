@@ -1,0 +1,21 @@
+{
+  "id": "github:dequelabs/axe-core",
+  "kind": "github",
+  "category": "accessibility-api",
+  "repo": "dequelabs/axe-core",
+  "url": "https://github.com/dequelabs/axe-core",
+  "description": "Accessibility engine for automated Web UI testing",
+  "stars": 7777,
+  "forks": 982,
+  "language": "HTML",
+  "license": "MPL-2.0",
+  "topics": [
+    "a11y",
+    "accessibility",
+    "axe"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T16:47:50Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

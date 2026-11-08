@@ -1,6 +1,6 @@
 # ИНДЕКС ИСТОЧНИКОВ — ZShelper
 
-Сгенерировано: `2026-11-08T12:39:17Z` · всего записей: **1258** · GitHub-репозиториев: **582**
+Сгенерировано: `2026-11-08T12:47:34Z` · всего записей: **1463** · GitHub-репозиториев: **665**
 
 Полные тексты лежат в `research/sources/<категория>/`. Машиночитаемый реестр — `research/SOURCES.json`.
 
@@ -9,18 +9,25 @@
 | Категория | Записей | Звёзд (сумма) |
 | --- | --- | --- |
 | [`academic-writing`](#academic-writing) | 60 | 313,296 |
+| [`accessibility-api`](#accessibility-api) | 15 | 40,384 |
+| [`backup-archive`](#backup-archive) | 22 | 152,678 |
 | [`benchmarks`](#benchmarks) | 14 | 43,820 |
 | [`benchmarks-extra`](#benchmarks-extra) | 12 | 33,029 |
+| [`business-finance`](#business-finance) | 22 | 201,708 |
 | [`coding-agents`](#coding-agents) | 63 | 1,043,500 |
 | [`configuration`](#configuration) | 22 | 47,652 |
 | [`connectors`](#connectors) | 44 | 591,577 |
 | [`connectors-extra`](#connectors-extra) | 37 | 338,500 |
+| [`deployment-admin`](#deployment-admin) | 21 | 210,007 |
+| [`design-3d`](#design-3d) | 26 | 240,390 |
+| [`devices-peripherals`](#devices-peripherals) | 32 | 374,202 |
 | [`electron-shell`](#electron-shell) | 28 | 381,504 |
 | [`inference-runtimes`](#inference-runtimes) | 45 | 1,169,178 |
 | [`low-end-inference`](#low-end-inference) | 35 | 638,695 |
 | [`mcp-and-tools`](#mcp-and-tools) | 50 | 956,879 |
 | [`media-production`](#media-production) | 45 | 486,062 |
 | [`memory-and-rag`](#memory-and-rag) | 50 | 573,502 |
+| [`network-admin`](#network-admin) | 26 | 216,887 |
 | [`observability-evals`](#observability-evals) | 32 | 207,602 |
 | [`office-automation`](#office-automation) | 44 | 138,819 |
 | [`orchestration`](#orchestration) | 94 | 2,899,123 |
@@ -29,12 +36,14 @@
 | [`reference-apps`](#reference-apps) | 25 | 1,013,937 |
 | [`safety-and-security`](#safety-and-security) | 38 | 493,731 |
 | [`screen-understanding`](#screen-understanding) | 42 | 700,299 |
+| [`security-ops`](#security-ops) | 25 | 268,412 |
 | [`self-extension`](#self-extension) | 36 | 532,101 |
 | [`system-control`](#system-control) | 62 | 635,018 |
 | [`system-triage`](#system-triage) | 36 | 421,432 |
 | [`tts-and-voice`](#tts-and-voice) | 28 | 329,740 |
 | [`ui-ux`](#ui-ux) | 66 | 706,173 |
 | [`updates`](#updates) | 25 | 103,468 |
+| [`virtualization-remote`](#virtualization-remote) | 16 | 268,324 |
 | [`whisper-and-asr`](#whisper-and-asr) | 52 | 438,275 |
 | [`windows-automation`](#windows-automation) | 56 | 560,206 |
 
@@ -103,6 +112,53 @@
 | [pypi: textstat](https://pypi.org/project/textstat/) | - | MIT |  | Calculate statistical features from text | `research/sources/academic-writing/pypi__textstat.md` |
 | [pypi: trafilatura](https://pypi.org/project/trafilatura/) | - | - |  | Python & Command-line tool to gather text and metadata on the Web: Crawling, scraping, extraction, output as CSV, JSON, HTML, MD, TXT, XML. | `research/sources/academic-writing/pypi__trafilatura.md` |
 
+## accessibility-api
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [microsoft/fluentui](https://github.com/microsoft/fluentui) | 20,391 | NOASSERTION | 2026-11-06 | Fluent UI web represents a collection of utilities, React components, and web components for building web applications. | `research/sources/accessibility-api/microsoft__fluentui/README.md` |
+| [dequelabs/axe-core](https://github.com/dequelabs/axe-core) | 7,777 | MPL-2.0 | 2026-11-05 | Accessibility engine for automated Web UI testing | `research/sources/accessibility-api/dequelabs__axe-core/README.md` |
+| [microsoft/Windows-classic-samples](https://github.com/microsoft/Windows-classic-samples) | 5,688 | NOASSERTION | 2026-09-03 | This repo contains samples that demonstrate the API used in Windows classic desktop applications. | `research/sources/accessibility-api/microsoft__Windows-classic-samples/README.md` |
+| [nvaccess/nvda](https://github.com/nvaccess/nvda) | 2,684 | NOASSERTION | 2026-11-06 | NVDA, the free and open source Screen Reader for Microsoft Windows | `research/sources/accessibility-api/nvaccess__nvda/README.md` |
+| [w3c/wcag](https://github.com/w3c/wcag) | 1,522 | NOASSERTION | 2026-11-06 | Web Content Accessibility Guidelines | `research/sources/accessibility-api/w3c__wcag/README.md` |
+| [w3c/aria-practices](https://github.com/w3c/aria-practices) | 1,361 | NOASSERTION | 2026-11-04 | WAI-ARIA Authoring Practices Guide (APG) | `research/sources/accessibility-api/w3c__aria-practices/README.md` |
+| [microsoft/accessibility-insights-web](https://github.com/microsoft/accessibility-insights-web) | 961 | MIT | 2026-11-03 | Accessibility Insights for Web | `research/sources/accessibility-api/microsoft__accessibility-insights-web/README.md` |
+| [npm: @axe-core/playwright](https://www.npmjs.com/package/@axe-core/playwright) | - | MPL-2.0 |  | Provides a method to inject and analyze web pages using axe | `research/sources/accessibility-api/npm__axe-core-playwright.md` |
+| [npm: axe-core](https://www.npmjs.com/package/axe-core) | - | MPL-2.0 |  | Accessibility engine for automated Web UI testing | `research/sources/accessibility-api/npm__axe-core.md` |
+| [npm: focus-trap](https://www.npmjs.com/package/focus-trap) | - | MIT |  | Trap focus within a DOM node. | `research/sources/accessibility-api/npm__focus-trap.md` |
+| [npm: tabbable](https://www.npmjs.com/package/tabbable) | - | MIT |  | Returns an array of all tabbable DOM nodes within a containing node. | `research/sources/accessibility-api/npm__tabbable.md` |
+| [pypi: accessible-output2](https://pypi.org/project/accessible-output2/) | - | - |  | Library to provide speech and braille output to a variety of different screen readers and other accessibility solutions. | `research/sources/accessibility-api/pypi__accessible-output2.md` |
+| [pypi: comtypes](https://pypi.org/project/comtypes/) | - | - |  | Pure Python COM package | `research/sources/accessibility-api/pypi__comtypes.md` |
+| [pypi: pyttsx3](https://pypi.org/project/pyttsx3/) | - | - |  | Text to Speech (TTS) library for Python 3. Works without internet connection or delay. Supports multiple TTS engines, including Sapi5, nsss, and espeak. | `research/sources/accessibility-api/pypi__pyttsx3.md` |
+| [pypi: uiautomation](https://pypi.org/project/uiautomation/) | - | Apache 2.0 |  | Python UIAutomation for Windows | `research/sources/accessibility-api/pypi__uiautomation.md` |
+
+## backup-archive
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [rclone/rclone](https://github.com/rclone/rclone) | 60,862 | MIT | 2026-11-07 | "rsync for cloud storage" - Google Drive, S3, Dropbox, Backblaze B2, One Drive, Swift, Hubic, Wasabi, Google Cloud Storage, Azure Blob, Azure Files, Yandex Files | `research/sources/backup-archive/rclone__rclone/README.md` |
+| [restic/restic](https://github.com/restic/restic) | 37,069 | BSD-2-Clause | 2026-11-06 | Fast, secure, efficient backup program | `research/sources/backup-archive/restic__restic/README.md` |
+| [duplicati/duplicati](https://github.com/duplicati/duplicati) | 15,189 | NOASSERTION | 2026-11-08 | Store securely encrypted backups in the cloud! | `research/sources/backup-archive/duplicati__duplicati/README.md` |
+| [kopia/kopia](https://github.com/kopia/kopia) | 14,607 | Apache-2.0 | 2026-11-08 | Cross-platform backup tool for Windows, macOS & Linux with fast, incremental backups, client-side end-to-end encryption, compression and data deduplication. CLI and GUI included. | `research/sources/backup-archive/kopia__kopia/README.md` |
+| [borgbackup/borg](https://github.com/borgbackup/borg) | 13,915 | NOASSERTION | 2026-11-06 | Deduplicating archiver with compression and authenticated encryption. | `research/sources/backup-archive/borgbackup__borg/README.md` |
+| [gilbertchen/duplicacy](https://github.com/gilbertchen/duplicacy) | 5,699 | NOASSERTION | 2026-10-27 | A new generation cloud backup tool | `research/sources/backup-archive/gilbertchen__duplicacy/README.md` |
+| [mholt/archiver](https://github.com/mholt/archiver) | 4,371 | MIT | 2024-11-19 | DEPRECATED. Please use mholt/archives instead. | `research/sources/backup-archive/mholt__archiver/README.md` |
+| [p7zip-project/p7zip](https://github.com/p7zip-project/p7zip) | 966 | NOASSERTION | 2025-05-20 | A new p7zip fork with additional codecs and improvements (forked from https://sourceforge.net/projects/sevenzip/ AND https://sourceforge.net/projects/p7zip/). | `research/sources/backup-archive/p7zip-project__p7zip/README.md` |
+| [npm: 7zip-bin](https://www.npmjs.com/package/7zip-bin) | - | MIT |  | 7-Zip precompiled binaries | `research/sources/backup-archive/npm__7zip-bin.md` |
+| [npm: adm-zip](https://www.npmjs.com/package/adm-zip) | - | MIT |  | Javascript implementation of zip for nodejs with support for electron original-fs. Allows user to create or extract zip files both in memory or to/from disk | `research/sources/backup-archive/npm__adm-zip.md` |
+| [npm: archiver](https://www.npmjs.com/package/archiver) | - | MIT |  | a streaming interface for archive generation | `research/sources/backup-archive/npm__archiver.md` |
+| [npm: fast-glob](https://www.npmjs.com/package/fast-glob) | - | MIT |  | It's a very fast and efficient glob library for Node.js | `research/sources/backup-archive/npm__fast-glob.md` |
+| [npm: node-7z](https://www.npmjs.com/package/node-7z) | - | ISC |  | A Node.js wrapper for 7-Zip with platform binaries | `research/sources/backup-archive/npm__node-7z.md` |
+| [npm: tar](https://www.npmjs.com/package/tar) | - | BlueOak-1.0.0 |  | tar for node | `research/sources/backup-archive/npm__tar.md` |
+| [npm: yauzl](https://www.npmjs.com/package/yauzl) | - | MIT |  | yet another unzip library for node | `research/sources/backup-archive/npm__yauzl.md` |
+| [pypi: boto3](https://pypi.org/project/boto3/) | - | Apache-2.0 |  | The AWS SDK for Python (Boto3) | `research/sources/backup-archive/pypi__boto3.md` |
+| [pypi: py7zr](https://pypi.org/project/py7zr/) | - | - |  | Pure python 7-zip library | `research/sources/backup-archive/pypi__py7zr.md` |
+| [pypi: pyarrow](https://pypi.org/project/pyarrow/) | - | - |  | Python library for Apache Arrow | `research/sources/backup-archive/pypi__pyarrow.md` |
+| [pypi: rarfile](https://pypi.org/project/rarfile/) | - | ISC |  | RAR archive reader for Python | `research/sources/backup-archive/pypi__rarfile.md` |
+| [pypi: rclone-python](https://pypi.org/project/rclone-python/) | - | - |  | A python wrapper for rclone. | `research/sources/backup-archive/pypi__rclone-python.md` |
+| [pypi: restic](https://pypi.org/project/restic/) | - | - |  | A modern, type-safe Python library for building robust REST API clients with automatic Pydantic validation, async support, and extensible route patterns. | `research/sources/backup-archive/pypi__restic.md` |
+| [pypi: zstandard](https://pypi.org/project/zstandard/) | - | - |  | Zstandard bindings for Python | `research/sources/backup-archive/pypi__zstandard.md` |
+
 ## benchmarks
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
@@ -138,6 +194,33 @@
 | [pypi: evalplus](https://pypi.org/project/evalplus/) | - | Apache-2.0 |  | "EvalPlus for rigourous evaluation of LLM-synthesized code" | `research/sources/benchmarks-extra/pypi__evalplus.md` |
 | [pypi: evaluate](https://pypi.org/project/evaluate/) | - | Apache 2.0 |  | HuggingFace community-driven open-source library of evaluation | `research/sources/benchmarks-extra/pypi__evaluate.md` |
 | [pypi: inspect-ai](https://pypi.org/project/inspect-ai/) | - | MIT License |  | Framework for large language model evaluations | `research/sources/benchmarks-extra/pypi__inspect-ai.md` |
+
+## business-finance
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [twentyhq/twenty](https://github.com/twentyhq/twenty) | 60,631 | NOASSERTION | 2026-11-08 | The open alternative to Salesforce, designed for AI. | `research/sources/business-finance/twentyhq__twenty/README.md` |
+| [odoo/odoo](https://github.com/odoo/odoo) | 55,637 | NOASSERTION | 2026-11-08 | Odoo. Open Source Apps To Grow Your Business. | `research/sources/business-finance/odoo__odoo/README.md` |
+| [actualbudget/actual](https://github.com/actualbudget/actual) | 30,079 | MIT | 2026-11-08 | A local-first personal finance app | `research/sources/business-finance/actualbudget__actual/README.md` |
+| [firefly-iii/firefly-iii](https://github.com/firefly-iii/firefly-iii) | 25,172 | AGPL-3.0 | 2026-11-07 | Firefly III: a personal finances manager | `research/sources/business-finance/firefly-iii__firefly-iii/README.md` |
+| [akaunting/akaunting](https://github.com/akaunting/akaunting) | 10,287 | NOASSERTION | 2026-11-07 | Online Accounting Software | `research/sources/business-finance/akaunting__akaunting/README.md` |
+| [beancount/beancount](https://github.com/beancount/beancount) | 6,153 | GPL-2.0 | 2026-08-23 | Beancount: Double-Entry Accounting from Text Files. | `research/sources/business-finance/beancount__beancount/README.md` |
+| [ledger/ledger](https://github.com/ledger/ledger) | 6,067 | NOASSERTION | 2026-11-08 | Double-entry accounting system with a command-line reporting interface | `research/sources/business-finance/ledger__ledger/README.md` |
+| [gnucash/gnucash](https://github.com/gnucash/gnucash) | 4,402 | NOASSERTION | 2026-11-08 | GnuCash Double-Entry Accounting Program. | `research/sources/business-finance/gnucash__gnucash/README.md` |
+| [invoiceplane/invoiceplane](https://github.com/invoiceplane/invoiceplane) | 3,280 | NOASSERTION | 2026-11-08 | A self-hosted open source application for managing your invoices, clients and payments. | `research/sources/business-finance/invoiceplane__invoiceplane/README.md` |
+| [npm: csv-stringify](https://www.npmjs.com/package/csv-stringify) | - | MIT |  | CSV stringifier implementing the Node.js `stream.Transform` API | `research/sources/business-finance/npm__csv-stringify.md` |
+| [npm: currency.js](https://www.npmjs.com/package/currency.js) | - | MIT |  | A small, lightweight javascript library for working with currency values. | `research/sources/business-finance/npm__currency.js.md` |
+| [npm: docx](https://www.npmjs.com/package/docx) | - | MIT |  | Easily generate .docx files with JS/TS with a nice declarative API. Works for Node and on the Browser. | `research/sources/business-finance/npm__docx.md` |
+| [npm: exceljs](https://www.npmjs.com/package/exceljs) | - | MIT |  | Excel Workbook Manager - Read and Write xlsx and csv Files. | `research/sources/business-finance/npm__exceljs.md` |
+| [npm: fast-csv](https://www.npmjs.com/package/fast-csv) | - | MIT |  | CSV parser and writer | `research/sources/business-finance/npm__fast-csv.md` |
+| [npm: pdfkit](https://www.npmjs.com/package/pdfkit) | - | MIT |  | A JavaScript PDF generation library | `research/sources/business-finance/npm__pdfkit.md` |
+| [pypi: beancount](https://pypi.org/project/beancount/) | - | GPL-2.0-only |  | Command-line Double-Entry Accounting | `research/sources/business-finance/pypi__beancount.md` |
+| [pypi: forex-python](https://pypi.org/project/forex-python/) | - | - |  | Free foreign exchange rates and currency conversion. | `research/sources/business-finance/pypi__forex-python.md` |
+| [pypi: ofxparse](https://pypi.org/project/ofxparse/) | - | MIT License |  | Tools for working with the OFX (Open Financial Exchange) file format | `research/sources/business-finance/pypi__ofxparse.md` |
+| [pypi: openpyxl](https://pypi.org/project/openpyxl/) | - | MIT |  | A Python library to read/write Excel 2010 xlsx/xlsm files | `research/sources/business-finance/pypi__openpyxl.md` |
+| [pypi: pandas-datareader](https://pypi.org/project/pandas-datareader/) | - | - |  | Pandas-compatible data readers. Formerly a component of pandas. | `research/sources/business-finance/pypi__pandas-datareader.md` |
+| [pypi: python-pptx](https://pypi.org/project/python-pptx/) | - | MIT |  | Create, read, and update PowerPoint 2007+ (.pptx) files. | `research/sources/business-finance/pypi__python-pptx.md` |
+| [pypi: QuantLib](https://pypi.org/project/QuantLib/) | - | BSD-3-Clause |  | Python bindings for the QuantLib library | `research/sources/business-finance/pypi__quantlib.md` |
 
 ## coding-agents
 
@@ -324,6 +407,100 @@
 | [pypi: requests](https://pypi.org/project/requests/) | - | Apache-2.0 |  | Python HTTP for Humans. | `research/sources/connectors-extra/pypi__requests.md` |
 | [pypi: slack-sdk](https://pypi.org/project/slack-sdk/) | - | MIT |  | The Slack API Platform SDK for Python | `research/sources/connectors-extra/pypi__slack-sdk.md` |
 | [pypi: twilio](https://pypi.org/project/twilio/) | - | MIT |  | Twilio API client and TwiML generator | `research/sources/connectors-extra/pypi__twilio.md` |
+
+## deployment-admin
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [ansible/ansible](https://github.com/ansible/ansible) | 71,275 | GPL-3.0 | 2026-11-06 | Ansible is a radically simple IT automation platform that makes your applications and systems easier to deploy and maintain. Automate everything from code deployment to network con | `research/sources/deployment-admin/ansible__ansible/README.md` |
+| [PowerShell/PowerShell](https://github.com/PowerShell/PowerShell) | 56,054 | MIT | 2026-11-06 | PowerShell for every system! | `research/sources/deployment-admin/PowerShell__PowerShell/README.md` |
+| [microsoft/winget-cli](https://github.com/microsoft/winget-cli) | 26,568 | MIT | 2026-11-06 | WinGet is the Windows Package Manager. This project includes a CLI (Command Line Interface), PowerShell modules, and a COM (Component Object Model) API (Application Programming Int | `research/sources/deployment-admin/microsoft__winget-cli/README.md` |
+| [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop) | 24,803 | NOASSERTION | 2026-11-08 | A command-line installer for Windows. | `research/sources/deployment-admin/ScoopInstaller__Scoop/README.md` |
+| [chocolatey/choco](https://github.com/chocolatey/choco) | 11,562 | NOASSERTION | 2026-10-28 | Chocolatey - the package manager for Windows | `research/sources/deployment-admin/chocolatey__choco/README.md` |
+| [chef/chef](https://github.com/chef/chef) | 8,260 | Apache-2.0 | 2026-11-06 | Chef Infra, a powerful automation platform that transforms infrastructure into code automating how infrastructure is configured, deployed and managed across any environment, at any | `research/sources/deployment-admin/chef__chef/README.md` |
+| [puppetlabs/puppet](https://github.com/puppetlabs/puppet) | 7,972 | Apache-2.0 | 2026-08-06 | Server automation framework and application | `research/sources/deployment-admin/puppetlabs__puppet/README.md` |
+| [PSAppDeployToolkit/PSAppDeployToolkit](https://github.com/PSAppDeployToolkit/PSAppDeployToolkit) | 2,441 | LGPL-3.0 | 2026-11-05 | Project Homepage & Forums | `research/sources/deployment-admin/PSAppDeployToolkit__PSAppDeployToolkit/README.md` |
+| [microsoft/msix-packaging](https://github.com/microsoft/msix-packaging) | 1,072 | MIT | 2026-08-24 | MSIX SDK | `research/sources/deployment-admin/microsoft__msix-packaging/README.md` |
+| [npm: cross-spawn](https://www.npmjs.com/package/cross-spawn) | - | MIT |  | Cross platform child_process#spawn and child_process#spawnSync | `research/sources/deployment-admin/npm__cross-spawn.md` |
+| [npm: execa](https://www.npmjs.com/package/execa) | - | MIT |  | Process execution for humans | `research/sources/deployment-admin/npm__execa.md` |
+| [npm: node-pty](https://www.npmjs.com/package/node-pty) | - | MIT |  | Fork pseudoterminals in Node.JS | `research/sources/deployment-admin/npm__node-pty.md` |
+| [npm: shelljs](https://www.npmjs.com/package/shelljs) | - | BSD-3-Clause |  | Portable Unix shell commands for Node.js | `research/sources/deployment-admin/npm__shelljs.md` |
+| [npm: tree-kill](https://www.npmjs.com/package/tree-kill) | - | MIT |  | kill trees of processes | `research/sources/deployment-admin/npm__tree-kill.md` |
+| [npm: which](https://www.npmjs.com/package/which) | - | ISC |  | Like which(1) unix command. Find the first instance of an executable in the PATH. | `research/sources/deployment-admin/npm__which.md` |
+| [pypi: ansible](https://pypi.org/project/ansible/) | - | GPL-3.0-or-later |  | Radically simple IT automation | `research/sources/deployment-admin/pypi__ansible.md` |
+| [pypi: fabric](https://pypi.org/project/fabric/) | - | BSD |  | High level SSH command execution | `research/sources/deployment-admin/pypi__fabric.md` |
+| [pypi: invoke](https://pypi.org/project/invoke/) | - | - |  | Pythonic task execution | `research/sources/deployment-admin/pypi__invoke.md` |
+| [pypi: plumbum](https://pypi.org/project/plumbum/) | - | - |  | Plumbum: shell combinators library | `research/sources/deployment-admin/pypi__plumbum.md` |
+| [pypi: pywinrm](https://pypi.org/project/pywinrm/) | - | Copyright (c) 2013 Alexey Diyan  Permission is hereby granted, free of charge, t |  | Python library for Windows Remote Management | `research/sources/deployment-admin/pypi__pywinrm.md` |
+| [pypi: sh](https://pypi.org/project/sh/) | - | MIT |  | Python subprocess replacement | `research/sources/deployment-admin/pypi__sh.md` |
+
+## design-3d
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [mrdoob/three.js](https://github.com/mrdoob/three.js) | 117,864 | MIT | 2026-11-08 | JavaScript 3D Library. | `research/sources/design-3d/mrdoob__three.js/README.md` |
+| [FreeCAD/FreeCAD](https://github.com/FreeCAD/FreeCAD) | 35,249 | LGPL-2.1 | 2026-11-08 | Official source code of FreeCAD, a free and opensource multiplatform 3D parametric modeler. | `research/sources/design-3d/FreeCAD__FreeCAD/README.md` |
+| [blender/blender](https://github.com/blender/blender) | 21,754 | NOASSERTION | 2026-11-07 | Official mirror of Blender | `research/sources/design-3d/blender__blender/README.md` |
+| [imagemagick/imagemagick](https://github.com/imagemagick/imagemagick) | 17,816 | NOASSERTION | 2026-11-08 | ImageMagick is a free, open-source software suite for creating, editing, converting, and displaying images. It supports 200+ formats and offers powerful command-line tools and APIs | `research/sources/design-3d/imagemagick__imagemagick/README.md` |
+| [assimp/assimp](https://github.com/assimp/assimp) | 13,312 | NOASSERTION | 2026-11-07 | The official Open-Asset-Importer-Library Repository. Loads 40+ 3D-file-formats into one unified and clean data structure. | `research/sources/design-3d/assimp__assimp/README.md` |
+| [libvips/libvips](https://github.com/libvips/libvips) | 11,792 | LGPL-2.1 | 2026-11-07 | A fast image processing library with low memory needs. | `research/sources/design-3d/libvips__libvips/README.md` |
+| [openscad/openscad](https://github.com/openscad/openscad) | 10,616 | NOASSERTION | 2026-11-07 | OpenSCAD - The Programmers Solid 3D CAD Modeller | `research/sources/design-3d/openscad__openscad/README.md` |
+| [KhronosGroup/glTF](https://github.com/KhronosGroup/glTF) | 7,885 | NOASSERTION | 2026-11-07 | glTF – Runtime 3D Asset Delivery | `research/sources/design-3d/KhronosGroup__glTF/README.md` |
+| [inkscape/inkscape](https://github.com/inkscape/inkscape) | 4,102 | NOASSERTION | 2022-03-03 | Project Website: https://inkscape.org - Code Repository: https://gitlab.com/inkscape/inkscape - Draw freely. 🖌 | `research/sources/design-3d/inkscape__inkscape/README.md` |
+| [npm: @gltf-transform/core](https://www.npmjs.com/package/@gltf-transform/core) | - | MIT |  | glTF 2.0 SDK for JavaScript and TypeScript, on Web and Node.js. | `research/sources/design-3d/npm__gltf-transform-core.md` |
+| [npm: canvas](https://www.npmjs.com/package/canvas) | - | MIT |  | Canvas graphics API backed by Cairo | `research/sources/design-3d/npm__canvas.md` |
+| [npm: jimp](https://www.npmjs.com/package/jimp) | - | MIT |  | An image processing library written entirely in JavaScript. | `research/sources/design-3d/npm__jimp.md` |
+| [npm: pdf-lib](https://www.npmjs.com/package/pdf-lib) | - | MIT |  | Create and modify PDF files with JavaScript | `research/sources/design-3d/npm__pdf-lib.md` |
+| [npm: sharp](https://www.npmjs.com/package/sharp) | - | Apache-2.0 |  | High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images | `research/sources/design-3d/npm__sharp.md` |
+| [npm: svg2png](https://www.npmjs.com/package/svg2png) | - | WTFPL |  | Converts SVGs to PNGs, using PhantomJS | `research/sources/design-3d/npm__svg2png.md` |
+| [npm: three](https://www.npmjs.com/package/three) | - | MIT |  | JavaScript 3D library | `research/sources/design-3d/npm__three.md` |
+| [pypi: cadquery](https://pypi.org/project/cadquery/) | - | Apache Public License 2.0 |  | CadQuery is a parametric  scripting language for creating and traversing CAD models | `research/sources/design-3d/pypi__cadquery.md` |
+| [pypi: CairoSVG](https://pypi.org/project/CairoSVG/) | - | LGPL-3.0-or-later |  | A Simple SVG Converter based on Cairo | `research/sources/design-3d/pypi__cairosvg.md` |
+| [pypi: ezdxf](https://pypi.org/project/ezdxf/) | - | - |  | A Python package to create/manipulate DXF drawings. | `research/sources/design-3d/pypi__ezdxf.md` |
+| [pypi: matplotlib](https://pypi.org/project/matplotlib/) | - | License agreement for matplotlib versions 1.3.0 and later |  | Python plotting package | `research/sources/design-3d/pypi__matplotlib.md` |
+| [pypi: numpy-stl](https://pypi.org/project/numpy-stl/) | - | - |  | Library to make reading, writing and modifying both binary and ascii STL files easy. | `research/sources/design-3d/pypi__numpy-stl.md` |
+| [pypi: pillow](https://pypi.org/project/pillow/) | - | - |  | Python Imaging Library (fork) | `research/sources/design-3d/pypi__pillow.md` |
+| [pypi: plotly](https://pypi.org/project/plotly/) | - | - |  | An open-source interactive data visualization library for Python | `research/sources/design-3d/pypi__plotly.md` |
+| [pypi: reportlab](https://pypi.org/project/reportlab/) | - | BSD license (see license.txt for details), Copyright (c) 2000-2025, ReportLab In |  | The Reportlab Toolkit | `research/sources/design-3d/pypi__reportlab.md` |
+| [pypi: svglib](https://pypi.org/project/svglib/) | - | - |  | A pure-Python library for reading and converting SVG | `research/sources/design-3d/pypi__svglib.md` |
+| [pypi: trimesh](https://pypi.org/project/trimesh/) | - | The MIT License (MIT) |  | Import, export, process, analyze and view triangular meshes. | `research/sources/design-3d/pypi__trimesh.md` |
+
+## devices-peripherals
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [Genymobile/scrcpy](https://github.com/Genymobile/scrcpy) | 154,300 | Apache-2.0 | 2026-11-06 | Display and control your Android device | `research/sources/devices-peripherals/Genymobile__scrcpy/README.md` |
+| [opencv/opencv](https://github.com/opencv/opencv) | 91,484 | Apache-2.0 | 2026-11-08 | Open Source Computer Vision Library | `research/sources/devices-peripherals/opencv__opencv/README.md` |
+| [obsproject/obs-studio](https://github.com/obsproject/obs-studio) | 79,160 | GPL-2.0 | 2026-11-06 | OBS Studio - Free and open source software for live streaming and screen recording | `research/sources/devices-peripherals/obsproject__obs-studio/README.md` |
+| [Arduino/Arduino](https://github.com/Arduino/Arduino) | 14,703 | NOASSERTION | 2025-10-11 | Arduino IDE 1.x | `research/sources/devices-peripherals/Arduino__Arduino/README.md` |
+| [libimobiledevice/libimobiledevice](https://github.com/libimobiledevice/libimobiledevice) | 8,326 | LGPL-2.1 | 2026-06-10 | A cross-platform protocol library to communicate with iOS devices | `research/sources/devices-peripherals/libimobiledevice__libimobiledevice/README.md` |
+| [espressif/esptool](https://github.com/espressif/esptool) | 6,542 | GPL-2.0 | 2026-11-03 | Serial utility for flashing, provisioning, and interacting with Espressif SoCs | `research/sources/devices-peripherals/espressif__esptool/README.md` |
+| [libusb/libusb](https://github.com/libusb/libusb) | 6,191 | LGPL-2.1 | 2026-11-06 | A cross-platform library to access USB devices | `research/sources/devices-peripherals/libusb__libusb/README.md` |
+| [microsoft/Windows-classic-samples](https://github.com/microsoft/Windows-classic-samples) | 5,688 | NOASSERTION | 2026-09-03 | This repo contains samples that demonstrate the API used in Windows classic desktop applications. | `research/sources/devices-peripherals/microsoft__Windows-classic-samples/README.md` |
+| [microsoft/WindowsAppSDK](https://github.com/microsoft/WindowsAppSDK) | 4,725 | MIT | 2026-11-08 | The Windows App SDK empowers all Windows desktop apps with modern Windows UI, APIs, and platform features, including back-compat support, shipped via NuGet. | `research/sources/devices-peripherals/microsoft__WindowsAppSDK/README.md` |
+| [libimobiledevice/usbmuxd](https://github.com/libimobiledevice/usbmuxd) | 1,794 | GPL-2.0 | 2025-12-06 | A socket daemon to multiplex connections from and to iOS devices | `research/sources/devices-peripherals/libimobiledevice__usbmuxd/README.md` |
+| [sigrokproject/pulseview](https://github.com/sigrokproject/pulseview) | 815 | GPL-3.0 | 2025-11-10 | Read-only mirror of the official repo at git://sigrok.org/pulseview. Pull requests welcome. Please file bugreports at sigrok.org/bugzilla. | `research/sources/devices-peripherals/sigrokproject__pulseview/README.md` |
+| [OpenNI/OpenNI2](https://github.com/OpenNI/OpenNI2) | 442 | Apache-2.0 | 2019-04-04 | OpenNI2 | `research/sources/devices-peripherals/OpenNI__OpenNI2/README.md` |
+| [KDE/kio-extras](https://github.com/KDE/kio-extras) | 32 | NOASSERTION | 2026-11-08 | Additional components to increase the functionality of KIO | `research/sources/devices-peripherals/KDE__kio-extras/README.md` |
+| [npm: @abandonware/noble](https://www.npmjs.com/package/@abandonware/noble) | - | MIT |  | A Node.js BLE (Bluetooth Low Energy) central library. | `research/sources/devices-peripherals/npm__abandonware-noble.md` |
+| [npm: drivelist](https://www.npmjs.com/package/drivelist) | - | Apache-2.0 |  | List all connected drives in your computer, in all major operating systems | `research/sources/devices-peripherals/npm__drivelist.md` |
+| [npm: node-hid](https://www.npmjs.com/package/node-hid) | - | (MIT OR X11) |  | USB HID device access library | `research/sources/devices-peripherals/npm__node-hid.md` |
+| [npm: serialport](https://www.npmjs.com/package/serialport) | - | MIT |  | Node.js package to access serial ports. Linux, OSX and Windows. Welcome your robotic JavaScript overlords. Better yet, program them! | `research/sources/devices-peripherals/npm__serialport.md` |
+| [npm: usb](https://www.npmjs.com/package/usb) | - | MIT |  | Library to access USB devices | `research/sources/devices-peripherals/npm__usb.md` |
+| [npm: webbluetooth](https://www.npmjs.com/package/webbluetooth) | - | MIT |  | Node.js implementation of the Web Bluetooth Specification | `research/sources/devices-peripherals/npm__webbluetooth.md` |
+| [pypi: bleak](https://pypi.org/project/bleak/) | - | - |  | Bluetooth Low Energy platform Agnostic Klient | `research/sources/devices-peripherals/pypi__bleak.md` |
+| [pypi: hidapi](https://pypi.org/project/hidapi/) | - | - |  | A Cython interface to the hidapi from https://github.com/libusb/hidapi | `research/sources/devices-peripherals/pypi__hidapi.md` |
+| [pypi: opencv-python](https://pypi.org/project/opencv-python/) | - | Apache 2.0 |  | Wrapper package for OpenCV python bindings. | `research/sources/devices-peripherals/pypi__opencv-python.md` |
+| [pypi: psutil](https://pypi.org/project/psutil/) | - | BSD-3-Clause |  | Cross-platform lib for process and system monitoring. | `research/sources/devices-peripherals/pypi__psutil.md` |
+| [pypi: pyserial](https://pypi.org/project/pyserial/) | - | BSD |  | Python Serial Port Extension | `research/sources/devices-peripherals/pypi__pyserial.md` |
+| [pypi: pyserial-asyncio](https://pypi.org/project/pyserial-asyncio/) | - | BSD |  | Python Serial Port Extension - Asynchronous I/O support | `research/sources/devices-peripherals/pypi__pyserial-asyncio.md` |
+| [pypi: pySmartDL](https://pypi.org/project/pySmartDL/) | - | Public Domain |  | A Smart Download Manager for Python | `research/sources/devices-peripherals/pypi__pysmartdl.md` |
+| [pypi: pythonnet](https://pypi.org/project/pythonnet/) | - | - |  | .NET and Mono integration for Python | `research/sources/devices-peripherals/pypi__pythonnet.md` |
+| [pypi: pyusb](https://pypi.org/project/pyusb/) | - | - |  | Easy USB access for Python | `research/sources/devices-peripherals/pypi__pyusb.md` |
+| [pypi: pywin32](https://pypi.org/project/pywin32/) | - | PSF |  | Python for Windows Extensions | `research/sources/devices-peripherals/pypi__pywin32.md` |
+| [pypi: screeninfo](https://pypi.org/project/screeninfo/) | - | MIT |  | Fetch location and size of physical screens. | `research/sources/devices-peripherals/pypi__screeninfo.md` |
+| [pypi: sounddevice](https://pypi.org/project/sounddevice/) | - | - |  | Play and Record Sound with Python | `research/sources/devices-peripherals/pypi__sounddevice.md` |
+| [pypi: WMI](https://pypi.org/project/WMI/) | - | http://www.opensource.org/licenses/mit-license.php |  | Windows Management Instrumentation | `research/sources/devices-peripherals/pypi__wmi.md` |
 
 ## electron-shell
 
@@ -607,6 +784,37 @@
 | [pypi: rank-bm25](https://pypi.org/project/rank-bm25/) | - | Apache2.0 |  | Various BM25 algorithms for document ranking | `research/sources/memory-and-rag/pypi__rank-bm25.md` |
 | [pypi: sentence-transformers](https://pypi.org/project/sentence-transformers/) | - | - |  | Embeddings, Retrieval, and Reranking | `research/sources/memory-and-rag/pypi__sentence-transformers.md` |
 | [pypi: sqlite-vec](https://pypi.org/project/sqlite-vec/) | - | MIT License, Apache License, Version 2.0 |  |  | `research/sources/memory-and-rag/pypi__sqlite-vec.md` |
+
+## network-admin
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [mitmproxy/mitmproxy](https://github.com/mitmproxy/mitmproxy) | 46,727 | MIT | 2026-11-04 | An interactive TLS-capable intercepting HTTP proxy for penetration testers and software developers. | `research/sources/network-admin/mitmproxy__mitmproxy/README.md` |
+| [curl/curl](https://github.com/curl/curl) | 43,429 | NOASSERTION | 2026-11-08 | A command line tool and library for transferring data with URL syntax, supporting DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, MQTTS, POP3,  | `research/sources/network-admin/curl__curl/README.md` |
+| [tailscale/tailscale](https://github.com/tailscale/tailscale) | 38,791 | BSD-3-Clause | 2026-11-07 | The easiest, most secure way to use WireGuard and 2FA. | `research/sources/network-admin/tailscale__tailscale/README.md` |
+| [jqlang/jq](https://github.com/jqlang/jq) | 36,068 | NOASSERTION | 2026-11-02 | Command-line JSON processor | `research/sources/network-admin/jqlang__jq/README.md` |
+| [zerotier/ZeroTierOne](https://github.com/zerotier/ZeroTierOne) | 17,239 | NOASSERTION | 2026-09-03 | A Smart Ethernet Switch for Earth | `research/sources/network-admin/zerotier__ZeroTierOne/README.md` |
+| [wireshark/wireshark](https://github.com/wireshark/wireshark) | 10,176 | GPL-2.0 | 2026-11-08 | Read-only mirror of Wireshark's Git repository at https://gitlab.com/wireshark/wireshark. You're welcome to submit pull requests there. | `research/sources/network-admin/wireshark__wireshark/README.md` |
+| [henrypp/simplewall](https://github.com/henrypp/simplewall) | 9,264 | GPL-3.0 | 2026-11-08 | Simple tool to configure Windows Filtering Platform (WFP) which can configure network activity on your computer. | `research/sources/network-admin/henrypp__simplewall/README.md` |
+| [ntop/ntopng](https://github.com/ntop/ntopng) | 8,339 | GPL-3.0 | 2026-11-08 | Web-based Traffic and Cybersecurity Network Traffic Monitoring | `research/sources/network-admin/ntop__ntopng/README.md` |
+| [M66B/NetGuard](https://github.com/M66B/NetGuard) | 3,969 | GPL-3.0 | 2026-08-01 | A simple way to block access to the internet per app | `research/sources/network-admin/M66B__NetGuard/README.md` |
+| [WireGuard/wireguard-windows](https://github.com/WireGuard/wireguard-windows) | 2,885 | MIT | 2026-09-26 | Download WireGuard for Windows at https://www.wireguard.com/install . This repo is a mirror only. Official repository is at https://git.zx2c4.com/wireguard-windows | `research/sources/network-admin/WireGuard__wireguard-windows/README.md` |
+| [npm: basic-ftp](https://www.npmjs.com/package/basic-ftp) | - | MIT |  | FTP client for Node.js, supports FTPS over TLS, IPv6, Async/Await, and Typescript. | `research/sources/network-admin/npm__basic-ftp.md` |
+| [npm: dns](https://www.npmjs.com/package/dns) | - | - |  | A DNS Server with a REST API | `research/sources/network-admin/npm__dns.md` |
+| [npm: ip](https://www.npmjs.com/package/ip) | - | MIT |  | [![](https://badge.fury.io/js/ip.svg)](https://www.npmjs.com/package/ip) | `research/sources/network-admin/npm__ip.md` |
+| [npm: net-snmp](https://www.npmjs.com/package/net-snmp) | - | MIT |  | JavaScript implementation of the Simple Network Management Protocol (SNMP) | `research/sources/network-admin/npm__net-snmp.md` |
+| [npm: node-ftp](https://www.npmjs.com/package/node-ftp) | - | - |  | security holding package | `research/sources/network-admin/npm__node-ftp.md` |
+| [npm: ssh2](https://www.npmjs.com/package/ssh2) | - | - |  | SSH2 client and server modules written in pure JavaScript for node.js | `research/sources/network-admin/npm__ssh2.md` |
+| [npm: undici](https://www.npmjs.com/package/undici) | - | MIT |  | An HTTP/1.1 client, written from scratch for Node.js | `research/sources/network-admin/npm__undici.md` |
+| [npm: ws](https://www.npmjs.com/package/ws) | - | MIT |  | Simple to use, blazing fast and thoroughly tested websocket client and server for Node.js | `research/sources/network-admin/npm__ws.md` |
+| [pypi: dnspython](https://pypi.org/project/dnspython/) | - | - |  | DNS toolkit | `research/sources/network-admin/pypi__dnspython.md` |
+| [pypi: httpx](https://pypi.org/project/httpx/) | - | BSD-3-Clause |  | The next generation HTTP client. | `research/sources/network-admin/pypi__httpx.md` |
+| [pypi: netifaces](https://pypi.org/project/netifaces/) | - | MIT License |  | Portable network interface information. | `research/sources/network-admin/pypi__netifaces.md` |
+| [pypi: paramiko](https://pypi.org/project/paramiko/) | - | - |  | SSH2 protocol library | `research/sources/network-admin/pypi__paramiko.md` |
+| [pypi: pysnmp](https://pypi.org/project/pysnmp/) | - | - |  | A Python library for SNMP | `research/sources/network-admin/pypi__pysnmp.md` |
+| [pypi: requests](https://pypi.org/project/requests/) | - | Apache-2.0 |  | Python HTTP for Humans. | `research/sources/network-admin/pypi__requests.md` |
+| [pypi: scapy](https://pypi.org/project/scapy/) | - | - |  | Scapy: interactive packet manipulation tool | `research/sources/network-admin/pypi__scapy.md` |
+| [pypi: speedtest-cli](https://pypi.org/project/speedtest-cli/) | - | Apache License, Version 2.0 |  | Command line interface for testing internet bandwidth using speedtest.net | `research/sources/network-admin/pypi__speedtest-cli.md` |
 
 ## observability-evals
 
@@ -1040,6 +1248,36 @@
 | [pypi: transformers](https://pypi.org/project/transformers/) | - | Apache 2.0 License |  | Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training. | `research/sources/screen-understanding/pypi__transformers.md` |
 | [pypi: unstructured](https://pypi.org/project/unstructured/) | - | - |  | A library that prepares raw documents for downstream ML tasks. | `research/sources/screen-understanding/pypi__unstructured.md` |
 
+## security-ops
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings) | 82,487 | MIT | 2026-10-30 | A list of useful payloads and bypass for Web Application Security and Pentest/CTF | `research/sources/security-ops/swisskyrepo__PayloadsAllTheThings/README.md` |
+| [OWASP/CheatSheetSeries](https://github.com/OWASP/CheatSheetSeries) | 33,940 | CC-BY-SA-4.0 | 2026-11-05 | The OWASP Cheat Sheet Series was created to provide a concise collection of high value information on specific application security topics. | `research/sources/security-ops/OWASP__CheatSheetSeries/README.md` |
+| [gitleaks/gitleaks](https://github.com/gitleaks/gitleaks) | 30,772 | MIT | 2026-10-28 | Find secrets with Gitleaks 🔑 | `research/sources/security-ops/gitleaks__gitleaks/README.md` |
+| [zricethezav/gitleaks](https://github.com/zricethezav/gitleaks) | 30,772 | MIT | 2026-10-28 | Find secrets with Gitleaks 🔑 | `research/sources/security-ops/zricethezav__gitleaks/README.md` |
+| [trufflesecurity/trufflehog](https://github.com/trufflesecurity/trufflehog) | 28,959 | AGPL-3.0 | 2026-11-05 | Find, verify, and analyze leaked credentials | `research/sources/security-ops/trufflesecurity__trufflehog/README.md` |
+| [casbin/casbin](https://github.com/casbin/casbin) | 20,486 | Apache-2.0 | 2026-11-04 | Apache Casbin: an authorization library that supports access control models like ACL, RBAC, ABAC. | `research/sources/security-ops/casbin__casbin/README.md` |
+| [open-policy-agent/opa](https://github.com/open-policy-agent/opa) | 12,446 | Apache-2.0 | 2026-11-08 | Open Policy Agent (OPA) is an open source, general-purpose policy engine. | `research/sources/security-ops/open-policy-agent__opa/README.md` |
+| [microsoft/presidio](https://github.com/microsoft/presidio) | 11,776 | MIT | 2026-11-08 | An open-source framework for detecting, redacting, masking, and anonymizing sensitive data (PII) across text, images, and structured data. Supports NLP, pattern matching, and custo | `research/sources/security-ops/microsoft__presidio/README.md` |
+| [sigstore/cosign](https://github.com/sigstore/cosign) | 6,419 | Apache-2.0 | 2026-11-05 | Code signing and transparency for containers and binaries | `research/sources/security-ops/sigstore__cosign/README.md` |
+| [microsoft/Windows-classic-samples](https://github.com/microsoft/Windows-classic-samples) | 5,688 | NOASSERTION | 2026-09-03 | This repo contains samples that demonstrate the API used in Windows classic desktop applications. | `research/sources/security-ops/microsoft__Windows-classic-samples/README.md` |
+| [Yelp/detect-secrets](https://github.com/Yelp/detect-secrets) | 4,667 | Apache-2.0 | 2026-04-02 | An enterprise friendly way of detecting and preventing secrets in code. | `research/sources/security-ops/Yelp__detect-secrets/README.md` |
+| [npm: bcryptjs](https://www.npmjs.com/package/bcryptjs) | - | BSD-3-Clause |  | Optimized bcrypt in plain JavaScript with zero dependencies, with TypeScript support. Compatible to 'bcrypt'. | `research/sources/security-ops/npm__bcryptjs.md` |
+| [npm: dompurify](https://www.npmjs.com/package/dompurify) | - | (MPL-2.0 OR Apache-2.0) |  | DOMPurify is a DOM-only, super-fast, uber-tolerant XSS sanitizer for HTML, MathML and SVG. It runs as JavaScript and works in all modern browsers, as well as in Node.js (via jsdom) | `research/sources/security-ops/npm__dompurify.md` |
+| [npm: helmet](https://www.npmjs.com/package/helmet) | - | MIT |  | help secure Express/Connect apps with various HTTP headers | `research/sources/security-ops/npm__helmet.md` |
+| [npm: jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) | - | MIT |  | JSON Web Token implementation (symmetric and asymmetric) | `research/sources/security-ops/npm__jsonwebtoken.md` |
+| [npm: node-forge](https://www.npmjs.com/package/node-forge) | - | (BSD-3-Clause OR GPL-2.0) |  | JavaScript implementations of network transports, cryptography, ciphers, PKI, message digests, and various utilities. | `research/sources/security-ops/npm__node-forge.md` |
+| [npm: otplib](https://www.npmjs.com/package/otplib) | - | MIT |  | TypeScript-first library for TOTP and HOTP with multi-runtime and plugin support | `research/sources/security-ops/npm__otplib.md` |
+| [pypi: bandit](https://pypi.org/project/bandit/) | - | Apache-2.0 |  | Security oriented static analyser for python code. | `research/sources/security-ops/pypi__bandit.md` |
+| [pypi: cryptography](https://pypi.org/project/cryptography/) | - | - |  | cryptography is a package which provides cryptographic recipes and primitives to Python developers. | `research/sources/security-ops/pypi__cryptography.md` |
+| [pypi: keyring](https://pypi.org/project/keyring/) | - | - |  | Store and access your passwords safely. | `research/sources/security-ops/pypi__keyring.md` |
+| [pypi: pip-audit](https://pypi.org/project/pip-audit/) | - | - |  | A tool for scanning Python environments for known vulnerabilities | `research/sources/security-ops/pypi__pip-audit.md` |
+| [pypi: presidio-analyzer](https://pypi.org/project/presidio-analyzer/) | - | - |  | Presidio Analyzer package | `research/sources/security-ops/pypi__presidio-analyzer.md` |
+| [pypi: PyOTP](https://pypi.org/project/PyOTP/) | - | - |  | Python One Time Password Library | `research/sources/security-ops/pypi__pyotp.md` |
+| [pypi: safety](https://pypi.org/project/safety/) | - | - |  | Scan dependencies for known vulnerabilities and licenses. | `research/sources/security-ops/pypi__safety.md` |
+| [pypi: yara-python](https://pypi.org/project/yara-python/) | - | Apache 2.0 |  | Python interface for YARA | `research/sources/security-ops/pypi__yara-python.md` |
+
 ## self-extension
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
@@ -1322,6 +1560,27 @@
 | [pypi: requests](https://pypi.org/project/requests/) | - | Apache-2.0 |  | Python HTTP for Humans. | `research/sources/updates/pypi__requests.md` |
 | [pypi: semver](https://pypi.org/project/semver/) | - | Copyright (c) 2013, Konstantine Rybnikov |  | Python helper for Semantic Versioning (https://semver.org) | `research/sources/updates/pypi__semver.md` |
 | [pypi: zstandard](https://pypi.org/project/zstandard/) | - | - |  | Zstandard bindings for Python | `research/sources/updates/pypi__zstandard.md` |
+
+## virtualization-remote
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [rustdesk/rustdesk](https://github.com/rustdesk/rustdesk) | 128,632 | AGPL-3.0 | 2026-11-08 | An open-source remote desktop application designed for self-hosting, as an alternative to TeamViewer. | `research/sources/virtualization-remote/rustdesk__rustdesk/README.md` |
+| [tailscale/tailscale](https://github.com/tailscale/tailscale) | 38,791 | BSD-3-Clause | 2026-11-07 | The easiest, most secure way to use WireGuard and 2FA. | `research/sources/virtualization-remote/tailscale__tailscale/README.md` |
+| [docker/compose](https://github.com/docker/compose) | 38,644 | Apache-2.0 | 2026-11-06 | Define and run multi-container applications with Docker | `research/sources/virtualization-remote/docker__compose/README.md` |
+| [microsoft/WSL](https://github.com/microsoft/WSL) | 34,316 | MIT | 2026-11-08 | Windows Subsystem for Linux | `research/sources/virtualization-remote/microsoft__WSL/README.md` |
+| [qemu/qemu](https://github.com/qemu/qemu) | 13,996 | NOASSERTION | 2026-11-06 | Official QEMU mirror. Please see https://www.qemu.org/contribute/ for how to submit changes to QEMU. Pull Requests are disabled. Please only use release tarballs from the QEMU webs | `research/sources/virtualization-remote/qemu__qemu/README.md` |
+| [mRemoteNG/mRemoteNG](https://github.com/mRemoteNG/mRemoteNG) | 11,192 | GPL-2.0 | 2026-11-06 | mRemoteNG is the next generation of mRemote, open source, tabbed, multi-protocol, remote connections manager. | `research/sources/virtualization-remote/mRemoteNG__mRemoteNG/README.md` |
+| [virtio-win/kvm-guest-drivers-windows](https://github.com/virtio-win/kvm-guest-drivers-windows) | 2,753 | BSD-3-Clause | 2026-10-29 | Windows paravirtualized drivers for QEMU\KVM | `research/sources/virtualization-remote/virtio-win__kvm-guest-drivers-windows/README.md` |
+| [npm: dockerode](https://www.npmjs.com/package/dockerode) | - | Apache-2.0 |  | Docker Remote API module. | `research/sources/virtualization-remote/npm__dockerode.md` |
+| [npm: node-ssh](https://www.npmjs.com/package/node-ssh) | - | MIT |  | SSH2 with Promises | `research/sources/virtualization-remote/npm__node-ssh.md` |
+| [npm: ssh2](https://www.npmjs.com/package/ssh2) | - | - |  | SSH2 client and server modules written in pure JavaScript for node.js | `research/sources/virtualization-remote/npm__ssh2.md` |
+| [npm: winrm-client](https://www.npmjs.com/package/winrm-client) | - | MIT |  | Make WinRM service calls from NodeJS | `research/sources/virtualization-remote/npm__winrm-client.md` |
+| [pypi: docker](https://pypi.org/project/docker/) | - | - |  | A Python library for the Docker Engine API. | `research/sources/virtualization-remote/pypi__docker.md` |
+| [pypi: libvirt-python](https://pypi.org/project/libvirt-python/) | - | LGPL-v2.0-or-later |  | The libvirt virtualization API python binding | `research/sources/virtualization-remote/pypi__libvirt-python.md` |
+| [pypi: paramiko](https://pypi.org/project/paramiko/) | - | - |  | SSH2 protocol library | `research/sources/virtualization-remote/pypi__paramiko.md` |
+| [pypi: pyvmomi](https://pypi.org/project/pyvmomi/) | - | License :: OSI Approved :: Apache Software License |  | VMware vSphere Python SDK | `research/sources/virtualization-remote/pypi__pyvmomi.md` |
+| [pypi: pywinrm](https://pypi.org/project/pywinrm/) | - | Copyright (c) 2013 Alexey Diyan  Permission is hereby granted, free of charge, t |  | Python library for Windows Remote Management | `research/sources/virtualization-remote/pypi__pywinrm.md` |
 
 ## whisper-and-asr
 

@@ -1,0 +1,43 @@
+---
+id: "github:espressif/esptool"
+kind: "github"
+category: "devices-peripherals"
+repo: "espressif/esptool"
+url: "https://github.com/espressif/esptool"
+description: "Serial utility for flashing, provisioning, and interacting with Espressif SoCs"
+stars: 6542
+forks: 1508
+language: "Python"
+license: "GPL-2.0"
+archived: false
+pushed_at: "2026-11-03T23:05:04Z"
+default_branch: "master"
+fetched_at: "2026-11-08T12:43:21Z"
+---
+
+# esptool
+
+A Python-based, open-source, platform-independent serial utility for flashing, provisioning, and interacting with Espressif SoCs.
+
+[![Test esptool](https://github.com/espressif/esptool/actions/workflows/test_esptool.yml/badge.svg?branch=master)](https://github.com/espressif/esptool/actions/workflows/test_esptool.yml) [![Build esptool](https://github.com/espressif/esptool/actions/workflows/build_esptool.yml/badge.svg?branch=master)](https://github.com/espressif/esptool/actions/workflows/build_esptool.yml)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/espressif/esptool/master.svg)](https://results.pre-commit.ci/latest/github/espressif/esptool/master)
+
+## Documentation
+
+Visit the [documentation](https://docs.espressif.com/projects/esptool/) or run `esptool -h`.
+
+## Flasher Stub
+
+esptool uploads a small [flasher stub](https://docs.espressif.com/projects/esptool/en/latest/esptool/flasher-stub.html) program to the chip to improve flashing performance and work around ROM bootloader limitations. The stub is developed in the [esp-flasher-stub](https://github.com/espressif/esp-flasher-stub) repository. Prebuilt binaries are bundled with esptool releases.
+
+## Contribute
+
+If you're interested in contributing to esptool, please check the [contributions guide](https://docs.espressif.com/projects/esptool/en/latest/contributing.html).
+
+## About
+
+esptool was initially created by Fredrik Ahlberg (@[themadinventor](https://github.com/themadinventor/)), and later maintained by Angus Gratton (@[projectgus](https://github.com/projectgus/)). It is now supported by Espressif Systems. It has also received improvements from many members of the community.
+
+## License
+
+This document and the attached source code are released as Free Software under GNU General Public License Version 2 or later. See the accompanying [LICENSE file](https://github.com/espressif/esptool/blob/master/LICENSE) for a copy.

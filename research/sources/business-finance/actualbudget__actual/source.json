@@ -1,0 +1,22 @@
+{
+  "id": "github:actualbudget/actual",
+  "kind": "github",
+  "category": "business-finance",
+  "repo": "actualbudget/actual",
+  "url": "https://github.com/actualbudget/actual",
+  "description": "A local-first personal finance app",
+  "stars": 30079,
+  "forks": 3259,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "budgeting",
+    "finance",
+    "money",
+    "personal-finance"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:02:31Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

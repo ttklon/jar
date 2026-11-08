@@ -1,0 +1,29 @@
+{
+  "id": "github:mitmproxy/mitmproxy",
+  "kind": "github",
+  "category": "network-admin",
+  "repo": "mitmproxy/mitmproxy",
+  "url": "https://github.com/mitmproxy/mitmproxy",
+  "description": "An interactive TLS-capable intercepting HTTP proxy for penetration testers and software developers.",
+  "stars": 46727,
+  "forks": 4945,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "debugging",
+    "http",
+    "http2",
+    "man-in-the-middle",
+    "mitmproxy",
+    "proxy",
+    "python",
+    "security",
+    "ssl",
+    "tls",
+    "websocket"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T23:01:46Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

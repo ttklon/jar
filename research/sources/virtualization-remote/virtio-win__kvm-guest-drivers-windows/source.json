@@ -1,0 +1,33 @@
+{
+  "id": "github:virtio-win/kvm-guest-drivers-windows",
+  "kind": "github",
+  "category": "virtualization-remote",
+  "repo": "virtio-win/kvm-guest-drivers-windows",
+  "url": "https://github.com/virtio-win/kvm-guest-drivers-windows",
+  "description": "Windows paravirtualized drivers for QEMU\\KVM",
+  "stars": 2753,
+  "forks": 500,
+  "language": "C",
+  "license": "BSD-3-Clause",
+  "topics": [
+    "c",
+    "c-plus-plus",
+    "drivers",
+    "guest",
+    "guest-agent",
+    "kernel-driver",
+    "kvm",
+    "kvm-hypervisor",
+    "ndis",
+    "qemu",
+    "qemu-kvm",
+    "storport",
+    "virtio",
+    "virtio-win",
+    "virtualization"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-29T10:16:12Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

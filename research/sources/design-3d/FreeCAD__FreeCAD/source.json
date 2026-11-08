@@ -1,0 +1,33 @@
+{
+  "id": "github:FreeCAD/FreeCAD",
+  "kind": "github",
+  "category": "design-3d",
+  "repo": "FreeCAD/FreeCAD",
+  "url": "https://github.com/FreeCAD/FreeCAD",
+  "description": "Official source code of FreeCAD, a free and opensource multiplatform 3D parametric modeler.",
+  "stars": 35249,
+  "forks": 6366,
+  "language": "C++",
+  "license": "LGPL-2.1",
+  "topics": [
+    "3d",
+    "3d-printing",
+    "architecture",
+    "bim",
+    "cad",
+    "cam",
+    "civil-engineering",
+    "coin",
+    "engineering",
+    "fem",
+    "freecad",
+    "linux",
+    "macos",
+    "mechanical-engineering",
+    "opencascade"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:45:34Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

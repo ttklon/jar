@@ -1,0 +1,33 @@
+{
+  "id": "github:akaunting/akaunting",
+  "kind": "github",
+  "category": "business-finance",
+  "repo": "akaunting/akaunting",
+  "url": "https://github.com/akaunting/akaunting",
+  "description": "Online Accounting Software",
+  "stars": 10287,
+  "forks": 3017,
+  "language": "PHP",
+  "license": "NOASSERTION",
+  "topics": [
+    "accounting",
+    "akaunting",
+    "balance",
+    "billing",
+    "bookkeeping",
+    "budget",
+    "crm",
+    "erp",
+    "expenses",
+    "finance",
+    "fintech",
+    "invoices",
+    "invoicing",
+    "laravel",
+    "laravel-application"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T15:14:05Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

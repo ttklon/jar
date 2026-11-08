@@ -1495,6 +1495,294 @@
         "python-dotenv",
         "toml"
       ]
+    },
+    "devices-peripherals": {
+      "github": [
+        "libimobiledevice/libimobiledevice",
+        "libimobiledevice/usbmuxd",
+        "android/platform-tools",
+        "Genymobile/scrcpy",
+        "KDE/kio-extras",
+        "libusb/libusb",
+        "tpn/libusb",
+        "OpenNI/OpenNI2",
+        "opencv/opencv",
+        "obsproject/obs-studio",
+        "microsoft/Windows-classic-samples",
+        "microsoft/WindowsAppSDK",
+        "Arduino/Arduino",
+        "espressif/esptool",
+        "sigrokproject/pulseview"
+      ],
+      "pypi": [
+        "pyusb",
+        "pyserial",
+        "hidapi",
+        "bleak",
+        "pysmartdl",
+        "sounddevice",
+        "screeninfo",
+        "psutil",
+        "wmi",
+        "pywin32",
+        "pythonnet",
+        "opencv-python",
+        "pyserial-asyncio"
+      ],
+      "npm": [
+        "usb",
+        "node-hid",
+        "@abandonware/noble",
+        "serialport",
+        "webbluetooth",
+        "drivelist"
+      ]
+    },
+    "network-admin": {
+      "github": [
+        "tailscale/tailscale",
+        "WireGuard/wireguard-windows",
+        "henrypp/simplewall",
+        "M66B/NetGuard",
+        "mitmproxy/mitmproxy",
+        "curl/curl",
+        "librespeed/librespeed",
+        "jqlang/jq",
+        "ntop/ntopng",
+        "wireshark/wireshark",
+        "zerotier/ZeroTierOne"
+      ],
+      "pypi": [
+        "scapy",
+        "dnspython",
+        "netifaces",
+        "speedtest-cli",
+        "requests",
+        "httpx",
+        "paramiko",
+        "pysnmp"
+      ],
+      "npm": [
+        "undici",
+        "ws",
+        "ssh2",
+        "ip",
+        "dns",
+        "net-snmp",
+        "node-ftp",
+        "basic-ftp"
+      ]
+    },
+    "virtualization-remote": {
+      "github": [
+        "microsoft/WSL",
+        "qemu/qemu",
+        "virtio-win/kvm-guest-drivers-windows",
+        "docker/compose",
+        "tailscale/tailscale",
+        "rustdesk/rustdesk",
+        "mRemoteNG/mRemoteNG"
+      ],
+      "pypi": [
+        "pywinrm",
+        "docker",
+        "libvirt-python",
+        "paramiko",
+        "pyvmomi"
+      ],
+      "npm": [
+        "ssh2",
+        "node-ssh",
+        "dockerode",
+        "winrm-client"
+      ]
+    },
+    "backup-archive": {
+      "github": [
+        "restic/restic",
+        "borgbackup/borg",
+        "kopia/kopia",
+        "duplicati/duplicati",
+        "7-Zip/7-Zip",
+        "p7zip-project/p7zip",
+        "mholt/archiver",
+        "gilbertchen/duplicacy",
+        "rclone/rclone"
+      ],
+      "pypi": [
+        "restic",
+        "py7zr",
+        "rarfile",
+        "zstandard",
+        "pyarrow",
+        "boto3",
+        "rclone-python"
+      ],
+      "npm": [
+        "archiver",
+        "7zip-bin",
+        "node-7z",
+        "tar",
+        "adm-zip",
+        "yauzl",
+        "fast-glob"
+      ]
+    },
+    "design-3d": {
+      "github": [
+        "FreeCAD/FreeCAD",
+        "openscad/openscad",
+        "blender/blender",
+        "inkscape/inkscape",
+        "Krita/Krita",
+        "GIMP/GIMP",
+        "libvips/libvips",
+        "imagemagick/imagemagick",
+        "three.js/three.js",
+        "mrdoob/three.js",
+        "KhronosGroup/glTF",
+        "assimp/assimp"
+      ],
+      "pypi": [
+        "pillow",
+        "cairosvg",
+        "svglib",
+        "reportlab",
+        "trimesh",
+        "numpy-stl",
+        "cadquery",
+        "ezdxf",
+        "matplotlib",
+        "plotly"
+      ],
+      "npm": [
+        "sharp",
+        "canvas",
+        "jimp",
+        "svg2png",
+        "three",
+        "@gltf-transform/core",
+        "pdf-lib"
+      ]
+    },
+    "business-finance": {
+      "github": [
+        "akaunting/akaunting",
+        "invoiceplane/invoiceplane",
+        "firefly-iii/firefly-iii",
+        "actualbudget/actual",
+        "beancount/beancount",
+        "ledger/ledger",
+        "gnucash/gnucash",
+        "twentyhq/twenty",
+        "erpnext/erpnext",
+        "odoo/odoo"
+      ],
+      "pypi": [
+        "beancount",
+        "python-pptx",
+        "openpyxl",
+        "ofxparse",
+        "forex-python",
+        "pandas-datareader",
+        "quantlib"
+      ],
+      "npm": [
+        "pdfkit",
+        "exceljs",
+        "docx",
+        "money.js",
+        "currency.js",
+        "csv-stringify",
+        "fast-csv"
+      ]
+    },
+    "accessibility-api": {
+      "github": [
+        "microsoft/accessibility-insights-web",
+        "microsoft/axe-core",
+        "dequelabs/axe-core",
+        "microsoft/Windows-classic-samples",
+        "nvaccess/nvda",
+        "microsoft/fluentui",
+        "w3c/wcag",
+        "w3c/aria-practices"
+      ],
+      "pypi": [
+        "pyttsx3",
+        "accessible-output2",
+        "pyatspi",
+        "comtypes",
+        "uiautomation"
+      ],
+      "npm": [
+        "axe-core",
+        "@axe-core/playwright",
+        "focus-trap",
+        "tabbable"
+      ]
+    },
+    "security-ops": {
+      "github": [
+        "microsoft/Windows-classic-samples",
+        "Yelp/detect-secrets",
+        "zricethezav/gitleaks",
+        "gitleaks/gitleaks",
+        "trufflesecurity/trufflehog",
+        "sigstore/cosign",
+        "open-policy-agent/opa",
+        "casbin/casbin",
+        "microsoft/presidio",
+        "swisskyrepo/PayloadsAllTheThings",
+        "OWASP/CheatSheetSeries"
+      ],
+      "pypi": [
+        "bandit",
+        "pip-audit",
+        "safety",
+        "pyotp",
+        "cryptography",
+        "keyring",
+        "presidio-analyzer",
+        "yara-python"
+      ],
+      "npm": [
+        "helmet",
+        "dompurify",
+        "bcryptjs",
+        "jsonwebtoken",
+        "otplib",
+        "node-forge"
+      ]
+    },
+    "deployment-admin": {
+      "github": [
+        "chocolatey/choco",
+        "ScoopInstaller/Scoop",
+        "microsoft/winget-cli",
+        "PowerShell/PowerShell",
+        "PSAppDeployToolkit/PSAppDeployToolkit",
+        "microsoft/msix-packaging",
+        "ansible/ansible",
+        "chef/chef",
+        "puppetlabs/puppet"
+      ],
+      "pypi": [
+        "pywinrm",
+        "ansible",
+        "fabric",
+        "invoke",
+        "plumbum",
+        "sh"
+      ],
+      "npm": [
+        "execa",
+        "cross-spawn",
+        "shelljs",
+        "node-pty",
+        "tree-kill",
+        "which"
+      ]
     }
   },
   "extras": {

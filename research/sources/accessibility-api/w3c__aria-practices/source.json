@@ -1,0 +1,21 @@
+{
+  "id": "github:w3c/aria-practices",
+  "kind": "github",
+  "category": "accessibility-api",
+  "repo": "w3c/aria-practices",
+  "url": "https://github.com/w3c/aria-practices",
+  "description": "WAI-ARIA Authoring Practices Guide (APG)",
+  "stars": 1361,
+  "forks": 495,
+  "language": "HTML",
+  "license": "NOASSERTION",
+  "topics": [
+    "aria",
+    "css",
+    "html"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T16:57:53Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

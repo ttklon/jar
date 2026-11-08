@@ -1,0 +1,17 @@
+{
+  "id": "github:KhronosGroup/glTF",
+  "kind": "github",
+  "category": "design-3d",
+  "repo": "KhronosGroup/glTF",
+  "url": "https://github.com/KhronosGroup/glTF",
+  "description": "glTF – Runtime 3D Asset Delivery",
+  "stars": 7885,
+  "forks": 1207,
+  "language": "HTML",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T23:43:33Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "github:microsoft/msix-packaging",
+  "kind": "github",
+  "category": "deployment-admin",
+  "repo": "microsoft/msix-packaging",
+  "url": "https://github.com/microsoft/msix-packaging",
+  "description": "MSIX SDK",
+  "stars": 1072,
+  "forks": 193,
+  "language": "C",
+  "license": "MIT",
+  "topics": [
+    "msix",
+    "uwp"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-24T23:31:48Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "github:restic/restic",
+  "kind": "github",
+  "category": "backup-archive",
+  "repo": "restic/restic",
+  "url": "https://github.com/restic/restic",
+  "description": "Fast, secure, efficient backup program",
+  "stars": 37069,
+  "forks": 1956,
+  "language": "Go",
+  "license": "BSD-2-Clause",
+  "topics": [
+    "backup",
+    "dedupe",
+    "deduplication",
+    "go",
+    "restic",
+    "secure-by-default"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T20:42:11Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "github:kopia/kopia",
+  "kind": "github",
+  "category": "backup-archive",
+  "repo": "kopia/kopia",
+  "url": "https://github.com/kopia/kopia",
+  "description": "Cross-platform backup tool for Windows, macOS & Linux with fast, incremental backups, client-side end-to-end encryption, compression and data deduplication. CLI and GUI included.",
+  "stars": 14607,
+  "forks": 792,
+  "language": "Go",
+  "license": "Apache-2.0",
+  "topics": [
+    "backup",
+    "cloud",
+    "deduplication",
+    "encryption",
+    "google-cloud-storage"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T12:23:49Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

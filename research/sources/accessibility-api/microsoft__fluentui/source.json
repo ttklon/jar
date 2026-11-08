@@ -1,0 +1,24 @@
+{
+  "id": "github:microsoft/fluentui",
+  "kind": "github",
+  "category": "accessibility-api",
+  "repo": "microsoft/fluentui",
+  "url": "https://github.com/microsoft/fluentui",
+  "description": "Fluent UI web represents a collection of utilities, React components, and web components for building web applications.",
+  "stars": 20391,
+  "forks": 2959,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "components",
+    "fluent",
+    "microsoft",
+    "office-ui-fabric",
+    "react",
+    "react-components"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T20:16:26Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

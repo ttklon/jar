@@ -1,0 +1,25 @@
+{
+  "id": "github:libimobiledevice/usbmuxd",
+  "kind": "github",
+  "category": "devices-peripherals",
+  "repo": "libimobiledevice/usbmuxd",
+  "url": "https://github.com/libimobiledevice/usbmuxd",
+  "description": "A socket daemon to multiplex connections from and to iOS devices",
+  "stars": 1794,
+  "forks": 406,
+  "language": "C",
+  "license": "GPL-2.0",
+  "topics": [
+    "c",
+    "daemon",
+    "ios",
+    "libimobiledevice",
+    "library",
+    "usb",
+    "usbmuxd"
+  ],
+  "archived": false,
+  "pushed_at": "2025-12-06T01:14:51Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

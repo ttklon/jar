@@ -1,0 +1,33 @@
+{
+  "id": "github:firefly-iii/firefly-iii",
+  "kind": "github",
+  "category": "business-finance",
+  "repo": "firefly-iii/firefly-iii",
+  "url": "https://github.com/firefly-iii/firefly-iii",
+  "description": "Firefly III: a personal finances manager",
+  "stars": 25172,
+  "forks": 2373,
+  "language": "PHP",
+  "license": "AGPL-3.0",
+  "topics": [
+    "accounting",
+    "budget",
+    "budgeting",
+    "budgets",
+    "cash-flow",
+    "cashflow",
+    "credit-card",
+    "docker",
+    "expenses",
+    "finance",
+    "finances",
+    "financial",
+    "linux",
+    "money",
+    "paycheck"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T20:38:33Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

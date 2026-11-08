@@ -1,0 +1,25 @@
+{
+  "id": "github:chef/chef",
+  "kind": "github",
+  "category": "deployment-admin",
+  "repo": "chef/chef",
+  "url": "https://github.com/chef/chef",
+  "description": "Chef Infra, a powerful automation platform that transforms infrastructure into code automating how infrastructure is configured, deployed and managed across any environment, at any scale",
+  "stars": 8260,
+  "forks": 2519,
+  "language": "Ruby",
+  "license": "Apache-2.0",
+  "topics": [
+    "automation",
+    "cfgmgt",
+    "chef",
+    "deployment",
+    "devops",
+    "hacktoberfest",
+    "infrastructure"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T22:25:48Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

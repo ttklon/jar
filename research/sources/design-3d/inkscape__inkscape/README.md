@@ -1,0 +1,32 @@
+---
+id: "github:inkscape/inkscape"
+kind: "github"
+category: "design-3d"
+repo: "inkscape/inkscape"
+url: "https://github.com/inkscape/inkscape"
+description: "Project Website: https://inkscape.org - Code Repository: https://gitlab.com/inkscape/inkscape - Draw freely. 🖌"
+stars: 4102
+forks: 314
+license: "NOASSERTION"
+archived: false
+pushed_at: "2022-03-03T20:52:00Z"
+default_branch: "master"
+fetched_at: "2026-11-08T12:43:21Z"
+---
+
+# Inkscape: Free and Open Source Vector Drawing
+
+<a href="https://inkscape.org"><img src="Freedom_Machine_by_Rizky_Djati_Munggaran_CC-By-SA.png" title="Inkscape - Draw Freely." /></a>
+
+Inkscape is a professional quality vector graphics software that runs on Windows, Mac OS X and Linux. It is used by design professionals and hobbyists worldwide, for creating a wide variety of graphics such as illustrations, icons, logos, diagrams, maps and web graphics. Inkscape uses the [W3C](http://www.w3.org) open standard [SVG](http://www.w3.org/Graphics/SVG/) (Scalable Vector Graphics) as its native format, and is free and open-source software.
+
+## Contributing
+
+Inkscape is being developed on **[GitLab](https://gitlab.com/inkscape/inkscape)**, a development platform that is itself part of the open source community and that can be self-hosted, if the need arises.
+
+For more information about the project, please refer to:
+
+-    the **[Inkscape Project Website](https://inkscape.org)**
+-    the **[Inkscape Repository on GitLab](https://gitlab.com/inkscape/inkscape)**
+
+Image: <em>Freedom Machine</em> CC-BY-SA [Rizky Djati Munggaran](https://inkscape.org/~ridjam)

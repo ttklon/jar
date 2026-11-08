@@ -1,0 +1,25 @@
+{
+  "id": "github:borgbackup/borg",
+  "kind": "github",
+  "category": "backup-archive",
+  "repo": "borgbackup/borg",
+  "url": "https://github.com/borgbackup/borg",
+  "description": "Deduplicating archiver with compression and authenticated encryption.",
+  "stars": 13915,
+  "forks": 882,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "backup",
+    "borgbackup",
+    "compression",
+    "deduplication",
+    "encryption",
+    "python",
+    "ssh"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T00:23:01Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}
