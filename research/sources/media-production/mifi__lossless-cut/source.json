@@ -1,0 +1,28 @@
+{
+  "id": "github:mifi/lossless-cut",
+  "kind": "github",
+  "category": "media-production",
+  "repo": "mifi/lossless-cut",
+  "url": "https://github.com/mifi/lossless-cut",
+  "description": "The swiss army knife of lossless video/audio editing",
+  "stars": 45815,
+  "forks": 2313,
+  "language": "TypeScript",
+  "license": "GPL-2.0",
+  "topics": [
+    "codec",
+    "cut",
+    "editor",
+    "ffmpeg",
+    "lossless",
+    "losslesscut",
+    "player",
+    "video",
+    "video-editor",
+    "video-files"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-03T14:13:46Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

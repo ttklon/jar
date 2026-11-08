@@ -1,0 +1,17 @@
+{
+  "id": "github:Dao-AILab/flash-attention",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "Dao-AILab/flash-attention",
+  "url": "https://github.com/Dao-AILab/flash-attention",
+  "description": "Fast and memory-efficient exact attention",
+  "stars": 25257,
+  "forks": 3212,
+  "language": "Python",
+  "license": "BSD-3-Clause",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T23:23:25Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

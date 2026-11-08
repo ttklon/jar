@@ -1,6 +1,6 @@
 # ИНДЕКС ИСТОЧНИКОВ — ZShelper
 
-Сгенерировано: `2026-11-08T12:20:21Z` · всего записей: **984** · GitHub-репозиториев: **408**
+Сгенерировано: `2026-11-08T12:38:51Z` · всего записей: **1258** · GitHub-репозиториев: **582**
 
 Полные тексты лежат в `research/sources/<категория>/`. Машиночитаемый реестр — `research/SOURCES.json`.
 
@@ -8,30 +8,100 @@
 
 | Категория | Записей | Звёзд (сумма) |
 | --- | --- | --- |
+| [`academic-writing`](#academic-writing) | 60 | 313,296 |
 | [`benchmarks`](#benchmarks) | 14 | 43,820 |
-| [`benchmarks-extra`](#benchmarks-extra) | 4 | 0 |
+| [`benchmarks-extra`](#benchmarks-extra) | 12 | 33,029 |
 | [`coding-agents`](#coding-agents) | 63 | 1,043,500 |
+| [`configuration`](#configuration) | 22 | 47,652 |
 | [`connectors`](#connectors) | 44 | 591,577 |
-| [`connectors-extra`](#connectors-extra) | 31 | 0 |
+| [`connectors-extra`](#connectors-extra) | 37 | 338,500 |
 | [`electron-shell`](#electron-shell) | 28 | 381,504 |
 | [`inference-runtimes`](#inference-runtimes) | 45 | 1,169,178 |
-| [`low-end-inference`](#low-end-inference) | 19 | 0 |
+| [`low-end-inference`](#low-end-inference) | 35 | 638,695 |
 | [`mcp-and-tools`](#mcp-and-tools) | 50 | 956,879 |
-| [`media-production`](#media-production) | 33 | 0 |
+| [`media-production`](#media-production) | 45 | 486,062 |
 | [`memory-and-rag`](#memory-and-rag) | 50 | 573,502 |
 | [`observability-evals`](#observability-evals) | 32 | 207,602 |
-| [`office-automation`](#office-automation) | 35 | 0 |
-| [`orchestration`](#orchestration) | 93 | 2,896,899 |
+| [`office-automation`](#office-automation) | 44 | 138,819 |
+| [`orchestration`](#orchestration) | 94 | 2,899,123 |
 | [`packaging-and-ci`](#packaging-and-ci) | 52 | 171,295 |
-| [`perf-optimization`](#perf-optimization) | 38 | 0 |
+| [`perf-optimization`](#perf-optimization) | 65 | 420,497 |
 | [`reference-apps`](#reference-apps) | 25 | 1,013,937 |
 | [`safety-and-security`](#safety-and-security) | 38 | 493,731 |
 | [`screen-understanding`](#screen-understanding) | 42 | 700,299 |
-| [`system-control`](#system-control) | 47 | 0 |
+| [`self-extension`](#self-extension) | 36 | 532,101 |
+| [`system-control`](#system-control) | 62 | 635,018 |
+| [`system-triage`](#system-triage) | 36 | 421,432 |
 | [`tts-and-voice`](#tts-and-voice) | 28 | 329,740 |
 | [`ui-ux`](#ui-ux) | 66 | 706,173 |
+| [`updates`](#updates) | 25 | 103,468 |
 | [`whisper-and-asr`](#whisper-and-asr) | 52 | 438,275 |
-| [`windows-automation`](#windows-automation) | 55 | 557,351 |
+| [`windows-automation`](#windows-automation) | 56 | 560,206 |
+
+## academic-writing
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [typst/typst](https://github.com/typst/typst) | 57,041 | Apache-2.0 | 2026-11-06 | A markup-based typesetting system that is powerful and easy to learn. | `research/sources/academic-writing/typst__typst/README.md` |
+| [jgm/pandoc](https://github.com/jgm/pandoc) | 46,854 | GPL-2.0 | 2026-11-08 | Universal markup converter | `research/sources/academic-writing/jgm__pandoc/README.md` |
+| [stanford-oval/storm](https://github.com/stanford-oval/storm) | 31,830 | MIT | 2025-09-30 | An LLM-powered knowledge curation system that researches a topic and generates a full-length report with citations. | `research/sources/academic-writing/stanford-oval__storm/README.md` |
+| [assafelovic/gpt-researcher](https://github.com/assafelovic/gpt-researcher) | 30,560 | Apache-2.0 | 2026-10-10 | An autonomous agent that conducts deep research on any data using any LLM providers | `research/sources/academic-writing/assafelovic__gpt-researcher/README.md` |
+| [dzhng/deep-research](https://github.com/dzhng/deep-research) | 19,880 | MIT | 2026-04-11 | An AI-powered research assistant that performs iterative, deep research on any topic by combining search engines, web scraping, and large language models.  The goal of this repo is | `research/sources/academic-writing/dzhng__deep-research/README.md` |
+| [zotero/zotero](https://github.com/zotero/zotero) | 15,884 | NOASSERTION | 2026-11-07 | Zotero is a free, easy-to-use tool to help you collect, organize, annotate, cite, and share your research sources. | `research/sources/academic-writing/zotero__zotero/README.md` |
+| [languagetool-org/languagetool](https://github.com/languagetool-org/languagetool) | 15,238 | LGPL-2.1 | 2026-11-08 | Style and Grammar Checker for 25+ Languages | `research/sources/academic-writing/languagetool-org__languagetool/README.md` |
+| [SakanaAI/AI-Scientist](https://github.com/SakanaAI/AI-Scientist) | 14,964 | NOASSERTION | 2025-12-19 | The AI Scientist: Towards Fully Automated Open-Ended Scientific Discovery 🧑‍🔬 | `research/sources/academic-writing/SakanaAI__AI-Scientist/README.md` |
+| [langchain-ai/open_deep_research](https://github.com/langchain-ai/open_deep_research) | 12,675 | MIT | 2026-08-10 |  | `research/sources/academic-writing/langchain-ai__open_deep_research/README.md` |
+| [SakanaAI/AI-Scientist-v2](https://github.com/SakanaAI/AI-Scientist-v2) | 7,477 | NOASSERTION | 2025-12-19 | The AI Scientist-v2: Workshop-Level Automated Scientific Discovery via Agentic Tree Search | `research/sources/academic-writing/SakanaAI__AI-Scientist-v2/README.md` |
+| [MineDojo/Voyager](https://github.com/MineDojo/Voyager) | 7,317 | MIT | 2024-04-03 | An Open-Ended Embodied Agent with Large Language Models | `research/sources/academic-writing/MineDojo__Voyager/README.md` |
+| [retorquere/zotero-better-bibtex](https://github.com/retorquere/zotero-better-bibtex) | 7,286 | MIT | 2026-11-08 | Make Zotero effective for us LaTeX holdouts | `research/sources/academic-writing/retorquere__zotero-better-bibtex/README.md` |
+| [adbar/trafilatura](https://github.com/adbar/trafilatura) | 7,094 | Apache-2.0 | 2026-11-06 | Python & Command-line tool to gather text and metadata on the Web: Crawling, scraping, extraction, output as CSV, JSON, HTML, MD, TXT, XML | `research/sources/academic-writing/adbar__trafilatura/README.md` |
+| [errata-ai/vale](https://github.com/errata-ai/vale) | 6,348 | MIT | 2026-11-07 | :pencil: A markup-aware linter for prose built with speed and extensibility in mind. | `research/sources/academic-writing/errata-ai__vale/README.md` |
+| [quarto-dev/quarto-cli](https://github.com/quarto-dev/quarto-cli) | 6,159 | NOASSERTION | 2026-11-06 | Open-source scientific and technical publishing system built on Pandoc. | `research/sources/academic-writing/quarto-dev__quarto-cli/README.md` |
+| [SamuelSchmidgall/AgentLaboratory](https://github.com/SamuelSchmidgall/AgentLaboratory) | 5,925 | MIT | 2025-08-20 | Agent Laboratory is an end-to-end autonomous research workflow meant to assist you as the human researcher toward implementing your research ideas | `research/sources/academic-writing/SamuelSchmidgall__AgentLaboratory/README.md` |
+| [tectonic-typesetting/tectonic](https://github.com/tectonic-typesetting/tectonic) | 5,232 | NOASSERTION | 2026-08-01 | A modernized, complete, self-contained TeX/LaTeX engine, powered by XeTeX and TeXLive. | `research/sources/academic-writing/tectonic-typesetting__tectonic/README.md` |
+| [citation-style-language/styles](https://github.com/citation-style-language/styles) | 3,937 | NOASSERTION | 2026-11-06 | Official repository for Citation Style Language (CSL) citation styles. | `research/sources/academic-writing/citation-style-language__styles/README.md` |
+| [textlint/textlint](https://github.com/textlint/textlint) | 3,206 | MIT | 2026-11-08 | textlint is the pluggable linter for natural language text. | `research/sources/academic-writing/textlint__textlint/README.md` |
+| [retextjs/retext](https://github.com/retextjs/retext) | 2,433 | MIT | 2025-02-04 | natural language processor powered by plugins part of the @unifiedjs collective | `research/sources/academic-writing/retextjs__retext/README.md` |
+| [latex3/latex3](https://github.com/latex3/latex3) | 2,136 | LPPL-1.3c | 2026-11-05 | The expl3 (LaTeX3) Development Repository | `research/sources/academic-writing/latex3__latex3/README.md` |
+| [HKUDS/Auto-Deep-Research](https://github.com/HKUDS/Auto-Deep-Research) | 1,758 | NOASSERTION | 2025-10-16 | "Your Fully-Automated Personal AI Assistant" | `research/sources/academic-writing/HKUDS__Auto-Deep-Research/README.md` |
+| [lierdakil/pandoc-crossref](https://github.com/lierdakil/pandoc-crossref) | 1,075 | GPL-2.0 | 2026-10-29 | Pandoc filter for cross-references | `research/sources/academic-writing/lierdakil__pandoc-crossref/README.md` |
+| [miktex/miktex](https://github.com/miktex/miktex) | 987 | NOASSERTION | 2026-08-02 | the MiKTeX source code | `research/sources/academic-writing/miktex__miktex/README.md` |
+| [npm: @citation-js/core](https://www.npmjs.com/package/@citation-js/core) | - | MIT |  | Convert different bibliographic metadata sources | `research/sources/academic-writing/npm__citation-js-core.md` |
+| [npm: alex](https://www.npmjs.com/package/alex) | - | MIT |  | Catch insensitive, inconsiderate writing | `research/sources/academic-writing/npm__alex.md` |
+| [npm: citation-js](https://www.npmjs.com/package/citation-js) | - | MIT |  | Citation.js converts formats like BibTeX, Wikidata JSON and ContentMine JSON to CSL-JSON to convert to other formats like APA, Vancouver and back to BibTeX. | `research/sources/academic-writing/npm__citation-js.md` |
+| [npm: citeproc](https://www.npmjs.com/package/citeproc) | - | CPAL-1.0 OR AGPL-1.0 |  | The citeproc-js citation formatting module, in CommonJS format. This version is based on citeproc-js 1.4.63 | `research/sources/academic-writing/npm__citeproc.md` |
+| [npm: remark-lint](https://www.npmjs.com/package/remark-lint) | - | MIT |  | remark plugin to lint Markdown code style | `research/sources/academic-writing/npm__remark-lint.md` |
+| [npm: retext](https://www.npmjs.com/package/retext) | - | MIT |  | natural language processor powered by plugins part of the unified collective | `research/sources/academic-writing/npm__retext.md` |
+| [npm: textlint](https://www.npmjs.com/package/textlint) | - | MIT |  | The pluggable linting tool for natural language. | `research/sources/academic-writing/npm__textlint.md` |
+| [npm: unified](https://www.npmjs.com/package/unified) | - | MIT |  | parse, inspect, transform, and serialize content through syntax trees | `research/sources/academic-writing/npm__unified.md` |
+| [npm: write-good](https://www.npmjs.com/package/write-good) | - | MIT |  | Naive linter for English prose | `research/sources/academic-writing/npm__write-good.md` |
+| [pypi: arxiv](https://pypi.org/project/arxiv/) | - | - |  | Python wrapper for the arXiv API | `research/sources/academic-writing/pypi__arxiv.md` |
+| [pypi: bibtexparser](https://pypi.org/project/bibtexparser/) | - | - |  | Bibtex parser for python 3 | `research/sources/academic-writing/pypi__bibtexparser.md` |
+| [pypi: citeproc-py](https://pypi.org/project/citeproc-py/) | - | - |  | Citations and bibliography formatter | `research/sources/academic-writing/pypi__citeproc-py.md` |
+| [pypi: ddgs](https://pypi.org/project/ddgs/) | - | - |  | Dux Distributed Global Search. A metasearch library that aggregates results from diverse web search services. | `research/sources/academic-writing/pypi__ddgs.md` |
+| [pypi: docx2python](https://pypi.org/project/docx2python/) | - | - |  | Extract content from docx files | `research/sources/academic-writing/pypi__docx2python.md` |
+| [pypi: duckduckgo-search](https://pypi.org/project/duckduckgo-search/) | - | MIT License |  | Search for words, documents, images, news, maps and text translation using the DuckDuckGo.com search engine. | `research/sources/academic-writing/pypi__duckduckgo-search.md` |
+| [pypi: grobid-client-python](https://pypi.org/project/grobid-client-python/) | - | - |  | Simple python client for GROBID REST services | `research/sources/academic-writing/pypi__grobid-client-python.md` |
+| [pypi: habanero](https://pypi.org/project/habanero/) | - | Copyright (C) 2025 Scott Chamberlain |  | Low Level Client for Crossref Search API | `research/sources/academic-writing/pypi__habanero.md` |
+| [pypi: jusText](https://pypi.org/project/jusText/) | - | The BSD 2-Clause License |  | Heuristic based boilerplate removal tool | `research/sources/academic-writing/pypi__justext.md` |
+| [pypi: language_tool_python](https://pypi.org/project/language_tool_python/) | - | - |  | Checks grammar using LanguageTool. | `research/sources/academic-writing/pypi__language-tool-python.md` |
+| [pypi: markdown2](https://pypi.org/project/markdown2/) | - | MIT |  | A fast and complete Python implementation of Markdown | `research/sources/academic-writing/pypi__markdown2.md` |
+| [pypi: newspaper3k](https://pypi.org/project/newspaper3k/) | - | MIT |  | Simplified python article discovery & extraction. | `research/sources/academic-writing/pypi__newspaper3k.md` |
+| [pypi: openalexapi](https://pypi.org/project/openalexapi/) | - | - |  | Libray for accessing the OpenAlex API | `research/sources/academic-writing/pypi__openalexapi.md` |
+| [pypi: pdfminer.six](https://pypi.org/project/pdfminer.six/) | - | - |  | PDF parser and analyzer | `research/sources/academic-writing/pypi__pdfminer.six.md` |
+| [pypi: pyalex](https://pypi.org/project/pyalex/) | - | MIT |  | Python interface to the OpenAlex database | `research/sources/academic-writing/pypi__pyalex.md` |
+| [pypi: pybtex](https://pypi.org/project/pybtex/) | - | - |  | A BibTeX-compatible bibliography processor in Python | `research/sources/academic-writing/pypi__pybtex.md` |
+| [pypi: pylatexenc](https://pypi.org/project/pylatexenc/) | - | MIT |  | Simple LaTeX parser providing latex-to-unicode and unicode-to-latex conversion | `research/sources/academic-writing/pypi__pylatexenc.md` |
+| [pypi: pypandoc](https://pypi.org/project/pypandoc/) | - | - |  | Thin wrapper for pandoc. | `research/sources/academic-writing/pypi__pypandoc.md` |
+| [pypi: pyspellchecker](https://pypi.org/project/pyspellchecker/) | - | - |  | Pure python spell checker based on work by Peter Norvig | `research/sources/academic-writing/pypi__pyspellchecker.md` |
+| [pypi: readability-lxml](https://pypi.org/project/readability-lxml/) | - | Apache-2.0 |  | fast html to text parser (article readability tool) with python 3 support | `research/sources/academic-writing/pypi__readability-lxml.md` |
+| [pypi: requests-cache](https://pypi.org/project/requests-cache/) | - | - |  | A persistent cache for python requests | `research/sources/academic-writing/pypi__requests-cache.md` |
+| [pypi: scholarly](https://pypi.org/project/scholarly/) | - | Unlicense |  | Simple access to Google Scholar authors and citations | `research/sources/academic-writing/pypi__scholarly.md` |
+| [pypi: semanticscholar](https://pypi.org/project/semanticscholar/) | - | MIT |  | Unofficial Python client library for Semantic Scholar APIs. | `research/sources/academic-writing/pypi__semanticscholar.md` |
+| [pypi: sumy](https://pypi.org/project/sumy/) | - | Apache License, Version 2.0 |  | Module for automatic summarization of text documents and HTML pages. | `research/sources/academic-writing/pypi__sumy.md` |
+| [pypi: tabulate](https://pypi.org/project/tabulate/) | - | - |  | Pretty-print tabular data | `research/sources/academic-writing/pypi__tabulate.md` |
+| [pypi: textstat](https://pypi.org/project/textstat/) | - | MIT |  | Calculate statistical features from text | `research/sources/academic-writing/pypi__textstat.md` |
+| [pypi: trafilatura](https://pypi.org/project/trafilatura/) | - | - |  | Python & Command-line tool to gather text and metadata on the Web: Crawling, scraping, extraction, output as CSV, JSON, HTML, MD, TXT, XML. | `research/sources/academic-writing/pypi__trafilatura.md` |
 
 ## benchmarks
 
@@ -56,6 +126,14 @@
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
 | --- | --- | --- | --- | --- | --- |
+| [ShishirPatil/gorilla](https://github.com/ShishirPatil/gorilla) | 13,064 | Apache-2.0 | 2026-10-17 | Gorilla: Training and Evaluating LLMs for Function Calls (Tool Calls) | `research/sources/benchmarks-extra/ShishirPatil__gorilla/README.md` |
+| [SWE-bench/SWE-bench](https://github.com/SWE-bench/SWE-bench) | 6,160 | MIT | 2026-09-18 | SWE-bench: Can Language Models Resolve Real-world Github Issues? | `research/sources/benchmarks-extra/SWE-bench__SWE-bench/README.md` |
+| [openai/simple-evals](https://github.com/openai/simple-evals) | 4,696 | MIT | 2026-04-22 |  | `research/sources/benchmarks-extra/openai__simple-evals/README.md` |
+| [xlang-ai/OSWorld](https://github.com/xlang-ai/OSWorld) | 3,256 | Apache-2.0 | 2026-11-02 | [NeurIPS 2024] OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments | `research/sources/benchmarks-extra/xlang-ai__OSWorld/README.md` |
+| [laude-institute/terminal-bench](https://github.com/laude-institute/terminal-bench) | 2,614 | Apache-2.0 | 2026-07-11 | A benchmark for LLMs on complicated tasks in the terminal | `research/sources/benchmarks-extra/laude-institute__terminal-bench/README.md` |
+| [LiveBench/LiveBench](https://github.com/LiveBench/LiveBench) | 1,351 | NOASSERTION | 2026-10-18 | LiveBench: A Challenging, Contamination-Free LLM Benchmark | `research/sources/benchmarks-extra/LiveBench__LiveBench/README.md` |
+| [LiveCodeBench/LiveCodeBench](https://github.com/LiveCodeBench/LiveCodeBench) | 973 | MIT | 2025-07-16 | Official repository for the paper "LiveCodeBench: Holistic and Contamination Free Evaluation of Large Language Models for Code" | `research/sources/benchmarks-extra/LiveCodeBench__LiveCodeBench/README.md` |
+| [microsoft/WindowsAgentArena](https://github.com/microsoft/WindowsAgentArena) | 915 | MIT | 2026-10-26 | Windows Agent Arena (WAA) 🪟 is a scalable OS platform for testing and benchmarking of multi-modal AI agents. | `research/sources/benchmarks-extra/microsoft__WindowsAgentArena/README.md` |
 | [pypi: datasets](https://pypi.org/project/datasets/) | - | Apache 2.0 |  | HuggingFace community-driven open-source library of datasets | `research/sources/benchmarks-extra/pypi__datasets.md` |
 | [pypi: evalplus](https://pypi.org/project/evalplus/) | - | Apache-2.0 |  | "EvalPlus for rigourous evaluation of LLM-synthesized code" | `research/sources/benchmarks-extra/pypi__evalplus.md` |
 | [pypi: evaluate](https://pypi.org/project/evaluate/) | - | Apache 2.0 |  | HuggingFace community-driven open-source library of evaluation | `research/sources/benchmarks-extra/pypi__evaluate.md` |
@@ -129,6 +207,33 @@
 | [pypi: tree-sitter-language-pack](https://pypi.org/project/tree-sitter-language-pack/) | - | - |  | Pre-compiled tree-sitter grammars for 371 programming languages | `research/sources/coding-agents/pypi__tree-sitter-language-pack.md` |
 | [pypi: uv](https://pypi.org/project/uv/) | - | - |  | An extremely fast Python package and project manager, written in Rust. | `research/sources/coding-agents/pypi__uv.md` |
 
+## configuration
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [rjsf-team/react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form) | 15,935 | Apache-2.0 | 2026-11-08 | A React component for building Web forms from JSON Schema. | `research/sources/configuration/rjsf-team__react-jsonschema-form/README.md` |
+| [ajv-validator/ajv](https://github.com/ajv-validator/ajv) | 14,872 | MIT | 2026-09-06 | The fastest JSON schema Validator. Supports JSON Schema draft-04/06/07/2019-09/2020-12 and JSON Type Definition (RFC8927) | `research/sources/configuration/ajv-validator__ajv/README.md` |
+| [piitaya/lovelace-mushroom](https://github.com/piitaya/lovelace-mushroom) | 5,255 | Apache-2.0 | 2026-10-20 | Build a beautiful Home Assistant dashboard easily | `research/sources/configuration/piitaya__lovelace-mushroom/README.md` |
+| [json-schema-org/json-schema-spec](https://github.com/json-schema-org/json-schema-spec) | 5,210 | NOASSERTION | 2026-11-02 | The JSON Schema specification | `research/sources/configuration/json-schema-org__json-schema-spec/README.md` |
+| [sindresorhus/electron-store](https://github.com/sindresorhus/electron-store) | 5,030 | MIT | 2026-10-12 | Simple data persistence for your Electron app or module - Save and load user preferences, app state, cache, etc | `research/sources/configuration/sindresorhus__electron-store/README.md (+1 доп. файлов)` |
+| [sindresorhus/conf](https://github.com/sindresorhus/conf) | 1,350 | MIT | 2026-10-12 | Simple config handling for your app or module | `research/sources/configuration/sindresorhus__conf/README.md` |
+| [npm: @rjsf/core](https://www.npmjs.com/package/@rjsf/core) | - | Apache-2.0 |  | A simple React component capable of building HTML forms out of a JSON schema. | `research/sources/configuration/npm__rjsf-core.md` |
+| [npm: @rjsf/utils](https://www.npmjs.com/package/@rjsf/utils) | - | Apache-2.0 |  | Utility functions for @rjsf/core | `research/sources/configuration/npm__rjsf-utils.md` |
+| [npm: @rjsf/validator-ajv8](https://www.npmjs.com/package/@rjsf/validator-ajv8) | - | Apache-2.0 |  | The ajv-8 based validator for @rjsf/core | `research/sources/configuration/npm__rjsf-validator-ajv8.md` |
+| [npm: ajv](https://www.npmjs.com/package/ajv) | - | MIT |  | Another JSON Schema Validator | `research/sources/configuration/npm__ajv.md` |
+| [npm: conf](https://www.npmjs.com/package/conf) | - | MIT |  | Simple config handling for your app or module | `research/sources/configuration/npm__conf.md` |
+| [npm: dot-prop](https://www.npmjs.com/package/dot-prop) | - | MIT |  | Get, set, or delete a property from a nested object using a dot path | `research/sources/configuration/npm__dot-prop.md` |
+| [npm: json-schema-to-typescript](https://www.npmjs.com/package/json-schema-to-typescript) | - | MIT |  | compile json schema to typescript typings | `research/sources/configuration/npm__json-schema-to-typescript.md` |
+| [npm: lodash.get](https://www.npmjs.com/package/lodash.get) | - | MIT |  | The lodash method `_.get` exported as a module. | `research/sources/configuration/npm__lodash.get.md` |
+| [npm: set-value](https://www.npmjs.com/package/set-value) | - | MIT |  | Create nested values and any intermediaries using dot notation (`'a.b.c'`) paths. | `research/sources/configuration/npm__set-value.md` |
+| [npm: zod-to-json-schema](https://www.npmjs.com/package/zod-to-json-schema) | - | ISC |  | Converts Zod schemas to Json Schemas | `research/sources/configuration/npm__zod-to-json-schema.md` |
+| [pypi: dynaconf](https://pypi.org/project/dynaconf/) | - | MIT |  | The dynamic configurator for your Python Project | `research/sources/configuration/pypi__dynaconf.md` |
+| [pypi: jsonschema](https://pypi.org/project/jsonschema/) | - | - |  | An implementation of JSON Schema validation for Python | `research/sources/configuration/pypi__jsonschema.md` |
+| [pypi: pydantic](https://pypi.org/project/pydantic/) | - | - |  | Data validation using Python type hints | `research/sources/configuration/pypi__pydantic.md` |
+| [pypi: pydantic-settings](https://pypi.org/project/pydantic-settings/) | - | - |  | Settings management using Pydantic | `research/sources/configuration/pypi__pydantic-settings.md` |
+| [pypi: python-dotenv](https://pypi.org/project/python-dotenv/) | - | BSD-3-Clause |  | Read key-value pairs from a .env file and set them as environment variables | `research/sources/configuration/pypi__python-dotenv.md` |
+| [pypi: toml](https://pypi.org/project/toml/) | - | MIT |  | Python Library for Tom's Obvious, Minimal Language | `research/sources/configuration/pypi__toml.md` |
+
 ## connectors
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
@@ -182,6 +287,12 @@
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
 | --- | --- | --- | --- | --- | --- |
+| [n8n-io/n8n](https://github.com/n8n-io/n8n) | 209,808 | NOASSERTION | 2026-11-08 | Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations. | `research/sources/connectors-extra/n8n-io__n8n/README.md` |
+| [home-assistant/core](https://github.com/home-assistant/core) | 92,062 | Apache-2.0 | 2026-11-08 | :house_with_garden: Open source home automation that puts local control and privacy first. | `research/sources/connectors-extra/home-assistant__core/README.md` |
+| [pedroslopez/whatsapp-web.js](https://github.com/pedroslopez/whatsapp-web.js) | 22,871 | Apache-2.0 | 2026-11-08 | A WhatsApp client library for NodeJS that connects through the WhatsApp Web browser app | `research/sources/connectors-extra/pedroslopez__whatsapp-web.js/README.md` |
+| [mqttjs/MQTT.js](https://github.com/mqttjs/MQTT.js) | 9,129 | NOASSERTION | 2026-10-20 | The MQTT client for Node.js and the browser | `research/sources/connectors-extra/mqttjs__MQTT.js/README.md` |
+| [eclipse/paho.mqtt.python](https://github.com/eclipse/paho.mqtt.python) | 2,434 | NOASSERTION | 2026-11-04 | paho.mqtt.python | `research/sources/connectors-extra/eclipse__paho.mqtt.python/README.md` |
+| [matrix-org/matrix-js-sdk](https://github.com/matrix-org/matrix-js-sdk) | 2,196 | Apache-2.0 | 2026-11-06 | Matrix Client-Server SDK for JavaScript | `research/sources/connectors-extra/matrix-org__matrix-js-sdk/README.md` |
 | [npm: @googleapis/calendar](https://www.npmjs.com/package/@googleapis/calendar) | - | Apache-2.0 |  | calendar | `research/sources/connectors-extra/npm__googleapis-calendar.md` |
 | [npm: @slack/web-api](https://www.npmjs.com/package/@slack/web-api) | - | MIT |  | Official library for using the Slack Platform's Web API | `research/sources/connectors-extra/npm__slack-web-api.md` |
 | [npm: baileys](https://www.npmjs.com/package/baileys) | - | MIT |  | A WebSockets library for interacting with WhatsApp Web | `research/sources/connectors-extra/npm__baileys.md` |
@@ -301,6 +412,22 @@
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
 | --- | --- | --- | --- | --- | --- |
+| [ollama/ollama](https://github.com/ollama/ollama) | 186,332 | MIT | 2026-11-08 | Get up and running with Kimi, GLM, MiniMax, DeepSeek, gpt-oss, Qwen, Gemma and other models. | `research/sources/low-end-inference/ollama__ollama/README.md (+1 доп. файлов)` |
+| [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | 133,710 | MIT | 2026-11-08 | LLM inference in C/C++ | `research/sources/low-end-inference/ggml-org__llama.cpp/README.md (+2 доп. файлов)` |
+| [nomic-ai/gpt4all](https://github.com/nomic-ai/gpt4all) | 77,346 | MIT | 2025-05-27 | GPT4All: Run Local LLMs on Any Device. Open-source and available for commercial use. | `research/sources/low-end-inference/nomic-ai__gpt4all/README.md` |
+| [ggml-org/whisper.cpp](https://github.com/ggml-org/whisper.cpp) | 55,011 | MIT | 2026-11-08 | Port of OpenAI's Whisper model in C/C++ | `research/sources/low-end-inference/ggml-org__whisper.cpp/README.md` |
+| [janhq/jan](https://github.com/janhq/jan) | 45,585 | NOASSERTION | 2026-11-05 | Jan is an open source alternative to ChatGPT that runs 100% offline on your computer. | `research/sources/low-end-inference/janhq__jan/README.md` |
+| [microsoft/BitNet](https://github.com/microsoft/BitNet) | 41,505 | MIT | 2026-07-27 | Official inference framework for 1-bit LLMs | `research/sources/low-end-inference/microsoft__BitNet/README.md` |
+| [QwenLM/Qwen3](https://github.com/QwenLM/Qwen3) | 27,721 | NOASSERTION | 2026-01-09 | Qwen3 is the large language model series developed by Qwen team, Alibaba Cloud. | `research/sources/low-end-inference/QwenLM__Qwen3/README.md` |
+| [k2-fsa/sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) | 15,824 | Apache-2.0 | 2026-11-07 | Speech-to-text, text-to-speech, speaker diarization, speech enhancement, source separation, and VAD using next-gen Kaldi with onnxruntime without Internet connection. Support embed | `research/sources/low-end-inference/k2-fsa__sherpa-onnx/README.md` |
+| [LostRuins/koboldcpp](https://github.com/LostRuins/koboldcpp) | 12,193 | AGPL-3.0 | 2026-11-08 | KoboldCpp - Run GGUF AI models locally with a KoboldAI UI. One File. Zero Install. | `research/sources/low-end-inference/LostRuins__koboldcpp/README.md` |
+| [openbmb/MiniCPM](https://github.com/openbmb/MiniCPM) | 11,824 | Apache-2.0 | 2026-09-21 | MiniCPM5: SOTA on-device LLMs, small yet powerful. | `research/sources/low-end-inference/openbmb__MiniCPM/README.md` |
+| [usefulsensors/moonshine](https://github.com/usefulsensors/moonshine) | 11,436 | NOASSERTION | 2026-11-08 | Very low latency speech to text, intent recognition, and text to speech, for building voice agents and interfaces | `research/sources/low-end-inference/usefulsensors__moonshine/README.md` |
+| [google/gemma.cpp](https://github.com/google/gemma.cpp) | 7,081 | Apache-2.0 | 2026-11-07 | lightweight, standalone C++ inference engine for Google's Gemma models. | `research/sources/low-end-inference/google__gemma.cpp/README.md` |
+| [huggingface/distil-whisper](https://github.com/huggingface/distil-whisper) | 4,119 | MIT | 2025-01-08 | Distilled variant of Whisper for speech recognition. 6x faster, 50% smaller, within 1% word error rate. | `research/sources/low-end-inference/huggingface__distil-whisper/README.md` |
+| [huggingface/smollm](https://github.com/huggingface/smollm) | 3,949 | Apache-2.0 | 2026-10-06 | Everything about the SmolLM and SmolVLM family of models | `research/sources/low-end-inference/huggingface__smollm/README.md` |
+| [microsoft/PhiCookBook](https://github.com/microsoft/PhiCookBook) | 3,906 | MIT | 2026-11-02 | This is a Phi Family of SLMs book for getting started with Phi Models. Phi a family of open sourced AI models developed by Microsoft. Phi models are the most capable and cost-effec | `research/sources/low-end-inference/microsoft__PhiCookBook/README.md` |
+| [microsoft/onnxruntime-genai](https://github.com/microsoft/onnxruntime-genai) | 1,153 | MIT | 2026-11-08 | Generative AI with ONNX Runtime | `research/sources/low-end-inference/microsoft__onnxruntime-genai/README.md` |
 | [npm: @huggingface/transformers](https://www.npmjs.com/package/@huggingface/transformers) | - | Apache-2.0 |  | State-of-the-art Machine Learning for the web. Run 🤗 Transformers directly in your browser, with no need for a server! | `research/sources/low-end-inference/npm__huggingface-transformers.md` |
 | [npm: kokoro-js](https://www.npmjs.com/package/kokoro-js) | - | Apache-2.0 |  | High-quality text-to-speech for the web | `research/sources/low-end-inference/npm__kokoro-js.md` |
 | [npm: node-llama-cpp](https://www.npmjs.com/package/node-llama-cpp) | - | MIT |  | Run AI models locally on your machine with node.js bindings for llama.cpp. Enforce a JSON schema on the model output on the generation level | `research/sources/low-end-inference/npm__node-llama-cpp.md` |
@@ -380,6 +507,18 @@
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
 | --- | --- | --- | --- | --- | --- |
+| [yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp) | 206,120 | Unlicense | 2026-11-04 | A feature-rich command-line audio/video downloader | `research/sources/media-production/yt-dlp__yt-dlp/README.md` |
+| [remotion-dev/remotion](https://github.com/remotion-dev/remotion) | 71,626 | NOASSERTION | 2026-11-08 | 🎥      Make videos programmatically with React | `research/sources/media-production/remotion-dev__remotion/README.md` |
+| [FFmpeg/FFmpeg](https://github.com/FFmpeg/FFmpeg) | 66,739 | NOASSERTION | 2026-11-08 | Mirror of https://git.ffmpeg.org/ffmpeg.git | `research/sources/media-production/FFmpeg__FFmpeg/README.md` |
+| [mifi/lossless-cut](https://github.com/mifi/lossless-cut) | 45,815 | GPL-2.0 | 2026-11-03 | The swiss army knife of lossless video/audio editing | `research/sources/media-production/mifi__lossless-cut/README.md` |
+| [m-bain/whisperX](https://github.com/m-bain/whisperX) | 25,150 | BSD-2-Clause | 2026-10-22 | WhisperX:  Automatic Speech Recognition with Word-level Timestamps (& Diarization) | `research/sources/media-production/m-bain__whisperX/README.md` |
+| [jianchang512/pyvideotrans](https://github.com/jianchang512/pyvideotrans) | 19,672 | GPL-3.0 | 2026-11-06 | Translate the video from one language to another and embed dubbing & subtitles. | `research/sources/media-production/jianchang512__pyvideotrans/README.md` |
+| [Zulko/moviepy](https://github.com/Zulko/moviepy) | 15,124 | MIT | 2026-08-26 | Video editing with Python | `research/sources/media-production/Zulko__moviepy/README.md` |
+| [BtbN/FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds) | 11,953 | MIT | 2026-11-07 |  | `research/sources/media-production/BtbN__FFmpeg-Builds/README.md` |
+| [kkroening/ffmpeg-python](https://github.com/kkroening/ffmpeg-python) | 11,015 | Apache-2.0 | 2024-08-04 | Python bindings for FFmpeg - with complex filtering support | `research/sources/media-production/kkroening__ffmpeg-python/README.md` |
+| [jdepoix/youtube-transcript-api](https://github.com/jdepoix/youtube-transcript-api) | 8,577 | MIT | 2026-11-05 | This is a python API which allows you to get the transcript/subtitles for a given YouTube video. It also works for automatically generated subtitles and it does not require an API  | `research/sources/media-production/jdepoix__youtube-transcript-api/README.md` |
+| [linto-ai/whisper-timestamped](https://github.com/linto-ai/whisper-timestamped) | 2,861 | AGPL-3.0 | 2026-09-28 | Multilingual Automatic Speech Recognition with word-level timestamps and confidence | `research/sources/media-production/linto-ai__whisper-timestamped/README.md` |
+| [eugeneware/ffmpeg-static](https://github.com/eugeneware/ffmpeg-static) | 1,410 | GPL-3.0 | 2026-03-21 | ffmpeg static binaries for Mac OSX and Linux and Windows | `research/sources/media-production/eugeneware__ffmpeg-static/README.md` |
 | [npm: @ffmpeg-installer/ffmpeg](https://www.npmjs.com/package/@ffmpeg-installer/ffmpeg) | - | LGPL-2.1 |  | Platform independent binary installer of FFmpeg for node projects | `research/sources/media-production/npm__ffmpeg-installer-ffmpeg.md` |
 | [npm: audio-context](https://www.npmjs.com/package/audio-context) | - | MIT |  | A WebAudio Context singleton | `research/sources/media-production/npm__audio-context.md` |
 | [npm: ffmpeg-static](https://www.npmjs.com/package/ffmpeg-static) | - | GPL-3.0-or-later |  | ffmpeg binaries for macOS, Linux and Windows | `research/sources/media-production/npm__ffmpeg-static.md` |
@@ -510,6 +649,15 @@
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
 | --- | --- | --- | --- | --- | --- |
+| [Stirling-Tools/Stirling-PDF](https://github.com/Stirling-Tools/Stirling-PDF) | 96,008 | NOASSERTION | 2026-11-08 | #1 PDF Application on GitHub that lets you edit PDFs on any device anywhere | `research/sources/office-automation/Stirling-Tools__Stirling-PDF/README.md` |
+| [PyMuPDF/pymupdf](https://github.com/PyMuPDF/pymupdf) | 11,086 | AGPL-3.0 | 2026-11-08 | PyMuPDF is a high performance Python library for data extraction, analysis, conversion & manipulation of PDF (and other) documents. | `research/sources/office-automation/PyMuPDF__pymupdf/README.md` |
+| [python-openxml/python-docx](https://github.com/python-openxml/python-docx) | 5,759 | MIT | 2026-08-01 | Create and modify Word documents with Python | `research/sources/office-automation/python-openxml__python-docx/README.md` |
+| [mhammond/pywin32](https://github.com/mhammond/pywin32) | 5,633 | NOASSERTION | 2026-11-03 | Python for Windows (pywin32) Extensions | `research/sources/office-automation/mhammond__pywin32/README.md` |
+| [qpdf/qpdf](https://github.com/qpdf/qpdf) | 5,564 | Apache-2.0 | 2026-09-26 | qpdf: A content-preserving PDF document transformer | `research/sources/office-automation/qpdf__qpdf/README.md` |
+| [LibreOffice/core](https://github.com/LibreOffice/core) | 4,618 | GPL-3.0 | 2026-11-08 | Read-only LibreOffice core repo - no pull request (use gerrit instead https://gerrit.libreoffice.org/) - don't download zip, use https://dev-www.libreoffice.org/bundles/  instead | `research/sources/office-automation/LibreOffice__core/README.md` |
+| [jmcnamara/XlsxWriter](https://github.com/jmcnamara/XlsxWriter) | 3,992 | BSD-2-Clause | 2026-10-28 | A Python module for creating Excel XLSX files. | `research/sources/office-automation/jmcnamara__XlsxWriter/README.md` |
+| [xlwings/xlwings](https://github.com/xlwings/xlwings) | 3,429 | NOASSERTION | 2026-11-07 | xlwings is a Python library that makes it easy to call Python from Excel and vice versa. It works with Excel on Windows, macOS, and Excel on the web. | `research/sources/office-automation/xlwings__xlwings/README.md` |
+| [elapouya/python-docx-template](https://github.com/elapouya/python-docx-template) | 2,730 | LGPL-2.1 | 2026-07-07 | Use a docx as a jinja2 template | `research/sources/office-automation/elapouya__python-docx-template/README.md` |
 | [npm: docx](https://www.npmjs.com/package/docx) | - | MIT |  | Easily generate .docx files with JS/TS with a nice declarative API. Works for Node and on the Browser. | `research/sources/office-automation/npm__docx.md` |
 | [npm: docxtemplater](https://www.npmjs.com/package/docxtemplater) | - | MIT |  | Generate docx, pptx, and xlsx from templates (Word, Powerpoint and Excel documents), from Node.js, the Browser and the command line | `research/sources/office-automation/npm__docxtemplater.md` |
 | [npm: exceljs](https://www.npmjs.com/package/exceljs) | - | MIT |  | Excel Workbook Manager - Read and Write xlsx and csv Files. | `research/sources/office-automation/npm__exceljs.md` |
@@ -607,6 +755,7 @@
 | [openai/openai-agents-js](https://github.com/openai/openai-agents-js) | 3,990 | MIT | 2026-11-08 | A lightweight, powerful framework for multi-agent workflows and voice agents | `research/sources/orchestration/openai__openai-agents-js/README.md` |
 | [evalstate/fast-agent](https://github.com/evalstate/fast-agent) | 3,960 | Apache-2.0 | 2026-11-08 | Code, Build and Evaluate agents - excellent Model and Skills/MCP/ACP/A2A Support | `research/sources/orchestration/evalstate__fast-agent/README.md` |
 | [breejs/bree](https://github.com/breejs/bree) | 3,298 | MIT | 2026-02-17 | Bree is a Node.js and JavaScript job task scheduler with worker threads, cron, Date, and human syntax. Built for @ladjs, @forwardemail, @spamscanner, @cabinjs. | `research/sources/orchestration/breejs__bree/README.md` |
+| [daodao97/chatmcp](https://github.com/daodao97/chatmcp) | 2,224 | Apache-2.0 | 2026-09-07 | ChatMCP is an AI chat client implementing the Model Context Protocol (MCP). | `research/sources/orchestration/daodao97__chatmcp/README.md` |
 | [dbos-inc/dbos-transact-py](https://github.com/dbos-inc/dbos-transact-py) | 1,670 | MIT | 2026-11-04 | Database-Backed Durable Python Workflows | `research/sources/orchestration/dbos-inc__dbos-transact-py/README.md` |
 | [chatmcp/chatmcp](https://github.com/chatmcp/chatmcp) | 1 | NOASSERTION | 2024-12-11 | ChatMCP is an MCP Client | `research/sources/orchestration/chatmcp__chatmcp/README.md` |
 | [npm: @ai-sdk/anthropic](https://www.npmjs.com/package/@ai-sdk/anthropic) | - | Apache-2.0 |  |  | `research/sources/orchestration/npm__ai-sdk-anthropic.md` |
@@ -705,6 +854,33 @@
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
 | --- | --- | --- | --- | --- | --- |
+| [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | 133,710 | MIT | 2026-11-08 | LLM inference in C/C++ | `research/sources/perf-optimization/ggml-org__llama.cpp/README.md (+2 доп. файлов)` |
+| [vllm-project/vllm](https://github.com/vllm-project/vllm) | 96,544 | Apache-2.0 | 2026-11-08 | A high-throughput and memory-efficient inference and serving engine for LLMs | `research/sources/perf-optimization/vllm-project__vllm/README.md` |
+| [Dao-AILab/flash-attention](https://github.com/Dao-AILab/flash-attention) | 25,257 | BSD-3-Clause | 2026-11-07 | Fast and memory-efficient exact attention | `research/sources/perf-optimization/Dao-AILab__flash-attention/README.md` |
+| [mlc-ai/mlc-llm](https://github.com/mlc-ai/mlc-llm) | 23,312 | Apache-2.0 | 2026-10-30 | Universal LLM Deployment Engine with ML Compilation | `research/sources/perf-optimization/mlc-ai__mlc-llm/README.md` |
+| [microsoft/onnxruntime](https://github.com/microsoft/onnxruntime) | 22,264 | MIT | 2026-11-08 | ONNX Runtime: cross-platform, high performance ML inferencing and training accelerator | `research/sources/perf-optimization/microsoft__onnxruntime/README.md` |
+| [guidance-ai/guidance](https://github.com/guidance-ai/guidance) | 21,821 | MIT | 2026-05-21 | A guidance language for controlling large language models. | `research/sources/perf-optimization/guidance-ai__guidance/README.md` |
+| [dottxt-ai/outlines](https://github.com/dottxt-ai/outlines) | 16,007 | Apache-2.0 | 2026-09-21 | Structured Outputs | `research/sources/perf-optimization/dottxt-ai__outlines/README.md` |
+| [NVIDIA/TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM) | 15,038 | NOASSERTION | 2026-11-08 | TensorRT LLM provides users with an easy-to-use Python API to define Large Language Models (LLMs) and supports state-of-the-art optimizations to perform inference efficiently on NV | `research/sources/perf-optimization/NVIDIA__TensorRT-LLM/README.md` |
+| [intel/ipex-llm](https://github.com/intel/ipex-llm) | 8,843 | Apache-2.0 | 2026-01-28 | Accelerate local LLM inference and finetuning (LLaMA, Mistral, ChatGLM, Qwen, DeepSeek, Mixtral, Gemma, Phi, MiniCPM, Qwen-VL, MiniCPM-V, etc.) on Intel XPU (e.g., local PC with iG | `research/sources/perf-optimization/intel__ipex-llm/README.md` |
+| [mit-han-lab/streaming-llm](https://github.com/mit-han-lab/streaming-llm) | 7,277 | MIT | 2024-07-11 | [ICLR 2024] Efficient Streaming Language Models with Attention Sinks | `research/sources/perf-optimization/mit-han-lab__streaming-llm/README.md` |
+| [microsoft/LLMLingua](https://github.com/microsoft/LLMLingua) | 6,809 | MIT | 2026-11-06 | [EMNLP'23, ACL'24] To speed up LLMs' inference and enhance LLM's perceive of key information, compress the prompt and KV-Cache, which achieves up to 20x compression with minimal pe | `research/sources/perf-optimization/microsoft__LLMLingua/README.md` |
+| [AutoGPTQ/AutoGPTQ](https://github.com/AutoGPTQ/AutoGPTQ) | 5,069 | MIT | 2025-04-11 | An easy-to-use LLMs quantization package with user-friendly apis, based on GPTQ algorithm. | `research/sources/perf-optimization/AutoGPTQ__AutoGPTQ/README.md` |
+| [turboderp-org/exllamav2](https://github.com/turboderp-org/exllamav2) | 4,652 | MIT | 2026-03-04 | A fast inference library for running LLMs locally on modern consumer-class GPUs | `research/sources/perf-optimization/turboderp-org__exllamav2/README.md` |
+| [vllm-project/llm-compressor](https://github.com/vllm-project/llm-compressor) | 3,952 | Apache-2.0 | 2026-11-08 | State-of-the-art LLM compression, built for production inference with vLLM | `research/sources/perf-optimization/vllm-project__llm-compressor/README.md` |
+| [huggingface/optimum](https://github.com/huggingface/optimum) | 3,519 | Apache-2.0 | 2026-11-02 | 🚀 Accelerate inference and training of 🤗 Transformers, Diffusers, TIMM and Sentence Transformers with easy to use hardware optimization tools | `research/sources/perf-optimization/huggingface__optimum/README.md` |
+| [ikawrakow/ik_llama.cpp](https://github.com/ikawrakow/ik_llama.cpp) | 3,380 | MIT | 2026-11-08 | llama.cpp fork with additional SOTA quants and improved performance | `research/sources/perf-optimization/ikawrakow__ik_llama.cpp/README.md` |
+| [neuralmagic/deepsparse](https://github.com/neuralmagic/deepsparse) | 3,152 | NOASSERTION | 2025-06-02 | Sparsity-aware deep learning inference runtime for CPUs | `research/sources/perf-optimization/neuralmagic__deepsparse/README.md` |
+| [pytorch/ao](https://github.com/pytorch/ao) | 3,023 | NOASSERTION | 2026-11-07 | PyTorch native quantization for training and inference | `research/sources/perf-optimization/pytorch__ao/README.md` |
+| [microsoft/Foundry-Local](https://github.com/microsoft/Foundry-Local) | 2,643 | NOASSERTION | 2026-11-08 |  | `research/sources/perf-optimization/microsoft__Foundry-Local/README.md` |
+| [microsoft/DirectML](https://github.com/microsoft/DirectML) | 2,596 | MIT | 2026-04-27 | ⚠️DirectML is in maintenance mode ⚠️ DirectML is a high-performance, hardware-accelerated DirectX 12 library for machine learning. DirectML provides GPU acceleration for common mac | `research/sources/perf-optimization/microsoft__DirectML/README.md` |
+| [SafeAILab/EAGLE](https://github.com/SafeAILab/EAGLE) | 2,572 | NOASSERTION | 2026-02-20 | Official Implementation of EAGLE-1 (ICML'24), EAGLE-2 (EMNLP'24), and EAGLE-3 (NeurIPS'25). | `research/sources/perf-optimization/SafeAILab__EAGLE/README.md` |
+| [noamgat/lm-format-enforcer](https://github.com/noamgat/lm-format-enforcer) | 2,038 | MIT | 2026-04-04 | Enforce the output format (JSON Schema, Regex etc) of a language model | `research/sources/perf-optimization/noamgat__lm-format-enforcer/README.md` |
+| [mlc-ai/xgrammar](https://github.com/mlc-ai/xgrammar) | 1,995 | Apache-2.0 | 2026-11-07 | Fast, Flexible and Portable Structured Generation | `research/sources/perf-optimization/mlc-ai__xgrammar/README.md` |
+| [microsoft/EdgeAI-for-beginners](https://github.com/microsoft/EdgeAI-for-beginners) | 1,778 | MIT | 2026-11-02 | This course is designed to guide beginners through the exciting world of Edge AI, covering fundamental concepts, popular models, inference techniques, device-specific applications, | `research/sources/perf-optimization/microsoft__EdgeAI-for-beginners/README.md` |
+| [openvinotoolkit/nncf](https://github.com/openvinotoolkit/nncf) | 1,218 | Apache-2.0 | 2026-11-06 | Neural Network Compression Framework for enhanced OpenVINO™ inference | `research/sources/perf-optimization/openvinotoolkit__nncf/README.md` |
+| [microsoft/Windows-Machine-Learning](https://github.com/microsoft/Windows-Machine-Learning) | 1,125 | MIT | 2025-08-07 | Samples and Tools for Windows ML. | `research/sources/perf-optimization/microsoft__Windows-Machine-Learning/README.md` |
+| [IST-DASLab/sparsegpt](https://github.com/IST-DASLab/sparsegpt) | 903 | Apache-2.0 | 2024-08-20 | Code for the ICML 2023 paper "SparseGPT: Massive Language Models Can Be Accurately Pruned in One-Shot". | `research/sources/perf-optimization/IST-DASLab__sparsegpt/README.md` |
 | [npm: @dqbd/tiktoken](https://www.npmjs.com/package/@dqbd/tiktoken) | - | MIT |  | JS/WASM bindings for tiktoken | `research/sources/perf-optimization/npm__dqbd-tiktoken.md` |
 | [npm: @huggingface/transformers](https://www.npmjs.com/package/@huggingface/transformers) | - | Apache-2.0 |  | State-of-the-art Machine Learning for the web. Run 🤗 Transformers directly in your browser, with no need for a server! | `research/sources/perf-optimization/npm__huggingface-transformers.md` |
 | [npm: @napi-rs/canvas](https://www.npmjs.com/package/@napi-rs/canvas) | - | MIT |  | Canvas for Node.js with skia backend | `research/sources/perf-optimization/npm__napi-rs-canvas.md` |
@@ -864,10 +1040,66 @@
 | [pypi: transformers](https://pypi.org/project/transformers/) | - | Apache 2.0 License |  | Transformers: the model-definition framework for state-of-the-art machine learning models in text, vision, audio, and multimodal models, for both inference and training. | `research/sources/screen-understanding/pypi__transformers.md` |
 | [pypi: unstructured](https://pypi.org/project/unstructured/) | - | - |  | A library that prepares raw documents for downstream ML tasks. | `research/sources/screen-understanding/pypi__unstructured.md` |
 
+## self-extension
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [anthropics/skills](https://github.com/anthropics/skills) | 189,139 | NOASSERTION | 2026-11-06 | Public repository for Agent Skills | `research/sources/self-extension/anthropics__skills/README.md` |
+| [punkpeye/awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers) | 97,463 | MIT | 2026-11-06 | A collection of MCP servers. | `research/sources/self-extension/punkpeye__awesome-mcp-servers/README.md` |
+| [wshobson/agents](https://github.com/wshobson/agents) | 42,302 | MIT | 2026-11-05 | Plugins, agents, skills, and commands for Claude Code, Codex CLI, Cursor, OpenCode, Antigravity CLI, GitHub Copilot, and Pi, written once in Markdown and adapted to each tool by ge | `research/sources/self-extension/wshobson__agents/README.md` |
+| [VoltAgent/awesome-agent-skills](https://github.com/VoltAgent/awesome-agent-skills) | 36,970 | MIT | 2026-11-05 | A curated collection of 1000+ agent skills from official dev teams and the community, compatible with Claude Code, Codex, Gemini CLI, Cursor, and more. | `research/sources/self-extension/VoltAgent__awesome-agent-skills/README.md` |
+| [openai/openai-agents-python](https://github.com/openai/openai-agents-python) | 30,555 | MIT | 2026-11-08 | A lightweight, powerful framework for multi-agent workflows | `research/sources/self-extension/openai__openai-agents-python/README.md` |
+| [jlowin/fastmcp](https://github.com/jlowin/fastmcp) | 28,341 | Apache-2.0 | 2026-11-08 | 🚀 The fast, Pythonic way to build MCP servers and clients. | `research/sources/self-extension/jlowin__fastmcp/README.md` |
+| [a2aproject/A2A](https://github.com/a2aproject/A2A) | 26,452 | Apache-2.0 | 2026-11-05 | Agent2Agent (A2A) is an open protocol enabling communication and interoperability between opaque agentic applications. | `research/sources/self-extension/a2aproject__A2A/README.md (+1 доп. файлов)` |
+| [google/adk-python](https://github.com/google/adk-python) | 22,141 | Apache-2.0 | 2026-11-08 | An open-source, code-first Python toolkit for building, evaluating, and deploying sophisticated AI agents with flexibility and control. | `research/sources/self-extension/google__adk-python/README.md` |
+| [microsoft/agent-framework](https://github.com/microsoft/agent-framework) | 14,586 | MIT | 2026-11-08 | A framework for building, orchestrating and deploying AI agents and multi-agent workflows with support for Python and .NET. | `research/sources/self-extension/microsoft__agent-framework/README.md` |
+| [modelcontextprotocol/inspector](https://github.com/modelcontextprotocol/inspector) | 11,253 | NOASSERTION | 2026-11-05 | Deterministic testing tools for MCP servers | `research/sources/self-extension/modelcontextprotocol__inspector/README.md` |
+| [lastmile-ai/mcp-agent](https://github.com/lastmile-ai/mcp-agent) | 8,577 | Apache-2.0 | 2026-01-25 | Build effective agents using Model Context Protocol and simple workflow patterns | `research/sources/self-extension/lastmile-ai__mcp-agent/README.md` |
+| [algorithmicsuperintelligence/openevolve](https://github.com/algorithmicsuperintelligence/openevolve) | 7,734 | Apache-2.0 | 2026-11-07 | Open-source implementation of AlphaEvolve | `research/sources/self-extension/algorithmicsuperintelligence__openevolve/README.md` |
+| [modelcontextprotocol/registry](https://github.com/modelcontextprotocol/registry) | 7,454 | NOASSERTION | 2026-11-08 | A community driven registry service for Model Context Protocol (MCP) servers. | `research/sources/self-extension/modelcontextprotocol__registry/README.md` |
+| [jennyzzt/dgm](https://github.com/jennyzzt/dgm) | 2,493 | Apache-2.0 | 2025-08-13 | Darwin Gödel Machine: Open-Ended Evolution of Self-Improving Agents | `research/sources/self-extension/jennyzzt__dgm/README.md` |
+| [google/adk-java](https://github.com/google/adk-java) | 1,766 | Apache-2.0 | 2026-11-07 | An open-source, code-first Java toolkit for building, evaluating, and deploying sophisticated AI agents with flexibility and control. | `research/sources/self-extension/google__adk-java/README.md` |
+| [ShengranHu/ADAS](https://github.com/ShengranHu/ADAS) | 1,662 | Apache-2.0 | 2025-01-28 | [ICLR 2025] Automated Design of Agentic Systems | `research/sources/self-extension/ShengranHu__ADAS/README.md` |
+| [docker/mcp-gateway](https://github.com/docker/mcp-gateway) | 1,626 | MIT | 2026-10-26 | docker mcp CLI plugin / MCP Gateway | `research/sources/self-extension/docker__mcp-gateway/README.md` |
+| [smithery-ai/cli](https://github.com/smithery-ai/cli) | 847 | AGPL-3.0 | 2026-05-31 | Install, manage and develop MCP servers and skills for agents | `research/sources/self-extension/smithery-ai__cli/README.md` |
+| [michaellatman/mcp-get](https://github.com/michaellatman/mcp-get) | 499 | MIT | 2026-06-17 | Archived: mcp-get is no longer maintained. | `research/sources/self-extension/michaellatman__mcp-get/README.md` |
+| [Arvid-pku/Godel_Agent](https://github.com/Arvid-pku/Godel_Agent) | 241 | MIT | 2025-09-17 | Gödel Agent: A Self-Referential Agent Framework for Recursive Self-Improvement | `research/sources/self-extension/Arvid-pku__Godel_Agent/README.md` |
+| [npm: @modelcontextprotocol/sdk](https://www.npmjs.com/package/@modelcontextprotocol/sdk) | - | MIT |  | Model Context Protocol implementation for TypeScript | `research/sources/self-extension/npm__modelcontextprotocol-sdk.md` |
+| [npm: @npmcli/arborist](https://www.npmjs.com/package/@npmcli/arborist) | - | ISC |  | Manage node_modules trees | `research/sources/self-extension/npm__npmcli-arborist.md` |
+| [npm: execa](https://www.npmjs.com/package/execa) | - | MIT |  | Process execution for humans | `research/sources/self-extension/npm__execa.md` |
+| [npm: pacote](https://www.npmjs.com/package/pacote) | - | ISC |  | JavaScript package downloader | `research/sources/self-extension/npm__pacote.md` |
+| [npm: semver](https://www.npmjs.com/package/semver) | - | ISC |  | The semantic version parser used by npm. | `research/sources/self-extension/npm__semver.md` |
+| [npm: tar](https://www.npmjs.com/package/tar) | - | BlueOak-1.0.0 |  | tar for node | `research/sources/self-extension/npm__tar.md` |
+| [npm: undici](https://www.npmjs.com/package/undici) | - | MIT |  | An HTTP/1.1 client, written from scratch for Node.js | `research/sources/self-extension/npm__undici.md` |
+| [pypi: a2a-sdk](https://pypi.org/project/a2a-sdk/) | - | - |  | A2A Python SDK | `research/sources/self-extension/pypi__a2a-sdk.md` |
+| [pypi: fastmcp](https://pypi.org/project/fastmcp/) | - | - |  | The fast, Pythonic way to build MCP servers and clients. | `research/sources/self-extension/pypi__fastmcp.md` |
+| [pypi: importlib-metadata](https://pypi.org/project/importlib-metadata/) | - | - |  | Read metadata from Python packages | `research/sources/self-extension/pypi__importlib-metadata.md` |
+| [pypi: mcp](https://pypi.org/project/mcp/) | - | MIT |  | Model Context Protocol SDK | `research/sources/self-extension/pypi__mcp.md` |
+| [pypi: packaging](https://pypi.org/project/packaging/) | - | - |  | Core utilities for Python packages | `research/sources/self-extension/pypi__packaging.md` |
+| [pypi: pip](https://pypi.org/project/pip/) | - | - |  | The PyPA recommended tool for installing Python packages. | `research/sources/self-extension/pypi__pip.md` |
+| [pypi: resolvelib](https://pypi.org/project/resolvelib/) | - | ISC License |  | Resolve abstract dependencies into concrete ones | `research/sources/self-extension/pypi__resolvelib.md` |
+| [pypi: semver](https://pypi.org/project/semver/) | - | Copyright (c) 2013, Konstantine Rybnikov |  | Python helper for Semantic Versioning (https://semver.org) | `research/sources/self-extension/pypi__semver.md` |
+| [pypi: tomlkit](https://pypi.org/project/tomlkit/) | - | - |  | Style preserving TOML library | `research/sources/self-extension/pypi__tomlkit.md` |
+
 ## system-control
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
 | --- | --- | --- | --- | --- | --- |
+| [microsoft/PowerToys](https://github.com/microsoft/PowerToys) | 140,714 | MIT | 2026-11-07 | Microsoft PowerToys is a collection of utilities that supercharge productivity and customization on Windows | `research/sources/system-control/microsoft__PowerToys/README.md` |
+| [microsoft/terminal](https://github.com/microsoft/terminal) | 105,348 | MIT | 2026-11-07 | The new Windows Terminal and the original Windows console host, all in the same place! | `research/sources/system-control/microsoft__terminal/README.md` |
+| [obsproject/obs-studio](https://github.com/obsproject/obs-studio) | 79,160 | GPL-2.0 | 2026-11-06 | OBS Studio - Free and open source software for live streaming and screen recording | `research/sources/system-control/obsproject__obs-studio/README.md` |
+| [PowerShell/PowerShell](https://github.com/PowerShell/PowerShell) | 56,054 | MIT | 2026-11-06 | PowerShell for every system! | `research/sources/system-control/PowerShell__PowerShell/README.md` |
+| [ShareX/ShareX](https://github.com/ShareX/ShareX) | 40,812 | GPL-3.0 | 2026-11-08 | ShareX is a free and open-source application that enables users to capture or record any area of their screen with a single keystroke. It also supports uploading images, text, and  | `research/sources/system-control/ShareX__ShareX/README.md` |
+| [pbatard/rufus](https://github.com/pbatard/rufus) | 38,281 | GPL-3.0 | 2026-11-05 | The Reliable USB Formatting Utility | `research/sources/system-control/pbatard__rufus/README.md` |
+| [mpv-player/mpv](https://github.com/mpv-player/mpv) | 37,992 | NOASSERTION | 2026-11-08 | 🎥 Command line media player | `research/sources/system-control/mpv-player__mpv/README.md` |
+| [keepassxreboot/keepassxc](https://github.com/keepassxreboot/keepassxc) | 29,853 | NOASSERTION | 2026-11-08 | KeePassXC is a cross-platform community-driven port of the Windows application “KeePass Password Safe”. | `research/sources/system-control/keepassxreboot__keepassxc/README.md` |
+| [microsoft/winget-cli](https://github.com/microsoft/winget-cli) | 26,568 | MIT | 2026-11-06 | WinGet is the Windows Package Manager. This project includes a CLI (Command Line Interface), PowerShell modules, and a COM (Component Object Model) API (Application Programming Int | `research/sources/system-control/microsoft__winget-cli/README.md` |
+| [ScoopInstaller/Scoop](https://github.com/ScoopInstaller/Scoop) | 24,803 | NOASSERTION | 2026-11-08 | A command-line installer for Windows. | `research/sources/system-control/ScoopInstaller__Scoop/README.md` |
+| [videolan/vlc](https://github.com/videolan/vlc) | 20,363 | GPL-2.0 | 2026-11-08 | VLC media player - plays everything, runs anywhere. Code here: https://code.videolan.org/videolan/vlc | `research/sources/system-control/videolan__vlc/README.md` |
+| [AutoHotkey/AutoHotkey](https://github.com/AutoHotkey/AutoHotkey) | 13,436 | GPL-2.0 | 2026-11-08 | AutoHotkey - macro-creation and automation-oriented scripting utility for Windows. | `research/sources/system-control/AutoHotkey__AutoHotkey/README.md` |
+| [chocolatey/choco](https://github.com/chocolatey/choco) | 11,562 | NOASSERTION | 2026-10-28 | Chocolatey - the package manager for Windows | `research/sources/system-control/chocolatey__choco/README.md` |
+| [microsoft/Windows-classic-samples](https://github.com/microsoft/Windows-classic-samples) | 5,688 | NOASSERTION | 2026-09-03 | This repo contains samples that demonstrate the API used in Windows classic desktop applications. | `research/sources/system-control/microsoft__Windows-classic-samples/README.md` |
+| [obsproject/obs-websocket](https://github.com/obsproject/obs-websocket) | 4,384 | GPL-2.0 | 2026-10-08 | Remote-control of OBS Studio through WebSocket | `research/sources/system-control/obsproject__obs-websocket/README.md` |
 | [npm: @napi-rs/keyring](https://www.npmjs.com/package/@napi-rs/keyring) | - | MIT |  | https://github.com/hwchen/keyring-rs Node.js binding via https://napi.rs | `research/sources/system-control/npm__napi-rs-keyring.md` |
 | [npm: active-win](https://www.npmjs.com/package/active-win) | - | MIT |  | Get metadata about the active window and open windows (title, id, bounds, owner, URL, etc) | `research/sources/system-control/npm__active-win.md` |
 | [npm: adm-zip](https://www.npmjs.com/package/adm-zip) | - | MIT |  | Javascript implementation of zip for nodejs with support for electron original-fs. Allows user to create or extract zip files both in memory or to/from disk | `research/sources/system-control/npm__adm-zip.md` |
@@ -915,6 +1147,47 @@
 | [pypi: winrt-runtime](https://pypi.org/project/winrt-runtime/) | - | - |  | The runtime that every PyWinRT projection package runs on | `research/sources/system-control/pypi__winrt-runtime.md` |
 | [pypi: winsdk](https://pypi.org/project/winsdk/) | - | MIT |  | Python bindings for the Windows SDK | `research/sources/system-control/pypi__winsdk.md` |
 | [pypi: WMI](https://pypi.org/project/WMI/) | - | http://www.opensource.org/licenses/mit-license.php |  | Windows Management Instrumentation | `research/sources/system-control/pypi__wmi.md` |
+
+## system-triage
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [microsoft/PowerToys](https://github.com/microsoft/PowerToys) | 140,714 | MIT | 2026-11-07 | Microsoft PowerToys is a collection of utilities that supercharge productivity and customization on Windows | `research/sources/system-triage/microsoft__PowerToys/README.md` |
+| [ChrisTitusTech/winutil](https://github.com/ChrisTitusTech/winutil) | 65,709 | MIT | 2026-11-04 | Chris Titus Tech's Windows Utility - Install Programs, Tweaks, Fixes, and Updates | `research/sources/system-triage/ChrisTitusTech__winutil/README.md` |
+| [Raphire/Win11Debloat](https://github.com/Raphire/Win11Debloat) | 62,079 | MIT | 2026-11-08 | A simple, lightweight PowerShell script that allows you to remove pre-installed apps, disable telemetry, as well as perform various other changes to declutter and customize your Wi | `research/sources/system-triage/Raphire__Win11Debloat/README.md` |
+| [PowerShell/PowerShell](https://github.com/PowerShell/PowerShell) | 56,054 | MIT | 2026-11-06 | PowerShell for every system! | `research/sources/system-triage/PowerShell__PowerShell/README.md` |
+| [hellzerg/optimizer](https://github.com/hellzerg/optimizer) | 18,219 | GPL-3.0 | 2026-01-20 | The finest Windows Optimizer | `research/sources/system-triage/hellzerg__optimizer/README.md` |
+| [henrypp/memreduct](https://github.com/henrypp/memreduct) | 11,159 | GPL-3.0 | 2026-10-07 | Lightweight real-time memory management application to monitor and clean system memory on your computer. | `research/sources/system-triage/henrypp__memreduct/README.md` |
+| [farag2/Sophia-Script-for-Windows](https://github.com/farag2/Sophia-Script-for-Windows) | 9,873 | MIT | 2026-11-07 | :zap: The most advanced PowerShell module on GitHub for fine-tuning Windows 11 & Windows 10 | `research/sources/system-triage/farag2__Sophia-Script-for-Windows/README.md` |
+| [LibreHardwareMonitor/LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) | 9,349 | MPL-2.0 | 2026-11-06 | Libre Hardware Monitor is free software that can monitor the temperature sensors, fan speeds, voltages, load and clock speeds of your computer. | `research/sources/system-triage/LibreHardwareMonitor__LibreHardwareMonitor/README.md` |
+| [henrypp/simplewall](https://github.com/henrypp/simplewall) | 9,263 | GPL-3.0 | 2026-11-08 | Simple tool to configure Windows Filtering Platform (WFP) which can configure network activity on your computer. | `research/sources/system-triage/henrypp__simplewall/README.md` |
+| [arsenetar/dupeguru](https://github.com/arsenetar/dupeguru) | 7,952 | GPL-3.0 | 2026-09-07 | Find duplicate files | `research/sources/system-triage/arsenetar__dupeguru/README.md` |
+| [bleachbit/bleachbit](https://github.com/bleachbit/bleachbit) | 7,413 | GPL-3.0 | 2026-11-08 | BleachBit system cleaner for Windows and Linux | `research/sources/system-triage/bleachbit__bleachbit/README.md` |
+| [undergroundwires/privacy.sexy](https://github.com/undergroundwires/privacy.sexy) | 6,170 | AGPL-3.0 | 2026-02-13 | Open-source tool to enforce privacy & security best-practices on Windows, macOS and Linux, because privacy is sexy | `research/sources/system-triage/undergroundwires__privacy.sexy/README.md` |
+| [W4RH4WK/Debloat-Windows-10](https://github.com/W4RH4WK/Debloat-Windows-10) | 6,130 | NOASSERTION | 2025-09-23 | A Collection of Scripts Which Disable / Remove Windows 10 Features and Apps | `research/sources/system-triage/W4RH4WK__Debloat-Windows-10/README.md` |
+| [builtbybel/ThisIsWin11](https://github.com/builtbybel/ThisIsWin11) | 5,169 | MIT | 2023-06-06 | The real PowerToys for Windows 11 | `research/sources/system-triage/builtbybel__ThisIsWin11/README.md` |
+| [olafhartong/sysmon-modular](https://github.com/olafhartong/sysmon-modular) | 3,187 | MIT | 2026-10-14 | A repository of sysmon configuration modules | `research/sources/system-triage/olafhartong__sysmon-modular/README.md` |
+| [pkolaczk/fclones](https://github.com/pkolaczk/fclones) | 2,992 | MIT | 2025-03-03 | Efficient Duplicate File Finder | `research/sources/system-triage/pkolaczk__fclones/README.md` |
+| [npm: diskusage](https://www.npmjs.com/package/diskusage) | - | MIT |  | Get total diskspace and free diskspace using bindings around platform specific calls. | `research/sources/system-triage/npm__diskusage.md` |
+| [npm: node-os-utils](https://www.npmjs.com/package/node-os-utils) | - | MIT |  | Advanced cross-platform operating system monitoring utilities with TypeScript support | `research/sources/system-triage/npm__node-os-utils.md` |
+| [npm: pidusage](https://www.npmjs.com/package/pidusage) | - | MIT |  | Cross-platform process cpu % and memory usage of a PID | `research/sources/system-triage/npm__pidusage.md` |
+| [npm: ps-list](https://www.npmjs.com/package/ps-list) | - | MIT |  | Get running processes | `research/sources/system-triage/npm__ps-list.md` |
+| [npm: regedit](https://www.npmjs.com/package/regedit) | - | MIT |  | Read, Write, List and do all sorts of funky stuff to the windows registry using node.js and windows script host | `research/sources/system-triage/npm__regedit.md` |
+| [npm: systeminformation](https://www.npmjs.com/package/systeminformation) | - | MIT |  | Advanced, lightweight system and OS information library | `research/sources/system-triage/npm__systeminformation.md` |
+| [npm: tasklist](https://www.npmjs.com/package/tasklist) | - | MIT |  | Wrapper for the Windows `tasklist` command. Returns a list of apps and services with their Process ID (PID) for all tasks running on either a local or a remote computer. | `research/sources/system-triage/npm__tasklist.md` |
+| [npm: tree-kill](https://www.npmjs.com/package/tree-kill) | - | MIT |  | kill trees of processes | `research/sources/system-triage/npm__tree-kill.md` |
+| [npm: windows-release](https://www.npmjs.com/package/windows-release) | - | MIT |  | Get the name of a Windows version from the release number: `5.1.2600` → `XP` | `research/sources/system-triage/npm__windows-release.md` |
+| [pypi: distro](https://pypi.org/project/distro/) | - | Apache License, Version 2.0 |  | Distro - an OS platform information API | `research/sources/system-triage/pypi__distro.md` |
+| [pypi: humanfriendly](https://pypi.org/project/humanfriendly/) | - | MIT |  | Human friendly output for text interfaces using Python | `research/sources/system-triage/pypi__humanfriendly.md` |
+| [pypi: packaging](https://pypi.org/project/packaging/) | - | - |  | Core utilities for Python packages | `research/sources/system-triage/pypi__packaging.md` |
+| [pypi: psutil](https://pypi.org/project/psutil/) | - | BSD-3-Clause |  | Cross-platform lib for process and system monitoring. | `research/sources/system-triage/pypi__psutil.md` |
+| [pypi: py-cpuinfo](https://pypi.org/project/py-cpuinfo/) | - | MIT |  | Get CPU info with pure Python | `research/sources/system-triage/pypi__py-cpuinfo.md` |
+| [pypi: pywin32](https://pypi.org/project/pywin32/) | - | PSF |  | Python for Windows Extensions | `research/sources/system-triage/pypi__pywin32.md` |
+| [pypi: rich](https://pypi.org/project/rich/) | - | MIT |  | Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal | `research/sources/system-triage/pypi__rich.md` |
+| [pypi: tabulate](https://pypi.org/project/tabulate/) | - | - |  | Pretty-print tabular data | `research/sources/system-triage/pypi__tabulate.md` |
+| [pypi: winrt-runtime](https://pypi.org/project/winrt-runtime/) | - | - |  | The runtime that every PyWinRT projection package runs on | `research/sources/system-triage/pypi__winrt-runtime.md` |
+| [pypi: winsdk](https://pypi.org/project/winsdk/) | - | MIT |  | Python bindings for the Windows SDK | `research/sources/system-triage/pypi__winsdk.md` |
+| [pypi: WMI](https://pypi.org/project/WMI/) | - | http://www.opensource.org/licenses/mit-license.php |  | Windows Management Instrumentation | `research/sources/system-triage/pypi__wmi.md` |
 
 ## tts-and-voice
 
@@ -1020,6 +1293,36 @@
 | [npm: vaul](https://www.npmjs.com/package/vaul) | - | MIT |  | Drawer component for React. | `research/sources/ui-ux/npm__vaul.md` |
 | [npm: zustand](https://www.npmjs.com/package/zustand) | - | MIT |  | 🐻 Bear necessities for state management in React | `research/sources/ui-ux/npm__zustand.md` |
 
+## updates
+
+| Источник | ★ | Лицензия | Апдейт | Описание | Файл |
+| --- | --- | --- | --- | --- | --- |
+| [facebook/zstd](https://github.com/facebook/zstd) | 28,206 | NOASSERTION | 2026-11-08 | Zstandard - Fast real-time compression algorithm | `research/sources/updates/facebook__zstd/README.md` |
+| [semantic-release/semantic-release](https://github.com/semantic-release/semantic-release) | 24,162 | MIT | 2026-11-06 | 📦🚀 Fully automated version management and package publishing | `research/sources/updates/semantic-release__semantic-release/README.md` |
+| [electron-userland/electron-builder](https://github.com/electron-userland/electron-builder) | 14,704 | MIT | 2026-11-07 | A complete solution to package and build a ready for distribution Electron app with “auto update” support out of the box | `research/sources/updates/electron-userland__electron-builder/README.md` |
+| [Squirrel/Squirrel.Windows](https://github.com/Squirrel/Squirrel.Windows) | 7,989 | MIT | 2024-07-24 | An installation and update framework for Windows desktop apps | `research/sources/updates/Squirrel__Squirrel.Windows/README.md` |
+| [googleapis/release-please](https://github.com/googleapis/release-please) | 7,745 | Apache-2.0 | 2026-11-03 | generate release PRs based on the conventionalcommits.org spec | `research/sources/updates/googleapis__release-please/README.md` |
+| [sigstore/cosign](https://github.com/sigstore/cosign) | 6,419 | Apache-2.0 | 2026-11-05 | Code signing and transparency for containers and binaries | `research/sources/updates/sigstore__cosign/README.md` |
+| [softprops/action-gh-release](https://github.com/softprops/action-gh-release) | 5,793 | MIT | 2026-11-05 | 📦 :octocat: GitHub Action for creating GitHub Releases | `research/sources/updates/softprops__action-gh-release/README.md` |
+| [electron/asar](https://github.com/electron/asar) | 2,890 | MIT | 2026-11-01 | Simple extensive tar-like archive format with indexing | `research/sources/updates/electron__asar/README.md` |
+| [velopack/velopack](https://github.com/velopack/velopack) | 2,447 | MIT | 2026-11-04 | Installer and automatic update framework for cross-platform desktop applications | `research/sources/updates/velopack__velopack/README.md` |
+| [actions/attest-build-provenance](https://github.com/actions/attest-build-provenance) | 1,073 | MIT | 2026-08-21 | Action for generating build provenance attestations for workflow artifacts | `research/sources/updates/actions__attest-build-provenance/README.md` |
+| [microsoft/msix-packaging](https://github.com/microsoft/msix-packaging) | 1,072 | MIT | 2026-08-24 | MSIX SDK | `research/sources/updates/microsoft__msix-packaging/README.md` |
+| [electron/update.electronjs.org](https://github.com/electron/update.electronjs.org) | 703 | NOASSERTION | 2026-11-02 | 📡 A free service that makes it easy for open-source Electron apps to update themselves. | `research/sources/updates/electron__update.electronjs.org/README.md` |
+| [anchore/sbom-action](https://github.com/anchore/sbom-action) | 265 | Apache-2.0 | 2026-11-06 | GitHub Action for creating software bill of materials using Syft. | `research/sources/updates/anchore__sbom-action/README.md` |
+| [npm: @electron/asar](https://www.npmjs.com/package/@electron/asar) | - | MIT |  | Creating Electron app packages | `research/sources/updates/npm__electron-asar.md` |
+| [npm: electron-builder](https://www.npmjs.com/package/electron-builder) | - | MIT |  | A complete solution to package and build a ready for distribution Electron app for MacOS, Windows and Linux with “auto update” support out of the box | `research/sources/updates/npm__electron-builder.md` |
+| [npm: electron-updater](https://www.npmjs.com/package/electron-updater) | - | MIT |  | Cross platform updater for electron applications | `research/sources/updates/npm__electron-updater.md` |
+| [npm: node-stream-zip](https://www.npmjs.com/package/node-stream-zip) | - | MIT |  | node.js library for reading and extraction of ZIP archives | `research/sources/updates/npm__node-stream-zip.md` |
+| [npm: semver](https://www.npmjs.com/package/semver) | - | ISC |  | The semantic version parser used by npm. | `research/sources/updates/npm__semver.md` |
+| [npm: tar](https://www.npmjs.com/package/tar) | - | BlueOak-1.0.0 |  | tar for node | `research/sources/updates/npm__tar.md` |
+| [npm: zstd-codec](https://www.npmjs.com/package/zstd-codec) | - | MIT |  | Zstandard codec powered by Emscripten | `research/sources/updates/npm__zstd-codec.md` |
+| [pypi: filelock](https://pypi.org/project/filelock/) | - | - |  | A platform independent file lock. | `research/sources/updates/pypi__filelock.md` |
+| [pypi: packaging](https://pypi.org/project/packaging/) | - | - |  | Core utilities for Python packages | `research/sources/updates/pypi__packaging.md` |
+| [pypi: requests](https://pypi.org/project/requests/) | - | Apache-2.0 |  | Python HTTP for Humans. | `research/sources/updates/pypi__requests.md` |
+| [pypi: semver](https://pypi.org/project/semver/) | - | Copyright (c) 2013, Konstantine Rybnikov |  | Python helper for Semantic Versioning (https://semver.org) | `research/sources/updates/pypi__semver.md` |
+| [pypi: zstandard](https://pypi.org/project/zstandard/) | - | - |  | Zstandard bindings for Python | `research/sources/updates/pypi__zstandard.md` |
+
 ## whisper-and-asr
 
 | Источник | ★ | Лицензия | Апдейт | Описание | Файл |
@@ -1099,6 +1402,7 @@
 | [wookayin/gpustat](https://github.com/wookayin/gpustat) | 4,387 | MIT | 2026-10-08 | 📊 A simple command-line utility for querying and monitoring GPU status | `research/sources/windows-automation/wookayin__gpustat/README.md` |
 | [yinkaisheng/Python-UIAutomation-for-Windows](https://github.com/yinkaisheng/Python-UIAutomation-for-Windows) | 3,593 | Apache-2.0 | 2026-06-02 | 🐍Python 3 wrapper of Microsoft UIAutomation. Support UIAutomation for MFC, WindowsForm, WPF, Modern UI(Metro UI), Qt, IE, Firefox, Chrome ... | `research/sources/windows-automation/yinkaisheng__Python-UIAutomation-for-Windows/README.md` |
 | [xlang-ai/OSWorld](https://github.com/xlang-ai/OSWorld) | 3,256 | Apache-2.0 | 2026-11-02 | [NeurIPS 2024] OSWorld: Benchmarking Multimodal Agents for Open-Ended Tasks in Real Computer Environments | `research/sources/windows-automation/xlang-ai__OSWorld/README.md` |
+| [nut-tree/nut.js](https://github.com/nut-tree/nut.js) | 2,855 | NOASSERTION | 2024-05-01 | Native UI testing / controlling with node | `research/sources/windows-automation/nut-tree__nut.js/README.md` |
 | [microsoft/CsWin32](https://github.com/microsoft/CsWin32) | 2,527 | MIT | 2026-11-06 | A source generator to add a user-defined set of Win32 P/Invoke methods and supporting types to a C# project. | `research/sources/windows-automation/microsoft__CsWin32/README.md` |
 | [microsoft/node-pty](https://github.com/microsoft/node-pty) | 2,059 | NOASSERTION | 2026-11-02 | Fork pseudoterminals in Node.JS | `research/sources/windows-automation/microsoft__node-pty/README.md` |
 | [sindresorhus/clipboardy](https://github.com/sindresorhus/clipboardy) | 1,981 | MIT | 2026-07-23 | Access the system clipboard (copy/paste) | `research/sources/windows-automation/sindresorhus__clipboardy/README.md` |

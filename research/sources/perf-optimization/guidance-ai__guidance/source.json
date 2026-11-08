@@ -1,0 +1,17 @@
+{
+  "id": "github:guidance-ai/guidance",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "guidance-ai/guidance",
+  "url": "https://github.com/guidance-ai/guidance",
+  "description": "A guidance language for controlling large language models.",
+  "stars": 21821,
+  "forks": 1211,
+  "language": "Jupyter Notebook",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-05-21T17:08:04Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

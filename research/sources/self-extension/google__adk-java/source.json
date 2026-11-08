@@ -1,0 +1,33 @@
+{
+  "id": "github:google/adk-java",
+  "kind": "github",
+  "category": "self-extension",
+  "repo": "google/adk-java",
+  "url": "https://github.com/google/adk-java",
+  "description": "An open-source, code-first Java toolkit for building, evaluating, and deploying sophisticated AI agents with flexibility and control.",
+  "stars": 1766,
+  "forks": 444,
+  "language": "Java",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent",
+    "agentic",
+    "agentic-ai",
+    "agentic-workflow",
+    "agents",
+    "agents-sdk",
+    "ai",
+    "ai-agents",
+    "aiagentframework",
+    "genai",
+    "genai-chatbot",
+    "llm",
+    "llms",
+    "multi-agent",
+    "multi-agent-system"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T05:26:08Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

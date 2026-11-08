@@ -1,0 +1,17 @@
+{
+  "id": "github:ikawrakow/ik_llama.cpp",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "ikawrakow/ik_llama.cpp",
+  "url": "https://github.com/ikawrakow/ik_llama.cpp",
+  "description": "llama.cpp fork with additional SOTA quants and improved performance",
+  "stars": 3380,
+  "forks": 512,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:23:20Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,18 @@
+# Discovery: `telegram bot agent llm`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 46,422 | [AstrBotDevs/AstrBot](https://github.com/AstrBotDevs/AstrBot) | Python | AGPL-3.0 | 2026-11-08 | AI Agent Assistant & development framework that integrates lots of IM platforms, LLMs, plugins and AI feature, and can be your openclaw alternative. ✨ |
+| 18,803 | [langbot-app/LangBot](https://github.com/langbot-app/LangBot) | Python | Apache-2.0 | 2026-11-08 | Production-grade platform for building agentic IM bots - 生产级多平台智能机器人开发平台/ Agent、知识库编排、插件系统 / Bots for Discord / Slack / LINE / Telegram / WeChat(企业微信, 企微智能机器人, 公众号) / 飞书 / 钉钉 / QQ / Matrix e.g. Integrated with ChatGPT(GP |
+| 429 | [SouravBeraAkaSpeed/xiryn](https://github.com/SouravBeraAkaSpeed/xiryn) | TypeScript | MIT | 2026-11-02 | Xiryn — the open-source personal agent. Does everything Muse, Grok Bot and Dots do, on your own computer: each agent gets its own Linux desktop in Docker, any model with your keys, an encrypted vault, and control from Te |
+| 73 | [sazonovanton/SirChatalot](https://github.com/sazonovanton/SirChatalot) | Python | GPL-3.0 | 2026-08-07 | A Telegram bot that proves you don't need a body to have a personality. Works with any OpenAI-compatible LLM; agentic tools, MCP, RAG over your files, memory, vision, voice and image generation. |
+| 54 | [s-nagaev/chibi](https://github.com/s-nagaev/chibi) | Python | MIT | 2026-11-08 | Your Digital Companion. Self-hosted Telegram bot orchestrating multiple AI providers (OpenAI, Anthropic, Google, xAI, DeepSeek, Mistral, Alibaba, MiniMax) with autonomous agent capabilities, MCP integrations, and async t |
+| 46 | [SoCloseSociety/MiloAgent](https://github.com/SoCloseSociety/MiloAgent) | Python | MIT | 2026-06-14 | MiloAgent — Autonomous AI Growth Agent for Reddit, Twitter/X & Telegram. Self-learning bot with LLM-powered content generation, multi-account management, community automation, and A/B testing. Zero cost, open source. |
+| 26 | [AtenovD/PumpGuard-AI](https://github.com/AtenovD/PumpGuard-AI) | Python | MIT | 2026-09-21 | PumpGuard AI: Telegram bot that screens new Robinhood Chain / hood.fun token launches with 4 LLM agents, a risk manager and a creator reputation book. Bring your own model: Grok by default, any OpenAI-compatible API work |
+| 22 | [Sompote/Tiger_bot](https://github.com/Sompote/Tiger_bot) | JavaScript | NOASSERTION | 2026-02-27 | Agentic Swarm AI Agent with persistent long-term memory, multi-provider LLM support, token management, self-learning, and Telegram bot integration — designed for 24/7 autonomous operation on Linux. |
+| 18 | [AniaBot-Project/AniaBot](https://github.com/AniaBot-Project/AniaBot) | Go | MIT | 2026-11-01 | 一个插件驱动型多平台机器人框架，内置AI Agent插件，支持主流Agent功能，适配QQ、微信、飞书、Telegram、Discord等主流平台 |
+| 14 | [steve-goldberg/NocoBot](https://github.com/steve-goldberg/NocoBot) | Python | AGPL-3.0 | 2026-09-18 | Talk to your NocoDB databases through Telegram. An LLM-powered agent that   turns natural language into API calls, with full schema control and   workflow guides, backed by a complete Python SDK for self-hosted NocoDB. |
+| 13 | [aeshef/obsidian-agent](https://github.com/aeshef/obsidian-agent) | Python | MIT | 2026-10-30 | Telegram bot for Obsidian — self-hosted AI agent / life OS: PKM notes RAG, kanban tasks, personal finance. Python, DeepSeek, fail-closed modules. |
+| 13 | [yastman/rag](https://github.com/yastman/rag) | Python | MIT | 2026-11-07 | AI real-estate automation platform: Telegram bot, RAG, apartment search, CRM workflows, voice agent, Langfuse observability, and Dockerized AI runtime. |

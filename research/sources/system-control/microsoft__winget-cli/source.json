@@ -1,0 +1,22 @@
+{
+  "id": "github:microsoft/winget-cli",
+  "kind": "github",
+  "category": "system-control",
+  "repo": "microsoft/winget-cli",
+  "url": "https://github.com/microsoft/winget-cli",
+  "description": "WinGet is the Windows Package Manager. This project includes a CLI (Command Line Interface), PowerShell modules, and a COM (Component Object Model) API (Application Programming Interface).",
+  "stars": 26568,
+  "forks": 1815,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "command-line",
+    "package-manager",
+    "windows",
+    "winget"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T19:59:35Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

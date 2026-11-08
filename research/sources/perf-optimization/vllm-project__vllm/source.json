@@ -1,0 +1,33 @@
+{
+  "id": "github:vllm-project/vllm",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "vllm-project/vllm",
+  "url": "https://github.com/vllm-project/vllm",
+  "description": "A high-throughput and memory-efficient inference and serving engine for LLMs",
+  "stars": 96544,
+  "forks": 24550,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "amd",
+    "blackwell",
+    "cuda",
+    "deepseek",
+    "deepseek-v3",
+    "gpt",
+    "gpt-oss",
+    "inference",
+    "kimi",
+    "llama",
+    "llm",
+    "llm-serving",
+    "model-serving",
+    "moe",
+    "openai"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T12:20:37Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "github:microsoft/terminal",
+  "kind": "github",
+  "category": "system-control",
+  "repo": "microsoft/terminal",
+  "url": "https://github.com/microsoft/terminal",
+  "description": "The new Windows Terminal and the original Windows console host, all in the same place!",
+  "stars": 105348,
+  "forks": 9733,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "cmd",
+    "command-line",
+    "console",
+    "contributions-welcome",
+    "good-first-issue",
+    "hacktoberfest",
+    "terminal",
+    "windows",
+    "windows-console",
+    "windows-terminal",
+    "wsl"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T00:35:29Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

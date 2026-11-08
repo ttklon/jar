@@ -183,23 +183,23 @@ _Сгенерировано из исследовательского vault (`py
 
 | Лицензия | Пакетов |
 | --- | --- |
-| MIT | 242 |
-| не указана | 103 |
-| Apache-2.0 | 73 |
+| MIT | 269 |
+| не указана | 125 |
+| Apache-2.0 | 77 |
 | BSD-3-Clause | 16 |
+| ISC | 8 |
 | BSD-2-Clause | 5 |
-| ISC | 4 |
 | NOASSERTION | 4 |
 | GPL-3.0-or-later | 2 |
+| Apache License, Version 2.0 | 2 |
 | BlueOak-1.0.0 | 2 |
 | LGPL-3.0 | 2 |
 | PSF | 1 |
 | LGPLv3 | 1 |
 | http://www.opensource.org/licenses/mit-license.php | 1 |
 | Apache Software License | 1 |
-| Apache 2.0 License | 1 |
 
-Всего пакетов в vault: **487**. Не найдено в vault (дозакачать): 1.
+Всего пакетов в vault: **552**. Не найдено в vault (дозакачать): 1.
 
 ## Не найдено в vault
 

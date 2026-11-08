@@ -1,0 +1,27 @@
+{
+  "id": "github:stanford-oval/storm",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "stanford-oval/storm",
+  "url": "https://github.com/stanford-oval/storm",
+  "description": "An LLM-powered knowledge curation system that researches a topic and generates a full-length report with citations.",
+  "stars": 31830,
+  "forks": 3005,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agentic-rag",
+    "deep-research",
+    "emnlp2024",
+    "knowledge-curation",
+    "large-language-models",
+    "naacl",
+    "nlp",
+    "report-generation",
+    "retrieval-augmented-generation"
+  ],
+  "archived": false,
+  "pushed_at": "2025-09-30T18:07:21Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

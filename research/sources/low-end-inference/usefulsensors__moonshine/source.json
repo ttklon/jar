@@ -1,0 +1,23 @@
+{
+  "id": "github:usefulsensors/moonshine",
+  "kind": "github",
+  "category": "low-end-inference",
+  "repo": "usefulsensors/moonshine",
+  "url": "https://github.com/usefulsensors/moonshine",
+  "description": "Very low latency speech to text, intent recognition, and text to speech, for building voice agents and interfaces",
+  "stars": 11436,
+  "forks": 658,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "intent-recognition",
+    "stt",
+    "tts",
+    "voice",
+    "voice-recognition"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T03:49:28Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:pkolaczk/fclones",
+  "kind": "github",
+  "category": "system-triage",
+  "repo": "pkolaczk/fclones",
+  "url": "https://github.com/pkolaczk/fclones",
+  "description": "Efficient Duplicate File Finder",
+  "stars": 2992,
+  "forks": 126,
+  "language": "Rust",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2025-03-03T09:50:02Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

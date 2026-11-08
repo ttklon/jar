@@ -1,0 +1,23 @@
+{
+  "id": "github:json-schema-org/json-schema-spec",
+  "kind": "github",
+  "category": "configuration",
+  "repo": "json-schema-org/json-schema-spec",
+  "url": "https://github.com/json-schema-org/json-schema-spec",
+  "description": "The JSON Schema specification",
+  "stars": 5210,
+  "forks": 475,
+  "language": "JavaScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "api-documentation",
+    "json",
+    "json-schema",
+    "jsonschema",
+    "validation"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-02T20:03:14Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

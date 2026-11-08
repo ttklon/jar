@@ -1,0 +1,28 @@
+{
+  "id": "github:miktex/miktex",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "miktex/miktex",
+  "url": "https://github.com/miktex/miktex",
+  "description": "the MiKTeX source code",
+  "stars": 987,
+  "forks": 131,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [
+    "latex",
+    "linux",
+    "luatex",
+    "macos",
+    "miktex",
+    "miktex-source",
+    "pdftex",
+    "tex",
+    "tex-distribution",
+    "xetex"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-02T10:45:35Z",
+  "default_branch": "next",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

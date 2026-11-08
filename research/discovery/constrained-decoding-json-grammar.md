@@ -1,0 +1,18 @@
+# Discovery: `constrained decoding json grammar`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 1 | [qusai-r03/call-me-maybe](https://github.com/qusai-r03/call-me-maybe) | Python | - | 2026-11-01 | Grammar-constrained function calling with Qwen3-0.6B, using a custom finite-state JSON grammar and token-level constrained decoding. |
+| 1 | [ajafarsadiq2002/cfg-parser-core](https://github.com/ajafarsadiq2002/cfg-parser-core) | Python | - | 2026-01-11 | A reusable Context-Free Grammar (CFG) parser in Python with get_valid_next() for LLM constrained decoding, autocomplete, and validation. Includes JSON, Math, CSV, TOML, YAML grammars. |
+| 1 | [Hemanth-hexo/Fraud_tool_LLM](https://github.com/Hemanth-hexo/Fraud_tool_LLM) | Python | MIT | 2026-10-10 | A small LLM fine-tuned and served by a custom-built inference engine (manual KV-cache, batching, from-scratch grammar-constrained JSON decoding) — built as a free, local alternative to a hosted LLM API for a fraud-detect |
+| 0 | [rajatslakhina/constrained-decoding-kit](https://github.com/rajatslakhina/constrained-decoding-kit) | Swift | MIT | 2026-10-24 | Grammar-constrained decoding for on-device LLMs in Swift: schema-valid JSON by construction, guaranteed termination, tested invariants. |
+| 0 | [Aaditya-2006/Constrained-Decoding-Engine](https://github.com/Aaditya-2006/Constrained-Decoding-Engine) | Python | - | 2026-08-02 | A PyTorch-based LLM inference engine that enforces strict output structures (JSON, Python, XML) using Context-Free Grammars (CFG) and custom logit-masking. |
+| 0 | [horita-yuya/grammer-constrained-decoding-demo](https://github.com/horita-yuya/grammer-constrained-decoding-demo) | TypeScript | - | 2026-05-23 | grammar-constrained decoding at inference time: by masking logits with a zod-derived grammar, even a tiny model that was never trained for structured output is forced to emit a schema-valid JSON object. |
+| 0 | [alexandrmotologa/grammarforge](https://github.com/alexandrmotologa/grammarforge) | Python | MIT | 2026-10-14 | Constrained decoding engine and JSON Schema to GBNF compiler for local LLM gateways with sub-millisecond logit masking |
+| 0 | [asp53826/grammar-decode](https://github.com/asp53826/grammar-decode) | Python | MIT | 2026-11-08 | Constrained decoding from scratch: JSON Schema compiled to a character automaton and a cached token mask over a 50k vocabulary |
+| 0 | [v-code01/constraintcost](https://github.com/v-code01/constraintcost) | Python | NOASSERTION | 2026-07-06 | The latency and validity cost of constrained decoding (JSON and grammar) versus unconstrained sampling. |
+| 0 | [ksrinivasarao2012/constrained-vs-finetuned-toolcalling](https://github.com/ksrinivasarao2012/constrained-vs-finetuned-toolcalling) | Python | - | 2026-09-23 | Does fine-tuning beat constrained decoding for LLM tool calling? A controlled 2×2 comparison — base vs QLoRA, free vs JSON-grammar decoding — measured on function selection, argument accuracy, hallucination and abstentio |
+| 0 | [zanarashidi/bpdecode](https://github.com/zanarashidi/bpdecode) | Python | MIT | 2026-09-20 | GPU-accelerated constrained decoding for LLM inference: regex, GBNF, and JSON Schema grammars, batched on the GPU that holds the logits. |
+| 0 | [eshaan2418/maskwise](https://github.com/eshaan2418/maskwise) | Python | MIT | 2026-11-02 | Grammar-constrained decoding for MLX: regex, JSON Schema and CFG to exact token masks, with a measured study of cost and accuracy on Apple silicon |

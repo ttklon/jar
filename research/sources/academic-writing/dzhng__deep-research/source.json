@@ -1,0 +1,23 @@
+{
+  "id": "github:dzhng/deep-research",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "dzhng/deep-research",
+  "url": "https://github.com/dzhng/deep-research",
+  "description": "An AI-powered research assistant that performs iterative, deep research on any topic by combining search engines, web scraping, and large language models.  The goal of this repo is to provide the simplest implementation of a deep research agent - e.g. an agent that can refine its research direction overtime and deep dive into a topic.",
+  "stars": 19880,
+  "forks": 2008,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "agent",
+    "ai",
+    "gpt",
+    "o3-mini",
+    "research"
+  ],
+  "archived": false,
+  "pushed_at": "2026-04-11T23:58:25Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

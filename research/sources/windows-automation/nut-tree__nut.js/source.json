@@ -1,0 +1,27 @@
+{
+  "id": "github:nut-tree/nut.js",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "nut-tree/nut.js",
+  "url": "https://github.com/nut-tree/nut.js",
+  "description": "Native UI testing / controlling with node",
+  "stars": 2855,
+  "forks": 187,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "automation",
+    "desktop-automation",
+    "electron",
+    "native",
+    "node",
+    "test-automation",
+    "testing",
+    "testing-tools",
+    "ui"
+  ],
+  "archived": false,
+  "pushed_at": "2024-05-01T19:50:22Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T12:33:56Z"
+}

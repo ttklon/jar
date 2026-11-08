@@ -1,0 +1,25 @@
+{
+  "id": "github:yt-dlp/yt-dlp",
+  "kind": "github",
+  "category": "media-production",
+  "repo": "yt-dlp/yt-dlp",
+  "url": "https://github.com/yt-dlp/yt-dlp",
+  "description": "A feature-rich command-line audio/video downloader",
+  "stars": 206120,
+  "forks": 18107,
+  "language": "Python",
+  "license": "Unlicense",
+  "topics": [
+    "cli",
+    "downloader",
+    "python",
+    "sponsorblock",
+    "youtube-dl",
+    "youtube-downloader",
+    "yt-dlp"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T07:16:27Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

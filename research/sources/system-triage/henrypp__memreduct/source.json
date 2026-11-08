@@ -1,0 +1,26 @@
+{
+  "id": "github:henrypp/memreduct",
+  "kind": "github",
+  "category": "system-triage",
+  "repo": "henrypp/memreduct",
+  "url": "https://github.com/henrypp/memreduct",
+  "description": "Lightweight real-time memory management application to monitor and clean system memory on your computer.",
+  "stars": 11159,
+  "forks": 633,
+  "language": "C",
+  "license": "GPL-3.0",
+  "topics": [
+    "cleaner",
+    "foss",
+    "mem-reduct",
+    "memory",
+    "memory-management",
+    "memory-monitoring",
+    "monitor",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-07T11:50:59Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

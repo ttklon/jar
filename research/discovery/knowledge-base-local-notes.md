@@ -1,0 +1,18 @@
+# Discovery: `knowledge base local notes`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 898 | [flyhunterl/flymd](https://github.com/flyhunterl/flymd) | JavaScript | NOASSERTION | 2026-07-22 | 高性能Markdown笔记工具！免费AI，智能便签、TODO推送、本地知识库、AI小说引擎。PDF解析、自动语音笔记、录音转文本。毫秒级启动High-performance Markdown note tool! Free AI, smart notes, TODO reminders, local knowledge base, AI novel engine. PDF parsing, auto voice notes, audio |
+| 779 | [GD4AI/obsidian-llm-wiki](https://github.com/GD4AI/obsidian-llm-wiki) | TypeScript | Apache-2.0 | 2026-11-08 | Karpathy's LLM Wiki implementation plugin for Obsidian - turns notes and PDFs into a linked, LLM-powered knowledge base with entity pages, concept pages, graph-powered Q&A, and local-first privacy. |
+| 578 | [docsagent/docsagent](https://github.com/docsagent/docsagent) | TypeScript | - | 2026-09-28 | ⚡ DocsAgent — give your AI agents instant, private access to your personal knowledge base (Zotero, Obsidian, Apple Notes supported now, local docs on the road). Native C++ search core: BM25 + passage ranking in ~15 ms. M |
+| 394 | [scott20201225/marknote-pro](https://github.com/scott20201225/marknote-pro) | JavaScript | NOASSERTION | 2026-11-08 | 本地优先的结构化 Markdown 笔记与知识工作台。原生集成 Git 版本控制、Draw.io 绘图、GeoGebra 建模、思维导图、KDBX 密码库（含 2FA & SSH 直连）及 PDF 专业批注。\| Local-first structured Markdown notes & knowledge base with Git, Draw.io, GeoGebra, MindMap, KDBX & PDF. |
+| 281 | [Freaction/Aquilum](https://github.com/Freaction/Aquilum) | Rust | AGPL-3.0 | 2026-11-08 | Fast local-first Markdown knowledge base for Windows with live preview, search, graph, Dataview, book reader, and MCP |
+| 196 | [postkevone/tiddlyresearch](https://github.com/postkevone/tiddlyresearch) | HTML | - | 2021-08-05 | Local and Anki-compatible note-taking tool based on TiddlyWiki |
+| 110 | [drpwchen/textbook-to-note](https://github.com/drpwchen/textbook-to-note) | Python | MIT | 2026-11-03 | Turn your own PDF textbooks into an AI-searchable knowledge base and structured, fully-cited notes — figures included. Local-first, token-frugal. |
+| 50 | [alkalim/Knopo](https://github.com/alkalim/Knopo) | Swift | AGPL-3.0 | 2026-11-06 | A native macOS outliner for structured thinking, local-first notes, and Markdown-based knowledge management. |
+| 47 | [raphasouthall/neurostack](https://github.com/raphasouthall/neurostack) | Python | Apache-2.0 | 2026-10-22 | Local RAG layer and optimizer for your Markdown knowledge base. CLI + MCP server: grounded answers for any AI client, stale-note detection, session harvesting into memories. Local-first. |
+| 25 | [tanghui315/lumenfolio](https://github.com/tanghui315/lumenfolio) | Rust | AGPL-3.0 | 2026-09-03 | Local-first AI knowledge base for PDFs, Office docs, web clips and Markdown notes — ask your whole library and get citations that jump back to the source. Vectorless RAG, wikilinks, local Codex/Claude agents. |
+| 24 | [BlockchainLabs/Pebblecoin](https://github.com/BlockchainLabs/Pebblecoin) | - | - | 2016-07-12 | Pebblecoin    UPDATE 2015/12/31: Version 0.4.4.1 is now out.  The major change is optimizing the daemon to use less RAM.  It no longer keeps all the blocks, which are rarely needed, in RAM, and so RAM usage has decreased |
+| 16 | [mshtawythug/second-brain](https://github.com/mshtawythug/second-brain) | Python | MIT | 2026-11-07 | Local-first personal knowledge base CLI — hybrid FTS + pgvector search, a GraphRAG entity graph, and LLM enrichment over your notes, transcripts, Slack & Gmail. Runs fully local on Ollama (no cloud, no API keys); queryab |

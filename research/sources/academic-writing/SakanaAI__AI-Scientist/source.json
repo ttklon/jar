@@ -1,0 +1,17 @@
+{
+  "id": "github:SakanaAI/AI-Scientist",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "SakanaAI/AI-Scientist",
+  "url": "https://github.com/SakanaAI/AI-Scientist",
+  "description": "The AI Scientist: Towards Fully Automated Open-Ended Scientific Discovery 🧑‍🔬",
+  "stars": 14964,
+  "forks": 2089,
+  "language": "Jupyter Notebook",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2025-12-19T07:46:21Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

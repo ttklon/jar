@@ -1,0 +1,17 @@
+{
+  "id": "github:eugeneware/ffmpeg-static",
+  "kind": "github",
+  "category": "media-production",
+  "repo": "eugeneware/ffmpeg-static",
+  "url": "https://github.com/eugeneware/ffmpeg-static",
+  "description": "ffmpeg static binaries for Mac OSX and Linux and Windows",
+  "stars": 1410,
+  "forks": 206,
+  "language": "JavaScript",
+  "license": "GPL-3.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-03-21T10:28:10Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

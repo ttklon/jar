@@ -1,0 +1,17 @@
+{
+  "id": "github:jennyzzt/dgm",
+  "kind": "github",
+  "category": "self-extension",
+  "repo": "jennyzzt/dgm",
+  "url": "https://github.com/jennyzzt/dgm",
+  "description": "Darwin Gödel Machine: Open-Ended Evolution of Self-Improving Agents",
+  "stars": 2493,
+  "forks": 462,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2025-08-13T10:40:14Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:ShengranHu/ADAS",
+  "kind": "github",
+  "category": "self-extension",
+  "repo": "ShengranHu/ADAS",
+  "url": "https://github.com/ShengranHu/ADAS",
+  "description": "[ICLR 2025] Automated Design of Agentic Systems",
+  "stars": 1662,
+  "forks": 241,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2025-01-28T06:37:51Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "github:pedroslopez/whatsapp-web.js",
+  "kind": "github",
+  "category": "connectors-extra",
+  "repo": "pedroslopez/whatsapp-web.js",
+  "url": "https://github.com/pedroslopez/whatsapp-web.js",
+  "description": "A WhatsApp client library for NodeJS that connects through the WhatsApp Web browser app",
+  "stars": 22871,
+  "forks": 5197,
+  "language": "JavaScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "api",
+    "bot",
+    "bot-api",
+    "hacktoberfest",
+    "whatsapp",
+    "whatsapp-api",
+    "whatsapp-bot",
+    "whatsapp-web",
+    "whatsapp-web-api"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T12:03:05Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

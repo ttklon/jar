@@ -1,0 +1,25 @@
+{
+  "id": "github:videolan/vlc",
+  "kind": "github",
+  "category": "system-control",
+  "repo": "videolan/vlc",
+  "url": "https://github.com/videolan/vlc",
+  "description": "VLC media player - plays everything, runs anywhere. Code here: https://code.videolan.org/videolan/vlc",
+  "stars": 20363,
+  "forks": 6425,
+  "language": "C",
+  "license": "GPL-2.0",
+  "topics": [
+    "c",
+    "framework",
+    "gplv2",
+    "lgpl",
+    "multimedia",
+    "open-source",
+    "vlc"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T07:56:52Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

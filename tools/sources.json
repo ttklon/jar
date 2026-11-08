@@ -39,7 +39,7 @@
     "windows-automation": {
       "github": [
         "octalmage/robotjs",
-        "nut-tree/nut-js",
+        "nut-tree/nut.js",
         "SnosMe/uiohook-napi",
         "sentialx/node-window-manager",
         "microsoft/node-pty",
@@ -64,7 +64,6 @@
         "xlang-ai/OSWorld",
         "microsoft/WindowsAgentArena",
         "LibreHardwareMonitor/LibreHardwareMonitor",
-        "openhardwaremonitor/openhardwaremonitor",
         "MicrosoftDocs/win32",
         "microsoft/WindowsAppSDK",
         "wookayin/gpustat",
@@ -186,8 +185,7 @@
         "onnxruntime-node",
         "onnxruntime-web",
         "@xenova/transformers",
-        "llama-node",
-        "web-llm"
+        "llama-node"
       ],
       "pypi": [
         "llama-cpp-python",
@@ -297,7 +295,6 @@
         "edge-tts",
         "f5-tts",
         "chatterbox-tts",
-        "openvoice",
         "vibevoice",
         "sounddevice"
       ]
@@ -361,7 +358,7 @@
         "mudler/LocalAI",
         "inngest/inngest",
         "sst/opencode",
-        "chatmcp/chatmcp",
+        "daodao97/chatmcp",
         "AgentOps-AI/agentops",
         "humanlayer/humanlayer"
       ],
@@ -459,7 +456,6 @@
       "pypi": [
         "mcp",
         "fastmcp",
-        "mcp-server-filesystem",
         "mcp-server-git",
         "mcp-server-fetch",
         "mcp-proxy"
@@ -469,7 +465,6 @@
       "github": [
         "tree-sitter/tree-sitter",
         "ast-grep/ast-grep",
-        "microsoft/language-server-protocol",
         "isomorphic-git/isomorphic-git",
         "gitpython-developers/GitPython",
         "nodegit/nodegit",
@@ -669,7 +664,6 @@
       ],
       "npm": [
         "grammy",
-        "telegraf",
         "googleapis",
         "@slack/web-api",
         "@slack/bolt",
@@ -717,10 +711,9 @@
         "electron-react-boilerplate/electron-react-boilerplate",
         "sindresorhus/electron-context-menu",
         "sindresorhus/electron-dl",
-        "mawie/electron-window-state",
         "electron/electron-api-demos",
         "cawa-93/vite-electron-builder",
-        "vaul? "
+        "vaul?"
       ],
       "npm": [
         "react",
@@ -1261,8 +1254,7 @@
         "google-auth-library",
         "open",
         "mailparser",
-        "node-imap",
-        "xmpp__skip"
+        "node-imap"
       ]
     },
     "benchmarks-extra": {
@@ -1281,6 +1273,228 @@
         "evalplus",
         "datasets",
         "evaluate"
+      ]
+    },
+    "academic-writing": {
+      "github": [
+        "jgm/pandoc",
+        "quarto-dev/quarto-cli",
+        "typst/typst",
+        "tectonic-typesetting/tectonic",
+        "miktex/miktex",
+        "latex3/latex3",
+        "lierdakil/pandoc-crossref",
+        "citation-style-language/styles",
+        "citation-style-language/citeproc-js",
+        "retorquere/zotero-better-bibtex",
+        "zotero/zotero",
+        "languagetool-org/languagetool",
+        "errata-ai/vale",
+        "textlint/textlint",
+        "retextjs/retext",
+        "adbar/trafilatura",
+        "stanford-oval/storm",
+        "assafelovic/gpt-researcher",
+        "dzhng/deep-research",
+        "langchain-ai/open_deep_research",
+        "HKUDS/Auto-Deep-Research",
+        "SamuelSchmidgall/AgentLaboratory",
+        "SakanaAI/AI-Scientist",
+        "MineDojo/Voyager",
+        "SakanaAI/AI-Scientist-v2"
+      ],
+      "pypi": [
+        "pypandoc",
+        "docx2python",
+        "language-tool-python",
+        "textstat",
+        "pyspellchecker",
+        "citeproc-py",
+        "habanero",
+        "scholarly",
+        "arxiv",
+        "semanticscholar",
+        "pyalex",
+        "openalexapi",
+        "ddgs",
+        "duckduckgo-search",
+        "trafilatura",
+        "newspaper3k",
+        "readability-lxml",
+        "justext",
+        "sumy",
+        "pdfminer.six",
+        "requests-cache",
+        "grobid-client-python",
+        "bibtexparser",
+        "pybtex",
+        "pylatexenc",
+        "markdown2",
+        "tabulate"
+      ],
+      "npm": [
+        "citation-js",
+        "@citation-js/core",
+        "citeproc",
+        "textlint",
+        "write-good",
+        "retext",
+        "alex",
+        "remark-lint",
+        "unified"
+      ]
+    },
+    "self-extension": {
+      "github": [
+        "Arvid-pku/Godel_Agent",
+        "ShengranHu/ADAS",
+        "jennyzzt/dgm",
+        "algorithmicsuperintelligence/openevolve",
+        "smithery-ai/cli",
+        "michaellatman/mcp-get",
+        "modelcontextprotocol/registry",
+        "punkpeye/awesome-mcp-servers",
+        "docker/mcp-gateway",
+        "anthropics/skills",
+        "VoltAgent/awesome-agent-skills",
+        "wshobson/agents",
+        "openai/openai-agents-python",
+        "lastmile-ai/mcp-agent",
+        "jlowin/fastmcp",
+        "modelcontextprotocol/inspector",
+        "microsoft/agent-framework",
+        "google/adk-python",
+        "google/adk-java",
+        "a2aproject/A2A"
+      ],
+      "pypi": [
+        "mcp",
+        "fastmcp",
+        "a2a-sdk",
+        "packaging",
+        "pip",
+        "importlib-metadata",
+        "tomlkit",
+        "semver",
+        "resolvelib"
+      ],
+      "npm": [
+        "semver",
+        "pacote",
+        "@npmcli/arborist",
+        "execa",
+        "@modelcontextprotocol/sdk",
+        "tar",
+        "undici"
+      ]
+    },
+    "system-triage": {
+      "github": [
+        "ChrisTitusTech/winutil",
+        "farag2/Sophia-Script-for-Windows",
+        "Raphire/Win11Debloat",
+        "builtbybel/ThisIsWin11",
+        "undergroundwires/privacy.sexy",
+        "henrypp/memreduct",
+        "henrypp/simplewall",
+        "bleachbit/bleachbit",
+        "czkawka/czkawka",
+        "arsenetar/dupeguru",
+        "jbruchon/jdupes",
+        "pkolaczk/fclones",
+        "LibreHardwareMonitor/LibreHardwareMonitor",
+        "hellzerg/optimizer",
+        "W4RH4WK/Debloat-Windows-10",
+        "microsoft/PowerToys",
+        "PowerShell/PowerShell",
+        "olafhartong/sysmon-modular"
+      ],
+      "pypi": [
+        "psutil",
+        "wmi",
+        "pywin32",
+        "winsdk",
+        "winrt-runtime",
+        "humanfriendly",
+        "tabulate",
+        "rich",
+        "py-cpuinfo",
+        "distro",
+        "packaging"
+      ],
+      "npm": [
+        "systeminformation",
+        "ps-list",
+        "pidusage",
+        "tree-kill",
+        "windows-release",
+        "regedit",
+        "tasklist",
+        "node-os-utils",
+        "diskusage"
+      ]
+    },
+    "updates": {
+      "github": [
+        "electron/update.electronjs.org",
+        "Squirrel/Squirrel.Windows",
+        "velopack/velopack",
+        "electron-userland/electron-builder",
+        "electron/asar",
+        "microsoft/msix-packaging",
+        "facebook/zstd",
+        "googleapis/release-please",
+        "semantic-release/semantic-release",
+        "softprops/action-gh-release",
+        "actions/attest-build-provenance",
+        "sigstore/cosign",
+        "anchore/sbom-action"
+      ],
+      "npm": [
+        "electron-updater",
+        "electron-builder",
+        "semver",
+        "zstd-codec",
+        "tar",
+        "@electron/asar",
+        "node-stream-zip"
+      ],
+      "pypi": [
+        "semver",
+        "packaging",
+        "zstandard",
+        "requests",
+        "filelock"
+      ]
+    },
+    "configuration": {
+      "github": [
+        "rjsf-team/react-jsonschema-form",
+        "ajv-validator/ajv",
+        "sindresorhus/conf",
+        "sindresorhus/electron-store",
+        "json-schema-org/json-schema-spec",
+        "piitaya/lovelace-mushroom"
+      ],
+      "npm": [
+        "ajv",
+        "@rjsf/core",
+        "@rjsf/utils",
+        "@rjsf/validator-ajv8",
+        "conf",
+        "json-schema-to-typescript",
+        "zod-to-json-schema",
+        "lodash.get",
+        "set-value",
+        "dot-prop"
+      ],
+      "pypi": [
+        "jsonschema",
+        "pydantic",
+        "pydantic-settings",
+        "dynaconf",
+        "python-dotenv",
+        "toml"
       ]
     }
   },

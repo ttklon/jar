@@ -1,0 +1,23 @@
+{
+  "id": "github:mqttjs/MQTT.js",
+  "kind": "github",
+  "category": "connectors-extra",
+  "repo": "mqttjs/MQTT.js",
+  "url": "https://github.com/mqttjs/MQTT.js",
+  "description": "The MQTT client for Node.js and the browser",
+  "stars": 9129,
+  "forks": 1453,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "hacktoberfest",
+    "javascript",
+    "mqtt",
+    "mqtt-broker",
+    "nodejs-library"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-20T07:15:24Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

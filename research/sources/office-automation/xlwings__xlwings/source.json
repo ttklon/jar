@@ -1,0 +1,22 @@
+{
+  "id": "github:xlwings/xlwings",
+  "kind": "github",
+  "category": "office-automation",
+  "repo": "xlwings/xlwings",
+  "url": "https://github.com/xlwings/xlwings",
+  "description": "xlwings is a Python library that makes it easy to call Python from Excel and vice versa. It works with Excel on Windows, macOS, and Excel on the web.",
+  "stars": 3429,
+  "forks": 540,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "automation",
+    "excel",
+    "python",
+    "reporting"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T20:59:51Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

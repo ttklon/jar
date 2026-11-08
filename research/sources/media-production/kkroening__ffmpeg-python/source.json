@@ -1,0 +1,17 @@
+{
+  "id": "github:kkroening/ffmpeg-python",
+  "kind": "github",
+  "category": "media-production",
+  "repo": "kkroening/ffmpeg-python",
+  "url": "https://github.com/kkroening/ffmpeg-python",
+  "description": "Python bindings for FFmpeg - with complex filtering support",
+  "stars": 11015,
+  "forks": 948,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2024-08-04T00:07:08Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

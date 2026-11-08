@@ -1,0 +1,17 @@
+{
+  "id": "github:QwenLM/Qwen3",
+  "kind": "github",
+  "category": "low-end-inference",
+  "repo": "QwenLM/Qwen3",
+  "url": "https://github.com/QwenLM/Qwen3",
+  "description": "Qwen3 is the large language model series developed by Qwen team, Alibaba Cloud.",
+  "stars": 27721,
+  "forks": 2100,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-01-09T03:05:47Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

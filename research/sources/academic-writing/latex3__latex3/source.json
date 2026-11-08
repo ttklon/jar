@@ -1,0 +1,20 @@
+{
+  "id": "github:latex3/latex3",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "latex3/latex3",
+  "url": "https://github.com/latex3/latex3",
+  "description": "The expl3 (LaTeX3) Development Repository",
+  "stars": 2136,
+  "forks": 216,
+  "language": "TeX",
+  "license": "LPPL-1.3c",
+  "topics": [
+    "latex",
+    "latex3-development"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T18:44:34Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

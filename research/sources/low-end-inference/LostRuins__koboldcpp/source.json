@@ -1,0 +1,28 @@
+{
+  "id": "github:LostRuins/koboldcpp",
+  "kind": "github",
+  "category": "low-end-inference",
+  "repo": "LostRuins/koboldcpp",
+  "url": "https://github.com/LostRuins/koboldcpp",
+  "description": "KoboldCpp - Run GGUF AI models locally with a KoboldAI UI. One File. Zero Install.",
+  "stars": 12193,
+  "forks": 808,
+  "language": "C++",
+  "license": "AGPL-3.0",
+  "topics": [
+    "gemma",
+    "ggml",
+    "gguf",
+    "koboldai",
+    "koboldcpp",
+    "language-model",
+    "llama",
+    "llamacpp",
+    "llm",
+    "mistral"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T09:41:02Z",
+  "default_branch": "concedo",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

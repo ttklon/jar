@@ -1,0 +1,17 @@
+{
+  "id": "github:IST-DASLab/sparsegpt",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "IST-DASLab/sparsegpt",
+  "url": "https://github.com/IST-DASLab/sparsegpt",
+  "description": "Code for the ICML 2023 paper \"SparseGPT: Massive Language Models Can Be Accurately Pruned in One-Shot\".",
+  "stars": 903,
+  "forks": 128,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2024-08-20T10:10:09Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "github:HKUDS/Auto-Deep-Research",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "HKUDS/Auto-Deep-Research",
+  "url": "https://github.com/HKUDS/Auto-Deep-Research",
+  "description": "\"Your Fully-Automated Personal AI Assistant\"",
+  "stars": 1758,
+  "forks": 245,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "agent",
+    "deep-research",
+    "llm"
+  ],
+  "archived": false,
+  "pushed_at": "2025-10-16T06:38:48Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

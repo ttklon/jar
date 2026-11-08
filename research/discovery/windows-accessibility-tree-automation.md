@@ -1,0 +1,18 @@
+# Discovery: `windows accessibility tree automation`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 13 | [deploymenttheory/windows-mcp-server](https://github.com/deploymenttheory/windows-mcp-server) | Go | MIT | 2026-11-06 | A MCP server that bridges AI agents to the Windows desktop. UI Automation, synthetic mouse/keyboard input, screenshots, window and application control, PowerShell, the registry, processes, the filesystem, and web scrapin |
+| 8 | [DigitalDog1/desk-mcp](https://github.com/DigitalDog1/desk-mcp) | PowerShell | Apache-2.0 | 2026-10-09 | Windows desktop automation MCP server - screenshots, OCR, mouse and keyboard, and accessibility trees via UI Automation, MSAA and Chrome DevTools Protocol. Node.js + built-in PowerShell, no Python and no native modules. |
+| 7 | [emperorbug46/PcGoz](https://github.com/emperorbug46/PcGoz) | Python | MIT | 2026-10-28 | MCP server that lets Claude see and use the Windows desktop: UI Automation tree, annotated screenshots and real mouse/keyboard input, with input lock and emergency stop. EN/TR. |
+| 6 | [TheRogue76/otto-harness](https://github.com/TheRogue76/otto-harness) | Swift | MIT | 2026-11-07 | Lets coding agents (Claude Code, Codex, pi and others) see and operate desktop apps on macOS and Linux, plus iOS Simulators and Android: the element tree, screenshots, clicks, typing, menus and windows. |
+| 3 | [Zichen-6688/Windows-MCP-Highspeed-Rust](https://github.com/Zichen-6688/Windows-MCP-Highspeed-Rust) | Rust | NOASSERTION | 2026-09-26 | A fast Model Context Protocol server that automates Windows desktop applications through the UI Automation (UIA) accessibility tree — pure semantic tree navigation and window handles, no screenshots. |
+| 3 | [jhonpork1233-beep/win-mind](https://github.com/jhonpork1233-beep/win-mind) | Python | Apache-2.0 | 2026-09-30 | Windows MCP server: AI sees and drives any app through the accessibility tree - no screenshots, no mouse - plus 200+ native Windows tools. |
+| 3 | [BillJr99/AutoGUI](https://github.com/BillJr99/AutoGUI) | Python | - | 2026-11-04 | Desktop automation agent connecting any OpenWebUI-compatible LLM to your computer via a ReAct tool loop: shell, filesystem, pixel and accessibility-tree clicking, Set-of-Mark grounding, Playwright browser control, and a  |
+| 2 | [desteny-dev/pc-screen-control](https://github.com/desteny-dev/pc-screen-control) | Python | MIT | 2026-08-06 | MCP server for Windows. Gives an AI the accessibility tree instead of screenshots, so it operates controls by name and reports the state before and after. 34 tools, no network access, one-click install for Claude Desktop |
+| 1 | [ibraheem-mustafa-dev/windowsagent](https://github.com/ibraheem-mustafa-dev/windowsagent) | Python | MIT | 2026-04-18 | Open-source AI agent for Windows desktop automation using the accessibility tree |
+| 1 | [zredo19/winhands](https://github.com/zredo19/winhands) | Python | MIT | 2026-10-19 | Computer use MCP server for Windows: accessibility tree + pixels, code mode, game-grade input and a safe takeover overlay |
+| 1 | [HuzPro/pytest-uia](https://github.com/HuzPro/pytest-uia) | Python | MIT | 2026-07-29 | Windows GUI acceptance testing for pytest, through the UI Automation accessibility tree rather than pixels. Drives WinForms, Electron and Tkinter; OCR only for surfaces with no tree. |
+| 1 | [2eezy77/window-hints](https://github.com/2eezy77/window-hints) | Python | MIT | 2026-07-21 | Windows systems tooling: UI Automation tree scan, overlay hint codes, and hotkey cursor targeting |

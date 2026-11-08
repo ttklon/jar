@@ -1,0 +1,18 @@
+# Discovery: `auto updater desktop app`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 439 | [NucleusFramework/Nucleus](https://github.com/NucleusFramework/Nucleus) | Kotlin | NOASSERTION | 2026-11-07 | Native desktop platform for the JVM. Compose Multiplatform apps with real OS integration — native window decorations, notifications, taskbar and dock, code signing, installers, auto-update — packaged for macOS, Windows a |
+| 347 | [leanflutter/auto_updater](https://github.com/leanflutter/auto_updater) | C++ | MIT | 2025-03-29 | This plugin allows Flutter desktop apps to automatically update themselves (based on sparkle and winsparkle). |
+| 277 | [Sfedfcv/redesigned-pancake](https://github.com/Sfedfcv/redesigned-pancake) | - | - | 2021-05-16 | Skip to content github / docs Code Issues 80 Pull requests 35 Discussions Actions Projects 2 Security Insights Merge branch 'main' into 1862-Add-Travis-CI-migration-table  1862-Add-Travis-CI-migration-table (#1869, Iixix |
+| 172 | [knightswarrior/AppAutoUpdater](https://github.com/knightswarrior/AppAutoUpdater) | C# | MIT | 2022-04-12 | AutoUpdater is a library which allows developers to easily add auto update feature to their desktop (Windows, macOS and Linux) application. |
+| 92 | [klonnet23/helloy-word](https://github.com/klonnet23/helloy-word) | - | - | 2022-08-29 |     {   "releases": {     "2.0.4": [       "[Fixed] Refresh for Enterprise repositories did not handle API error querying branches - #7713",       "[Fixed] Missing \"Discard all changes\" context menu in Changes header - |
+| 83 | [dvgamerr-app/hentai-downloader](https://github.com/dvgamerr-app/hentai-downloader) | JavaScript | MIT | 2026-10-26 | Desktop app that queues e-hentai.org / exhentai.org gallery links and saves the images into tidy folders. Clipboard watching, history, auto update. |
+| 56 | [Ronald106/Surviv.io](https://github.com/Ronald106/Surviv.io) | - | - | 2020-03-08 |  <!doctype html> <html lang='en'>   <head>     <!-- Meta Properties -->     <meta charset='UTF-8'>     <title>surviv.io - 2d battle royale game</title>     <meta name="viewport" content="width=device-width, height=device |
+| 53 | [MarlonJD/flutter_desktop_updater](https://github.com/MarlonJD/flutter_desktop_updater) | Dart | MIT | 2026-11-04 | Sparkle-style auto-updates for Flutter desktop apps: verified releases, release CLI, built-in UI, and Windows/macOS/Linux support. |
+| 47 | [ikhd/claude-desktop-rtl](https://github.com/ikhd/claude-desktop-rtl) | PowerShell | MIT | 2026-05-29 | Arabic / RTL support for the Claude Desktop app (Windows + macOS) - same app, your login, auto re-applies after updates. |
+| 33 | [Reina-Agent/Reina](https://github.com/Reina-Agent/Reina) | - | AGPL-3.0 | 2026-09-10 | Reina 桌面 AI Agent 发行仓库（仅安装包） \| Release distribution for the Reina desktop AI agent — installers only. Windows x64 & macOS arm64, in-app auto-update. |
+| 24 | [kdroidFilter/AppwithAutoUpdater](https://github.com/kdroidFilter/AppwithAutoUpdater) | Kotlin | MIT | 2025-01-14 | This repository demonstrates how to use the PlatformTools library to implement self-updating functionality for desktop and Android apps.  |
+| 24 | [DevNullInc/RenegadeCMM](https://github.com/DevNullInc/RenegadeCMM) | TypeScript | NOASSERTION | 2026-10-22 | A unified desktop app for managing ComfyUI models. Browse and download from CivitAI, auto-organize into folders, track updates, detect duplicates, and handle version management with intelligent routing for SD models, GGU |

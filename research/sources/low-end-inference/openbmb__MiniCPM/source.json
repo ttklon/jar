@@ -1,0 +1,17 @@
+{
+  "id": "github:openbmb/MiniCPM",
+  "kind": "github",
+  "category": "low-end-inference",
+  "repo": "openbmb/MiniCPM",
+  "url": "https://github.com/openbmb/MiniCPM",
+  "description": "MiniCPM5: SOTA on-device LLMs, small yet powerful.",
+  "stars": 11824,
+  "forks": 825,
+  "language": "Jupyter Notebook",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-09-21T13:38:23Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

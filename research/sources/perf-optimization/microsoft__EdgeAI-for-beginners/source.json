@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/EdgeAI-for-beginners",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "microsoft/EdgeAI-for-beginners",
+  "url": "https://github.com/microsoft/EdgeAI-for-beginners",
+  "description": "This course is designed to guide beginners through the exciting world of Edge AI, covering fundamental concepts, popular models, inference techniques, device-specific applications, model optimization, and the development of intelligent Edge AI agents.",
+  "stars": 1778,
+  "forks": 419,
+  "language": "Jupyter Notebook",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-02T03:11:20Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

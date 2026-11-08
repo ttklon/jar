@@ -1,0 +1,26 @@
+{
+  "id": "github:sindresorhus/electron-store",
+  "kind": "github",
+  "category": "configuration",
+  "repo": "sindresorhus/electron-store",
+  "url": "https://github.com/sindresorhus/electron-store",
+  "description": "Simple data persistence for your Electron app or module - Save and load user preferences, app state, cache, etc",
+  "stars": 5030,
+  "forks": 167,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "config",
+    "data-persistence",
+    "electron",
+    "electron-module",
+    "npm-package",
+    "preferences",
+    "storage",
+    "user-preferences"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-12T19:53:29Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

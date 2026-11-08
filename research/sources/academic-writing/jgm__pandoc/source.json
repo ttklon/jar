@@ -1,0 +1,27 @@
+{
+  "id": "github:jgm/pandoc",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "jgm/pandoc",
+  "url": "https://github.com/jgm/pandoc",
+  "description": "Universal markup converter",
+  "stars": 46854,
+  "forks": 5121,
+  "language": "Haskell",
+  "license": "GPL-2.0",
+  "topics": [
+    "commonmark",
+    "converter",
+    "document",
+    "haskell",
+    "markdown",
+    "markup",
+    "pandoc",
+    "presentation",
+    "publishing"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T06:38:46Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

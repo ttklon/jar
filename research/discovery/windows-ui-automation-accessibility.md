@@ -1,0 +1,18 @@
+# Discovery: `windows ui automation accessibility`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 277 | [Sfedfcv/redesigned-pancake](https://github.com/Sfedfcv/redesigned-pancake) | - | - | 2021-05-16 | Skip to content github / docs Code Issues 80 Pull requests 35 Discussions Actions Projects 2 Security Insights Merge branch 'main' into 1862-Add-Travis-CI-migration-table  1862-Add-Travis-CI-migration-table (#1869, Iixix |
+| 164 | [ThePacielloGroup/aviewer](https://github.com/ThePacielloGroup/aviewer) | Pascal | Apache-2.0 | 2025-02-19 | Inspection tool for Windows accessibility API information (MSAA, IAccessible2, UI Automation, ARIA, HTML DOM) |
+| 15 | [manushi4/Screenhand](https://github.com/manushi4/Screenhand) | TypeScript | AGPL-3.0 | 2026-04-02 | Give AI eyes and hands on your desktop. Open-source MCP server for desktop automation — screenshots, UI control, browser automation, OCR. Works with Claude, Cursor, and any MCP client. macOS + Windows. |
+| 13 | [deploymenttheory/windows-mcp-server](https://github.com/deploymenttheory/windows-mcp-server) | Go | MIT | 2026-11-06 | A MCP server that bridges AI agents to the Windows desktop. UI Automation, synthetic mouse/keyboard input, screenshots, window and application control, PowerShell, the registry, processes, the filesystem, and web scrapin |
+| 12 | [stevefaulkner/aViewer---moderno](https://github.com/stevefaulkner/aViewer---moderno) | C# | NOASSERTION | 2026-07-29 | Accessibillity API Vibe viewer - Inspection tool for Windows accessibility API information (MSAA, IAccessible2, UI Automation, ARIA, HTML DOM) |
+| 9 | [nijakanthan/WindowsAutomationSpy](https://github.com/nijakanthan/WindowsAutomationSpy) | C# | MIT | 2016-04-17 | Windows-based tool that enables you select any UI element and view the element's accessibility data. |
+| 8 | [VBS2004/jev-windows-agent](https://github.com/VBS2004/jev-windows-agent) | Python | MIT | 2026-09-27 | Windows UI Automation extension of arc-cua: a fast, JEV-powered decision loop for desktop computer-use agents |
+| 8 | [DigitalDog1/desk-mcp](https://github.com/DigitalDog1/desk-mcp) | PowerShell | Apache-2.0 | 2026-10-09 | Windows desktop automation MCP server - screenshots, OCR, mouse and keyboard, and accessibility trees via UI Automation, MSAA and Chrome DevTools Protocol. Node.js + built-in PowerShell, no Python and no native modules. |
+| 7 | [timteh/antigravity-autopilot](https://github.com/timteh/antigravity-autopilot) | PowerShell | MIT | 2026-03-18 | 🚀 Auto-accept agent steps in Antigravity IDE — no CDP required. Uses OS-level accessibility (Windows UI Automation) to click Run/Accept/Continue buttons invisibly. Works when every other auto-accept extension fails. |
+| 7 | [emperorbug46/PcGoz](https://github.com/emperorbug46/PcGoz) | Python | MIT | 2026-10-28 | MCP server that lets Claude see and use the Windows desktop: UI Automation tree, annotated screenshots and real mouse/keyboard input, with input lock and emergency stop. EN/TR. |
+| 5 | [amitse/uiacli](https://github.com/amitse/uiacli) | C# | MIT | 2026-05-17 | browser-use for Windows desktops — AI agents see and control any Windows app via UI Automation. The missing piece for computer-use agents. |
+| 4 | [Ranrar/wgaf](https://github.com/Ranrar/wgaf) | Rust | MIT | 2026-08-16 |   A Wayland-native automation framework for GNOME Shell — window management, keyboard/mouse automation, application discovery, and accessibility-driven UI automation. |

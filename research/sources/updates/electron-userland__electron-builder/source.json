@@ -1,0 +1,33 @@
+{
+  "id": "github:electron-userland/electron-builder",
+  "kind": "github",
+  "category": "updates",
+  "repo": "electron-userland/electron-builder",
+  "url": "https://github.com/electron-userland/electron-builder",
+  "description": "A complete solution to package and build a ready for distribution Electron app with “auto update” support out of the box",
+  "stars": 14704,
+  "forks": 1895,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "appx",
+    "auto-update",
+    "builder",
+    "contributions-welcome",
+    "deb",
+    "distribution-electron",
+    "dmg",
+    "electron",
+    "electron-builder",
+    "electron-updater",
+    "linux",
+    "macos",
+    "msi",
+    "nsis",
+    "pkg"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T20:37:01Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "github:jlowin/fastmcp",
+  "kind": "github",
+  "category": "self-extension",
+  "repo": "jlowin/fastmcp",
+  "url": "https://github.com/jlowin/fastmcp",
+  "description": "🚀 The fast, Pythonic way to build MCP servers and clients.",
+  "stars": 28341,
+  "forks": 2566,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agents",
+    "fastmcp",
+    "llms",
+    "mcp",
+    "mcp-clients",
+    "mcp-servers",
+    "mcp-tools",
+    "model-context-protocol",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T12:19:23Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

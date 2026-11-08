@@ -1,0 +1,17 @@
+{
+  "id": "github:LiveBench/LiveBench",
+  "kind": "github",
+  "category": "benchmarks-extra",
+  "repo": "LiveBench/LiveBench",
+  "url": "https://github.com/LiveBench/LiveBench",
+  "description": "LiveBench: A Challenging, Contamination-Free LLM Benchmark",
+  "stars": 1351,
+  "forks": 130,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-18T01:48:44Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

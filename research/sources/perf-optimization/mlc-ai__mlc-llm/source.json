@@ -1,0 +1,22 @@
+{
+  "id": "github:mlc-ai/mlc-llm",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "mlc-ai/mlc-llm",
+  "url": "https://github.com/mlc-ai/mlc-llm",
+  "description": "Universal LLM Deployment Engine with ML Compilation",
+  "stars": 23312,
+  "forks": 2165,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "language-model",
+    "llm",
+    "machine-learning-compilation",
+    "tvm"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-30T09:07:12Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

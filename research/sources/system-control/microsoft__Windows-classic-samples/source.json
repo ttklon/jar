@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/Windows-classic-samples",
+  "kind": "github",
+  "category": "system-control",
+  "repo": "microsoft/Windows-classic-samples",
+  "url": "https://github.com/microsoft/Windows-classic-samples",
+  "description": "This repo contains samples that demonstrate the API used in Windows classic desktop applications.",
+  "stars": 5688,
+  "forks": 3292,
+  "language": "",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-09-03T20:50:29Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

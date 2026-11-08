@@ -1,0 +1,23 @@
+{
+  "id": "github:electron/asar",
+  "kind": "github",
+  "category": "updates",
+  "repo": "electron/asar",
+  "url": "https://github.com/electron/asar",
+  "description": "Simple extensive tar-like archive format with indexing",
+  "stars": 2890,
+  "forks": 270,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "asar",
+    "chrome",
+    "electron",
+    "javascript",
+    "pickle"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-01T09:30:34Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

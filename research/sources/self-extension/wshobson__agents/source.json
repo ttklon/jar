@@ -1,0 +1,33 @@
+{
+  "id": "github:wshobson/agents",
+  "kind": "github",
+  "category": "self-extension",
+  "repo": "wshobson/agents",
+  "url": "https://github.com/wshobson/agents",
+  "description": "Plugins, agents, skills, and commands for Claude Code, Codex CLI, Cursor, OpenCode, Antigravity CLI, GitHub Copilot, and Pi, written once in Markdown and adapted to each tool by generators with validation and evals.",
+  "stars": 42302,
+  "forks": 4472,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agent-skills",
+    "agentic-ai",
+    "ai-agents",
+    "anthropic",
+    "antigravity",
+    "claude",
+    "claude-code",
+    "claude-code-marketplace",
+    "claude-code-plugin",
+    "claude-skills",
+    "codex",
+    "coding-agents",
+    "cursor",
+    "cursor-rules",
+    "github-copilot"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T15:57:30Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

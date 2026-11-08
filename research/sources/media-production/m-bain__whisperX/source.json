@@ -1,0 +1,23 @@
+{
+  "id": "github:m-bain/whisperX",
+  "kind": "github",
+  "category": "media-production",
+  "repo": "m-bain/whisperX",
+  "url": "https://github.com/m-bain/whisperX",
+  "description": "WhisperX:  Automatic Speech Recognition with Word-level Timestamps (& Diarization)",
+  "stars": 25150,
+  "forks": 2540,
+  "language": "Python",
+  "license": "BSD-2-Clause",
+  "topics": [
+    "asr",
+    "speech",
+    "speech-recognition",
+    "speech-to-text",
+    "whisper"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-22T14:53:44Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

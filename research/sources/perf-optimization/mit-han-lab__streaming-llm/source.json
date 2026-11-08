@@ -1,0 +1,17 @@
+{
+  "id": "github:mit-han-lab/streaming-llm",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "mit-han-lab/streaming-llm",
+  "url": "https://github.com/mit-han-lab/streaming-llm",
+  "description": "[ICLR 2024] Efficient Streaming Language Models with Attention Sinks",
+  "stars": 7277,
+  "forks": 402,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2024-07-11T08:14:43Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

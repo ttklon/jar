@@ -1,0 +1,33 @@
+{
+  "id": "github:n8n-io/n8n",
+  "kind": "github",
+  "category": "connectors-extra",
+  "repo": "n8n-io/n8n",
+  "url": "https://github.com/n8n-io/n8n",
+  "description": "Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.",
+  "stars": 209808,
+  "forks": 61401,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "ai",
+    "apis",
+    "automation",
+    "cli",
+    "data-flow",
+    "development",
+    "integration-framework",
+    "integrations",
+    "ipaas",
+    "low-code",
+    "low-code-platform",
+    "mcp",
+    "mcp-client",
+    "mcp-server",
+    "n8n"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:45:10Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

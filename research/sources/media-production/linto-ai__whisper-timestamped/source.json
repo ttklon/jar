@@ -1,0 +1,33 @@
+{
+  "id": "github:linto-ai/whisper-timestamped",
+  "kind": "github",
+  "category": "media-production",
+  "repo": "linto-ai/whisper-timestamped",
+  "url": "https://github.com/linto-ai/whisper-timestamped",
+  "description": "Multilingual Automatic Speech Recognition with word-level timestamps and confidence",
+  "stars": 2861,
+  "forks": 213,
+  "language": "Python",
+  "license": "AGPL-3.0",
+  "topics": [
+    "asr",
+    "attention-is-all-you-need",
+    "attention-mechanism",
+    "attention-model",
+    "attention-network",
+    "attention-seq2seq",
+    "attention-visualization",
+    "deep-learning",
+    "machine-learning",
+    "multilingual-models",
+    "python",
+    "python3",
+    "pytorch",
+    "speaker-diarization",
+    "speech"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-28T09:57:17Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

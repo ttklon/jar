@@ -1,0 +1,26 @@
+{
+  "id": "github:dottxt-ai/outlines",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "dottxt-ai/outlines",
+  "url": "https://github.com/dottxt-ai/outlines",
+  "description": "Structured Outputs",
+  "stars": 16007,
+  "forks": 911,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "cfg",
+    "generative-ai",
+    "json",
+    "llms",
+    "prompt-engineering",
+    "regex",
+    "structured-generation",
+    "symbolic-ai"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-21T17:58:05Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:quarto-dev/quarto-cli",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "quarto-dev/quarto-cli",
+  "url": "https://github.com/quarto-dev/quarto-cli",
+  "description": "Open-source scientific and technical publishing system built on Pandoc.",
+  "stars": 6159,
+  "forks": 481,
+  "language": "JavaScript",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T17:04:42Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

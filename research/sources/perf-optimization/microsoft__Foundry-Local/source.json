@@ -1,0 +1,28 @@
+{
+  "id": "github:microsoft/Foundry-Local",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "microsoft/Foundry-Local",
+  "url": "https://github.com/microsoft/Foundry-Local",
+  "description": "",
+  "stars": 2643,
+  "forks": 386,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "ai-sdk",
+    "chat-completions",
+    "foundry-local",
+    "gpu-acceleration",
+    "local-ai",
+    "microsoft",
+    "on-device-inference",
+    "onnx-runtime",
+    "speech-to-text",
+    "whisper"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:12:28Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "github:errata-ai/vale",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "errata-ai/vale",
+  "url": "https://github.com/errata-ai/vale",
+  "description": ":pencil: A markup-aware linter for prose built with speed and extensibility in mind.",
+  "stars": 6348,
+  "forks": 238,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [
+    "linter",
+    "linting",
+    "vale"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T14:37:05Z",
+  "default_branch": "v3",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

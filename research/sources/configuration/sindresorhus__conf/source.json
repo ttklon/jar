@@ -1,0 +1,27 @@
+{
+  "id": "github:sindresorhus/conf",
+  "kind": "github",
+  "category": "configuration",
+  "repo": "sindresorhus/conf",
+  "url": "https://github.com/sindresorhus/conf",
+  "description": "Simple config handling for your app or module",
+  "stars": 1350,
+  "forks": 139,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "command-line",
+    "config",
+    "configuration-management",
+    "json",
+    "json-schema",
+    "node-module",
+    "npm-package",
+    "preferences",
+    "storage"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-12T17:27:44Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "github:modelcontextprotocol/inspector",
+  "kind": "github",
+  "category": "self-extension",
+  "repo": "modelcontextprotocol/inspector",
+  "url": "https://github.com/modelcontextprotocol/inspector",
+  "description": "Deterministic testing tools for MCP servers",
+  "stars": 11253,
+  "forks": 1562,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "cli",
+    "debug",
+    "mcp",
+    "tool",
+    "tui",
+    "web"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T23:07:44Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

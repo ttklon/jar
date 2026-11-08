@@ -1,0 +1,17 @@
+{
+  "id": "github:electron/update.electronjs.org",
+  "kind": "github",
+  "category": "updates",
+  "repo": "electron/update.electronjs.org",
+  "url": "https://github.com/electron/update.electronjs.org",
+  "description": "📡 A free service that makes it easy for open-source Electron apps to update themselves.",
+  "stars": 703,
+  "forks": 85,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-02T01:34:28Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

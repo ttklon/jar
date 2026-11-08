@@ -1,0 +1,22 @@
+{
+  "id": "github:matrix-org/matrix-js-sdk",
+  "kind": "github",
+  "category": "connectors-extra",
+  "repo": "matrix-org/matrix-js-sdk",
+  "url": "https://github.com/matrix-org/matrix-js-sdk",
+  "description": "Matrix Client-Server SDK for JavaScript",
+  "stars": 2196,
+  "forks": 712,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "hacktoberfest",
+    "matrix",
+    "matrix-chat",
+    "matrix-sdk"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T14:15:38Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

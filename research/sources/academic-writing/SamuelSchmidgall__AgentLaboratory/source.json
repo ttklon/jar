@@ -1,0 +1,17 @@
+{
+  "id": "github:SamuelSchmidgall/AgentLaboratory",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "SamuelSchmidgall/AgentLaboratory",
+  "url": "https://github.com/SamuelSchmidgall/AgentLaboratory",
+  "description": "Agent Laboratory is an end-to-end autonomous research workflow meant to assist you as the human researcher toward implementing your research ideas",
+  "stars": 5925,
+  "forks": 804,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2025-08-20T21:46:43Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:langchain-ai/open_deep_research",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "langchain-ai/open_deep_research",
+  "url": "https://github.com/langchain-ai/open_deep_research",
+  "description": "",
+  "stars": 12675,
+  "forks": 1863,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": true,
+  "pushed_at": "2026-08-10T18:13:37Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

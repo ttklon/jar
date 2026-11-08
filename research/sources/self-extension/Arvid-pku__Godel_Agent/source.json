@@ -1,0 +1,17 @@
+{
+  "id": "github:Arvid-pku/Godel_Agent",
+  "kind": "github",
+  "category": "self-extension",
+  "repo": "Arvid-pku/Godel_Agent",
+  "url": "https://github.com/Arvid-pku/Godel_Agent",
+  "description": "Gödel Agent: A Self-Referential Agent Framework for Recursive Self-Improvement",
+  "stars": 241,
+  "forks": 53,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2025-09-17T22:21:44Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,27 @@
+{
+  "id": "github:AutoGPTQ/AutoGPTQ",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "AutoGPTQ/AutoGPTQ",
+  "url": "https://github.com/AutoGPTQ/AutoGPTQ",
+  "description": "An easy-to-use LLMs quantization package with user-friendly apis, based on GPTQ algorithm.",
+  "stars": 5069,
+  "forks": 547,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "deep-learning",
+    "inference",
+    "large-language-models",
+    "llms",
+    "nlp",
+    "pytorch",
+    "quantization",
+    "transformer",
+    "transformers"
+  ],
+  "archived": true,
+  "pushed_at": "2025-04-11T13:27:20Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

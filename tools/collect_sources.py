@@ -368,6 +368,24 @@ DISCOVERY_QUERIES += [
     "windows ui automation accessibility",
 ]
 
+DISCOVERY_QUERIES += [
+    "academic writing assistant citation",
+    "deep research agent report",
+    "docx generation python",
+    "plagiarism detection local",
+    "windows debloat optimizer",
+    "duplicate file finder",
+    "windows services analysis",
+    "self improving agent",
+    "tool discovery agent",
+    "mcp server installer",
+    "auto updater desktop app",
+    "delta update electron",
+    "json schema settings ui",
+    "documentation generation llm",
+    "knowledge base local notes",
+]
+
 
 def discover(force: bool, per_query: int = 12) -> None:
     DISCOVERY.mkdir(parents=True, exist_ok=True)
