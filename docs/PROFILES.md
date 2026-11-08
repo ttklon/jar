@@ -6,7 +6,7 @@
 
 Файл генерируется `python3 tools/profiles.py`; руками не править.
 
-**Профилей: 77** · операций: **480** · проблем: **0**
+**Профилей: 81** · операций: **522** · проблем: **0**
 
 Правила (проверяются автоматически, ошибка = ненулевой код возврата):
 
@@ -58,8 +58,10 @@
 | OBS Studio | `app` | `obs64.exe` | qt | 31.x (2026-11) | 2026-11-08 | 7 | 12 | `obs.json` |
 | Obsidian | `app` | `Obsidian.exe` | electron | 1.9.x (2026-11) | 2026-11-08 | 5 | 5 | `obsidian.json` |
 | Oracle VirtualBox | `app` | `VirtualBox.exe, VBoxManage.exe, VBoxHeadless.exe` | qt | 7.1.x (2026-11) | 2026-11-08 | 5 | 5 | `virtualbox.json` |
+| PostgreSQL (psql / pg_dump / pg_restore) | `tool` | `psql.exe, pg_dump.exe, pg_restore.exe` | win32 | PostgreSQL 16–17 (2026-11) | 2026-11-08 | 8 | 11 | `postgres-cli.json` |
 | PowerShell 7 / Windows PowerShell | `app` | `pwsh.exe, powershell.exe` | win32 | 7.5 / 5.1 (2026-11) | 2026-11-08 | 3 | 5 | `powershell.json` |
 | REAPER | `app` | `reaper.exe` | win32 | 7.x (2026-11) | 2026-11-08 | 4 | 9 | `reaper.json` |
+| SQLite (sqlite3.exe) | `tool` | `sqlite3.exe` | win32 | SQLite 3.45+ (2026-11) | 2026-11-08 | 7 | 14 | `sqlite-cli.json` |
 | Slack | `app` | `slack.exe` | electron | 4.4x (2026-11) | 2026-11-08 | 5 | 5 | `slack.json` |
 | Steam | `app` | `steam.exe, steamwebhelper.exe` | electron | 2026-11 | 2026-11-08 | 6 | 9 | `steam.json` |
 | Telegram Desktop | `app` | `Telegram.exe` | qt | 5.x (2026-11) | 2026-11-08 | 5 | 7 | `telegram.json` |
@@ -76,7 +78,9 @@
 | Безопасность аккаунтов и данных | `system` | `MpCmdRun.exe, manage-bde.exe, secpol.msc, SystemSettings.exe` | uia | Windows 11 24H2 + Defender (2026-11) | 2026-11-08 | 6 | 5 | `security-access.json` |
 | Бэкап и диски Windows (robocopy / wbadmin / smartctl) | `tool` | `robocopy.exe, wbadmin.exe, smartctl.exe, diskmgmt.msc` | win32 | Windows 11 24H2 + smartmontools 7.4 (2026-11) | 2026-11-08 | 6 | 6 | `storage-tools.json` |
 | Ввод и макросы (AutoHotkey / Rust input layer) | `tool` | `AutoHotkey64.exe, AutoHotkey.exe, nircmd.exe` | win32 | AHK 2.0.19 + enigo 0.2 (2026-11) | 2026-11-08 | 6 | 7 | `input-macros.json` |
+| Деньги бизнеса (расходы, дебиторка, прогноз, контрагенты, CRM) | `system` | `soffice.exe, EXCEL.EXE` | win32 | Excel 365 / LibreOffice 25.x / Outlook 365 (2026-11) | 2026-11-08 | 7 | 8 | `business-money.json` |
 | Диспетчер задач | `app` | `Taskmgr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `taskmgr.json` |
+| Документы бизнеса (счета, акты, сверка, реестры, КП) | `system` | `soffice.exe, WINWORD.EXE, AcroRd32.exe, pdftotext.exe` | win32 | LibreOffice 25.x / Word 365 / poppler pdftotext (2026-11) | 2026-11-08 | 8 | 9 | `business-docs.json` |
 | Доступность (экранный диктор, субтитры, контраст, управление без мыши) | `system` | `narrator.exe, Magnify.exe, osk.exe, SystemSettings.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 6 | `accessibility.json` |
 | Календарь и задачи | `system` | `OUTLOOK.EXE, olk.exe, schtasks.exe, Calendar.exe` | uia | Outlook 365 + Windows 11 (2026-11) | 2026-11-08 | 5 | 6 | `calendar-tasks.json` |
 | Командная строка (cmd.exe) и пакетные файлы | `app` | `cmd.exe` | win32 | Windows 10/11 (2026-11) | 2026-11-08 | 2 | 4 | `cmd.json` |
@@ -96,23 +100,25 @@
 | Умный дом (Home Assistant / MQTT / Matter) | `system` | `` | web | HA 2026.1 + Matter 1.3 (2026-11) | 2026-11-08 | 6 | 7 | `home-assistant.json` |
 | Устройства Windows (USB / Bluetooth / печать) | `system` | `pnputil.exe, printui.exe, DevicePairingWizard.exe, SystemSettings.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 10 | `devices.json` |
 
-По типу: `app` — 50 · `tool` — 19 · `system` — 8. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
+По типу: `app` — 50 · `tool` — 21 · `system` — 10. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
 
 ## Риск операций
 
-- `write-local` — 256
-- `read` — 153
-- `destructive` — 35
-- `external` — 31
+- `write-local` — 267
+- `read` — 173
+- `destructive` — 43
+- `external` — 34
 - `identity` — 4
 - `money` — 1
 
 ## Покрытие доменов реестра
 
 - `video` — 40
+- `databases` — 31
 - `music-production` — 26
 - `dev-code` — 26
 - `files` — 25
+- `business-finance` — 23
 - `chat-social` — 22
 - `text-docs` — 18
 - `images` — 17
@@ -143,9 +149,7 @@
 - `input` — 7
 - `accounts-updates` — 7
 - `email` — 7
-- `business-finance` — 6
 - `calendar-tasks` — 6
-- `databases` — 6
 - `system-power` — 6
 - `automation` — 5
 - `display-sound` — 5

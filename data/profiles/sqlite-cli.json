@@ -1,0 +1,291 @@
+{
+  "app": "SQLite (sqlite3.exe)",
+  "kind": "tool",
+  "exe": [
+    "sqlite3.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "SQLite 3.45+ (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "shell": {
+      "by": "api",
+      "value": "sqlite3 -readonly app.db  (или sqlite3 app.db \"<sql>\" для одной команды)"
+    },
+    "dot": {
+      "by": "api",
+      "value": ".tables / .schema <t> / .indexes / .mode box / .headers on / .once out.csv"
+    },
+    "integrity": {
+      "by": "api",
+      "value": "PRAGMA quick_check; PRAGMA integrity_check; PRAGMA foreign_key_check;"
+    },
+    "vacuum_into": {
+      "by": "api",
+      "value": "VACUUM INTO 'backup-YYYYMMDD.db' — консистентная копия живой базы"
+    },
+    "user_version": {
+      "by": "api",
+      "value": "PRAGMA user_version — номер применённой миграции"
+    },
+    "plan": {
+      "by": "api",
+      "value": "EXPLAIN QUERY PLAN <sql> до и после индекса"
+    },
+    "recover": {
+      "by": "api",
+      "value": "sqlite3 broken.db \".recover\" | sqlite3 new.db"
+    }
+  },
+  "operations": [
+    {
+      "name": "Открыть базу только на чтение и понять, что в ней",
+      "registry": "databases|подключиться|к БД",
+      "steps": [
+        "sqlite3 -readonly \"C:\\path\\app.db\"",
+        ".tables",
+        "PRAGMA user_version;",
+        "SELECT count(*) FROM sqlite_master WHERE type IN ('table','index');"
+      ],
+      "verify": [
+        "перечислены таблицы с числом строк в каждой",
+        "число объектов совпало с sqlite_master",
+        "назван user_version (номер миграции)",
+        "размер и время изменения файла до/после совпали — база не тронута"
+      ],
+      "risk": "read",
+      "notes": "-readonly — не «режим вежливости», а запрет записи на уровне SQLite; без него открытие базы в WAL-режиме само создаёт -wal/-shm"
+    },
+    {
+      "name": "Выполнить SELECT с ограничением",
+      "registry": "databases|выполнить|SELECT",
+      "steps": [
+        ".mode box",
+        ".headers on",
+        "SELECT ... LIMIT 1000;",
+        "при времени > 1 с — EXPLAIN QUERY PLAN того же запроса"
+      ],
+      "verify": [
+        "вернулись строки и время выполнения",
+        "LIMIT соблюдён (нет выгрузки всей таблицы)",
+        "если в плане SCAN — сказано явно, а не спрятано"
+      ],
+      "risk": "read"
+    },
+    {
+      "name": "Создать таблицу вместе с миграцией",
+      "registry": "databases|создать|таблицу",
+      "steps": [
+        "BEGIN IMMEDIATE;",
+        "CREATE TABLE IF NOT EXISTS t (...);",
+        "PRAGMA user_version = <N>;",
+        "COMMIT;",
+        ".schema t"
+      ],
+      "verify": [
+        ".schema показывает колонки, типы, NOT NULL и PK",
+        "user_version = N",
+        "повторный прогон миграции ничего не меняет (идемпотентность)"
+      ],
+      "risk": "write-local",
+      "notes": "DDL в SQLite транзакционен — откат CREATE TABLE реально работает, в отличие от MySQL"
+    },
+    {
+      "name": "Применить миграцию к живой базе",
+      "registry": "databases|мигрировать|схему",
+      "steps": [
+        "VACUUM INTO 'before-migration.db'",
+        "PRAGMA foreign_keys=ON;",
+        "BEGIN IMMEDIATE;",
+        "ALTER TABLE ... / новая таблица + INSERT SELECT + переименование;",
+        "PRAGMA user_version = <N>; COMMIT;",
+        "при ошибке — ROLLBACK"
+      ],
+      "verify": [
+        "user_version = N",
+        ".schema соответствует миграции",
+        "PRAGMA integrity_check = ok",
+        "бэкап before-migration.db открывается и содержит старый user_version"
+      ],
+      "risk": "destructive",
+      "on_fail": "если ALTER требует пересборки таблицы (смена типа, некоторые DROP COLUMN) — только 12-шаговая процедура из документации SQLite, без «на живой»"
+    },
+    {
+      "name": "Изменить данные в транзакции",
+      "registry": "databases|изменить|данные",
+      "steps": [
+        "SELECT count(*) с тем же WHERE — сколько строк затронется",
+        "VACUUM INTO 'before-update.db'",
+        "BEGIN IMMEDIATE;",
+        "UPDATE/DELETE ...;",
+        "SELECT changes();",
+        "COMMIT;"
+      ],
+      "verify": [
+        "changes() равен числу из первого шага",
+        "контрольный SELECT показывает ожидаемое",
+        "при расхождении — ROLLBACK и разбор, а не «доделать руками»"
+      ],
+      "risk": "destructive",
+      "notes": "changes() — единственный способ узнать, что UPDATE действительно что-то изменил, а не прошёл по нулю строк"
+    },
+    {
+      "name": "Импортировать лист Excel в таблицу",
+      "registry": "databases|импортировать|таблицу Excel в базу",
+      "steps": [
+        "сохранить лист в CSV UTF-8 с разделителем ;",
+        "создать таблицу с явными типами (INTEGER/REAL/TEXT, даты в ISO)",
+        ".mode csv",
+        ".separator \";\"",
+        ".import --skip 1 data.csv t"
+      ],
+      "verify": [
+        "count(*) = строк в CSV минус заголовок",
+        "typeof() числовых колонок не TEXT",
+        "даты в YYYY-MM-DD, а не «01.02.2026»",
+        "сумма числовой колонки совпала с итогом в Excel"
+      ],
+      "risk": "write-local",
+      "notes": "разделитель тысяч и запятая как десятичный разделитель ломают REAL — чистить до импорта, а не после"
+    },
+    {
+      "name": "Починить повреждённую базу",
+      "registry": "databases|починить|SQLite",
+      "steps": [
+        "PRAGMA integrity_check (полный, не quick_check)",
+        "сохранить копию файла как есть",
+        "sqlite3 broken.db \".recover\" | sqlite3 new.db",
+        "PRAGMA integrity_check на new.db"
+      ],
+      "verify": [
+        "integrity_check на новой базе = ok",
+        "count(*) ключевых таблиц сопоставлен с оригиналом",
+        "исходный файл сохранён рядом"
+      ],
+      "risk": "destructive",
+      "timeouts_ms": 600000,
+      "on_fail": "не запускать VACUUM/REINDEX на повреждённой базе: они перезаписывают файл и добивают остатки"
+    },
+    {
+      "name": "Удалить устаревшие записи пачками",
+      "registry": "databases|удалить|устаревшие записи",
+      "steps": [
+        "SELECT count(*) по условию устаревания",
+        "VACUUM INTO 'before-purge.db'",
+        "DELETE ... WHERE ... LIMIT 10000 в цикле",
+        "после — VACUUM вне транзакции"
+      ],
+      "verify": [
+        "остаток равен ожидаемому (посчитан заранее)",
+        "размер файла уменьшился",
+        "бэкап before-purge.db на месте и открывается",
+        "приложение открывает таблицу"
+      ],
+      "risk": "destructive",
+      "notes": "VACUUM требует до 2× свободного места и не работает внутри транзакции"
+    },
+    {
+      "name": "Создать индекс и доказать, что он помог",
+      "registry": "databases|создать|индекс",
+      "steps": [
+        "EXPLAIN QUERY PLAN <sql>",
+        "CREATE INDEX idx ON t(col);",
+        "ANALYZE;",
+        "EXPLAIN QUERY PLAN <sql> снова",
+        "замер времени на одинаковых данных"
+      ],
+      "verify": [
+        "план сменился на SEARCH ... USING INDEX",
+        "время до/после названо числами",
+        "размер файла вырос примерно на размер индекса"
+      ],
+      "risk": "write-local",
+      "on_fail": "если план не изменился — индекс не нужен, DROP INDEX; не оставлять «на всякий случай»"
+    },
+    {
+      "name": "Проверить целостность и индексы",
+      "registry": "databases|проверить|целостность и индексы",
+      "steps": [
+        "PRAGMA quick_check;",
+        "PRAGMA integrity_check;",
+        "PRAGMA foreign_key_check;",
+        "список таблиц без PRIMARY KEY",
+        "список индексов, покрывающих одни и те же колонки"
+      ],
+      "verify": [
+        "integrity_check = ok",
+        "перечислены таблицы без PK",
+        "перечислены дублирующие индексы с размером"
+      ],
+      "risk": "read"
+    },
+    {
+      "name": "Сделать бэкап живой базы",
+      "registry": "databases|сделать|бэкап БД",
+      "steps": [
+        "VACUUM INTO 'backup-YYYYMMDD-HHMM.db'",
+        "для занятой приложением базы — .backup 'copy.db' (копирует через SQLite API)",
+        "проверить копию отдельным процессом"
+      ],
+      "verify": [
+        "PRAGMA integrity_check на копии = ok",
+        "count(*) ключевых таблиц совпал с источником",
+        "копия открывается без -wal/-shm"
+      ],
+      "risk": "write-local",
+      "notes": "копирование файла Проводником на живой базе даёт битый архив: страницы меняются во время копирования"
+    },
+    {
+      "name": "Восстановить базу из бэкапа",
+      "registry": "databases|восстановить|БД",
+      "steps": [
+        "закрыть приложение/службу, держащую файл (handle.exe / Get-Process)",
+        "переименовать текущий файл в .corrupt-YYYYMMDD",
+        "положить копию на место",
+        "удалить app.db-wal и app.db-shm от старого файла"
+      ],
+      "verify": [
+        "integrity_check на восстановленной базе = ok",
+        "user_version совпал с ожидаемым",
+        "приложение читает данные и открывает ключевые экраны",
+        "старый файл .corrupt-* на месте"
+      ],
+      "risk": "destructive",
+      "on_fail": "если приложение не открывается — вернуть прежний файл и разбираться, а не «чинить дальше»"
+    },
+    {
+      "name": "Экспортировать результат в CSV/JSON",
+      "registry": "databases|экспортировать|результат",
+      "steps": [
+        ".headers on",
+        ".mode csv",
+        ".once out.csv",
+        "SELECT ...;",
+        "или sqlite3 -json app.db \"<sql>\" > out.json"
+      ],
+      "verify": [
+        "число строк файла = count(*) того же запроса",
+        "заголовки на месте",
+        "кириллица читается (UTF-8 + BOM или разделитель ; для Excel)",
+        "числа не стали текстом с разделителями тысяч"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Задокументировать схему базы",
+      "registry": "databases|задокументировать|схему БД",
+      "steps": [
+        ".schema > schema.sql",
+        "PRAGMA table_info('t') по каждой таблице",
+        "PRAGMA foreign_key_list('t')",
+        "собрать markdown: таблица → колонки, типы, PK, FK"
+      ],
+      "verify": [
+        "у каждой таблицы перечислены колонки и типы",
+        "внешние ключи указаны",
+        "документ совпадает с .schema построчно (нет выдуманных колонок)"
+      ],
+      "risk": "read"
+    }
+  ]
+}

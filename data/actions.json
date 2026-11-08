@@ -13173,5 +13173,149 @@
   "human_code": "c",
   "status": "v1",
   "notes": "долго: 10-40 мин"
+ },
+ {
+  "id": "databases-821",
+  "domain": "databases",
+  "verb": "проверить",
+  "object": "права и роли",
+  "example": "кто что может в этой базе",
+  "implementation": [
+   "roles + grants"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "принцип наименьших прав: сервис не ходит суперпользователем"
+ },
+ {
+  "id": "databases-822",
+  "domain": "databases",
+  "verb": "мигрировать",
+  "object": "схему",
+  "example": "добавь колонку в таблицу на проде",
+  "implementation": [
+   "миграция в транзакции"
+  ],
+  "risk": "destructive",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "бэкап и план отката до запуска"
+ },
+ {
+  "id": "databases-823",
+  "domain": "databases",
+  "verb": "проверить",
+  "object": "медленные запросы",
+  "example": "что тормозит базу",
+  "implementation": [
+   "pg_stat_statements"
+  ],
+  "risk": "read",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "databases-824",
+  "domain": "databases",
+  "verb": "закрыть",
+  "object": "сессии перед обслуживанием",
+  "example": "освободи базу для восстановления",
+  "implementation": [
+   "pg_terminate_backend"
+  ],
+  "risk": "destructive",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "сначала pg_cancel_backend, terminate — последним"
+ },
+ {
+  "id": "databases-825",
+  "domain": "databases",
+  "verb": "задокументировать",
+  "object": "схему БД",
+  "example": "сделай описание схемы",
+  "implementation": [
+   "schema-only dump + markdown"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "business-finance-826",
+  "domain": "business-finance",
+  "verb": "сформировать",
+  "object": "реестр счетов за период",
+  "example": "собери все счета за месяц",
+  "implementation": [
+   "папка + таблица"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "business-finance-827",
+  "domain": "business-finance",
+  "verb": "проверить",
+  "object": "ИНН/ОГРН контрагента",
+  "example": "проверь реквизиты по контрольной сумме",
+  "implementation": [
+   "алгоритм ФНС + реестр"
+  ],
+  "risk": "read",
+  "tier": "T2",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "контрольная сумма ловит опечатку, а не недобросовестность"
+ },
+ {
+  "id": "business-finance-828",
+  "domain": "business-finance",
+  "verb": "сверить",
+  "object": "оплату со счётом",
+  "example": "пришла ли оплата по счёту 1523",
+  "implementation": [
+   "банк + реестр счетов"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "business-finance-829",
+  "domain": "business-finance",
+  "verb": "подготовить",
+  "object": "пакет документов к сделке",
+  "example": "собери документы по этой сделке",
+  "implementation": [
+   "шаблоны + чеклист"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
  }
 ]

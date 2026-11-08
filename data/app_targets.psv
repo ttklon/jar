@@ -55,6 +55,8 @@ git-bash|Git for Windows|Разработка|git-bash.exe|cli|A|P0|
 docker|Docker Desktop|Разработка|Docker Desktop.exe|cli|A|P1|docker CLI
 postman|Postman|Разработка|Postman.exe|api|B|P3|newman
 dbeaver|DBeaver|Разработка|dbeaver.exe|cli|A|P2|JDBC, но лучше напрямую
+sqlite3|SQLite CLI|Разработка|sqlite3.exe|cli|A|P2|профиль готов; бэкап только VACUUM INTO
+psql|PostgreSQL CLI|Разработка|psql.exe|cli|A|P2|профиль готов; psql/pg_dump/pg_restore
 pgadmin|pgAdmin|Разработка|pgAdmin4.exe|cli|C|P3|psql
 ssms|SQL Server Management Studio|Разработка|Ssms.exe|cli|C|P3|sqlcmd
 wireshark|Wireshark|Разработка|Wireshark.exe|cli|A|P2|tshark
