@@ -38,6 +38,7 @@ STEPS: list[tuple[str, list[str], str]] = [
     ("evals", ["tools/evals.py"], "an eval plan for every action"),
     ("targets", ["tools/app_targets.py"], "tier A apps have profiles"),
     ("skills", ["tools/skills.py"], "skills reference real rows, risk not lowered"),
+    ("hands", ["tools/hands.py"], "data/tools.json points at real, allowed registry rows"),
     ("ecosystem:build", ["tools/build_ecosystem.py"], "10 catalogues rebuilt from vault + curated"),
     ("ecosystem:check", ["tools/ecosystem.py"], "ids unique, >=200 each, statuses honest"),
     ("status", ["tools/status.py"], "AGENTS.md status block matches the data"),

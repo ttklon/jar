@@ -38,6 +38,9 @@ jobs:
       - name: Skills reference real registry rows, risk matches, done criteria present
         run: python3 tools/skills.py
 
+      - name: Hands (data/tools.json) reference real registry rows and allowed risk
+        run: python3 tools/hands.py
+
       - name: Ecosystem catalogues (10 catalogues, >=200 each, ids unique, statuses honest)
         run: |
           python3 tools/build_ecosystem.py

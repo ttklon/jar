@@ -1,0 +1,119 @@
+[
+ {
+  "registry": "files|создать|папку",
+  "title": "Создать папку",
+  "summary": "Создаёт папку по указанному пути вместе с недостающими родителями. Если папка уже есть — это тоже успех.",
+  "implementation": "fs.create_dir_all + проверка, что путь существует",
+  "params": [
+   {
+    "name": "path",
+    "label": "Путь",
+    "placeholder": "C:\\Users\\Имя\\Downloads\\Проект",
+    "hint": "полный путь; переменные вида %USERPROFILE% не раскрываются",
+    "required": true
+   }
+  ]
+ },
+ {
+  "registry": "files|проверить|размеры и место",
+  "title": "Сколько занимает папка",
+  "summary": "Считает файлы, суммарный объём и пять самых частых расширений внутри папки.",
+  "implementation": "PowerShell Get-ChildItem + Measure-Object",
+  "params": [
+   {
+    "name": "path",
+    "label": "Путь к папке",
+    "placeholder": "C:\\Users\\Имя\\Downloads",
+    "hint": "считает рекурсивно; на сетевом диске может занять минуты",
+    "required": true
+   }
+  ]
+ },
+ {
+  "registry": "files|найти|по имени",
+  "title": "Найти файлы по имени",
+  "summary": "Ищет файлы по маске в папке и во всех вложенных, показывает до 50 совпадений.",
+  "implementation": "PowerShell Get-ChildItem -Filter",
+  "params": [
+   {
+    "name": "path",
+    "label": "Где искать",
+    "placeholder": "C:\\Users\\Имя\\Documents",
+    "hint": "поиск рекурсивный",
+    "required": true
+   },
+   {
+    "name": "query",
+    "label": "Маска имени",
+    "placeholder": "*.pdf или договор*",
+    "hint": "маска PowerShell, не регулярное выражение",
+    "required": true
+   }
+  ]
+ },
+ {
+  "registry": "files|проверить|дубликаты по хэшу",
+  "title": "Найти дубликаты",
+  "summary": "Группирует файлы папки по SHA-256 и показывает группы одинаковых файлов.",
+  "implementation": "PowerShell Get-FileHash -Algorithm SHA256",
+  "params": [
+   {
+    "name": "path",
+    "label": "Путь к папке",
+    "placeholder": "C:\\Users\\Имя\\Pictures",
+    "hint": "первый проход читает до 5000 файлов; ничего не удаляет",
+    "required": true
+   }
+  ]
+ },
+ {
+  "registry": "processes-services|показать|топ по нагрузке",
+  "title": "Что грузит компьютер",
+  "summary": "Пять процессов с наибольшим объёмом занятой памяти.",
+  "implementation": "PowerShell Get-Process",
+  "params": []
+ },
+ {
+  "registry": "storage-backup|проверить|свободное место",
+  "title": "Свободное место на дисках",
+  "summary": "Список дисков с занятым и свободным объёмом.",
+  "implementation": "PowerShell Get-PSDrive",
+  "params": []
+ },
+ {
+  "registry": "storage-backup|проверить|SMART диска",
+  "title": "Состояние дисков (SMART)",
+  "summary": "Модель, тип и состояние здоровья физических дисков.",
+  "implementation": "PowerShell Get-PhysicalDisk",
+  "params": []
+ },
+ {
+  "registry": "network|проверить|подключение",
+  "title": "Проверить подключение",
+  "summary": "Пингует 1.1.1.1 и проверяет DNS: отвечает ли сеть и резолвятся ли имена.",
+  "implementation": "PowerShell Test-Connection + Resolve-DnsName",
+  "params": []
+ },
+ {
+  "registry": "network|проверить|открытые порты",
+  "title": "Кто слушает порты",
+  "summary": "Список портов в состоянии Listen с именами процессов.",
+  "implementation": "PowerShell Get-NetTCPConnection",
+  "params": []
+ },
+ {
+  "registry": "files|удалить|в корзину",
+  "title": "Удалить в корзину",
+  "summary": "Отправляет файл или папку в корзину: безвозвратного удаления здесь нет.",
+  "implementation": "Microsoft.VisualBasic.FileIO.FileSystem + SendToRecycleBin",
+  "params": [
+   {
+    "name": "path",
+    "label": "Что удалить",
+    "placeholder": "C:\\Users\\Имя\\Downloads\\старое",
+    "hint": "файл или папка; восстанавливается из корзины",
+    "required": true
+   }
+  ]
+ }
+]

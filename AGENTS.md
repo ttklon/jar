@@ -41,7 +41,7 @@
 | Этап | Задачи | Следующий шаг |
 | --- | --- | --- |
 | **M0 · Исследование и фундамент ✅ (текущий)** | 6/7 | Проверить ключевые технические гипотезы на прототипах (см. M1) |
-| **M1 · Скелет приложения и «руки» (2–3 недели)** | 3/13 | Хоткеи (push-to-talk `Ctrl+Alt+Z`) и Mica-эффект окна |
+| **M1 · Скелет приложения и «руки» (2–3 недели)** | 5/13 | Хоткеи (push-to-talk `Ctrl+Alt+Z`) и Mica-эффект окна |
 | **M1.5 · Сервер лицензий и защита сборки (2–3 дня)** | 0/6 | VPS: Caddy + API (Axum/Fastify) + Postgres, `POST /v1/activate/refresh/deactivate/entitlements` |
 | **M2 · Голос (2 недели)** | 0/5 | WASAPI-захват, Silero VAD, PTT-хоткей, индикатор |
 | **M3 · Мозги (3 недели)** | 2/6 | Менеджер моделей: манифест, скачивание, sha256, LRU, `llama-server` |
@@ -285,6 +285,7 @@ python3 tools/check_all.py --check  # то же + падает, если сге�
 | `python3 tools/app_targets.py` | каталог приложений + инвариант tier A ⇒ профиль |
 | `python3 tools/evals.py` | тест-план на каждое действие |
 | `python3 tools/skills.py` | скиллы: реальные строки реестра, риск, критерии «готово» |
+| `python3 tools/hands.py` | инструменты `data/tools.json`: реальные строки реестра, допустимый риск |
 | `python3 tools/build_ecosystem.py` + `ecosystem.py` | 10 каталогов: свежесть, уникальные id, ≥200, честные статусы |
 | `python3 tools/status.py [--check]` | блок состояния в этом файле |
 | `python3 tools/dashboard.py [--check]` | `docs/DASHBOARD.md` (сводка) и `docs/INDEX.md` (индекс документов) |

@@ -47,3 +47,61 @@ export async function registrySnapshot(): Promise<RegistrySnapshot> {
 
 /** Только для тестов: убедиться, что порядок риска покрывает все значения. */
 export const DEV_ORDERS = { RISK_ORDER, TIER_ORDER, STATUS_ORDER };
+
+// ── Инструменты в браузере ───────────────────────────────────────────────────
+//
+// Ядро выполняет инструменты на Windows; браузер — нет. Здесь мы только показываем
+// тот же список с тем же решением политики, чтобы экран можно было верстать.
+// Любая попытка запуска честно заканчивается ошибкой, а не имитацией успеха.
+
+import toolsJson from "../../data/tools.json";
+import { decide, decisionReason } from "../lib/policy";
+import type { ToolView } from "./types";
+
+const TOOL_SPECS = toolsJson as unknown as {
+  registry: string;
+  title: string;
+  summary: string;
+  implementation: string;
+  params: { name: string; label: string; placeholder: string; hint: string; required: boolean }[];
+}[];
+
+export async function listTools(): Promise<ToolView[]> {
+  return TOOL_SPECS.map((spec) => {
+    const action = ROWS.find((row) => `${row.domain}|${row.verb}|${row.object}` === spec.registry);
+    if (!action) {
+      // Данные разъехались — это ошибка сборки данных, а не пользователя.
+      throw new Error(`нет действия в реестре для инструмента ${spec.registry}`);
+    }
+    const decision = decide(action);
+    return {
+      registry: spec.registry,
+      title: spec.title,
+      summary: spec.summary,
+      implementation: spec.implementation,
+      params: spec.params,
+      risk: action.risk,
+      risk_needs_human: action.risk !== "read",
+      decision,
+      decision_reason: decisionReason(decision, action.risk),
+      needs_token: decision === "confirm",
+    };
+  });
+}
+
+export async function runTool(
+  registry: string,
+  _params: Record<string, string>,
+  _token?: number,
+): Promise<never> {
+  throw new Error(
+    `«${registry}» выполняется только в приложении: браузер не получает доступ к системе. Запусти npm run tauri dev.`,
+  );
+}
+
+export async function confirmTool(
+  _registry: string,
+  _params: Record<string, string>,
+): Promise<never> {
+  throw new Error("подтверждения выдаёт ядро — в браузере их нет");
+}

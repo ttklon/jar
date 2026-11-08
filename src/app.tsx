@@ -11,6 +11,7 @@ import {
 } from "@fluentui/react-components";
 import {
   AppsListDetailRegular,
+  HandRightRegular,
   HomeRegular,
   SettingsRegular,
 } from "@fluentui/react-icons";
@@ -18,11 +19,12 @@ import { isTauri, registrySnapshot } from "./ipc";
 import type { RegistrySnapshot } from "./ipc";
 import { Overview } from "./screens/Overview";
 import { Catalog } from "./screens/Catalog";
+import { Hands } from "./screens/Hands";
 import { Settings } from "./screens/Settings";
-import { t } from "./i18n/ru";
+import { hands, t } from "./i18n/ru";
 import { APP_VERSION } from "./version";
 
-type Screen = "overview" | "catalog" | "settings";
+type Screen = "overview" | "catalog" | "hands" | "settings";
 
 const useStyles = makeStyles({
   shell: {
@@ -94,6 +96,7 @@ const useStyles = makeStyles({
 const NAV: { id: Screen; label: string; icon: React.ReactElement }[] = [
   { id: "overview", label: t.navOverview, icon: <HomeRegular /> },
   { id: "catalog", label: t.navCatalog, icon: <AppsListDetailRegular /> },
+  { id: "hands", label: hands.nav, icon: <HandRightRegular /> },
   { id: "settings", label: t.navSettings, icon: <SettingsRegular /> },
 ];
 
@@ -173,6 +176,8 @@ export function App() {
             <Overview snapshot={snapshot} />
           ) : screen === "catalog" ? (
             <Catalog snapshot={snapshot} />
+          ) : screen === "hands" ? (
+            <Hands />
           ) : (
             <Settings
               dark={dark}

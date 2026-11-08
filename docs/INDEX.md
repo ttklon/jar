@@ -96,6 +96,7 @@
 | `deps_report.py` | стек и лицензии → docs/DEPENDENCIES.md |
 | `ecosystem.py` | валидатор экосистемы → docs/ECOSYSTEM.md |
 | `evals.py` | план проверок → docs/EVALS.md, data/evals.json |
+| `hands.py` | — |
 | `links.py` | проверка относительных ссылок в документах |
 | `mine_awesome.py` | разбор awesome-листов |
 | `profiles.py` | валидатор профилей → docs/PROFILES.md |

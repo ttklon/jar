@@ -61,3 +61,56 @@ export const RISK_ORDER: Risk[] = [
 
 export const TIER_ORDER: Tier[] = ["T0", "T1", "T2", "T3"];
 export const STATUS_ORDER: ActionStatus[] = ["v1", "v2", "later", "never"];
+
+// ── Инструменты («руки») ─────────────────────────────────────────────────────
+
+/** Параметр инструмента. Описание приходит из `data/tools.json` через ядро. */
+export interface ParamSpec {
+  name: string;
+  label: string;
+  placeholder: string;
+  hint: string;
+  required: boolean;
+}
+
+/** Решение политики для действия. */
+export type Decision = "allow" | "allow_with_notice" | "confirm" | "deny";
+
+export interface ToolView {
+  registry: string;
+  title: string;
+  summary: string;
+  implementation: string;
+  params: ParamSpec[];
+  risk: Risk;
+  /** Есть ли в риске что-то, что требует человека рядом. */
+  risk_needs_human: boolean;
+  decision: Decision;
+  decision_reason: string;
+  needs_token: boolean;
+}
+
+/** Доказательство того, что шаг действительно выполнен. */
+export type Evidence =
+  | { kind: "exit_code"; code: number }
+  | { kind: "path_exists"; path: string; exists: boolean }
+  | { kind: "stdout_marker"; marker: string; found: boolean }
+  | { kind: "failed"; reason: string };
+
+export interface StepResult {
+  registry: string;
+  ok: boolean;
+  evidence: Evidence;
+  reason: string;
+  stdout_tail: string;
+  stderr_tail: string;
+  exit_code: number | null;
+  timed_out: boolean;
+  cancelled: boolean;
+  duration_ms: number;
+}
+
+export interface ConfirmToken {
+  token: number;
+  ttl_sec: number;
+}

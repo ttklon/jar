@@ -4,7 +4,7 @@
  */
 
 import { invoke } from "@tauri-apps/api/core";
-import type { RegistrySnapshot } from "./types";
+import type { ConfirmToken, RegistrySnapshot, StepResult, ToolView } from "./types";
 
 export interface AppStatus {
   version: string;
@@ -12,6 +12,8 @@ export interface AppStatus {
   domains: number;
   data_loaded: boolean;
   log_file: string;
+  audit_file: string;
+  tools: number;
 }
 
 export function registrySnapshot(): Promise<RegistrySnapshot> {
@@ -20,4 +22,27 @@ export function registrySnapshot(): Promise<RegistrySnapshot> {
 
 export function appStatus(): Promise<AppStatus> {
   return invoke<AppStatus>("app_status");
+}
+
+export function listTools(): Promise<ToolView[]> {
+  return invoke<ToolView[]>("list_tools");
+}
+
+export function confirmTool(
+  registry: string,
+  params: Record<string, string>,
+): Promise<ConfirmToken> {
+  return invoke<ConfirmToken>("confirm_tool", { registry, params });
+}
+
+export function runTool(
+  registry: string,
+  params: Record<string, string>,
+  token?: number,
+): Promise<StepResult> {
+  return invoke<StepResult>("run_tool", { registry, params, token: token ?? null });
+}
+
+export function cancelTool(): Promise<void> {
+  return invoke<void>("cancel_tool");
 }

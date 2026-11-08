@@ -40,6 +40,18 @@ describe("App", () => {
     expect(screen.getAllByText("829").length).toBeGreaterThan(0);
   });
 
+  it("экран «Руки» показывает десять инструментов и их политику", async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
+
+    screen.getByRole("button", { name: "Руки" }).click();
+    await waitFor(() => expect(screen.getByText(/10 инструментов/)).toBeTruthy());
+
+    // Опасное помечено, чтение — нет: политика приходит из того же решения, что и в ядре.
+    expect(screen.getAllByText("Требует подтверждения").length).toBeGreaterThan(0);
+    expect(screen.getByText(/В браузере инструменты не выполняются/)).toBeTruthy();
+  });
+
   it("каталог фильтрует по фразе", async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
