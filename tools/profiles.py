@@ -66,6 +66,10 @@ def check_profile(path: Path, combo, domain_verbs) -> tuple[list[str], dict]:
     if errs:
         return errs, {}
 
+    kind = prof.get("kind", "app")
+    if kind not in ("app", "tool", "system"):
+        errs.append(f"{path.name}: unknown kind '{kind}' (app|tool|system)")
+
     anchors = prof.get("anchors", {})
     risks = Counter()
     ogres = Counter()
@@ -126,6 +130,7 @@ def check_profile(path: Path, combo, domain_verbs) -> tuple[list[str], dict]:
 
     info = {
         "app": prof["app"],
+        "kind": kind,
         "exe": ", ".join(prof["exe"]),
         "stack": prof.get("ui_stack", "—"),
         "version": prof["version_seen"],
@@ -166,16 +171,27 @@ def render(infos: list[dict], errs: list[str]) -> str:
         "",
         "## Профили",
         "",
-        "| Приложение | Процесс | Стек | Версия | Проверен | Якорей | Операций | Файл |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| Приложение / класс | Тип | Процесс | Стек | Версия | Проверен | Якорей | Операций | Файл |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for info in sorted(infos, key=lambda i: i["app"]):
         lines.append(
-            f"| {info['app']} | `{info['exe']}` | {info['stack']} | {info['version']} "
+            f"| {info['app']} | `{info['kind']}` | `{info['exe']}` | {info['stack']} | {info['version']} "
             f"| {info['verified']} | {info['anchors']} | {info['ops']} | `{info['file']}` |"
         )
 
-    lines += ["", "## Риск операций", ""]
+    kinds: Counter = Counter(i["kind"] for i in infos)
+    lines += [
+        "",
+        "По типу: "
+        + " · ".join(f"`{k}` — {n}" for k, n in kinds.most_common())
+        + ". `app` — конкретная программа, `tool` — командный инструмент без интерфейса, "
+        "`system` — класс работы в самой Windows (устройства, безопасность, календарь), "
+        "где «приложение» — это система.",
+        "",
+        "## Риск операций",
+        "",
+    ]
     for risk, n in all_risks.most_common():
         lines.append(f"- `{risk}` — {n}")
     if not all_risks:

@@ -31,6 +31,7 @@ MD_OUT = ROOT / "docs" / "COVERAGE.md"
 
 FAMILIES_FILE = ROOT / "data" / "verb_families.json"
 DOMAIN_MATRIX = ROOT / "data" / "domain_families.json"
+PROFILE_POLICY = ROOT / "data" / "domain_profile_policy.json"
 
 THIN_LIMIT = 8
 
@@ -157,20 +158,42 @@ def main() -> int:
     else:
         L.append("Нет.")
 
-    L += ["", "## 4. Домены без профиля (нет ни одной доведённой до кнопок операции)", ""]
+    L += ["", "## 4. Домены без профиля", ""]
     no_prof = sorted((d for d in by_domain if not prof_ops.get(d)), key=lambda d: -len(by_domain[d]))
-    L += [f"- `{d}` — {len(by_domain[d])} действий" for d in no_prof]
+    policy = {}
+    if PROFILE_POLICY.exists():
+        policy = json.loads(PROFILE_POLICY.read_text(encoding="utf-8")).get("domains", {})
+    unclassified = [d for d in no_prof if d not in policy]
+    queue = [d for d in no_prof if policy.get(d, {}).get("needs_profile")]
+    by_design = [d for d in no_prof if d in policy and not policy[d].get("needs_profile")]
+
+    L += [
+        "Правило проекта: **домен без профиля обязан быть классифицирован** в "
+        "`data/domain_profile_policy.json`. Иначе непонятно, это долг или решение.",
+        "",
+        f"### 4.1 Нужен профиль (очередь) — {len(queue)}",
+        "",
+    ]
+    L += [f"- `{d}` — {len(by_domain[d])} действий. *{policy[d]['why']}* → {policy[d].get('next', '—')}"
+          for d in queue] or ["Нет."]
+    L += [
+        "",
+        f"### 4.2 Профиль не нужен — домен закрывается другим артефактом — {len(by_design)}",
+        "",
+        "| Домен | Действий | Чем закрывается | Почему не профиль |",
+        "| --- | --- | --- | --- |",
+    ]
+    for d in by_design:
+        L.append(f"| `{d}` | {len(by_domain[d])} | {policy[d].get('fulfilled_by', '—')} | {policy[d]['why']} |")
+    if not by_design:
+        L.append("| — | — | — | — |")
     L += [
         "",
         f"С профилями: {', '.join(f'`{d}` ({n})' for d, n in prof_ops.most_common()) or '—'}.",
         "",
-        f"Это главный честный разрыв: ширина есть, глубина — в {len({d for d in prof_ops})} "
-        f"доменах из {len(by_domain)}.",
-        "Очередь закрывается не «по одному домену за раз», а через профили приложений: "
-        "адресный список — в `docs/APP-COVERAGE.md` (приоритеты P0…P3).",
-        "Крупнейшие непокрытые домены: "
-        + ", ".join(f"`{d}` ({len(by_domain[d])})" for d in no_prof[:6])
-        + ".",
+        f"Ширина есть, глубина — в {len({d for d in prof_ops})} доменах из {len(by_domain)}. "
+        "Очередь закрывается через профили приложений: адресный список — "
+        "`docs/APP-COVERAGE.md` (приоритеты P0…P3).",
         "",
         "## 5. Глаголы-одиночки (встречаются один раз)",
         "",
@@ -202,6 +225,10 @@ def main() -> int:
     ]
     MD_OUT.write_text("\n".join(L), encoding="utf-8")
 
+    if unclassified:
+        print("UNCLASSIFIED DOMAINS (add to data/domain_profile_policy.json): "
+              + ", ".join(unclassified), file=sys.stderr)
+        return 1
     if unmapped_verbs:
         print("UNMAPPED VERBS:", ", ".join(unmapped_verbs), file=sys.stderr)
         return 1

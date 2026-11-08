@@ -6,7 +6,7 @@
 
 Файл генерируется `python3 tools/profiles.py`; руками не править.
 
-**Профилей: 46** · операций: **270** · проблем: **0**
+**Профилей: 55** · операций: **328** · проблем: **0**
 
 Правила (проверяются автоматически, ошибка = ненулевой код возврата):
 
@@ -16,90 +16,107 @@
 
 ## Профили
 
-| Приложение | Процесс | Стек | Версия | Проверен | Якорей | Операций | Файл |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1С:Предприятие 8 (тонкий/толстый клиент) | `1cv8.exe, 1cv8c.exe` | win32 | 8.3.x (2026-11) | 2026-11-08 | 5 | 6 | `1c.json` |
-| 7-Zip | `7zFM.exe, 7z.exe, 7zG.exe` | win32 | 24.x (2026-11) | 2026-11-08 | 2 | 4 | `7zip.json` |
-| Ableton Live 12 | `Ableton Live 12.exe, Ableton Live 12 Beta.exe` | win32 | 12.x (2026-11) | 2026-11-08 | 7 | 7 | `ableton.json` |
-| Adobe Photoshop | `Photoshop.exe` | win32 | 2026 (v27) | 2026-11-08 | 8 | 8 | `photoshop.json` |
-| Adobe Premiere Pro | `Adobe Premiere Pro.exe` | win32 | 2026 (v26) | 2026-11-08 | 8 | 7 | `premiere.json` |
-| Audacity | `audacity.exe` | win32 | 3.7.x (2026-11) | 2026-11-08 | 6 | 6 | `audacity.json` |
-| Bitwig Studio | `Bitwig Studio.exe` | win32 | 5.x (2026-11) | 2026-11-08 | 5 | 5 | `bitwig.json` |
-| Blender | `blender.exe` | qt | 4.x (2026-11) | 2026-11-08 | 3 | 5 | `blender.json` |
-| CapCut (Desktop) | `CapCut.exe` | electron | 6.x (2026-11) | 2026-11-08 | 6 | 9 | `capcut.json` |
-| Chrome / Edge / Yandex (Chromium) | `chrome.exe, msedge.exe, browser.exe` | web | Chrome 131+ / Edge 131+ | 2026-11-08 | 7 | 8 | `browser.json` |
-| DBeaver | `dbeaver.exe, dbeaverc.exe` | qt | 25.x (2026-11) | 2026-11-08 | 6 | 6 | `dbeaver.json` |
-| DaVinci Resolve | `Resolve.exe, DaVinciResolve.exe` | qt | 19.x (2026-11) | 2026-11-08 | 6 | 6 | `davinci.json` |
-| Discord (desktop) | `Discord.exe` | electron | 0.0.9x (2026-11) | 2026-11-08 | 5 | 6 | `discord.json` |
-| Docker Desktop | `Docker Desktop.exe, com.docker.backend.exe` | electron | 4.3x (2026-11) | 2026-11-08 | 5 | 7 | `docker.json` |
-| Everything | `Everything.exe` | win32 | 1.5.x (2026-11) | 2026-11-08 | 4 | 5 | `everything.json` |
-| FL Studio | `FL64.exe, FL.exe` | win32 | FL Studio 2024/2025 (2026-11) | 2026-11-08 | 8 | 6 | `flstudio.json` |
-| Figma (desktop / web) | `Figma.exe, chrome.exe` | web | 2026-11 | 2026-11-08 | 6 | 6 | `figma.json` |
-| FileZilla | `filezilla.exe` | win32 | 3.6x (2026-11) | 2026-11-08 | 5 | 4 | `filezilla.json` |
-| Git for Windows (git-bash / git.exe) | `git-bash.exe, git.exe, bash.exe` | win32 | 2.4x (2026-11) | 2026-11-08 | 2 | 5 | `git-bash.json` |
-| HandBrake | `HandBrake.exe, HandBrakeCLI.exe` | win32 | 1.9.x (2026-11) | 2026-11-08 | 2 | 4 | `handbrake.json` |
-| JetBrains IDE (IDEA / PyCharm / WebStorm) | `idea64.exe, pycharm64.exe, webstorm64.exe, studio64.exe` | qt | 2025.3 (2026-11) | 2026-11-08 | 7 | 5 | `jetbrains.json` |
-| Microsoft Excel | `EXCEL.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 4 | 8 | `excel.json` |
-| Microsoft Outlook (классический и новый) | `OUTLOOK.EXE, olk.exe` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 8 | 7 | `outlook.json` |
-| Microsoft PowerPoint | `POWERPNT.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 6 | 6 | `powerpoint.json` |
-| Microsoft Visual Studio | `devenv.exe` | uia | 17.x (2022, 2026-11) | 2026-11-08 | 7 | 5 | `visualstudio.json` |
-| Microsoft Word | `WINWORD.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 7 | 8 | `word.json` |
-| Notion | `Notion.exe` | electron | 4.x (2026-11) | 2026-11-08 | 5 | 5 | `notion.json` |
-| OBS Studio | `obs64.exe` | qt | 31.x (2026-11) | 2026-11-08 | 7 | 7 | `obs.json` |
-| Obsidian | `Obsidian.exe` | electron | 1.9.x (2026-11) | 2026-11-08 | 5 | 5 | `obsidian.json` |
-| PowerShell 7 / Windows PowerShell | `pwsh.exe, powershell.exe` | win32 | 7.5 / 5.1 (2026-11) | 2026-11-08 | 3 | 5 | `powershell.json` |
-| REAPER | `reaper.exe` | win32 | 7.x (2026-11) | 2026-11-08 | 4 | 9 | `reaper.json` |
-| Steam | `steam.exe, steamwebhelper.exe` | electron | 2026-11 | 2026-11-08 | 6 | 6 | `steam.json` |
-| Telegram Desktop | `Telegram.exe` | qt | 5.x (2026-11) | 2026-11-08 | 5 | 6 | `telegram.json` |
-| VLC media player | `vlc.exe` | win32 | 3.0.x (2026-11) | 2026-11-08 | 4 | 5 | `vlc.json` |
-| Visual Studio Code | `Code.exe` | electron | 1.9x (2026-11) | 2026-11-08 | 7 | 7 | `vscode.json` |
-| WinSCP | `WinSCP.exe, winscp.com` | win32 | 6.x (2026-11) | 2026-11-08 | 4 | 4 | `winscp.json` |
-| Windows Terminal | `WindowsTerminal.exe, wt.exe` | uia | 1.2x (2026-11) | 2026-11-08 | 6 | 5 | `wt.json` |
-| Wireshark / tshark | `Wireshark.exe, tshark.exe, dumpcap.exe` | qt | 4.4.x (2026-11) | 2026-11-08 | 6 | 5 | `tshark.json` |
-| Zotero | `zotero.exe` | uia | 7.x (2026-11) | 2026-11-08 | 5 | 4 | `zotero.json` |
-| Банк (веб-кабинет и десктоп-клиент) — только чтение | `chrome.exe, msedge.exe, browser.exe` | web | 2026-11 | 2026-11-08 | 5 | 6 | `bank.json` |
-| Бэкап и диски Windows (robocopy / wbadmin / smartctl) | `robocopy.exe, wbadmin.exe, smartctl.exe, diskmgmt.msc` | win32 | Windows 11 24H2 + smartmontools 7.4 (2026-11) | 2026-11-08 | 6 | 6 | `storage-tools.json` |
-| Диспетчер задач | `Taskmgr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `taskmgr.json` |
-| Командная строка (cmd.exe) и пакетные файлы | `cmd.exe` | win32 | Windows 10/11 (2026-11) | 2026-11-08 | 2 | 4 | `cmd.json` |
-| Параметры Windows | `SystemSettings.exe, ApplicationFrameHost.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `windows-settings.json` |
-| Проводник Windows | `explorer.exe` | uia | Windows 11 24H2 / Windows 10 22H2 | 2026-11-08 | 6 | 7 | `explorer.json` |
-| Просмотр событий | `mmc.exe, eventvwr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `eventvwr.json` |
+| Приложение / класс | Тип | Процесс | Стек | Версия | Проверен | Якорей | Операций | Файл |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1С:Предприятие 8 (тонкий/толстый клиент) | `app` | `1cv8.exe, 1cv8c.exe` | win32 | 8.3.x (2026-11) | 2026-11-08 | 5 | 6 | `1c.json` |
+| 7-Zip | `app` | `7zFM.exe, 7z.exe, 7zG.exe` | win32 | 24.x (2026-11) | 2026-11-08 | 2 | 4 | `7zip.json` |
+| Ableton Live 12 | `app` | `Ableton Live 12.exe, Ableton Live 12 Beta.exe` | win32 | 12.x (2026-11) | 2026-11-08 | 7 | 7 | `ableton.json` |
+| Adobe Acrobat | `app` | `Acrobat.exe, AcroRd32.exe, AcrobatDC.exe` | uia | 2025.x (2026-11) | 2026-11-08 | 5 | 6 | `acrobat.json` |
+| Adobe Photoshop | `app` | `Photoshop.exe` | win32 | 2026 (v27) | 2026-11-08 | 8 | 8 | `photoshop.json` |
+| Adobe Premiere Pro | `app` | `Adobe Premiere Pro.exe` | win32 | 2026 (v26) | 2026-11-08 | 8 | 7 | `premiere.json` |
+| Audacity | `app` | `audacity.exe` | win32 | 3.7.x (2026-11) | 2026-11-08 | 6 | 6 | `audacity.json` |
+| Bitwig Studio | `app` | `Bitwig Studio.exe` | win32 | 5.x (2026-11) | 2026-11-08 | 5 | 5 | `bitwig.json` |
+| Blender | `app` | `blender.exe` | qt | 4.x (2026-11) | 2026-11-08 | 3 | 5 | `blender.json` |
+| CapCut (Desktop) | `app` | `CapCut.exe` | electron | 6.x (2026-11) | 2026-11-08 | 6 | 12 | `capcut.json` |
+| Chrome / Edge / Yandex (Chromium) | `app` | `chrome.exe, msedge.exe, browser.exe` | web | Chrome 131+ / Edge 131+ | 2026-11-08 | 7 | 8 | `browser.json` |
+| DBeaver | `app` | `dbeaver.exe, dbeaverc.exe` | qt | 25.x (2026-11) | 2026-11-08 | 6 | 6 | `dbeaver.json` |
+| DaVinci Resolve | `app` | `Resolve.exe, DaVinciResolve.exe` | qt | 19.x (2026-11) | 2026-11-08 | 6 | 6 | `davinci.json` |
+| Discord (desktop) | `app` | `Discord.exe` | electron | 0.0.9x (2026-11) | 2026-11-08 | 5 | 6 | `discord.json` |
+| Docker Desktop | `app` | `Docker Desktop.exe, com.docker.backend.exe` | electron | 4.3x (2026-11) | 2026-11-08 | 5 | 7 | `docker.json` |
+| Everything | `app` | `Everything.exe` | win32 | 1.5.x (2026-11) | 2026-11-08 | 4 | 5 | `everything.json` |
+| FL Studio | `app` | `FL64.exe, FL.exe` | win32 | FL Studio 2024/2025 (2026-11) | 2026-11-08 | 8 | 6 | `flstudio.json` |
+| Figma (desktop / web) | `app` | `Figma.exe, chrome.exe` | web | 2026-11 | 2026-11-08 | 6 | 6 | `figma.json` |
+| FileZilla | `app` | `filezilla.exe` | win32 | 3.6x (2026-11) | 2026-11-08 | 5 | 4 | `filezilla.json` |
+| Git for Windows (git-bash / git.exe) | `app` | `git-bash.exe, git.exe, bash.exe` | win32 | 2.4x (2026-11) | 2026-11-08 | 2 | 5 | `git-bash.json` |
+| HandBrake | `app` | `HandBrake.exe, HandBrakeCLI.exe` | win32 | 1.9.x (2026-11) | 2026-11-08 | 2 | 4 | `handbrake.json` |
+| JetBrains IDE (IDEA / PyCharm / WebStorm) | `app` | `idea64.exe, pycharm64.exe, webstorm64.exe, studio64.exe` | qt | 2025.3 (2026-11) | 2026-11-08 | 7 | 5 | `jetbrains.json` |
+| LibreOffice | `tool` | `soffice.exe, soffice.com, soffice.bin` | win32 | 25.x (2026-11) | 2026-11-08 | 5 | 6 | `libreoffice.json` |
+| Microsoft Excel | `app` | `EXCEL.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 4 | 8 | `excel.json` |
+| Microsoft Outlook (классический и новый) | `app` | `OUTLOOK.EXE, olk.exe` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 8 | 7 | `outlook.json` |
+| Microsoft PowerPoint | `app` | `POWERPNT.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 6 | 6 | `powerpoint.json` |
+| Microsoft Visual Studio | `app` | `devenv.exe` | uia | 17.x (2022, 2026-11) | 2026-11-08 | 7 | 5 | `visualstudio.json` |
+| Microsoft Word | `app` | `WINWORD.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 7 | 8 | `word.json` |
+| Notion | `app` | `Notion.exe` | electron | 4.x (2026-11) | 2026-11-08 | 5 | 5 | `notion.json` |
+| OBS Studio | `app` | `obs64.exe` | qt | 31.x (2026-11) | 2026-11-08 | 7 | 7 | `obs.json` |
+| Obsidian | `app` | `Obsidian.exe` | electron | 1.9.x (2026-11) | 2026-11-08 | 5 | 5 | `obsidian.json` |
+| PowerShell 7 / Windows PowerShell | `app` | `pwsh.exe, powershell.exe` | win32 | 7.5 / 5.1 (2026-11) | 2026-11-08 | 3 | 5 | `powershell.json` |
+| REAPER | `app` | `reaper.exe` | win32 | 7.x (2026-11) | 2026-11-08 | 4 | 9 | `reaper.json` |
+| Slack | `app` | `slack.exe` | electron | 4.4x (2026-11) | 2026-11-08 | 5 | 5 | `slack.json` |
+| Steam | `app` | `steam.exe, steamwebhelper.exe` | electron | 2026-11 | 2026-11-08 | 6 | 6 | `steam.json` |
+| Telegram Desktop | `app` | `Telegram.exe` | qt | 5.x (2026-11) | 2026-11-08 | 5 | 6 | `telegram.json` |
+| VLC media player | `app` | `vlc.exe` | win32 | 3.0.x (2026-11) | 2026-11-08 | 4 | 5 | `vlc.json` |
+| Visual Studio Code | `app` | `Code.exe` | electron | 1.9x (2026-11) | 2026-11-08 | 7 | 7 | `vscode.json` |
+| WinSCP | `app` | `WinSCP.exe, winscp.com` | win32 | 6.x (2026-11) | 2026-11-08 | 4 | 4 | `winscp.json` |
+| Windows Terminal | `app` | `WindowsTerminal.exe, wt.exe` | uia | 1.2x (2026-11) | 2026-11-08 | 6 | 5 | `wt.json` |
+| Wireshark / tshark | `tool` | `Wireshark.exe, tshark.exe, dumpcap.exe` | qt | 4.4.x (2026-11) | 2026-11-08 | 6 | 5 | `tshark.json` |
+| Zotero | `app` | `zotero.exe` | uia | 7.x (2026-11) | 2026-11-08 | 5 | 4 | `zotero.json` |
+| Автоматизация любого приложения (руки и глаза) | `tool` | `python.exe, uia_probe.py` | uia | ZShelper tools/uia_probe.py v1 (2026-11) | 2026-11-08 | 5 | 8 | `apps-generic.json` |
+| Банк (веб-кабинет и десктоп-клиент) — только чтение | `app` | `chrome.exe, msedge.exe, browser.exe` | web | 2026-11 | 2026-11-08 | 5 | 6 | `bank.json` |
+| Безопасность аккаунтов и данных | `system` | `MpCmdRun.exe, manage-bde.exe, secpol.msc, SystemSettings.exe` | uia | Windows 11 24H2 + Defender (2026-11) | 2026-11-08 | 6 | 5 | `security-access.json` |
+| Бэкап и диски Windows (robocopy / wbadmin / smartctl) | `tool` | `robocopy.exe, wbadmin.exe, smartctl.exe, diskmgmt.msc` | win32 | Windows 11 24H2 + smartmontools 7.4 (2026-11) | 2026-11-08 | 6 | 6 | `storage-tools.json` |
+| Ввод и макросы (AutoHotkey / Rust input layer) | `tool` | `AutoHotkey64.exe, AutoHotkey.exe, nircmd.exe` | win32 | AHK 2.0.19 + enigo 0.2 (2026-11) | 2026-11-08 | 6 | 7 | `input-macros.json` |
+| Диспетчер задач | `app` | `Taskmgr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `taskmgr.json` |
+| Календарь и задачи | `system` | `OUTLOOK.EXE, olk.exe, schtasks.exe, Calendar.exe` | uia | Outlook 365 + Windows 11 (2026-11) | 2026-11-08 | 5 | 6 | `calendar-tasks.json` |
+| Командная строка (cmd.exe) и пакетные файлы | `app` | `cmd.exe` | win32 | Windows 10/11 (2026-11) | 2026-11-08 | 2 | 4 | `cmd.json` |
+| Музыкальная библиотека (beets / fpcalc / rsgain) | `tool` | `beet.exe, fpcalc.exe, rsgain.exe, loudgain.exe, ffmpeg.exe` | win32 | beets 2.x, chromaprint 1.5, rsgain 3.x (2026-11) | 2026-11-08 | 5 | 6 | `music-library.json` |
+| Параметры Windows | `app` | `SystemSettings.exe, ApplicationFrameHost.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `windows-settings.json` |
+| Проводник Windows | `app` | `explorer.exe` | uia | Windows 11 24H2 / Windows 10 22H2 | 2026-11-08 | 6 | 7 | `explorer.json` |
+| Просмотр событий | `app` | `mmc.exe, eventvwr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `eventvwr.json` |
+| Устройства Windows (USB / Bluetooth / печать) | `system` | `pnputil.exe, printui.exe, DevicePairingWizard.exe, SystemSettings.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 6 | `devices.json` |
+
+По типу: `app` — 46 · `tool` — 6 · `system` — 3. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
 
 ## Риск операций
 
-- `write-local` — 155
-- `read` — 84
-- `external` — 17
-- `destructive` — 12
+- `write-local` — 186
+- `read` — 104
+- `external` — 20
+- `destructive` — 14
+- `identity` — 3
 - `money` — 1
-- `identity` — 1
 
 ## Покрытие доменов реестра
 
-- `video` — 32
+- `video` — 35
 - `music-production` — 26
 - `dev-code` — 26
 - `files` — 21
+- `chat-social` — 17
+- `text-docs` — 17
 - `learning-research` — 13
-- `chat-social` — 12
 - `processes-services` — 11
-- `text-docs` — 11
+- `slides-pdf-print` — 10
 - `audio` — 9
 - `virtualization-remote` — 9
+- `apps-generic` — 8
 - `creative-3d` — 8
 - `web` — 8
 - `images` — 8
 - `apps-windows` — 7
+- `input` — 7
 - `email` — 7
 - `business-finance` — 6
 - `personal-finance` — 6
+- `calendar-tasks` — 6
 - `databases` — 6
+- `devices` — 6
 - `network` — 6
+- `music` — 6
 - `games` — 6
 - `storage-backup` — 6
 - `sheets-data` — 5
 - `automation` — 5
-- `slides-pdf-print` — 4
+- `security-access` — 5
 - `video-production` — 3
 - `system-power` — 2
 - `engineering-3d` — 1

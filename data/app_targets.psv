@@ -30,7 +30,7 @@ thunderbird|Mozilla Thunderbird|Почта|thunderbird.exe|uia|B|P2|IMAP/SMTP н
 telegram|Telegram Desktop|Мессенджер|Telegram.exe|api+uia|A|P0|профиль готов
 whatsapp|WhatsApp Desktop|Мессенджер|WhatsApp.exe|uia|B|P1|web-клиент в оболочке
 discord|Discord|Мессенджер|Discord.exe|api|A|P1|профиль готов (Bot API)
-slack|Slack|Мессенджер|slack.exe|api+uia|B|P2|Slack API
+slack|Slack|Мессенджер|slack.exe|api+uia|A|P2|Slack API
 teams|Microsoft Teams|Мессенджер|ms-teams.exe|uia|C|P3|Graph API лучше
 signal|Signal Desktop|Мессенджер|Signal.exe|uia|C|P3|нет API, только GUI
 zoom|Zoom|Связь|Zoom.exe|cli+uia|B|P2|Zoom CLI, запись
@@ -39,9 +39,9 @@ word|Microsoft Word|Офис|WINWORD.EXE|com+uia|A|P0|профиль готов
 excel|Microsoft Excel|Офис|EXCEL.EXE|com+uia|A|P0|профиль готов
 powerpoint|Microsoft PowerPoint|Офис|POWERPNT.EXE|com+uia|A|P1|COM-объектная модель
 onenote|Microsoft OneNote|Офис|ONENOTE.EXE|com|B|P2|
-libreoffice-writer|LibreOffice Writer|Офис|soffice.exe|cli|B|P2|--headless конвертация
-libreoffice-calc|LibreOffice Calc|Офис|soffice.exe|cli|B|P2|
-acrobat|Adobe Acrobat Reader|Офис|AcroRd32.exe|cli+uia|B|P2|pdf-библиотеки надёжнее
+libreoffice-writer|LibreOffice Writer|Офис|soffice.exe|cli|A|P2|--headless конвертация
+libreoffice-calc|LibreOffice Calc|Офис|soffice.exe|cli|A|P2|
+acrobat|Adobe Acrobat Reader|Офис|AcroRd32.exe|cli+uia|A|P2|pdf-библиотеки надёжнее
 foxit|Foxit Reader|Офис|FoxitReader.exe|uia|C|P3|
 notepadpp|Notepad++|Офис|notepad++.exe|cli+uia|B|P2|
 sublime|Sublime Text|Офис|sublime_text.exe|cli|B|P3|subl --command

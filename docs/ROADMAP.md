@@ -108,12 +108,17 @@
       Firefox, WhatsApp, VirtualBox, HWiNFO, CrystalDiskInfo — очередь
 - [x] Профили P2: DaVinci Resolve, Visual Studio, JetBrains (IDEA/PyCharm/Android Studio),
       WinSCP, FileZilla, DBeaver, tshark, robocopy/smartctl
-- [ ] Профили P2 остаток: Steam-углубление, Slack, LibreOffice, Acrobat, CapCut-углубление
+- [x] Профили P2 остаток: Slack, LibreOffice, Acrobat, CapCut-углубление (Steam — в очереди)
+- [x] Профили-инструменты и классы: `kind: tool` (robocopy, tshark, soffice, beets, AHK) и
+      `kind: system` (устройства, безопасность аккаунтов, календарь)
+- [x] Политика `data/domain_profile_policy.json`: домен без профиля обязан быть классифицирован
+      (аудит падает на неклассифицированном)
 - [ ] Tier C: список приложений-канвасов + политика «визуальный агент с проверкой по скриншоту»
 - [ ] Дрейф: пере-проверка якорей по `verified_at` старше 90 дней, отчёт в CI
-- [ ] Домены без профиля: остались 16 (health-daily, superhuman, devices, security-access, input,
-      travel, smart-home, music, home-daily, languages, career, calendar-tasks, ai-ml, legal-docs,
-      licensing, apps-generic) — закрывать через профили приложений, а не строками реестра
+- [ ] Домены без профиля: осталось 10 — 1 в очереди (`smart-home`, профиль хаба) и 9 решений
+      (health-daily, travel, home-daily, languages, career, ai-ml, legal-docs, licensing,
+      superhuman): каждый закрывается скилл-рецептом, коннектором, бенчмарком или API, а не
+      профилем приложения. См. `research/notes/32-artifact-types.md`
 
 **Критерий выхода линии:** ≥60 профилей tier A + ≥30 приложений, прошедших авто-профиль с
 подтверждением вручную; ни одного приложения из P0 без профиля.

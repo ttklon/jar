@@ -3,14 +3,14 @@
 Данные — [`data/app_targets.psv`](../data/app_targets.psv), файл генерируется
 `python3 tools/app_targets.py`, руками не править.
 
-**Приложений в каталоге: 122** · категорий: **17** · профиль найден по процессу: **60** · без профиля (визуальный агент): **62**
+**Приложений в каталоге: 122** · категорий: **17** · профиль найден по процессу: **64** · без профиля (визуальный агент): **58**
 
 ## Три уровня покрытия (почему не «профиль на каждую программу руками»)
 
 | Tier | Что это | Сколько | Как появляется |
 | --- | --- | --- | --- |
-| **A** | ручной профиль: якоря, шаги, проверки | 48 | пишется человеком/агентом по UIA-дампу |
-| **B** | авто-профиль из UIA + подтверждение | 41 | `tools/uia_probe` → кандидаты → подтверждение |
+| **A** | ручной профиль: якоря, шаги, проверки | 52 | пишется человеком/агентом по UIA-дампу |
+| **B** | авто-профиль из UIA + подтверждение | 37 | `tools/uia_probe` → кандидаты → подтверждение |
 | **C** | только визуальный агент (скриншот→OCR/VLM→клик) | 33 | профиля нет, работает универсальный цикл |
 
 Подробно — [`PROFILE-STRATEGY.md`](PROFILE-STRATEGY.md). Правило: приложение без профиля
@@ -113,9 +113,9 @@
 | Microsoft Excel | `EXCEL.EXE` | com+uia | A | P0 | ✅ | профиль готов |
 | Microsoft Word | `WINWORD.EXE` | com+uia | A | P0 | ✅ | профиль готов |
 | Microsoft PowerPoint | `POWERPNT.EXE` | com+uia | A | P1 | ✅ | COM-объектная модель |
-| Adobe Acrobat Reader | `AcroRd32.exe` | cli+uia | B | P2 | — | pdf-библиотеки надёжнее |
-| LibreOffice Calc | `soffice.exe` | cli | B | P2 | — |  |
-| LibreOffice Writer | `soffice.exe` | cli | B | P2 | — | --headless конвертация |
+| Adobe Acrobat Reader | `AcroRd32.exe` | cli+uia | A | P2 | ✅ | pdf-библиотеки надёжнее |
+| LibreOffice Calc | `soffice.exe` | cli | A | P2 | ✅ |  |
+| LibreOffice Writer | `soffice.exe` | cli | A | P2 | ✅ | --headless конвертация |
 | Microsoft OneNote | `ONENOTE.EXE` | com | B | P2 | — |  |
 | Notepad++ | `notepad++.exe` | cli+uia | B | P2 | — |  |
 | Foxit Reader | `FoxitReader.exe` | uia | C | P3 | — |  |
@@ -170,7 +170,7 @@
 | Telegram Desktop | `Telegram.exe` | api+uia | A | P0 | ✅ | профиль готов |
 | Discord | `Discord.exe` | api | A | P1 | ✅ | профиль готов (Bot API) |
 | WhatsApp Desktop | `WhatsApp.exe` | uia | B | P1 | — | web-клиент в оболочке |
-| Slack | `slack.exe` | api+uia | B | P2 | — | Slack API |
+| Slack | `slack.exe` | api+uia | A | P2 | ✅ | Slack API |
 | Discord Canary | `DiscordCanary.exe` | api | C | P3 | — |  |
 | Microsoft Teams | `ms-teams.exe` | uia | C | P3 | — | Graph API лучше |
 | Signal Desktop | `Signal.exe` | uia | C | P3 | — | нет API, только GUI |

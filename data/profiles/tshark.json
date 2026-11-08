@@ -1,52 +1,117 @@
 {
   "app": "Wireshark / tshark",
-  "exe": ["Wireshark.exe", "tshark.exe", "dumpcap.exe"],
+  "kind": "tool",
+  "exe": [
+    "Wireshark.exe",
+    "tshark.exe",
+    "dumpcap.exe"
+  ],
   "ui_stack": "qt",
   "version_seen": "4.4.x (2026-11)",
   "verified_at": "2026-11-08",
   "anchors": {
-    "capture": { "by": "api", "value": "dumpcap -i <iface> -a duration:60 -w cap.pcapng -f \"<bpf-фильтр>\" (без GUI, минимальные права)" },
-    "read": { "by": "api", "value": "tshark -r cap.pcapng -q -z conv,tcp / -z io,stat,1 / -Y \"<display filter>\"" },
-    "iface_list": { "by": "api", "value": "dumpcap -D / Get-NetAdapter" },
-    "latency": { "by": "api", "value": "Test-NetConnection <host> -Port <p>; Test-Connection <host> -Count 10" },
-    "dns": { "by": "api", "value": "Resolve-DnsName <domain> -Type A; Get-DnsClientServerAddress" },
-    "gui_filter": { "by": "uia", "value": "Edit Name='Display filter' (Placeholder 'Apply a display filter')", "fallback": "Ctrl+/ фокус в поле фильтра" }
+    "capture": {
+      "by": "api",
+      "value": "dumpcap -i <iface> -a duration:60 -w cap.pcapng -f \"<bpf-фильтр>\" (без GUI, минимальные права)"
+    },
+    "read": {
+      "by": "api",
+      "value": "tshark -r cap.pcapng -q -z conv,tcp / -z io,stat,1 / -Y \"<display filter>\""
+    },
+    "iface_list": {
+      "by": "api",
+      "value": "dumpcap -D / Get-NetAdapter"
+    },
+    "latency": {
+      "by": "api",
+      "value": "Test-NetConnection <host> -Port <p>; Test-Connection <host> -Count 10"
+    },
+    "dns": {
+      "by": "api",
+      "value": "Resolve-DnsName <domain> -Type A; Get-DnsClientServerAddress"
+    },
+    "gui_filter": {
+      "by": "uia",
+      "value": "Edit Name='Display filter' (Placeholder 'Apply a display filter')",
+      "fallback": "Ctrl+/ фокус в поле фильтра"
+    }
   },
   "operations": [
     {
       "name": "Проанализировать трафик за период",
       "registry": "network|проанализировать|трафик",
-      "steps": ["прочитать anchor:iface_list — выбрать интерфейс по имени, а не по индексу", "cli:dumpcap -a duration:60 -w cap.pcapng", "cli:tshark -r cap.pcapng -q -z conv,tcp -z io,stat,1", "выделить топ-5 адресов по объёму"],
-      "verify": ["pcap-файл не пуст и открывается tshark", "есть таблица соединений с байтами по направлениям", "вывод содержит конкретные IP/домены, а не общие слова"],
+      "steps": [
+        "прочитать anchor:iface_list — выбрать интерфейс по имени, а не по индексу",
+        "cli:dumpcap -a duration:60 -w cap.pcapng",
+        "cli:tshark -r cap.pcapng -q -z conv,tcp -z io,stat,1",
+        "выделить топ-5 адресов по объёму"
+      ],
+      "verify": [
+        "pcap-файл не пуст и открывается tshark",
+        "есть таблица соединений с байтами по направлениям",
+        "вывод содержит конкретные IP/домены, а не общие слова"
+      ],
       "risk": "read",
       "notes": "захват чужого трафика — вмешательство в приватность: только на своей машине и по запросу пользователя"
     },
     {
       "name": "Показать, кто в локальной сети",
       "registry": "network|показать|кто в сети",
-      "steps": ["cli:Get-NetNeighbor -AddressFamily IPv4 | Where State -ne 'Unreachable'", "cli:arp -a (фолбэк)", "сопоставить MAC с производителем (OUI) и именем устройства"],
-      "verify": ["таблица: IP, MAC, производитель, имя хоста (если резолвится)", "устройства сгруппированы по типу", "нет сканирования портов без запроса — только пассивные данные"],
+      "steps": [
+        "cli:Get-NetNeighbor -AddressFamily IPv4 | Where State -ne 'Unreachable'",
+        "cli:arp -a (фолбэк)",
+        "сопоставить MAC с производителем (OUI) и именем устройства"
+      ],
+      "verify": [
+        "таблица: IP, MAC, производитель, имя хоста (если резолвится)",
+        "устройства сгруппированы по типу",
+        "нет сканирования портов без запроса — только пассивные данные"
+      ],
       "risk": "read"
     },
     {
       "name": "Проверить открытые порты на своей машине",
       "registry": "network|проверить|открытые порты",
-      "steps": ["cli:Get-NetTCPConnection -State Listen | Select LocalAddress,LocalPort,OwningProcess", "сопоставить порт → процесс", "cli:netsh advfirewall firewall show rule name=all — только входящие разрешения"],
-      "verify": ["для каждого слушающего порта назван процесс", "отдельно отмечены порты, слушающие 0.0.0.0 (доступны из сети)", "правила firewall сгруппированы по разрешённым приложениям"],
+      "steps": [
+        "cli:Get-NetTCPConnection -State Listen | Select LocalAddress,LocalPort,OwningProcess",
+        "сопоставить порт → процесс",
+        "cli:netsh advfirewall firewall show rule name=all — только входящие разрешения"
+      ],
+      "verify": [
+        "для каждого слушающего порта назван процесс",
+        "отдельно отмечены порты, слушающие 0.0.0.0 (доступны из сети)",
+        "правила firewall сгруппированы по разрешённым приложениям"
+      ],
       "risk": "read"
     },
     {
       "name": "Замерить задержку и потери до узла",
       "registry": "network|замерить|задержку до узла",
-      "steps": ["cli:Test-Connection <host> -Count 20 | Measure-Object -Property ResponseTime -Average -Maximum", "cli:Test-NetConnection <host> -Port 443 -InformationLevel Detailed", "прочитать потери и jitter"],
-      "verify": ["получены средние, максимальные и потери в процентах", "указано, на каком шаге потери (tracert при потерях > 2 %)", "цифры не выдуманы: есть сырые значения"],
+      "steps": [
+        "cli:Test-Connection <host> -Count 20 | Measure-Object -Property ResponseTime -Average -Maximum",
+        "cli:Test-NetConnection <host> -Port 443 -InformationLevel Detailed",
+        "прочитать потери и jitter"
+      ],
+      "verify": [
+        "получены средние, максимальные и потери в процентах",
+        "указано, на каком шаге потери (tracert при потерях > 2 %)",
+        "цифры не выдуманы: есть сырые значения"
+      ],
       "risk": "read"
     },
     {
       "name": "Проверить DNS и утечки",
       "registry": "network|проверить|DNS и утечки",
-      "steps": ["cli:Get-DnsClientServerAddress — какие DNS используются", "cli:Resolve-DnsName <домен> + сравнить с публичным резолвером", "cli:nslookup <домен> 1.1.1.1 — сравнить ответы"],
-      "verify": ["показаны DNS-серверы по каждому интерфейсу", "ответы локального и публичного резолвера совпадают (или объяснено расхождение — фильтрация)", "отмечено, если DNS задан вручную в обход DHCP"],
+      "steps": [
+        "cli:Get-DnsClientServerAddress — какие DNS используются",
+        "cli:Resolve-DnsName <домен> + сравнить с публичным резолвером",
+        "cli:nslookup <домен> 1.1.1.1 — сравнить ответы"
+      ],
+      "verify": [
+        "показаны DNS-серверы по каждому интерфейсу",
+        "ответы локального и публичного резолвера совпадают (или объяснено расхождение — фильтрация)",
+        "отмечено, если DNS задан вручную в обход DHCP"
+      ],
       "risk": "read",
       "notes": "без активного VPN «утечка» — это про DNS-сервер провайдера; проверяем факты, а не пугаем"
     }
