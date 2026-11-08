@@ -65,7 +65,10 @@ pub fn install(app: &mut tauri::App) {
     }
 
     match app.global_shortcut().register(shortcut()) {
-        Ok(()) => tracing::info!(accelerator = ACCELERATOR, "горячая клавиша зарегистрирована"),
+        Ok(()) => tracing::info!(
+            accelerator = ACCELERATOR,
+            "горячая клавиша зарегистрирована"
+        ),
         Err(error) => tracing::warn!(%error, accelerator = ACCELERATOR, "горячая клавиша занята"),
     }
 }
