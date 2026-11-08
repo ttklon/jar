@@ -1,4 +1,4 @@
-//! Первые десять «рук» — исполняемые действия из реестра.
+//! Первые «руки» — исполняемые действия из реестра.
 //!
 //! Описание инструментов лежит в данных (`data/tools.json`), а не в коде: его
 //! читают и Rust, и интерфейс, и питон-валидатор в CI. Так исчезает обычная
@@ -88,6 +88,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
 
     match registry {
         "files|создать|папку" => create_folder(registry, params),
+        "files|переместить|файлы/папки" => move_item(registry, params, cancel),
         "files|удалить|в корзину" => recycle(registry, params, cancel),
         "files|проверить|размеры и место" => {
             folder_sizes(registry, params, cancel)
@@ -103,6 +104,10 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
             simple(registry, FREE_SPACE, 30, cancel)
         }
         "storage-backup|проверить|SMART диска" => simple(registry, SMART, 30, cancel),
+        "system-power|проверить|батарею" => simple(registry, BATTERY, 30, cancel),
+        "processes-services|проанализировать|автозапуск" => {
+            simple(registry, STARTUP, 60, cancel)
+        }
         "network|проверить|подключение" => {
             simple(registry, CONNECTIVITY, 60, cancel)
         }
@@ -171,6 +176,34 @@ fn create_folder(registry: &str, params: &BTreeMap<String, String>) -> StepResul
         }
         Err(error) => StepResult::failed(registry, format!("папка не создана: {error}")),
     }
+}
+
+const MOVE_ITEM: &str = r#"$src = $env:ZS_FROM
+$dst = $env:ZS_TO
+if (-not (Test-Path -LiteralPath $src)) { Write-Output 'ZSHELPER-MISSING: источника нет'; exit 3 }
+if (Test-Path -LiteralPath $dst) { Write-Output 'ZSHELPER-EXISTS: цель уже есть, не перезаписываю'; exit 2 }
+Move-Item -LiteralPath $src -Destination $dst -ErrorAction Stop
+if ((Test-Path -LiteralPath $dst) -and (-not (Test-Path -LiteralPath $src))) {
+  Write-Output 'ZSHELPER-OK moved'
+} else {
+  Write-Output 'ZSHELPER-FAILED: после переноса состояние не сходится'
+  exit 4
+}"#;
+
+/// Перенос без перезаписи. Ожидание — собственный маркер, а не «путь существует»:
+/// цель могла существовать и до запуска, тогда проверка ничего бы не доказала.
+fn move_item(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let from = clean_path(param(params, "from"));
+    let to = clean_path(param(params, "to"));
+
+    run_script(
+        registry,
+        MOVE_ITEM,
+        &[("FROM", &from), ("TO", &to)],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(120),
+        cancel,
+    )
 }
 
 const RECYCLE: &str = r#"$target = $env:ZS_PATH
@@ -291,6 +324,22 @@ $disks | ForEach-Object {
   Write-Output ('{0}: {1}, {2} ГБ, состояние {3}' -f $_.FriendlyName, $_.MediaType, [math]::Round($_.Size / 1GB), $_.HealthStatus)
 }"#;
 
+const STARTUP: &str = r#"$items = @(Get-CimInstance Win32_StartupCommand -ErrorAction SilentlyContinue |
+  Select-Object -First 20)
+Write-Output ('ZSHELPER-OK autostart={0}' -f $items.Count)
+$items | ForEach-Object { Write-Output ('{0} — {1}' -f $_.Name, $_.Command) }"#;
+
+const BATTERY: &str = r#"$batteries = @(Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue)
+if ($batteries.Count -eq 0) {
+  Write-Output 'ZSHELPER-OK none'
+  Write-Output 'батареи нет — это настольный компьютер'
+  exit 0
+}
+Write-Output ('ZSHELPER-OK batteries={0}' -f $batteries.Count)
+$batteries | ForEach-Object {
+  Write-Output ('{0}: заряд {1}%, состояние {2}' -f $_.Name, $_.EstimatedChargeRemaining, $_.BatteryStatus)
+}"#;
+
 const OPEN_PORTS: &str = r#"$listeners = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Sort-Object LocalPort | Select-Object -First 100)
 Write-Output ('ZSHELPER-OK listeners={0}' -f $listeners.Count)
 $listeners | ForEach-Object {
@@ -327,9 +376,9 @@ mod tests {
     use crate::registry::Registry;
 
     #[test]
-    fn tools_file_parses_and_has_ten_hands() {
+    fn tools_file_parses_and_every_hand_is_described() {
         let tools = all();
-        assert_eq!(tools.len(), 10, "на этом этапе «рук» ровно десять");
+        assert!(tools.len() >= 10, "«рук» не должно становиться меньше");
         for tool in tools {
             assert!(
                 !tool.title.trim().is_empty(),
@@ -424,6 +473,42 @@ mod tests {
 
         let again = run("files|создать|папку", &params, &cancel);
         assert!(again.ok, "повторное создание идемпотентно");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Перенос проверяется на живой Windows: PowerShell есть только в job `core`.
+    #[cfg(windows)]
+    #[test]
+    fn move_refuses_to_overwrite_and_confirms_the_move() {
+        let cancel = AtomicBool::new(false);
+        let dir = std::env::temp_dir().join(format!("zshelper-move-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("временная папка");
+        let source = dir.join("источник.txt");
+        let taken = dir.join("занято.txt");
+        let free = dir.join("свободно.txt");
+        std::fs::write(&source, "данные").expect("файл записан");
+        std::fs::write(&taken, "чужое").expect("файл записан");
+
+        let mut blocked = BTreeMap::new();
+        blocked.insert("from".to_string(), source.to_string_lossy().to_string());
+        blocked.insert("to".to_string(), taken.to_string_lossy().to_string());
+        let refused = run("files|переместить|файлы/папки", &blocked, &cancel);
+        assert!(!refused.ok, "цель занята — переноса быть не должно");
+        assert!(source.exists(), "источник остаётся на месте");
+        assert_eq!(
+            std::fs::read_to_string(&taken).expect("цель читается"),
+            "чужое",
+            "чужой файл не перезаписан"
+        );
+
+        let mut allowed = BTreeMap::new();
+        allowed.insert("from".to_string(), source.to_string_lossy().to_string());
+        allowed.insert("to".to_string(), free.to_string_lossy().to_string());
+        let moved = run("files|переместить|файлы/папки", &allowed, &cancel);
+        assert!(moved.ok, "перенос должен подтвердиться: {}", moved.reason);
+        assert_eq!(moved.evidence.kind(), "stdout_marker");
+        assert!(free.exists() && !source.exists(), "файл переехал");
 
         let _ = std::fs::remove_dir_all(&dir);
     }

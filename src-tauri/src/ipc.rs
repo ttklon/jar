@@ -226,7 +226,7 @@ pub fn app_status(state: State<'_, AppState>) -> AppStatus {
     }
 }
 
-/// Десять инструментов, которые уже умеют работать.
+/// Инструменты, которые уже умеют работать (список — в `data/tools.json`).
 #[tauri::command]
 pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
     tools::all()

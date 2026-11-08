@@ -40,12 +40,12 @@ describe("App", () => {
     expect(screen.getAllByText("829").length).toBeGreaterThan(0);
   });
 
-  it("экран «Руки» показывает десять инструментов и их политику", async () => {
+  it("экран «Руки» показывает инструменты и их политику", async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
 
     screen.getByRole("button", { name: "Руки" }).click();
-    await waitFor(() => expect(screen.getByText(/10 инструментов/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/\d+ инструментов/)).toBeTruthy());
 
     // Опасное помечено, чтение — нет: политика приходит из того же решения, что и в ядре.
     expect(screen.getAllByText("Требует подтверждения").length).toBeGreaterThan(0);
@@ -57,7 +57,7 @@ describe("App", () => {
     await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
 
     screen.getByRole("button", { name: "Сценарии" }).click();
-    await waitFor(() => expect(screen.getByText(/5 сценариев/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/6 сценариев/)).toBeTruthy());
 
     // Сценарии собираются из данных: заголовок и его шаги приходят из data/flows.json.
     expect(screen.getByText("Как поживает компьютер")).toBeTruthy();
