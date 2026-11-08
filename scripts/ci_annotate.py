@@ -113,12 +113,23 @@ def main() -> int:
     if "--max" in argv:
         limit = int(argv[argv.index("--max") + 1])
 
+    raw = "--raw" in argv
+
     path = Path(argv[0])
     if not path.exists():
         print(f"ci_annotate: нет файла {path}")
         return 0
 
     text = path.read_text(encoding="utf-8", errors="replace")
+
+    if raw:
+        # Режим «отдать текст как есть»: используется для диффов форматирования,
+        # которые нельзя прочитать в логах, но можно применить руками.
+        flat = escape(text)
+        for start in range(0, len(flat), 3000):
+            print(f"::error title=fmt-diff::{flat[start:start + 3000]}")
+        return 0
+
     annotations = annotate(text, limit)
 
     if not annotations:

@@ -95,6 +95,18 @@ jobs:
         if: steps.clippy.outputs.status == '0'
         run: cargo test --manifest-path src-tauri/Cargo.toml
 
+      # rustfmt детерминирован: если файлы не отформатированы, показываем патч
+      # аннотациями — их видно даже там, где логи джоб недоступны.
       - name: Rustfmt
         if: steps.clippy.outputs.status == '0'
-        run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
+        shell: bash
+        run: |
+          set +e
+          cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check > fmt.log 2>&1
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            cargo fmt --manifest-path src-tauri/Cargo.toml --all
+            git diff -- src-tauri/src src-tauri/build.rs > fmt.diff
+            python scripts/ci_annotate.py fmt.diff --raw
+            exit 1
+          fi
