@@ -3,15 +3,15 @@
 Данные — [`data/app_targets.psv`](../data/app_targets.psv), файл генерируется
 `python3 tools/app_targets.py`, руками не править.
 
-**Приложений в каталоге: 122** · категорий: **17** · профиль найден по процессу: **70** · без профиля (визуальный агент): **52**
+**Приложений в каталоге: 134** · категорий: **17** · профиль найден по процессу: **75** · без профиля (визуальный агент): **59**
 
 ## Три уровня покрытия (почему не «профиль на каждую программу руками»)
 
 | Tier | Что это | Сколько | Как появляется |
 | --- | --- | --- | --- |
-| **A** | ручной профиль: якоря, шаги, проверки | 57 | пишется человеком/агентом по UIA-дампу |
-| **B** | авто-профиль из UIA + подтверждение | 32 | `tools/uia_probe` → кандидаты → подтверждение |
-| **C** | только визуальный агент (скриншот→OCR/VLM→клик) | 33 | профиля нет, работает универсальный цикл |
+| **A** | ручной профиль: якоря, шаги, проверки | 60 | пишется человеком/агентом по UIA-дампу |
+| **B** | авто-профиль из UIA + подтверждение | 40 | `tools/uia_probe` → кандидаты → подтверждение |
+| **C** | только визуальный агент (скриншот→OCR/VLM→клик) | 34 | профиля нет, работает универсальный цикл |
 
 Подробно — [`PROFILE-STRATEGY.md`](PROFILE-STRATEGY.md). Правило: приложение без профиля
 всё равно **работает**, просто медленнее и с меньшей надёжностью.
@@ -22,9 +22,9 @@
 
 | Основной канал | Приложений |
 | --- | --- |
-| `cli` | 47 |
+| `cli` | 52 |
 | `uia` | 43 |
-| `api` | 19 |
+| `api` | 26 |
 | `web` | 8 |
 | `com` | 5 |
 
@@ -33,9 +33,9 @@
 | Приоритет | Приложений |
 | --- | --- |
 | P0 | 22 |
-| P1 | 27 |
-| P2 | 40 |
-| P3 | 33 |
+| P1 | 29 |
+| P2 | 47 |
+| P3 | 36 |
 
 ## Инвариант: tier A ⇒ есть профиль
 
@@ -68,7 +68,7 @@
 | Windows Terminal Preview | `WindowsTerminal.exe` | cli+uia | C | P3 | ✅ |  |
 | pgAdmin | `pgAdmin4.exe` | cli | C | P3 | — | psql |
 
-### Медиа (16)
+### Медиа (17)
 
 | Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -86,6 +86,7 @@
 | Spotify | `Spotify.exe` | api+uia | B | P2 | — | Web API (нужен токен) |
 | foobar2000 | `foobar2000.exe` | cli+uia | B | P2 | — | /command |
 | Adobe InDesign | `InDesign.exe` | uia+jsx | C | P3 | — |  |
+| Kdenlive | `kdenlive.exe` | api | B | P3 | — | MLT-скрипты, рендер через melt |
 | MusicBee | `MusicBee.exe` | uia | C | P3 | — |  |
 | VEGAS Pro | `vegas.exe` | uia | C | P3 | — |  |
 
@@ -104,7 +105,23 @@
 | Диспетчер устройств | `mmc.exe` | uia+cli | B | P2 | ✅ | pnputil |
 | Редактор реестра | `regedit.exe` | cli | C | P2 | — | reg.exe, GUI — последний вариант |
 | Управление дисками | `diskmgmt.msc` | uia | C | P2 | ✅ | опасно, только с подтверждением |
-| Монитор ресурсов | `resmon.exe` | uia | C | P3 | — |  |
+| Монитор ресурсов | `resmon.exe` | uia | C | P3 | ✅ |  |
+
+### Утилиты (11)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| 7-Zip | `7zFM.exe` | cli | A | P0 | ✅ | 7z.exe |
+| CrystalDiskInfo | `crystaldiskinfo.exe` | cli | B | P1 | — | SMART через smartctl |
+| Everything | `Everything.exe` | cli | A | P1 | ✅ | ES CLI, индексация по имени |
+| HWiNFO | `HWiNFO64.exe` | api | A | P1 | ✅ | shared memory/датчики |
+| KeePassXC | `KeePassXC.exe` | cli | B | P1 | — | keepassxc-cli: чтение записей без UI |
+| PowerToys | `PowerToys.exe` | uia | B | P2 | — | часть функций через API |
+| WinRAR | `WinRAR.exe` | cli | B | P2 | — | rar.exe |
+| WizTree | `WizTree.exe` | cli | B | P2 | — | экспорт CSV |
+| qBittorrent | `qbittorrent.exe` | api | B | P2 | — | Web API /api/v2, сессии и лимиты |
+| CPU-Z | `cpuz.exe` | uia | C | P3 | — | лучше WMI |
+| JDownloader | `JDownloader.exe` | api | C | P3 | — | MyJDownloader API, капчи — вручную |
 
 ### Офис (10)
 
@@ -150,19 +167,6 @@
 | Kindle | `Kindle.exe` | uia | C | P3 | — |  |
 | Mendeley | `MendeleyDesktop.exe` | uia | C | P3 | — |  |
 
-### Утилиты (8)
-
-| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
-| --- | --- | --- | --- | --- | --- | --- |
-| 7-Zip | `7zFM.exe` | cli | A | P0 | ✅ | 7z.exe |
-| CrystalDiskInfo | `crystaldiskinfo.exe` | cli | B | P1 | — | SMART через smartctl |
-| Everything | `Everything.exe` | cli | A | P1 | ✅ | ES CLI, индексация по имени |
-| HWiNFO | `HWiNFO64.exe` | api | A | P1 | ✅ | shared memory/датчики |
-| PowerToys | `PowerToys.exe` | uia | B | P2 | — | часть функций через API |
-| WinRAR | `WinRAR.exe` | cli | B | P2 | — | rar.exe |
-| WizTree | `WizTree.exe` | cli | B | P2 | — | экспорт CSV |
-| CPU-Z | `cpuz.exe` | uia | C | P3 | — | лучше WMI |
-
 ### Мессенджер (7)
 
 | Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
@@ -175,6 +179,18 @@
 | Microsoft Teams | `ms-teams.exe` | uia | C | P3 | — | Graph API лучше |
 | Signal Desktop | `Signal.exe` | uia | C | P3 | — | нет API, только GUI |
 
+### Дизайн (7)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Figma | `Figma.exe` | api | A | P1 | ✅ | профиль готов |
+| GIMP | `gimp-2.10.exe` | cli | B | P2 | — | Script-Fu/batch |
+| GIMP | `gimp-2.10.exe` | api | B | P2 | — | Script-Fu/Python-Fu, консольный batch |
+| Inkscape | `inkscape.exe` | cli | B | P2 | — | --export |
+| Inkscape | `inkscape.exe` | cli | B | P2 | — | --export-type, векторизация трассировкой |
+| Krita | `krita.exe` | uia | C | P2 | — |  |
+| Krita | `krita.exe` | api | B | P3 | — | Python-плагины, batch-экспорт |
+
 ### Музыка (6)
 
 | Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
@@ -185,6 +201,16 @@
 | Bitwig Studio | `Bitwig Studio.exe` | api | A | P1 | ✅ | Java API |
 | PreSonus Studio One | `Studio One.exe` | uia | C | P3 | — |  |
 | Steinberg Cubase | `Cubase12.exe` | uia | C | P3 | — |  |
+
+### 3D (5)
+
+| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
+| --- | --- | --- | --- | --- | --- | --- |
+| Blender | `blender.exe` | api | A | P0 | ✅ | bpy headless |
+| FreeCAD | `FreeCAD.exe` | api+cli | A | P1 | ✅ | FreeCADCmd + Python API, профиль готов |
+| Blender (аддоны и скрипты) | `blender.exe` | api | B | P2 | ✅ | bpy: аддоны, геоноды, пакетный рендер |
+| OrcaSlicer | `orca-slicer.exe` | cli | A | P2 | ✅ | CLI-нарезка и профили печати, профиль готов |
+| PrusaSlicer | `prusa-slicer.exe` | cli | A | P2 | ✅ | консольная нарезка --export-gcode, профиль готов |
 
 ### Игры (5)
 
@@ -205,14 +231,13 @@
 | Firefox | `firefox.exe` | web | A | P1 | ✅ | отдельный профиль (Marionette) |
 | Яндекс Браузер | `browser.exe` | web | B | P2 | ✅ |  |
 
-### Дизайн (4)
+### Почта (3)
 
 | Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
 | --- | --- | --- | --- | --- | --- | --- |
-| Figma | `Figma.exe` | api | A | P1 | ✅ | профиль готов |
-| GIMP | `gimp-2.10.exe` | cli | B | P2 | — | Script-Fu/batch |
-| Inkscape | `inkscape.exe` | cli | B | P2 | — | --export |
-| Krita | `krita.exe` | uia | C | P2 | — |  |
+| Microsoft Outlook | `OUTLOOK.EXE` | api+uia | A | P1 | ✅ | профиль готов (Graph) |
+| Mozilla Thunderbird | `thunderbird.exe` | uia | B | P2 | — | IMAP/SMTP напрямую лучше |
+| Mozilla Thunderbird | `thunderbird.exe` | cli | B | P2 | — | профиль mbox/IMAP, без COM |
 
 ### Виртуализация (3)
 
@@ -230,25 +255,12 @@
 | AnyDesk | `AnyDesk.exe` | uia | C | P3 | — |  |
 | TeamViewer | `TeamViewer.exe` | uia | C | P3 | — |  |
 
-### Почта (2)
-
-| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
-| --- | --- | --- | --- | --- | --- | --- |
-| Microsoft Outlook | `OUTLOOK.EXE` | api+uia | A | P1 | ✅ | профиль готов (Graph) |
-| Mozilla Thunderbird | `thunderbird.exe` | uia | B | P2 | — | IMAP/SMTP напрямую лучше |
-
 ### Связь (2)
 
 | Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
 | --- | --- | --- | --- | --- | --- | --- |
 | Zoom | `Zoom.exe` | cli+uia | B | P2 | — | Zoom CLI, запись |
 | Skype | `Skype.exe` | uia | C | P3 | — |  |
-
-### 3D (1)
-
-| Приложение | exe | Канал | Tier | Приоритет | Профиль | Заметка |
-| --- | --- | --- | --- | --- | --- | --- |
-| Blender | `blender.exe` | api | A | P0 | ✅ | bpy headless |
 
 ## Как каталог пополняется
 

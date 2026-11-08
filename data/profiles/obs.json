@@ -1,70 +1,219 @@
 {
   "app": "OBS Studio",
-  "exe": ["obs64.exe"],
+  "exe": [
+    "obs64.exe"
+  ],
   "ui_stack": "qt",
   "version_seen": "31.x (2026-11)",
   "verified_at": "2026-11-08",
   "anchors": {
-    "ws": { "by": "api", "value": "obs-websocket v5 (localhost:4455, пароль в secrets.enc)", "fallback": "UIA + горячие клавиши" },
-    "scenes": { "by": "uia", "value": "ControlType=List; Name~«Сцены»" },
-    "sources": { "by": "uia", "value": "ControlType=List; Name~«Источники»" },
-    "start_record": { "by": "hotkey", "value": "Ctrl+F9 (настраивается)" },
-    "start_stream": { "by": "hotkey", "value": "Ctrl+F10 (настраивается)" },
-    "settings": { "by": "menu", "value": "Файл → Настройки" },
-    "status_bar": { "by": "ocr", "value": "«Запись»/«В эфире» + таймер" }
+    "ws": {
+      "by": "api",
+      "value": "obs-websocket v5 (localhost:4455, пароль в secrets.enc)",
+      "fallback": "UIA + горячие клавиши"
+    },
+    "scenes": {
+      "by": "uia",
+      "value": "ControlType=List; Name~«Сцены»"
+    },
+    "sources": {
+      "by": "uia",
+      "value": "ControlType=List; Name~«Источники»"
+    },
+    "start_record": {
+      "by": "hotkey",
+      "value": "Ctrl+F9 (настраивается)"
+    },
+    "start_stream": {
+      "by": "hotkey",
+      "value": "Ctrl+F10 (настраивается)"
+    },
+    "settings": {
+      "by": "menu",
+      "value": "Файл → Настройки"
+    },
+    "status_bar": {
+      "by": "ocr",
+      "value": "«Запись»/«В эфире» + таймер"
+    }
   },
   "operations": [
     {
       "name": "Создать сцену «экран + камера»",
       "registry": "video|настроить|сцену в OBS",
-      "steps": ["ws:CreateScene", "ws:CreateInput(monitor_capture)", "ws:CreateInput(video_capture_device)", "расположить камеру в углу"],
-      "verify": ["ws:GetSceneList содержит сцену", "ws:GetInputList содержит оба источника", "скриншот превью не чёрный"],
+      "steps": [
+        "ws:CreateScene",
+        "ws:CreateInput(monitor_capture)",
+        "ws:CreateInput(video_capture_device)",
+        "расположить камеру в углу"
+      ],
+      "verify": [
+        "ws:GetSceneList содержит сцену",
+        "ws:GetInputList содержит оба источника",
+        "скриншот превью не чёрный"
+      ],
       "risk": "write-local"
     },
     {
       "name": "Настроить микрофон и шумоподавление",
       "registry": "audio|настроить|микрофон",
-      "steps": ["ws:SetInputSettings(mic)", "включить фильтры: noise_suppress, gate, compressor"],
-      "verify": ["фильтры в списке активны", "тестовая запись 5 с: шум фона ниже -50 dB"],
+      "steps": [
+        "ws:SetInputSettings(mic)",
+        "включить фильтры: noise_suppress, gate, compressor"
+      ],
+      "verify": [
+        "фильтры в списке активны",
+        "тестовая запись 5 с: шум фона ниже -50 dB"
+      ],
       "risk": "write-local"
     },
     {
       "name": "Записать экран",
       "registry": "video|записать|экран",
-      "steps": ["ws:StartRecord", "wait:длительность", "ws:StopRecord"],
-      "verify": ["ffprobe: файл существует, длительность > 0", "размер > 10 КБ", "разрешение совпадает с монитором"],
+      "steps": [
+        "ws:StartRecord",
+        "wait:длительность",
+        "ws:StopRecord"
+      ],
+      "verify": [
+        "ffprobe: файл существует, длительность > 0",
+        "размер > 10 КБ",
+        "разрешение совпадает с монитором"
+      ],
       "risk": "write-local",
       "on_fail": "проверить свободное место и путь записи, не начинать дубль без предупреждения"
     },
     {
       "name": "Запустить стрим",
       "registry": "video|стримить|в сервис",
-      "steps": ["проверить ключ и сервер", "ws:StartStream", "watch: bitrate/dropped frames 60 с"],
-      "verify": ["ws:GetStreamStatus.active = true", "dropped frames < 1%", "в чате сервиса видно «в эфире»"],
+      "steps": [
+        "проверить ключ и сервер",
+        "ws:StartStream",
+        "watch: bitrate/dropped frames 60 с"
+      ],
+      "verify": [
+        "ws:GetStreamStatus.active = true",
+        "dropped frames < 1%",
+        "в чате сервиса видно «в эфире»"
+      ],
       "risk": "external",
       "on_fail": "немедленно остановить при падении битрейта, сообщить в Telegram"
     },
     {
       "name": "Включить виртуальную камеру",
       "registry": "video|включить|виртуальную камеру",
-      "steps": ["ws:StartVirtualCam"],
-      "verify": ["в Zoom/Teams камера «OBS Virtual Camera» доступна", "превью не чёрное"],
+      "steps": [
+        "ws:StartVirtualCam"
+      ],
+      "verify": [
+        "в Zoom/Teams камера «OBS Virtual Camera» доступна",
+        "превью не чёрное"
+      ],
       "risk": "write-local"
     },
     {
       "name": "Хоткеи переключения сцен",
       "registry": "automation|создать|хоткей",
-      "steps": ["ws:SetHotkey для сцен 1–4", "проверить в настройках горячих клавиш"],
-      "verify": ["нажатие хоткея переключает сцену (ws:GetCurrentProgramScene)"],
+      "steps": [
+        "ws:SetHotkey для сцен 1–4",
+        "проверить в настройках горячих клавиш"
+      ],
+      "verify": [
+        "нажатие хоткея переключает сцену (ws:GetCurrentProgramScene)"
+      ],
       "risk": "write-local"
     },
     {
       "name": "Проверить, что запись не пустая и со звуком",
       "registry": "video|проверить|качество",
-      "steps": ["ffprobe потоков", "ffmpeg: замерить громкость", "взять 3 кадра и проверить, что не чёрные"],
-      "verify": ["есть video и audio потоки", "средняя громкость > -40 dB", "кадры не однотонные"],
+      "steps": [
+        "ffprobe потоков",
+        "ffmpeg: замерить громкость",
+        "взять 3 кадра и проверить, что не чёрные"
+      ],
+      "verify": [
+        "есть video и audio потоки",
+        "средняя громкость > -40 dB",
+        "кадры не однотонные"
+      ],
       "risk": "read",
       "notes": "самая частая ошибка стримеров: запись без звука — проверять всегда"
+    },
+    {
+      "name": "Нарезать запись по тишине и сценам",
+      "registry": "video-production|нарезать|по тишине/сценам",
+      "steps": [
+        "ffmpeg silencedetect (порог −35 dB, длительность 0.6 с) для пауз",
+        "сцены: ffmpeg select='gt(scene,0.4)' для смены кадра",
+        "сформировать план резки и применить без перекодирования ключевых участков"
+      ],
+      "verify": [
+        "число склеек совпадает с планом",
+        "длительность результата = сумма отрезков ±0.1 с",
+        "на стыках нет обрыва слова (проверить 3 стыка)"
+      ],
+      "risk": "write-local",
+      "notes": "резать по нулевому переходу звука, иначе слышны щелчки"
+    },
+    {
+      "name": "Исправить цвет и звук записи",
+      "registry": "video-production|исправить|цвет и звук",
+      "steps": [
+        "звук: шумоподавление (arnndn/rnnoise) + нормализация −16 LUFS для голоса",
+        "цвет: автоуровни/баланс белого по серой карте или пресету",
+        "проверить, что кожа не стала зелёной, а голос не «подводным»"
+      ],
+      "verify": [
+        "LUFS и true peak измерены после обработки",
+        "изменение цвета видно на скриншоте «до/после» и не выглядит перегретым",
+        "нет артефактов шумоподавления (прослушать 10 с тишины)"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Сделать вертикальные нарезки из длинного видео",
+      "registry": "video-production|сделать|вертикальные нарезки",
+      "steps": [
+        "найти 3–7 ярких фрагментов (по ASR + громкости/сменам сцен)",
+        "вырезать 20–60 с с запасом 0.3 с по краям",
+        "перекадрировать в 1080×1920 с отслеживанием лица, вписать субтитры в безопасную зону"
+      ],
+      "verify": [
+        "каждый фрагмент в 9:16 и длится 20–60 с",
+        "лицо в кадре на всём протяжении (проверка по 3 кадрам)",
+        "субтитры не перекрывают интерфейс платформы"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Сделать обложку и превью",
+      "registry": "video-production|сделать|обложку/превью",
+      "steps": [
+        "выбрать кадр-основу (резкий, с эмоцией) или собрать композицию",
+        "наложить 3–5 слов крупным шрифтом, контраст ≥4.5:1",
+        "экспорт 1280×720 (YouTube) и 1080×1920 (Shorts)"
+      ],
+      "verify": [
+        "размеры и соотношения сторон соответствуют требованиям площадок",
+        "текст читается при уменьшении до 320 px по ширине",
+        "нет водяных знаков и чужих логотипов"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Проверить технические параметры готового видео",
+      "registry": "video-production|проверить|технические параметры",
+      "steps": [
+        "ffprobe: контейнер, кодеки, битрейт, fps, разрешение, каналы и частота аудио",
+        "ebur128: LUFS и true peak",
+        "однообразие fps: нет VFR там, где нужен CFR"
+      ],
+      "verify": [
+        "все параметры в таблице и соответствуют площадке",
+        "LUFS в целевом диапазоне, пики ≤ −1 dBTP",
+        "VFR/CFR указан явно (VFR ломает синхронизацию в редакторах)"
+      ],
+      "risk": "read"
     }
   ]
 }

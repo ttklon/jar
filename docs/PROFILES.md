@@ -6,7 +6,7 @@
 
 Файл генерируется `python3 tools/profiles.py`; руками не править.
 
-**Профилей: 63** · операций: **378** · проблем: **0**
+**Профилей: 68** · операций: **427** · проблем: **0**
 
 Правила (проверяются автоматически, ошибка = ненулевой код возврата):
 
@@ -19,6 +19,7 @@
 | Приложение / класс | Тип | Процесс | Стек | Версия | Проверен | Якорей | Операций | Файл |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1С:Предприятие 8 (тонкий/толстый клиент) | `app` | `1cv8.exe, 1cv8c.exe` | win32 | 8.3.x (2026-11) | 2026-11-08 | 5 | 6 | `1c.json` |
+| 3D-печать (OrcaSlicer / PrusaSlicer / OctoPrint) | `tool` | `orca-slicer.exe, prusa-slicer-console.exe, prusa-slicer.exe, orcaslicer-console.exe` | qt | OrcaSlicer 2.2, PrusaSlicer 2.9, OctoPrint 1.11 (2026-11) | 2026-11-08 | 6 | 6 | `slicer-3d.json` |
 | 7-Zip | `app` | `7zFM.exe, 7z.exe, 7zG.exe` | win32 | 24.x (2026-11) | 2026-11-08 | 2 | 4 | `7zip.json` |
 | Ableton Live 12 | `app` | `Ableton Live 12.exe, Ableton Live 12 Beta.exe` | win32 | 12.x (2026-11) | 2026-11-08 | 7 | 7 | `ableton.json` |
 | Adobe Acrobat | `app` | `Acrobat.exe, AcroRd32.exe, AcrobatDC.exe` | uia | 2025.x (2026-11) | 2026-11-08 | 5 | 6 | `acrobat.json` |
@@ -39,6 +40,7 @@
 | FL Studio | `app` | `FL64.exe, FL.exe` | win32 | FL Studio 2024/2025 (2026-11) | 2026-11-08 | 8 | 6 | `flstudio.json` |
 | Figma (desktop / web) | `app` | `Figma.exe, chrome.exe` | web | 2026-11 | 2026-11-08 | 6 | 6 | `figma.json` |
 | FileZilla | `app` | `filezilla.exe` | win32 | 3.6x (2026-11) | 2026-11-08 | 5 | 4 | `filezilla.json` |
+| FreeCAD (CAD-моделирование) | `tool` | `FreeCAD.exe, FreeCADCmd.exe` | qt | 1.0 (2026-11) | 2026-11-08 | 6 | 7 | `freecad.json` |
 | Git for Windows (git-bash / git.exe) | `app` | `git-bash.exe, git.exe, bash.exe` | win32 | 2.4x (2026-11) | 2026-11-08 | 2 | 5 | `git-bash.json` |
 | HandBrake | `app` | `HandBrake.exe, HandBrakeCLI.exe` | win32 | 1.9.x (2026-11) | 2026-11-08 | 2 | 4 | `handbrake.json` |
 | JetBrains IDE (IDEA / PyCharm / WebStorm) | `app` | `idea64.exe, pycharm64.exe, webstorm64.exe, studio64.exe` | qt | 2025.3 (2026-11) | 2026-11-08 | 7 | 5 | `jetbrains.json` |
@@ -50,7 +52,7 @@
 | Microsoft Word | `app` | `WINWORD.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 7 | 8 | `word.json` |
 | Mozilla Firefox | `app` | `firefox.exe, geckodriver.exe` | web | 14x (2026-11) | 2026-11-08 | 6 | 6 | `firefox.json` |
 | Notion | `app` | `Notion.exe` | electron | 4.x (2026-11) | 2026-11-08 | 5 | 5 | `notion.json` |
-| OBS Studio | `app` | `obs64.exe` | qt | 31.x (2026-11) | 2026-11-08 | 7 | 7 | `obs.json` |
+| OBS Studio | `app` | `obs64.exe` | qt | 31.x (2026-11) | 2026-11-08 | 7 | 12 | `obs.json` |
 | Obsidian | `app` | `Obsidian.exe` | electron | 1.9.x (2026-11) | 2026-11-08 | 5 | 5 | `obsidian.json` |
 | Oracle VirtualBox | `app` | `VirtualBox.exe, VBoxManage.exe, VBoxHeadless.exe` | qt | 7.1.x (2026-11) | 2026-11-08 | 5 | 5 | `virtualbox.json` |
 | PowerShell 7 / Windows PowerShell | `app` | `pwsh.exe, powershell.exe` | win32 | 7.5 / 5.1 (2026-11) | 2026-11-08 | 3 | 5 | `powershell.json` |
@@ -71,25 +73,28 @@
 | Бэкап и диски Windows (robocopy / wbadmin / smartctl) | `tool` | `robocopy.exe, wbadmin.exe, smartctl.exe, diskmgmt.msc` | win32 | Windows 11 24H2 + smartmontools 7.4 (2026-11) | 2026-11-08 | 6 | 6 | `storage-tools.json` |
 | Ввод и макросы (AutoHotkey / Rust input layer) | `tool` | `AutoHotkey64.exe, AutoHotkey.exe, nircmd.exe` | win32 | AHK 2.0.19 + enigo 0.2 (2026-11) | 2026-11-08 | 6 | 7 | `input-macros.json` |
 | Диспетчер задач | `app` | `Taskmgr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `taskmgr.json` |
+| Доступность (экранный диктор, субтитры, контраст, управление без мыши) | `system` | `narrator.exe, Magnify.exe, osk.exe, SystemSettings.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 6 | `accessibility.json` |
 | Календарь и задачи | `system` | `OUTLOOK.EXE, olk.exe, schtasks.exe, Calendar.exe` | uia | Outlook 365 + Windows 11 (2026-11) | 2026-11-08 | 5 | 6 | `calendar-tasks.json` |
 | Командная строка (cmd.exe) и пакетные файлы | `app` | `cmd.exe` | win32 | Windows 10/11 (2026-11) | 2026-11-08 | 2 | 4 | `cmd.json` |
 | Мониторинг железа (HWiNFO / smartctl / diskspd) | `tool` | `HWiNFO64.exe, LibreHardwareMonitor.exe, smartctl.exe, diskspd.exe` | win32 | HWiNFO 8.x, LibreHardwareMonitor 0.9, smartmontools 7.4 (2026-11) | 2026-11-08 | 6 | 6 | `hardware-monitor.json` |
 | Музыкальная библиотека (beets / fpcalc / rsgain) | `tool` | `beet.exe, fpcalc.exe, rsgain.exe, loudgain.exe, ffmpeg.exe` | win32 | beets 2.x, chromaprint 1.5, rsgain 3.x (2026-11) | 2026-11-08 | 5 | 6 | `music-library.json` |
+| Наблюдение и разбор инцидентов | `system` | `perfmon.exe, wpr.exe, resmon.exe, nssm.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 7 | `monitoring-triage.json` |
 | Панель управления и установка программ | `system` | `control.exe, appwiz.cpl, winget.exe, msiexec.exe` | uia | Windows 11 24H2 + winget 1.9 (2026-11) | 2026-11-08 | 5 | 4 | `control-panel.json` |
-| Параметры Windows | `app` | `SystemSettings.exe, ApplicationFrameHost.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `windows-settings.json` |
+| Параметры Windows | `app` | `SystemSettings.exe, ApplicationFrameHost.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 15 | `windows-settings.json` |
 | Проводник Windows | `app` | `explorer.exe` | uia | Windows 11 24H2 / Windows 10 22H2 | 2026-11-08 | 6 | 7 | `explorer.json` |
 | Просмотр событий | `app` | `mmc.exe, eventvwr.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 5 | 5 | `eventvwr.json` |
+| Релизный конвейер (cargo/tauri build, signtool, gh, syft) | `tool` | `cargo.exe, tauri.exe, signtool.exe, iscc.exe, gh.exe, syft.exe` | win32 | Rust 1.8x, Tauri CLI 2.x, WiX 3.14, NSIS 3.10, signtool 10.0 (2026-11) | 2026-11-08 | 7 | 8 | `release-pipeline.json` |
 | Умный дом (Home Assistant / MQTT / Matter) | `system` | `` | web | HA 2026.1 + Matter 1.3 (2026-11) | 2026-11-08 | 6 | 7 | `home-assistant.json` |
 | Устройства Windows (USB / Bluetooth / печать) | `system` | `pnputil.exe, printui.exe, DevicePairingWizard.exe, SystemSettings.exe` | uia | Windows 11 24H2 (2026-11) | 2026-11-08 | 6 | 6 | `devices.json` |
 
-По типу: `app` — 49 · `tool` — 9 · `system` — 5. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
+По типу: `app` — 49 · `tool` — 12 · `system` — 7. `app` — конкретная программа, `tool` — командный инструмент без интерфейса, `system` — класс работы в самой Windows (устройства, безопасность, календарь), где «приложение» — это система.
 
 ## Риск операций
 
-- `write-local` — 205
-- `read` — 120
-- `external` — 27
-- `destructive` — 22
+- `write-local` — 234
+- `read` — 135
+- `external` — 28
+- `destructive` — 26
 - `identity` — 3
 - `money` — 1
 
@@ -101,6 +106,7 @@
 - `files` — 23
 - `chat-social` — 22
 - `text-docs` — 18
+- `engineering-3d` — 14
 - `web` — 14
 - `virtualization-remote` — 14
 - `learning-research` — 13
@@ -109,10 +115,14 @@
 - `slides-pdf-print` — 10
 - `apps-windows` — 10
 - `creative-3d` — 9
+- `distribution` — 9
 - `images` — 9
 - `apps-generic` — 8
+- `video-production` — 8
+- `monitoring-triage` — 8
 - `hardware-diag` — 8
 - `games` — 8
+- `accessibility` — 7
 - `music` — 7
 - `storage-backup` — 7
 - `sheets-data` — 7
@@ -125,16 +135,11 @@
 - `databases` — 6
 - `devices` — 6
 - `network` — 6
+- `system-power` — 6
 - `automation` — 5
 - `security-access` — 5
-- `video-production` — 3
-- `system-power` — 2
-- `engineering-3d` — 1
-- `distribution` — 1
-- `monitoring-triage` — 1
-- `accessibility` — 1
-- `accounts-updates` — 1
-- `display-sound` — 1
+- `display-sound` — 5
+- `accounts-updates` — 3
 
 ## Проблемы
 

@@ -2,7 +2,7 @@
 
 Аудит реестра действий и профилей. Генерируется `python3 tools/audit_actions.py`.
 
-**Действий: 815** · доменов: 49 · глаголов: 201 · профилей: 63 · операций в профилях: 378
+**Действий: 815** · доменов: 49 · глаголов: 201 · профилей: 68 · операций в профилях: 427
 
 ## Статусы, риск, железо
 
@@ -61,7 +61,7 @@
 | `legal-docs` | 13 | профили документов + скилл-рецепт | Документы (DOCX/PDF/сканы) уже покрыты профилями Word, LibreOffice и Acrobat. Юридическая работа — это анализ текста и чеклисты, а не кнопки. Подпись — identity-операция, всегда с человеком. |
 | `licensing` | 12 | API собственного сервера + тесты | Лицензирование — часть нашего собственного продукта. «Профиль» здесь — это API VPS, описанный в docs/LICENSING.md (activate/refresh/deactivate/entitlements), и он проверяется интеграционными тестами, а не UIA-якорями. |
 
-С профилями: `video` (39), `music-production` (26), `dev-code` (26), `files` (23), `chat-social` (22), `text-docs` (18), `web` (14), `virtualization-remote` (14), `learning-research` (13), `audio` (11), `processes-services` (11), `slides-pdf-print` (10), `apps-windows` (10), `creative-3d` (9), `images` (9), `apps-generic` (8), `hardware-diag` (8), `games` (8), `music` (7), `storage-backup` (7), `sheets-data` (7), `smart-home` (7), `input` (7), `email` (7), `business-finance` (6), `personal-finance` (6), `calendar-tasks` (6), `databases` (6), `devices` (6), `network` (6), `automation` (5), `security-access` (5), `video-production` (3), `system-power` (2), `engineering-3d` (1), `distribution` (1), `monitoring-triage` (1), `accessibility` (1), `accounts-updates` (1), `display-sound` (1).
+С профилями: `video` (39), `music-production` (26), `dev-code` (26), `files` (23), `chat-social` (22), `text-docs` (18), `engineering-3d` (14), `web` (14), `virtualization-remote` (14), `learning-research` (13), `audio` (11), `processes-services` (11), `slides-pdf-print` (10), `apps-windows` (10), `creative-3d` (9), `distribution` (9), `images` (9), `apps-generic` (8), `video-production` (8), `monitoring-triage` (8), `hardware-diag` (8), `games` (8), `accessibility` (7), `music` (7), `storage-backup` (7), `sheets-data` (7), `smart-home` (7), `input` (7), `email` (7), `business-finance` (6), `personal-finance` (6), `calendar-tasks` (6), `databases` (6), `devices` (6), `network` (6), `system-power` (6), `automation` (5), `security-access` (5), `display-sound` (5), `accounts-updates` (3).
 
 Ширина есть, глубина — в 40 доменах из 49. Очередь закрывается через профили приложений: адресный список — `docs/APP-COVERAGE.md` (приоритеты P0…P3).
 
@@ -81,18 +81,18 @@
 
 | Домен | Действий | Операций в профилях | Глубина |
 | --- | --- | --- | --- |
-| `engineering-3d` | 16 | 1 | 0.06 |
-| `distribution` | 15 | 1 | 0.07 |
-| `monitoring-triage` | 14 | 1 | 0.07 |
-| `accounts-updates` | 13 | 1 | 0.08 |
-| `display-sound` | 11 | 1 | 0.09 |
-| `accessibility` | 10 | 1 | 0.10 |
-| `system-power` | 14 | 2 | 0.14 |
-| `video-production` | 21 | 3 | 0.14 |
+| `accounts-updates` | 13 | 3 | 0.23 |
 | `security-access` | 18 | 5 | 0.28 |
 | `network` | 21 | 6 | 0.29 |
 | `devices` | 19 | 6 | 0.32 |
 | `personal-finance` | 18 | 6 | 0.33 |
+| `video-production` | 21 | 8 | 0.38 |
+| `business-finance` | 15 | 6 | 0.40 |
+| `databases` | 15 | 6 | 0.40 |
+| `hardware-diag` | 20 | 8 | 0.40 |
+| `sheets-data` | 17 | 7 | 0.41 |
+| `automation` | 12 | 5 | 0.42 |
+| `system-power` | 14 | 6 | 0.43 |
 
 Ниже всех — те домены, где реестр обещает больше, чем умеют профили. Это и есть адресная очередь на углубление (а не список «домены, которых нет»). Домены, которые по решению закрываются другим артефактом (скилл, коннектор, бенчмарк, API), здесь не участвуют — иначе они вечно висели бы в конце таблицы с нулём.
 
