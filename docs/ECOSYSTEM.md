@@ -4,7 +4,7 @@
 реальную вещь** с происхождением: README репозитория, документация вендора, протокол
 или строка нашего реестра. Ничего не выдумано: если записи нет в источнике, её нет здесь.
 
-**Всего записей: 2633** · проверено и выбрано: **405** · кандидатов на разбор: **2228**
+**Всего записей: 2633** · проверено и выбрано: **411** · кандидатов на разбор: **2222**
 
 | Каталог | Записей | Выбрано | Кандидатов | Что это |
 | --- | --- | --- | --- | --- |
@@ -16,7 +16,7 @@
 | [`mcp-servers.json`](../data/ecosystem/mcp-servers.json) | 267 | 0 | 267 | MCP-серверы |
 | [`models.json`](../data/ecosystem/models.json) | 389 | 0 | 389 | Модели |
 | [`plugins.json`](../data/ecosystem/plugins.json) | 208 | 0 | 208 | Плагины и пакеты-расширения |
-| [`skills.json`](../data/ecosystem/skills.json) | 245 | 14 | 231 | Навыки и скиллы |
+| [`skills.json`](../data/ecosystem/skills.json) | 245 | 20 | 225 | Навыки и скиллы |
 | [`tools.json`](../data/ecosystem/tools.json) | 230 | 0 | 230 | Инструменты |
 
 ## Два статуса, и почему это важно
@@ -34,10 +34,10 @@
 
 | Источник | Что даёт | Записей |
 | --- | --- | --- |
-| `vault` | `research/` (1461 MCP-сервер, 347 Agent Skills, 96 агентов, 880 пакетов npm/PyPI) | 1147 |
+| `vault` | `research/` (1461 MCP-сервер, 347 Agent Skills, 96 агентов, 880 пакетов npm/PyPI) | 1141 |
 | `curated` | списки по документации вендоров и протоколам (модели, коннекторы, каналы, приложения) | 1081 |
 | `registry` | `data/actions.json` — наши действия, сгруппированные в умения | 342 |
-| `zshelper` | наши скиллы и роли помощников | 63 |
+| `zshelper` | наши скиллы и роли помощников | 69 |
 
 ## Каталоги
 
@@ -315,35 +315,35 @@
 
 ### Навыки и скиллы — 245
 
-Распределение: `agent-skill` — 231, `zshelper-recipe` — 14.
+Распределение: `agent-skill` — 225, `zshelper-recipe` — 20.
 
 | # | Название | Тип | Что даёт | Статус |
 | --- | --- | --- | --- | --- |
-| 1 | Выставить счёт и проверить оплату | `zshelper-recipe` | реквизиты → счёт → отправка человеком → реестр → сверка оплаты. Деньги не двигаются: оплату делает человек в банке. | `selected` |
-| 2 | Исследовать вопрос и написать отчёт | `zshelper-recipe` | вопрос → источники → проверка фактов → текст с ссылками. Без выдуманных источников и цифр. | `selected` |
-| 3 | Найти и сравнить варианты в вебе | `zshelper-recipe` | поиск → чтение → таблица → сравнение с оговорками → сохранение доказательств. Ничего не покупается и не отправляется. | `selected` |
-| 4 | Написать и сдать курсовую | `zshelper-recipe` | от методички до собранного PDF. Отправку в вуз делает человек. | `selected` |
-| 5 | Настроить бэкап по правилу 3-2-1 | `zshelper-recipe` | три копии, два носителя, одна вне машины — с проверкой восстановления, а не «файлы скопированы». | `selected` |
-| 6 | Откликнуться на вакансию | `zshelper-recipe` | поиск → сравнение → резюме и письмо → отклик человеком → трекинг. | `selected` |
-| 7 | Подвести итоги недели | `zshelper-recipe` | календарь, почта, файлы → заметка недели → план следующей. Ничего не удаляется и не отменяется без подтверждения. | `selected` |
-| 8 | Привести систему в порядок | `zshelper-recipe` | диагностика → безопасная чистка → проверка результата числами. Ничего личного не удаляется без списка на подтверждение. | `selected` |
-| 9 | Разобрать завалы в папке | `zshelper-recipe` | инвентаризация → дубли → правила → сортировка → удаление по подтверждённому списку. | `selected` |
-| 10 | Разобрать почту до нуля | `zshelper-recipe` | входящие → классификация → проверка на опасное → черновики ответов → задачи из писем. Отправляет и удаляет человек. | `selected` |
-| 11 | Разобрать фотоархив | `zshelper-recipe` | инвентаризация → дубли → сортировка по датам → метаданные. Удаление только по подтверждённому списку. | `selected` |
-| 12 | Сделать трек | `zshelper-recipe` | от референса до мастер-файла. Публикация и дистрибуция — отдельный шаг с подтверждением человеком. | `selected` |
-| 13 | Смонтировать и опубликовать ролик | `zshelper-recipe` | монтаж → проверка параметров → черновик публикации. Кнопку «Опубликовать» нажимает человек. | `selected` |
-| 14 | Собрать рабочее место | `zshelper-recipe` | запуск нужных программ, раскладка окон по мониторам, хоткеи. Без изменения файлов проекта. | `selected` |
-| 15 | morluto/rea | `agent-skill` | Reverse engineer anything with agents, from app behavior down to native binaries. | `candidate` |
-| 16 | mattpocock/skills | `agent-skill` | Skills for Real Engineers. Straight from my .agents directory. | `candidate` |
-| 17 | obra/brainstorming | `agent-skill` | An agentic skills framework & software development methodology that works. | `candidate` |
-| 18 | nextlevelbuilder/ui-ux-pro-max-skill | `agent-skill` | An AI skill that provides design intelligence for building professional UI/UX across multiple platforms. | `candidate` |
-| 19 | thedotmack/claude-mem | `agent-skill` | Persistent Context Across Sessions for Every Agent – Captures everything your agent does during sessions, compresses it  | `candidate` |
-| 20 | Leonxlnx/taste-skill | `agent-skill` | Agent skills that give coding agents taste: art direction, reference images and a browser check instead of generic AI pa | `candidate` |
-| 21 | Panniantong/Agent-Reach | `agent-skill` | Give your AI agent eyes to see the entire internet. Read & search Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongSh | `candidate` |
-| 22 | tt-a1i/archify | `agent-skill` | Turn any idea, plan, or codebase into a beautiful interactive diagram. An agent skill for Claude Code, Codex, and more. | `candidate` |
-| 23 | Lum1104/understand-anything | `agent-skill` | Graphs that teach graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and as | `candidate` |
-| 24 | career-ops-hq/career-ops | `agent-skill` | Open-source AI job search agent and job finder: scan job boards, score each job 1-5 against your CV before you apply, ta | `candidate` |
-| 25 | heygen-com/hyperframes | `agent-skill` | Write HTML. Render video. Built for agents. | `candidate` |
+| 1 | Вести дневник самочувствия | `zshelper-recipe` | ежедневные записи → графики → разбор анализов → пакет для врача. Никаких назначений и доз. | `selected` |
+| 2 | Выставить счёт и проверить оплату | `zshelper-recipe` | реквизиты → счёт → отправка человеком → реестр → сверка оплаты. Деньги не двигаются: оплату делает человек в банке. | `selected` |
+| 3 | Исследовать вопрос и написать отчёт | `zshelper-recipe` | вопрос → источники → проверка фактов → текст с ссылками. Без выдуманных источников и цифр. | `selected` |
+| 4 | Найти и сравнить варианты в вебе | `zshelper-recipe` | поиск → чтение → таблица → сравнение с оговорками → сохранение доказательств. Ничего не покупается и не отправляется. | `selected` |
+| 5 | Написать и сдать курсовую | `zshelper-recipe` | от методички до собранного PDF. Отправку в вуз делает человек. | `selected` |
+| 6 | Настроить бэкап по правилу 3-2-1 | `zshelper-recipe` | три копии, два носителя, одна вне машины — с проверкой восстановления, а не «файлы скопированы». | `selected` |
+| 7 | Откликнуться на вакансию | `zshelper-recipe` | поиск → сравнение → резюме и письмо → отклик человеком → трекинг. | `selected` |
+| 8 | Перевести документ и проверить перевод | `zshelper-recipe` | извлечь текст → глоссарий → перевод → сверка чисел и терминов → PDF/озвучка. | `selected` |
+| 9 | Подвести итоги недели | `zshelper-recipe` | календарь, почта, файлы → заметка недели → план следующей. Ничего не удаляется и не отменяется без подтверждения. | `selected` |
+| 10 | Подготовиться к экзамену | `zshelper-recipe` | план → материалы → карточки → тренировка → проверка знаний → расписание повторений. | `selected` |
+| 11 | Привести систему в порядок | `zshelper-recipe` | диагностика → безопасная чистка → проверка результата числами. Ничего личного не удаляется без списка на подтверждение. | `selected` |
+| 12 | Проверить безопасность аккаунтов | `zshelper-recipe` | угрозы → обновления → утечки → пароли → 2FA → сессии → резервные коды. Пароли не показываются в логах. | `selected` |
+| 13 | Разобрать завалы в папке | `zshelper-recipe` | инвентаризация → дубли → правила → сортировка → удаление по подтверждённому списку. | `selected` |
+| 14 | Разобрать музыкальную библиотеку | `zshelper-recipe` | инвентаризация → дубли → теги → громкость → плейлисты. Файлы не удаляются без подтверждённого списка. | `selected` |
+| 15 | Разобрать почту до нуля | `zshelper-recipe` | входящие → классификация → проверка на опасное → черновики ответов → задачи из писем. Отправляет и удаляет человек. | `selected` |
+| 16 | Разобрать фотоархив | `zshelper-recipe` | инвентаризация → дубли → сортировка по датам → метаданные. Удаление только по подтверждённому списку. | `selected` |
+| 17 | Сделать трек | `zshelper-recipe` | от референса до мастер-файла. Публикация и дистрибуция — отдельный шаг с подтверждением человеком. | `selected` |
+| 18 | Смонтировать и опубликовать ролик | `zshelper-recipe` | монтаж → проверка параметров → черновик публикации. Кнопку «Опубликовать» нажимает человек. | `selected` |
+| 19 | Собрать рабочее место | `zshelper-recipe` | запуск нужных программ, раскладка окон по мониторам, хоткеи. Без изменения файлов проекта. | `selected` |
+| 20 | Спланировать поездку | `zshelper-recipe` | документы → варианты → маршрут → бюджет → чеклист → напоминания. Билеты и отели не покупаются. | `selected` |
+| 21 | morluto/rea | `agent-skill` | Reverse engineer anything with agents, from app behavior down to native binaries. | `candidate` |
+| 22 | mattpocock/skills | `agent-skill` | Skills for Real Engineers. Straight from my .agents directory. | `candidate` |
+| 23 | obra/brainstorming | `agent-skill` | An agentic skills framework & software development methodology that works. | `candidate` |
+| 24 | nextlevelbuilder/ui-ux-pro-max-skill | `agent-skill` | An AI skill that provides design intelligence for building professional UI/UX across multiple platforms. | `candidate` |
+| 25 | thedotmack/claude-mem | `agent-skill` | Persistent Context Across Sessions for Every Agent – Captures everything your agent does during sessions, compresses it  | `candidate` |
 
 …и ещё 220 в [`data/ecosystem/skills.json`](../data/ecosystem/skills.json).
 

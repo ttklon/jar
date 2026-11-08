@@ -89,6 +89,29 @@
   "needs_check": false
  },
  {
+  "id": "skill:zshelper:doc-translate",
+  "name": "Перевести документ и проверить перевод",
+  "category": "skills",
+  "subkind": "zshelper-recipe",
+  "origin": "zshelper",
+  "url": "docs/SKILLS.md#doc-translate",
+  "license": "own",
+  "gives": "извлечь текст → глоссарий → перевод → сверка чисел и терминов → PDF/озвучка.",
+  "phrases": [
+   "переведи документ",
+   "переведи статью и объясни",
+   "сделай перевод с озвучкой"
+  ],
+  "domains": [
+   "text-docs",
+   "learning-research",
+   "slides-pdf-print"
+  ],
+  "risk": "write-local",
+  "status": "selected",
+  "needs_check": false
+ },
+ {
   "id": "skill:zshelper:email-zero",
   "name": "Разобрать почту до нуля",
   "category": "skills",
@@ -128,6 +151,27 @@
    "files"
   ],
   "risk": "destructive",
+  "status": "selected",
+  "needs_check": false
+ },
+ {
+  "id": "skill:zshelper:health-diary",
+  "name": "Вести дневник самочувствия",
+  "category": "skills",
+  "subkind": "zshelper-recipe",
+  "origin": "zshelper",
+  "url": "docs/SKILLS.md#health-diary",
+  "license": "own",
+  "gives": "ежедневные записи → графики → разбор анализов → пакет для врача. Никаких назначений и доз.",
+  "phrases": [
+   "веди дневник самочувствия",
+   "разбери мои анализы",
+   "собери документы для врача"
+  ],
+  "domains": [
+   "health-daily"
+  ],
+  "risk": "write-local",
   "status": "selected",
   "needs_check": false
  },
@@ -172,6 +216,28 @@
    "text-docs"
   ],
   "risk": "external",
+  "status": "selected",
+  "needs_check": false
+ },
+ {
+  "id": "skill:zshelper:music-library",
+  "name": "Разобрать музыкальную библиотеку",
+  "category": "skills",
+  "subkind": "zshelper-recipe",
+  "origin": "zshelper",
+  "url": "docs/SKILLS.md#music-library",
+  "license": "own",
+  "gives": "инвентаризация → дубли → теги → громкость → плейлисты. Файлы не удаляются без подтверждённого списка.",
+  "phrases": [
+   "разбери музыкальную библиотеку",
+   "наведи порядок в музыке",
+   "собери плейлист из этого"
+  ],
+  "domains": [
+   "music",
+   "files"
+  ],
+  "risk": "write-local",
   "status": "selected",
   "needs_check": false
  },
@@ -245,6 +311,49 @@
   "needs_check": false
  },
  {
+  "id": "skill:zshelper:security-audit",
+  "name": "Проверить безопасность аккаунтов",
+  "category": "skills",
+  "subkind": "zshelper-recipe",
+  "origin": "zshelper",
+  "url": "docs/SKILLS.md#security-audit",
+  "license": "own",
+  "gives": "угрозы → обновления → утечки → пароли → 2FA → сессии → резервные коды. Пароли не показываются в логах.",
+  "phrases": [
+   "проверь безопасность аккаунтов",
+   "проверь, не утекли ли пароли",
+   "настрой 2FA"
+  ],
+  "domains": [
+   "security-access"
+  ],
+  "risk": "identity",
+  "status": "selected",
+  "needs_check": false
+ },
+ {
+  "id": "skill:zshelper:study-session",
+  "name": "Подготовиться к экзамену",
+  "category": "skills",
+  "subkind": "zshelper-recipe",
+  "origin": "zshelper",
+  "url": "docs/SKILLS.md#study-session",
+  "license": "own",
+  "gives": "план → материалы → карточки → тренировка → проверка знаний → расписание повторений.",
+  "phrases": [
+   "подготовь меня к экзамену",
+   "составь план учёбы",
+   "сделай карточки по теме"
+  ],
+  "domains": [
+   "learning-research",
+   "calendar-tasks"
+  ],
+  "risk": "external",
+  "status": "selected",
+  "needs_check": false
+ },
+ {
   "id": "skill:zshelper:system-tuneup",
   "name": "Привести систему в порядок",
   "category": "skills",
@@ -265,6 +374,28 @@
    "files"
   ],
   "risk": "destructive",
+  "status": "selected",
+  "needs_check": false
+ },
+ {
+  "id": "skill:zshelper:trip-plan",
+  "name": "Спланировать поездку",
+  "category": "skills",
+  "subkind": "zshelper-recipe",
+  "origin": "zshelper",
+  "url": "docs/SKILLS.md#trip-plan",
+  "license": "own",
+  "gives": "документы → варианты → маршрут → бюджет → чеклист → напоминания. Билеты и отели не покупаются.",
+  "phrases": [
+   "спланируй поездку",
+   "собери маршрут",
+   "посчитай бюджет поездки"
+  ],
+  "domains": [
+   "travel",
+   "web"
+  ],
+  "risk": "write-local",
   "status": "selected",
   "needs_check": false
  },
@@ -3238,84 +3369,6 @@
   "license": "NOASSERTION",
   "stars": 85,
   "gives": "Hand-drawn diagram skill for Claude Code and Codex. Generates monochrome architecture, workflow, and UX blueprint diagrams as PNGs.",
-  "status": "candidate",
-  "needs_check": true
- },
- {
-  "id": "skill:HeshamFS/materials-simulation-skills",
-  "name": "materials-simulation-skills",
-  "category": "skills",
-  "subkind": "agent-skill",
-  "origin": "vault",
-  "url": "https://github.com/HeshamFS/materials-simulation-skills",
-  "license": "Apache-2.0",
-  "stars": 83,
-  "gives": "Agent Skills for computational materials science -- numerical stability, solvers, meshing, convergence, and simulation workflows.",
-  "status": "candidate",
-  "needs_check": true
- },
- {
-  "id": "skill:skymanbp/cc-tree",
-  "name": "skymanbp/cc-tree",
-  "category": "skills",
-  "subkind": "agent-skill",
-  "origin": "vault",
-  "url": "https://github.com/skymanbp/cc-tree",
-  "license": "MIT",
-  "stars": 82,
-  "gives": "Claude Code plugin: universal radial-tree exploration engine. One tree skill + swappable presets brainstorm / attack / design / code-audit for divergent ideation, adversarial critique, and design-space exploration. 12",
-  "status": "candidate",
-  "needs_check": true
- },
- {
-  "id": "skill:prisma/skills",
-  "name": "prisma/skills",
-  "category": "skills",
-  "subkind": "agent-skill",
-  "origin": "vault",
-  "url": "https://github.com/prisma/skills",
-  "license": "MIT",
-  "stars": 79,
-  "gives": "Official Prisma skills: ORM, Postgres, Compute and migrations",
-  "status": "candidate",
-  "needs_check": true
- },
- {
-  "id": "skill:Cap-go/capgo-skills",
-  "name": "Cap-go/capgo-skills",
-  "category": "skills",
-  "subkind": "agent-skill",
-  "origin": "vault",
-  "url": "https://github.com/Cap-go/capgo-skills",
-  "license": "MIT",
-  "stars": 77,
-  "gives": "Skills for AI coding agents working with Capacitor formerly capacitor-skills",
-  "status": "candidate",
-  "needs_check": true
- },
- {
-  "id": "skill:archcore-ai/archcore",
-  "name": "archcore-ai/archcore",
-  "category": "skills",
-  "subkind": "agent-skill",
-  "origin": "vault",
-  "url": "https://github.com/archcore-ai/archcore",
-  "license": "Apache-2.0",
-  "stars": 75,
-  "gives": "Spec-driven development and context engineering for Claude Code, Cursor, Codex, and GitHub Copilot — backed by project context in Git.",
-  "status": "candidate",
-  "needs_check": true
- },
- {
-  "id": "skill:fvadicamo/dev-agent-skills",
-  "name": "fvadicamo/dev-agent-skills",
-  "category": "skills",
-  "subkind": "agent-skill",
-  "origin": "vault",
-  "url": "https://github.com/fvadicamo/dev-agent-skills",
-  "license": "MIT",
-  "stars": 72,
-  "gives": "Claude Code skills plugin for Git, GitHub, and skill authoring workflows",
   "status": "candidate",
   "needs_check": true
  }
