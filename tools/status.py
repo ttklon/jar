@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 AGENTS = ROOT / "AGENTS.md"
 ACTIONS = ROOT / "data" / "actions.json"
 PROFILES = ROOT / "data" / "profiles"
+SKILLS = ROOT / "data" / "skills"
 TARGETS = ROOT / "data" / "app_targets.psv"
 POLICY = ROOT / "data" / "domain_profile_policy.json"
 EVALS = ROOT / "data" / "evals.json"
@@ -38,6 +39,29 @@ END = "<!-- STATUS:END -->"
 
 
 RESEARCH_SOURCES = ROOT / "research" / "SOURCES.json"
+
+
+def skill_stats(actions: list[dict]) -> tuple[int, int, int]:
+    """(skills, steps, registry rows used by at least one skill step)."""
+    index: dict[tuple[str, str], list[tuple[int, str]]] = {}
+    for i, r in enumerate(actions):
+        index.setdefault((r["domain"], r["verb"]), []).append((i, r["object"]))
+    covered: set[int] = set()
+    n_skills = n_steps = 0
+    for path in sorted(SKILLS.glob("*.json")):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        n_skills += 1
+        for step in data.get("steps", []):
+            n_steps += 1
+            for ref in step.get("actions", []):
+                parts = ref.split("|")
+                if len(parts) < 2:
+                    continue
+                obj = parts[2] if len(parts) > 2 else None
+                for i, name in index.get((parts[0], parts[1]), []):
+                    if obj is None or obj in name:
+                        covered.add(i)
+    return n_skills, n_steps, len(covered)
 
 
 def count_sources() -> tuple[int, int]:
@@ -151,6 +175,7 @@ def build_block() -> str:
     else:
         n_evals, n_curated = len(evals_raw), 0
     src_total, src_cats = count_sources()
+    n_skills, n_steps, skill_covered = skill_stats(actions)
 
     L = [
         BEGIN,
@@ -166,6 +191,7 @@ def build_block() -> str:
         f"C — {tier.get('C', 0)}; профиль найден по процессу у {covered}) |",
         f"| Доменов без профиля | **{len(no_prof)}** — в очереди {len(queue)}, по решению {len(by_design)} |",
         f"| Сценариев в плане проверок | **{n_evals}** (+ {n_curated} обязательных) |",
+        f"| Скиллов | **{n_skills}** · шагов {n_steps} · действий задействовано {skill_covered} из {len(actions)} |",
         f"| Источников в каталоге | **{src_total}** в {src_cats} категориях |",
         "",
         "**Очередь на углубление** (домены с наименьшим отношением «операции профилей / действия реестра», "

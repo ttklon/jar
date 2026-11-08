@@ -35,6 +35,9 @@ jobs:
       - name: App target catalogue (tier A ⇒ profile exists)
         run: python3 tools/app_targets.py
 
+      - name: Skills reference real registry rows, risk matches, done criteria present
+        run: python3 tools/skills.py
+
       - name: AGENTS.md status block matches the data
         run: python3 tools/status.py --check
 
@@ -43,7 +46,7 @@ jobs:
 
       - name: Generated artefacts are committed and up to date
         run: |
-          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md docs/EVALS.md docs/APP-COVERAGE.md data/evals.json AGENTS.md \
+          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md docs/EVALS.md docs/APP-COVERAGE.md docs/SKILLS.md data/evals.json AGENTS.md \
             || { echo "::error::generated files are stale — run tools/actions.py, tools/profiles.py, tools/audit_actions.py and commit"; exit 1; }
 
       - name: Summary
