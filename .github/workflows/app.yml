@@ -7,8 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  # нужно, чтобы публиковать дифф форматирования отдельной проверкой
+  contents: write
   checks: write
 
 jobs:
@@ -42,6 +41,9 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+        with:
+          # токен нужен, чтобы CI мог запушить коммит форматирования в ветку
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -97,21 +99,27 @@ jobs:
         if: steps.clippy.outputs.status == '0'
         run: cargo test --manifest-path src-tauri/Cargo.toml
 
-      # rustfmt детерминирован: если файлы не отформатированы, показываем патч
-      # аннотациями — их видно даже там, где логи джоб недоступны.
+      # У разработчика может не быть Rust-тулчейна (песочница, новая машина), а
+      # форматирование детерминировано. Поэтому ветку чинит сам CI отдельным
+      # коммитом, а не человек, вручную правящий отступы по диффу из аннотаций.
       - name: Rustfmt
         if: steps.clippy.outputs.status == '0'
         shell: bash
         run: |
-          set +e
-          cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check > fmt.log 2>&1
-          status=$?
-          if [ "$status" -ne 0 ]; then
-            cargo fmt --manifest-path src-tauri/Cargo.toml --all
-            git diff -- src-tauri/src src-tauri/build.rs > fmt.diff
-            python scripts/ci_annotate.py fmt.diff --raw
-            python scripts/ci_check_report.py --name rustfmt-diff --title "rustfmt" --file fmt.diff
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          cargo fmt --manifest-path src-tauri/Cargo.toml --all
+          if git diff --quiet -- src-tauri; then
+            echo "форматирование в порядке"
+            exit 0
+          fi
+          if [ "${{ github.event_name }}" != "push" ]; then
+            git diff -- src-tauri
+            echo "::error::файлы не отформатированы — запусти cargo fmt"
             exit 1
           fi
+          git config user.name "zshelper-ci"
+          git config user.email "ci@zshelper.local"
+          git add src-tauri
+          git commit -m "style: cargo fmt (автоматически, CI)"
+          git push
+          echo "::error::CI отформатировал код и запушил коммит — подтяни его (git pull --rebase)"
+          exit 1
