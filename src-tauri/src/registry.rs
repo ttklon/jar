@@ -327,7 +327,11 @@ mod tests {
         let registry = registry();
         // Точное число меняется с данными — проверяем порядок величины и то,
         // что это не пустой огрызок.
-        assert!(registry.len() > 500, "в реестре {} действий", registry.len());
+        assert!(
+            registry.len() > 500,
+            "в реестре {} действий",
+            registry.len()
+        );
         assert!(registry.stats().domains > 20);
         assert!(registry.stats().verbs > 50);
     }

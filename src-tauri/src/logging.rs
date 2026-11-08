@@ -70,9 +70,7 @@ pub fn init() -> PathBuf {
         }
         Err(error) => {
             // Без файла — в stderr, но приложение работает.
-            let _ = tracing_subscriber::fmt()
-                .with_env_filter(filter)
-                .try_init();
+            let _ = tracing_subscriber::fmt().with_env_filter(filter).try_init();
             eprintln!("zshelper: не удалось открыть {}: {error}", path.display());
         }
     }
