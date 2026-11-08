@@ -24,16 +24,17 @@
 | [`research/INDEX.md`](research/INDEX.md) | Автогенерируемый индекс всех источников с лицензиями и звёздами |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | План по этапам M0…M7 с критериями выхода |
 | [`docs/DEPENDENCIES.md`](docs/DEPENDENCIES.md) | Стек v1 с версиями и **аудитом лицензий** (генерируется из vault) |
-| [`docs/ACTIONS.md`](docs/ACTIONS.md) | **Реестр действий: 683 действия / 44 домена** — всё, что умеет, с риском, tier'ом и границами |
+| [`docs/ACTIONS.md`](docs/ACTIONS.md) | **Реестр действий: 717 действий / 45 доменов** — всё, что умеет, с риском, tier'ом и границами |
 | [`data/actions.psv`](data/actions.psv) | Исходник реестра (машиночитаемо, генерирует каталог, права и тесты) |
-| [`docs/PROFILES.md`](docs/PROFILES.md) | **Профили приложений**: 81 операция в 11 приложениях (CapCut, Excel, Проводник, браузер, Word, VS Code, Telegram, Photoshop, Premiere, OBS, Figma) — якоря, шаги, проверки |
+| [`docs/PROFILES.md`](docs/PROFILES.md) | **Профили приложений**: 100 операций в 14 приложениях (CapCut, Excel, Проводник, браузер, Word, VS Code, Telegram, Photoshop, Premiere, OBS, Figma) — якоря, шаги, проверки |
 | [`data/profiles/`](data/profiles) | Профили как данные: `app`, `anchors`, `operations` + валидатор инвариантов |
 | [`docs/COVERAGE.md`](docs/COVERAGE.md) | **Аудит покрытия**: тонкие домены, дырки по семействам действий, домены без профиля |
-| [`docs/EVALS.md`](docs/EVALS.md) | **План проверок**: 683 сценария из реестра + 15 обязательных P0/P1 до релиза |
+| [`docs/EVALS.md`](docs/EVALS.md) | **План проверок**: 717 сценариев из реестра + 15 обязательных P0/P1 до релиза |
 | [`research/notes/18-capability-map.md`](research/notes/18-capability-map.md) | Обзор по доменам: ~180 строк способностей, риск, tier, границы |
 | [`research/notes/24-action-taxonomy.md`](research/notes/24-action-taxonomy.md) | Метод: как перечислять «всё» системно (объект × глагол × контекст × масштаб × риск) |
 | [`research/notes/25-app-profiles.md`](research/notes/25-app-profiles.md) | Профили: иерархия якорей, обязательные проверки, дрейф интерфейса, self-healing |
 | [`research/notes/26-new-domains.md`](research/notes/26-new-domains.md) | Музыка, фото/OCR, финансы, юридика, дом и IoT: стек, границы, физические риски |
+| [`research/notes/27-career-security-devices.md`](research/notes/27-career-security-devices.md) | Карьера, 2FA/утечки, устройства, сеть, макросы |
 | [`tools/actions.py`](tools/actions.py) · [`tools/profiles.py`](tools/profiles.py) · [`tools/audit_actions.py`](tools/audit_actions.py) · [`tools/evals.py`](tools/evals.py) | Реестр → каталог, профили → проверка, покрытие → дырки, реестр → тест-план. Всё генерируется и проверяется в CI |
 | [`tools/collect_sources.py`](tools/collect_sources.py) | Скачивание/обновление источников (идемпотентно) |
 | [`tools/mine_awesome.py`](tools/mine_awesome.py) | Разбор awesome-листов в инвентаризацию с метаданными |

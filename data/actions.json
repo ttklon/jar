@@ -10980,5 +10980,549 @@
   "human_code": "c",
   "status": "v1",
   "notes": ""
+ },
+ {
+  "id": "career-684",
+  "domain": "career",
+  "verb": "написать",
+  "object": "резюме под вакансию",
+  "example": "переделай резюме под эту вакансию",
+  "implementation": [
+   "LLM + разбор требований"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "career-685",
+  "domain": "career",
+  "verb": "найти",
+  "object": "вакансии по фильтрам",
+  "example": "найди удалёнку по Python",
+  "implementation": [
+   "браузер + парсинг"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "career-686",
+  "domain": "career",
+  "verb": "сравнить",
+  "object": "вакансии по требованиям и деньгам",
+  "example": "что лучше по условиям",
+  "implementation": [
+   "таблица + LLM"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "career-687",
+  "domain": "career",
+  "verb": "подготовить",
+  "object": "сопроводительное письмо",
+  "example": "напиши письмо под вакансию",
+  "implementation": [
+   "LLM + факты из резюме"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "career-688",
+  "domain": "career",
+  "verb": "заполнить",
+  "object": "анкету и отклик",
+  "example": "отправь отклик на эту вакансию",
+  "implementation": [
+   "браузерный агент"
+  ],
+  "risk": "external",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "данные профиля, подтверждение"
+ },
+ {
+  "id": "career-689",
+  "domain": "career",
+  "verb": "отследить",
+  "object": "статусы откликов",
+  "example": "где я уже откликался",
+  "implementation": [
+   "трекер + почта"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "career-690",
+  "domain": "career",
+  "verb": "подготовить",
+  "object": "ответы к интервью",
+  "example": "какие вопросы зададут",
+  "implementation": [
+   "LLM + вакансия"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "career-691",
+  "domain": "career",
+  "verb": "собрать",
+  "object": "портфолио",
+  "example": "собери проекты в одно портфолио",
+  "implementation": [
+   "файлы + сайт"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "career-692",
+  "domain": "career",
+  "verb": "проверить",
+  "object": "репутацию компании",
+  "example": "что говорят о работодателе",
+  "implementation": [
+   "браузер + отзывы"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "career-693",
+  "domain": "career",
+  "verb": "подготовить",
+  "object": "вопросы работодателю",
+  "example": "что спросить на интервью",
+  "implementation": [
+   "LLM"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "career-694",
+  "domain": "career",
+  "verb": "сравнить",
+  "object": "офферы",
+  "example": "какой оффер выгоднее",
+  "implementation": [
+   "налоги + условия"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "career-695",
+  "domain": "career",
+  "verb": "собрать",
+  "object": "документы для трудоустройства",
+  "example": "что нужно для оформления",
+  "implementation": [
+   "чеклист"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "career-696",
+  "domain": "career",
+  "verb": "спланировать",
+  "object": "релокацию",
+  "example": "что нужно для переезда",
+  "implementation": [
+   "виза + жильё + налоги"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "security-access-697",
+  "domain": "security-access",
+  "verb": "настроить",
+  "object": "двухфакторную аутентификацию",
+  "example": "включи 2FA",
+  "implementation": [
+   "TOTP + сервис"
+  ],
+  "risk": "identity",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": "секреты в secrets.enc"
+ },
+ {
+  "id": "security-access-698",
+  "domain": "security-access",
+  "verb": "проверить",
+  "object": "утечки паролей",
+  "example": "мои пароли светились",
+  "implementation": [
+   "k-anonymity запрос к HIBP по префиксу хэша"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "сами пароли не отправляются"
+ },
+ {
+  "id": "security-access-699",
+  "domain": "security-access",
+  "verb": "создать",
+  "object": "резервные коды 2FA",
+  "example": "сохрани коды восстановления",
+  "implementation": [
+   "шифрованное хранилище"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "security-access-700",
+  "domain": "security-access",
+  "verb": "проверить",
+  "object": "какие приложения имеют доступ",
+  "example": "кто имеет доступ к аккаунту",
+  "implementation": [
+   "OAuth-список"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "security-access-701",
+  "domain": "security-access",
+  "verb": "заблокировать",
+  "object": "подозрительную сессию",
+  "example": "выйди на всех устройствах",
+  "implementation": [
+   "API/UI"
+  ],
+  "risk": "destructive",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "security-access-702",
+  "domain": "security-access",
+  "verb": "зашифровать",
+  "object": "папку или диск",
+  "example": "зашифруй папку с документами",
+  "implementation": [
+   "BitLocker/VeraCrypt"
+  ],
+  "risk": "destructive",
+  "tier": "T1",
+  "human": "сложно",
+  "human_code": "h",
+  "status": "v2",
+  "notes": "потеря ключа = потеря данных"
+ },
+ {
+  "id": "devices-703",
+  "domain": "devices",
+  "verb": "подключить",
+  "object": "телефон по USB",
+  "example": "подключи телефон к компьютеру",
+  "implementation": [
+   "ADB + драйверы"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "devices-704",
+  "domain": "devices",
+  "verb": "скопировать",
+  "object": "фото и файлы с телефона",
+  "example": "слей все фото с телефона",
+  "implementation": [
+   "MTP/ADB"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "devices-705",
+  "domain": "devices",
+  "verb": "установить",
+  "object": "APK на телефон",
+  "example": "поставь это приложение на телефон",
+  "implementation": [
+   "ADB install"
+  ],
+  "risk": "destructive",
+  "tier": "T1",
+  "human": "сложно",
+  "human_code": "h",
+  "status": "v2",
+  "notes": "только свои сборки"
+ },
+ {
+  "id": "devices-706",
+  "domain": "devices",
+  "verb": "сделать",
+  "object": "скриншот экрана телефона",
+  "example": "покажи что на телефоне",
+  "implementation": [
+   "scrcpy/ADB"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "devices-707",
+  "domain": "devices",
+  "verb": "найти",
+  "object": "устройства в сети",
+  "example": "кто подключён к моему Wi-Fi",
+  "implementation": [
+   "ARP/ping sweep"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "network-708",
+  "domain": "network",
+  "verb": "настроить",
+  "object": "VPN-подключение",
+  "example": "подключи VPN",
+  "implementation": [
+   "WireGuard/встроенный клиент"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "network-709",
+  "domain": "network",
+  "verb": "проверить",
+  "object": "DNS и утечки",
+  "example": "нет ли утечек DNS",
+  "implementation": [
+   "резолвер-тест"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "network-710",
+  "domain": "network",
+  "verb": "настроить",
+  "object": "правило firewall",
+  "example": "закрой этот порт",
+  "implementation": [
+   "Windows Firewall API"
+  ],
+  "risk": "destructive",
+  "tier": "T1",
+  "human": "сложно",
+  "human_code": "h",
+  "status": "v2",
+  "notes": "с проверкой доступности после"
+ },
+ {
+  "id": "network-711",
+  "domain": "network",
+  "verb": "проверить",
+  "object": "скорость соединения",
+  "example": "какая у меня скорость",
+  "implementation": [
+   "локальный speedtest"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "dev-code-712",
+  "domain": "dev-code",
+  "verb": "настроить",
+  "object": "линтеры и pre-commit",
+  "example": "поставь проверки перед коммитом",
+  "implementation": [
+   "husky/pre-commit + ruff"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "dev-code-713",
+  "domain": "dev-code",
+  "verb": "проверить",
+  "object": "уязвимости зависимостей",
+  "example": "есть ли дыры в пакетах",
+  "implementation": [
+   "npm audit/pip-audit/OSV"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "dev-code-714",
+  "domain": "dev-code",
+  "verb": "собрать",
+  "object": "Docker-образ",
+  "example": "собери контейнер",
+  "implementation": [
+   "docker build"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
+ },
+ {
+  "id": "input-715",
+  "domain": "input",
+  "verb": "записать",
+  "object": "макрос моих действий",
+  "example": "запиши что я делаю и повтори",
+  "implementation": [
+   "UIA-запись + сценарий"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "input-716",
+  "domain": "input",
+  "verb": "воспроизвести",
+  "object": "макрос",
+  "example": "повтори вчерашнюю последовательность",
+  "implementation": [
+   "UIA-плеер с проверками"
+  ],
+  "risk": "write-local",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v2",
+  "notes": ""
+ },
+ {
+  "id": "career-717",
+  "domain": "career",
+  "verb": "ответить",
+  "object": "работодателю на сообщение",
+  "example": "ответь рекрутеру что готов к интервью",
+  "implementation": [
+   "почта/мессенджер"
+  ],
+  "risk": "external",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": ""
  }
 ]

@@ -1,0 +1,72 @@
+{
+  "app": "Microsoft Outlook (классический и новый)",
+  "exe": ["OUTLOOK.EXE", "olk.exe"],
+  "ui_stack": "uia",
+  "version_seen": "Microsoft 365 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "new_mail": { "by": "hotkey", "value": "Ctrl+N", "fallback": "кнопка «Создать»" },
+    "send": { "by": "hotkey", "value": "Alt+S", "fallback": "Ctrl+Enter" },
+    "search": { "by": "hotkey", "value": "Ctrl+E", "fallback": "Ctrl+Shift+F (расширенный поиск)" },
+    "reply": { "by": "hotkey", "value": "Ctrl+R" },
+    "attach": { "by": "hotkey", "value": "Alt+N, A" },
+    "folder_list": { "by": "uia", "value": "ControlType=Tree; Name~«Папки»" },
+    "reading_pane": { "by": "uia", "value": "ControlType=Document; Name~«Область чтения»" },
+    "graph": { "by": "api", "value": "Microsoft Graph (OAuth, app-only или delegated)", "fallback": "IMAP/SMTP с app-password" }
+  },
+  "operations": [
+    {
+      "name": "Прочитать входящие и выделить важное",
+      "registry": "email|прочитать|входящие",
+      "steps": ["graph:list messages (top 50, unread)", "классификация", "сводка в чат"],
+      "verify": ["число обработанных = числу непрочитанных", "сводка содержит отправителя, тему, срок если есть"],
+      "risk": "read",
+      "notes": "Graph предпочтительнее GUI: не ворует фокус и не ломается от смены темы"
+    },
+    {
+      "name": "Подготовить и отправить письмо",
+      "registry": "email|отправить|письмо",
+      "steps": ["anchor:new_mail", "type:адресат", "type:тема", "type:текст", "показать пользователю превью", "anchor:send"],
+      "verify": ["письмо в «Отправленных»", "адресат и вложения совпадают", "graph:message.status = sent"],
+      "risk": "external",
+      "on_fail": "не отправлять повторно; проверить «Исходящие» на застрявшее письмо"
+    },
+    {
+      "name": "Ответить на письмо",
+      "registry": "email|ответить|на письмо",
+      "steps": ["выделить письмо", "anchor:reply", "type:ответ", "превью", "anchor:send"],
+      "verify": ["в цепочке появился ответ", "тема начинается с Re:"],
+      "risk": "external"
+    },
+    {
+      "name": "Приложить файлы и проверить размер",
+      "registry": "email|приложить|файлы",
+      "steps": ["anchor:attach", "type:путь", "проверить суммарный размер"],
+      "verify": ["вложения видны в письме", "размер < лимита сервера (обычно 25 МБ)", "имя файла не искажено"],
+      "risk": "write-local",
+      "on_fail": "предложить ссылку на файл вместо вложения"
+    },
+    {
+      "name": "Разобрать вложения (сохранить и проиндексировать)",
+      "registry": "email|разобрать|вложения",
+      "steps": ["graph:получить attachments", "сохранить в папку проекта", "извлечь текст"],
+      "verify": ["файлы сохранены", "текст извлекается", "нет дублей по хэшу"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Настроить правило сортировки",
+      "registry": "email|настроить|правило",
+      "steps": ["graph:create messageRule", "проверить на тестовом письме"],
+      "verify": ["правило в списке", "тестовое письмо попало в нужную папку"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Проверить подозрительное письмо",
+      "registry": "email|проверить|вложения и ссылки",
+      "steps": ["извлечь все ссылки", "проверить домены по эвристикам и VT-API", "проверить вложения (тип, макросы)"],
+      "verify": ["отчёт: список ссылок, домены, вердикт", "вложения не открывались"],
+      "risk": "read",
+      "notes": "судя по фишингу — не открывать письмо в браузере, только анализ заголовков"
+    }
+  ]
+}

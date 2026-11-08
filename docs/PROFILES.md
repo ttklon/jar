@@ -6,7 +6,7 @@
 
 Файл генерируется `python3 tools/profiles.py`; руками не править.
 
-**Профилей: 11** · операций: **81** · проблем: **0**
+**Профилей: 14** · операций: **100** · проблем: **0**
 
 Правила (проверяются автоматически, ошибка = ненулевой код возврата):
 
@@ -22,31 +22,36 @@
 | Adobe Premiere Pro | `Adobe Premiere Pro.exe` | win32 | 2026 (v26) | 2026-11-08 | 8 | 7 | `premiere.json` |
 | CapCut (Desktop) | `CapCut.exe` | electron | 6.x (2026-11) | 2026-11-08 | 6 | 9 | `capcut.json` |
 | Chrome / Edge / Yandex (Chromium) | `chrome.exe, msedge.exe, browser.exe` | web | Chrome 131+ / Edge 131+ | 2026-11-08 | 7 | 8 | `browser.json` |
+| Discord (desktop) | `Discord.exe` | electron | 0.0.9x (2026-11) | 2026-11-08 | 5 | 6 | `discord.json` |
 | Figma (desktop / web) | `Figma.exe, chrome.exe` | web | 2026-11 | 2026-11-08 | 6 | 6 | `figma.json` |
 | Microsoft Excel | `EXCEL.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 4 | 8 | `excel.json` |
+| Microsoft Outlook (классический и новый) | `OUTLOOK.EXE, olk.exe` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 8 | 7 | `outlook.json` |
 | Microsoft Word | `WINWORD.EXE` | uia | Microsoft 365 (2026-11) | 2026-11-08 | 7 | 8 | `word.json` |
 | OBS Studio | `obs64.exe` | qt | 31.x (2026-11) | 2026-11-08 | 7 | 7 | `obs.json` |
+| Steam | `steam.exe, steamwebhelper.exe` | electron | 2026-11 | 2026-11-08 | 6 | 6 | `steam.json` |
 | Telegram Desktop | `Telegram.exe` | qt | 5.x (2026-11) | 2026-11-08 | 5 | 6 | `telegram.json` |
 | Visual Studio Code | `Code.exe` | electron | 1.9x (2026-11) | 2026-11-08 | 7 | 7 | `vscode.json` |
 | Проводник Windows | `explorer.exe` | uia | Windows 11 24H2 / Windows 10 22H2 | 2026-11-08 | 6 | 7 | `explorer.json` |
 
 ## Риск операций
 
-- `write-local` — 59
-- `read` — 13
-- `external` — 7
+- `write-local` — 65
+- `read` — 20
+- `external` — 12
+- `destructive` — 2
 - `identity` — 1
-- `destructive` — 1
 
 ## Покрытие доменов реестра
 
 - `video` — 17
+- `chat-social` — 12
 - `web` — 8
 - `dev-code` — 8
 - `images` — 8
 - `text-docs` — 8
 - `files` — 7
-- `chat-social` — 6
+- `email` — 7
+- `games` — 6
 - `sheets-data` — 5
 - `creative-3d` — 4
 - `video-production` — 3
