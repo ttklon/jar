@@ -21,6 +21,7 @@ use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::registry::{Action, Registry, RegistrySnapshot};
+use crate::roles;
 use crate::server::{self, Server};
 use crate::step::StepResult;
 use crate::tools::{self, ParamSpec, ToolSpec};
