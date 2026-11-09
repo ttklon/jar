@@ -89,6 +89,10 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
     match registry {
         "files|создать|папку" => create_folder(registry, params),
         "files|переместить|файлы/папки" => move_item(registry, params, cancel),
+        "apps-windows|запустить|программу" => launch_app(registry, params, cancel),
+        "apps-windows|показать|установленные программы" => {
+            simple(registry, INSTALLED_APPS, 60, cancel)
+        }
         "files|удалить|в корзину" => recycle(registry, params, cancel),
         "files|проверить|размеры и место" => {
             folder_sizes(registry, params, cancel)
@@ -324,6 +328,54 @@ $disks | ForEach-Object {
   Write-Output ('{0}: {1}, {2} ГБ, состояние {3}' -f $_.FriendlyName, $_.MediaType, [math]::Round($_.Size / 1GB), $_.HealthStatus)
 }"#;
 
+const LAUNCH_APP: &str = r#"$exe = $env:ZS_PATH
+if (-not (Test-Path -LiteralPath $exe)) { Write-Output 'ZSHELPER-MISSING: файла нет'; exit 3 }
+if ((Get-Item -LiteralPath $exe).Extension -ne '.exe') {
+  Write-Output 'ZSHELPER-BAD: нужен сам .exe, а не ярлык'
+  exit 2
+}
+try {
+  $proc = Start-Process -FilePath $exe -PassThru -ErrorAction Stop
+} catch {
+  Write-Output ('ZSHELPER-FAILED: ' + $_.Exception.Message)
+  exit 4
+}
+Start-Sleep -Milliseconds 1200
+$alive = Get-Process -Id $proc.Id -ErrorAction SilentlyContinue
+if ($alive) {
+  Write-Output ('ZSHELPER-OK pid={0} name={1}' -f $proc.Id, $alive.ProcessName)
+} else {
+  Write-Output 'ZSHELPER-FAILED: процесс завершился сразу после старта'
+  exit 5
+}"#;
+
+/// Запуск программы. Ожидание — маркер после проверки, что процесс жив: «Start-Process
+/// не выдал ошибку» ещё не значит, что программа открылась.
+fn launch_app(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let path = clean_path(param(params, "path"));
+
+    run_script(
+        registry,
+        LAUNCH_APP,
+        &[("PATH", &path)],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(60),
+        cancel,
+    )
+}
+
+const INSTALLED_APPS: &str = r#"$keys = @(
+  'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+  'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*',
+  'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*'
+)
+$apps = @(Get-ItemProperty $keys -ErrorAction SilentlyContinue |
+  Where-Object { $_.DisplayName } |
+  Sort-Object DisplayName |
+  Select-Object -First 40 DisplayName, DisplayVersion)
+Write-Output ('ZSHELPER-OK apps={0}' -f $apps.Count)
+$apps | ForEach-Object { Write-Output ('{0} — {1}' -f $_.DisplayName, $_.DisplayVersion) }"#;
+
 const STARTUP: &str = r#"$items = @(Get-CimInstance Win32_StartupCommand -ErrorAction SilentlyContinue |
   Select-Object -First 20)
 Write-Output ('ZSHELPER-OK autostart={0}' -f $items.Count)
@@ -511,6 +563,22 @@ mod tests {
         assert!(free.exists() && !source.exists(), "файл переехал");
 
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Запуск проверяется без побочных эффектов: файла нет — запуска быть не должно.
+    #[cfg(windows)]
+    #[test]
+    fn launching_a_missing_program_is_refused() {
+        let cancel = AtomicBool::new(false);
+        let mut params = BTreeMap::new();
+        params.insert(
+            "path".to_string(),
+            "C:\\нет-такого-файла\\программа.exe".to_string(),
+        );
+
+        let refused = run("apps-windows|запустить|программу", &params, &cancel);
+        assert!(!refused.ok, "запускать нечего — это провал");
+        assert_eq!(refused.evidence.kind(), "stdout_marker");
     }
 
     #[test]
