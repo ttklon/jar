@@ -416,24 +416,16 @@ mod tests {
     #[test]
     fn a_restricted_process_has_no_privileges_left() {
         // `DISABLE_MAX_PRIVILEGE` оставляет ровно одну привилегию — SeChangeNotifyPrivilege,
-        // без которой не работает обход каталогов. Всё остальное обязано исчезнуть, а у
-        // обычного процесса с этой машины оно есть, иначе проверка ничего не доказывает.
+        // без которой не работает обход каталогов. Всё остальное обязано исчезнуть.
+        //
         // Одна строка: в сырой строке обратный слэш и перевод строки — это символы, а не
         // продолжение строки, и PowerShell такое не разберёт.
         let script = r"@(whoami /priv | Select-String -Pattern 'Se\w+Privilege' -AllMatches | ForEach-Object { $_.Matches.Value } | Where-Object { $_ -ne 'SeChangeNotifyPrivilege' }).Count";
-        let request = ExecRequest::new(
-            "powershell.exe",
-            vec![
-                "-NoProfile".to_string(),
-                "-NonInteractive".to_string(),
-                "-Command".to_string(),
-                script.to_string(),
-            ],
-        );
 
         let cancel = AtomicBool::new(false);
-        let restricted = run(&request, None, &cancel)
+        let restricted = run(&request(script), None, &cancel)
             .unwrap_or_else(|error| panic!("ограниченный запуск провалился: {error}"));
+
         assert!(
             restricted.limits_note.contains("права сняты"),
             "{}",
@@ -443,29 +435,49 @@ mod tests {
             restricted.stdout.trim(),
             "0",
             "у ограниченного процесса не должно остаться привилегий: stdout={:?} stderr={:?}",
-            restricted.stdout, restricted.stderr
+            restricted.stdout,
+            restricted.stderr
         );
 
-        let plain = crate::executor::run(&request, &cancel).expect("обычный запуск");
-        assert_ne!(
-            plain.stdout.trim(),
-            "0",
-            "проверка бессмысленна, если и у обычного процесса привилегий нет"
+        // Вторая половина проверки — про права администратора. Она честно различает два
+        // случая: на машине, где приложение запущено от администратора, обычный процесс
+        // администратором является, а ограниченный — нет. На сборочной машине с урезанным
+        // токеном различать нечего, и тест об этом говорит, а не притворяется.
+        let admin = r"([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)";
+        let plain_admin = crate::executor::run(&request(admin), &cancel).expect("обычный запуск");
+        let restricted_admin = run(&request(admin), None, &cancel).expect("ограниченный запуск");
+
+        assert_eq!(
+            restricted_admin.stdout.trim(),
+            "False",
+            "ограниченный процесс не должен быть администратором: stdout={:?} stderr={:?}",
+            restricted_admin.stdout,
+            restricted_admin.stderr
+        );
+
+        eprintln!(
+            "обычный процесс администратор: {} — если False, машина сама прав не даёт",
+            plain_admin.stdout.trim()
         );
     }
 
-    #[cfg(windows)]
-    #[test]
-    fn a_restricted_process_runs_under_the_ceiling_too() {
-        let request = ExecRequest::new(
+    fn request(script: &str) -> ExecRequest {
+        ExecRequest::new(
             "powershell.exe",
             vec![
                 "-NoProfile".to_string(),
                 "-NonInteractive".to_string(),
                 "-Command".to_string(),
-                "while ($true) { }".to_string(),
+                script.to_string(),
             ],
-        );
+        )
+    }
+
+
+    #[cfg(windows)]
+    #[test]
+    fn a_restricted_process_runs_under_the_ceiling_too() {
+        let request = request("while ($true) { }");
 
         let limits = Limits {
             process_ms: 500,
