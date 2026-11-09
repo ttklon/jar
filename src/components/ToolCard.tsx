@@ -35,6 +35,10 @@ const useStyles = makeStyles({
   title: { fontWeight: tokens.fontWeightSemibold, fontSize: tokens.fontSizeBase400 },
   summary: { color: tokens.colorNeutralForeground2, fontSize: tokens.fontSizeBase300 },
   impl: { color: tokens.colorNeutralForeground3, fontSize: tokens.fontSizeBase200 },
+  screeningRefuse: {
+    color: tokens.colorPaletteRedForeground2,
+    fontSize: tokens.fontSizeBase200,
+  },
   params: { display: "flex", flexDirection: "column", gap: "8px" },
   actions: { display: "flex", gap: "8px", alignItems: "center" },
   result: {

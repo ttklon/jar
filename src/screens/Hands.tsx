@@ -63,7 +63,7 @@ export function Hands() {
 
       {!isTauri() ? (
         <Text className={styles.note} block>
-          {hands.readOnly}
+          {hands.readOnly} {hands.screeningBrowser}
         </Text>
       ) : null}
 

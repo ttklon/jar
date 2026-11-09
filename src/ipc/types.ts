@@ -88,6 +88,11 @@ export interface ToolView {
   decision: Decision;
   decision_reason: string;
   needs_token: boolean;
+  /**
+   * Проверка перед запуском. В браузере её нет: правила живут в ядре, а повторять их
+   * в третий раз значило бы держать третью правду.
+   */
+  screening?: Screening;
   /** Параметры прошлого удачного запуска — интерфейс подставляет их сам. */
   last_params?: Record<string, string> | null;
 }
@@ -145,6 +150,13 @@ export interface Learning {
   /** Сколько раз просили: частота решает, чему учиться первым. */
   times: number;
   steps: LearningStep[];
+}
+
+/** Итог проверки команды перед запуском. */
+export interface Screening {
+  decision: "allow" | "ask" | "refuse";
+  /** Почему так: пусто только при `allow`. */
+  reasons: string[];
 }
 
 /** Что известно о локальном распознавании речи. */

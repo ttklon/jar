@@ -21,6 +21,7 @@ use crate::models::{self, ModelFile};
 use crate::plan::{self, Answer, Plan, Problem, Question, StepGate};
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
+use crate::sandbox::{self, Verdict};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::roles;
@@ -79,6 +80,9 @@ pub struct ToolView {
     /// Параметры прошлого удачного запуска: интерфейс подставляет их, а не заставляет
     /// каждый раз вводить один и тот же путь.
     pub last_params: Option<BTreeMap<String, String>>,
+    /// Что даст проверка перед запуском. `None` — у этой руки нет текста команды
+    /// (например, она работает системными вызовами), и тогда проверять нечего.
+    pub screening: Option<Verdict>,
 }
 
 /// Операция профиля: ссылка на реестр, риск и решение политики.
@@ -173,6 +177,15 @@ fn risk_label(action: &Action) -> String {
     action.risk.as_str().to_string()
 }
 
+/// Проверка перед запуском для руки: текст её команды против правил `sandbox`.
+/// Нет текста — нечего проверять, и это честнее, чем зелёная галочка на пустом месте.
+fn screening_for(registry: &str) -> Option<Verdict> {
+    tools::scripts()
+        .into_iter()
+        .find(|(key, _)| *key == registry)
+        .map(|(_, script)| sandbox::screen_script(script))
+}
+
 fn view(inner: &Inner, spec: &'static ToolSpec) -> ToolView {
     let (decision, risk) = decision_of(inner, &spec.registry);
     let needs_human = action_for(&inner.registry, &spec.registry)
@@ -191,6 +204,7 @@ fn view(inner: &Inner, spec: &'static ToolSpec) -> ToolView {
         decision_reason: decision.reason().to_string(),
         needs_token: decision.needs_token(),
         last_params: inner.memory.last_params(&spec.registry),
+        screening: screening_for(&spec.registry),
     }
 }
 

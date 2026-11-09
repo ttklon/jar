@@ -40,6 +40,7 @@ pub mod policy;
 pub mod profiles;
 pub mod registry;
 pub mod roles;
+pub mod sandbox;
 pub mod server;
 pub mod step;
 pub mod stt;

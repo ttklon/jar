@@ -441,6 +441,31 @@ fn simple(registry: &str, script: &str, timeout_secs: u64, cancel: &AtomicBool) 
     )
 }
 
+/// Скрипты рук: ключ реестра и текст, который выполняется.
+///
+/// Нужны наружу для двух вещей: проба перед запуском (`sandbox::trial`) и проверка,
+/// что собственные руки приложения не содержат того, что приложение само запрещает.
+/// Ручной список нарочно: он ломается вместе с новым `match`, и это заметно.
+pub fn scripts() -> Vec<(&'static str, &'static str)> {
+    vec![
+        ("files|переместить|файлы/папки", MOVE_ITEM),
+        ("files|удалить|в корзину", RECYCLE),
+        ("files|проверить|размеры и место", FOLDER_SIZES),
+        ("files|найти|по имени", FIND_BY_NAME),
+        ("files|проверить|дубликаты по хэшу", DUPLICATES),
+        ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
+        ("processes-services|проанализировать|автозапуск", STARTUP),
+        ("storage-backup|проверить|свободное место", FREE_SPACE),
+        ("storage-backup|проверить|SMART диска", SMART),
+        ("system-power|проверить|батарею", BATTERY),
+        ("hardware-diag|показать|характеристики железа", HARDWARE),
+        ("network|проверить|подключение", CONNECTIVITY),
+        ("network|проверить|открытые порты", OPEN_PORTS),
+        ("apps-windows|показать|установленные программы", INSTALLED_APPS),
+        ("apps-windows|запустить|программу", LAUNCH_APP),
+    ]
+}
+
 /// Полный вывод инструмента для интерфейса — с ограничением размера.
 pub fn detail(result: &StepResult) -> String {
     tail(&result.stdout_tail, DETAIL_TAIL)
