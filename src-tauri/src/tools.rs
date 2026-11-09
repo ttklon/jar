@@ -89,7 +89,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
     match registry {
         "files|создать|папку" => create_folder(registry, params),
         "files|переместить|файлы/папки" => move_item(registry, params, cancel),
-        "apps-windows|запустить|программу" => launch_app(registry, params, cancel),
+        "apps-windows|запустить|программу" => {
+            launch_app(registry, params, cancel)
+        }
         "apps-windows|показать|установленные программы" => {
             simple(registry, INSTALLED_APPS, 60, cancel)
         }
@@ -351,7 +353,11 @@ if ($alive) {
 
 /// Запуск программы. Ожидание — маркер после проверки, что процесс жив: «Start-Process
 /// не выдал ошибку» ещё не значит, что программа открылась.
-fn launch_app(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+fn launch_app(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
     let path = clean_path(param(params, "path"));
 
     run_script(
