@@ -75,7 +75,7 @@ pub fn resolve<'a>(registry: &'a Registry, key: &str) -> Option<&'a Action> {
         .filter(|action| {
             action.domain == domain
                 && action.verb == verb
-                && object.map_or(true, |filter| action.object.contains(filter))
+                && object.is_none_or(|filter| action.object.contains(filter))
         })
         .max_by_key(|action| action.risk)
 }
