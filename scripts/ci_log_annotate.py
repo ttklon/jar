@@ -15,6 +15,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 
 
@@ -33,6 +34,17 @@ def main() -> int:
     parser.add_argument("--title", default="лог", help="заголовок аннотации")
     parser.add_argument("--tail", type=int, default=80, help="сколько последних строк показать")
     parser.add_argument("--chunk", type=int, default=600, help="длина куска строки")
+    parser.add_argument(
+        "--grep",
+        default="",
+        help="показывать только строки, подходящие под регулярное выражение",
+    )
+    parser.add_argument(
+        "--max",
+        type=int,
+        default=8,
+        help="сколько аннотаций максимум (GitHub принимает не больше десяти на шаг)",
+    )
     args = parser.parse_args()
 
     try:
@@ -42,12 +54,20 @@ def main() -> int:
         print(f"::error title={escape(args.title)}::лог не создан — команда не запускалась")
         return 0
 
-    tail = [line for line in lines if line.strip()][-args.tail :]
+    tail = [line for line in lines if line.strip()]
+    if args.grep:
+        pattern = re.compile(args.grep)
+        tail = [line for line in tail if pattern.search(line)]
+    tail = tail[-args.tail :][: args.max]
+
     if not tail:
-        print(f"::error title={escape(args.title)}::лог пуст")
+        print(f"::error title={escape(args.title)}::в логе нет строк, о которых стоит сказать")
         return 0
 
-    print(f"::error title={escape(args.title)}::{escape(str(len(lines)))} строк, показываю хвост")
+    print(
+        f"::error title={escape(args.title)}::{escape(str(len(lines)))} строк, "
+        f"показываю {len(tail)} самых важных"
+    )
     for line in tail:
         for start in range(0, len(line), args.chunk):
             piece = line[start : start + args.chunk]

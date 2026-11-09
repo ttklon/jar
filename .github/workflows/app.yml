@@ -141,7 +141,8 @@ jobs:
           cargo test --manifest-path src-tauri/Cargo.toml > tests.log 2>&1
           status=$?
           if [ "$status" -ne 0 ]; then
-            python scripts/ci_log_annotate.py tests.log --title "cargo test" --tail 60
+            python scripts/ci_log_annotate.py tests.log --title "cargo test" \
+              --grep "FAILED|panicked|---- |assertion|left|right" --max 8
           fi
           exit "$status"
 
