@@ -16,7 +16,7 @@
 //! * показывает, сколько занимают модели и сколько свободно на диске, и удаляет файл
 //!   только после подтверждения человеком;
 //! * умеет запускать локальный сервер модели и ждать от него ответа (`server`), а не
-//!   только «процесс стартовал»;
+//!   только «процесс стартовал»; конкретные флаги `llama-server` живут в `llama`;
 //! * знает, как это делается в 87 программах (`profiles`), и честно показывает, что из
 //!   этого уже исполняется;
 //! * вызывается из любой программы по `Ctrl+Alt+Z` (`hotkey`).
@@ -29,6 +29,7 @@ pub mod executor;
 pub mod flows;
 pub mod hotkey;
 pub mod ipc;
+pub mod llama;
 pub mod logging;
 pub mod memory;
 pub mod models;
@@ -92,6 +93,8 @@ pub fn run() {
             audit,
             memory,
             models_dir: models::dir(&base),
+            base_dir: base.clone(),
+            engine: std::sync::Mutex::new(None),
             policy: PolicyState::new(),
             cancel: AtomicBool::new(false),
         }),
@@ -118,6 +121,9 @@ pub fn run() {
             ipc::verify_model,
             ipc::download_model,
             ipc::remove_model,
+            ipc::engine_status,
+            ipc::start_engine,
+            ipc::stop_engine,
             ipc::list_profiles,
             ipc::policy_for,
             ipc::confirm_tool,
@@ -132,6 +138,24 @@ pub fn run() {
             }
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("приложение не запустилось");
+        .build(tauri::generate_context!())
+        .expect("приложение не собралось")
+        .run(|app, event| {
+            // Движок — дочерний процесс: закрыть окно и оставить его работать нельзя,
+            // иначе следующий запуск найдёт занятый порт и «чужой» сервер.
+            if !matches!(event, tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit) {
+                return;
+            }
+
+            let Some(state) = app.try_state::<AppState>() else {
+                return;
+            };
+            let taken = state.inner.engine.lock().ok().and_then(|mut guard| guard.take());
+            let Some(mut server) = taken else { return };
+
+            match server.stop() {
+                Ok(()) => tracing::info!("движок остановлен при выходе"),
+                Err(error) => tracing::warn!(%error, "движок не остановился при выходе"),
+            }
+        });
 }

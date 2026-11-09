@@ -13,6 +13,8 @@ use tauri::State;
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::download::{self, Downloaded};
+use crate::llama;
+use crate::server::{self, Server};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::memory::{Memory, RunRecord};
 use crate::models::{self, ModelFile};
@@ -30,6 +32,11 @@ pub struct Inner {
     pub memory: Memory,
     /// Папка моделей: модели весят гигабайты, поэтому путь явный, а не «где-то рядом».
     pub models_dir: std::path::PathBuf,
+    /// Рядом с этим каталогом лежат данные приложения, логи и `sidecars/`.
+    pub base_dir: std::path::PathBuf,
+    /// Запущенный движок. Один: две модели на одной видеокарте — это не «параллельно»,
+    /// это «обе тормозят».
+    pub engine: std::sync::Mutex<Option<Server>>,
     pub policy: PolicyState,
     pub cancel: AtomicBool,
 }
@@ -442,6 +449,122 @@ pub async fn download_model(
 #[tauri::command]
 pub fn remove_model(state: State<'_, AppState>, name: String) -> Result<(), String> {
     models::remove(&state.inner.models_dir, &name, &state.inner.memory)
+}
+
+/// Что известно о движке моделей.
+#[derive(Debug, Serialize)]
+pub struct EngineStatus {
+    /// Найден ли `llama-server.exe` рядом с приложением или в `PATH`.
+    pub found: bool,
+    /// Полный путь к движку, если он найден.
+    pub program: Option<String>,
+    /// Где приложение его ищет — это нужно, чтобы человек знал, куда положить файл.
+    pub search_dir: String,
+    pub running: bool,
+    pub port: Option<u16>,
+    pub pid: Option<u32>,
+}
+
+fn engine_status(state: &AppState) -> EngineStatus {
+    let program = llama::find_program(&state.inner.base_dir);
+
+    let (running, port, pid) = match state.inner.engine.lock() {
+        Ok(guard) => match guard.as_ref() {
+            Some(server) => (true, Some(server.port()), Some(server.pid())),
+            None => (false, None, None),
+        },
+        // Отравленный мьютекс: считаем, что движок не под нашим контролем.
+        Err(_) => (false, None, None),
+    };
+
+    EngineStatus {
+        found: program.is_some(),
+        program: program.map(|path| path.display().to_string()),
+        search_dir: state.inner.base_dir.join("sidecars").display().to_string(),
+        running,
+        port,
+        pid,
+    }
+}
+
+/// Состояние движка. Ничего не запускает — просто отвечает, что есть.
+#[tauri::command]
+pub fn engine_status(state: State<'_, AppState>) -> EngineStatus {
+    engine_status(&state)
+}
+
+/// Запускает `llama-server` с файлом модели `name`.
+///
+/// Ошибки разные и говорят разное: «движка нет» (положите файл), «модели нет»
+/// (скачайте) и «не ответил за 60 с» (смотрите лог). Смешивать их в одно «не удалось»
+/// значит отнять у человека единственную подсказку.
+#[tauri::command]
+pub async fn start_engine(state: State<'_, AppState>, name: String) -> Result<EngineStatus, String> {
+    if state.inner.engine.lock().map(|guard| guard.is_some()).unwrap_or(false) {
+        return Err("движок уже запущен — сначала остановите его".to_string());
+    }
+
+    let inner = state.inner.clone();
+    let model = inner.models_dir.join(&name);
+    if !model.is_file() {
+        return Err(format!("файла модели нет: {name}"));
+    }
+
+    let program = llama::find_program(&inner.base_dir).ok_or_else(|| {
+        format!(
+            "движок не найден: положите llama-server.exe в {}",
+            inner.base_dir.join("sidecars").display()
+        )
+    })?;
+
+    let port = server::free_port()?;
+    let log = inner
+        .base_dir
+        .join(format!("llama-server-{port}.log"));
+    let spec = llama::spec(&program, &model, port);
+    let run = inner.memory.start_run("server", &name).ok();
+
+    let started = tauri::async_runtime::spawn_blocking(move || {
+        Server::start(&spec, &log, std::time::Duration::from_secs(60))
+    })
+    .await
+    .map_err(|error| format!("запуск не выполнился: {error}"))?;
+
+    let result = match started {
+        Ok(server) => {
+            if let Ok(mut guard) = state.inner.engine.lock() {
+                *guard = Some(server);
+            }
+            Ok(())
+        }
+        Err(error) => Err(error),
+    };
+
+    if let Some(run) = run {
+        let outcome = if result.is_ok() { "ok" } else { "failed" };
+        let _ = state.inner.memory.finish_run(run, outcome);
+    }
+
+    result.map(|()| engine_status(&state))
+}
+
+/// Останавливает движок. Не запущен — не ошибка: цель достигнута.
+#[tauri::command]
+pub fn stop_engine(state: State<'_, AppState>) -> EngineStatus {
+    let taken = state
+        .inner
+        .engine
+        .lock()
+        .ok()
+        .and_then(|mut guard| guard.take());
+
+    if let Some(mut server) = taken {
+        if let Err(error) = server.stop() {
+            tracing::warn!(%error, "движок не остановился штатно");
+        }
+    }
+
+    engine_status(&state)
 }
 
 /// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это

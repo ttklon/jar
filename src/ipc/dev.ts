@@ -119,6 +119,7 @@ import type {
   AuditEvent,
   Decision,
   Downloaded,
+  EngineStatus,
   HashCheck,
   ModelsView,
   PlanItem,
@@ -339,4 +340,21 @@ export async function downloadModel(
   _sha256?: string,
 ): Promise<Downloaded> {
   throw new Error("скачивание делает приложение: запустите npm run tauri dev");
+}
+
+// ── Движок в браузере ───────────────────────────────────────────────────────
+//
+// Процессов в браузере нет: состояние честное («не найден, не запущен»), а запуск
+// отвечает отказом. Имитировать работающий движок значило бы врать про готовность.
+
+export async function engineStatus(): Promise<EngineStatus> {
+  return { found: false, program: null, search_dir: "", running: false, port: null, pid: null };
+}
+
+export async function startEngine(_name: string): Promise<EngineStatus> {
+  throw new Error("движок запускает приложение: в браузере нет процессов");
+}
+
+export async function stopEngine(): Promise<EngineStatus> {
+  return engineStatus();
 }

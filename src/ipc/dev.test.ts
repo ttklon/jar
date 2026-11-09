@@ -3,12 +3,14 @@ import {
   auditTail,
   buildStats,
   downloadModel,
+  engineStatus,
   listFlows,
   listProfiles,
   listTools,
   listModels,
   memoryRuns,
   removeModel,
+  startEngine,
   verifyModel,
   planFor,
   registrySnapshot,
@@ -182,6 +184,18 @@ describe("поиск по реестру в браузере", () => {
     const money = (await planFor("оплати счёт", 20)).find((item) => item.risk === "money");
     expect(money?.decision).toBe("deny");
     expect(money?.tool).toBeNull();
+  });
+});
+
+describe("движок в браузере", () => {
+  it("движка нет — и это честное «не найден», а не ошибка", async () => {
+    const status = await engineStatus();
+    expect(status.found).toBe(false);
+    expect(status.running).toBe(false);
+  });
+
+  it("запуск движка в браузере отказывает", async () => {
+    await expect(startEngine("m.gguf")).rejects.toThrow(/приложение/);
   });
 });
 

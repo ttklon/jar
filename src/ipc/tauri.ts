@@ -8,6 +8,7 @@ import type {
   AuditEvent,
   ConfirmToken,
   Downloaded,
+  EngineStatus,
   FlowView,
   HashCheck,
   ModelsView,
@@ -61,6 +62,18 @@ export function downloadModel(
   sha256?: string,
 ): Promise<Downloaded> {
   return invoke<Downloaded>("download_model", { url, name, sha256: sha256 ?? null });
+}
+
+export function engineStatus(): Promise<EngineStatus> {
+  return invoke<EngineStatus>("engine_status");
+}
+
+export function startEngine(name: string): Promise<EngineStatus> {
+  return invoke<EngineStatus>("start_engine", { name });
+}
+
+export function stopEngine(): Promise<EngineStatus> {
+  return invoke<EngineStatus>("stop_engine");
 }
 
 export function listTools(): Promise<ToolView[]> {

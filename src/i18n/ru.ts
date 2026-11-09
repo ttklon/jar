@@ -249,6 +249,24 @@ export const models = {
   used: (total: string) => `Модели занимают ${total}`,
   free: (free: string) => `свободно на диске ${free}`,
   freeUnknown: "свободное место неизвестно",
+  engine: {
+    title: "Движок",
+    lead:
+      "Модель запускает отдельный процесс llama-server на 127.0.0.1. Движок не входит в " +
+      "сборку: положите llama-server.exe в папку sidecars рядом с данными приложения.",
+    searching: "Ищу движок…",
+    notFound: "Движок не найден",
+    whereToPut: (dir: string) => `Положите llama-server.exe в ${dir} или в PATH.`,
+    found: (program: string) => `Движок: ${program}`,
+    running: (port: number, pid: number) => `работает на 127.0.0.1:${port}, PID ${pid}`,
+    stopped: "не запущен",
+    start: (name: string) => `Запустить ${name}`,
+    starting: "Запускаю…",
+    stop: "Остановить движок",
+    noModel: "Сначала нужен хотя бы один целый .gguf в папке моделей.",
+    browserNote: "В браузере движок не запускается: процессов здесь нет.",
+    startError: "Движок не запустился",
+  },
   remove: "Удалить",
   removeTitle: "Удалить файл модели?",
   removeLead:

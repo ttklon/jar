@@ -13,6 +13,7 @@ export type {
   ConfirmToken,
   Decision,
   Downloaded,
+  EngineStatus,
   Evidence,
   FlowInput,
   FlowStepView,
@@ -39,6 +40,7 @@ import type {
   AuditEvent,
   ConfirmToken,
   Downloaded,
+  EngineStatus,
   FlowView,
   HashCheck,
   ModelsView,
@@ -229,4 +231,39 @@ export async function removeModel(name: string): Promise<void> {
   }
   const { removeModel: fromData } = await import("./dev");
   return fromData(name);
+}
+
+// ── Движок моделей ──────────────────────────────────────────────────────────
+
+/** Состояние `llama-server`: найден ли бинарник и запущен ли он. */
+export async function engineStatus(): Promise<EngineStatus> {
+  if (isTauri()) {
+    const { engineStatus: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { engineStatus: fromData } = await import("./dev");
+  return fromData();
+}
+
+/**
+ * Запустить движок с файлом модели. В браузере процессов нет — там отказ,
+ * и он честно объясняет, почему.
+ */
+export async function startEngine(name: string): Promise<EngineStatus> {
+  if (isTauri()) {
+    const { startEngine: fromCore } = await import("./tauri");
+    return fromCore(name);
+  }
+  const { startEngine: fromData } = await import("./dev");
+  return fromData(name);
+}
+
+/** Остановить движок. В приложении это делает ядро по PID. */
+export async function stopEngine(): Promise<EngineStatus> {
+  if (isTauri()) {
+    const { stopEngine: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { stopEngine: fromData } = await import("./dev");
+  return fromData();
 }

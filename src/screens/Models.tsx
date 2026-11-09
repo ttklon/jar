@@ -14,8 +14,17 @@ import {
   tokens,
 } from "@fluentui/react-components";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
-import { downloadModel, isTauri, listModels, removeModel, verifyModel } from "../ipc";
-import type { Downloaded, HashCheck, ModelFile, ModelsView } from "../ipc";
+import {
+  downloadModel,
+  engineStatus,
+  isTauri,
+  listModels,
+  removeModel,
+  startEngine,
+  stopEngine,
+  verifyModel,
+} from "../ipc";
+import type { Downloaded, EngineStatus, HashCheck, ModelFile, ModelsView } from "../ipc";
 import { models as text } from "../i18n/ru";
 
 const useStyles = makeStyles({
@@ -118,6 +127,9 @@ export function Models() {
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<ModelFile | null>(null);
   const [removeError, setRemoveError] = useState<string | null>(null);
+  const [engine, setEngine] = useState<EngineStatus | null>(null);
+  const [engineBusy, setEngineBusy] = useState(false);
+  const [engineError, setEngineError] = useState<string | null>(null);
 
   const verify = useCallback((name: string) => {
     setBusy((current) => ({ ...current, [name]: true }));
@@ -132,16 +144,50 @@ export function Models() {
       .finally(() => setBusy((current) => ({ ...current, [name]: false })));
   }, []);
 
+  // Пока запускаем первый целый файл в папке: выбор модели появится вместе с
+  // манифестом, а придумывать «модель по умолчанию» из имени файла — гадание.
+  const runnable = view?.items.find((file) => file.ok) ?? null;
+
+  const refreshEngine = useCallback(() => {
+    // Движок и папка читаются отдельно: молчащий движок не должен скрывать список.
+    engineStatus()
+      .then(setEngine)
+      .catch(() => setEngine(null));
+  }, []);
+
   const load = useCallback(() => {
     setError(null);
+    refreshEngine();
     listModels()
       .then(setView)
       .catch((reason: unknown) =>
         setError(reason instanceof Error ? reason.message : String(reason)),
       );
-  }, []);
+  }, [refreshEngine]);
 
   useEffect(load, [load]);
+
+  const startWith = useCallback((fileName: string) => {
+    setEngineBusy(true);
+    setEngineError(null);
+    startEngine(fileName)
+      .then(setEngine)
+      .catch((reason: unknown) =>
+        setEngineError(reason instanceof Error ? reason.message : String(reason)),
+      )
+      .finally(() => setEngineBusy(false));
+  }, []);
+
+  const stopNow = useCallback(() => {
+    setEngineBusy(true);
+    setEngineError(null);
+    stopEngine()
+      .then(setEngine)
+      .catch((reason: unknown) =>
+        setEngineError(reason instanceof Error ? reason.message : String(reason)),
+      )
+      .finally(() => setEngineBusy(false));
+  }, []);
 
   const confirmRemove = useCallback(() => {
     const file = removing;
@@ -237,6 +283,62 @@ export function Models() {
               : text.download.doneUnverified(size(done.bytes))}
             {" · "}
             <span className={styles.mono}>{done.sha256.slice(0, 12)}</span>
+          </Text>
+        ) : null}
+      </section>
+
+      <section className={styles.download}>
+        <Text as="h2" size={500}>
+          {text.engine.title}
+        </Text>
+        <Text className={styles.note}>{text.engine.lead}</Text>
+
+        {engine === null ? (
+          <Text className={styles.note}>{text.engine.searching}</Text>
+        ) : engine.found ? (
+          <Text className={styles.mono}>{text.engine.found(engine.program ?? "")}</Text>
+        ) : (
+          <>
+            <Text className={styles.broken}>{text.engine.notFound}</Text>
+            <Text className={styles.note}>{text.engine.whereToPut(engine.search_dir)}</Text>
+          </>
+        )}
+
+        {engine?.running ? (
+          <div className={styles.rowActions}>
+            <Text className={styles.ok}>
+              {text.engine.running(engine.port ?? 0, engine.pid ?? 0)}
+            </Text>
+            <Button size="small" disabled={engineBusy} onClick={stopNow}>
+              {text.engine.stop}
+            </Button>
+          </div>
+        ) : null}
+
+        {engine !== null && engine.found && !engine.running ? (
+          <div className={styles.rowActions}>
+            <Text className={styles.note}>
+              {runnable === null ? text.engine.noModel : `${text.engine.stopped} · ${runnable.name}`}
+            </Text>
+            <Button
+              size="small"
+              appearance="primary"
+              disabled={runnable === null || engineBusy}
+              onClick={() => {
+                if (runnable !== null) startWith(runnable.name);
+              }}
+            >
+              {engineBusy
+                ? text.engine.starting
+                : text.engine.start(runnable?.name ?? "—")}
+            </Button>
+          </div>
+        ) : null}
+
+        {!isTauri() ? <Text className={styles.note}>{text.engine.browserNote}</Text> : null}
+        {engineError ? (
+          <Text className={styles.error}>
+            {text.engine.startError}: {engineError}
           </Text>
         ) : null}
       </section>

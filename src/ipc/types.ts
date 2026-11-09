@@ -124,6 +124,18 @@ export interface ModelFile {
   hash: string | null;
 }
 
+/** Что известно о движке `llama-server`. */
+export interface EngineStatus {
+  /** Найден ли бинарник рядом с приложением или в `PATH`. */
+  found: boolean;
+  program: string | null;
+  /** Куда его положить, если не найден. */
+  search_dir: string;
+  running: boolean;
+  port: number | null;
+  pid: number | null;
+}
+
 /** Результат скачивания: файл уже лежит в папке моделей и хеш посчитан. */
 export interface Downloaded {
   name: string;

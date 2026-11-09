@@ -1,7 +1,15 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { downloadModel, listModels, removeModel, verifyModel } from "../ipc";
+import {
+  downloadModel,
+  engineStatus,
+  listModels,
+  removeModel,
+  startEngine,
+  stopEngine,
+  verifyModel,
+} from "../ipc";
 import type { ModelFile, ModelsView } from "../ipc";
 import { Models } from "./Models";
 
@@ -17,6 +25,9 @@ vi.mock("../ipc", () => ({
   verifyModel: vi.fn(),
   downloadModel: vi.fn(),
   removeModel: vi.fn(),
+  engineStatus: vi.fn(),
+  startEngine: vi.fn(),
+  stopEngine: vi.fn(),
 }));
 
 class ResizeObserverStub {
@@ -27,13 +38,29 @@ class ResizeObserverStub {
 
 vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
+beforeEach(() => {
+  // По умолчанию движка нет: тестам про хеши и удаление он не мешает.
+  vi.mocked(engineStatus).mockResolvedValue(NO_ENGINE);
+});
+
 afterEach(() => {
   cleanup();
   vi.mocked(listModels).mockReset();
   vi.mocked(verifyModel).mockReset();
   vi.mocked(downloadModel).mockReset();
   vi.mocked(removeModel).mockReset();
+  vi.mocked(startEngine).mockReset();
+  vi.mocked(stopEngine).mockReset();
 });
+
+const NO_ENGINE = {
+  found: false,
+  program: null,
+  search_dir: "C:/app/sidecars",
+  running: false,
+  port: null,
+  pid: null,
+};
 
 /** Ответ ядра в одном месте: у модели есть размер папки и место на диске. */
 function view(items: ModelFile[], total: number): ModelsView {
@@ -203,5 +230,95 @@ describe("удаление файла модели", () => {
       expect(screen.getByText(/модели занимают 1\.0 ГБ/i)).toBeTruthy();
     });
     expect(screen.getByText(/свободно на диске 39\.1 ГБ/i)).toBeTruthy();
+  });
+});
+
+describe("движок моделей", () => {
+  it("если движка нет — говорит, куда его положить", async () => {
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
+
+    render(<Models />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/движок не найден/i)).toBeTruthy();
+    });
+    expect(screen.getByText(/C:\/app\/sidecars/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /запустить/i })).toBeNull();
+  });
+
+  it("запускает первый целый файл и показывает порт с PID", async () => {
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
+    vi.mocked(engineStatus).mockResolvedValue({
+      ...NO_ENGINE,
+      found: true,
+      program: "C:/app/sidecars/llama-server.exe",
+    });
+    vi.mocked(startEngine).mockResolvedValue({
+      found: true,
+      program: "C:/app/sidecars/llama-server.exe",
+      search_dir: "C:/app/sidecars",
+      running: true,
+      port: 51234,
+      pid: 4242,
+    });
+
+    render(<Models />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /запустить qwen3-1\.7b\.gguf/i }));
+
+    await waitFor(() => {
+      expect(vi.mocked(startEngine)).toHaveBeenCalledWith("qwen3-1.7b.gguf");
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/127\.0\.0\.1:51234, PID 4242/)).toBeTruthy();
+    });
+  });
+
+  it("останавливает движок и возвращается в «не запущен»", async () => {
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
+    vi.mocked(engineStatus).mockResolvedValue({
+      ...NO_ENGINE,
+      found: true,
+      program: "C:/app/sidecars/llama-server.exe",
+      running: true,
+      port: 51234,
+      pid: 4242,
+    });
+    vi.mocked(stopEngine).mockResolvedValue({
+      ...NO_ENGINE,
+      found: true,
+      program: "C:/app/sidecars/llama-server.exe",
+    });
+
+    render(<Models />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /остановить движок/i }));
+
+    await waitFor(() => {
+      expect(vi.mocked(stopEngine)).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(screen.queryByText(/PID 4242/)).toBeNull();
+    });
+  });
+
+  it("ошибка запуска показывается целиком, а не «не удалось»", async () => {
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
+    vi.mocked(engineStatus).mockResolvedValue({
+      ...NO_ENGINE,
+      found: true,
+      program: "C:/app/sidecars/llama-server.exe",
+    });
+    vi.mocked(startEngine).mockRejectedValue(
+      new Error("процесс не ответил на /health за 60 с, лог: C:/app/llama-server-51234.log"),
+    );
+
+    render(<Models />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /запустить/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/не ответил на \/health за 60 с/i)).toBeTruthy();
+    });
   });
 });
