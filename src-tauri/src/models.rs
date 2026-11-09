@@ -207,9 +207,9 @@ impl Reader<'_> {
     fn skip(&mut self, kind: u32) -> Result<(), String> {
         let size = match kind {
             0 | 1 | 7 => 1,
-            2 | 3 => 2,
-            4 | 5 | 6 => 4,
-            10 | 11 | 12 => 8,
+            2..=3 => 2,
+            4..=6 => 4,
+            10..=12 => 8,
             KIND_STRING => {
                 let len = self.u64()?;
                 self.take(len.min(self.bytes.len() as u64) as usize)?;
