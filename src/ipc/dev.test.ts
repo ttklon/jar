@@ -11,6 +11,7 @@ import {
   lastPlan,
   listModels,
   listRoles,
+  searchEpisodes,
   memoryRuns,
   assignRole,
   removeModel,
@@ -188,6 +189,12 @@ describe("поиск по реестру в браузере", () => {
     const money = (await planFor("оплати счёт", 20)).find((item) => item.risk === "money");
     expect(money?.decision).toBe("deny");
     expect(money?.tool).toBeNull();
+  });
+});
+
+describe("поиск по памяти в браузере", () => {
+  it("прошлых запусков нет, и это честный пустой ответ", async () => {
+    await expect(searchEpisodes("загрузки")).resolves.toEqual([]);
   });
 });
 

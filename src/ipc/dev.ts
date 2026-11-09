@@ -120,6 +120,7 @@ import type {
   Decision,
   Downloaded,
   EngineStatus,
+  Episode,
   HashCheck,
   ModelsView,
   Plan,
@@ -294,6 +295,11 @@ export async function listProfiles(): Promise<ProfileView[]> {
  * ответ — пустой список, а не выдуманные запуски.
  */
 export async function memoryRuns(_limit: number): Promise<RunRecord[]> {
+  return [];
+}
+
+export async function searchEpisodes(_query: string, _limit = 20): Promise<Episode[]> {
+  // Памяти в браузере нет: пустой ответ здесь честнее выдуманных запусков.
   return [];
 }
 

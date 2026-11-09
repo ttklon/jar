@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
+import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
-import { auditTail, isTauri, memoryRuns } from "../ipc";
-import type { AuditEvent, RunRecord } from "../ipc";
+import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
+import type { AuditEvent, Episode, RunRecord } from "../ipc";
 import { journal } from "../i18n/ru";
 
 const LIMIT = 100;
@@ -92,11 +92,54 @@ function outcomeClass(styles: ReturnType<typeof useStyles>, outcome: string): st
   return styles.cell;
 }
 
+type Styles = ReturnType<typeof useStyles>;
+
+/** Карточка одного запуска: то же лицо и в списке, и в результатах поиска. */
+function RunCard({ run, styles }: { run: RunRecord; styles: Styles }) {
+  return (
+    <div className={styles.run}>
+      <div className={styles.runHead}>
+        <Text weight="semibold">{run.subject}</Text>
+        <span className={styles.runKind}>{journal.runKind[run.kind] ?? run.kind}</span>
+        <span className={styles.mono}>{time(run.started_ms)}</span>
+        <span className={styles.mono}>{runDuration(run)}</span>
+        <span
+          className={
+            run.outcome === "ok"
+              ? styles.ok
+              : run.outcome === "running"
+                ? styles.mono
+                : styles.denied
+          }
+        >
+          {run.outcome}
+        </span>
+      </div>
+      {run.steps.length === 0 ? (
+        <Text className={styles.note}>{journal.noSteps}</Text>
+      ) : (
+        <ul className={styles.steps}>
+          {run.steps.map((step) => (
+            <li key={step.position}>
+              {step.tool} · {step.ok ? journal.runStepOk : journal.runStepFailed}
+              {step.reason ? ` · ${step.reason}` : ""}
+              {step.evidence ? ` · ${step.evidence}` : ""}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export function Journal() {
   const styles = useStyles();
   const [events, setEvents] = useState<AuditEvent[] | null>(null);
   const [runs, setRuns] = useState<RunRecord[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [episodes, setEpisodes] = useState<Episode[] | null>(null);
+  const [searchBusy, setSearchBusy] = useState(false);
 
   const load = useCallback(() => {
     setError(null);
@@ -112,6 +155,21 @@ export function Journal() {
   }, []);
 
   useEffect(load, [load]);
+
+  const find = useCallback(() => {
+    const text = query.trim();
+    if (!text) {
+      setEpisodes(null);
+      return;
+    }
+
+    setSearchBusy(true);
+    searchEpisodes(text)
+      .then(setEpisodes)
+      // Сломанный поиск — это не «ничего не нашлось», но экран не должен падать.
+      .catch(() => setEpisodes([]))
+      .finally(() => setSearchBusy(false));
+  }, [query]);
 
   return (
     <div className={styles.root}>
@@ -134,6 +192,48 @@ export function Journal() {
 
       <section className={styles.runs}>
         <Text as="h3" size={500} weight="semibold">
+          {journal.searchTitle}
+        </Text>
+        <Text className={styles.note}>{journal.searchLead}</Text>
+        {!isTauri() ? <Text className={styles.note}>{journal.searchBrowserNote}</Text> : null}
+
+        <form
+          className={styles.bar}
+          onSubmit={(event) => {
+            event.preventDefault();
+            find();
+          }}
+        >
+          <Input
+            value={query}
+            placeholder={journal.searchPlaceholder}
+            aria-label={journal.searchTitle}
+            onChange={(_, data) => setQuery(data.value)}
+          />
+          <Button type="submit" disabled={searchBusy}>
+            {journal.searchButton}
+          </Button>
+          {episodes !== null ? (
+            <Text className={styles.note}>{journal.searchFound(episodes.length)}</Text>
+          ) : null}
+        </form>
+
+        {episodes !== null && episodes.length === 0 ? (
+          <Text className={styles.note}>{journal.searchNothing}</Text>
+        ) : null}
+
+        {episodes !== null && episodes.length > 0
+          ? episodes.map((episode) => (
+              <div key={episode.run.id} className={styles.run}>
+                <Text className={styles.note}>{journal.searchMatched(episode.matched)}</Text>
+                <RunCard run={episode.run} styles={styles} />
+              </div>
+            ))
+          : null}
+      </section>
+
+      <section className={styles.runs}>
+        <Text as="h3" size={500} weight="semibold">
           {journal.runsTitle}
         </Text>
         <Text className={styles.note}>{journal.runsLead}</Text>
@@ -142,42 +242,7 @@ export function Journal() {
           <Text className={styles.note}>{journal.runsEmpty}</Text>
         ) : null}
         {runs !== null && runs.length > 0
-          ? runs.map((run) => (
-              <div key={run.id} className={styles.run}>
-                <div className={styles.runHead}>
-                  <Text weight="semibold">{run.subject}</Text>
-                  <span className={styles.runKind}>
-                    {journal.runKind[run.kind] ?? run.kind}
-                  </span>
-                  <span className={styles.mono}>{time(run.started_ms)}</span>
-                  <span className={styles.mono}>{runDuration(run)}</span>
-                  <span
-                    className={
-                      run.outcome === "ok"
-                        ? styles.ok
-                        : run.outcome === "running"
-                          ? styles.mono
-                          : styles.denied
-                    }
-                  >
-                    {run.outcome}
-                  </span>
-                </div>
-                {run.steps.length === 0 ? (
-                  <Text className={styles.note}>{journal.noSteps}</Text>
-                ) : (
-                  <ul className={styles.steps}>
-                    {run.steps.map((step) => (
-                      <li key={step.position}>
-                        {step.tool} · {step.ok ? journal.runStepOk : journal.runStepFailed}
-                        {step.reason ? ` · ${step.reason}` : ""}
-                        {step.evidence ? ` · ${step.evidence}` : ""}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))
+          ? runs.map((run) => <RunCard key={run.id} run={run} styles={styles} />)
           : null}
       </section>
 

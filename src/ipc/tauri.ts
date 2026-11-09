@@ -9,6 +9,7 @@ import type {
   ConfirmToken,
   Downloaded,
   EngineStatus,
+  Episode,
   FlowView,
   HashCheck,
   ModelsView,
@@ -89,6 +90,10 @@ export function assignRole(role: string, name: string): Promise<RoleView[]> {
 
 export function clearRole(role: string): Promise<RoleView[]> {
   return invoke<RoleView[]>("clear_role", { role });
+}
+
+export function searchEpisodes(query: string, limit = 20): Promise<Episode[]> {
+  return invoke<Episode[]>("search_episodes", { query, limit });
 }
 
 export function checkPlan(json: string): Promise<PlanCheck> {

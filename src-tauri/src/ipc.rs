@@ -15,7 +15,7 @@ use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::download::{self, Downloaded};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::llama;
-use crate::memory::{Memory, RunRecord};
+use crate::memory::{Episode, Memory, RunRecord};
 use crate::models::{self, ModelFile};
 use crate::plan::{self, Plan, Problem};
 use crate::planner::{self, PlanItem};
@@ -707,6 +707,19 @@ pub fn memory_runs(state: State<'_, AppState>, limit: usize) -> Vec<RunRecord> {
         .memory
         .recent_runs(limit.clamp(1, 200))
         .unwrap_or_default()
+}
+
+/// Поиск по памяти: «что я делал с этой папкой?». Каждое слово запроса обязано
+/// найтись, и ответ говорит, какие слова совпали — иначе поиск по памяти выглядит
+/// как гадание.
+#[tauri::command]
+pub fn search_episodes(
+    state: State<'_, AppState>,
+    query: String,
+    limit: Option<usize>,
+) -> Vec<Episode> {
+    let limit = limit.unwrap_or(20).clamp(1, 100);
+    state.inner.memory.search(&query, limit).unwrap_or_default()
 }
 
 /// Профили приложений: что описано и что из этого уже исполняется.

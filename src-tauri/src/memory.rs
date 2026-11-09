@@ -53,6 +53,20 @@ pub struct RunRecord {
     pub steps: Vec<RunStep>,
 }
 
+/// Найденный эпизод: запуск и слова запроса, которые в нём действительно есть.
+///
+/// `matched` возвращается, чтобы интерфейс мог сказать, *почему* запуск нашёлся. Без
+/// этого поиск по памяти выглядит как гадание.
+#[derive(Debug, Clone, Serialize)]
+pub struct Episode {
+    pub run: RunRecord,
+    pub matched: Vec<String>,
+}
+
+/// Сколько запусков просматривает поиск. Память — не полнотекстовый индекс: честный
+/// предел лучше, чем запрос, который однажды начнёт тормозить незаметно.
+pub const SEARCH_DEPTH: usize = 2000;
+
 /// Память приложения. `Connection` не `Sync`, поэтому он под мьютексом: команды
 /// ядра приходят из разных потоков, а база одна.
 pub struct Memory {
@@ -200,6 +214,40 @@ impl Memory {
         Ok(runs)
     }
 
+    /// Ищет прошлые запуски по словам: «что я делал с этой папкой?».
+    ///
+    /// Правила нарочно простые и проверяемые: запрос режется на слова (короче двух
+    /// букв — не слова), каждое слово обязано найтись в запуске. Поэтому два слова
+    /// сужают ответ, а не расширяют его: поиск здесь — фильтр, а не угадывание.
+    pub fn search(&self, query: &str, limit: usize) -> Result<Vec<Episode>, MemoryError> {
+        let words = words(query);
+        if words.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let runs = self.recent_runs(SEARCH_DEPTH)?;
+        let mut found = Vec::new();
+
+        for run in runs {
+            let haystack = haystack(&run);
+            let matched: Vec<String> = words
+                .iter()
+                .filter(|word| haystack.contains(word.as_str()))
+                .cloned()
+                .collect();
+
+            // Совпали все слова — иначе запуск не отвечает на вопрос целиком.
+            if matched.len() == words.len() {
+                found.push(Episode { run, matched });
+            }
+            if found.len() == limit {
+                break;
+            }
+        }
+
+        Ok(found)
+    }
+
     /// Версия схемы — то, что записано в файле, а не в константе.
     pub fn schema_version(&self) -> i64 {
         let conn = self.lock();
@@ -270,6 +318,37 @@ fn migrate(conn: &Connection) -> Result<(), rusqlite::Error> {
     }
 
     Ok(())
+}
+
+/// Слова запроса: нижний регистр, без повторов, короткие отбрасываются.
+fn words(query: &str) -> Vec<String> {
+    let mut words: Vec<String> = query
+        .to_lowercase()
+        .split(|symbol: char| !symbol.is_alphanumeric())
+        .filter(|word| word.chars().count() >= 2)
+        .map(str::to_string)
+        .collect();
+    let mut unique: Vec<String> = Vec::with_capacity(words.len());
+    for word in words {
+        if !unique.contains(&word) {
+            unique.push(word);
+        }
+    }
+    unique
+}
+
+/// Всё, по чему запуск можно узнать: предмет, вид, шаги и их доказательства.
+fn haystack(run: &RunRecord) -> String {
+    let mut text = format!("{} {}", run.kind, run.subject).to_lowercase();
+    for step in &run.steps {
+        text.push(' ');
+        text.push_str(&step.tool.to_lowercase());
+        text.push(' ');
+        text.push_str(&step.reason.to_lowercase());
+        text.push(' ');
+        text.push_str(&step.evidence.to_lowercase());
+    }
+    text
 }
 
 fn now_ms() -> u64 {
@@ -357,6 +436,102 @@ mod tests {
 
         // Другой инструмент не видит чужих параметров.
         assert!(memory.last_params("files|удалить|в корзину").is_none());
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Три запуска: чистка загрузок, проверка диска и скачивание модели.
+    fn seeded(name: &str) -> (Memory, PathBuf) {
+        let (memory, dir) = temp_memory(name);
+
+        let clean = memory.start_run("tool", "Уборка в Загрузках").expect("запуск");
+        memory
+            .add_step(clean, 1, "files|удалить|в корзину", true, "", "path_missing")
+            .expect("шаг");
+        memory
+            .add_step(clean, 2, "files|проверить|дубликаты по хэшу", true, "", "duplicates=3")
+            .expect("шаг");
+        memory.finish_run(clean, "ok").expect("итог");
+
+        let disk = memory.start_run("tool", "Свободное место").expect("запуск");
+        memory
+            .add_step(disk, 1, "storage-backup|проверить|свободное место", true, "", "free_gb=12")
+            .expect("шаг");
+        memory.finish_run(disk, "ok").expect("итог");
+
+        let model = memory.start_run("download", "qwen2.5-1.5b.gguf").expect("запуск");
+        memory.finish_run(model, "ok").expect("итог");
+
+        (memory, dir)
+    }
+
+    #[test]
+    fn search_finds_a_run_by_word_in_any_case() {
+        let (memory, dir) = seeded("search-case");
+
+        let found = memory.search("загрузк", 10).expect("поиск");
+        assert_eq!(found.len(), 1, "нашлась уборка: {found:?}");
+        assert_eq!(found[0].run.subject, "Уборка в Загрузках");
+        assert_eq!(found[0].matched, vec!["загрузк".to_string()]);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn two_words_narrow_the_answer_and_are_named() {
+        let (memory, dir) = seeded("search-two");
+
+        // «папк» есть в шаге уборки, «диска» нет нигде — пустой ответ, а не «примерно».
+        assert!(memory.search("загрузки диска", 10).expect("поиск").is_empty());
+
+        let found = memory.search("уборка хэшу", 10).expect("поиск");
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].matched, vec!["уборка".to_string(), "хэшу".to_string()]);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn search_looks_inside_steps_not_only_subjects() {
+        let (memory, dir) = seeded("search-steps");
+
+        let found = memory.search("duplicates", 10).expect("поиск");
+        assert_eq!(found.len(), 1, "слово из доказательства шага тоже считается");
+        assert!(found[0].run.subject.contains("Загрузк"));
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn empty_query_and_empty_memory_answer_nothing() {
+        let (memory, dir) = seeded("search-empty");
+
+        // Короче двух букв — не слово: «я» ничего не значит.
+        assert!(memory.search("я", 10).expect("поиск").is_empty());
+        assert!(memory.search("   ", 10).expect("поиск").is_empty());
+
+        let (empty, empty_dir) = temp_memory("search-nothing");
+        assert!(empty.search("диск", 10).expect("поиск").is_empty());
+
+        let _ = std::fs::remove_dir_all(&dir);
+        let _ = std::fs::remove_dir_all(&empty_dir);
+    }
+
+    #[test]
+    fn search_returns_newest_first_and_respects_the_limit() {
+        let (memory, dir) = temp_memory("search-limit");
+
+        for subject in ["Папка А", "Папка Б", "Папка В"] {
+            let run = memory.start_run("tool", subject).expect("запуск");
+            memory.finish_run(run, "ok").expect("итог");
+        }
+
+        let all = memory.search("папка", 10).expect("поиск");
+        assert_eq!(all.len(), 3);
+        assert!(all[0].run.id > all[1].run.id, "новые сверху");
+        assert_eq!(all[0].run.subject, "Папка В");
+
+        assert_eq!(memory.search("папка", 2).expect("поиск").len(), 2);
 
         let _ = std::fs::remove_dir_all(&dir);
     }

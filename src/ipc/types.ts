@@ -124,6 +124,13 @@ export interface ModelFile {
   hash: string | null;
 }
 
+/** Найденный прошлый запуск: почему он нашёлся — часть ответа. */
+export interface Episode {
+  run: RunRecord;
+  /** Слова запроса, которые в запуске действительно есть. */
+  matched: string[];
+}
+
 /** План: несколько шагов как данные, до исполнения проверяется. */
 export interface PlanStep {
   registry: string;

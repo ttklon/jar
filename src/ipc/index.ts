@@ -14,6 +14,7 @@ export type {
   Decision,
   Downloaded,
   EngineStatus,
+  Episode,
   Evidence,
   FlowInput,
   FlowStepView,
@@ -45,6 +46,7 @@ import type {
   ConfirmToken,
   Downloaded,
   EngineStatus,
+  Episode,
   Plan,
   PlanCheck,
   RoleView,
@@ -167,6 +169,19 @@ export async function memoryRuns(limit = 20): Promise<RunRecord[]> {
   }
   const { memoryRuns: fromData } = await import("./dev");
   return fromData(limit);
+}
+
+/**
+ * Поиск по прошлым запускам: «что я делал с этой папкой?». Каждое слово запроса
+ * обязано найтись; ответ называет совпавшие слова.
+ */
+export async function searchEpisodes(query: string, limit = 20): Promise<Episode[]> {
+  if (isTauri()) {
+    const { searchEpisodes: fromCore } = await import("./tauri");
+    return fromCore(query, limit);
+  }
+  const { searchEpisodes: fromData } = await import("./dev");
+  return fromData(query, limit);
 }
 
 // ── Поиск по реестру ────────────────────────────────────────────────────────
