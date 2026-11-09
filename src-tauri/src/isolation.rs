@@ -86,7 +86,7 @@ impl Limits {
 
 /// «5000» человеку читать незачем.
 fn duration_text(ms: u64) -> String {
-    if ms % 1000 == 0 {
+    if ms.is_multiple_of(1000) {
         format!("{} с", ms / 1000)
     } else {
         format!("{:.1} с", ms as f64 / 1000.0)
@@ -127,6 +127,7 @@ mod imp {
     /// Держит job object открытым. Пока он открыт — потолки действуют; при закрытии всё,
     /// что внутри, умирает. Поэтому `Guard` не клонируется и живёт ровно столько, сколько
     /// длится запуск.
+    #[derive(Debug)]
     pub struct Guard {
         job: HANDLE,
     }
@@ -206,6 +207,7 @@ mod imp {
 
     /// На других системах потолков нет. Пустышка, а не притворство: `attach` честно
     /// возвращает отказ, и вызывающий обязан сказать об этом, а не делать вид.
+    #[derive(Debug)]
     pub struct Guard;
 
     pub fn attach(_pid: u32, limits: &Limits) -> Result<Guard, String> {
