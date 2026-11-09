@@ -6,6 +6,8 @@
 //! * выполняет инструменты (`tools`) с независимой проверкой результата (`verifier`);
 //! * собирает их в сценарии (`flows`) — план из шагов, каждый со своим подтверждением;
 //! * показывает, что было сделано: журнал (`audit`) читается экраном «История»;
+//! * помнит удачные запуски и их параметры в SQLite (`memory`), чтобы не спрашивать
+//!   одно и то же дважды;
 //! * знает, как это делается в 87 программах (`profiles`), и честно показывает, что из
 //!   этого уже исполняется;
 //! * вызывается из любой программы по `Ctrl+Alt+Z` (`hotkey`).
@@ -18,6 +20,7 @@ pub mod flows;
 pub mod hotkey;
 pub mod ipc;
 pub mod logging;
+pub mod memory;
 pub mod policy;
 pub mod profiles;
 pub mod registry;
@@ -31,6 +34,7 @@ use std::sync::Arc;
 
 use audit::Audit;
 use ipc::{AppState, Inner};
+use memory::Memory;
 use policy::PolicyState;
 use registry::Registry;
 
@@ -55,16 +59,25 @@ pub fn run() {
         "реестр загружен"
     );
 
-    let audit = Audit::new(
-        app_dir
-            .unwrap_or_else(std::env::temp_dir)
-            .join("audit.jsonl"),
-    );
+    let base = app_dir.unwrap_or_else(std::env::temp_dir);
+    let audit = Audit::new(base.join("audit.jsonl"));
+
+    // Память не должна мешать запуску: без неё приложение работает, просто не помнит
+    // прошлые параметры. Поэтому ошибка уходит в лог, а не в панику.
+    let memory = match Memory::open(base.join("memory.db")) {
+        Ok(memory) => memory,
+        Err(error) => {
+            tracing::warn!(%error, "память недоступна — продолжаю без неё");
+            Memory::open(std::env::temp_dir().join("zshelper-memory.db"))
+                .expect("временная память обязана открыться")
+        }
+    };
 
     let state = AppState {
         inner: Arc::new(Inner {
             registry,
             audit,
+            memory,
             policy: PolicyState::new(),
             cancel: AtomicBool::new(false),
         }),
@@ -85,6 +98,7 @@ pub fn run() {
             ipc::list_tools,
             ipc::list_flows,
             ipc::audit_tail,
+            ipc::memory_runs,
             ipc::list_profiles,
             ipc::policy_for,
             ipc::confirm_tool,

@@ -66,7 +66,9 @@ const useStyles = makeStyles({
 
 export function ToolCard({ tool }: { tool: ToolView }) {
   const styles = useStyles();
-  const [values, setValues] = useState<Record<string, string>>({});
+  // Прошлые удачные параметры подставляются сразу: путь к папке обычно один и тот же,
+  // а вводить его заново каждый раз — работа, которую приложение уже сделало.
+  const [values, setValues] = useState<Record<string, string>>(() => tool.last_params ?? {});
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<StepResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -130,6 +132,12 @@ export function ToolCard({ tool }: { tool: ToolView }) {
       <Text className={styles.impl} block>
         {hands.implementation}: {tool.implementation}
       </Text>
+
+      {tool.last_params && Object.keys(tool.last_params).length > 0 ? (
+        <Text className={styles.muted} block>
+          {hands.prefilled}
+        </Text>
+      ) : null}
 
       {denied ? <Text className={styles.denyNote}>{tool.decision_reason}</Text> : null}
 

@@ -13,6 +13,7 @@ use tauri::State;
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
+use crate::memory::{Memory, RunRecord};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::registry::{Action, Registry, RegistrySnapshot};
@@ -23,6 +24,7 @@ use crate::tools::{self, ParamSpec, ToolSpec};
 pub struct Inner {
     pub registry: Registry,
     pub audit: Audit,
+    pub memory: Memory,
     pub policy: PolicyState,
     pub cancel: AtomicBool,
 }
@@ -102,6 +104,9 @@ pub struct FlowStepView {
     pub decision: String,
     pub decision_reason: String,
     pub needs_token: bool,
+    /// Параметры прошлого удачного запуска: интерфейс подставляет их, а не заставляет
+    /// каждый раз вводить один и тот же путь.
+    pub last_params: Option<BTreeMap<String, String>>,
 }
 
 /// Сценарий для экрана «Сценарии»: шаги, входы и риск самого опасного шага.
@@ -172,6 +177,7 @@ fn view(inner: &Inner, spec: &'static ToolSpec) -> ToolView {
         decision: decision.as_str().to_string(),
         decision_reason: decision.reason().to_string(),
         needs_token: decision.needs_token(),
+        last_params: inner.memory.last_params(&spec.registry),
     }
 }
 
@@ -320,6 +326,17 @@ pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
         .iter()
         .map(|spec| view(&state.inner, spec))
         .collect()
+}
+
+/// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это
+/// структура: запуск, шаг, итог — то, что нужно планировщику и экрану истории.
+#[tauri::command]
+pub fn memory_runs(state: State<'_, AppState>, limit: usize) -> Vec<RunRecord> {
+    state
+        .inner
+        .memory
+        .recent_runs(limit.clamp(1, 200))
+        .unwrap_or_default()
 }
 
 /// Профили приложений: что описано и что из этого уже исполняется.
@@ -485,12 +502,40 @@ pub async fn run_tool(
         },
     );
 
+    // Память пишется до запуска и после него: если приложение упадёт посреди работы,
+    // в базе останется запуск со статусом `running` — это видно, а не потеряно.
+    let run_id = inner.memory.start_run("tool", &registry).ok();
+
     let worker = Arc::clone(&inner);
     let key = registry.clone();
     let outcome =
         tauri::async_runtime::spawn_blocking(move || tools::run(&key, &params, &worker.cancel))
             .await
             .map_err(|error| format!("исполнение прервано: {error}"))?;
+
+    if let Some(run_id) = run_id {
+        let summary = if outcome.cancelled {
+            "cancelled"
+        } else if outcome.ok {
+            "ok"
+        } else {
+            "failed"
+        };
+        let _ = inner.memory.add_step(
+            run_id,
+            0,
+            &registry,
+            outcome.ok,
+            &outcome.reason,
+            outcome.evidence.kind(),
+        );
+        let _ = inner.memory.finish_run(run_id, summary);
+    }
+
+    // Запоминаем параметры только у удачного запуска: неудачный ввод подставлять нельзя.
+    if outcome.ok && !params.is_empty() {
+        let _ = inner.memory.remember_params(&registry, &params);
+    }
 
     let summary = if outcome.ok { "ok" } else { "failed" };
     audit(

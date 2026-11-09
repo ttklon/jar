@@ -88,6 +88,20 @@ export interface ToolView {
   decision: Decision;
   decision_reason: string;
   needs_token: boolean;
+  /** Параметры прошлого удачного запуска — интерфейс подставляет их сам. */
+  last_params?: Record<string, string> | null;
+}
+
+/** Запуск из памяти приложения (SQLite). */
+export interface RunRecord {
+  id: number;
+  /** `tool` — одиночный инструмент, `flow` — сценарий. */
+  kind: string;
+  subject: string;
+  started_ms: number;
+  finished_ms: number | null;
+  /** `running` | `ok` | `failed` | `denied` | `cancelled`. */
+  outcome: string;
 }
 
 /** Доказательство того, что шаг действительно выполнен. */

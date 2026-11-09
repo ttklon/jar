@@ -5,6 +5,7 @@ import {
   listFlows,
   listProfiles,
   listTools,
+  memoryRuns,
   registrySnapshot,
 } from "./dev";
 import { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
@@ -147,6 +148,18 @@ describe("профили приложений в браузере", () => {
       }
 
       expect(profile.executable).toBe(executable);
+    }
+  });
+});
+
+describe("память в браузере", () => {
+  it("запусков нет — пустой список, и параметры не подставляются", async () => {
+    await expect(memoryRuns(10)).resolves.toEqual([]);
+
+    const tools = await listTools();
+    expect(tools.length).toBeGreaterThan(0);
+    for (const tool of tools) {
+      expect(tool.last_params).toBeNull();
     }
   });
 });

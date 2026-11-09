@@ -85,6 +85,8 @@ export async function listTools(): Promise<ToolView[]> {
       decision,
       decision_reason: decisionReason(decision, action.risk),
       needs_token: decision === "confirm",
+      // Памяти в браузере нет: подставлять нечего.
+      last_params: null,
     };
   });
 }
@@ -116,6 +118,7 @@ import flowsJson from "../../data/flows.json";
 import type {
   AuditEvent,
   Decision,
+  RunRecord,
   FlowStepView,
   FlowView,
   ProfileOpView,
@@ -276,4 +279,12 @@ export async function listProfiles(): Promise<ProfileView[]> {
       operations,
     };
   });
+}
+
+/**
+ * Память приложения живёт в SQLite рядом с журналом. В браузере её нет: честный
+ * ответ — пустой список, а не выдуманные запуски.
+ */
+export async function memoryRuns(_limit: number): Promise<RunRecord[]> {
+  return [];
 }

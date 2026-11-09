@@ -21,6 +21,7 @@ export type {
   ProfileView,
   RegistrySnapshot,
   RegistryStats,
+  RunRecord,
   Risk,
   StepResult,
   Tier,
@@ -33,6 +34,7 @@ import type {
   ConfirmToken,
   FlowView,
   ProfileView,
+  RunRecord,
   StepResult,
   ToolView,
 } from "./types";
@@ -131,4 +133,19 @@ export async function listProfiles(): Promise<ProfileView[]> {
   }
   const { listProfiles: fromData } = await import("./dev");
   return fromData();
+}
+
+// ── Память ──────────────────────────────────────────────────────────────────
+
+/**
+ * Последние запуски из памяти приложения. В отличие от журнала это структура:
+ * запуск, шаг, итог. В браузере памяти нет — там пусто.
+ */
+export async function memoryRuns(limit = 20): Promise<RunRecord[]> {
+  if (isTauri()) {
+    const { memoryRuns: fromCore } = await import("./tauri");
+    return fromCore(limit);
+  }
+  const { memoryRuns: fromData } = await import("./dev");
+  return fromData(limit);
 }

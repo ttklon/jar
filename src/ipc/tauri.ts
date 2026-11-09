@@ -10,6 +10,7 @@ import type {
   FlowView,
   ProfileView,
   RegistrySnapshot,
+  RunRecord,
   StepResult,
   ToolView,
 } from "./types";
@@ -67,4 +68,8 @@ export function auditTail(limit: number): Promise<AuditEvent[]> {
 
 export function listProfiles(): Promise<ProfileView[]> {
   return invoke<ProfileView[]>("list_profiles");
+}
+
+export function memoryRuns(limit: number): Promise<RunRecord[]> {
+  return invoke<RunRecord[]>("memory_runs", { limit });
 }
