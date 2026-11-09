@@ -70,8 +70,11 @@ describe("App", () => {
     await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
 
     screen.getByRole("button", { name: "История" }).click();
-    await waitFor(() => expect(screen.getByText(/Пока пусто/)).toBeTruthy());
+    // Два «Пока пусто» — журнал и память: это разные источники, и оба честно пусты
+    // в браузере, где нет ни журнала, ни базы.
+    await waitFor(() => expect(screen.getAllByText(/Пока пусто/).length).toBe(2));
     expect(screen.getByText(/В браузере журнала нет/)).toBeTruthy();
+    expect(screen.getByText(/В браузере памяти нет/)).toBeTruthy();
   });
 
   it("экран «Приложения» показывает профили и честно говорит, что исполняется", async () => {

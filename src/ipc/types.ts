@@ -152,15 +152,26 @@ export interface ModelsView {
 }
 
 /** Запуск из памяти приложения (SQLite). */
+/** Шаг запуска: что сделали, чем кончилось, чем подтверждено. */
+export interface RunStep {
+  position: number;
+  tool: string;
+  ok: boolean;
+  reason: string;
+  evidence: string;
+}
+
 export interface RunRecord {
   id: number;
-  /** `tool` — одиночный инструмент, `flow` — сценарий. */
+  /** `tool` — одиночный инструмент, `flow` — сценарий, `download` — скачивание. */
   kind: string;
   subject: string;
   started_ms: number;
   finished_ms: number | null;
   /** `running` | `ok` | `failed` | `denied` | `cancelled`. */
   outcome: string;
+  /** Шаги по порядку; пусто у запусков без шагов (например, скачивания). */
+  steps: RunStep[];
 }
 
 /** Доказательство того, что шаг действительно выполнен. */

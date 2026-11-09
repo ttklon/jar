@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
-import { auditTail, isTauri } from "../ipc";
-import type { AuditEvent } from "../ipc";
+import { auditTail, isTauri, memoryRuns } from "../ipc";
+import type { AuditEvent, RunRecord } from "../ipc";
 import { journal } from "../i18n/ru";
 
 const LIMIT = 100;
@@ -38,11 +38,50 @@ const useStyles = makeStyles({
   },
   denied: { color: tokens.colorPaletteRedForeground2 },
   ok: { color: tokens.colorPaletteGreenForeground2 },
+  runs: { display: "flex", flexDirection: "column", gap: "10px", maxWidth: "110ch" },
+  run: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+    padding: "12px 14px",
+    borderRadius: tokens.borderRadiusLarge,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground2,
+  },
+  runHead: { display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" },
+  runKind: {
+    color: tokens.colorNeutralForeground3,
+    fontSize: tokens.fontSizeBase200,
+    padding: "1px 8px",
+    borderRadius: "999px",
+    backgroundColor: tokens.colorNeutralBackground4,
+  },
+  mono: {
+    fontFamily: tokens.fontFamilyMonospace,
+    fontSize: tokens.fontSizeBase100,
+    color: tokens.colorNeutralForeground3,
+  },
+  steps: {
+    margin: 0,
+    paddingLeft: "18px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+    fontFamily: tokens.fontFamilyMonospace,
+    fontSize: tokens.fontSizeBase100,
+    color: tokens.colorNeutralForeground2,
+  },
 });
 
 function time(ms: number): string {
   const at = new Date(ms);
   return at.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+/** Длительность запуска: пока он идёт, времени ещё нет — так и говорим. */
+function runDuration(run: RunRecord): string {
+  if (run.finished_ms === null) return journal.runRunning;
+  return journal.duration(run.finished_ms - run.started_ms);
 }
 
 function outcomeClass(styles: ReturnType<typeof useStyles>, outcome: string): string {
@@ -56,6 +95,7 @@ function outcomeClass(styles: ReturnType<typeof useStyles>, outcome: string): st
 export function Journal() {
   const styles = useStyles();
   const [events, setEvents] = useState<AuditEvent[] | null>(null);
+  const [runs, setRuns] = useState<RunRecord[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
@@ -65,6 +105,10 @@ export function Journal() {
       .catch((reason: unknown) =>
         setError(reason instanceof Error ? reason.message : String(reason)),
       );
+    // Память читается отдельно: сломанная память не должна скрывать журнал, и наоборот.
+    memoryRuns(20)
+      .then(setRuns)
+      .catch(() => setRuns([]));
   }, []);
 
   useEffect(load, [load]);
@@ -87,6 +131,55 @@ export function Journal() {
       ) : null}
 
       {error ? <Text className={styles.error}>{`${journal.loadError}: ${error}`}</Text> : null}
+
+      <section className={styles.runs}>
+        <Text as="h3" size={500} weight="semibold">
+          {journal.runsTitle}
+        </Text>
+        <Text className={styles.note}>{journal.runsLead}</Text>
+        {!isTauri() ? <Text className={styles.note}>{journal.runsBrowserNote}</Text> : null}
+        {runs !== null && runs.length === 0 ? (
+          <Text className={styles.note}>{journal.runsEmpty}</Text>
+        ) : null}
+        {runs !== null && runs.length > 0
+          ? runs.map((run) => (
+              <div key={run.id} className={styles.run}>
+                <div className={styles.runHead}>
+                  <Text weight="semibold">{run.subject}</Text>
+                  <span className={styles.runKind}>
+                    {journal.runKind[run.kind] ?? run.kind}
+                  </span>
+                  <span className={styles.mono}>{time(run.started_ms)}</span>
+                  <span className={styles.mono}>{runDuration(run)}</span>
+                  <span
+                    className={
+                      run.outcome === "ok"
+                        ? styles.ok
+                        : run.outcome === "running"
+                          ? styles.mono
+                          : styles.denied
+                    }
+                  >
+                    {run.outcome}
+                  </span>
+                </div>
+                {run.steps.length === 0 ? (
+                  <Text className={styles.note}>{journal.noSteps}</Text>
+                ) : (
+                  <ul className={styles.steps}>
+                    {run.steps.map((step) => (
+                      <li key={step.position}>
+                        {step.tool} · {step.ok ? journal.runStepOk : journal.runStepFailed}
+                        {step.reason ? ` · ${step.reason}` : ""}
+                        {step.evidence ? ` · ${step.evidence}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))
+          : null}
+      </section>
 
       <div className={styles.bar}>
         <Button icon={<ArrowClockwiseRegular />} onClick={load}>

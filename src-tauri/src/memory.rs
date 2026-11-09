@@ -30,7 +30,17 @@ pub enum MemoryError {
     Path(String),
 }
 
-/// Один запуск: инструмент или сценарий. `finished_ms` пуст, пока запуск идёт.
+/// Один шаг запуска: что сделали, чем кончилось, чем это подтверждено.
+#[derive(Debug, Clone, Serialize)]
+pub struct RunStep {
+    pub position: i64,
+    pub tool: String,
+    pub ok: bool,
+    pub reason: String,
+    pub evidence: String,
+}
+
+/// Один запуск: инструмент, сценарий, скачивание. `finished_ms` пуст, пока он идёт.
 #[derive(Debug, Clone, Serialize)]
 pub struct RunRecord {
     pub id: i64,
@@ -39,6 +49,8 @@ pub struct RunRecord {
     pub started_ms: u64,
     pub finished_ms: Option<u64>,
     pub outcome: String,
+    /// Шаги по порядку. Пусто у запусков без шагов (например, скачивания).
+    pub steps: Vec<RunStep>,
 }
 
 /// Память приложения. `Connection` не `Sync`, поэтому он под мьютексом: команды
@@ -156,24 +168,36 @@ impl Memory {
         serde_json::from_str(&value).ok()
     }
 
-    /// Последние запуски, новые сверху.
+    /// Последние запуски, новые сверху, вместе с шагами.
+    ///
+    /// Шаги читаются отдельным запросом на запуск: запусков в списке единицы, а
+    /// соединение таблиц здесь усложнило бы чтение ради экономии, которой не видно.
     pub fn recent_runs(&self, limit: usize) -> Result<Vec<RunRecord>, MemoryError> {
         let conn = self.lock();
-        let mut statement = conn.prepare(
-            "SELECT id, kind, subject, started_ms, finished_ms, outcome
-             FROM runs ORDER BY id DESC LIMIT ?1",
-        )?;
-        let rows = statement.query_map(params![limit as i64], |row| {
-            Ok(RunRecord {
-                id: row.get(0)?,
-                kind: row.get(1)?,
-                subject: row.get(2)?,
-                started_ms: row.get(3)?,
-                finished_ms: row.get(4)?,
-                outcome: row.get(5)?,
-            })
-        })?;
-        Ok(rows.filter_map(Result::ok).collect())
+        let mut runs: Vec<RunRecord> = {
+            let mut statement = conn.prepare(
+                "SELECT id, kind, subject, started_ms, finished_ms, outcome
+                 FROM runs ORDER BY id DESC LIMIT ?1",
+            )?;
+            let rows = statement.query_map(params![limit as i64], |row| {
+                Ok(RunRecord {
+                    id: row.get(0)?,
+                    kind: row.get(1)?,
+                    subject: row.get(2)?,
+                    started_ms: row.get(3)?,
+                    finished_ms: row.get(4)?,
+                    outcome: row.get(5)?,
+                    steps: Vec::new(),
+                })
+            })?;
+            rows.filter_map(Result::ok).collect()
+        };
+
+        for run in &mut runs {
+            run.steps = steps_for(&conn, run.id)?;
+        }
+
+        Ok(runs)
     }
 
     /// Версия схемы — то, что записано в файле, а не в константе.
@@ -190,6 +214,24 @@ impl Memory {
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner())
     }
+}
+
+/// Шаги одного запуска по порядку.
+fn steps_for(conn: &Connection, run_id: i64) -> Result<Vec<RunStep>, MemoryError> {
+    let mut statement = conn.prepare(
+        "SELECT position, tool, ok, reason, evidence FROM steps
+         WHERE run_id = ?1 ORDER BY position",
+    )?;
+    let rows = statement.query_map(params![run_id], |row| {
+        Ok(RunStep {
+            position: row.get(0)?,
+            tool: row.get(1)?,
+            ok: row.get::<_, i64>(2)? != 0,
+            reason: row.get(3)?,
+            evidence: row.get(4)?,
+        })
+    })?;
+    Ok(rows.filter_map(Result::ok).collect())
 }
 
 /// Миграции. `user_version` — единственный источник правды о том, что уже применено.
@@ -290,6 +332,10 @@ mod tests {
         assert_eq!(runs[0].outcome, "ok");
         assert_eq!(runs[0].subject, "files|создать|папку");
         assert!(runs[0].finished_ms.is_some(), "запуск закрыт временем");
+        assert_eq!(runs[0].steps.len(), 1, "шаг читается вместе с запуском");
+        assert_eq!(runs[0].steps[0].tool, "files|создать|папку");
+        assert!(runs[0].steps[0].ok);
+        assert_eq!(runs[0].steps[0].evidence, "path_exists");
 
         let _ = std::fs::remove_dir_all(&dir);
     }

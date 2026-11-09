@@ -27,6 +27,7 @@ export type {
   RegistrySnapshot,
   RegistryStats,
   RunRecord,
+  RunStep,
   Risk,
   StepResult,
   Tier,
