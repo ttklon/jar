@@ -430,7 +430,8 @@ mod tests {
         );
 
         let cancel = AtomicBool::new(false);
-        let restricted = run(&request, None, &cancel).expect("ограниченный запуск");
+        let restricted = run(&request, None, &cancel)
+            .unwrap_or_else(|error| panic!("ограниченный запуск провалился: {error}"));
         assert!(
             restricted.limits_note.contains("права сняты"),
             "{}",
@@ -472,7 +473,8 @@ mod tests {
 
         let started = std::time::Instant::now();
         let cancel = AtomicBool::new(false);
-        let output = run(&request, Some(limits), &cancel).expect("запуск");
+        let output = run(&request, Some(limits), &cancel)
+            .unwrap_or_else(|error| panic!("ограниченный запуск провалился: {error}"));
 
         assert!(output.limits_note.contains("под потолком"), "{}", output.limits_note);
         assert!(!output.timed_out, "остановить должен потолок");
