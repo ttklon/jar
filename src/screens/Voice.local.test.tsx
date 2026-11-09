@@ -16,6 +16,11 @@ vi.mock("../ipc", () => ({
   draftPlan: vi.fn().mockResolvedValue(null),
   runPlan: vi.fn(),
   speechStatus: vi.fn(),
+  isolationStatus: vi.fn().mockResolvedValue({
+    available: true,
+    summary: "не больше 256 МБ памяти, 5 с процессорного времени, 8 процессов",
+    note: "каждый пробный запуск идёт внутри job object",
+  }),
   transcribeLocal: vi.fn(),
 }));
 
