@@ -418,9 +418,9 @@ mod tests {
         // `DISABLE_MAX_PRIVILEGE` оставляет ровно одну привилегию — SeChangeNotifyPrivilege,
         // без которой не работает обход каталогов. Всё остальное обязано исчезнуть, а у
         // обычного процесса с этой машины оно есть, иначе проверка ничего не доказывает.
-        let script = r"@(whoami /priv | Select-String -Pattern 'Se\w+Privilege' -AllMatches \
-            | ForEach-Object { $_.Matches.Value } \
-            | Where-Object { $_ -ne 'SeChangeNotifyPrivilege' }).Count";
+        // Одна строка: в сырой строке обратный слэш и перевод строки — это символы, а не
+        // продолжение строки, и PowerShell такое не разберёт.
+        let script = r"@(whoami /priv | Select-String -Pattern 'Se\w+Privilege' -AllMatches | ForEach-Object { $_.Matches.Value } | Where-Object { $_ -ne 'SeChangeNotifyPrivilege' }).Count";
         let request = ExecRequest::new(
             "powershell.exe",
             vec![
@@ -442,8 +442,8 @@ mod tests {
         assert_eq!(
             restricted.stdout.trim(),
             "0",
-            "у ограниченного процесса не должно остаться привилегий: {:?}",
-            restricted.stdout
+            "у ограниченного процесса не должно остаться привилегий: stdout={:?} stderr={:?}",
+            restricted.stdout, restricted.stderr
         );
 
         let plain = crate::executor::run(&request, &cancel).expect("обычный запуск");
