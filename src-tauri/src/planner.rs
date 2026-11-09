@@ -204,8 +204,14 @@ mod tests {
 
         assert!(first.len() <= 3, "лимит соблюдается");
         assert_eq!(
-            first.iter().map(|item| item.key.clone()).collect::<Vec<_>>(),
-            second.iter().map(|item| item.key.clone()).collect::<Vec<_>>(),
+            first
+                .iter()
+                .map(|item| item.key.clone())
+                .collect::<Vec<_>>(),
+            second
+                .iter()
+                .map(|item| item.key.clone())
+                .collect::<Vec<_>>(),
             "один и тот же запрос обязан давать один и тот же порядок"
         );
     }
