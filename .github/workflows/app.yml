@@ -133,18 +133,34 @@ jobs:
           echo "::error::clippy завершился с ошибками (см. аннотации выше)"
           exit 1
 
+      # Как и у clippy: сначала прогон пишет лог, потом отдельный шаг превращает его
+      # в аннотации, и только третий валит сборку. Аннотации из шага, который сам
+      # завершился ошибкой, до API не доходят.
       - name: Tests (реестр встроен в бинарник)
+        id: tests
         if: steps.clippy.outputs.status == '0'
         shell: bash
         run: |
           set +e
           cargo test --manifest-path src-tauri/Cargo.toml > tests.log 2>&1
-          status=$?
-          if [ "$status" -ne 0 ]; then
-            python scripts/ci_log_annotate.py tests.log --title "cargo test" \
-              --grep "FAILED|panicked|---- |assertion|left|right" --max 8
-          fi
-          exit "$status"
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Tests report
+        if: always() && steps.tests.outputs.status != '0'
+        shell: bash
+        continue-on-error: true
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          python scripts/ci_log_annotate.py tests.log --title "cargo test" \
+            --grep "FAILED|panicked|---- |assertion|left|right" --max 8
+
+      - name: Tests gate
+        if: steps.tests.outputs.status != '0'
+        shell: bash
+        run: |
+          echo "::error::cargo test упал — подробности в аннотациях выше"
+          exit 1
 
       # У разработчика может не быть Rust-тулчейна (песочница, новая машина), а
       # форматирование детерминировано. Поэтому ветку чинит сам CI отдельным

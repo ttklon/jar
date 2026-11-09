@@ -44,9 +44,11 @@ export function ProfileCard({ profile }: { profile: ProfileView }) {
       <div className={styles.head}>
         <div>
           <div className={styles.title}>{profile.app}</div>
-          <Text className={styles.mono} block>
-            {profile.exe.join(", ")}
-          </Text>
+          {profile.exe.length > 0 ? (
+            <Text className={styles.mono} block>
+              {profile.exe.join(", ")}
+            </Text>
+          ) : null}
           <Text className={styles.meta} block>
             {apps.kind[profile.kind] ?? profile.kind} · {apps.stack}: {profile.ui_stack} ·{" "}
             {apps.anchors(profile.anchors)} · {apps.verified(profile.verified_at)}

@@ -103,7 +103,15 @@ mod tests {
             );
             assert!(seen.insert(&profile.slug), "слаг «{}» повторяется", profile.slug);
             assert!(!profile.app.trim().is_empty(), "у {} нет названия", profile.slug);
-            assert!(!profile.exe.is_empty(), "у {} не указан исполняемый файл", profile.slug);
+            // У веб-сервисов (умный дом, панели) исполняемого файла нет — это не ошибка,
+            // но у обычных программ он обязан быть: иначе непонятно, что открывать.
+            if profile.kind == "app" {
+                assert!(
+                    !profile.exe.is_empty(),
+                    "у {} не указан исполняемый файл",
+                    profile.slug
+                );
+            }
             assert!(
                 !profile.operations.is_empty(),
                 "у {} нет ни одной операции",
