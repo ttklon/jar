@@ -145,14 +145,22 @@ pub fn run() {
         .run(|app, event| {
             // Движок — дочерний процесс: закрыть окно и оставить его работать нельзя,
             // иначе следующий запуск найдёт занятый порт и «чужой» сервер.
-            if !matches!(event, tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit) {
+            if !matches!(
+                event,
+                tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit
+            ) {
                 return;
             }
 
             let Some(state) = app.try_state::<AppState>() else {
                 return;
             };
-            let taken = state.inner.engine.lock().ok().and_then(|mut guard| guard.take());
+            let taken = state
+                .inner
+                .engine
+                .lock()
+                .ok()
+                .and_then(|mut guard| guard.take());
             let Some(mut server) = taken else { return };
 
             match server.stop() {

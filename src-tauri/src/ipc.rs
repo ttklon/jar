@@ -13,15 +13,15 @@ use tauri::State;
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::download::{self, Downloaded};
-use crate::llama;
-use crate::server::{self, Server};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
+use crate::llama;
 use crate::memory::{Memory, RunRecord};
 use crate::models::{self, ModelFile};
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::registry::{Action, Registry, RegistrySnapshot};
+use crate::server::{self, Server};
 use crate::step::StepResult;
 use crate::tools::{self, ParamSpec, ToolSpec};
 
@@ -499,8 +499,17 @@ pub fn engine_status(state: State<'_, AppState>) -> EngineStatus {
 /// (скачайте) и «не ответил за 60 с» (смотрите лог). Смешивать их в одно «не удалось»
 /// значит отнять у человека единственную подсказку.
 #[tauri::command]
-pub async fn start_engine(state: State<'_, AppState>, name: String) -> Result<EngineStatus, String> {
-    if state.inner.engine.lock().map(|guard| guard.is_some()).unwrap_or(false) {
+pub async fn start_engine(
+    state: State<'_, AppState>,
+    name: String,
+) -> Result<EngineStatus, String> {
+    if state
+        .inner
+        .engine
+        .lock()
+        .map(|guard| guard.is_some())
+        .unwrap_or(false)
+    {
         return Err("движок уже запущен — сначала остановите его".to_string());
     }
 
@@ -518,9 +527,7 @@ pub async fn start_engine(state: State<'_, AppState>, name: String) -> Result<En
     })?;
 
     let port = server::free_port()?;
-    let log = inner
-        .base_dir
-        .join(format!("llama-server-{port}.log"));
+    let log = inner.base_dir.join(format!("llama-server-{port}.log"));
     let spec = llama::spec(&program, &model, port);
     let run = inner.memory.start_run("server", &name).ok();
 

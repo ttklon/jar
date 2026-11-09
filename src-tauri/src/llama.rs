@@ -55,7 +55,12 @@ pub fn args(model: &Path, port: u16) -> Vec<String> {
 
 /// Готовая спецификация для `server::Server::start`.
 pub fn spec(program: &Path, model: &Path, port: u16) -> ServerSpec {
-    ServerSpec::new(&program.display().to_string(), args(model, port), port, "/health")
+    ServerSpec::new(
+        &program.display().to_string(),
+        args(model, port),
+        port,
+        "/health",
+    )
 }
 
 #[cfg(test)]
@@ -74,7 +79,10 @@ mod tests {
         let args = args(Path::new("C:/models/m.gguf"), 51234);
         let joined = args.join(" ");
 
-        assert!(joined.contains("--host 127.0.0.1"), "наружу не смотрит: {joined}");
+        assert!(
+            joined.contains("--host 127.0.0.1"),
+            "наружу не смотрит: {joined}"
+        );
         assert!(joined.contains("--port 51234"));
         assert!(joined.contains("--no-webui"));
         assert!(joined.contains("--parallel 1"));
