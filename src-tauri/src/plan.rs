@@ -84,9 +84,7 @@ pub fn parse(json: &str) -> Result<Plan, String> {
     }
 
     serde_json::from_str(json).map_err(|error| {
-        format!(
-            "план не разбирается как JSON: {error} (нужны поля goal и steps[].registry)"
-        )
+        format!("план не разбирается как JSON: {error} (нужны поля goal и steps[].registry)")
     })
 }
 
@@ -216,7 +214,11 @@ mod tests {
         };
 
         assert_eq!(plan.steps.len(), 2);
-        assert_eq!(check(&plan, &registry()), Vec::new(), "план должен быть чистым");
+        assert_eq!(
+            check(&plan, &registry()),
+            Vec::new(),
+            "план должен быть чистым"
+        );
     }
 
     #[test]
@@ -229,7 +231,10 @@ mod tests {
 
         let problems = check(&plan, &registry());
         assert_eq!(problems.len(), 1);
-        assert!(problems[0].problem.contains("нет инструмента"), "{problems:?}");
+        assert!(
+            problems[0].problem.contains("нет инструмента"),
+            "{problems:?}"
+        );
     }
 
     #[test]
@@ -241,7 +246,10 @@ mod tests {
         };
 
         let problems = check(&plan, &registry());
-        assert!(problems[0].problem.contains("строки реестра нет"), "{problems:?}");
+        assert!(
+            problems[0].problem.contains("строки реестра нет"),
+            "{problems:?}"
+        );
     }
 
     #[test]
@@ -278,7 +286,9 @@ mod tests {
         };
         let problems = check(&long, &registry());
         assert!(
-            problems.iter().any(|problem| problem.problem.contains("сценарий")),
+            problems
+                .iter()
+                .any(|problem| problem.problem.contains("сценарий")),
             "длинный план называется сценарием: {problems:?}"
         );
     }
@@ -292,7 +302,9 @@ mod tests {
         };
         let problems = check(&plan, &registry());
         assert_eq!(problems.len(), 2, "нет цели и нет шагов: {problems:?}");
-        assert!(problems.iter().any(|problem| problem.problem.contains("нет цели")));
+        assert!(problems
+            .iter()
+            .any(|problem| problem.problem.contains("нет цели")));
     }
 
     #[test]
