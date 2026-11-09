@@ -60,6 +60,9 @@ pub struct ToolView {
     pub decision: String,
     pub decision_reason: String,
     pub needs_token: bool,
+    /// Параметры прошлого удачного запуска: интерфейс подставляет их, а не заставляет
+    /// каждый раз вводить один и тот же путь.
+    pub last_params: Option<BTreeMap<String, String>>,
 }
 
 /// Операция профиля: ссылка на реестр, риск и решение политики.
@@ -104,9 +107,6 @@ pub struct FlowStepView {
     pub decision: String,
     pub decision_reason: String,
     pub needs_token: bool,
-    /// Параметры прошлого удачного запуска: интерфейс подставляет их, а не заставляет
-    /// каждый раз вводить один и тот же путь.
-    pub last_params: Option<BTreeMap<String, String>>,
 }
 
 /// Сценарий для экрана «Сценарии»: шаги, входы и риск самого опасного шага.
@@ -508,6 +508,9 @@ pub async fn run_tool(
 
     let worker = Arc::clone(&inner);
     let key = registry.clone();
+    // Копия нужна, потому что `params` уезжает в фоновый поток: память должна хранить
+    // именно те значения, с которыми инструмент действительно работал.
+    let remembered = params.clone();
     let outcome =
         tauri::async_runtime::spawn_blocking(move || tools::run(&key, &params, &worker.cancel))
             .await
@@ -533,8 +536,8 @@ pub async fn run_tool(
     }
 
     // Запоминаем параметры только у удачного запуска: неудачный ввод подставлять нельзя.
-    if outcome.ok && !params.is_empty() {
-        let _ = inner.memory.remember_params(&registry, &params);
+    if outcome.ok && !remembered.is_empty() {
+        let _ = inner.memory.remember_params(&registry, &remembered);
     }
 
     let summary = if outcome.ok { "ok" } else { "failed" };
