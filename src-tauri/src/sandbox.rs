@@ -525,8 +525,12 @@ mod tests {
     #[test]
     fn a_trial_run_happens_under_the_ceiling() {
         let dir = std::env::temp_dir().join("zshelper-sandbox-trial");
-        let trial = trial("Write-Output 'ok'", &dir, std::time::Duration::from_secs(20))
-            .expect("пробный запуск");
+        let trial = trial(
+            "Write-Output 'ok'",
+            &dir,
+            std::time::Duration::from_secs(20),
+        )
+        .expect("пробный запуск");
         assert_eq!(trial.exit_code, Some(0), "{trial:?}");
         assert!(
             trial.limits_note.contains("под потолком"),

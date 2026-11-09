@@ -293,7 +293,11 @@ mod tests {
             !output.timed_out,
             "остановить должен потолок процессорного времени, а не наш таймаут"
         );
-        assert_ne!(output.exit_code, Some(0), "убитый процесс не может быть успешным");
+        assert_ne!(
+            output.exit_code,
+            Some(0),
+            "убитый процесс не может быть успешным"
+        );
         assert!(
             started.elapsed().as_secs() < 20,
             "потолок не сработал: {:?}",
