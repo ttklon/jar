@@ -3,12 +3,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import { listen } from "./voice";
 import type { Voice, VoiceListeners } from "./voice";
+import { startRecording } from "./recorder";
 import { useVoice } from "./useVoice";
 
 /**
  * «Держу и говорю»: пока держишь — слушаем, отпустил — разбираем. Если разобрать не
  * удалось, человек это слышит, а не остаётся в тишине.
  */
+
+vi.mock("./recorder", async () => {
+  const actual = await vi.importActual<typeof import("./recorder")>("./recorder");
+  return {
+    ...actual,
+    microphoneAvailable: () => true,
+    startRecording: vi.fn(),
+  };
+});
 
 vi.mock("./voice", async () => {
   const actual = await vi.importActual<typeof import("./voice")>("./voice");
@@ -36,6 +46,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.mocked(listen).mockReset();
+  vi.mocked(startRecording).mockReset();
   vi.useRealTimers();
 });
 
@@ -126,5 +137,87 @@ describe("удержание микрофона", () => {
     expect(stopSpy).toHaveBeenCalled();
 
     input.remove();
+  });
+});
+
+describe("свой движок распознавания", () => {
+  const WAV = new Uint8Array([0x52, 0x49, 0x46, 0x46, 1, 2, 3]);
+
+  it("пишет звук и отдаёт его движку, а не системе", async () => {
+    const stopRecorder = vi.fn().mockResolvedValue({ wav: WAV, seconds: 1.2, sampleRate: 16_000 });
+    vi.mocked(startRecording).mockResolvedValue({ stop: stopRecorder });
+
+    const transcribe = vi.fn().mockResolvedValue("  открой почту ");
+    const onText = vi.fn();
+
+    const { result } = renderHook(() =>
+      useVoice({ onText, onError: vi.fn(), local: { transcribe } }),
+    );
+
+    act(() => result.current.start());
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => result.current.stop());
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    // Системное распознавание не трогали: звук ушёл своему движку.
+    expect(vi.mocked(listen)).not.toHaveBeenCalled();
+    expect(transcribe).toHaveBeenCalledWith(WAV);
+    expect(onText).toHaveBeenCalledWith("открой почту");
+    expect(result.current.listening).toBe(false);
+  });
+
+  it("тишина — это «ничего не сказано», и движок не тревожится", async () => {
+    const stopRecorder = vi.fn().mockResolvedValue({ wav: WAV, seconds: 0, sampleRate: 16_000 });
+    vi.mocked(startRecording).mockResolvedValue({ stop: stopRecorder });
+
+    const transcribe = vi.fn();
+    const onError = vi.fn();
+
+    const { result } = renderHook(() =>
+      useVoice({ onText: vi.fn(), onError, local: { transcribe }, nothingHeard: "тишина" }),
+    );
+
+    act(() => result.current.start());
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => result.current.stop());
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(transcribe).not.toHaveBeenCalled();
+    expect(onError).toHaveBeenCalledWith("тишина");
+  });
+
+  it("движок не ответил — об этом сказано его словами", async () => {
+    const stopRecorder = vi.fn().mockResolvedValue({ wav: WAV, seconds: 1, sampleRate: 16_000 });
+    vi.mocked(startRecording).mockResolvedValue({ stop: stopRecorder });
+
+    const transcribe = vi.fn().mockRejectedValue(new Error("движок не отвечает на 127.0.0.1:8081"));
+    const onError = vi.fn();
+
+    const { result } = renderHook(() =>
+      useVoice({ onText: vi.fn(), onError, local: { transcribe } }),
+    );
+
+    act(() => result.current.start());
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() => result.current.stop());
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(onError).toHaveBeenCalledWith("движок не отвечает на 127.0.0.1:8081");
   });
 });

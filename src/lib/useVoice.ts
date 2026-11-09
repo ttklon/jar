@@ -13,6 +13,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { microphoneAvailable, startRecording, type Recorder } from "./recorder";
 import { listen, speechSupported, stopSpeaking, type Voice } from "./voice";
 
 /** Сколько ждём разбор после того, как человек отпустил кнопку. */
@@ -29,6 +30,11 @@ export interface VoiceOptions {
   grace?: number;
   /** Что сказать, если после отпускания ничего не разобралось. */
   nothingHeard?: string;
+  /**
+   * Свой движок распознавания. Есть — записываем звук и отдаём ему, звук остаётся на
+   * компьютере. Нет — слушаем тем, что даёт система.
+   */
+  local?: { transcribe(wav: Uint8Array): Promise<string> } | null;
 }
 
 export interface VoiceControl {
@@ -58,17 +64,19 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     hotkey = true,
     grace = GRACE_MS,
     nothingHeard = "не разобрал — попробуйте ещё раз",
+    local = null,
   } = options;
   const [listening, setListening] = useState(false);
 
   const voiceRef = useRef<Voice | null>(null);
+  const recorderRef = useRef<Recorder | null>(null);
   const graceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heardRef = useRef(false);
   const activeRef = useRef(false);
 
   // Колбэки живут в ссылке: иначе каждое изменение пропсов пересоздавало бы слушание.
-  const callbacks = useRef({ onText, onError, nothingHeard });
-  callbacks.current = { onText, onError, nothingHeard };
+  const callbacks = useRef({ onText, onError, nothingHeard, local });
+  callbacks.current = { onText, onError, nothingHeard, local };
 
   const clearGrace = useCallback(() => {
     if (graceRef.current !== null) {
@@ -92,6 +100,28 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     activeRef.current = true;
     setListening(true);
 
+    const engine = callbacks.current.local;
+    if (engine) {
+      // Свой движок: пишем звук, распознаём после отпускания. Разрешение на микрофон
+      // спрашивается здесь же, и отказ должен быть слышен, а не проглочен.
+      startRecording()
+        .then((recorder) => {
+          if (!activeRef.current) {
+            // Отпустили раньше, чем открылся микрофон: не держим его включённым.
+            recorder.stop().catch(() => {});
+            return;
+          }
+          recorderRef.current = recorder;
+        })
+        .catch((error: unknown) => {
+          finish();
+          callbacks.current.onError(
+            error instanceof Error ? error.message : String(error),
+          );
+        });
+      return;
+    }
+
     voiceRef.current = listen({
       onText: (text) => {
         // Одна фраза — одно нажатие: услышали, дальше слушать нечего.
@@ -112,6 +142,41 @@ export function useVoice(options: VoiceOptions): VoiceControl {
 
   const stop = useCallback(() => {
     if (!activeRef.current) return;
+
+    const engine = callbacks.current.local;
+    if (engine) {
+      const recorder = recorderRef.current;
+      recorderRef.current = null;
+      finish();
+
+      if (!recorder) {
+        // Микрофон ещё не открылся — сказать нечего, но и молчать не надо.
+        callbacks.current.onError("микрофон не успел открыться — попробуйте ещё раз");
+        return;
+      }
+
+      recorder
+        .stop()
+        .then((recording) => {
+          if (recording.seconds === 0) {
+            callbacks.current.onError(callbacks.current.nothingHeard);
+            return null;
+          }
+          return engine.transcribe(recording.wav);
+        })
+        .then((text) => {
+          if (text === null) return;
+          if (text.trim().length === 0) {
+            callbacks.current.onError(callbacks.current.nothingHeard);
+            return;
+          }
+          callbacks.current.onText(text.trim());
+        })
+        .catch((error: unknown) =>
+          callbacks.current.onError(error instanceof Error ? error.message : String(error)),
+        );
+      return;
+    }
 
     voiceRef.current?.stop();
 
@@ -160,9 +225,13 @@ export function useVoice(options: VoiceOptions): VoiceControl {
       clearGrace();
       activeRef.current = false;
       voiceRef.current?.stop();
+      recorderRef.current?.stop().catch(() => {});
     },
     [clearGrace],
   );
 
-  return { listening, supported: speechSupported(), start, stop };
+  // В локальном режиме нужен микрофон, а не системное распознавание: это разные вещи.
+  const supported = local ? microphoneAvailable() : speechSupported();
+
+  return { listening, supported, start, stop };
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, Input, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { MicRegular } from "@fluentui/react-icons";
-import { planFor, speechStatus } from "../ipc";
+import { planFor, speechStatus, transcribeLocal } from "../ipc";
 import type { PlanItem, SpeechStatus } from "../ipc";
 import { speak } from "../lib/voice";
 import { useVoice } from "../lib/useVoice";
@@ -105,7 +105,15 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       .finally(() => setBusy(false));
   }, []);
 
+  // Свой движок есть — пишем звук и отдаём ему: это единственный путь, где звук не
+  // покидает компьютер. Нет — слушаем тем, что даёт система, и говорим об этом выше.
+  const localEngine =
+    speech && speech.found && speech.model
+      ? { transcribe: (wav: Uint8Array) => transcribeLocal(Array.from(wav)) }
+      : null;
+
   const mic = useVoice({
+    local: localEngine,
     onText: (heard) => {
       setVoiceError(null);
       setText(heard);
