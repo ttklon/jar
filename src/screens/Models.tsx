@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
-import { isTauri, listModels } from "../ipc";
-import type { ModelsView } from "../ipc";
+import { isTauri, listModels, verifyModel } from "../ipc";
+import type { HashCheck, ModelsView } from "../ipc";
 import { models as text } from "../i18n/ru";
 
 const useStyles = makeStyles({
@@ -49,7 +49,15 @@ const useStyles = makeStyles({
   mono: { fontFamily: tokens.fontFamilyMonospace },
   ok: { color: tokens.colorPaletteGreenForeground2 },
   broken: { color: tokens.colorPaletteRedForeground2 },
+  changed: { color: tokens.colorPaletteDarkOrangeForeground2 },
+  action: { marginTop: "4px" },
 });
+
+/** Вердикт сверки человеческим языком. Неизвестный вердикт не выдумываем. */
+function verdictText(verdict: string): string {
+  const known = text.verdict as Record<string, string>;
+  return known[verdict] ?? verdict;
+}
 
 /** Размер в гигабайтах: модели измеряются ими, а не байтами. */
 function size(bytes: number): string {
@@ -63,6 +71,22 @@ export function Models() {
   const styles = useStyles();
   const [view, setView] = useState<ModelsView | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Результат сверки — по имени файла: у каждой строки свой ответ.
+  const [checks, setChecks] = useState<Record<string, HashCheck | { error: string }>>({});
+  const [busy, setBusy] = useState<Record<string, boolean>>({});
+
+  const verify = useCallback((name: string) => {
+    setBusy((current) => ({ ...current, [name]: true }));
+    verifyModel(name)
+      .then((check) => setChecks((current) => ({ ...current, [name]: check })))
+      .catch((reason: unknown) =>
+        setChecks((current) => ({
+          ...current,
+          [name]: { error: reason instanceof Error ? reason.message : String(reason) },
+        })),
+      )
+      .finally(() => setBusy((current) => ({ ...current, [name]: false })));
+  }, []);
 
   const load = useCallback(() => {
     setError(null);
@@ -123,33 +147,72 @@ export function Models() {
                   <th className={styles.head}>{text.columns.quant}</th>
                   <th className={styles.head}>{text.columns.version}</th>
                   <th className={styles.head}>{text.columns.tensors}</th>
+                  <th className={styles.head}>{text.columns.hash}</th>
                   <th className={styles.head}>{text.columns.state}</th>
                 </tr>
               </thead>
               <tbody>
-                {view.items.map((file) => (
-                  <tr key={file.name}>
-                    <td className={`${styles.cell} ${styles.name}`}>{file.name}</td>
-                    <td className={`${styles.cell} ${styles.mono}`}>{size(file.size_bytes)}</td>
-                    <td className={`${styles.cell} ${styles.mono}`}>{file.architecture ?? "—"}</td>
-                    <td className={`${styles.cell} ${styles.mono}`}>{file.quant ?? "—"}</td>
-                    <td className={`${styles.cell} ${styles.mono}`}>{file.version ?? "—"}</td>
-                    <td className={`${styles.cell} ${styles.mono}`}>{file.tensors ?? "—"}</td>
-                    <td className={styles.cell}>
-                      {file.ok ? (
-                        <span className={styles.ok}>{text.ok}</span>
-                      ) : (
-                        <span className={styles.broken}>
-                          {text.broken}: {file.note}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {view.items.map((file) => {
+                  const check = checks[file.name];
+                  const hash = check && "actual" in check ? check.actual : file.hash;
+                  return (
+                    <tr key={file.name}>
+                      <td className={`${styles.cell} ${styles.name}`}>{file.name}</td>
+                      <td className={`${styles.cell} ${styles.mono}`}>{size(file.size_bytes)}</td>
+                      <td className={`${styles.cell} ${styles.mono}`}>
+                        {file.architecture ?? "—"}
+                      </td>
+                      <td className={`${styles.cell} ${styles.mono}`}>{file.quant ?? "—"}</td>
+                      <td className={`${styles.cell} ${styles.mono}`}>{file.version ?? "—"}</td>
+                      <td className={`${styles.cell} ${styles.mono}`}>{file.tensors ?? "—"}</td>
+                      <td className={`${styles.cell} ${styles.mono}`} title={hash ?? undefined}>
+                        {hash ? hash.slice(0, 12) : text.neverHashed}
+                      </td>
+                      <td className={styles.cell}>
+                        {file.ok ? (
+                          <span className={styles.ok}>{text.ok}</span>
+                        ) : (
+                          <span className={styles.broken}>
+                            {text.broken}: {file.note}
+                          </span>
+                        )}
+                        {file.ok ? (
+                          <div className={styles.action}>
+                            <Button
+                              size="small"
+                              disabled={busy[file.name] === true}
+                              onClick={() => verify(file.name)}
+                            >
+                              {busy[file.name] ? text.verifying : text.verify}
+                            </Button>
+                          </div>
+                        ) : null}
+                        {check ? (
+                          <div className={styles.action}>
+                            {"error" in check ? (
+                              <span className={styles.broken}>
+                                {text.hashError}: {check.error}
+                              </span>
+                            ) : (
+                              <span
+                                className={
+                                  check.verdict === "changed" ? styles.changed : styles.ok
+                                }
+                              >
+                                {verdictText(check.verdict)}
+                              </span>
+                            )}
+                          </div>
+                        ) : null}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
 
+          <Text className={styles.note}>{text.hashNote}</Text>
           <Text className={styles.note}>{text.envHint}</Text>
         </>
       )}

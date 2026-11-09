@@ -7,6 +7,7 @@ import {
   listTools,
   listModels,
   memoryRuns,
+  verifyModel,
   planFor,
   registrySnapshot,
 } from "./dev";
@@ -188,5 +189,9 @@ describe("модели в браузере", () => {
     expect(view.items).toEqual([]);
     expect(view.dir).toBe("");
     expect(view.error).toBeNull();
+  });
+
+  it("хеш не выдумывается: сверку делает только приложение", async () => {
+    await expect(verifyModel("qwen3-1.7b.gguf")).rejects.toThrow(/приложение/);
   });
 });

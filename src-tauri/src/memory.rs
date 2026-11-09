@@ -109,14 +109,20 @@ impl Memory {
         Ok(())
     }
 
-    /// Запоминает параметры удачного запуска — их подставит интерфейс в следующий раз.
-    pub fn remember_params(
-        &self,
-        tool: &str,
-        values: &BTreeMap<String, String>,
-    ) -> Result<(), MemoryError> {
-        let key = format!("params:{tool}");
-        let value = serde_json::to_string(values).unwrap_or_else(|_| "{}".to_string());
+    /// Значение факта по ключу. Факты — это «что я об этом знаю»: прошлые параметры,
+    /// известный хеш файла модели. Нет значения — нет и догадок.
+    pub fn fact(&self, key: &str) -> Option<String> {
+        let conn = self.lock();
+        conn.query_row(
+            "SELECT value FROM facts WHERE key = ?1",
+            params![key],
+            |row| row.get(0),
+        )
+        .ok()
+    }
+
+    /// Пишет факт. Повторная запись обновляет значение и время, а не заводит вторую строку.
+    pub fn remember(&self, key: &str, value: &str) -> Result<(), MemoryError> {
         let conn = self.lock();
         conn.execute(
             "INSERT INTO facts (key, value, updated_ms) VALUES (?1, ?2, ?3)
@@ -126,17 +132,19 @@ impl Memory {
         Ok(())
     }
 
+    /// Запоминает параметры удачного запуска — их подставит интерфейс в следующий раз.
+    pub fn remember_params(
+        &self,
+        tool: &str,
+        values: &BTreeMap<String, String>,
+    ) -> Result<(), MemoryError> {
+        let value = serde_json::to_string(values).unwrap_or_else(|_| "{}".to_string());
+        self.remember(&format!("params:{tool}"), &value)
+    }
+
     /// Прошлые удачные параметры инструмента. Битый JSON — это «нет данных», а не паника.
     pub fn last_params(&self, tool: &str) -> Option<BTreeMap<String, String>> {
-        let key = format!("params:{tool}");
-        let conn = self.lock();
-        let value: String = conn
-            .query_row(
-                "SELECT value FROM facts WHERE key = ?1",
-                params![key],
-                |row| row.get(0),
-            )
-            .ok()?;
+        let value = self.fact(&format!("params:{tool}"))?;
         serde_json::from_str(&value).ok()
     }
 

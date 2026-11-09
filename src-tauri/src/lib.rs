@@ -107,6 +107,7 @@ pub fn run() {
             ipc::memory_runs,
             ipc::plan_for,
             ipc::list_models,
+            ipc::verify_model,
             ipc::list_profiles,
             ipc::policy_for,
             ipc::confirm_tool,

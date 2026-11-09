@@ -16,6 +16,7 @@ export type {
   FlowInput,
   FlowStepView,
   FlowView,
+  HashCheck,
   ModelFile,
   ModelsView,
   ParamSpec,
@@ -36,6 +37,7 @@ import type {
   AuditEvent,
   ConfirmToken,
   FlowView,
+  HashCheck,
   ModelsView,
   PlanItem,
   ProfileView,
@@ -184,4 +186,14 @@ export async function listModels(): Promise<ModelsView> {
   }
   const { listModels: fromData } = await import("./dev");
   return fromData();
+}
+
+/** Сверка хеша файла модели: та же папка, тот же вопрос, ответ из памяти. */
+export async function verifyModel(name: string): Promise<HashCheck> {
+  if (isTauri()) {
+    const { verifyModel: fromCore } = await import("./tauri");
+    return fromCore(name);
+  }
+  const { verifyModel: fromData } = await import("./dev");
+  return fromData(name);
 }

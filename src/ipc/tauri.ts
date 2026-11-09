@@ -8,6 +8,7 @@ import type {
   AuditEvent,
   ConfirmToken,
   FlowView,
+  HashCheck,
   ModelsView,
   PlanItem,
   ProfileView,
@@ -43,6 +44,10 @@ export function planFor(query: string, limit = 8): Promise<PlanItem[]> {
 
 export function listModels(): Promise<ModelsView> {
   return invoke<ModelsView>("list_models");
+}
+
+export function verifyModel(name: string): Promise<HashCheck> {
+  return invoke<HashCheck>("verify_model", { name });
 }
 
 export function listTools(): Promise<ToolView[]> {

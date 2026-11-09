@@ -120,6 +120,16 @@ export interface ModelFile {
   tensors: number | null;
   architecture: string | null;
   quant: string | null;
+  /** Известный хеш файла из памяти; `null` — файл ещё не сверяли. */
+  hash: string | null;
+}
+
+/** Результат сверки хеша. `verdict`: `first` | `same` | `changed`. */
+export interface HashCheck {
+  name: string;
+  actual: string;
+  previous: string | null;
+  verdict: string;
 }
 
 export interface ModelsView {

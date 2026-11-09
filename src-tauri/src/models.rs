@@ -16,6 +16,9 @@ use std::io::Read;
 use std::path::{Path, PathBuf};
 
 use serde::Serialize;
+use sha2::{Digest, Sha256};
+
+use crate::memory::Memory;
 
 /// Сколько байт файла читаем для разбора. Метаданные GGUF обычно десятки килобайт;
 /// держать в памяти начало в мегабайт достаточно и для больших словарей.
@@ -38,6 +41,83 @@ pub struct ModelFile {
     pub architecture: Option<String>,
     /// Квантование из `general.file_type`, например `Q4_K_M`.
     pub quant: Option<String>,
+    /// Известный хеш файла из памяти (заполняет IPC, а не `scan`: чтение папки не
+    /// должно ничего знать про память).
+    pub hash: Option<String>,
+}
+
+/// Ключ факта с известным хешем файла. Имя файла, а не полный путь: папку моделей
+/// пользователь может перенести, и тогда «файл другой» было бы ложью.
+pub fn hash_key(name: &str) -> String {
+    format!("model.sha256:{name}")
+}
+
+/// Считает sha256 потоком по 64 КиБ: модель на много гигабайт не должна целиком
+/// попадать в память, иначе проверка станет причиной её отсутствия.
+pub fn sha256_file(path: &Path) -> Result<String, String> {
+    let mut file = File::open(path).map_err(|error| format!("файл не открывается: {error}"))?;
+    let mut hasher = Sha256::new();
+    let mut buffer = vec![0u8; 64 * 1024];
+
+    loop {
+        let read = file
+            .read(&mut buffer)
+            .map_err(|error| format!("файл не читается: {error}"))?;
+        if read == 0 {
+            break;
+        }
+        hasher.update(&buffer[..read]);
+    }
+
+    Ok(format!("{:x}", hasher.finalize()))
+}
+
+/// Что показала сверка хеша.
+#[derive(Debug, Serialize)]
+pub struct HashCheck {
+    pub name: String,
+    pub actual: String,
+    /// Хеш, который был известен до этой сверки (если был).
+    pub previous: Option<String>,
+    /// `first` — хеш записан впервые, `same` — совпал, `changed` — файл другой.
+    pub verdict: &'static str,
+}
+
+/// Сверяет файл с известным хешем и запоминает новый.
+///
+/// Это не «защита от подмены»: манифеста с эталонными хешами пока нет. Это проверка
+/// «файл тот же, что и в прошлый раз» — она ловит битую докачку и подмену файла, но
+/// не подменяет собой проверку по манифесту, которая появится вместе со скачиванием.
+pub fn verify(dir: &Path, name: &str, memory: &Memory) -> Result<HashCheck, String> {
+    if name.is_empty() || name.contains(['/', '\\']) || name.contains("..") {
+        return Err("имя файла не может быть путём".to_string());
+    }
+
+    let path = dir.join(name);
+    if !path.is_file() {
+        return Err(format!("файла нет: {name}"));
+    }
+
+    let actual = sha256_file(&path)?;
+    let previous = memory.fact(&hash_key(name));
+    let verdict = match previous.as_deref() {
+        None => "first",
+        Some(known) if known == actual => "same",
+        Some(_) => "changed",
+    };
+
+    // Записываем всегда: память обязана отражать то, что лежит на диске сейчас.
+    // «Было иначе» видно по `verdict` и `previous` — это ответ на сверку, а не история.
+    memory
+        .remember(&hash_key(name), &actual)
+        .map_err(|error| format!("хеш не записался: {error}"))?;
+
+    Ok(HashCheck {
+        name: name.to_string(),
+        actual,
+        previous,
+        verdict,
+    })
 }
 
 /// Разобранный заголовок: только то, что показывается человеку.
@@ -104,6 +184,7 @@ fn inspect(path: &Path) -> ModelFile {
         tensors: None,
         architecture: None,
         quant: None,
+        hash: None,
     };
 
     match read_prefix(path) {
@@ -376,6 +457,73 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
         let error = scan(&dir).expect_err("папки нет");
         assert!(error.contains("папки моделей нет"), "{error}");
+    }
+
+    #[test]
+    fn sha256_matches_the_published_values() {
+        let dir = temp_dir("sha");
+        let empty = dir.join("empty.gguf");
+        let abc = dir.join("abc.gguf");
+        std::fs::write(&empty, b"").expect("файл пишется");
+        std::fs::write(&abc, b"abc").expect("файл пишется");
+
+        assert_eq!(
+            sha256_file(&empty).expect("хеш считается"),
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        );
+        assert_eq!(
+            sha256_file(&abc).expect("хеш считается"),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn verify_records_the_hash_then_notices_a_change() {
+        let dir = temp_dir("verify");
+        let memory = Memory::open(dir.join("memory.db")).expect("память открывается");
+        std::fs::write(dir.join("model.gguf"), b"first").expect("файл пишется");
+
+        let first = verify(&dir, "model.gguf", &memory).expect("сверка работает");
+        assert_eq!(first.verdict, "first");
+        assert!(first.previous.is_none());
+
+        let second = verify(&dir, "model.gguf", &memory).expect("сверка работает");
+        assert_eq!(second.verdict, "same");
+        assert_eq!(second.previous.as_deref(), Some(first.actual.as_str()));
+
+        std::fs::write(dir.join("model.gguf"), b"second").expect("файл перезаписывается");
+        let third = verify(&dir, "model.gguf", &memory).expect("сверка работает");
+        assert_eq!(third.verdict, "changed", "файл подменили — это видно");
+        assert_eq!(third.previous.as_deref(), Some(first.actual.as_str()));
+        assert_ne!(third.actual, first.actual);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn verify_refuses_paths_instead_of_names() {
+        let dir = temp_dir("traversal");
+        let memory = Memory::open(dir.join("memory.db")).expect("память открывается");
+
+        for name in ["../secret", "sub/model.gguf", "..\\model.gguf", ""] {
+            let error = verify(&dir, name, &memory).expect_err("это не имя файла");
+            assert!(error.contains("путём") || error.contains("файла нет"), "{error}");
+        }
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn verify_says_when_there_is_no_file() {
+        let dir = temp_dir("nofile");
+        let memory = Memory::open(dir.join("memory.db")).expect("память открывается");
+
+        let error = verify(&dir, "absent.gguf", &memory).expect_err("файла нет");
+        assert!(error.contains("файла нет"), "{error}");
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]

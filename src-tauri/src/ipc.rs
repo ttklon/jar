@@ -355,17 +355,40 @@ pub struct ModelsView {
 pub fn list_models(state: State<'_, AppState>) -> ModelsView {
     let dir = &state.inner.models_dir;
     match models::scan(dir) {
-        Ok(items) => ModelsView {
-            dir: dir.display().to_string(),
-            items,
-            error: None,
-        },
+        Ok(mut items) => {
+            // Известный хеш берётся из памяти: чтение папки про память ничего не знает.
+            for item in &mut items {
+                item.hash = state.inner.memory.fact(&models::hash_key(&item.name));
+            }
+            ModelsView {
+                dir: dir.display().to_string(),
+                items,
+                error: None,
+            }
+        }
         Err(error) => ModelsView {
             dir: dir.display().to_string(),
             items: Vec::new(),
             error: Some(error),
         },
     }
+}
+
+/// Сверяет хеш файла модели с тем, что помнит приложение.
+///
+/// Чтение гигабайтного файла идёт в отдельном потоке: интерфейс не должен
+/// замирать на несколько секунд из-за проверки.
+#[tauri::command]
+pub async fn verify_model(
+    state: State<'_, AppState>,
+    name: String,
+) -> Result<models::HashCheck, String> {
+    let inner = state.inner.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        models::verify(&inner.models_dir, &name, &inner.memory)
+    })
+    .await
+    .map_err(|error| format!("проверка не выполнилась: {error}"))?
 }
 
 /// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это

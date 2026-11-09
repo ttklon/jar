@@ -118,6 +118,7 @@ import flowsJson from "../../data/flows.json";
 import type {
   AuditEvent,
   Decision,
+  HashCheck,
   ModelsView,
   PlanItem,
   RunRecord,
@@ -315,4 +316,12 @@ export async function planFor(query: string, limit = 8): Promise<PlanItem[]> {
 
 export async function listModels(): Promise<ModelsView> {
   return { dir: "", items: [], error: null };
+}
+
+/**
+ * Хеша в браузере нет: файлов на диске тоже нет, а придумывать ответ значило бы
+ * врать про проверку. Честнее сказать, что это делает только приложение.
+ */
+export async function verifyModel(_name: string): Promise<HashCheck> {
+  throw new Error("хеш считает приложение: в браузере нет файлов на диске");
 }
