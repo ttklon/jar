@@ -39,6 +39,7 @@ export type {
   RunStep,
   Risk,
   RoleView,
+  IsolationStatus,
   SpeechStatus,
   StepResult,
   Tier,
@@ -52,6 +53,7 @@ import type {
   Downloaded,
   EngineStatus,
   Episode,
+  IsolationStatus,
   Learning,
   Plan,
   PlanAnswer,
@@ -427,6 +429,16 @@ export async function learningRequests(): Promise<Learning[]> {
 }
 
 // ── Локальное распознавание ─────────────────────────────────────────────────
+
+/** Потолки запуска на этой машине: что есть и чего нет. */
+export async function isolationStatus(): Promise<IsolationStatus> {
+  if (isTauri()) {
+    const { isolationStatus: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { isolationStatus: fromData } = await import("./dev");
+  return fromData();
+}
 
 /** Есть ли чем распознавать локально: движок и модель. Ничего не запускает. */
 export async function speechStatus(): Promise<SpeechStatus> {

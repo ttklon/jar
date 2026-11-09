@@ -15,6 +15,7 @@ import {
   fillPlan,
   learningRequests,
   requestLearning,
+  isolationStatus,
   speechStatus,
   transcribeLocal,
   listRoles,
@@ -135,6 +136,14 @@ describe("сценарии в браузере", () => {
 });
 
 describe("журнал в браузере", () => {
+  it("в браузере потолков запуска нет, и это сказано прямо", async () => {
+    const status = await isolationStatus();
+    expect(status.available).toBe(false);
+    expect(status.note).toMatch(/запускать нечего/);
+    // Обещания «всё под контролем» здесь были бы ложью: процессов в браузере нет.
+    expect(status.available).not.toBe(true);
+  });
+
   it("возвращает пустой список, а не выдуманные события", async () => {
     await expect(auditTail(10)).resolves.toEqual([]);
   });

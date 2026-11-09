@@ -8,7 +8,8 @@
 //!   учётными записями и реестром, скачивание из сети, повышение прав, обфускация;
 //! * **экран значений** — параметр, пришедший от человека или от модели, не должен
 //!   нести в себе вторую команду;
-//! * **пробный запуск** — короткая команда в отдельной папке, с таймаутом и без сети.
+//! * **пробный запуск** — короткая команда в отдельной папке, под потолками памяти,
+//!   процессорного времени и числа процессов (`isolation`).
 //!
 //! Зачем это до генерации новых рук: рука, которую предложит модель, — это текст
 //! команды. Проверить текст дешевле, чем откатывать его последствия.
@@ -369,7 +370,10 @@ pub fn trial(
             script.to_string(),
         ],
     )
-    .with_timeout(timeout);
+    .with_limits(crate::isolation::Limits {
+        timeout_ms: timeout.as_millis() as u64,
+        ..crate::isolation::Limits::trial()
+    });
 
     let cancel = std::sync::atomic::AtomicBool::new(false);
     let started = std::time::Instant::now();
@@ -382,6 +386,7 @@ pub fn trial(
         stderr: crate::step::tail(&output.stderr, 400),
         timed_out: output.timed_out,
         duration_ms: started.elapsed().as_millis() as u64,
+        limits_note: output.limits_note.clone(),
         verdict,
     })
 }
@@ -394,6 +399,8 @@ pub struct Trial {
     pub stderr: String,
     pub timed_out: bool,
     pub duration_ms: u64,
+    /// Что стало с потолками: применены или почему нет.
+    pub limits_note: String,
     /// Проверка, с которой запуск был начат.
     pub verdict: Verdict,
 }
@@ -512,6 +519,20 @@ mod tests {
                 "рука «{registry}» не проходит собственную проверку: {verdict:?}"
             );
         }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn a_trial_run_happens_under_the_ceiling() {
+        let dir = std::env::temp_dir().join("zshelper-sandbox-trial");
+        let trial = trial("Write-Output 'ok'", &dir, std::time::Duration::from_secs(20))
+            .expect("пробный запуск");
+        assert_eq!(trial.exit_code, Some(0), "{trial:?}");
+        assert!(
+            trial.limits_note.contains("под потолком"),
+            "{}",
+            trial.limits_note
+        );
     }
 
     #[test]

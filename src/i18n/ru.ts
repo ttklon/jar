@@ -483,6 +483,8 @@ export const voice = {
     destructive: "уничтожение",
     unknown: "неизвестно",
   } as Record<string, string>,
+  ceilings: (summary: string, note: string) => `потолки запуска: ${summary}. ${note}`,
+  ceilingsNone: (note: string) => `потолки запуска: ${note}`,
   localReady: (program: string) => `локальное распознавание готово: ${program} — звук не покидает компьютер`,
   localNoModel: (dir: string) => `движок распознавания есть, а модели нет: положите ggml-*.bin в ${dir}`,
   localNone: (dir: string) =>

@@ -24,6 +24,7 @@ use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::roles;
+use crate::isolation;
 use crate::sandbox::{self, Verdict};
 use crate::server::{self, Server};
 use crate::step::StepResult;
@@ -880,6 +881,27 @@ fn read_speech_status(state: &AppState) -> SpeechStatus {
         model: model.map(|path| path.display().to_string()),
         search_dir: inner.base_dir.join("sidecars").display().to_string(),
         models_dir: inner.models_dir.display().to_string(),
+    }
+}
+
+/// Что известно о потолках запуска на этой машине.
+#[derive(Debug, Serialize)]
+pub struct IsolationStatus {
+    /// Держит ли система потолки (job object — только Windows).
+    pub available: bool,
+    /// Потолки пробного запуска словами.
+    pub summary: String,
+    /// Что именно происходит — и чего не происходит.
+    pub note: String,
+}
+
+/// Потолки для запуска: что есть на самом деле, а не что хотелось бы.
+#[tauri::command]
+pub fn isolation_status() -> IsolationStatus {
+    IsolationStatus {
+        available: isolation::available(),
+        summary: isolation::Limits::trial().describe(),
+        note: isolation::note(),
     }
 }
 

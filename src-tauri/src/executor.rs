@@ -24,6 +24,10 @@ pub struct ExecRequest {
     pub argv: Vec<String>,
     pub env: Vec<(String, String)>,
     pub timeout: Duration,
+    /// Потолки памяти, процессорного времени и числа процессов. `None` — запуск без них:
+    /// так идут обычные руки, которым нечего бояться (и которым нельзя ставить потолок:
+    /// открытая программа обязана пережить приложение).
+    pub limits: Option<crate::isolation::Limits>,
 }
 
 impl ExecRequest {
@@ -33,7 +37,15 @@ impl ExecRequest {
             argv,
             env: Vec::new(),
             timeout: Duration::from_secs(60),
+            limits: None,
         }
+    }
+
+    /// Запуск под потолками: для пробного прогона и вообще для всего, чему не доверяем.
+    pub fn with_limits(mut self, limits: crate::isolation::Limits) -> Self {
+        self.timeout = limits.timeout();
+        self.limits = Some(limits);
+        self
     }
 
     pub fn with_env(mut self, name: impl Into<String>, value: impl Into<String>) -> Self {
@@ -55,6 +67,8 @@ pub struct ExecOutput {
     pub timed_out: bool,
     pub cancelled: bool,
     pub duration_ms: u64,
+    /// Что стало с потолками: применены они или почему нет. Пусто, если их не просили.
+    pub limits_note: String,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -83,6 +97,24 @@ pub fn run(request: &ExecRequest, cancel: &AtomicBool) -> Result<ExecOutput, Exe
     let mut child = command
         .spawn()
         .map_err(|error| ExecError::Spawn(format!("{}: {error}", request.program)))?;
+
+    // Потолки ставятся сразу после появления процесса: окно между `spawn` и `attach`
+    // измеряется микросекундами, но оно есть, и об этом честнее сказать в комментарии,
+    // чем делать вид, что его нет.
+    let mut limits_note = String::new();
+    let guard = match &request.limits {
+        Some(limits) => match crate::isolation::attach(child.id(), limits) {
+            Ok(guard) => {
+                limits_note = format!("под потолком: {}", limits.describe());
+                Some(guard)
+            }
+            Err(reason) => {
+                limits_note = format!("потолки не применены: {reason}");
+                None
+            }
+        },
+        None => None,
+    };
 
     let stdout = child
         .stdout
@@ -125,13 +157,18 @@ pub fn run(request: &ExecRequest, cancel: &AtomicBool) -> Result<ExecOutput, Exe
     let stdout = out_reader.join().unwrap_or_default();
     let stderr = err_reader.join().unwrap_or_default();
 
+    let duration_ms = started.elapsed().as_millis() as u64;
+    // `guard` закрывается здесь же: всё, что осталось в job object, умирает вместе с ним.
+    drop(guard);
+
     Ok(ExecOutput {
         exit_code: status.and_then(|status| status.code()),
         stdout: String::from_utf8_lossy(&stdout).to_string(),
         stderr: String::from_utf8_lossy(&stderr).to_string(),
         timed_out,
         cancelled,
-        duration_ms: started.elapsed().as_millis() as u64,
+        duration_ms,
+        limits_note,
     })
 }
 

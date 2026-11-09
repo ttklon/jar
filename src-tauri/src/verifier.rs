@@ -136,6 +136,7 @@ mod tests {
             timed_out: false,
             cancelled: false,
             duration_ms: 7,
+            limits_note: String::new(),
         }
     }
 

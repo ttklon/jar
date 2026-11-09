@@ -170,6 +170,7 @@ fn native_result(
         timed_out: false,
         cancelled: false,
         duration_ms: started.elapsed().as_millis() as u64,
+        limits_note: String::new(),
     };
     verifier::check(registry, &expectation, &output)
 }

@@ -152,6 +152,16 @@ export interface Learning {
   steps: LearningStep[];
 }
 
+/** Потолки запуска: что есть на этой машине на самом деле. */
+export interface IsolationStatus {
+  /** Держит ли система потолки (job object есть только на Windows). */
+  available: boolean;
+  /** Потолки пробного запуска словами. */
+  summary: string;
+  /** Что происходит — и чего не происходит. */
+  note: string;
+}
+
 /** Итог проверки команды перед запуском. */
 export interface Screening {
   decision: "allow" | "ask" | "refuse";

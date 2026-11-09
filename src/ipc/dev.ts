@@ -129,6 +129,7 @@ import type {
   PlanCheck,
   PlanReport,
   RoleView,
+  IsolationStatus,
   SpeechStatus,
   PlanItem,
   RunRecord,
@@ -526,6 +527,18 @@ export async function runPlan(_json: string, _approved: number[]): Promise<PlanR
 }
 
 // ── Локальное распознавание в браузере ──────────────────────────────────────
+
+// ── Потолки запуска в браузере ──────────────────────────────────────────────
+
+export async function isolationStatus(): Promise<IsolationStatus> {
+  // Запускать в браузере нечего, поэтому и потолков нет. Врать «всё под контролем»
+  // здесь было бы особенно легко — и особенно вредно.
+  return {
+    available: false,
+    summary: "в браузере процессов нет",
+    note: "потолки живут в ядре приложения: здесь запускать нечего",
+  };
+}
 
 export async function speechStatus(): Promise<SpeechStatus> {
   // В браузере движка нет по определению: это файл рядом с приложением.

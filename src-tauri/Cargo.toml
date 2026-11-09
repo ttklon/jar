@@ -24,6 +24,16 @@ sha2 = "0.10"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+[target.'cfg(windows)'.dependencies]
+# Потолки для запуска (job object). Прямая зависимость, хотя она уже приходит через
+# tauri транзитивно: своя зависимость не должна зависеть от чужой версии.
+windows-sys = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_Security",
+  "Win32_System_JobObjects",
+  "Win32_System_Threading",
+] }
+
 [profile.release]
 codegen-units = 1
 lto = true

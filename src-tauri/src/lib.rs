@@ -28,6 +28,7 @@ pub mod download;
 pub mod executor;
 pub mod flows;
 pub mod hotkey;
+pub mod isolation;
 pub mod ipc;
 pub mod learn;
 pub mod llama;
@@ -144,6 +145,7 @@ pub fn run() {
             ipc::search_episodes,
             ipc::run_plan,
             ipc::speech_status,
+            ipc::isolation_status,
             ipc::transcribe_local,
             ipc::list_profiles,
             ipc::policy_for,

@@ -21,6 +21,7 @@ import type {
   PlanItem,
   ProfileView,
   RoleView,
+  IsolationStatus,
   SpeechStatus,
   RegistrySnapshot,
   RunRecord,
@@ -102,6 +103,11 @@ export function requestLearning(query: string): Promise<Learning | null> {
 
 export function learningRequests(): Promise<Learning[]> {
   return invoke<Learning[]>("learning_requests");
+}
+
+/** Потолки запуска: что есть на самом деле. Ничего не запускает. */
+export function isolationStatus(): Promise<IsolationStatus> {
+  return invoke<IsolationStatus>("isolation_status");
 }
 
 export function speechStatus(): Promise<SpeechStatus> {

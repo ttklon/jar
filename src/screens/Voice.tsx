@@ -7,10 +7,18 @@ import {
   planFor,
   requestLearning,
   runPlan,
+  isolationStatus,
   speechStatus,
   transcribeLocal,
 } from "../ipc";
-import type { Learning, PlanCheck, PlanItem, PlanReport, SpeechStatus } from "../ipc";
+import type {
+  IsolationStatus,
+  Learning,
+  PlanCheck,
+  PlanItem,
+  PlanReport,
+  SpeechStatus,
+} from "../ipc";
 import { speak } from "../lib/voice";
 import { useVoice } from "../lib/useVoice";
 import { ActionList } from "../components/ActionList";
@@ -96,6 +104,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [seconds, setSeconds] = useState(0);
   const [spoken, setSpoken] = useState<string | null>(null);
   const [speech, setSpeech] = useState<SpeechStatus | null>(null);
+  const [isolation, setIsolation] = useState<IsolationStatus | null>(null);
   const [draft, setDraft] = useState<PlanCheck | null>(null);
   const [approved, setApproved] = useState(false);
   const [report, setReport] = useState<PlanReport | null>(null);
@@ -179,6 +188,13 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     speechStatus()
       .then(setSpeech)
       .catch(() => setSpeech(null));
+
+    // Потолки — вторая половина того же честного разговора: чем распознаём и что
+    // будет, если запущенная команда ошибётся. Сказать об этом один раз на экране
+    // дешевле, чем объяснять потом.
+    isolationStatus()
+      .then(setIsolation)
+      .catch(() => setIsolation(null));
   }, []);
 
   useEffect(() => {
@@ -288,6 +304,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
             : speech.found
               ? voice.localNoModel(speech.models_dir)
               : voice.localNone(speech.search_dir)}
+        </Text>
+      ) : null}
+
+      {isolation ? (
+        <Text className={styles.note}>
+          {isolation.available
+            ? voice.ceilings(isolation.summary, isolation.note)
+            : voice.ceilingsNone(isolation.note)}
         </Text>
       ) : null}
 
