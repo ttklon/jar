@@ -145,7 +145,9 @@ jobs:
         shell: bash
         run: |
           cargo fmt --manifest-path src-tauri/Cargo.toml --all
-          if git diff --quiet -- src-tauri; then
+          # Смотрим только исходники: cargo build переписывает Cargo.lock и раньше
+          # выдавал это за «код не отформатирован».
+          if git diff --quiet -- src-tauri/src src-tauri/build.rs; then
             echo "форматирование в порядке"
             exit 0
           fi
@@ -156,7 +158,7 @@ jobs:
           fi
           git config user.name "zshelper-ci"
           git config user.email "ci@zshelper.local"
-          git add src-tauri
+          git add src-tauri/src src-tauri/build.rs src-tauri/Cargo.lock
           git commit -m "style: cargo fmt (автоматически, CI)"
           git push
           echo "::error::CI отформатировал код и запушил коммит — подтяни его (git pull --rebase)"
