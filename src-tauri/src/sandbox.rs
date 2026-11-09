@@ -102,7 +102,11 @@ const RULES: &[Rule] = &[
     Rule { pattern: "invoke-expression", danger: "исполнение собранной строки" },
     Rule { pattern: "iex ", danger: "исполнение собранной строки" },
     Rule { pattern: "[convert]::frombase64string", danger: "раскодирование скрытого" },
-    Rule { pattern: "add-type", danger: "подключение чужого кода" },
+    // `Add-Type -AssemblyName` грузит системную сборку по имени — так работает корзина.
+    // Опасно другое: компиляция своей строки в код и подгрузка чужого файла с диска.
+    Rule { pattern: "add-type -typedefinition", danger: "компиляция чужого кода" },
+    Rule { pattern: "add-type -memberdefinition", danger: "компиляция чужого кода" },
+    Rule { pattern: "add-type -path", danger: "подгрузка чужого кода с диска" },
 ];
 
 /// Что меняет состояние: не запрещено, но без человека нельзя.
@@ -299,6 +303,26 @@ mod tests {
                 "должно быть отказано: {script} → {verdict:?}"
             );
             assert!(!verdict.reasons.is_empty(), "отказ без причины бесполезен");
+        }
+    }
+
+    #[test]
+    fn loading_a_system_assembly_is_not_compiling_foreign_code() {
+        // Так корзина вызывает системную библиотеку — это не исполнение своего кода.
+        let allowed = screen_script("Add-Type -AssemblyName Microsoft.VisualBasic");
+        assert_eq!(allowed.decision, Decision::Allow, "{allowed:?}");
+
+        // А это — исполнение чужого кода, и здесь отказ без обсуждений.
+        for script in [
+            "Add-Type -TypeDefinition 'public class X {}'",
+            "Add-Type -MemberDefinition '[DllImport(...)]'",
+            "Add-Type -Path C:\\tmp\\evil.dll",
+        ] {
+            assert_eq!(
+                screen_script(script).decision,
+                Decision::Refuse,
+                "должно быть отказано: {script}"
+            );
         }
     }
 
