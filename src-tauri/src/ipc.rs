@@ -816,7 +816,10 @@ pub async fn transcribe_local(
         return Err("нечего распознавать: пустая запись".to_string());
     }
 
-    let run = inner.memory.start_run("speech", "локальное распознавание").ok();
+    let run = inner
+        .memory
+        .start_run("speech", "локальное распознавание")
+        .ok();
     // Копия для записи итога: замыкание забирает свою.
     let memory_owner = inner.clone();
 

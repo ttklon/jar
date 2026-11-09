@@ -94,8 +94,8 @@ pub fn request(wav: &[u8]) -> Vec<u8> {
 
 /// Текст из ответа движка. Пустой текст — это «ничего не разобрал», а не ошибка.
 pub fn text_from_json(raw: &str) -> Result<String, String> {
-    let value: serde_json::Value = serde_json::from_str(raw)
-        .map_err(|error| format!("движок ответил не JSON: {error}"))?;
+    let value: serde_json::Value =
+        serde_json::from_str(raw).map_err(|error| format!("движок ответил не JSON: {error}"))?;
 
     if let Some(error) = value.get("error").and_then(|error| error.as_str()) {
         return Err(format!("движок не смог: {error}"));
@@ -144,8 +144,8 @@ pub fn start(
 ) -> Result<std::process::Child, String> {
     use std::process::{Command, Stdio};
 
-    let out = std::fs::File::create(log)
-        .map_err(|error| format!("лог движка не создаётся: {error}"))?;
+    let out =
+        std::fs::File::create(log).map_err(|error| format!("лог движка не создаётся: {error}"))?;
     let errors = out
         .try_clone()
         .map_err(|error| format!("лог движка не открывается второй раз: {error}"))?;
@@ -327,8 +327,7 @@ mod tests {
             listener.local_addr().expect("адрес").port()
         };
 
-        let error = post(port, &wav_fixture(), Duration::from_millis(300))
-            .expect_err("движка нет");
+        let error = post(port, &wav_fixture(), Duration::from_millis(300)).expect_err("движка нет");
         assert!(error.contains("не отвечает"), "{error}");
 
         let error = post(port, &[], Duration::from_millis(300)).expect_err("пустая запись");
