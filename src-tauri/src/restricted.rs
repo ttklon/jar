@@ -247,8 +247,10 @@ mod imp {
     ) -> Result<(HANDLE, HANDLE, u32), String> {
         let token = restricted_token()?;
 
+        // Программу не подставляем отдельным аргументом: с `lpApplicationName` Windows не
+        // ищет файл в PATH, и `powershell.exe` превращается в «файл не найден». Первый
+        // элемент командной строки делает то же самое, но с поиском.
         let mut line_wide = wide(&command_line(&request.program, &request.argv));
-        let program_wide = wide(&request.program);
 
         let mut si: STARTUPINFOW = std::mem::zeroed();
         si.cb = std::mem::size_of::<STARTUPINFOW>() as u32;
@@ -260,7 +262,7 @@ mod imp {
         let mut pi: PROCESS_INFORMATION = std::mem::zeroed();
         let created = CreateProcessAsUserW(
             token,
-            program_wide.as_ptr(),
+            std::ptr::null(),
             line_wide.as_mut_ptr(),
             std::ptr::null(),
             std::ptr::null(),
