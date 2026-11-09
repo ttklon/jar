@@ -349,7 +349,7 @@ mod tests {
         let dir = temp_dir("scan");
         std::fs::write(dir.join("b-model.gguf"), gguf("llama", 7)).expect("файл пишется");
         std::fs::write(dir.join("a-model.GGUF"), gguf("qwen2", 15)).expect("файл пишется");
-        std::fs::write(dir.join("readme.txt"), b"не модель").expect("файл пишется");
+        std::fs::write(dir.join("readme.txt"), "не модель").expect("файл пишется");
         std::fs::write(dir.join("broken.gguf"), b"not a gguf at all").expect("файл пишется");
 
         let files = scan(&dir).expect("папка читается");
