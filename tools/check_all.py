@@ -52,6 +52,7 @@ STEPS: list[tuple[str, list[str], str]] = [
 GENERATED = [
     "data/actions.json",
     "data/evals.json",
+    "data/profiles.json",
     "data/ecosystem",
     "docs/ACTIONS.md",
     "docs/PROFILES.md",

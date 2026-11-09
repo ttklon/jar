@@ -175,3 +175,35 @@ export interface AuditEvent {
   outcome: string;
   duration_ms: number;
 }
+
+/**
+ * Профиль приложения — слой «как именно»: что и в каком порядке делать в конкретной
+ * программе. Профили проверяются данными (`tools/profiles.py`), поэтому интерфейс
+ * показывает их как есть: описание, якоря и операции с риском из реестра.
+ */
+export interface ProfileOpView {
+  name: string;
+  /** Ссылка из профиля; может быть короткой (`domain|verb`). */
+  registry: string;
+  /** Строка реестра, в которую она разрешилась. */
+  resolved: string;
+  risk: Risk | "unknown";
+  decision: Decision;
+  decision_reason: string;
+  needs_token: boolean;
+  /** Есть ли уже инструмент, который это выполняет. */
+  has_tool: boolean;
+}
+
+export interface ProfileView {
+  slug: string;
+  app: string;
+  kind: string;
+  exe: string[];
+  ui_stack: string;
+  version_seen: string;
+  verified_at: string;
+  anchors: number;
+  executable: number;
+  operations: ProfileOpView[];
+}

@@ -74,6 +74,18 @@ describe("App", () => {
     expect(screen.getByText(/В браузере журнала нет/)).toBeTruthy();
   });
 
+  it("экран «Приложения» показывает профили и честно говорит, что исполняется", async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
+
+    screen.getByRole("button", { name: "Приложения" }).click();
+    await waitFor(() => expect(screen.getByText(/87 приложений/)).toBeTruthy());
+
+    // Числа приходят из данных: профилей столько, сколько файлов в data/profiles.
+    expect(screen.getAllByText(/\d+ операций/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Показать операции/).length).toBeGreaterThan(0);
+  });
+
   it("каталог фильтрует по фразе", async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });

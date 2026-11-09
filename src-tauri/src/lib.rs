@@ -6,6 +6,8 @@
 //! * выполняет инструменты (`tools`) с независимой проверкой результата (`verifier`);
 //! * собирает их в сценарии (`flows`) — план из шагов, каждый со своим подтверждением;
 //! * показывает, что было сделано: журнал (`audit`) читается экраном «История»;
+//! * знает, как это делается в 87 программах (`profiles`), и честно показывает, что из
+//!   этого уже исполняется;
 //! * вызывается из любой программы по `Ctrl+Alt+Z` (`hotkey`).
 //!
 //! Чего ещё нет: планировщика, моделей, голоса, памяти, MCP — они следующие.
@@ -17,6 +19,7 @@ pub mod hotkey;
 pub mod ipc;
 pub mod logging;
 pub mod policy;
+pub mod profiles;
 pub mod registry;
 pub mod step;
 pub mod tools;
@@ -82,6 +85,7 @@ pub fn run() {
             ipc::list_tools,
             ipc::list_flows,
             ipc::audit_tail,
+            ipc::list_profiles,
             ipc::policy_for,
             ipc::confirm_tool,
             ipc::run_tool,

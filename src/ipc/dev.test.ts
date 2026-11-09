@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { auditTail, buildStats, listFlows, listTools, registrySnapshot } from "./dev";
+import {
+  auditTail,
+  buildStats,
+  listFlows,
+  listProfiles,
+  listTools,
+  registrySnapshot,
+} from "./dev";
 import { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
 /**
@@ -110,5 +117,31 @@ describe("сценарии в браузере", () => {
 describe("журнал в браузере", () => {
   it("возвращает пустой список, а не выдуманные события", async () => {
     await expect(auditTail(10)).resolves.toEqual([]);
+  });
+});
+
+describe("профили приложений в браузере", () => {
+  it("каждая операция разрешается в строку реестра и берёт риск оттуда", async () => {
+    const { actions } = await registrySnapshot();
+    const byKey = new Map(actions.map((a) => [`${a.domain}|${a.verb}|${a.object}`, a]));
+    const tools = new Set((await listTools()).map((tool) => tool.registry));
+
+    const profiles = await listProfiles();
+    expect(profiles.length).toBeGreaterThan(0);
+
+    for (const profile of profiles) {
+      expect(profile.operations.length).toBeGreaterThan(0);
+      let executable = 0;
+
+      for (const operation of profile.operations) {
+        const action = byKey.get(operation.resolved);
+        expect(action, `${profile.slug}: ${operation.registry}`).toBeTruthy();
+        expect(operation.risk).toBe(action?.risk);
+        if (operation.has_tool) executable += 1;
+        if (operation.has_tool) expect(tools.has(operation.registry)).toBe(true);
+      }
+
+      expect(profile.executable).toBe(executable);
+    }
   });
 });

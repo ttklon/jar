@@ -8,6 +8,7 @@ import type {
   AuditEvent,
   ConfirmToken,
   FlowView,
+  ProfileView,
   RegistrySnapshot,
   StepResult,
   ToolView,
@@ -22,6 +23,7 @@ export interface AppStatus {
   audit_file: string;
   tools: number;
   flows: number;
+  profiles: number;
 }
 
 export function registrySnapshot(): Promise<RegistrySnapshot> {
@@ -61,4 +63,8 @@ export function cancelTool(): Promise<void> {
 
 export function auditTail(limit: number): Promise<AuditEvent[]> {
   return invoke<AuditEvent[]>("audit_tail", { limit });
+}
+
+export function listProfiles(): Promise<ProfileView[]> {
+  return invoke<ProfileView[]>("list_profiles");
 }

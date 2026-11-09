@@ -17,6 +17,8 @@ export type {
   FlowStepView,
   FlowView,
   ParamSpec,
+  ProfileOpView,
+  ProfileView,
   RegistrySnapshot,
   RegistryStats,
   Risk,
@@ -26,7 +28,14 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { AuditEvent, ConfirmToken, FlowView, StepResult, ToolView } from "./types";
+import type {
+  AuditEvent,
+  ConfirmToken,
+  FlowView,
+  ProfileView,
+  StepResult,
+  ToolView,
+} from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -110,4 +119,16 @@ export async function auditTail(limit = 100): Promise<AuditEvent[]> {
   }
   const { auditTail: fromData } = await import("./dev");
   return fromData(limit);
+}
+
+// ── Профили приложений ──────────────────────────────────────────────────────
+
+/** Каталог приложений: описание операций и что из них уже исполняется. */
+export async function listProfiles(): Promise<ProfileView[]> {
+  if (isTauri()) {
+    const { listProfiles: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { listProfiles: fromData } = await import("./dev");
+  return fromData();
 }

@@ -11,6 +11,7 @@ import {
 } from "@fluentui/react-components";
 import {
   AppsListDetailRegular,
+  AppGenericRegular,
   BranchRegular,
   HandRightRegular,
   HistoryRegular,
@@ -24,11 +25,19 @@ import { Catalog } from "./screens/Catalog";
 import { Hands } from "./screens/Hands";
 import { Flows } from "./screens/Flows";
 import { Journal } from "./screens/Journal";
+import { Apps } from "./screens/Apps";
 import { Settings } from "./screens/Settings";
-import { flows, hands, journal, t } from "./i18n/ru";
+import { apps, flows, hands, journal, t } from "./i18n/ru";
 import { APP_VERSION } from "./version";
 
-type Screen = "overview" | "catalog" | "hands" | "flows" | "journal" | "settings";
+type Screen =
+  | "overview"
+  | "catalog"
+  | "hands"
+  | "flows"
+  | "apps"
+  | "journal"
+  | "settings";
 
 const useStyles = makeStyles({
   shell: {
@@ -102,6 +111,7 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement }[] = [
   { id: "catalog", label: t.navCatalog, icon: <AppsListDetailRegular /> },
   { id: "hands", label: hands.nav, icon: <HandRightRegular /> },
   { id: "flows", label: flows.nav, icon: <BranchRegular /> },
+  { id: "apps", label: apps.nav, icon: <AppGenericRegular /> },
   { id: "journal", label: journal.nav, icon: <HistoryRegular /> },
   { id: "settings", label: t.navSettings, icon: <SettingsRegular /> },
 ];
@@ -186,6 +196,8 @@ export function App() {
             <Hands />
           ) : screen === "flows" ? (
             <Flows />
+          ) : screen === "apps" ? (
+            <Apps />
           ) : screen === "journal" ? (
             <Journal />
           ) : (

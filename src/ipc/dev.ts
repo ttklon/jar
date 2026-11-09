@@ -113,7 +113,15 @@ export async function confirmTool(
 // невозможно по той же причине, что и одиночного инструмента.
 
 import flowsJson from "../../data/flows.json";
-import type { AuditEvent, Decision, FlowStepView, FlowView, Risk } from "./types";
+import type {
+  AuditEvent,
+  Decision,
+  FlowStepView,
+  FlowView,
+  ProfileOpView,
+  ProfileView,
+  Risk,
+} from "./types";
 
 const FLOW_SPECS = flowsJson as unknown as {
   id: string;
@@ -193,4 +201,79 @@ export async function listFlows(): Promise<FlowView[]> {
  */
 export async function auditTail(_limit: number): Promise<AuditEvent[]> {
   return [];
+}
+
+// ── Профили приложений в браузере ───────────────────────────────────────────
+//
+// Ядро отдаёт профили командой `list_profiles`. Здесь та же сводка читается из
+// `data/profiles.json`, а решение политики считается тем же зеркалом, что и для
+// остальных экранов, — чтобы верстка не зависела от Rust.
+
+import profilesJson from "../../data/profiles.json";
+
+const PROFILE_SPECS = profilesJson as unknown as {
+  slug: string;
+  app: string;
+  kind: string;
+  exe: string[];
+  ui_stack: string;
+  version_seen: string;
+  verified_at: string;
+  anchors: number;
+  operations: { name: string; registry: string; risk: Risk }[];
+}[];
+
+export async function listProfiles(): Promise<ProfileView[]> {
+  return PROFILE_SPECS.map((spec) => {
+    const operations: ProfileOpView[] = spec.operations.map((operation) => {
+      // Ссылка профиля может быть короткой: `domain|verb` или `domain|verb|часть объекта`.
+      // Ядро берёт самую рискованную подходящую строку — здесь так же.
+      const [domain, verb, object] = operation.registry.split("|");
+      const action = ROWS.filter(
+        (row) =>
+          row.domain === domain &&
+          row.verb === verb &&
+          (object === undefined || row.object.includes(object)),
+      ).sort((left, right) => RISK_ORDER.indexOf(right.risk) - RISK_ORDER.indexOf(left.risk))[0];
+      if (!action) {
+        // Ссылка профиля не разрешилась — это ошибка данных, показываем её как отказ.
+        return {
+          name: operation.name,
+          registry: operation.registry,
+          resolved: "",
+          risk: "unknown" as const,
+          decision: "deny" as const,
+          decision_reason: "в реестре нет такой строки",
+          needs_token: false,
+          has_tool: false,
+        };
+      }
+      const decision = decide(action);
+      return {
+        name: operation.name,
+        registry: operation.registry,
+        resolved: `${action.domain}|${action.verb}|${action.object}`,
+        risk: action.risk,
+        decision,
+        decision_reason: decisionReason(decision, action.risk),
+        needs_token: decision === "confirm",
+        has_tool: TOOL_SPECS.some(
+          (tool) => tool.registry === `${action.domain}|${action.verb}|${action.object}`,
+        ),
+      };
+    });
+
+    return {
+      slug: spec.slug,
+      app: spec.app,
+      kind: spec.kind,
+      exe: spec.exe,
+      ui_stack: spec.ui_stack,
+      version_seen: spec.version_seen,
+      verified_at: spec.verified_at,
+      anchors: spec.anchors,
+      executable: operations.filter((operation) => operation.has_tool).length,
+      operations,
+    };
+  });
 }

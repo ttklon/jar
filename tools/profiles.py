@@ -28,6 +28,8 @@ ROOT = Path(__file__).resolve().parents[1]
 ACTIONS = ROOT / "data" / "actions.json"
 PROFILE_DIR = ROOT / "data" / "profiles"
 MD_OUT = ROOT / "docs" / "PROFILES.md"
+# Сводка для приложения: одно чтение вместо 87 файлов, и Rust, и интерфейс.
+INDEX_OUT = ROOT / "data" / "profiles.json"
 
 RISK_RANK = {"read": 0, "write-local": 1, "external": 2, "destructive": 3, "identity": 4, "money": 5}
 REQUIRED = ("app", "exe", "version_seen", "verified_at", "anchors", "operations")
@@ -129,6 +131,7 @@ def check_profile(path: Path, combo, domain_verbs) -> tuple[list[str], dict]:
             ok_ops += 1
 
     info = {
+        "slug": path.stem,
         "app": prof["app"],
         "kind": kind,
         "exe": ", ".join(prof["exe"]),
@@ -141,6 +144,17 @@ def check_profile(path: Path, combo, domain_verbs) -> tuple[list[str], dict]:
         "risks": risks,
         "domains": ogres,
         "file": path.name,
+        # Для приложения: имя операции, ссылка на реестр и риск, не заниженный профилем.
+        "operations": [
+            {
+                "name": op.get("name", ""),
+                "registry": op.get("registry", ""),
+                "risk": op.get("risk", ""),
+            }
+            for op in prof.get("operations", [])
+            if all(key in op for key in OP_REQUIRED)
+        ],
+        "exe_list": list(prof["exe"]),
     }
     return errs, info
 
@@ -258,8 +272,36 @@ def main() -> int:
     MD_OUT.parent.mkdir(parents=True, exist_ok=True)
     MD_OUT.write_text(render(infos, errs), encoding="utf-8")
 
+    # Сводка для приложения. Пишется всегда, а не только при отсутствии ошибок:
+    # расхождение с источниками всё равно поймает `--check` в CI.
+    INDEX_OUT.write_text(
+        json.dumps(
+            [
+                {
+                    "slug": info["slug"],
+                    "app": info["app"],
+                    "kind": info["kind"],
+                    "exe": info["exe_list"],
+                    "ui_stack": info["stack"],
+                    "version_seen": info["version"],
+                    "verified_at": info["verified"],
+                    "anchors": info["anchors"],
+                    "operations": info["operations"],
+                }
+                for info in infos
+            ],
+            ensure_ascii=False,
+            indent=1,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
     ops = sum(i["ops"] for i in infos)
-    print(f"profiles: {len(infos)}, operations: {ops}, problems: {len(errs)} -> {MD_OUT.relative_to(ROOT)}")
+    print(
+        f"profiles: {len(infos)}, operations: {ops}, problems: {len(errs)} -> "
+        f"{MD_OUT.relative_to(ROOT)}, {INDEX_OUT.relative_to(ROOT)}"
+    )
     for e in errs:
         print("  !", e)
     return 1 if errs else 0

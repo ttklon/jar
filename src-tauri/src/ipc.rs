@@ -13,6 +13,7 @@ use tauri::State;
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
+use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::step::StepResult;
@@ -41,6 +42,7 @@ pub struct AppStatus {
     pub audit_file: String,
     pub tools: usize,
     pub flows: usize,
+    pub profiles: usize,
 }
 
 /// Инструмент для экрана «Руки»: строка реестра + параметры + решение политики.
@@ -56,6 +58,37 @@ pub struct ToolView {
     pub decision: String,
     pub decision_reason: String,
     pub needs_token: bool,
+}
+
+/// Операция профиля: ссылка на реестр, риск и решение политики.
+#[derive(Debug, Serialize)]
+pub struct ProfileOpView {
+    pub name: String,
+    pub registry: String,
+    /// Фактический ключ строки реестра (ссылка профиля может быть короткой).
+    pub resolved: String,
+    pub risk: String,
+    pub decision: String,
+    pub decision_reason: String,
+    pub needs_token: bool,
+    /// Есть ли уже инструмент, который это выполняет.
+    pub has_tool: bool,
+}
+
+/// Профиль приложения для экрана «Приложения».
+#[derive(Debug, Serialize)]
+pub struct ProfileView {
+    pub slug: String,
+    pub app: String,
+    pub kind: String,
+    pub exe: Vec<String>,
+    pub ui_stack: String,
+    pub version_seen: String,
+    pub verified_at: String,
+    pub anchors: usize,
+    /// Сколько операций уже можно выполнить инструментом.
+    pub executable: usize,
+    pub operations: Vec<ProfileOpView>,
 }
 
 /// Шаг сценария с уже известным решением политики: интерфейс не считает риск сам.
@@ -142,6 +175,57 @@ fn view(inner: &Inner, spec: &'static ToolSpec) -> ToolView {
     }
 }
 
+fn profile_op_view(inner: &Inner, operation: &ProfileOperation) -> ProfileOpView {
+    match profiles::resolve(&inner.registry, &operation.registry) {
+        Some(action) => {
+            let decision = policy::decide(action);
+            let resolved = action.key();
+            ProfileOpView {
+                name: operation.name.clone(),
+                registry: operation.registry.clone(),
+                has_tool: tools::spec(&resolved).is_some(),
+                resolved,
+                risk: risk_label(action),
+                decision: decision.as_str().to_string(),
+                decision_reason: decision.reason().to_string(),
+                needs_token: decision.needs_token(),
+            }
+        }
+        // Данные разъехались — показываем это честно, а не делаем вид, что всё хорошо.
+        None => ProfileOpView {
+            name: operation.name.clone(),
+            registry: operation.registry.clone(),
+            resolved: String::new(),
+            risk: "unknown".into(),
+            decision: Decision::Deny("в реестре нет такой строки").as_str().to_string(),
+            decision_reason: "в реестре нет такой строки".into(),
+            needs_token: false,
+            has_tool: false,
+        },
+    }
+}
+
+fn profile_view(inner: &Inner, profile: &ProfileSpec) -> ProfileView {
+    let operations: Vec<ProfileOpView> = profile
+        .operations
+        .iter()
+        .map(|operation| profile_op_view(inner, operation))
+        .collect();
+
+    ProfileView {
+        slug: profile.slug.clone(),
+        app: profile.app.clone(),
+        kind: profile.kind.clone(),
+        exe: profile.exe.clone(),
+        ui_stack: profile.ui_stack.clone(),
+        version_seen: profile.version_seen.clone(),
+        verified_at: profile.verified_at.clone(),
+        anchors: profile.anchors,
+        executable: operations.iter().filter(|view| view.has_tool).count(),
+        operations,
+    }
+}
+
 fn step_view(inner: &Inner, step: &FlowStep) -> FlowStepView {
     let (decision, risk) = decision_of(inner, &step.tool);
     let title = tools::spec(&step.tool)
@@ -223,6 +307,7 @@ pub fn app_status(state: State<'_, AppState>) -> AppStatus {
         audit_file: state.inner.audit.path().display().to_string(),
         tools: tools::all().len(),
         flows: flows::all().len(),
+        profiles: profiles::all().len(),
     }
 }
 
@@ -232,6 +317,15 @@ pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
     tools::all()
         .iter()
         .map(|spec| view(&state.inner, spec))
+        .collect()
+}
+
+/// Профили приложений: что описано и что из этого уже исполняется.
+#[tauri::command]
+pub fn list_profiles(state: State<'_, AppState>) -> Vec<ProfileView> {
+    profiles::all()
+        .iter()
+        .map(|profile| profile_view(&state.inner, profile))
         .collect()
 }
 
