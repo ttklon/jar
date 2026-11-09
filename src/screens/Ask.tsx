@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Button,
   Input,
@@ -12,7 +12,8 @@ import { MicRegular, SearchRegular } from "@fluentui/react-icons";
 import { checkPlan, isTauri, planFor, runPlan, savePlan } from "../ipc";
 import type { PlanCheck, PlanItem, PlanReport } from "../ipc";
 import { ask } from "../i18n/ru";
-import { listen, speak, type Voice } from "../lib/voice";
+import { speak } from "../lib/voice";
+import { useVoice } from "../lib/useVoice";
 import { RiskBadge } from "../components/RiskBadge";
 
 const LIMIT = 8;
@@ -90,10 +91,9 @@ export function Ask() {
   const [saved, setSaved] = useState(false);
   const [approved, setApproved] = useState<number[]>([]);
   const [report, setReport] = useState<PlanReport | null>(null);
-  const [listening, setListening] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [spokenNote, setSpokenNote] = useState<string | null>(null);
-  const voiceRef = useRef<Voice | null>(null);
+  const [voiceSeconds, setVoiceSeconds] = useState(0);
 
   const search = useCallback((text: string) => {
     const trimmed = text.trim();
@@ -116,29 +116,25 @@ export function Ask() {
 
   // Сказать задачу: услышанное идёт в тот же поиск, что и напечатанное. Голос — это
   // только вход, дальше обычный путь: реестр, руки, политика.
-  const startVoice = useCallback(() => {
-    setVoiceError(null);
+  const voice = useVoice({
+    onText: (text) => {
+      setVoiceError(null);
+      setQuery(text);
+      search(text);
+    },
+    onError: (message) => setVoiceError(message),
+    nothingHeard: ask.voiceNothing,
+  });
 
-    if (listening) {
-      voiceRef.current?.stop();
-      setListening(false);
+  // Счётчик секунд: человек должен видеть, что его слушают прямо сейчас.
+  useEffect(() => {
+    if (!voice.listening) {
+      setVoiceSeconds(0);
       return;
     }
-
-    setListening(true);
-    const voice = listen({
-      onText: (text) => {
-        setQuery(text);
-        search(text);
-      },
-      onError: (message) => {
-        setVoiceError(message);
-        setListening(false);
-      },
-      onEnd: () => setListening(false),
-    });
-    voiceRef.current = voice;
-  }, [listening, search]);
+    const timer = setInterval(() => setVoiceSeconds((seconds) => seconds + 1), 1000);
+    return () => clearInterval(timer);
+  }, [voice.listening]);
 
   const verifyPlan = useCallback(() => {
     setPlanBusy(true);
@@ -350,17 +346,34 @@ export function Ask() {
         />
         <Button
           icon={<MicRegular />}
-          onClick={startVoice}
-          aria-label={listening ? ask.voiceStop : ask.voiceSay}
-          title={ask.voiceNote}
+          aria-label={ask.voiceSay}
+          title={ask.voiceHold}
+          onPointerDown={(event) => {
+            event.preventDefault();
+            voice.start();
+          }}
+          onPointerUp={() => voice.stop()}
+          onPointerLeave={() => voice.stop()}
+          onPointerCancel={() => voice.stop()}
+          onKeyDown={(event) => {
+            if (event.key !== " " && event.key !== "Enter") return;
+            event.preventDefault();
+            if (!event.repeat) voice.start();
+          }}
+          onKeyUp={(event) => {
+            if (event.key !== " " && event.key !== "Enter") return;
+            event.preventDefault();
+            voice.stop();
+          }}
         >
-          {listening ? ask.voiceListening : ask.voiceSay}
+          {voice.listening ? ask.voiceListening(voiceSeconds) : ask.voiceSay}
         </Button>
         <Button appearance="primary" icon={<SearchRegular />} type="submit" disabled={busy}>
           {busy ? ask.searching : ask.find}
         </Button>
       </form>
 
+      <Text className={styles.note}>{ask.voiceHold}</Text>
       <Text className={styles.note}>{ask.voiceNote}</Text>
 
       {voiceError ? <Text className={styles.error}>{voiceError}</Text> : null}

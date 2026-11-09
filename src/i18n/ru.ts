@@ -344,9 +344,11 @@ export const ask = {
   planStepOk: "готово",
   planStepFailed: "не выполнено",
   planStepCancelled: "отменено",
-  voiceSay: "Сказать",
-  voiceListening: "слушаю…",
+  voiceSay: "Держать и говорить",
+  voiceListening: (seconds: number) => `слушаю… ${seconds} с`,
   voiceStop: "Стоп",
+  voiceHold: "Зажмите кнопку и говорите — или удерживайте Ctrl+Space. Отпустили — приложение разбирает сказанное.",
+  voiceNothing: "не разобрал — попробуйте ещё раз",
   voiceNote:
     "Задачу можно сказать голосом, и ответ проговаривается вслух. Распознаёт и " +
     "озвучивает служба системы (Windows/Chromium): звук уходит наружу. Локальное " +

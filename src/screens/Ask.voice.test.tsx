@@ -53,14 +53,19 @@ function capture(): VoiceListeners {
 }
 
 describe("голосовой вход", () => {
-  it("услышанная задача попадает в поиск так же, как напечатанная", async () => {
-    vi.mocked(listen).mockReturnValue({ stop: vi.fn() });
+  it("держим кнопку — слушаем, услышанное сразу идёт в поиск", async () => {
+    const stop = vi.fn();
+    vi.mocked(listen).mockReturnValue({ stop });
     vi.mocked(planFor).mockResolvedValue([]);
 
     render(<Ask />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Сказать" }));
-    expect(screen.getByRole("button", { name: "Стоп" })).toBeTruthy();
+    const mic = screen.getByRole("button", { name: "Держать и говорить" });
+    fireEvent.pointerDown(mic);
+    expect(listen).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Держать и говорить" }).textContent).toContain(
+      "слушаю",
+    );
 
     capture().onText("наведи порядок в загрузках");
 
@@ -71,10 +76,37 @@ describe("голосовой вход", () => {
       (screen.getByLabelText(/почистить диск от временных файлов/i) as HTMLInputElement).value,
     ).toBe("наведи порядок в загрузках");
 
-    capture().onEnd?.();
+    // Услышали — микрофон выключился сам, ждать отпускания не нужно.
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Сказать" })).toBeTruthy();
+      expect(
+        screen.getByRole("button", { name: "Держать и говорить" }).textContent,
+      ).toContain("Держать и говорить");
     });
+    expect(stop).not.toHaveBeenCalled();
+  });
+
+  it("отпустили кнопку — перестали слушать", () => {
+    const stop = vi.fn();
+    vi.mocked(listen).mockReturnValue({ stop });
+
+    render(<Ask />);
+
+    const mic = screen.getByRole("button", { name: "Держать и говорить" });
+    fireEvent.pointerDown(mic);
+    fireEvent.pointerUp(mic);
+
+    expect(stop).toHaveBeenCalled();
+  });
+
+  it("Ctrl+Space держит микрофон с рабочего стола", async () => {
+    vi.mocked(listen).mockReturnValue({ stop: vi.fn() });
+
+    render(<Ask />);
+
+    fireEvent.keyDown(window, { code: "Space", ctrlKey: true });
+    expect(listen).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyUp(window, { code: "Space", ctrlKey: true });
   });
 
   it("если слушать нечем, причина названа", async () => {
@@ -85,13 +117,15 @@ describe("голосовой вход", () => {
 
     render(<Ask />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Сказать" }));
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
 
     await waitFor(() => {
       expect(screen.getByText(/распознавания речи нет/)).toBeTruthy();
     });
     // Микрофон не остался «включённым» после отказа.
-    expect(screen.getByRole("button", { name: "Сказать" })).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Держать и говорить" }).textContent,
+    ).toContain("Держать и говорить");
   });
 
   it("итог плана проговаривается вслух", async () => {
