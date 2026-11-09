@@ -17,6 +17,7 @@ use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::llama;
 use crate::memory::{Memory, RunRecord};
 use crate::models::{self, ModelFile};
+use crate::plan::{self, Plan, Problem};
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
@@ -641,6 +642,60 @@ pub fn assign_role(
 pub fn clear_role(state: State<'_, AppState>, role: String) -> Result<Vec<RoleView>, String> {
     roles::clear(&state.inner.memory, &role)?;
     Ok(role_views(&state))
+}
+
+/// Результат проверки плана: сам план (если разобрался) и список проблем.
+#[derive(Debug, Serialize)]
+pub struct PlanCheck {
+    pub plan: Option<Plan>,
+    /// Пусто — план исполним. Каждая проблема называет шаг и причину.
+    pub problems: Vec<Problem>,
+}
+
+/// Проверяет план из JSON. Ничего не исполняет: это ровно то, что должно случиться
+/// до первого шага — иначе план из модели исполнялся бы «на доверии».
+#[tauri::command]
+pub fn check_plan(state: State<'_, AppState>, json: String) -> PlanCheck {
+    match plan::parse(&json) {
+        Err(error) => PlanCheck {
+            plan: None,
+            problems: vec![Problem {
+                position: 0,
+                registry: String::new(),
+                problem: error,
+            }],
+        },
+        Ok(parsed) => PlanCheck {
+            problems: plan::check(&parsed, &state.inner.registry),
+            plan: Some(parsed),
+        },
+    }
+}
+
+/// Сохраняет проверенный план в памяти. Невалидный план не сохраняется: память не
+/// должна помнить то, что нельзя исполнить.
+#[tauri::command]
+pub fn save_plan(state: State<'_, AppState>, json: String) -> Result<PlanCheck, String> {
+    let parsed = plan::parse(&json)?;
+    let problems = plan::check(&parsed, &state.inner.registry);
+    if !problems.is_empty() {
+        return Ok(PlanCheck {
+            plan: Some(parsed),
+            problems,
+        });
+    }
+
+    plan::remember(&state.inner.memory, &parsed)?;
+    Ok(PlanCheck {
+        plan: Some(parsed),
+        problems: Vec::new(),
+    })
+}
+
+/// Последний сохранённый план, если он был.
+#[tauri::command]
+pub fn last_plan(state: State<'_, AppState>) -> Option<Plan> {
+    plan::last(&state.inner.memory)
 }
 
 /// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это

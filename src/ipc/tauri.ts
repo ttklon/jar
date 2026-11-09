@@ -12,6 +12,8 @@ import type {
   FlowView,
   HashCheck,
   ModelsView,
+  Plan,
+  PlanCheck,
   PlanItem,
   ProfileView,
   RoleView,
@@ -87,6 +89,18 @@ export function assignRole(role: string, name: string): Promise<RoleView[]> {
 
 export function clearRole(role: string): Promise<RoleView[]> {
   return invoke<RoleView[]>("clear_role", { role });
+}
+
+export function checkPlan(json: string): Promise<PlanCheck> {
+  return invoke<PlanCheck>("check_plan", { json });
+}
+
+export function savePlan(json: string): Promise<PlanCheck> {
+  return invoke<PlanCheck>("save_plan", { json });
+}
+
+export function lastPlan(): Promise<Plan | null> {
+  return invoke<Plan | null>("last_plan");
 }
 
 export function listTools(): Promise<ToolView[]> {

@@ -22,7 +22,10 @@ export type {
   ModelFile,
   ModelsView,
   ParamSpec,
+  Plan,
+  PlanCheck,
   PlanItem,
+  PlanProblem,
   ProfileOpView,
   ProfileView,
   RegistrySnapshot,
@@ -42,6 +45,8 @@ import type {
   ConfirmToken,
   Downloaded,
   EngineStatus,
+  Plan,
+  PlanCheck,
   RoleView,
   FlowView,
   HashCheck,
@@ -300,4 +305,38 @@ export async function clearRole(role: string): Promise<RoleView[]> {
   }
   const { clearRole: fromData } = await import("./dev");
   return fromData(role);
+}
+
+// ── Планы ───────────────────────────────────────────────────────────────────
+
+/**
+ * Проверить план из JSON: каждая строка — реестр, у каждой есть «рука», политика не
+ * против, у шага есть «зачем». Ничего не исполняет.
+ */
+export async function checkPlan(json: string): Promise<PlanCheck> {
+  if (isTauri()) {
+    const { checkPlan: fromCore } = await import("./tauri");
+    return fromCore(json);
+  }
+  const { checkPlan: fromData } = await import("./dev");
+  return fromData(json);
+}
+
+/** Сохранить проверенный план в памяти. Невалидный не сохраняется. */
+export async function savePlan(json: string): Promise<PlanCheck> {
+  if (isTauri()) {
+    const { savePlan: fromCore } = await import("./tauri");
+    return fromCore(json);
+  }
+  const { savePlan: fromData } = await import("./dev");
+  return fromData(json);
+}
+
+export async function lastPlan(): Promise<Plan | null> {
+  if (isTauri()) {
+    const { lastPlan: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { lastPlan: fromData } = await import("./dev");
+  return fromData();
 }

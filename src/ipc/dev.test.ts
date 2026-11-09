@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   auditTail,
   buildStats,
+  checkPlan,
   downloadModel,
   engineStatus,
   listFlows,
   listProfiles,
   listTools,
+  lastPlan,
   listModels,
   listRoles,
   memoryRuns,
@@ -186,6 +188,16 @@ describe("поиск по реестру в браузере", () => {
     const money = (await planFor("оплати счёт", 20)).find((item) => item.risk === "money");
     expect(money?.decision).toBe("deny");
     expect(money?.tool).toBeNull();
+  });
+});
+
+describe("планы в браузере", () => {
+  it("проверка плана отказывает: правила живут в ядре", async () => {
+    await expect(checkPlan("{}")).rejects.toThrow(/ядре/);
+  });
+
+  it("последнего плана в браузере нет", async () => {
+    await expect(lastPlan()).resolves.toBeNull();
   });
 });
 

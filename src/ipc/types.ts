@@ -124,6 +124,33 @@ export interface ModelFile {
   hash: string | null;
 }
 
+/** План: несколько шагов как данные, до исполнения проверяется. */
+export interface PlanStep {
+  registry: string;
+  params?: Record<string, string>;
+  why?: string;
+}
+
+export interface Plan {
+  goal: string;
+  source?: string;
+  steps: PlanStep[];
+}
+
+/** Что не так с планом: где, в каком шаге и что именно. */
+export interface PlanProblem {
+  /** Ноль — проблема в плане целиком, а не в шаге. */
+  position: number;
+  registry: string;
+  problem: string;
+}
+
+export interface PlanCheck {
+  plan: Plan | null;
+  /** Пусто — план исполним. */
+  problems: PlanProblem[];
+}
+
 /** Роль модели: требование к роли плюс то, что на неё назначено. */
 export interface RoleView {
   id: string;

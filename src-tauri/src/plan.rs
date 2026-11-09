@@ -1,0 +1,322 @@
+//! План: несколько шагов как данные, а не как код.
+//!
+//! План — это то, что предложит модель (или человек напишет руками), и до исполнения
+//! он обязан пройти проверку. Правила простые и жёсткие:
+//!
+//! * каждый шаг — строка реестра, а не свободный текст;
+//! * у шага должна быть «рука», иначе план обещает то, чего приложение не умеет;
+//! * политика не должна запрещать шаг (`deny` — это «не делаем никогда»);
+//! * у шага есть объяснение: план без «зачем» неотличим от случайного списка.
+//!
+//! Плана из модели пока нет — сначала схема и валидатор, которые можно проверить без
+//! неё. Хранится план в памяти как факт: он принадлежит запуску, а не файлу.
+
+use std::collections::BTreeMap;
+
+use serde::{Deserialize, Serialize};
+
+use crate::memory::Memory;
+use crate::policy;
+use crate::registry::Registry;
+use crate::tools;
+
+/// Сколько шагов ещё считается планом. Длиннее — это уже сценарий, и его место в
+/// `data/flows.json`, где шаги проверяются валидатором данных.
+pub const MAX_STEPS: usize = 12;
+
+/// Ключ факта, под которым лежит последний план.
+pub const FACT_KEY: &str = "plan:last";
+
+/// Один план.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Plan {
+    /// Что человек попросил — дословно, а не пересказ.
+    pub goal: String,
+    /// Откуда план: `model`, `human` или `flow`.
+    #[serde(default)]
+    pub source: String,
+    pub steps: Vec<PlanStep>,
+}
+
+/// Шаг плана.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlanStep {
+    /// Ключ реестра `domain|verb|object`.
+    pub registry: String,
+    #[serde(default)]
+    pub params: BTreeMap<String, String>,
+    /// Зачем этот шаг нужен в этом плане.
+    #[serde(default)]
+    pub why: String,
+}
+
+/// Что не так с планом: где, в каком шаге и что именно.
+#[derive(Debug, PartialEq, Eq, Serialize)]
+pub struct Problem {
+    /// Ноль означает «проблема не в шаге, а в плане целиком».
+    pub position: usize,
+    pub registry: String,
+    pub problem: String,
+}
+
+impl Problem {
+    fn whole(problem: impl Into<String>) -> Self {
+        Self {
+            position: 0,
+            registry: String::new(),
+            problem: problem.into(),
+        }
+    }
+
+    fn step(position: usize, registry: &str, problem: impl Into<String>) -> Self {
+        Self {
+            position: position + 1,
+            registry: registry.to_string(),
+            problem: problem.into(),
+        }
+    }
+}
+
+/// Разбирает JSON плана. Ошибка — человеческая строка: её увидит и модель, и человек.
+pub fn parse(json: &str) -> Result<Plan, String> {
+    if json.trim().is_empty() {
+        return Err("план пуст: нет JSON".to_string());
+    }
+
+    serde_json::from_str(json).map_err(|error| {
+        format!(
+            "план не разбирается как JSON: {error} (нужны поля goal и steps[].registry)"
+        )
+    })
+}
+
+/// Проверяет план против реестра и политики. Пустой список проблем — план исполним.
+pub fn check(plan: &Plan, registry: &Registry) -> Vec<Problem> {
+    let mut problems = Vec::new();
+
+    if plan.goal.trim().is_empty() {
+        problems.push(Problem::whole("у плана нет цели: непонятно, что проверять"));
+    }
+
+    if plan.steps.is_empty() {
+        problems.push(Problem::whole("в плане нет шагов"));
+        return problems;
+    }
+
+    if plan.steps.len() > MAX_STEPS {
+        problems.push(Problem::whole(format!(
+            "шагов {} — больше предела {MAX_STEPS}: это уже сценарий, а не план",
+            plan.steps.len()
+        )));
+    }
+
+    for (position, step) in plan.steps.iter().enumerate() {
+        let key = step.registry.trim();
+
+        if key.is_empty() {
+            problems.push(Problem::step(position, key, "у шага нет строки реестра"));
+            continue;
+        }
+
+        let Some(action) = registry.by_key(key) else {
+            problems.push(Problem::step(
+                position,
+                key,
+                "такой строки реестра нет: ключ пишется как domain|verb|object",
+            ));
+            continue;
+        };
+
+        if tools::spec(key).is_none() {
+            problems.push(Problem::step(
+                position,
+                key,
+                "у этого действия нет инструмента: строки реестра мало, нужна рука",
+            ));
+            continue;
+        }
+
+        if let policy::Decision::Deny(_) = policy::decide(action) {
+            problems.push(Problem::step(
+                position,
+                key,
+                "политика это запрещает: деньги и учётные данные не делает система",
+            ));
+            continue;
+        }
+
+        if step.why.trim().is_empty() {
+            problems.push(Problem::step(
+                position,
+                key,
+                "шаг без объяснения: непонятно, зачем он в этом плане",
+            ));
+        }
+    }
+
+    problems
+}
+
+/// Запоминает план (JSON как есть) и возвращает его разобранным.
+pub fn remember(memory: &Memory, plan: &Plan) -> Result<(), String> {
+    let json = serde_json::to_string(plan).map_err(|error| format!("план не пишется: {error}"))?;
+    memory
+        .remember(FACT_KEY, &json)
+        .map_err(|error| format!("план не сохранился: {error}"))
+}
+
+/// Последний сохранённый план. Битый JSON — это «плана нет», а не паника.
+pub fn last(memory: &Memory) -> Option<Plan> {
+    memory
+        .fact(FACT_KEY)
+        .and_then(|json| serde_json::from_str(&json).ok())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn registry() -> Registry {
+        Registry::load().expect("реестр читается")
+    }
+
+    fn step(registry: &str) -> PlanStep {
+        PlanStep {
+            registry: registry.to_string(),
+            params: BTreeMap::new(),
+            why: "нужно, чтобы двигаться дальше".to_string(),
+        }
+    }
+
+    #[test]
+    fn parse_reports_the_missing_fields_in_human_words() {
+        let json = r#"{"goal":"наведи порядок","steps":[{"registry":"files|создать|папку"}]}"#;
+        let plan = parse(json).expect("план разбирается");
+        assert_eq!(plan.goal, "наведи порядок");
+        assert_eq!(plan.steps[0].registry, "files|создать|папку");
+
+        let error = parse("не json").expect_err("это не план");
+        assert!(error.contains("не разбирается"), "{error}");
+
+        let error = parse("   ").expect_err("пусто");
+        assert!(error.contains("пуст"), "{error}");
+    }
+
+    #[test]
+    fn a_plan_with_real_hands_has_no_problems() {
+        let plan = Plan {
+            goal: "посмотреть, что с диском".to_string(),
+            source: "human".to_string(),
+            steps: vec![
+                step("storage-backup|проверить|свободное место"),
+                step("files|проверить|размеры и место"),
+            ],
+        };
+
+        assert_eq!(plan.steps.len(), 2);
+        assert_eq!(check(&plan, &registry()), Vec::new(), "план должен быть чистым");
+    }
+
+    #[test]
+    fn a_step_without_a_hand_is_refused() {
+        let plan = Plan {
+            goal: "найди по содержимому".to_string(),
+            source: "model".to_string(),
+            steps: vec![step("files|найти|по содержимому")],
+        };
+
+        let problems = check(&plan, &registry());
+        assert_eq!(problems.len(), 1);
+        assert!(problems[0].problem.contains("нет инструмента"), "{problems:?}");
+    }
+
+    #[test]
+    fn unknown_registry_key_is_named_as_unknown() {
+        let plan = Plan {
+            goal: "что-нибудь".to_string(),
+            source: "model".to_string(),
+            steps: vec![step("files|телепортировать|файл")],
+        };
+
+        let problems = check(&plan, &registry());
+        assert!(problems[0].problem.contains("строки реестра нет"), "{problems:?}");
+    }
+
+    #[test]
+    fn money_is_refused_by_policy_not_by_chance() {
+        let plan = Plan {
+            goal: "оплати счёт".to_string(),
+            source: "model".to_string(),
+            steps: vec![step("personal-finance|оплатить|счёт")],
+        };
+
+        let problems = check(&plan, &registry());
+        assert!(problems[0].problem.contains("запрещает"), "{problems:?}");
+    }
+
+    #[test]
+    fn a_step_without_reason_and_an_endless_plan_are_reported() {
+        let mut bare = step("storage-backup|проверить|свободное место");
+        bare.why.clear();
+        let plan = Plan {
+            goal: "место".to_string(),
+            source: "model".to_string(),
+            steps: vec![bare],
+        };
+        assert!(check(&plan, &registry())[0]
+            .problem
+            .contains("без объяснения"));
+
+        let long = Plan {
+            goal: "всё сразу".to_string(),
+            source: "model".to_string(),
+            steps: (0..MAX_STEPS + 1)
+                .map(|_| step("files|проверить|размеры и место"))
+                .collect(),
+        };
+        let problems = check(&long, &registry());
+        assert!(
+            problems.iter().any(|problem| problem.problem.contains("сценарий")),
+            "длинный план называется сценарием: {problems:?}"
+        );
+    }
+
+    #[test]
+    fn empty_plan_lists_no_steps() {
+        let plan = Plan {
+            goal: String::new(),
+            source: "model".to_string(),
+            steps: Vec::new(),
+        };
+        let problems = check(&plan, &registry());
+        assert_eq!(problems.len(), 2, "нет цели и нет шагов: {problems:?}");
+        assert!(problems.iter().any(|problem| problem.problem.contains("нет цели")));
+    }
+
+    #[test]
+    fn the_last_plan_survives_a_reopen() {
+        let dir = std::env::temp_dir().join(format!("zshelper-plan-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка создаётся");
+        let path = dir.join("memory.db");
+
+        let plan = Plan {
+            goal: "посмотреть диск".to_string(),
+            source: "human".to_string(),
+            steps: vec![step("storage-backup|проверить|свободное место")],
+        };
+
+        {
+            let memory = Memory::open(path.clone()).expect("память открывается");
+            assert!(last(&memory).is_none(), "до сохранения плана нет");
+            remember(&memory, &plan).expect("план сохраняется");
+        }
+
+        let memory = Memory::open(path).expect("память открывается снова");
+        let back = last(&memory).expect("план читается");
+        assert_eq!(back.goal, plan.goal);
+        assert_eq!(back.steps.len(), 1);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+}

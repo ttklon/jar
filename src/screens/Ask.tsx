@@ -1,8 +1,16 @@
 import { useCallback, useState } from "react";
-import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
+import {
+  Button,
+  Input,
+  makeStyles,
+  Spinner,
+  Text,
+  Textarea,
+  tokens,
+} from "@fluentui/react-components";
 import { SearchRegular } from "@fluentui/react-icons";
-import { planFor } from "../ipc";
-import type { PlanItem } from "../ipc";
+import { checkPlan, isTauri, planFor, savePlan } from "../ipc";
+import type { PlanCheck, PlanItem } from "../ipc";
 import { ask } from "../i18n/ru";
 import { RiskBadge } from "../components/RiskBadge";
 
@@ -53,6 +61,19 @@ const useStyles = makeStyles({
   hand: { color: tokens.colorPaletteGreenForeground2, fontWeight: tokens.fontWeightSemibold },
   noHand: { color: tokens.colorNeutralForeground3, fontStyle: "italic" },
   count: { color: tokens.colorNeutralForeground3, fontSize: tokens.fontSizeBase200 },
+  plan: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    padding: "14px 16px",
+    borderRadius: tokens.borderRadiusLarge,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground2,
+    maxWidth: "96ch",
+  },
+  problems: { margin: 0, paddingLeft: "18px", fontSize: tokens.fontSizeBase200 },
+  problem: { color: tokens.colorPaletteRedForeground2 },
+  okPlan: { color: tokens.colorPaletteGreenForeground2, fontSize: tokens.fontSizeBase200 },
 });
 
 export function Ask() {
@@ -61,6 +82,11 @@ export function Ask() {
   const [items, setItems] = useState<PlanItem[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [planJson, setPlanJson] = useState("");
+  const [check, setCheck] = useState<PlanCheck | null>(null);
+  const [planBusy, setPlanBusy] = useState(false);
+  const [planError, setPlanError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const search = useCallback((text: string) => {
     const trimmed = text.trim();
@@ -81,12 +107,97 @@ export function Ask() {
       .finally(() => setBusy(false));
   }, []);
 
+  const verifyPlan = useCallback(() => {
+    setPlanBusy(true);
+    setPlanError(null);
+    setSaved(false);
+    checkPlan(planJson)
+      .then(setCheck)
+      .catch((reason: unknown) =>
+        setPlanError(reason instanceof Error ? reason.message : String(reason)),
+      )
+      .finally(() => setPlanBusy(false));
+  }, [planJson]);
+
+  const storePlan = useCallback(() => {
+    setPlanBusy(true);
+    setPlanError(null);
+    savePlan(planJson)
+      .then((result) => {
+        setCheck(result);
+        setSaved(result.problems.length === 0);
+      })
+      .catch((reason: unknown) =>
+        setPlanError(reason instanceof Error ? reason.message : String(reason)),
+      )
+      .finally(() => setPlanBusy(false));
+  }, [planJson]);
+
   return (
     <div className={styles.root}>
       <Text as="h1" size={700}>
         {ask.title}
       </Text>
       <Text className={styles.lead}>{ask.lead}</Text>
+
+      <section className={styles.plan}>
+        <Text as="h2" size={500}>
+          {ask.planTitle}
+        </Text>
+        <Text className={styles.note}>{ask.planLead}</Text>
+        {!isTauri() ? (
+          <Text className={styles.note}>{ask.planNoPlan}</Text>
+        ) : (
+          <>
+            <Textarea
+              value={planJson}
+              placeholder={ask.planPlaceholder}
+              aria-label={ask.planTitle}
+              resize="vertical"
+              textarea={{ spellCheck: false }}
+              onChange={(_, data) => setPlanJson(data.value)}
+            />
+            <div className={styles.bar}>
+              <Button disabled={planBusy} onClick={verifyPlan}>
+                {ask.planCheck}
+              </Button>
+              <Button
+                appearance="primary"
+                disabled={planBusy || check === null || check.problems.length > 0}
+                onClick={storePlan}
+              >
+                {ask.planSaving}
+              </Button>
+              {saved ? <Text className={styles.okPlan}>{ask.planSaved}</Text> : null}
+            </div>
+          </>
+        )}
+
+        {planError ? (
+          <Text className={styles.error}>
+            {ask.planError}: {planError}
+          </Text>
+        ) : null}
+
+        {check !== null && check.problems.length === 0 ? (
+          <Text className={styles.okPlan}>{ask.planOk(check.plan?.steps.length ?? 0)}</Text>
+        ) : null}
+
+        {check !== null && check.problems.length > 0 ? (
+          <>
+            <Text className={styles.problem}>{ask.planProblems(check.problems.length)}</Text>
+            <ul className={styles.problems}>
+              {check.problems.map((problem, index) => (
+                <li key={`${problem.position}-${index}`} className={styles.problem}>
+                  {problem.position > 0 ? `шаг ${problem.position}: ` : ""}
+                  {problem.registry ? `${problem.registry} — ` : ""}
+                  {problem.problem}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+      </section>
 
       <form
         className={styles.bar}

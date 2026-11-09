@@ -122,6 +122,8 @@ import type {
   EngineStatus,
   HashCheck,
   ModelsView,
+  Plan,
+  PlanCheck,
   RoleView,
   PlanItem,
   RunRecord,
@@ -389,4 +391,22 @@ export async function assignRole(_role: string, _name: string): Promise<RoleView
 
 export async function clearRole(_role: string): Promise<RoleView[]> {
   throw new Error("назначение хранится в памяти приложения — в браузере её нет");
+}
+
+// ── Планы в браузере ────────────────────────────────────────────────────────
+//
+// Проверка плана — это реестр плюс политика плюс наличие «руки». Зеркалить её в TS
+// значило бы держать третью правду о том, что исполнимо. Поэтому здесь честный отказ,
+// а интерфейс в браузере просто не показывает проверялку.
+
+export async function checkPlan(_json: string): Promise<PlanCheck> {
+  throw new Error("план проверяет приложение: правила реестра и политики живут в ядре");
+}
+
+export async function savePlan(_json: string): Promise<PlanCheck> {
+  throw new Error("план сохраняет приложение: память живёт в ядре");
+}
+
+export async function lastPlan(): Promise<Plan | null> {
+  return null;
 }

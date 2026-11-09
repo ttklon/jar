@@ -33,6 +33,7 @@ pub mod llama;
 pub mod logging;
 pub mod memory;
 pub mod models;
+pub mod plan;
 pub mod planner;
 pub mod policy;
 pub mod profiles;
@@ -130,6 +131,9 @@ pub fn run() {
             ipc::list_roles,
             ipc::assign_role,
             ipc::clear_role,
+            ipc::check_plan,
+            ipc::save_plan,
+            ipc::last_plan,
             ipc::list_profiles,
             ipc::policy_for,
             ipc::confirm_tool,
