@@ -252,7 +252,10 @@ mod tests {
 
         assert_eq!(server.port(), port);
         assert!(server.pid() > 0);
-        assert!(answers(&spec, Duration::from_millis(500)), "отвечает после старта");
+        assert!(
+            answers(&spec, Duration::from_millis(500)),
+            "отвечает после старта"
+        );
 
         server.stop().expect("останавливается");
 
@@ -261,7 +264,10 @@ mod tests {
         while Instant::now() < deadline && answers(&spec, Duration::from_millis(200)) {
             std::thread::sleep(Duration::from_millis(100));
         }
-        assert!(!answers(&spec, Duration::from_millis(200)), "после stop никто не отвечает");
+        assert!(
+            !answers(&spec, Duration::from_millis(200)),
+            "после stop никто не отвечает"
+        );
     }
 
     #[cfg(windows)]
