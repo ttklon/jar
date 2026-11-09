@@ -14,7 +14,7 @@
 
 use serde::Serialize;
 
-use crate::policy::{self, Decision};
+use crate::policy;
 use crate::registry::{Action, Registry};
 use crate::tools;
 
