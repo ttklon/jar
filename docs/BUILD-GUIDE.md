@@ -536,6 +536,12 @@ impl ModelManager {
 * Один `workhorse` одновременно; `router` может жить параллельно. VRAM: не более 80 % доступной.
 * Не тянуть модель на батарее (настройка «не скачивать при питании от батареи»).
 
+**Состояние на сейчас:** папка моделей, чтение заголовка GGUF, сверка sha256, скачивание
+через `curl` и место на диске — сделаны. Процесс-менеджер (`server.rs`) есть и проверен на
+заглушке (`HttpListener` вместо движка): запуск, ожидание `/health`, таймаут, остановка.
+Сам `llama-server` ещё не подключён — ни бинарника, ни флагов в сборке пока нет, поэтому
+«модель запущена» интерфейс не обещает.
+
 ### 9.3 Промпт-контракт с моделью
 
 * Всегда: JSON-схема (грамматика GBNF от llama.cpp или `response_format json_schema`), температура
@@ -740,7 +746,7 @@ python tools/check_all.py           # данные (обязательно пе�
 ```
 
 Что уже стоит в репозитории на момент написания (проверять, а не предполагать):
-`src-tauri/src/{registry,policy,tools,flows,profiles,memory,planner,models,download,ipc,tray,logging,lib}.rs`,
+`src-tauri/src/{registry,policy,tools,flows,profiles,memory,planner,models,download,server,ipc,tray,logging,lib}.rs`,
 `src/{app,screens,components,ipc,lib,i18n}`, `scripts/make_icons.py`, джобы `ui`, `core` и `release`
 в `.github/workflows/app.yml`.
 
