@@ -780,7 +780,7 @@ pub fn request_learning(
         return Ok(None);
     };
 
-    learn::request(&inner.memory, action, &query, audit::now_ms()).map(Some)
+    learn::request(&inner.memory, action, &query, now_ms()).map(Some)
 }
 
 /// Всё, чему приложение ещё не научилось, — самое просимое сверху.
