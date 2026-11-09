@@ -77,6 +77,68 @@ impl Problem {
     }
 }
 
+/// Решение по одному шагу до запуска: что можно делать сразу, а что человек должен
+/// разрешить. Заполняется целиком до первого шага — план либо начинается, либо нет.
+#[derive(Debug, PartialEq, Eq, Serialize)]
+pub struct StepGate {
+    /// Номер шага, начиная с единицы.
+    pub position: usize,
+    pub registry: String,
+    /// `allow`, `allow_with_notice`, `confirm` или `deny`.
+    pub decision: String,
+    /// Риск строки реестра: `read`, `write-local`, `destructive`.
+    pub risk: String,
+    /// Шаг требует подтверждения и человек его не разрешил.
+    pub wants_approval: bool,
+}
+
+/// Что можно из плана прямо сейчас. Отказ политики не спрашивает никого: такой шаг
+/// не исполнится, даже если человек его разрешил.
+pub fn gate_plan(plan: &Plan, registry: &Registry, approved: &[usize]) -> Vec<StepGate> {
+    plan.steps
+        .iter()
+        .enumerate()
+        .map(|(index, step)| {
+            let key = step.registry.trim();
+            let (decision, risk) = match registry.by_key(key) {
+                Some(action) => {
+                    let decision = policy::decide(action);
+                    (decision.as_str(), action.risk.as_str())
+                }
+                // Строку проверяет `check`; здесь неизвестное не разрешается никогда.
+                None => ("deny", "unknown"),
+            };
+
+            StepGate {
+                position: index + 1,
+                registry: key.to_string(),
+                decision: decision.to_string(),
+                risk: risk.to_string(),
+                wants_approval: decision == "confirm" && !approved.contains(&(index + 1)),
+            }
+        })
+        .collect()
+}
+
+/// Первое, что мешает запуску плана целиком: неодобренный шаг или запрет политики.
+pub fn blocker(gates: &[StepGate]) -> Option<String> {
+    for gate in gates {
+        if gate.decision == "deny" {
+            return Some(format!(
+                "шаг {} ({}) политика запрещает: это не делает система",
+                gate.position, gate.registry
+            ));
+        }
+        if gate.wants_approval {
+            return Some(format!(
+                "шаг {} ({}) требует подтверждения человеком",
+                gate.position, gate.registry
+            ));
+        }
+    }
+    None
+}
+
 /// Разбирает JSON плана. Ошибка — человеческая строка: её увидит и модель, и человек.
 pub fn parse(json: &str) -> Result<Plan, String> {
     if json.trim().is_empty() {
@@ -332,5 +394,57 @@ mod tests {
         assert_eq!(back.steps.len(), 1);
 
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_destructive_step_waits_for_a_person_and_then_runs() {
+        let plan = Plan {
+            goal: "убери лишнее".to_string(),
+            source: "model".to_string(),
+            steps: vec![
+                step("files|проверить|дубликаты по хэшу"),
+                step("files|удалить|в корзину"),
+            ],
+        };
+        let registry = registry();
+
+        let gates = gate_plan(&plan, &registry, &[]);
+        assert!(!gates[0].wants_approval, "чтение не спрашивает");
+        assert!(gates[1].wants_approval, "удаление спрашивает");
+        assert_eq!(gates[1].risk, "destructive");
+        assert!(blocker(&gates).expect("блокер").contains("шаг 2"));
+
+        let approved = gate_plan(&plan, &registry, &[2]);
+        assert!(!approved[1].wants_approval, "одобренный шаг не ждёт");
+        assert_eq!(blocker(&approved), None, "план можно запускать");
+    }
+
+    #[test]
+    fn a_forbidden_step_is_not_unlocked_by_approval() {
+        let plan = Plan {
+            goal: "оплати счёт".to_string(),
+            source: "model".to_string(),
+            steps: vec![step("personal-finance|оплатить|счёт")],
+        };
+
+        // Даже если человек «одобрил»: отказ политики не спрашивает разрешения.
+        let gates = gate_plan(&plan, &registry(), &[1]);
+        assert_eq!(gates[0].decision, "deny");
+        assert!(!gates[0].wants_approval);
+        assert!(blocker(&gates).expect("блокер").contains("запрещает"));
+    }
+
+    #[test]
+    fn unknown_step_is_a_denial_not_a_crash() {
+        let plan = Plan {
+            goal: "что-нибудь".to_string(),
+            source: "model".to_string(),
+            steps: vec![step("files|телепортировать|файл")],
+        };
+
+        let gates = gate_plan(&plan, &registry(), &[1]);
+        assert_eq!(gates[0].decision, "deny");
+        assert_eq!(gates[0].risk, "unknown");
+        assert!(blocker(&gates).expect("блокер").contains("запрещает"));
     }
 }

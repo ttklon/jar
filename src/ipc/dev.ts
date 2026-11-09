@@ -125,6 +125,7 @@ import type {
   ModelsView,
   Plan,
   PlanCheck,
+  PlanReport,
   RoleView,
   PlanItem,
   RunRecord,
@@ -415,4 +416,10 @@ export async function savePlan(_json: string): Promise<PlanCheck> {
 
 export async function lastPlan(): Promise<Plan | null> {
   return null;
+}
+
+export async function runPlan(_json: string, _approved: number[]): Promise<PlanReport> {
+  // План исполняет ядро: руки, политика и отмена живут там, и повторять это в браузере
+  // значило бы обещать то, чего браузер не умеет.
+  throw new Error("план исполняет приложение: руки и политика живут в ядре");
 }

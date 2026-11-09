@@ -15,6 +15,7 @@ import type {
   ModelsView,
   Plan,
   PlanCheck,
+  PlanReport,
   PlanItem,
   ProfileView,
   RoleView,
@@ -98,6 +99,10 @@ export function searchEpisodes(query: string, limit = 20): Promise<Episode[]> {
 
 export function checkPlan(json: string): Promise<PlanCheck> {
   return invoke<PlanCheck>("check_plan", { json });
+}
+
+export function runPlan(json: string, approved: number[]): Promise<PlanReport> {
+  return invoke<PlanReport>("run_plan", { json, approved });
 }
 
 export function savePlan(json: string): Promise<PlanCheck> {

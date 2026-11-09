@@ -326,6 +326,24 @@ export const ask = {
   planNoPlan: "в браузере проверка планов недоступна — правила реестра и политики живут в ядре",
   planError: "Проверка не удалась",
   planSaved: "план сохранён в памяти",
+  planStepsTitle: "Шаги плана",
+  planNeedsApproval: "нужно ваше разрешение",
+  planApprove: (position: number) => `разрешить шаг ${position}`,
+  planStep: (position: number, registry: string, risk: string) =>
+    `шаг ${position}: ${registry} · ${risk}`,
+  planRisk: {
+    read: "чтение",
+    "write-local": "изменение",
+    destructive: "уничтожение",
+    unknown: "неизвестно",
+  } as Record<string, string>,
+  planRun: "Выполнить план",
+  planRunError: "План не запущен",
+  planReportTitle: "Что получилось",
+  planStopped: (reason: string) => `остановлено: ${reason}`,
+  planStepOk: "готово",
+  planStepFailed: "не выполнено",
+  planStepCancelled: "отменено",
 };
 
 export const journal = {
@@ -365,6 +383,7 @@ export const journal = {
     tool: "инструмент",
     flow: "сценарий",
     download: "скачивание",
+    plan: "план",
   } as Record<string, string>,
   loadError: "Не удалось прочитать журнал",
   count: (n: number) => `Последние ${n} событий`,

@@ -10,6 +10,7 @@ import {
   listTools,
   lastPlan,
   listModels,
+  runPlan,
   listRoles,
   searchEpisodes,
   memoryRuns,
@@ -201,6 +202,10 @@ describe("поиск по памяти в браузере", () => {
 describe("планы в браузере", () => {
   it("проверка плана отказывает: правила живут в ядре", async () => {
     await expect(checkPlan("{}")).rejects.toThrow(/ядре/);
+  });
+
+  it("исполнение плана отказывает: руки и политика живут в ядре", async () => {
+    await expect(runPlan("{}", [])).rejects.toThrow(/ядре/);
   });
 
   it("последнего плана в браузере нет", async () => {

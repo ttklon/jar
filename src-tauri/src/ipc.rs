@@ -17,7 +17,7 @@ use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::llama;
 use crate::memory::{Episode, Memory, RunRecord};
 use crate::models::{self, ModelFile};
-use crate::plan::{self, Plan, Problem};
+use crate::plan::{self, Plan, Problem, StepGate};
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
@@ -650,6 +650,9 @@ pub struct PlanCheck {
     pub plan: Option<Plan>,
     /// Пусто — план исполним. Каждая проблема называет шаг и причину.
     pub problems: Vec<Problem>,
+    /// Что можно сразу, а что человек должен разрешить. Считается без разрешений:
+    /// интерфейс показывает галочки именно там, где они нужны.
+    pub gates: Vec<StepGate>,
 }
 
 /// Проверяет план из JSON. Ничего не исполняет: это ровно то, что должно случиться
@@ -664,9 +667,11 @@ pub fn check_plan(state: State<'_, AppState>, json: String) -> PlanCheck {
                 registry: String::new(),
                 problem: error,
             }],
+            gates: Vec::new(),
         },
         Ok(parsed) => PlanCheck {
             problems: plan::check(&parsed, &state.inner.registry),
+            gates: plan::gate_plan(&parsed, &state.inner.registry, &[]),
             plan: Some(parsed),
         },
     }
@@ -678,10 +683,12 @@ pub fn check_plan(state: State<'_, AppState>, json: String) -> PlanCheck {
 pub fn save_plan(state: State<'_, AppState>, json: String) -> Result<PlanCheck, String> {
     let parsed = plan::parse(&json)?;
     let problems = plan::check(&parsed, &state.inner.registry);
+    let gates = plan::gate_plan(&parsed, &state.inner.registry, &[]);
     if !problems.is_empty() {
         return Ok(PlanCheck {
             plan: Some(parsed),
             problems,
+            gates,
         });
     }
 
@@ -689,6 +696,7 @@ pub fn save_plan(state: State<'_, AppState>, json: String) -> Result<PlanCheck, 
     Ok(PlanCheck {
         plan: Some(parsed),
         problems: Vec::new(),
+        gates,
     })
 }
 
@@ -938,6 +946,179 @@ pub async fn run_tool(
     );
 
     Ok(outcome)
+}
+
+/// Что произошло на одном шаге плана.
+#[derive(Debug, Serialize)]
+pub struct PlanStepRun {
+    pub position: usize,
+    pub registry: String,
+    /// `ok`, `failed` или `cancelled`.
+    pub status: String,
+    pub reason: String,
+    pub evidence: String,
+    pub duration_ms: u64,
+}
+
+/// Отчёт о запуске плана. `stopped` пуст только если план прошёл целиком.
+#[derive(Debug, Serialize)]
+pub struct PlanReport {
+    pub goal: String,
+    pub steps: Vec<PlanStepRun>,
+    pub stopped: Option<String>,
+    pub run_id: Option<i64>,
+}
+
+/// Запускает план шаг за шагом. `approved` — номера шагов, которые человек разрешил
+/// (с единицы): шаг с риском выше чтения без разрешения не запускается, и это
+/// решается *до* первого шага, чтобы план не останавливался на середине.
+///
+/// Шаги идут по порядку и без параллельности: план — это последовательность, а не
+/// набор. Ошибка шага останавливает план: продолжать после неудачи значит делать
+/// следующий шаг на неверных данных.
+#[tauri::command]
+pub async fn run_plan(
+    state: State<'_, AppState>,
+    json: String,
+    approved: Vec<usize>,
+) -> Result<PlanReport, String> {
+    let inner = Arc::clone(&state.inner);
+    let plan = plan::parse(&json)?;
+
+    let problems = plan::check(&plan, &inner.registry);
+    if let Some(problem) = problems.first() {
+        return Err(format!("план не запущен: {}", problem.problem));
+    }
+
+    let gates = plan::gate_plan(&plan, &inner.registry, &approved);
+    if let Some(blocker) = plan::blocker(&gates) {
+        return Err(format!("план не запущен: {blocker}"));
+    }
+
+    // План запоминается до первого шага: он уже проверен, а итог запуска — отдельная
+    // история, которую ведёт журнал и память запусков.
+    let _ = plan::remember(&inner.memory, &plan);
+
+    let run_id = inner.memory.start_run("plan", &plan.goal).ok();
+    inner.cancel.store(false, Ordering::Relaxed);
+
+    let mut steps = Vec::new();
+    let mut stopped: Option<String> = None;
+
+    for (index, step) in plan.steps.iter().enumerate() {
+        let position = index + 1;
+        let key = step.registry.trim().to_string();
+        let args: Vec<(String, String)> = step.params.clone().into_iter().collect();
+        let fingerprint = format!("{:016x}", policy::fingerprint(&key, &args));
+        let (decision, risk) = decision_of(&inner, &key);
+
+        // Человек разрешил этот шаг в окне плана, поэтому токен выдаётся и сразу
+        // тратится здесь: правило «один токен на одно действие» остаётся в силе, а
+        // подтверждение остаётся подтверждением, просто данным заранее.
+        if decision.needs_token() {
+            let token = inner.policy.issue(&key, &args);
+            audit(
+                &inner,
+                Entry {
+                    kind: AuditKind::Confirmed,
+                    subject: &key,
+                    risk: &risk,
+                    decision: decision.as_str(),
+                    fingerprint: &fingerprint,
+                    outcome: "approved in plan",
+                    duration_ms: 0,
+                },
+            );
+            if let Err(error) = inner.policy.consume(token, &key, &args) {
+                stopped = Some(format!("шаг {position}: {}", error.as_str()));
+                break;
+            }
+        }
+
+        audit(
+            &inner,
+            Entry {
+                kind: AuditKind::Requested,
+                subject: &key,
+                risk: &risk,
+                decision: decision.as_str(),
+                fingerprint: &fingerprint,
+                outcome: "requested",
+                duration_ms: 0,
+            },
+        );
+
+        let worker = Arc::clone(&inner);
+        let running = key.clone();
+        let params = step.params.clone();
+        let outcome = tauri::async_runtime::spawn_blocking(move || {
+            tools::run(&running, &params, &worker.cancel)
+        })
+        .await
+        .map_err(|error| format!("исполнение прервано: {error}"))?;
+
+        let status = if outcome.cancelled {
+            "cancelled"
+        } else if outcome.ok {
+            "ok"
+        } else {
+            "failed"
+        };
+
+        audit(
+            &inner,
+            Entry {
+                kind: AuditKind::Finished,
+                subject: &key,
+                risk: &risk,
+                decision: decision.as_str(),
+                fingerprint: &fingerprint,
+                outcome: status,
+                duration_ms: outcome.duration_ms,
+            },
+        );
+
+        if let Some(run_id) = run_id {
+            let _ = inner.memory.add_step(
+                run_id,
+                position as i64,
+                &key,
+                outcome.ok,
+                &outcome.reason,
+                outcome.evidence.kind(),
+            );
+        }
+
+        steps.push(PlanStepRun {
+            position,
+            registry: key,
+            status: status.to_string(),
+            reason: outcome.reason.clone(),
+            evidence: outcome.evidence.kind().to_string(),
+            duration_ms: outcome.duration_ms,
+        });
+
+        if outcome.cancelled {
+            stopped = Some("отменено человеком".to_string());
+            break;
+        }
+        if !outcome.ok {
+            stopped = Some(format!("шаг {position} не выполнен: {}", outcome.reason));
+            break;
+        }
+    }
+
+    if let Some(run_id) = run_id {
+        let summary = if stopped.is_some() { "stopped" } else { "ok" };
+        let _ = inner.memory.finish_run(run_id, summary);
+    }
+
+    Ok(PlanReport {
+        goal: plan.goal.clone(),
+        steps,
+        stopped,
+        run_id,
+    })
 }
 
 /// Отмена текущего запуска: флаг выставляет исполнитель, процесс убивается в `executor`.

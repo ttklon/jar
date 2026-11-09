@@ -9,8 +9,8 @@ import {
   tokens,
 } from "@fluentui/react-components";
 import { SearchRegular } from "@fluentui/react-icons";
-import { checkPlan, isTauri, planFor, savePlan } from "../ipc";
-import type { PlanCheck, PlanItem } from "../ipc";
+import { checkPlan, isTauri, planFor, runPlan, savePlan } from "../ipc";
+import type { PlanCheck, PlanItem, PlanReport } from "../ipc";
 import { ask } from "../i18n/ru";
 import { RiskBadge } from "../components/RiskBadge";
 
@@ -87,6 +87,8 @@ export function Ask() {
   const [planBusy, setPlanBusy] = useState(false);
   const [planError, setPlanError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [approved, setApproved] = useState<number[]>([]);
+  const [report, setReport] = useState<PlanReport | null>(null);
 
   const search = useCallback((text: string) => {
     const trimmed = text.trim();
@@ -111,6 +113,8 @@ export function Ask() {
     setPlanBusy(true);
     setPlanError(null);
     setSaved(false);
+    setReport(null);
+    setApproved([]);
     checkPlan(planJson)
       .then(setCheck)
       .catch((reason: unknown) =>
@@ -132,6 +136,23 @@ export function Ask() {
       )
       .finally(() => setPlanBusy(false));
   }, [planJson]);
+
+  const executePlan = useCallback(() => {
+    // Запускаем ровно то, что проверили: правка текста после проверки не должна
+    // просачиваться в исполнение в обход проверки.
+    const validated = check?.plan;
+    if (!validated) return;
+
+    setPlanBusy(true);
+    setPlanError(null);
+    setReport(null);
+    runPlan(JSON.stringify(validated), approved)
+      .then(setReport)
+      .catch((reason: unknown) =>
+        setPlanError(reason instanceof Error ? reason.message : String(reason)),
+      )
+      .finally(() => setPlanBusy(false));
+  }, [check, approved]);
 
   return (
     <div className={styles.root}>
@@ -180,7 +201,83 @@ export function Ask() {
         ) : null}
 
         {check !== null && check.problems.length === 0 ? (
-          <Text className={styles.okPlan}>{ask.planOk(check.plan?.steps.length ?? 0)}</Text>
+          <>
+            <Text className={styles.okPlan}>{ask.planOk(check.plan?.steps.length ?? 0)}</Text>
+            <Text className={styles.note}>{ask.planStepsTitle}</Text>
+            <ul className={styles.problems}>
+              {check.gates.map((gate) => {
+                const risky = gate.decision === "confirm";
+                return (
+                  <li key={gate.position}>
+                    <label>
+                      {risky ? (
+                        <input
+                          type="checkbox"
+                          aria-label={ask.planApprove(gate.position)}
+                          checked={approved.includes(gate.position)}
+                          onChange={(event) =>
+                            setApproved((current) =>
+                              event.target.checked
+                                ? [...current, gate.position]
+                                : current.filter((position) => position !== gate.position),
+                            )
+                          }
+                        />
+                      ) : null}
+                      {" "}
+                      {ask.planStep(
+                        gate.position,
+                        gate.registry,
+                        ask.planRisk[gate.risk] ?? gate.risk,
+                      )}
+                      {risky ? ` · ${ask.planNeedsApproval}` : ""}
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className={styles.bar}>
+              <Button
+                appearance="primary"
+                disabled={
+                  planBusy ||
+                  check.gates.some(
+                    (gate) =>
+                      gate.decision === "confirm" && !approved.includes(gate.position),
+                  )
+                }
+                onClick={executePlan}
+              >
+                {ask.planRun}
+              </Button>
+            </div>
+          </>
+        ) : null}
+
+        {report !== null ? (
+          <>
+            <Text weight="semibold">{ask.planReportTitle}</Text>
+            <ul className={styles.problems}>
+              {report.steps.map((step) => (
+                <li
+                  key={step.position}
+                  className={step.status === "ok" ? styles.okPlan : styles.problem}
+                >
+                  {`шаг ${step.position}: ${step.registry}`}:{" "}
+                  {step.status === "ok"
+                    ? ask.planStepOk
+                    : step.status === "cancelled"
+                      ? ask.planStepCancelled
+                      : ask.planStepFailed}
+                  {step.evidence ? ` · ${step.evidence}` : ""}
+                  {step.reason ? ` · ${step.reason}` : ""}
+                </li>
+              ))}
+            </ul>
+            {report.stopped ? (
+              <Text className={styles.problem}>{ask.planStopped(report.stopped)}</Text>
+            ) : null}
+          </>
         ) : null}
 
         {check !== null && check.problems.length > 0 ? (

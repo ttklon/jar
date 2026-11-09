@@ -25,8 +25,10 @@ export type {
   ParamSpec,
   Plan,
   PlanCheck,
+  PlanGate,
   PlanItem,
   PlanProblem,
+  PlanReport,
   ProfileOpView,
   ProfileView,
   RegistrySnapshot,
@@ -49,6 +51,7 @@ import type {
   Episode,
   Plan,
   PlanCheck,
+  PlanReport,
   RoleView,
   FlowView,
   HashCheck,
@@ -335,6 +338,16 @@ export async function checkPlan(json: string): Promise<PlanCheck> {
   }
   const { checkPlan: fromData } = await import("./dev");
   return fromData(json);
+}
+
+/** Запустить проверенный план. `approved` — номера шагов, которые человек разрешил. */
+export async function runPlan(json: string, approved: number[]): Promise<PlanReport> {
+  if (isTauri()) {
+    const { runPlan: fromCore } = await import("./tauri");
+    return fromCore(json, approved);
+  }
+  const { runPlan: fromData } = await import("./dev");
+  return fromData(json, approved);
 }
 
 /** Сохранить проверенный план в памяти. Невалидный не сохраняется. */

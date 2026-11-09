@@ -135,6 +135,7 @@ pub fn run() {
             ipc::save_plan,
             ipc::last_plan,
             ipc::search_episodes,
+            ipc::run_plan,
             ipc::list_profiles,
             ipc::policy_for,
             ipc::confirm_tool,

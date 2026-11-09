@@ -156,6 +156,37 @@ export interface PlanCheck {
   plan: Plan | null;
   /** Пусто — план исполним. */
   problems: PlanProblem[];
+  /** Что можно сразу, а что человек должен разрешить. */
+  gates: PlanGate[];
+}
+
+/** Решение по шагу до запуска: политика уже спрошена. */
+export interface PlanGate {
+  /** Номер шага, с единицы. */
+  position: number;
+  registry: string;
+  decision: "allow" | "allow_with_notice" | "confirm" | "deny";
+  risk: string;
+  /** Шаг требует подтверждения и человек его пока не разрешил. */
+  wants_approval: boolean;
+}
+
+/** Что случилось на одном шаге плана. */
+export interface PlanStepRun {
+  position: number;
+  registry: string;
+  status: "ok" | "failed" | "cancelled";
+  reason: string;
+  evidence: string;
+  duration_ms: number;
+}
+
+/** Отчёт о запуске: `stopped` пуст, только если план прошёл целиком. */
+export interface PlanReport {
+  goal: string;
+  steps: PlanStepRun[];
+  stopped: string | null;
+  run_id: number | null;
 }
 
 /** Роль модели: требование к роли плюс то, что на неё назначено. */
