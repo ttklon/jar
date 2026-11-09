@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   Button,
   Input,
@@ -8,10 +8,11 @@ import {
   Textarea,
   tokens,
 } from "@fluentui/react-components";
-import { SearchRegular } from "@fluentui/react-icons";
+import { MicRegular, SearchRegular } from "@fluentui/react-icons";
 import { checkPlan, isTauri, planFor, runPlan, savePlan } from "../ipc";
 import type { PlanCheck, PlanItem, PlanReport } from "../ipc";
 import { ask } from "../i18n/ru";
+import { listen, speak, type Voice } from "../lib/voice";
 import { RiskBadge } from "../components/RiskBadge";
 
 const LIMIT = 8;
@@ -89,6 +90,10 @@ export function Ask() {
   const [saved, setSaved] = useState(false);
   const [approved, setApproved] = useState<number[]>([]);
   const [report, setReport] = useState<PlanReport | null>(null);
+  const [listening, setListening] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [spokenNote, setSpokenNote] = useState<string | null>(null);
+  const voiceRef = useRef<Voice | null>(null);
 
   const search = useCallback((text: string) => {
     const trimmed = text.trim();
@@ -108,6 +113,32 @@ export function Ask() {
       )
       .finally(() => setBusy(false));
   }, []);
+
+  // Сказать задачу: услышанное идёт в тот же поиск, что и напечатанное. Голос — это
+  // только вход, дальше обычный путь: реестр, руки, политика.
+  const startVoice = useCallback(() => {
+    setVoiceError(null);
+
+    if (listening) {
+      voiceRef.current?.stop();
+      setListening(false);
+      return;
+    }
+
+    setListening(true);
+    const voice = listen({
+      onText: (text) => {
+        setQuery(text);
+        search(text);
+      },
+      onError: (message) => {
+        setVoiceError(message);
+        setListening(false);
+      },
+      onEnd: () => setListening(false),
+    });
+    voiceRef.current = voice;
+  }, [listening, search]);
 
   const verifyPlan = useCallback(() => {
     setPlanBusy(true);
@@ -147,7 +178,14 @@ export function Ask() {
     setPlanError(null);
     setReport(null);
     runPlan(JSON.stringify(validated), approved)
-      .then(setReport)
+      .then((result) => {
+        setReport(result);
+        // Проговариваем итог: человек не смотрит в экран, он говорит.
+        const phrase = result.stopped
+          ? ask.planSpeechStopped(result.stopped)
+          : ask.planSpeech(result.steps.length);
+        setSpokenNote(speak(phrase) ? null : ask.voiceSilent);
+      })
       .catch((reason: unknown) =>
         setPlanError(reason instanceof Error ? reason.message : String(reason)),
       )
@@ -310,10 +348,23 @@ export function Ask() {
           aria-label={ask.placeholder}
           onChange={(_, data) => setQuery(data.value)}
         />
+        <Button
+          icon={<MicRegular />}
+          onClick={startVoice}
+          aria-label={listening ? ask.voiceStop : ask.voiceSay}
+          title={ask.voiceNote}
+        >
+          {listening ? ask.voiceListening : ask.voiceSay}
+        </Button>
         <Button appearance="primary" icon={<SearchRegular />} type="submit" disabled={busy}>
           {busy ? ask.searching : ask.find}
         </Button>
       </form>
+
+      <Text className={styles.note}>{ask.voiceNote}</Text>
+
+      {voiceError ? <Text className={styles.error}>{voiceError}</Text> : null}
+      {spokenNote ? <Text className={styles.note}>{spokenNote}</Text> : null}
 
       {error ? (
         <Text className={styles.error}>

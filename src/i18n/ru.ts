@@ -344,6 +344,16 @@ export const ask = {
   planStepOk: "готово",
   planStepFailed: "не выполнено",
   planStepCancelled: "отменено",
+  voiceSay: "Сказать",
+  voiceListening: "слушаю…",
+  voiceStop: "Стоп",
+  voiceNote:
+    "Задачу можно сказать голосом, и ответ проговаривается вслух. Распознаёт и " +
+    "озвучивает служба системы (Windows/Chromium): звук уходит наружу. Локальное " +
+    "распознавание появится вместе с whisper-сервером.",
+  voiceSilent: "проговорить не могу: синтеза речи в этом окружении нет",
+  planSpeech: (steps: number) => `план выполнен, шагов: ${steps}`,
+  planSpeechStopped: (reason: string) => `план остановлен: ${reason}`,
 };
 
 export const journal = {
