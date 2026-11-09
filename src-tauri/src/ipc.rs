@@ -348,6 +348,10 @@ pub struct ModelsView {
     pub dir: String,
     pub items: Vec<ModelFile>,
     pub error: Option<String>,
+    /// Сколько всего занимают модели в папке.
+    pub total_bytes: u64,
+    /// Свободно на этом диске. `None` — спросить не удалось; выдумывать число нельзя.
+    pub free_bytes: Option<u64>,
 }
 
 /// Список `.gguf` в папке моделей. Ничего не скачивает и не запускает — только читает
@@ -363,6 +367,8 @@ pub fn list_models(state: State<'_, AppState>) -> ModelsView {
             }
             ModelsView {
                 dir: dir.display().to_string(),
+                total_bytes: models::total_bytes(&items),
+                free_bytes: models::free_space(dir),
                 items,
                 error: None,
             }
@@ -370,6 +376,8 @@ pub fn list_models(state: State<'_, AppState>) -> ModelsView {
         Err(error) => ModelsView {
             dir: dir.display().to_string(),
             items: Vec::new(),
+            total_bytes: 0,
+            free_bytes: models::free_space(dir),
             error: Some(error),
         },
     }
@@ -425,6 +433,15 @@ pub async fn download_model(
     }
 
     result
+}
+
+/// Удаляет файл модели.
+///
+/// Необратимо, поэтому подтверждение спрашивает интерфейс, а команда только делает
+/// то, о чём уже договорились. Хеш из памяти убирается вместе с файлом.
+#[tauri::command]
+pub fn remove_model(state: State<'_, AppState>, name: String) -> Result<(), String> {
+    models::remove(&state.inner.models_dir, &name, &state.inner.memory)
 }
 
 /// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это

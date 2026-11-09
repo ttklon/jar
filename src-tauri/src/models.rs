@@ -89,9 +89,7 @@ pub struct HashCheck {
 /// «файл тот же, что и в прошлый раз» — она ловит битую докачку и подмену файла, но
 /// не подменяет собой проверку по манифесту, которая появится вместе со скачиванием.
 pub fn verify(dir: &Path, name: &str, memory: &Memory) -> Result<HashCheck, String> {
-    if name.is_empty() || name.contains(['/', '\\']) || name.contains("..") {
-        return Err("имя файла не может быть путём".to_string());
-    }
+    check_file_name(name)?;
 
     let path = dir.join(name);
     if !path.is_file() {
@@ -118,6 +116,66 @@ pub fn verify(dir: &Path, name: &str, memory: &Memory) -> Result<HashCheck, Stri
         previous,
         verdict,
     })
+}
+
+/// Имя файла, а не путь: папку выбирает приложение, и запросом из неё не выйти.
+fn check_file_name(name: &str) -> Result<(), String> {
+    if name.is_empty() || name.contains(['/', '\\']) || name.contains("..") {
+        return Err("имя файла не может быть путём".to_string());
+    }
+    Ok(())
+}
+
+/// Удаляет файл модели. Действие необратимое, поэтому подтверждение спрашивает
+/// интерфейс, а не этот код: здесь только «сделать», если человек уже сказал «да».
+pub fn remove(dir: &Path, name: &str, memory: &Memory) -> Result<(), String> {
+    check_file_name(name)?;
+
+    let path = dir.join(name);
+    if !path.is_file() {
+        return Err(format!("файла нет: {name}"));
+    }
+
+    std::fs::remove_file(&path).map_err(|error| format!("файл не удаляется: {error}"))?;
+
+    // Память не должна помнить хеш файла, которого больше нет.
+    memory
+        .forget(&hash_key(name))
+        .map_err(|error| format!("память не обновилась: {error}"))
+}
+
+/// Сколько всего занимают модели в папке.
+pub fn total_bytes(items: &[ModelFile]) -> u64 {
+    items.iter().map(|item| item.size_bytes).sum()
+}
+
+/// Свободное место на диске, где лежит папка моделей.
+///
+/// На не-Windows — `None`: число, взятое с потолка, в интерфейсе опаснее пустоты.
+/// Папки может ещё не быть, поэтому диск определяется по корню пути, а не по файлу.
+#[cfg(windows)]
+pub fn free_space(dir: &Path) -> Option<u64> {
+    let path = dir.display().to_string().replace('\'', "''");
+    let script = format!(
+        "$root = [System.IO.Path]::GetPathRoot('{path}');\
+         $disk = Get-CimInstance Win32_LogicalDisk -Filter \"DeviceID='$root'\";\
+         Write-Output $disk.FreeSpace"
+    );
+
+    let output = std::process::Command::new("powershell.exe")
+        .args(crate::executor::powershell(&script))
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+
+    String::from_utf8_lossy(&output.stdout).trim().parse().ok()
+}
+
+#[cfg(not(windows))]
+pub fn free_space(_dir: &Path) -> Option<u64> {
+    None
 }
 
 /// Разобранный заголовок: только то, что показывается человеку.
@@ -527,6 +585,84 @@ mod tests {
         assert!(error.contains("файла нет"), "{error}");
 
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn remove_deletes_the_file_and_forgets_its_hash() {
+        let dir = temp_dir("remove");
+        let memory = Memory::open(dir.join("memory.db")).expect("память открывается");
+        std::fs::write(dir.join("gone.gguf"), b"payload").expect("файл пишется");
+        verify(&dir, "gone.gguf", &memory).expect("хеш запоминается");
+        assert!(memory.fact(&hash_key("gone.gguf")).is_some());
+
+        remove(&dir, "gone.gguf", &memory).expect("файл удаляется");
+
+        assert!(!dir.join("gone.gguf").exists());
+        assert!(
+            memory.fact(&hash_key("gone.gguf")).is_none(),
+            "память не помнит хеш того, чего нет"
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn remove_refuses_paths_and_absent_files() {
+        let dir = temp_dir("remove-guard");
+        let memory = Memory::open(dir.join("memory.db")).expect("память открывается");
+
+        let error = remove(&dir, "../secret", &memory).expect_err("это путь");
+        assert!(error.contains("путём"), "{error}");
+
+        let error = remove(&dir, "absent.gguf", &memory).expect_err("файла нет");
+        assert!(error.contains("файла нет"), "{error}");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn total_bytes_adds_up_what_is_on_disk() {
+        let items = vec![
+            ModelFile {
+                name: "a.gguf".into(),
+                size_bytes: 1000,
+                ok: true,
+                note: String::new(),
+                version: None,
+                tensors: None,
+                architecture: None,
+                quant: None,
+                hash: None,
+            },
+            ModelFile {
+                name: "b.gguf".into(),
+                size_bytes: 24,
+                ok: false,
+                note: String::new(),
+                version: None,
+                tensors: None,
+                architecture: None,
+                quant: None,
+                hash: None,
+            },
+        ];
+
+        assert_eq!(total_bytes(&items), 1024);
+        assert_eq!(total_bytes(&[]), 0);
+    }
+
+    #[test]
+    fn free_space_is_a_real_number_or_an_honest_none() {
+        let free = free_space(&std::env::temp_dir());
+
+        if cfg!(windows) {
+            assert!(
+                free.is_some_and(|bytes| bytes > 0),
+                "на Windows PowerShell обязан ответить числом: {free:?}"
+            );
+        } else {
+            assert!(free.is_none(), "на других системах мы не выдумываем место");
+        }
     }
 
     #[test]

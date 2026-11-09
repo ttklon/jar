@@ -316,7 +316,12 @@ export async function planFor(query: string, limit = 8): Promise<PlanItem[]> {
 // список — не ошибка: экран сам скажет, что смотреть надо в приложении.
 
 export async function listModels(): Promise<ModelsView> {
-  return { dir: "", items: [], error: null };
+  return { dir: "", items: [], error: null, total_bytes: 0, free_bytes: null };
+}
+
+/** Удалять в браузере нечего: файлов на диске тоже нет. */
+export async function removeModel(_name: string): Promise<void> {
+  throw new Error("удаляет приложение: в браузере нет файлов на диске");
 }
 
 /**

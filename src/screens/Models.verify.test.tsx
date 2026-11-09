@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { downloadModel, listModels, verifyModel } from "../ipc";
+import { downloadModel, listModels, removeModel, verifyModel } from "../ipc";
+import type { ModelFile, ModelsView } from "../ipc";
 import { Models } from "./Models";
 
 /**
@@ -15,6 +16,7 @@ vi.mock("../ipc", () => ({
   listModels: vi.fn(),
   verifyModel: vi.fn(),
   downloadModel: vi.fn(),
+  removeModel: vi.fn(),
 }));
 
 class ResizeObserverStub {
@@ -30,7 +32,19 @@ afterEach(() => {
   vi.mocked(listModels).mockReset();
   vi.mocked(verifyModel).mockReset();
   vi.mocked(downloadModel).mockReset();
+  vi.mocked(removeModel).mockReset();
 });
+
+/** Ответ ядра в одном месте: у модели есть размер папки и место на диске. */
+function view(items: ModelFile[], total: number): ModelsView {
+  return {
+    dir: "C:/models",
+    items,
+    error: null,
+    total_bytes: total,
+    free_bytes: 42_000_000_000,
+  };
+}
 
 const FILE = {
   name: "qwen3-1.7b.gguf",
@@ -46,7 +60,7 @@ const FILE = {
 
 describe("сверка хеша на экране «Модели»", () => {
   it("первая сверка показывает, что хеш записан впервые", async () => {
-    vi.mocked(listModels).mockResolvedValue({ dir: "C:/models", items: [FILE], error: null });
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
     vi.mocked(verifyModel).mockResolvedValue({
       name: FILE.name,
       actual: "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
@@ -67,9 +81,7 @@ describe("сверка хеша на экране «Модели»", () => {
 
   it("изменённый файл называется изменённым, а не совпавшим", async () => {
     vi.mocked(listModels).mockResolvedValue({
-      dir: "C:/models",
-      items: [{ ...FILE, hash: "aa".repeat(32) }],
-      error: null,
+      ...view([{ ...FILE, hash: "aa".repeat(32) }], 1_100_000_000),
     });
     vi.mocked(verifyModel).mockResolvedValue({
       name: FILE.name,
@@ -89,7 +101,7 @@ describe("сверка хеша на экране «Модели»", () => {
   });
 
   it("скачивание без эталона так и говорит: хеш записан, а не проверен", async () => {
-    vi.mocked(listModels).mockResolvedValue({ dir: "C:/models", items: [], error: null });
+    vi.mocked(listModels).mockResolvedValue(view([], 0));
     vi.mocked(downloadModel).mockResolvedValue({
       name: "qwen3-1.7b.gguf",
       bytes: 1_100_000_000,
@@ -119,7 +131,7 @@ describe("сверка хеша на экране «Модели»", () => {
   });
 
   it("без ссылки скачивание не начинается", async () => {
-    vi.mocked(listModels).mockResolvedValue({ dir: "C:/models", items: [], error: null });
+    vi.mocked(listModels).mockResolvedValue(view([], 0));
 
     render(<Models />);
 
@@ -132,7 +144,7 @@ describe("сверка хеша на экране «Модели»", () => {
   });
 
   it("ошибка сверки показывается как ошибка", async () => {
-    vi.mocked(listModels).mockResolvedValue({ dir: "C:/models", items: [FILE], error: null });
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
     vi.mocked(verifyModel).mockRejectedValue(new Error("файла нет: qwen3-1.7b.gguf"));
 
     render(<Models />);
@@ -142,5 +154,54 @@ describe("сверка хеша на экране «Модели»", () => {
     await waitFor(() => {
       expect(screen.getByText(/сверка не удалась/i)).toBeTruthy();
     });
+  });
+});
+
+describe("удаление файла модели", () => {
+  it("спрашивает подтверждение и удаляет только после ответа", async () => {
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
+    vi.mocked(removeModel).mockResolvedValue(undefined);
+
+    render(<Models />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /^удалить$/i }));
+
+    // Пока человек не ответил, ничего не удаляется.
+    expect(screen.getByText(/удалить файл модели\?/i)).toBeTruthy();
+    expect(vi.mocked(removeModel)).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: /удалить файл/i }));
+
+    await waitFor(() => {
+      expect(vi.mocked(removeModel)).toHaveBeenCalledWith("qwen3-1.7b.gguf");
+    });
+    await waitFor(() => {
+      expect(vi.mocked(listModels)).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it("«оставить» ничего не удаляет", async () => {
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
+
+    render(<Models />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /^удалить$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /оставить/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/удалить файл модели\?/i)).toBeNull();
+    });
+    expect(vi.mocked(removeModel)).not.toHaveBeenCalled();
+  });
+
+  it("показывает занятое место и свободное на диске", async () => {
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
+
+    render(<Models />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/модели занимают 1\.0 ГБ/i)).toBeTruthy();
+    });
+    expect(screen.getByText(/свободно на диске 39\.1 ГБ/i)).toBeTruthy();
   });
 });

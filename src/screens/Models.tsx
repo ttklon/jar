@@ -1,8 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogContent,
+  DialogSurface,
+  DialogTitle,
+  Input,
+  makeStyles,
+  Spinner,
+  Text,
+  tokens,
+} from "@fluentui/react-components";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
-import { downloadModel, isTauri, listModels, verifyModel } from "../ipc";
-import type { Downloaded, HashCheck, ModelsView } from "../ipc";
+import { downloadModel, isTauri, listModels, removeModel, verifyModel } from "../ipc";
+import type { Downloaded, HashCheck, ModelFile, ModelsView } from "../ipc";
 import { models as text } from "../i18n/ru";
 
 const useStyles = makeStyles({
@@ -62,6 +75,16 @@ const useStyles = makeStyles({
     maxWidth: "110ch",
   },
   form: { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" },
+  summary: {
+    display: "flex",
+    gap: "14px",
+    alignItems: "center",
+    flexWrap: "wrap",
+    color: tokens.colorNeutralForeground2,
+    fontSize: tokens.fontSizeBase200,
+  },
+  rowActions: { display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" },
+  remove: { color: tokens.colorPaletteRedForeground2 },
   wide: { flex: "3 1 340px", minWidth: "220px" },
   mid: { flex: "1 1 200px", minWidth: "160px" },
 });
@@ -93,6 +116,8 @@ export function Models() {
   const [downloading, setDownloading] = useState(false);
   const [done, setDone] = useState<Downloaded | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [removing, setRemoving] = useState<ModelFile | null>(null);
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
   const verify = useCallback((name: string) => {
     setBusy((current) => ({ ...current, [name]: true }));
@@ -117,6 +142,22 @@ export function Models() {
   }, []);
 
   useEffect(load, [load]);
+
+  const confirmRemove = useCallback(() => {
+    const file = removing;
+    if (file === null) return;
+
+    setRemoveError(null);
+    removeModel(file.name)
+      .then(() => {
+        setRemoving(null);
+        load();
+      })
+      .catch((reason: unknown) =>
+        setRemoveError(reason instanceof Error ? reason.message : String(reason)),
+      );
+  }, [removing, load]);
+
 
   const startDownload = useCallback(() => {
     const trimmedUrl = url.trim();
@@ -215,7 +256,15 @@ export function Models() {
               {text.reload}
             </Button>
             {view.items.length > 0 ? (
-              <Text className={styles.note}>{text.count(view.items.length)}</Text>
+              <>
+                <Text className={styles.note}>{text.count(view.items.length)}</Text>
+                <Text className={styles.note}>{text.used(size(view.total_bytes))}</Text>
+                <Text className={styles.note}>
+                  {view.free_bytes === null
+                    ? text.freeUnknown
+                    : text.free(size(view.free_bytes))}
+                </Text>
+              </>
             ) : null}
           </div>
 
@@ -270,17 +319,30 @@ export function Models() {
                             {text.broken}: {file.note}
                           </span>
                         )}
-                        {file.ok ? (
-                          <div className={styles.action}>
+                        <div className={styles.action}>
+                          <div className={styles.rowActions}>
+                            {file.ok ? (
+                              <Button
+                                size="small"
+                                disabled={busy[file.name] === true}
+                                onClick={() => verify(file.name)}
+                              >
+                                {busy[file.name] ? text.verifying : text.verify}
+                              </Button>
+                            ) : null}
                             <Button
                               size="small"
-                              disabled={busy[file.name] === true}
-                              onClick={() => verify(file.name)}
+                              appearance="subtle"
+                              className={styles.remove}
+                              onClick={() => {
+                                setRemoveError(null);
+                                setRemoving(file);
+                              }}
                             >
-                              {busy[file.name] ? text.verifying : text.verify}
+                              {text.remove}
                             </Button>
                           </div>
-                        ) : null}
+                        </div>
                         {check ? (
                           <div className={styles.action}>
                             {"error" in check ? (
@@ -310,6 +372,38 @@ export function Models() {
           <Text className={styles.note}>{text.envHint}</Text>
         </>
       )}
+
+      <Dialog
+        open={removing !== null}
+        onOpenChange={(_, data) => {
+          if (!data.open) setRemoving(null);
+        }}
+      >
+        <DialogSurface>
+          <DialogBody>
+            <DialogTitle>{text.removeTitle}</DialogTitle>
+            <DialogContent>
+              <Text block>{text.removeLead}</Text>
+              <Text block weight="semibold">
+                {removing?.name} · {size(removing?.size_bytes ?? 0)}
+              </Text>
+              {removeError ? (
+                <Text block className={styles.error}>
+                  {text.removeError}: {removeError}
+                </Text>
+              ) : null}
+            </DialogContent>
+            <DialogActions>
+              <Button appearance="secondary" onClick={() => setRemoving(null)}>
+                {text.removeCancel}
+              </Button>
+              <Button appearance="primary" onClick={confirmRemove}>
+                {text.removeConfirm}
+              </Button>
+            </DialogActions>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
     </div>
   );
 }

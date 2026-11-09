@@ -47,6 +47,10 @@ export function listModels(): Promise<ModelsView> {
   return invoke<ModelsView>("list_models");
 }
 
+export function removeModel(name: string): Promise<void> {
+  return invoke<void>("remove_model", { name });
+}
+
 export function verifyModel(name: string): Promise<HashCheck> {
   return invoke<HashCheck>("verify_model", { name });
 }

@@ -216,3 +216,16 @@ export async function downloadModel(
   const { downloadModel: fromData } = await import("./dev");
   return fromData(url, name, sha256);
 }
+
+/**
+ * Удалить файл модели. Необратимо, поэтому вызывается только после подтверждения
+ * в интерфейсе; в браузере файлов нет — там отказ, а не тихий успех.
+ */
+export async function removeModel(name: string): Promise<void> {
+  if (isTauri()) {
+    const { removeModel: fromCore } = await import("./tauri");
+    return fromCore(name);
+  }
+  const { removeModel: fromData } = await import("./dev");
+  return fromData(name);
+}

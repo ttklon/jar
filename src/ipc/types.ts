@@ -146,6 +146,9 @@ export interface ModelsView {
   items: ModelFile[];
   /** Папку не прочитать — это не то же самое, что пустая папка. */
   error: string | null;
+  total_bytes: number;
+  /** Свободно на диске; `null` — спросить не удалось. */
+  free_bytes: number | null;
 }
 
 /** Запуск из памяти приложения (SQLite). */

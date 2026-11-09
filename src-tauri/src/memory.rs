@@ -132,6 +132,14 @@ impl Memory {
         Ok(())
     }
 
+    /// Забывает факт. Нужно, когда сам предмет исчез: помнить хеш удалённого файла
+    /// значит помнить то, чего нет.
+    pub fn forget(&self, key: &str) -> Result<(), MemoryError> {
+        let conn = self.lock();
+        conn.execute("DELETE FROM facts WHERE key = ?1", params![key])?;
+        Ok(())
+    }
+
     /// Запоминает параметры удачного запуска — их подставит интерфейс в следующий раз.
     pub fn remember_params(
         &self,

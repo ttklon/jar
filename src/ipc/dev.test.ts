@@ -8,6 +8,7 @@ import {
   listTools,
   listModels,
   memoryRuns,
+  removeModel,
   verifyModel,
   planFor,
   registrySnapshot,
@@ -194,6 +195,10 @@ describe("модели в браузере", () => {
 
   it("хеш не выдумывается: сверку делает только приложение", async () => {
     await expect(verifyModel("qwen3-1.7b.gguf")).rejects.toThrow(/приложение/);
+  });
+
+  it("удаление в браузере отказывает, а не делает вид", async () => {
+    await expect(removeModel("m.gguf")).rejects.toThrow(/приложение/);
   });
 
   it("скачивание в браузере не притворяется успешным", async () => {
