@@ -37,6 +37,7 @@ pub mod planner;
 pub mod policy;
 pub mod profiles;
 pub mod registry;
+pub mod roles;
 pub mod server;
 pub mod step;
 pub mod tools;
@@ -126,6 +127,9 @@ pub fn run() {
             ipc::engine_status,
             ipc::start_engine,
             ipc::stop_engine,
+            ipc::list_roles,
+            ipc::assign_role,
+            ipc::clear_role,
             ipc::list_profiles,
             ipc::policy_for,
             ipc::confirm_tool,

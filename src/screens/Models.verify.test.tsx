@@ -2,8 +2,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
+  assignRole,
+  clearRole,
   downloadModel,
   engineStatus,
+  listRoles,
   listModels,
   removeModel,
   startEngine,
@@ -28,6 +31,9 @@ vi.mock("../ipc", () => ({
   engineStatus: vi.fn(),
   startEngine: vi.fn(),
   stopEngine: vi.fn(),
+  listRoles: vi.fn(),
+  assignRole: vi.fn(),
+  clearRole: vi.fn(),
 }));
 
 class ResizeObserverStub {
@@ -39,8 +45,9 @@ class ResizeObserverStub {
 vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
 beforeEach(() => {
-  // По умолчанию движка нет: тестам про хеши и удаление он не мешает.
+  // По умолчанию движка нет и роли не назначены: тестам про хеши это не мешает.
   vi.mocked(engineStatus).mockResolvedValue(NO_ENGINE);
+  vi.mocked(listRoles).mockResolvedValue(ROLES);
 });
 
 afterEach(() => {
@@ -51,7 +58,30 @@ afterEach(() => {
   vi.mocked(removeModel).mockReset();
   vi.mocked(startEngine).mockReset();
   vi.mocked(stopEngine).mockReset();
+  vi.mocked(assignRole).mockReset();
+  vi.mocked(clearRole).mockReset();
 });
+
+const ROLES = [
+  {
+    id: "router",
+    title: "Router",
+    purpose: "понять, чего человек хочет",
+    max_bytes: 2_147_483_648,
+    assigned: null,
+    assigned_bytes: null,
+    fits: true,
+  },
+  {
+    id: "workhorse",
+    title: "Рабочая",
+    purpose: "план и код",
+    max_bytes: 8_589_934_592,
+    assigned: null,
+    assigned_bytes: null,
+    fits: true,
+  },
+];
 
 const NO_ENGINE = {
   found: false,
@@ -319,6 +349,84 @@ describe("движок моделей", () => {
 
     await waitFor(() => {
       expect(screen.getByText(/не ответил на \/health за 60 с/i)).toBeTruthy();
+    });
+  });
+});
+
+describe("роли моделей", () => {
+  it("показывает роль, её потолок и что назначения нет", async () => {
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
+
+    render(<Models />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Router")).toBeTruthy();
+    });
+    expect(screen.getByText(/не больше 2\.0 ГБ/)).toBeTruthy();
+    expect(screen.getByLabelText(/роли моделей: router/i)).toBeTruthy();
+  });
+
+  it("назначение уходит в ядро и возвращает новый список ролей", async () => {
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
+    vi.mocked(assignRole).mockResolvedValue([
+      {
+        ...ROLES[0]!,
+        assigned: "qwen3-1.7b.gguf",
+        assigned_bytes: 1_100_000_000,
+        fits: true,
+      },
+      ROLES[1]!,
+    ]);
+
+    render(<Models />);
+
+    const select = await screen.findByLabelText(/роли моделей: router/i);
+    fireEvent.change(select, { target: { value: "qwen3-1.7b.gguf" } });
+
+    await waitFor(() => {
+      expect(vi.mocked(assignRole)).toHaveBeenCalledWith("router", "qwen3-1.7b.gguf");
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/по размеру подходит/i)).toBeTruthy();
+    });
+  });
+
+  it("слишком большая модель для роли называется слишком большой", async () => {
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
+    vi.mocked(assignRole).mockResolvedValue([
+      {
+        ...ROLES[0]!,
+        assigned: "qwen3-1.7b.gguf",
+        assigned_bytes: 5_000_000_000,
+        fits: false,
+      },
+    ]);
+
+    render(<Models />);
+
+    fireEvent.change(await screen.findByLabelText(/роли моделей: router/i), {
+      target: { value: "qwen3-1.7b.gguf" },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/не подходит: 4\.7 ГБ больше потолка роли/i)).toBeTruthy();
+    });
+  });
+
+  it("снятие назначения выбирает «не выбрана»", async () => {
+    vi.mocked(listModels).mockResolvedValue(view([FILE], 1_100_000_000));
+    vi.mocked(listRoles).mockResolvedValue([
+      { ...ROLES[0]!, assigned: "qwen3-1.7b.gguf", assigned_bytes: 1_100_000_000 },
+    ]);
+    vi.mocked(clearRole).mockResolvedValue([ROLES[0]!]);
+
+    render(<Models />);
+
+    const select = await screen.findByLabelText(/роли моделей: router/i);
+    fireEvent.change(select, { target: { value: "" } });
+
+    await waitFor(() => {
+      expect(vi.mocked(clearRole)).toHaveBeenCalledWith("router");
     });
   });
 });

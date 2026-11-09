@@ -30,6 +30,7 @@ export type {
   RunRecord,
   RunStep,
   Risk,
+  RoleView,
   StepResult,
   Tier,
   ToolView,
@@ -41,6 +42,7 @@ import type {
   ConfirmToken,
   Downloaded,
   EngineStatus,
+  RoleView,
   FlowView,
   HashCheck,
   ModelsView,
@@ -266,4 +268,36 @@ export async function stopEngine(): Promise<EngineStatus> {
   }
   const { stopEngine: fromData } = await import("./dev");
   return fromData();
+}
+
+// ── Роли моделей ────────────────────────────────────────────────────────────
+
+/** Роли и то, что на них назначено. В браузере назначений нет — память живёт в ядре. */
+export async function listRoles(): Promise<RoleView[]> {
+  if (isTauri()) {
+    const { listRoles: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { listRoles: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Назначить файл на роль. Ядро проверит, что файл существует. */
+export async function assignRole(role: string, name: string): Promise<RoleView[]> {
+  if (isTauri()) {
+    const { assignRole: fromCore } = await import("./tauri");
+    return fromCore(role, name);
+  }
+  const { assignRole: fromData } = await import("./dev");
+  return fromData(role, name);
+}
+
+/** Снять назначение с роли. */
+export async function clearRole(role: string): Promise<RoleView[]> {
+  if (isTauri()) {
+    const { clearRole: fromCore } = await import("./tauri");
+    return fromCore(role);
+  }
+  const { clearRole: fromData } = await import("./dev");
+  return fromData(role);
 }

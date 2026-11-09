@@ -511,6 +511,10 @@ pub fn run_cli(spec: &CliSpec) -> StepResult {
 | `tts` | текст → речь | ≤ 500 МБ | Kokoro-82M / Piper (ru) |
 | `vad` | детект речи | ≤ 5 МБ | Silero VAD |
 
+Реализованные сейчас роли (`router`, `workhorse`, `embed`) описаны данными в
+`data/roles.json`: идентификатор, назначение и потолок размера. Привязка идёт от роли к
+файлу на диске и проверяется по размеру — ссылок и эталонных хешей там нет намеренно.
+
 Конкретные файлы, sha256 и лицензии — из `data/ecosystem/models.json` (поле `selected` = проверено;
 `candidate` = требует проверки лицензии перед включением в сборку).
 
@@ -748,7 +752,7 @@ python tools/check_all.py           # данные (обязательно пе�
 ```
 
 Что уже стоит в репозитории на момент написания (проверять, а не предполагать):
-`src-tauri/src/{registry,policy,tools,flows,profiles,memory,planner,models,download,server,llama,ipc,tray,logging,lib}.rs`,
+`src-tauri/src/{registry,policy,tools,flows,profiles,memory,planner,models,download,server,llama,roles,ipc,tray,logging,lib}.rs`,
 `src/{app,screens,components,ipc,lib,i18n}`, `scripts/make_icons.py`, джобы `ui`, `core` и `release`
 в `.github/workflows/app.yml`.
 

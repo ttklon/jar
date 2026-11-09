@@ -8,7 +8,9 @@ import {
   listProfiles,
   listTools,
   listModels,
+  listRoles,
   memoryRuns,
+  assignRole,
   removeModel,
   startEngine,
   verifyModel,
@@ -184,6 +186,21 @@ describe("поиск по реестру в браузере", () => {
     const money = (await planFor("оплати счёт", 20)).find((item) => item.risk === "money");
     expect(money?.decision).toBe("deny");
     expect(money?.tool).toBeNull();
+  });
+});
+
+describe("роли в браузере", () => {
+  it("требования ролей те же, что читает ядро", async () => {
+    const roles = await listRoles();
+    const ids = roles.map((role) => role.id);
+    expect(ids).toContain("router");
+    expect(ids).toContain("workhorse");
+    expect(roles.every((role) => role.max_bytes > 0)).toBe(true);
+    expect(roles.every((role) => role.assigned === null)).toBe(true);
+  });
+
+  it("назначение роли в браузере отказывает", async () => {
+    await expect(assignRole("router", "m.gguf")).rejects.toThrow(/памяти/);
   });
 });
 

@@ -124,6 +124,18 @@ export interface ModelFile {
   hash: string | null;
 }
 
+/** Роль модели: требование к роли плюс то, что на неё назначено. */
+export interface RoleView {
+  id: string;
+  title: string;
+  purpose: string;
+  max_bytes: number;
+  assigned: string | null;
+  assigned_bytes: number | null;
+  /** Влезает ли назначенный файл в потолок роли. */
+  fits: boolean;
+}
+
 /** Что известно о движке `llama-server`. */
 export interface EngineStatus {
   /** Найден ли бинарник рядом с приложением или в `PATH`. */

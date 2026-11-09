@@ -14,6 +14,7 @@ import type {
   ModelsView,
   PlanItem,
   ProfileView,
+  RoleView,
   RegistrySnapshot,
   RunRecord,
   StepResult,
@@ -74,6 +75,18 @@ export function startEngine(name: string): Promise<EngineStatus> {
 
 export function stopEngine(): Promise<EngineStatus> {
   return invoke<EngineStatus>("stop_engine");
+}
+
+export function listRoles(): Promise<RoleView[]> {
+  return invoke<RoleView[]>("list_roles");
+}
+
+export function assignRole(role: string, name: string): Promise<RoleView[]> {
+  return invoke<RoleView[]>("assign_role", { role, name });
+}
+
+export function clearRole(role: string): Promise<RoleView[]> {
+  return invoke<RoleView[]>("clear_role", { role });
 }
 
 export function listTools(): Promise<ToolView[]> {

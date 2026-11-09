@@ -122,6 +122,7 @@ import type {
   EngineStatus,
   HashCheck,
   ModelsView,
+  RoleView,
   PlanItem,
   RunRecord,
   FlowStepView,
@@ -357,4 +358,35 @@ export async function startEngine(_name: string): Promise<EngineStatus> {
 
 export async function stopEngine(): Promise<EngineStatus> {
   return engineStatus();
+}
+
+// ── Роли в браузере ─────────────────────────────────────────────────────────
+//
+// Требования ролей — те же данные, что читает ядро (`data/roles.json`), поэтому
+// экран верстается без Rust. Назначений здесь нет: они хранятся в памяти ядра.
+
+import rolesJson from "../../data/roles.json";
+
+const ROLE_SPECS = rolesJson.roles as unknown as {
+  id: string;
+  title: string;
+  purpose: string;
+  max_bytes: number;
+}[];
+
+export async function listRoles(): Promise<RoleView[]> {
+  return ROLE_SPECS.map((role) => ({
+    ...role,
+    assigned: null,
+    assigned_bytes: null,
+    fits: true,
+  }));
+}
+
+export async function assignRole(_role: string, _name: string): Promise<RoleView[]> {
+  throw new Error("назначение хранится в памяти приложения — в браузере её нет");
+}
+
+export async function clearRole(_role: string): Promise<RoleView[]> {
+  throw new Error("назначение хранится в памяти приложения — в браузере её нет");
 }

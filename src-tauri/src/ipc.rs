@@ -574,6 +574,74 @@ pub fn stop_engine(state: State<'_, AppState>) -> EngineStatus {
     read_engine_status(&state)
 }
 
+/// Роль модели в интерфейсе: требование роли плюс то, что на неё назначено.
+#[derive(Debug, Serialize)]
+pub struct RoleView {
+    pub id: String,
+    pub title: String,
+    pub purpose: String,
+    pub max_bytes: u64,
+    /// Назначенный файл (только имя, без пути).
+    pub assigned: Option<String>,
+    /// Размер назначенного файла, если его удалось узнать.
+    pub assigned_bytes: Option<u64>,
+    /// Влезает ли назначенный файл в потолок роли.
+    pub fits: bool,
+}
+
+fn role_views(state: &AppState) -> Vec<RoleView> {
+    let dir = &state.inner.models_dir;
+    let files = models::scan(dir).unwrap_or_default();
+
+    roles::all()
+        .iter()
+        .map(|role| {
+            let assigned = roles::assigned(&state.inner.memory, &role.id);
+            let size = assigned.as_ref().and_then(|name| {
+                files
+                    .iter()
+                    .find(|file| &file.name == name)
+                    .map(|file| file.size_bytes)
+            });
+
+            RoleView {
+                id: role.id.clone(),
+                title: role.title.clone(),
+                purpose: role.purpose.clone(),
+                max_bytes: role.max_bytes,
+                fits: size.is_none_or(|bytes| roles::fits(role, bytes)),
+                assigned,
+                assigned_bytes: size,
+            }
+        })
+        .collect()
+}
+
+/// Роли моделей: что от них требуется и какая модель на роль назначена.
+#[tauri::command]
+pub fn list_roles(state: State<'_, AppState>) -> Vec<RoleView> {
+    role_views(&state)
+}
+
+/// Назначить файл на роль. Файл обязан существовать: роль, которая указывает в пустоту,
+/// выглядит настроенной, но ею не является.
+#[tauri::command]
+pub fn assign_role(
+    state: State<'_, AppState>,
+    role: String,
+    name: String,
+) -> Result<Vec<RoleView>, String> {
+    roles::assign(&state.inner.models_dir, &state.inner.memory, &role, &name)?;
+    Ok(role_views(&state))
+}
+
+/// Снять назначение с роли.
+#[tauri::command]
+pub fn clear_role(state: State<'_, AppState>, role: String) -> Result<Vec<RoleView>, String> {
+    roles::clear(&state.inner.memory, &role)?;
+    Ok(role_views(&state))
+}
+
 /// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это
 /// структура: запуск, шаг, итог — то, что нужно планировщику и экрану истории.
 #[tauri::command]

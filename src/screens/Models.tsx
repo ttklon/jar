@@ -15,16 +15,26 @@ import {
 } from "@fluentui/react-components";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
 import {
+  assignRole,
+  clearRole,
   downloadModel,
   engineStatus,
   isTauri,
+  listRoles,
   listModels,
   removeModel,
   startEngine,
   stopEngine,
   verifyModel,
 } from "../ipc";
-import type { Downloaded, EngineStatus, HashCheck, ModelFile, ModelsView } from "../ipc";
+import type {
+  Downloaded,
+  EngineStatus,
+  HashCheck,
+  ModelFile,
+  ModelsView,
+  RoleView,
+} from "../ipc";
 import { models as text } from "../i18n/ru";
 
 const useStyles = makeStyles({
@@ -94,6 +104,24 @@ const useStyles = makeStyles({
   },
   rowActions: { display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" },
   remove: { color: tokens.colorPaletteRedForeground2 },
+  roleRow: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+    paddingTop: "10px",
+    borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  roleHead: { display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" },
+  select: {
+    fontFamily: tokens.fontFamilyBase,
+    fontSize: tokens.fontSizeBase300,
+    padding: "4px 8px",
+    borderRadius: tokens.borderRadiusMedium,
+    border: `1px solid ${tokens.colorNeutralStrokeAccessible}`,
+    backgroundColor: tokens.colorNeutralBackground1,
+    color: tokens.colorNeutralForeground1,
+    maxWidth: "320px",
+  },
   wide: { flex: "3 1 340px", minWidth: "220px" },
   mid: { flex: "1 1 200px", minWidth: "160px" },
 });
@@ -127,6 +155,9 @@ export function Models() {
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [removing, setRemoving] = useState<ModelFile | null>(null);
   const [removeError, setRemoveError] = useState<string | null>(null);
+  const [roles, setRoles] = useState<RoleView[]>([]);
+  const [rolesBusy, setRolesBusy] = useState(false);
+  const [rolesError, setRolesError] = useState<string | null>(null);
   const [engine, setEngine] = useState<EngineStatus | null>(null);
   const [engineBusy, setEngineBusy] = useState(false);
   const [engineError, setEngineError] = useState<string | null>(null);
@@ -148,6 +179,21 @@ export function Models() {
   // манифестом, а придумывать «модель по умолчанию» из имени файла — гадание.
   const runnable = view?.items.find((file) => file.ok) ?? null;
 
+  // Роли привязываются только к целым файлам: битый заголовок — это не модель.
+  const okFiles = view?.items.filter((file) => file.ok) ?? [];
+
+  const setRole = useCallback((role: string, name: string) => {
+    setRolesBusy(true);
+    setRolesError(null);
+    const request = name === "" ? clearRole(role) : assignRole(role, name);
+    request
+      .then(setRoles)
+      .catch((reason: unknown) =>
+        setRolesError(reason instanceof Error ? reason.message : String(reason)),
+      )
+      .finally(() => setRolesBusy(false));
+  }, []);
+
   const refreshEngine = useCallback(() => {
     // Движок и папка читаются отдельно: молчащий движок не должен скрывать список.
     engineStatus()
@@ -158,6 +204,9 @@ export function Models() {
   const load = useCallback(() => {
     setError(null);
     refreshEngine();
+    listRoles()
+      .then(setRoles)
+      .catch(() => setRoles([]));
     listModels()
       .then(setView)
       .catch((reason: unknown) =>
@@ -283,6 +332,54 @@ export function Models() {
               : text.download.doneUnverified(size(done.bytes))}
             {" · "}
             <span className={styles.mono}>{done.sha256.slice(0, 12)}</span>
+          </Text>
+        ) : null}
+      </section>
+
+      <section className={styles.download}>
+        <Text as="h2" size={500}>
+          {text.roles.title}
+        </Text>
+        <Text className={styles.note}>{text.roles.lead}</Text>
+        {!isTauri() ? <Text className={styles.note}>{text.roles.browserNote}</Text> : null}
+        {okFiles.length === 0 ? <Text className={styles.note}>{text.roles.noFiles}</Text> : null}
+
+        {roles.map((role) => (
+          <div key={role.id} className={styles.roleRow}>
+            <div className={styles.roleHead}>
+              <Text weight="semibold">{role.title}</Text>
+              <span className={styles.mono}>{text.roles.ceiling(size(role.max_bytes))}</span>
+            </div>
+            <Text className={styles.note}>{role.purpose}</Text>
+            <div className={styles.rowActions}>
+              <select
+                className={styles.select}
+                aria-label={`${text.roles.title}: ${role.title}`}
+                value={role.assigned ?? ""}
+                disabled={rolesBusy || okFiles.length === 0}
+                onChange={(event) => setRole(role.id, event.target.value)}
+              >
+                <option value="">{text.roles.none}</option>
+                {okFiles.map((file) => (
+                  <option key={file.name} value={file.name}>
+                    {file.name} · {size(file.size_bytes)}
+                  </option>
+                ))}
+              </select>
+              {role.assigned ? (
+                <Text className={role.fits ? styles.ok : styles.changed}>
+                  {role.fits
+                    ? text.roles.fits
+                    : text.roles.tooBig(size(role.assigned_bytes ?? 0))}
+                </Text>
+              ) : null}
+            </div>
+          </div>
+        ))}
+
+        {rolesError ? (
+          <Text className={styles.error}>
+            {text.roles.error}: {rolesError}
           </Text>
         ) : null}
       </section>
