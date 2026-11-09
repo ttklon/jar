@@ -131,9 +131,11 @@ impl Memory {
         let key = format!("params:{tool}");
         let conn = self.lock();
         let value: String = conn
-            .query_row("SELECT value FROM facts WHERE key = ?1", params![key], |row| {
-                row.get(0)
-            })
+            .query_row(
+                "SELECT value FROM facts WHERE key = ?1",
+                params![key],
+                |row| row.get(0),
+            )
             .ok()?;
         serde_json::from_str(&value).ok()
     }
@@ -168,7 +170,9 @@ impl Memory {
     fn lock(&self) -> std::sync::MutexGuard<'_, Connection> {
         // Отравленный мьютекс означает панику в другом потоке; база от этого не портится,
         // а терять память целиком хуже, чем продолжить с ней.
-        self.conn.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+        self.conn
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
     }
 }
 
@@ -250,9 +254,18 @@ mod tests {
     #[test]
     fn run_with_steps_is_recorded_and_read_back() {
         let (memory, dir) = temp_memory("runs");
-        let run_id = memory.start_run("tool", "files|создать|папку").expect("запуск");
+        let run_id = memory
+            .start_run("tool", "files|создать|папку")
+            .expect("запуск");
         memory
-            .add_step(run_id, 0, "files|создать|папку", true, "готово", "path_exists")
+            .add_step(
+                run_id,
+                0,
+                "files|создать|папку",
+                true,
+                "готово",
+                "path_exists",
+            )
             .expect("шаг");
         memory.finish_run(run_id, "ok").expect("итог");
 
