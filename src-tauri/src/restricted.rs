@@ -105,6 +105,10 @@ mod imp {
 
     const POLL_MS: u32 = 30;
 
+    /// Счётчик запусков: тесты в одном процессе идут параллельно, и общая папка вывода
+    /// означала бы, что один запуск затирает отчёт другого.
+    static RUNS: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
     /// Запускает команду с ограниченным токеном. Потолки ставятся до первого шага.
     pub fn run(
         request: &ExecRequest,
@@ -112,7 +116,11 @@ mod imp {
         cancel: &AtomicBool,
     ) -> Result<ExecOutput, String> {
         let started = Instant::now();
-        let dir = std::env::temp_dir().join(format!("zshelper-bez-prav-{}", std::process::id()));
+        let number = RUNS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let dir = std::env::temp_dir().join(format!(
+            "zshelper-bez-prav-{}-{number}",
+            std::process::id()
+        ));
         std::fs::create_dir_all(&dir).map_err(|error| format!("папка вывода: {error}"))?;
 
         let out_file = dir.join("stdout.txt");
