@@ -302,7 +302,10 @@ mod tests {
     #[test]
     fn foreign_file_is_named_as_foreign() {
         let error = parse(b"hello world").expect_err("это не GGUF");
-        assert!(error.contains("GGUF"), "сообщение объясняет причину: {error}");
+        assert!(
+            error.contains("GGUF"),
+            "сообщение объясняет причину: {error}"
+        );
     }
 
     #[test]
@@ -356,7 +359,10 @@ mod tests {
         let names: Vec<&str> = files.iter().map(|file| file.name.as_str()).collect();
         assert_eq!(names, ["a-model.GGUF", "b-model.gguf", "broken.gguf"]);
 
-        assert!(files[0].ok, "GGUF в верхнем регистре расширения тоже модель");
+        assert!(
+            files[0].ok,
+            "GGUF в верхнем регистре расширения тоже модель"
+        );
         assert_eq!(files[0].quant.as_deref(), Some("Q4_K_M"));
         assert!(!files[2].ok, "битый файл виден, но не считается моделью");
         assert!(files[2].size_bytes > 0);
