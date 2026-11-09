@@ -39,6 +39,7 @@ pub mod plan;
 pub mod planner;
 pub mod policy;
 pub mod profiles;
+pub mod restricted;
 pub mod registry;
 pub mod roles;
 pub mod sandbox;

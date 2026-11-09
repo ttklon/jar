@@ -9,7 +9,7 @@
 //! * **экран значений** — параметр, пришедший от человека или от модели, не должен
 //!   нести в себе вторую команду;
 //! * **пробный запуск** — короткая команда в отдельной папке, под потолками памяти,
-//!   процессорного времени и числа процессов (`isolation`).
+//!   процессорного времени и числа процессов (`isolation`) и без прав (`restricted`).
 //!
 //! Зачем это до генерации новых рук: рука, которую предложит модель, — это текст
 //! команды. Проверить текст дешевле, чем откатывать его последствия.
@@ -340,10 +340,11 @@ pub fn screen(script: &str, values: &[(&str, &str)]) -> Verdict {
     verdict
 }
 
-/// Пробный запуск: команда проверяется в отдельной папке и с таймаутом.
+/// Пробный запуск: команда идёт в отдельной папке, без прав и под потолками.
 ///
-/// Это не изоляция — процесс видит систему так же, как любой другой. Смысл другой:
-/// убедиться, что команда **запускается** и заканчивается, прежде чем доверять ей
+/// Это не полная изоляция: файлы пользователя и сеть остаются доступны, и об этом сказано
+/// в `restricted`. Смысл другой: убедиться, что команда **запускается** и заканчивается,
+/// и что она не может ни съесть машину, ни повысить себе права, прежде чем доверять ей
 /// настоящее дело.
 pub fn trial(
     script: &str,
@@ -361,6 +362,11 @@ pub fn trial(
     std::fs::create_dir_all(dir)
         .map_err(|error| format!("папка пробного запуска не создаётся: {error}"))?;
 
+    let limits = crate::isolation::Limits {
+        timeout_ms: timeout.as_millis() as u64,
+        ..crate::isolation::Limits::trial()
+    };
+
     let request = crate::executor::ExecRequest::new(
         "powershell.exe",
         vec![
@@ -370,15 +376,19 @@ pub fn trial(
             script.to_string(),
         ],
     )
-    .with_limits(crate::isolation::Limits {
-        timeout_ms: timeout.as_millis() as u64,
-        ..crate::isolation::Limits::trial()
-    });
+    .with_limits(limits);
 
     let cancel = std::sync::atomic::AtomicBool::new(false);
     let started = std::time::Instant::now();
-    let output = crate::executor::run(&request, &cancel)
-        .map_err(|error| format!("пробный запуск не удался: {error}"))?;
+
+    // Недоверенная команда идёт и без прав, и под потолком. Если ограниченный запуск на
+    // этой системе недоступен, честнее сказать это в отчёте, чем молча запустить как есть.
+    let output = if crate::restricted::available() {
+        crate::restricted::run(&request, Some(limits), &cancel)
+    } else {
+        crate::executor::run(&request, &cancel).map_err(|error| error.to_string())
+    }
+    .map_err(|error| format!("пробный запуск не удался: {error}"))?;
 
     Ok(Trial {
         exit_code: output.exit_code,

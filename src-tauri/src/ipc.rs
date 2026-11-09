@@ -15,6 +15,7 @@ use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::download::{self, Downloaded};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::isolation;
+use crate::restricted;
 use crate::learn::{self, Learning};
 use crate::llama;
 use crate::memory::{Episode, Memory, RunRecord};
@@ -901,7 +902,7 @@ pub fn isolation_status() -> IsolationStatus {
     IsolationStatus {
         available: isolation::available(),
         summary: isolation::Limits::trial().describe(),
-        note: isolation::note(),
+        note: format!("{}. {}", isolation::note(), restricted::note()),
     }
 }
 
