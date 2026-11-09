@@ -509,7 +509,10 @@ mod tests {
 
         for name in ["../secret", "sub/model.gguf", "..\\model.gguf", ""] {
             let error = verify(&dir, name, &memory).expect_err("это не имя файла");
-            assert!(error.contains("путём") || error.contains("файла нет"), "{error}");
+            assert!(
+                error.contains("путём") || error.contains("файла нет"),
+                "{error}"
+            );
         }
 
         let _ = std::fs::remove_dir_all(&dir);
