@@ -61,17 +61,31 @@ jobs:
         run: npm ci
 
       # Вывод сборки превращается в аннотации: логи джоб недоступны, аннотации — да.
+      # Аннотации из шага, который сам упал, до API не доходят (проверено), поэтому
+      # три шага: run → report (`continue-on-error`) → gate.
       - name: Build installer (NSIS)
+        id: bundle
+        continue-on-error: true
+        shell: bash
+        run: npm run tauri build > bundle.log 2>&1
+
+      - name: Report bundle errors
+        if: steps.bundle.outcome == 'failure'
         shell: bash
         run: |
-          set +e
-          npm run tauri build > bundle.log 2>&1
-          status=$?
-          if [ "$status" -ne 0 ]; then
-            python scripts/ci_log_annotate.py bundle.log --title "tauri build"
-            exit "$status"
-          fi
-          ls -la src-tauri/target/release/bundle/nsis
+          tail -120 bundle.log
+          python scripts/ci_log_annotate.py bundle.log --title "tauri build" \
+            --grep "error|Error|ERROR|failed|panicked" --tail 40 --max 8
+
+      - name: Installer gate
+        if: steps.bundle.outcome == 'failure'
+        shell: bash
+        run: exit 1
+
+      - name: Installer artifacts
+        if: steps.bundle.outcome == 'success'
+        shell: bash
+        run: ls -la src-tauri/target/release/bundle/nsis
 
   rust:
     name: core (cargo check + tests, Windows)
