@@ -131,12 +131,11 @@ mod tests {
                         profile.slug, operation.name, operation.registry
                     )
                 });
-                assert!(
-                    !action.risk.is_forbidden_for_agent(),
-                    "{}: «{}» — действие, которое система не выполняет",
-                    profile.slug,
-                    operation.registry
-                );
+                // Профили могут описывать и то, что агент не выполняет сам: подписать PDF,
+                // оплатить счёт, войти в аккаунт. Это карта мира, а не разрешение — решение
+                // принимает политика по риску строки (`identity`/`money` → отказ).
+                // Запрет на такие строки действует для «рук» (`tools/hands.py`), не для описаний.
+                let _ = action;
             }
         }
     }
