@@ -20,8 +20,8 @@
 //! Чего ещё нет: планировщика, моделей, голоса, памяти, MCP — они следующие.
 
 pub mod audit;
-pub mod executor;
 pub mod download;
+pub mod executor;
 pub mod flows;
 pub mod hotkey;
 pub mod ipc;

@@ -106,14 +106,15 @@ pub fn download(
     let target = dir.join(name);
     if target.exists() {
         // Перезаписывать модель без спроса нельзя: это гигабайты и, возможно, единственная копия.
-        return Err(format!("файл уже есть: {name} — сверьте его хеш или удалите сами"));
+        return Err(format!(
+            "файл уже есть: {name} — сверьте его хеш или удалите сами"
+        ));
     }
 
     let part = part_path(&target);
     let _ = std::fs::remove_file(&part);
 
-    let result =
-        fetch(url, &part).and_then(|()| commit(&part, &target, name, expected, memory));
+    let result = fetch(url, &part).and_then(|()| commit(&part, &target, name, expected, memory));
 
     if result.is_err() {
         let _ = std::fs::remove_file(&part);
@@ -224,7 +225,10 @@ mod tests {
         assert!(!done.verified, "эталона не было — так и говорим");
         assert!(dir.join("model.gguf").is_file());
         assert!(!part_path(&dir.join("model.gguf")).exists(), ".part убран");
-        assert_eq!(memory.fact(&models::hash_key("model.gguf")), Some(done.sha256));
+        assert_eq!(
+            memory.fact(&models::hash_key("model.gguf")),
+            Some(done.sha256)
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -252,8 +256,14 @@ mod tests {
         let error = download(&dir, "model.gguf", &url, Some(&"0".repeat(64)), &memory)
             .expect_err("хеш не сойдётся");
         assert!(error.contains("хеш не совпал"), "{error}");
-        assert!(!dir.join("model.gguf").exists(), "битый файл не стал моделью");
-        assert!(!part_path(&dir.join("model.gguf")).exists(), "и .part убран");
+        assert!(
+            !dir.join("model.gguf").exists(),
+            "битый файл не стал моделью"
+        );
+        assert!(
+            !part_path(&dir.join("model.gguf")).exists(),
+            "и .part убран"
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -299,10 +309,18 @@ mod tests {
         for name in ["../escape.gguf", "sub/model.gguf", "model.bin", ""] {
             let error = download(&dir, name, "https://example.com/m.gguf", None, &memory)
                 .expect_err("такое имя не годится");
-            assert!(error.contains("имя файла") || error.contains(".gguf"), "{error}");
+            assert!(
+                error.contains("имя файла") || error.contains(".gguf"),
+                "{error}"
+            );
         }
 
-        for url in ["file:///etc/passwd", "ftp://example.com/m.gguf", "https://", "example.com"] {
+        for url in [
+            "file:///etc/passwd",
+            "ftp://example.com/m.gguf",
+            "https://",
+            "example.com",
+        ] {
             let error = download(&dir, "model.gguf", url, None, &memory)
                 .expect_err("такая ссылка не годится");
             assert!(error.contains("ссылка"), "{error}");

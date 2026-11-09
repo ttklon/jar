@@ -12,9 +12,9 @@ use serde::Serialize;
 use tauri::State;
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
+use crate::download::{self, Downloaded};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::memory::{Memory, RunRecord};
-use crate::download::{self, Downloaded};
 use crate::models::{self, ModelFile};
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
@@ -408,7 +408,13 @@ pub async fn download_model(
     let run = inner.memory.start_run("download", &name).ok();
 
     let result = tauri::async_runtime::spawn_blocking(move || {
-        download::download(&inner.models_dir, &name, &url, sha256.as_deref(), &inner.memory)
+        download::download(
+            &inner.models_dir,
+            &name,
+            &url,
+            sha256.as_deref(),
+            &inner.memory,
+        )
     })
     .await
     .map_err(|error| format!("скачивание не выполнилось: {error}"))?;
