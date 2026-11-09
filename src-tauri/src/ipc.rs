@@ -701,6 +701,31 @@ pub fn save_plan(state: State<'_, AppState>, json: String) -> Result<PlanCheck, 
     })
 }
 
+/// Черновик плана из сказанного: один шаг, который приложение правда умеет.
+///
+/// Это запасной путь, а не замена модели: шаг берётся из реестра по совпадению слов, а
+/// данные для него — из памяти прошлого удачного запуска. Ничего не выдумывается, и
+/// если данных не хватает, `problems` скажет, каких именно.
+#[tauri::command]
+pub fn draft_plan(state: State<'_, AppState>, query: String) -> Option<PlanCheck> {
+    let inner = &state.inner;
+
+    // Сначала находим шаг, потом спрашиваем память по его ключу: параметры хранятся по
+    // инструменту, а имя инструмента известно только после поиска.
+    let found = plan::draft(&query, &inner.registry, None)?;
+    let key = found.steps[0].registry.clone();
+    let plan = match inner.memory.last_params(&key) {
+        Some(params) => plan::draft(&query, &inner.registry, Some(params))?,
+        None => found,
+    };
+
+    Some(PlanCheck {
+        problems: plan::check(&plan, &inner.registry),
+        gates: plan::gate_plan(&plan, &inner.registry, &[]),
+        plan: Some(plan),
+    })
+}
+
 /// Последний сохранённый план, если он был.
 #[tauri::command]
 pub fn last_plan(state: State<'_, AppState>) -> Option<Plan> {

@@ -119,6 +119,10 @@ export function savePlan(json: string): Promise<PlanCheck> {
   return invoke<PlanCheck>("save_plan", { json });
 }
 
+export function draftPlan(query: string): Promise<PlanCheck | null> {
+  return invoke<PlanCheck | null>("draft_plan", { query });
+}
+
 export function lastPlan(): Promise<Plan | null> {
   return invoke<Plan | null>("last_plan");
 }

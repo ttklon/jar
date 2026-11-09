@@ -352,6 +352,19 @@ export async function runPlan(json: string, approved: number[]): Promise<PlanRep
   return fromData(json, approved);
 }
 
+/**
+ * Черновик плана по сказанному: один шаг из реестра, который приложение правда умеет,
+ * с данными из памяти прошлого запуска. `null` — предложить нечего.
+ */
+export async function draftPlan(query: string): Promise<PlanCheck | null> {
+  if (isTauri()) {
+    const { draftPlan: fromCore } = await import("./tauri");
+    return fromCore(query);
+  }
+  const { draftPlan: fromData } = await import("./dev");
+  return fromData(query);
+}
+
 /** Сохранить проверенный план в памяти. Невалидный не сохраняется. */
 export async function savePlan(json: string): Promise<PlanCheck> {
   if (isTauri()) {

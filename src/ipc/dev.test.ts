@@ -11,6 +11,7 @@ import {
   lastPlan,
   listModels,
   runPlan,
+  draftPlan,
   speechStatus,
   transcribeLocal,
   listRoles,
@@ -192,6 +193,29 @@ describe("поиск по реестру в браузере", () => {
     const money = (await planFor("оплати счёт", 20)).find((item) => item.risk === "money");
     expect(money?.decision).toBe("deny");
     expect(money?.tool).toBeNull();
+  });
+});
+
+describe("черновик плана в браузере", () => {
+  it("на понятную просьбу предлагает один шаг с рукой", async () => {
+    const draft = await draftPlan("проверь свободное место");
+
+    expect(draft?.plan?.steps.length).toBe(1);
+    expect(draft?.plan?.steps[0]?.registry).toBe("storage-backup|проверить|свободное место");
+    expect(draft?.problems).toEqual([]);
+    expect(draft?.gates[0]?.decision).toBe("allow");
+  });
+
+  it("без нужных данных говорит, каких именно, а не молчит", async () => {
+    const draft = await draftPlan("создай папку");
+
+    expect(draft?.plan?.steps[0]?.registry).toBe("files|создать|папку");
+    expect(draft?.problems[0]?.problem).toMatch(/не хватает данных/);
+  });
+
+  it("то, чего приложение не делает, черновиком не становится", async () => {
+    await expect(draftPlan("оплати счёт за интернет")).resolves.toBeNull();
+    await expect(draftPlan("   ")).resolves.toBeNull();
   });
 });
 

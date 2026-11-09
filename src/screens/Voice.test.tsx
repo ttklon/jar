@@ -61,6 +61,38 @@ describe("голосовой экран", () => {
     expect(screen.getByText(/звук распознаёт служба системы/)).toBeTruthy();
   });
 
+  it("по сказанному предлагает шаг, а не только список", async () => {
+    render(<Voice />);
+
+    fireEvent.change(screen.getByLabelText("Услышал"), {
+      target: { value: "проверь свободное место" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Что могу сделать")).toBeTruthy();
+    });
+    expect(
+      (screen.getByRole("button", { name: "Выполнить" }) as HTMLButtonElement).disabled,
+    ).toBe(false);
+  });
+
+  it("если данных для шага нет — это сказано, а не выясняется при запуске", async () => {
+    render(<Voice />);
+
+    fireEvent.change(screen.getByLabelText("Услышал"), {
+      target: { value: "создай папку" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/шагу не хватает данных/)).toBeTruthy();
+    });
+    expect(
+      (screen.getByRole("button", { name: "Выполнить" }) as HTMLButtonElement).disabled,
+    ).toBe(true);
+  });
+
   it("под капотом — вход в доказательство, а не второй рабочий стол", () => {
     const onOpen = vi.fn();
     render(<Voice onOpen={onOpen} />);

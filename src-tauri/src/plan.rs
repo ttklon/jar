@@ -16,6 +16,7 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 
 use crate::memory::Memory;
+use crate::planner;
 use crate::policy;
 use crate::registry::Registry;
 use crate::tools;
@@ -207,6 +208,19 @@ pub fn check(plan: &Plan, registry: &Registry) -> Vec<Problem> {
             continue;
         }
 
+        // Параметры проверяются до запуска: «создай папку» без пути — это не шаг, а
+        // намерение. Лучше сказать это здесь, чем упасть на первом же окне.
+        if let Some(spec) = tools::spec(key) {
+            if let Err(problem) = tools::validate(spec, &step.params) {
+                problems.push(Problem::step(
+                    position,
+                    key,
+                    format!("шагу не хватает данных: {problem}"),
+                ));
+                continue;
+            }
+        }
+
         if step.why.trim().is_empty() {
             problems.push(Problem::step(
                 position,
@@ -217,6 +231,41 @@ pub fn check(plan: &Plan, registry: &Registry) -> Vec<Problem> {
     }
 
     problems
+}
+
+/// Черновик плана по сказанному: один шаг из реестра, который приложение умеет
+/// выполнить, плюс параметры прошлого удачного запуска, если они были.
+///
+/// Почему один шаг: план из нескольких шагов требует понимания задачи, а понимает её
+/// модель, которой пока нет. Один шаг собран из фактов — что нашлось в реестре и что
+/// уже лежит в памяти — и поэтому не выдумывает лишнего. Когда появится модель, она
+/// будет предлагать шаги, а этот путь останется как честный запасной.
+pub fn draft(
+    goal: &str,
+    registry: &Registry,
+    remembered: Option<BTreeMap<String, String>>,
+) -> Option<Plan> {
+    let item = planner::plan(registry, goal, 8)
+        .into_iter()
+        .find(|item| item.tool.is_some() && item.decision != "deny")?;
+
+    let params = match (tools::spec(&item.key), remembered) {
+        (Some(spec), Some(values)) => values
+            .into_iter()
+            .filter(|(name, _)| spec.params.iter().any(|param| param.name == *name))
+            .collect(),
+        _ => BTreeMap::new(),
+    };
+
+    Some(Plan {
+        goal: goal.to_string(),
+        source: "registry".to_string(),
+        steps: vec![PlanStep {
+            registry: item.key.clone(),
+            params,
+            why: format!("единственное, что здесь умею и что подходит: {}", item.example),
+        }],
+    })
 }
 
 /// Запоминает план (JSON как есть) и возвращает его разобранным.
@@ -446,5 +495,60 @@ mod tests {
         assert_eq!(gates[0].decision, "deny");
         assert_eq!(gates[0].risk, "unknown");
         assert!(blocker(&gates).expect("блокер").contains("запрещает"));
+    }
+
+    #[test]
+    fn a_plan_without_the_data_it_needs_says_which_data() {
+        // «Создай папку» без пути — не шаг, а намерение.
+        let plan = Plan {
+            goal: "создай папку".to_string(),
+            source: "registry".to_string(),
+            steps: vec![step("files|создать|папку")],
+        };
+
+        let problems = check(&plan, &registry());
+        assert!(
+            problems.iter().any(|problem| problem.problem.contains("не хватает данных")),
+            "{problems:?}"
+        );
+    }
+
+    #[test]
+    fn a_draft_takes_the_step_it_can_actually_do() {
+        let draft = draft("почисти диск от временных файлов", &registry(), None)
+            .expect("что-то найдётся");
+
+        assert_eq!(draft.source, "registry");
+        assert_eq!(draft.steps.len(), 1);
+        assert!(
+            tools::spec(&draft.steps[0].registry).is_some(),
+            "шаг без руки не предлагаем"
+        );
+        assert!(!draft.steps[0].why.is_empty(), "объяснение обязательно");
+    }
+
+    #[test]
+    fn a_draft_uses_only_the_parameters_the_tool_asks_for() {
+        let plan = draft("создай папку", &registry(), None).expect("нашлось");
+        let key = plan.steps[0].registry.clone();
+        assert!(tools::spec(&key).is_some());
+
+        // Память хранила лишнее: лишнее не должно попасть в шаг.
+        let remembered = BTreeMap::from([
+            ("path".to_string(), "C:\\tmp\\jar".to_string()),
+            ("чужое".to_string(), "не наше".to_string()),
+        ]);
+        let with_params = draft("создай папку", &registry(), Some(remembered)).expect("нашлось");
+        assert_eq!(
+            with_params.steps[0].params.get("path").map(String::as_str),
+            Some("C:\\tmp\\jar")
+        );
+        assert!(!with_params.steps[0].params.contains_key("чужое"));
+    }
+
+    #[test]
+    fn money_never_becomes_a_draft() {
+        // Даже если строка нашлась, `deny` — это отказ, а не черновик.
+        assert!(draft("оплати счёт за интернет", &registry(), None).is_none());
     }
 }

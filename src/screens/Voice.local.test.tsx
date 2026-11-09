@@ -13,6 +13,8 @@ import { Voice } from "./Voice";
 vi.mock("../ipc", () => ({
   isTauri: () => true,
   planFor: vi.fn().mockResolvedValue([]),
+  draftPlan: vi.fn().mockResolvedValue(null),
+  runPlan: vi.fn(),
   speechStatus: vi.fn(),
   transcribeLocal: vi.fn(),
 }));

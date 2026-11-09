@@ -322,6 +322,54 @@ export async function planFor(query: string, limit = 8): Promise<PlanItem[]> {
   );
 }
 
+/**
+ * Черновик плана в браузере: то же правило, что в ядре (`plan::draft`) — первый
+ * найденный шаг, у которого есть рука и который не запрещён. Параметров здесь нет:
+ * памяти в браузере тоже нет, поэтому план честно скажет, каких данных не хватает.
+ */
+export async function draftPlan(query: string): Promise<PlanCheck | null> {
+  const found = await planFor(query, 8);
+  const item = found.find((candidate) => candidate.tool && candidate.decision !== "deny");
+  if (!item) return null;
+
+  const plan: Plan = {
+    goal: query,
+    source: "registry",
+    steps: [
+      {
+        registry: item.key,
+        params: {},
+        why: `единственное, что здесь умею и что подходит: ${item.example}`,
+      },
+    ],
+  };
+
+  const missing = missingParams(item.key);
+  return {
+    plan,
+    gates: [
+      {
+        position: 1,
+        registry: item.key,
+        decision: item.decision,
+        risk: item.risk,
+        wants_approval: item.decision === "confirm",
+      },
+    ],
+    problems: missing
+      ? [{ position: 1, registry: item.key, problem: `шагу не хватает данных: ${missing}` }]
+      : [],
+  };
+}
+
+/** Какие обязательные параметры инструмента остались незаполненными. */
+function missingParams(key: string): string | null {
+  const tool = TOOL_SPECS.find((candidate) => candidate.registry === key);
+  const required = tool?.params.filter((param) => param.required) ?? [];
+  const names = required.map((param) => param.label || param.name);
+  return names.length > 0 ? names.join(", ") : null;
+}
+
 // ── Модели в браузере ───────────────────────────────────────────────────────
 //
 // Браузер не видит файловую систему, поэтому и списка нет. Пустой путь и пустой

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, Input, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { MicRegular } from "@fluentui/react-icons";
-import { planFor, speechStatus, transcribeLocal } from "../ipc";
-import type { PlanItem, SpeechStatus } from "../ipc";
+import { draftPlan, planFor, runPlan, speechStatus, transcribeLocal } from "../ipc";
+import type { PlanCheck, PlanItem, PlanReport, SpeechStatus } from "../ipc";
 import { speak } from "../lib/voice";
 import { useVoice } from "../lib/useVoice";
 import { ActionList } from "../components/ActionList";
@@ -47,6 +47,17 @@ const useStyles = makeStyles({
   input: { flex: 1 },
   error: { color: tokens.colorPaletteRedForeground2 },
   spoken: { color: tokens.colorNeutralForeground3, fontStyle: "italic" },
+  draft: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    padding: "14px 16px",
+    borderRadius: tokens.borderRadiusLarge,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground2,
+    maxWidth: "96ch",
+  },
+  problems: { margin: 0, paddingLeft: "18px", fontSize: tokens.fontSizeBase200 },
   localReady: {
     color: tokens.colorPaletteGreenForeground2,
     fontSize: tokens.fontSizeBase200,
@@ -77,6 +88,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [seconds, setSeconds] = useState(0);
   const [spoken, setSpoken] = useState<string | null>(null);
   const [speech, setSpeech] = useState<SpeechStatus | null>(null);
+  const [draft, setDraft] = useState<PlanCheck | null>(null);
+  const [approved, setApproved] = useState(false);
+  const [report, setReport] = useState<PlanReport | null>(null);
+  const [running, setRunning] = useState(false);
 
   const search = useCallback((phrase: string) => {
     const query = phrase.trim();
@@ -88,15 +103,25 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     setBusy(true);
     setError(null);
     planFor(query, LIMIT)
-      .then((found) => {
+      .then(async (found) => {
         setItems(found);
+        setReport(null);
+        setApproved(false);
+
+        // Черновик плана: что именно приложение собирается сделать. Спрашиваем его
+        // сразу — человек сказал задачу, и ответ «могу сделать вот это» полезнее списка.
+        const proposal = await draftPlan(query).catch(() => null);
+        setDraft(proposal);
         // Отвечаем вслух: человек, который говорит, не смотрит в экран.
-        const phraseOut =
-          found.length === 0
+        const phraseOut = !proposal
+          ? found.length === 0
             ? voice.spokenNothing
             : found.some((item) => Boolean(item.tool))
-              ? voice.spokenFound(found.length)
-              : voice.spokenOnlyDescription;
+              ? voice.spokenFoundProposal(found.length)
+              : voice.spokenOnlyDescription
+          : proposal.problems.length > 0
+            ? `${voice.draftSpoken(proposal.plan?.steps.length ?? 0)}. ${voice.draftMissing}`
+            : voice.draftSpoken(proposal.plan?.steps.length ?? 0);
         setSpoken(speak(phraseOut) ? voice.said(phraseOut) : voice.silent);
       })
       .catch((reason: unknown) =>
@@ -138,6 +163,27 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     const timer = setInterval(() => setSeconds((value) => value + 1), 1000);
     return () => clearInterval(timer);
   }, [mic.listening]);
+
+  const execute = useCallback(() => {
+    const plan = draft?.plan;
+    if (!plan) return;
+
+    setRunning(true);
+    runPlan(JSON.stringify(plan), approved ? [1] : [])
+      .then((result) => {
+        setReport(result);
+        const phrase = result.stopped
+          ? voice.draftSpokenStopped(result.stopped)
+          : voice.planSpeech(result.steps.length);
+        setSpoken(speak(phrase) ? voice.said(phrase) : voice.silent);
+      })
+      .catch((reason: unknown) => {
+        const message = reason instanceof Error ? reason.message : String(reason);
+        setError(message);
+        speak(voice.draftSpokenStopped(message));
+      })
+      .finally(() => setRunning(false));
+  }, [draft, approved]);
 
   return (
     <div className={styles.root}>
@@ -220,6 +266,53 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       ) : (
         <ActionList items={items} />
       )}
+
+      {draft?.plan ? (
+        <section className={styles.draft}>
+          <Text weight="semibold">{voice.draftTitle}</Text>
+          <ul className={styles.problems}>
+            {draft.gates.map((gate) => (
+              <li key={gate.position}>
+                <label>
+                  {gate.decision === "confirm" ? (
+                    <input
+                      type="checkbox"
+                      aria-label={voice.draftApprove(gate.position)}
+                      checked={approved}
+                      onChange={(event) => setApproved(event.target.checked)}
+                    />
+                  ) : null}{" "}
+                  {gate.registry} · {voice.planRisk[gate.risk] ?? gate.risk}
+                  {gate.decision === "confirm" ? ` · ${voice.draftNeed}` : ""}
+                </label>
+              </li>
+            ))}
+          </ul>
+          {draft.problems.map((problem, index) => (
+            <Text key={`${problem.position}-${index}`} className={styles.error}>
+              {`${voice.draftMissing}: ${problem.problem}`}
+            </Text>
+          ))}
+          <div className={styles.bar}>
+            <Button
+              appearance="primary"
+              disabled={
+                running ||
+                draft.problems.length > 0 ||
+                draft.gates.some((gate) => gate.decision === "confirm" && !approved)
+              }
+              onClick={execute}
+            >
+              {running ? voice.draftRunning : voice.draftRun}
+            </Button>
+            {report ? (
+              <Text className={report.stopped ? styles.error : styles.localReady}>
+                {report.stopped ? report.stopped : voice.draftDone}
+              </Text>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       {onOpen ? (
         <div className={styles.hood}>
