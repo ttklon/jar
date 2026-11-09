@@ -461,7 +461,10 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("hardware-diag|показать|характеристики железа", HARDWARE),
         ("network|проверить|подключение", CONNECTIVITY),
         ("network|проверить|открытые порты", OPEN_PORTS),
-        ("apps-windows|показать|установленные программы", INSTALLED_APPS),
+        (
+            "apps-windows|показать|установленные программы",
+            INSTALLED_APPS,
+        ),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }

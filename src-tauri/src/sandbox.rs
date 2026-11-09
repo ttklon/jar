@@ -67,60 +67,192 @@ struct Rule {
 /// Запрещённое всегда: уничтожение данных, учётные записи, защита, сеть, права.
 const RULES: &[Rule] = &[
     // Диски и разметка
-    Rule { pattern: "format-volume", danger: "форматирование раздела" },
-    Rule { pattern: "clear-disk", danger: "стирание диска" },
-    Rule { pattern: "initialize-disk", danger: "переразметка диска" },
-    Rule { pattern: "diskpart", danger: "работа с разделами напрямую" },
-    Rule { pattern: "bcdedit", danger: "правка загрузчика" },
+    Rule {
+        pattern: "format-volume",
+        danger: "форматирование раздела",
+    },
+    Rule {
+        pattern: "clear-disk",
+        danger: "стирание диска",
+    },
+    Rule {
+        pattern: "initialize-disk",
+        danger: "переразметка диска",
+    },
+    Rule {
+        pattern: "diskpart",
+        danger: "работа с разделами напрямую",
+    },
+    Rule {
+        pattern: "bcdedit",
+        danger: "правка загрузчика",
+    },
     // Уничтожение пачкой
-    Rule { pattern: "remove-item", danger: "удаление без корзины" },
-    Rule { pattern: "del /s", danger: "удаление с подпапками" },
-    Rule { pattern: "rd /s", danger: "удаление папки с содержимым" },
-    Rule { pattern: "rmdir /s", danger: "удаление папки с содержимым" },
-    Rule { pattern: "vssadmin delete", danger: "удаление теневых копий" },
+    Rule {
+        pattern: "remove-item",
+        danger: "удаление без корзины",
+    },
+    Rule {
+        pattern: "del /s",
+        danger: "удаление с подпапками",
+    },
+    Rule {
+        pattern: "rd /s",
+        danger: "удаление папки с содержимым",
+    },
+    Rule {
+        pattern: "rmdir /s",
+        danger: "удаление папки с содержимым",
+    },
+    Rule {
+        pattern: "vssadmin delete",
+        danger: "удаление теневых копий",
+    },
     // Учётные записи и права
-    Rule { pattern: "net user", danger: "учётные записи" },
-    Rule { pattern: "net localgroup", danger: "группы и права" },
-    Rule { pattern: "reg add", danger: "правка реестра" },
-    Rule { pattern: "reg delete", danger: "удаление из реестра" },
-    Rule { pattern: "schtasks /create", danger: "создание задачи планировщика" },
-    Rule { pattern: "schtasks /delete", danger: "удаление задачи планировщика" },
-    Rule { pattern: "-verb runas", danger: "повышение прав" },
-    Rule { pattern: "start-process -verb", danger: "запуск с другими правами" },
-    Rule { pattern: "set-mppreference", danger: "правка защиты от вирусов" },
-    Rule { pattern: "add-mppreference", danger: "правка защиты от вирусов" },
-    Rule { pattern: "netsh advfirewall", danger: "правка сетевого экрана" },
+    Rule {
+        pattern: "net user",
+        danger: "учётные записи",
+    },
+    Rule {
+        pattern: "net localgroup",
+        danger: "группы и права",
+    },
+    Rule {
+        pattern: "reg add",
+        danger: "правка реестра",
+    },
+    Rule {
+        pattern: "reg delete",
+        danger: "удаление из реестра",
+    },
+    Rule {
+        pattern: "schtasks /create",
+        danger: "создание задачи планировщика",
+    },
+    Rule {
+        pattern: "schtasks /delete",
+        danger: "удаление задачи планировщика",
+    },
+    Rule {
+        pattern: "-verb runas",
+        danger: "повышение прав",
+    },
+    Rule {
+        pattern: "start-process -verb",
+        danger: "запуск с другими правами",
+    },
+    Rule {
+        pattern: "set-mppreference",
+        danger: "правка защиты от вирусов",
+    },
+    Rule {
+        pattern: "add-mppreference",
+        danger: "правка защиты от вирусов",
+    },
+    Rule {
+        pattern: "netsh advfirewall",
+        danger: "правка сетевого экрана",
+    },
     // Сеть наружу
-    Rule { pattern: "invoke-webrequest", danger: "скачивание из сети" },
-    Rule { pattern: "invoke-restmethod", danger: "запрос в сеть" },
-    Rule { pattern: "start-bitstransfer", danger: "скачивание из сети" },
-    Rule { pattern: "bitsadmin", danger: "скачивание в обход" },
-    Rule { pattern: "downloadstring", danger: "исполнение скачанного" },
-    Rule { pattern: "downloadfile", danger: "скачивание из сети" },
+    Rule {
+        pattern: "invoke-webrequest",
+        danger: "скачивание из сети",
+    },
+    Rule {
+        pattern: "invoke-restmethod",
+        danger: "запрос в сеть",
+    },
+    Rule {
+        pattern: "start-bitstransfer",
+        danger: "скачивание из сети",
+    },
+    Rule {
+        pattern: "bitsadmin",
+        danger: "скачивание в обход",
+    },
+    Rule {
+        pattern: "downloadstring",
+        danger: "исполнение скачанного",
+    },
+    Rule {
+        pattern: "downloadfile",
+        danger: "скачивание из сети",
+    },
     // Обфускация и исполнение строк
-    Rule { pattern: "-encodedcommand", danger: "скрытая команда" },
-    Rule { pattern: "invoke-expression", danger: "исполнение собранной строки" },
-    Rule { pattern: "iex ", danger: "исполнение собранной строки" },
-    Rule { pattern: "[convert]::frombase64string", danger: "раскодирование скрытого" },
+    Rule {
+        pattern: "-encodedcommand",
+        danger: "скрытая команда",
+    },
+    Rule {
+        pattern: "invoke-expression",
+        danger: "исполнение собранной строки",
+    },
+    Rule {
+        pattern: "iex ",
+        danger: "исполнение собранной строки",
+    },
+    Rule {
+        pattern: "[convert]::frombase64string",
+        danger: "раскодирование скрытого",
+    },
     // `Add-Type -AssemblyName` грузит системную сборку по имени — так работает корзина.
     // Опасно другое: компиляция своей строки в код и подгрузка чужого файла с диска.
-    Rule { pattern: "add-type -typedefinition", danger: "компиляция чужого кода" },
-    Rule { pattern: "add-type -memberdefinition", danger: "компиляция чужого кода" },
-    Rule { pattern: "add-type -path", danger: "подгрузка чужого кода с диска" },
+    Rule {
+        pattern: "add-type -typedefinition",
+        danger: "компиляция чужого кода",
+    },
+    Rule {
+        pattern: "add-type -memberdefinition",
+        danger: "компиляция чужого кода",
+    },
+    Rule {
+        pattern: "add-type -path",
+        danger: "подгрузка чужого кода с диска",
+    },
 ];
 
 /// Что меняет состояние: не запрещено, но без человека нельзя.
 const CHANGES: &[Rule] = &[
-    Rule { pattern: "new-item", danger: "создание" },
-    Rule { pattern: "move-item", danger: "перемещение" },
-    Rule { pattern: "copy-item", danger: "копирование" },
-    Rule { pattern: "set-content", danger: "запись в файл" },
-    Rule { pattern: "out-file", danger: "запись в файл" },
-    Rule { pattern: "rename-item", danger: "переименование" },
-    Rule { pattern: "start-process", danger: "запуск программы" },
-    Rule { pattern: "stop-process", danger: "остановка программы" },
-    Rule { pattern: "remove-item -recurse", danger: "удаление с подпапками" },
-    Rule { pattern: "mkdir", danger: "создание папки" },
+    Rule {
+        pattern: "new-item",
+        danger: "создание",
+    },
+    Rule {
+        pattern: "move-item",
+        danger: "перемещение",
+    },
+    Rule {
+        pattern: "copy-item",
+        danger: "копирование",
+    },
+    Rule {
+        pattern: "set-content",
+        danger: "запись в файл",
+    },
+    Rule {
+        pattern: "out-file",
+        danger: "запись в файл",
+    },
+    Rule {
+        pattern: "rename-item",
+        danger: "переименование",
+    },
+    Rule {
+        pattern: "start-process",
+        danger: "запуск программы",
+    },
+    Rule {
+        pattern: "stop-process",
+        danger: "остановка программы",
+    },
+    Rule {
+        pattern: "remove-item -recurse",
+        danger: "удаление с подпапками",
+    },
+    Rule {
+        pattern: "mkdir",
+        danger: "создание папки",
+    },
 ];
 
 /// Проверяет текст команды.
@@ -281,7 +413,10 @@ mod tests {
     fn writing_needs_a_person_but_is_not_refused() {
         let verdict = screen_script("New-Item -ItemType Directory -Path $env:ZS_PATH");
         assert_eq!(verdict.decision, Decision::Ask);
-        assert!(verdict.reasons.iter().any(|reason| reason.contains("создание")));
+        assert!(verdict
+            .reasons
+            .iter()
+            .any(|reason| reason.contains("создание")));
     }
 
     #[test]
@@ -328,9 +463,17 @@ mod tests {
 
     #[test]
     fn a_value_that_carries_a_second_command_is_refused() {
-        assert_eq!(screen_value("path", "C:\\tmp\\jar").decision, Decision::Allow);
+        assert_eq!(
+            screen_value("path", "C:\\tmp\\jar").decision,
+            Decision::Allow
+        );
 
-        for value in ["C:\\tmp; Remove-Item C:\\ -Recurse", "a|b", "$(whoami)", "x\ny"] {
+        for value in [
+            "C:\\tmp; Remove-Item C:\\ -Recurse",
+            "a|b",
+            "$(whoami)",
+            "x\ny",
+        ] {
             let verdict = screen_value("path", value);
             assert_eq!(verdict.decision, Decision::Refuse, "значение: {value}");
             assert!(verdict.reasons[0].contains("path"));
@@ -345,8 +488,15 @@ mod tests {
         );
         assert_eq!(verdict.decision, Decision::Ask);
 
-        let verdict = screen("New-Item -Path $env:ZS_PATH", &[("path", "C:\\tmp; whoami")]);
-        assert_eq!(verdict.decision, Decision::Refuse, "значение опаснее скрипта");
+        let verdict = screen(
+            "New-Item -Path $env:ZS_PATH",
+            &[("path", "C:\\tmp; whoami")],
+        );
+        assert_eq!(
+            verdict.decision,
+            Decision::Refuse,
+            "значение опаснее скрипта"
+        );
         assert!(verdict.reasons.iter().any(|reason| reason.contains("path")));
     }
 
