@@ -156,17 +156,23 @@ pub fn total_bytes(items: &[ModelFile]) -> u64 {
 #[cfg(windows)]
 pub fn free_space(dir: &Path) -> Option<u64> {
     let path = dir.display().to_string().replace('\'', "''");
+    // Диск берётся по корню пути, а не по `DeviceID`: у корня есть обратная косая
+    // черта («C:\»), и фильтр CIM `DeviceID='C:\'` не совпадает ни с чем.
     let script = format!(
-        "$root = [System.IO.Path]::GetPathRoot('{path}');\
-         $disk = Get-CimInstance Win32_LogicalDisk -Filter \"DeviceID='$root'\";\
-         Write-Output $disk.FreeSpace"
+        "$drive = [System.IO.Path]::GetPathRoot('{path}').TrimEnd('\\').TrimEnd(':');\
+         Write-Output (Get-PSDrive -Name $drive).Free"
     );
 
     let output = std::process::Command::new("powershell.exe")
         .args(crate::executor::powershell(&script))
         .output()
         .ok()?;
+
     if !output.status.success() {
+        tracing::warn!(
+            stderr = %String::from_utf8_lossy(&output.stderr).trim(),
+            "свободное место на диске не удалось узнать"
+        );
         return None;
     }
 
