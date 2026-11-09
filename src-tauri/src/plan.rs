@@ -127,20 +127,22 @@ pub fn check(plan: &Plan, registry: &Registry) -> Vec<Problem> {
             continue;
         };
 
-        if tools::spec(key).is_none() {
-            problems.push(Problem::step(
-                position,
-                key,
-                "у этого действия нет инструмента: строки реестра мало, нужна рука",
-            ));
-            continue;
-        }
-
+        // Отказ политики проверяется первым: «не делаем никогда» — более сильное
+        // утверждение, чем «нет руки», и человеку важнее увидеть именно его.
         if let policy::Decision::Deny(_) = policy::decide(action) {
             problems.push(Problem::step(
                 position,
                 key,
                 "политика это запрещает: деньги и учётные данные не делает система",
+            ));
+            continue;
+        }
+
+        if tools::spec(key).is_none() {
+            problems.push(Problem::step(
+                position,
+                key,
+                "у этого действия нет инструмента: строки реестра мало, нужна рука",
             ));
             continue;
         }

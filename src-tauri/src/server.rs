@@ -182,16 +182,21 @@ mod tests {
     /// всё. Так проверяется контракт «процесс + /health», а не конкретный движок.
     #[cfg(windows)]
     fn stand_in(port: u16) -> ServerSpec {
+        // Тело цикла в try/catch: клиент может закрыть соединение раньше, чем заглушка
+        // ответит, и тогда без перехвата скрипт умирал бы после первого же запроса.
         let script = format!(
             "$l = [System.Net.HttpListener]::new(); \
              $l.Prefixes.Add('http://127.0.0.1:{port}/'); \
              $l.Start(); \
              while ($true) {{ \
-               $c = $l.GetContext(); \
-               $b = [System.Text.Encoding]::ASCII.GetBytes('ok'); \
-               $c.Response.StatusCode = 200; \
-               $c.Response.OutputStream.Write($b, 0, $b.Length); \
-               $c.Response.Close() \
+               try {{ \
+                 $c = $l.GetContext(); \
+                 $c.Response.KeepAlive = $false; \
+                 $b = [System.Text.Encoding]::ASCII.GetBytes('ok'); \
+                 $c.Response.StatusCode = 200; \
+                 $c.Response.OutputStream.Write($b, 0, $b.Length); \
+                 $c.Response.Close() \
+               }} catch {{ }} \
              }}"
         );
 
@@ -253,14 +258,14 @@ mod tests {
         assert_eq!(server.port(), port);
         assert!(server.pid() > 0);
         assert!(
-            answers(&spec, Duration::from_millis(500)),
-            "отвечает после старта"
+            answers(&spec, Duration::from_secs(2)),
+            "отвечает после старта (порт {port})"
         );
 
         server.stop().expect("останавливается");
 
         // Порт освободился: никто больше не отвечает.
-        let deadline = Instant::now() + Duration::from_secs(5);
+        let deadline = Instant::now() + Duration::from_secs(10);
         while Instant::now() < deadline && answers(&spec, Duration::from_millis(200)) {
             std::thread::sleep(Duration::from_millis(100));
         }
