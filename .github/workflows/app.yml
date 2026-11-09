@@ -63,11 +63,25 @@ jobs:
       # Вывод сборки превращается в аннотации: логи джоб недоступны, аннотации — да.
       # Аннотации из шага, который сам упал, до API не доходят (проверено), поэтому
       # три шага: run → report (`continue-on-error`) → gate.
+      # Бандлер Tauri скачивает себе NSIS с внешнего хранилища, и оно регулярно
+      # отвечает 504. Это не наш код, но из-за него релиз «красный» через раз —
+      # поэтому три попытки, и только на 504: остальные ошибки повторять незачем.
       - name: Build installer (NSIS)
         id: bundle
         continue-on-error: true
         shell: bash
-        run: npm run tauri build > bundle.log 2>&1
+        run: |
+          for attempt in 1 2 3; do
+            echo "попытка $attempt"
+            if npm run tauri build > bundle.log 2>&1; then
+              exit 0
+            fi
+            if ! grep -q "http status: 504" bundle.log; then
+              exit 1
+            fi
+            sleep 20
+          done
+          exit 1
 
       # `continue-on-error` здесь не для красоты: упавший отчёт делает `success()`
       # ложным, и гейт ниже молча пропускается — сборка «зелёная» без установщика.
