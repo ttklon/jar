@@ -25,8 +25,6 @@
 //! дескрипторов работает, но каналы пришлось бы читать параллельно из потоков, а пробный
 //! запуск короткий и потоковая передача ему не нужна. Файл — это скучно и надёжно.
 
-use std::sync::atomic::AtomicBool;
-
 /// Умеет ли система запускать без прав.
 pub fn available() -> bool {
     cfg!(windows)
@@ -247,10 +245,7 @@ mod imp {
         stderr_handle: HANDLE,
         stdin_handle: HANDLE,
     ) -> Result<(HANDLE, HANDLE, u32), String> {
-        let token = match restricted_token() {
-            Ok(token) => token,
-            Err(reason) => return Err(reason),
-        };
+        let token = restricted_token()?;
 
         let mut line_wide = wide(&command_line(&request.program, &request.argv));
         let program_wide = wide(&request.program);
@@ -376,6 +371,12 @@ pub use imp::run;
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(windows)]
+    use crate::executor::ExecRequest;
+    #[cfg(windows)]
+    use crate::isolation::Limits;
+    #[cfg(windows)]
+    use std::sync::atomic::AtomicBool;
 
     #[test]
     fn an_argument_with_a_space_is_quoted_as_one_argument() {
@@ -412,8 +413,6 @@ mod tests {
     #[cfg(windows)]
     #[test]
     fn a_restricted_process_has_no_privileges_left() {
-        use std::sync::atomic::AtomicBool;
-
         // `DISABLE_MAX_PRIVILEGE` оставляет ровно одну привилегию — SeChangeNotifyPrivilege,
         // без которой не работает обход каталогов. Всё остальное обязано исчезнуть, а у
         // обычного процесса с этой машины оно есть, иначе проверка ничего не доказывает.
@@ -455,8 +454,6 @@ mod tests {
     #[cfg(windows)]
     #[test]
     fn a_restricted_process_runs_under_the_ceiling_too() {
-        use std::sync::atomic::AtomicBool;
-
         let request = ExecRequest::new(
             "powershell.exe",
             vec![
