@@ -166,10 +166,7 @@ mod tests {
         for profile in all() {
             for operation in &profile.operations {
                 let action = resolve(&registry, &operation.registry).expect("строка реестра");
-                let base = serde_json::to_value(action.risk)
-                    .ok()
-                    .and_then(|value| value.as_str().map(str::to_string))
-                    .unwrap_or_default();
+                let base = action.risk.as_str().to_string();
                 assert!(
                     rank(&operation.risk) >= rank(&base),
                     "{}: «{}» объявляет риск {}, а реестр — {}",

@@ -8,6 +8,7 @@ import type {
   AuditEvent,
   ConfirmToken,
   FlowView,
+  PlanItem,
   ProfileView,
   RegistrySnapshot,
   RunRecord,
@@ -33,6 +34,10 @@ export function registrySnapshot(): Promise<RegistrySnapshot> {
 
 export function appStatus(): Promise<AppStatus> {
   return invoke<AppStatus>("app_status");
+}
+
+export function planFor(query: string, limit = 8): Promise<PlanItem[]> {
+  return invoke<PlanItem[]>("plan_for", { query, limit });
 }
 
 export function listTools(): Promise<ToolView[]> {

@@ -8,6 +8,8 @@
 //! * показывает, что было сделано: журнал (`audit`) читается экраном «История»;
 //! * помнит удачные запуски и их параметры в SQLite (`memory`), чтобы не спрашивать
 //!   одно и то же дважды;
+//! * по фразе человека находит действия в реестре (`planner`) и честно говорит, что из
+//!   них выполнимо;
 //! * знает, как это делается в 87 программах (`profiles`), и честно показывает, что из
 //!   этого уже исполняется;
 //! * вызывается из любой программы по `Ctrl+Alt+Z` (`hotkey`).
@@ -21,6 +23,7 @@ pub mod hotkey;
 pub mod ipc;
 pub mod logging;
 pub mod memory;
+pub mod planner;
 pub mod policy;
 pub mod profiles;
 pub mod registry;
@@ -99,6 +102,7 @@ pub fn run() {
             ipc::list_flows,
             ipc::audit_tail,
             ipc::memory_runs,
+            ipc::plan_for,
             ipc::list_profiles,
             ipc::policy_for,
             ipc::confirm_tool,

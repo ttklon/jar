@@ -6,6 +6,7 @@ import {
   listProfiles,
   listTools,
   memoryRuns,
+  planFor,
   registrySnapshot,
 } from "./dev";
 import { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
@@ -161,5 +162,21 @@ describe("память в браузере", () => {
     for (const tool of tools) {
       expect(tool.last_params).toBeNull();
     }
+  });
+});
+
+describe("поиск по реестру в браузере", () => {
+  it("отвечает тем же, чем ответило бы ядро", async () => {
+    const [first] = await planFor("создай папку", 5);
+    expect(first?.key).toBe("files|создать|папку");
+    expect(first?.tool).not.toBeNull();
+
+    await expect(planFor("   ")).resolves.toEqual([]);
+  });
+
+  it("на отказ по деньгам отвечает отказом, а не пустотой", async () => {
+    const money = (await planFor("оплати счёт", 20)).find((item) => item.risk === "money");
+    expect(money?.decision).toBe("deny");
+    expect(money?.tool).toBeNull();
   });
 });

@@ -14,6 +14,7 @@ use tauri::State;
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::memory::{Memory, RunRecord};
+use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::registry::{Action, Registry, RegistrySnapshot};
@@ -154,10 +155,7 @@ fn decision_of(inner: &Inner, key: &str) -> (Decision, String) {
 }
 
 fn risk_label(action: &Action) -> String {
-    serde_json::to_value(action.risk)
-        .ok()
-        .and_then(|value| value.as_str().map(str::to_string))
-        .unwrap_or_else(|| "unknown".to_string())
+    action.risk.as_str().to_string()
 }
 
 fn view(inner: &Inner, spec: &'static ToolSpec) -> ToolView {
@@ -326,6 +324,15 @@ pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
         .iter()
         .map(|spec| view(&state.inner, spec))
         .collect()
+}
+
+/// Поиск по реестру: что приложение может сделать по этой фразе.
+///
+/// Модели здесь нет — только сопоставление слов (`planner`). Ответ честный: у каждого
+/// найденного действия видно решение политики и то, есть ли уже инструмент.
+#[tauri::command]
+pub fn plan_for(state: State<'_, AppState>, query: String, limit: usize) -> Vec<PlanItem> {
+    planner::plan(&state.inner.registry, &query, limit.clamp(1, 50))
 }
 
 /// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это

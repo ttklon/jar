@@ -17,6 +17,7 @@ export type {
   FlowStepView,
   FlowView,
   ParamSpec,
+  PlanItem,
   ProfileOpView,
   ProfileView,
   RegistrySnapshot,
@@ -33,6 +34,7 @@ import type {
   AuditEvent,
   ConfirmToken,
   FlowView,
+  PlanItem,
   ProfileView,
   RunRecord,
   StepResult,
@@ -148,4 +150,20 @@ export async function memoryRuns(limit = 20): Promise<RunRecord[]> {
   }
   const { memoryRuns: fromData } = await import("./dev");
   return fromData(limit);
+}
+
+// ── Поиск по реестру ────────────────────────────────────────────────────────
+
+/**
+ * «Что нужно сделать?» — поиск действий по фразе. В приложении считает Rust
+ * (`planner.rs`), в браузере — его зеркало (`src/lib/planner.ts`). Возвращается не
+ * план, а кандидаты: у каждого видно решение политики и есть ли уже инструмент.
+ */
+export async function planFor(query: string, limit = 8): Promise<PlanItem[]> {
+  if (isTauri()) {
+    const { planFor: fromCore } = await import("./tauri");
+    return fromCore(query, limit);
+  }
+  const { planFor: fromData } = await import("./dev");
+  return fromData(query, limit);
 }

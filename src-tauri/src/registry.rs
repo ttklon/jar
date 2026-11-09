@@ -37,6 +37,19 @@ pub enum Risk {
 }
 
 impl Risk {
+    /// Строка риска ровно в том виде, в каком она лежит в реестре и приходит в UI.
+    /// Одно место вместо `serde_json::to_value` по всему коду.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Risk::Read => "read",
+            Risk::WriteLocal => "write-local",
+            Risk::External => "external",
+            Risk::Destructive => "destructive",
+            Risk::Identity => "identity",
+            Risk::Money => "money",
+        }
+    }
+
     /// Нужен ли человек рядом, чтобы это выполнить.
     pub fn needs_human(self) -> bool {
         !matches!(self, Risk::Read)

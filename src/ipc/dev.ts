@@ -118,6 +118,7 @@ import flowsJson from "../../data/flows.json";
 import type {
   AuditEvent,
   Decision,
+  PlanItem,
   RunRecord,
   FlowStepView,
   FlowView,
@@ -287,4 +288,21 @@ export async function listProfiles(): Promise<ProfileView[]> {
  */
 export async function memoryRuns(_limit: number): Promise<RunRecord[]> {
   return [];
+}
+
+// ── Поиск по реестру в браузере ─────────────────────────────────────────────
+//
+// Ядро ищет фразой по реестру (`plan_for`). Здесь правила повторены в
+// `src/lib/planner.ts`, чтобы экран «Спросить» показывал тот же ответ без Rust.
+
+import { plan } from "../lib/planner";
+
+const TOOL_KEYS: ReadonlySet<string> = new Set(TOOL_SPECS.map((spec) => spec.registry));
+
+export async function planFor(query: string, limit = 8): Promise<PlanItem[]> {
+  return plan(
+    { actions: ROWS, tools: TOOL_KEYS, decide, reason: decisionReason },
+    query,
+    Math.min(Math.max(limit, 1), 50),
+  );
 }

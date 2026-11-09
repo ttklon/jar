@@ -92,6 +92,21 @@ export interface ToolView {
   last_params?: Record<string, string> | null;
 }
 
+/**
+ * Найденное действие по фразе человека (`planner.rs`).
+ * `tool` заполнен только тогда, когда приложение действительно умеет это выполнить.
+ */
+export interface PlanItem {
+  key: string;
+  example: string;
+  risk: Risk;
+  decision: Decision;
+  decision_reason: string;
+  needs_token: boolean;
+  tool: string | null;
+  score: number;
+}
+
 /** Запуск из памяти приложения (SQLite). */
 export interface RunRecord {
   id: number;
