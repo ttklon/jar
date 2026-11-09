@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, Input, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { MicRegular } from "@fluentui/react-icons";
-import { planFor } from "../ipc";
-import type { PlanItem } from "../ipc";
+import { planFor, speechStatus } from "../ipc";
+import type { PlanItem, SpeechStatus } from "../ipc";
 import { speak } from "../lib/voice";
 import { useVoice } from "../lib/useVoice";
 import { ActionList } from "../components/ActionList";
@@ -47,6 +47,11 @@ const useStyles = makeStyles({
   input: { flex: 1 },
   error: { color: tokens.colorPaletteRedForeground2 },
   spoken: { color: tokens.colorNeutralForeground3, fontStyle: "italic" },
+  localReady: {
+    color: tokens.colorPaletteGreenForeground2,
+    fontSize: tokens.fontSizeBase200,
+    maxWidth: "78ch",
+  },
   hood: {
     display: "flex",
     gap: "10px",
@@ -71,6 +76,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [spoken, setSpoken] = useState<string | null>(null);
+  const [speech, setSpeech] = useState<SpeechStatus | null>(null);
 
   const search = useCallback((phrase: string) => {
     const query = phrase.trim();
@@ -107,6 +113,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     },
     onError: (message) => setVoiceError(message),
   });
+
+  // Чем распознаём — видно сразу: пока своего движка нет, звук уходит наружу, и
+  // человек должен знать это до того, как заговорит, а не после.
+  useEffect(() => {
+    speechStatus()
+      .then(setSpeech)
+      .catch(() => setSpeech(null));
+  }, []);
 
   useEffect(() => {
     if (!mic.listening) {
@@ -156,6 +170,15 @@ export function Voice({ onOpen }: VoiceScreenProps) {
 
       <Text className={styles.note}>{voice.hotkey}</Text>
       <Text className={styles.note}>{voice.privacy}</Text>
+      {speech ? (
+        <Text className={speech.found && speech.model ? styles.localReady : styles.note}>
+          {speech.found && speech.model
+            ? voice.localReady(speech.program ?? "")
+            : speech.found
+              ? voice.localNoModel(speech.models_dir)
+              : voice.localNone(speech.search_dir)}
+        </Text>
+      ) : null}
 
       {voiceError ? <Text className={styles.error}>{voiceError}</Text> : null}
 

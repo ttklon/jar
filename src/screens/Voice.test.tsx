@@ -51,6 +51,16 @@ describe("голосовой экран", () => {
     expect(screen.getByText(/Пока ничего не сказано/)).toBeTruthy();
   });
 
+  it("говорит заранее, чем распознаёт и покидает ли звук компьютер", async () => {
+    render(<Voice />);
+
+    // В браузере своего движка нет по определению — так и написано.
+    await waitFor(() => {
+      expect(screen.getByText(/локального распознавания нет/)).toBeTruthy();
+    });
+    expect(screen.getByText(/звук распознаёт служба системы/)).toBeTruthy();
+  });
+
   it("под капотом — вход в доказательство, а не второй рабочий стол", () => {
     const onOpen = vi.fn();
     render(<Voice onOpen={onOpen} />);

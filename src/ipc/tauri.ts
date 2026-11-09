@@ -19,6 +19,7 @@ import type {
   PlanItem,
   ProfileView,
   RoleView,
+  SpeechStatus,
   RegistrySnapshot,
   RunRecord,
   StepResult,
@@ -91,6 +92,15 @@ export function assignRole(role: string, name: string): Promise<RoleView[]> {
 
 export function clearRole(role: string): Promise<RoleView[]> {
   return invoke<RoleView[]>("clear_role", { role });
+}
+
+export function speechStatus(): Promise<SpeechStatus> {
+  return invoke<SpeechStatus>("speech_status");
+}
+
+/** Распознать запись своим движком: звук не покидает компьютер. */
+export function transcribeLocal(audio: number[]): Promise<string> {
+  return invoke<string>("transcribe_local", { audio });
 }
 
 export function searchEpisodes(query: string, limit = 20): Promise<Episode[]> {

@@ -37,6 +37,7 @@ export type {
   RunStep,
   Risk,
   RoleView,
+  SpeechStatus,
   StepResult,
   Tier,
   ToolView,
@@ -53,6 +54,7 @@ import type {
   PlanCheck,
   PlanReport,
   RoleView,
+  SpeechStatus,
   FlowView,
   HashCheck,
   ModelsView,
@@ -367,4 +369,29 @@ export async function lastPlan(): Promise<Plan | null> {
   }
   const { lastPlan: fromData } = await import("./dev");
   return fromData();
+}
+
+// ── Локальное распознавание ─────────────────────────────────────────────────
+
+/** Есть ли чем распознавать локально: движок и модель. Ничего не запускает. */
+export async function speechStatus(): Promise<SpeechStatus> {
+  if (isTauri()) {
+    const { speechStatus: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { speechStatus: fromData } = await import("./dev");
+  return fromData();
+}
+
+/**
+ * Распознать запись своим движком. В браузере этого нет и быть не может: движок —
+ * это файл рядом с приложением, а не то, что умеет вкладка.
+ */
+export async function transcribeLocal(audio: number[]): Promise<string> {
+  if (isTauri()) {
+    const { transcribeLocal: fromCore } = await import("./tauri");
+    return fromCore(audio);
+  }
+  const { transcribeLocal: fromData } = await import("./dev");
+  return fromData(audio);
 }

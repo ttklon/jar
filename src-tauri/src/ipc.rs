@@ -25,6 +25,7 @@ use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::roles;
 use crate::server::{self, Server};
 use crate::step::StepResult;
+use crate::stt;
 use crate::tools::{self, ParamSpec, ToolSpec};
 
 /// Всё, что нужно командам. Один `Arc`, чтобы клонировать в фоновый поток.
@@ -728,6 +729,126 @@ pub fn search_episodes(
 ) -> Vec<Episode> {
     let limit = limit.unwrap_or(20).clamp(1, 100);
     state.inner.memory.search(&query, limit).unwrap_or_default()
+}
+
+/// Что известно о локальном распознавании речи.
+#[derive(Debug, Serialize)]
+pub struct SpeechStatus {
+    /// Найден ли `whisper-server.exe` рядом с приложением или в `PATH`.
+    pub found: bool,
+    pub program: Option<String>,
+    /// Файл модели распознавания, если он лежит в папке моделей.
+    pub model: Option<String>,
+    /// Куда положить движок и модель — чтобы человеку не гадать.
+    pub search_dir: String,
+    pub models_dir: String,
+}
+
+/// Модель распознавания: `ggml-*.bin` в папке моделей. Имя проверяется по смыслу,
+/// потому что `.bin` бывает разный, а брать «первый попавшийся» — значит подсунуть
+/// движку чужие веса и получить мусор вместо текста.
+fn speech_model(inner: &Inner) -> Option<std::path::PathBuf> {
+    let entries = std::fs::read_dir(&inner.models_dir).ok()?;
+    let mut found: Vec<std::path::PathBuf> = entries
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| {
+            let name = path
+                .file_name()
+                .map(|name| name.to_string_lossy().to_lowercase())
+                .unwrap_or_default();
+            path.is_file()
+                && name.ends_with(".bin")
+                && (name.contains("whisper") || name.starts_with("ggml-"))
+        })
+        .collect();
+    found.sort();
+    found.into_iter().next()
+}
+
+fn read_speech_status(state: &AppState) -> SpeechStatus {
+    let inner = &state.inner;
+    let program = stt::find_program(&inner.base_dir);
+    let model = speech_model(inner);
+
+    SpeechStatus {
+        found: program.is_some(),
+        program: program.map(|path| path.display().to_string()),
+        model: model.map(|path| path.display().to_string()),
+        search_dir: inner.base_dir.join("sidecars").display().to_string(),
+        models_dir: inner.models_dir.display().to_string(),
+    }
+}
+
+/// Есть ли чем распознавать локально. Ничего не запускает.
+#[tauri::command]
+pub fn speech_status(state: State<'_, AppState>) -> SpeechStatus {
+    read_speech_status(&state)
+}
+
+/// Распознаёт запись своим движком, не выпуская звук из компьютера.
+///
+/// Движок поднимается на один запрос и сразу останавливается: распознавание идёт
+/// редко и короткими кусками, а висящий процесс — это утечка, о которой человек не
+/// знает. Ошибки разные: нет движка, нет модели, не открыл порт, не разобрал.
+#[tauri::command]
+pub async fn transcribe_local(
+    state: State<'_, AppState>,
+    audio: Vec<u8>,
+) -> Result<String, String> {
+    let inner = state.inner.clone();
+    let status = read_speech_status(&state);
+
+    let program = stt::find_program(&inner.base_dir).ok_or_else(|| {
+        format!(
+            "локально распознавать нечем: положите whisper-server.exe в {}",
+            status.search_dir
+        )
+    })?;
+    let model = speech_model(&inner).ok_or_else(|| {
+        format!(
+            "нет модели распознавания: положите ggml-*.bin в {}",
+            status.models_dir
+        )
+    })?;
+
+    if audio.is_empty() {
+        return Err("нечего распознавать: пустая запись".to_string());
+    }
+
+    let run = inner.memory.start_run("speech", "локальное распознавание").ok();
+
+    let result = tauri::async_runtime::spawn_blocking(move || {
+        let port = server::free_port()?;
+        let log = inner.base_dir.join(format!("whisper-server-{port}.log"));
+        let mut child = stt::start(
+            &program,
+            &model,
+            port,
+            &log,
+            std::time::Duration::from_secs(60),
+        )?;
+
+        let text = stt::post(port, &audio, stt::TIMEOUT);
+
+        // Останавливаем всегда, даже если распознавание не удалось: движок не должен
+        // переживать запрос.
+        let stopped = child.kill().and_then(|()| child.wait());
+        if let Err(error) = stopped {
+            tracing::warn!("движок распознавания не остановился: {error}");
+        }
+
+        text
+    })
+    .await
+    .map_err(|error| format!("распознавание не выполнилось: {error}"))?;
+
+    if let Some(run) = run {
+        let outcome = if result.is_ok() { "ok" } else { "failed" };
+        let _ = inner.memory.finish_run(run, outcome);
+    }
+
+    result
 }
 
 /// Профили приложений: что описано и что из этого уже исполняется.

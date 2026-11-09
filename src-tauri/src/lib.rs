@@ -41,6 +41,7 @@ pub mod registry;
 pub mod roles;
 pub mod server;
 pub mod step;
+pub mod stt;
 pub mod tools;
 pub mod tray;
 pub mod verifier;
@@ -136,6 +137,8 @@ pub fn run() {
             ipc::last_plan,
             ipc::search_episodes,
             ipc::run_plan,
+            ipc::speech_status,
+            ipc::transcribe_local,
             ipc::list_profiles,
             ipc::policy_for,
             ipc::confirm_tool,

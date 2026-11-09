@@ -124,6 +124,18 @@ export interface ModelFile {
   hash: string | null;
 }
 
+/** Что известно о локальном распознавании речи. */
+export interface SpeechStatus {
+  /** Найден ли `whisper-server.exe` рядом с приложением или в `PATH`. */
+  found: boolean;
+  program: string | null;
+  /** Файл модели распознавания в папке моделей, если он есть. */
+  model: string | null;
+  /** Куда положить движок. */
+  search_dir: string;
+  models_dir: string;
+}
+
 /** Найденный прошлый запуск: почему он нашёлся — часть ответа. */
 export interface Episode {
   run: RunRecord;

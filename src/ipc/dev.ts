@@ -127,6 +127,7 @@ import type {
   PlanCheck,
   PlanReport,
   RoleView,
+  SpeechStatus,
   PlanItem,
   RunRecord,
   FlowStepView,
@@ -422,4 +423,21 @@ export async function runPlan(_json: string, _approved: number[]): Promise<PlanR
   // План исполняет ядро: руки, политика и отмена живут там, и повторять это в браузере
   // значило бы обещать то, чего браузер не умеет.
   throw new Error("план исполняет приложение: руки и политика живут в ядре");
+}
+
+// ── Локальное распознавание в браузере ──────────────────────────────────────
+
+export async function speechStatus(): Promise<SpeechStatus> {
+  // В браузере движка нет по определению: это файл рядом с приложением.
+  return {
+    found: false,
+    program: null,
+    model: null,
+    search_dir: "sidecars/ — рядом с приложением",
+    models_dir: "папка моделей приложения",
+  };
+}
+
+export async function transcribeLocal(_audio: number[]): Promise<string> {
+  throw new Error("локальное распознавание живёт в приложении: движок — файл рядом с ним");
 }

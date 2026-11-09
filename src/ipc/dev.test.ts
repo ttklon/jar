@@ -11,6 +11,8 @@ import {
   lastPlan,
   listModels,
   runPlan,
+  speechStatus,
+  transcribeLocal,
   listRoles,
   searchEpisodes,
   memoryRuns,
@@ -190,6 +192,19 @@ describe("поиск по реестру в браузере", () => {
     const money = (await planFor("оплати счёт", 20)).find((item) => item.risk === "money");
     expect(money?.decision).toBe("deny");
     expect(money?.tool).toBeNull();
+  });
+});
+
+describe("локальное распознавание в браузере", () => {
+  it("движка нет по определению, и это сказано", async () => {
+    const status = await speechStatus();
+    expect(status.found).toBe(false);
+    expect(status.program).toBeNull();
+    expect(status.search_dir).toMatch(/sidecars/);
+  });
+
+  it("распознавать в браузере нечем", async () => {
+    await expect(transcribeLocal([1, 2, 3])).rejects.toThrow(/приложении/);
   });
 });
 
