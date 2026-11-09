@@ -752,7 +752,7 @@ pub fn fill_plan(
         .map_err(|error| format!("план не переписывается: {error}"))?;
 
     let _ = plan::remember(&state.inner.memory, &parsed);
-    check_plan(state, rechecked)
+    Ok(check_plan(state, rechecked))
 }
 
 /// Последний сохранённый план, если он был.
