@@ -263,7 +263,10 @@ pub fn draft(
         steps: vec![PlanStep {
             registry: item.key.clone(),
             params,
-            why: format!("единственное, что здесь умею и что подходит: {}", item.example),
+            why: format!(
+                "единственное, что здесь умею и что подходит: {}",
+                item.example
+            ),
         }],
     })
 }
@@ -510,15 +513,17 @@ mod tests {
 
         let problems = check(&plan, &registry());
         assert!(
-            problems.iter().any(|problem| problem.problem.contains("не хватает данных")),
+            problems
+                .iter()
+                .any(|problem| problem.problem.contains("не хватает данных")),
             "{problems:?}"
         );
     }
 
     #[test]
     fn a_draft_takes_the_step_it_can_actually_do() {
-        let draft = draft("почисти диск от временных файлов", &registry(), None)
-            .expect("что-то найдётся");
+        let draft =
+            draft("почисти диск от временных файлов", &registry(), None).expect("что-то найдётся");
 
         assert_eq!(draft.source, "registry");
         assert_eq!(draft.steps.len(), 1);
