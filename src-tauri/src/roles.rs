@@ -111,7 +111,10 @@ mod tests {
             assert!(!role.purpose.is_empty());
             assert!(role.max_bytes > 0);
             assert!(
-                all().iter().skip(index + 1).all(|other| other.id != role.id),
+                all()
+                    .iter()
+                    .skip(index + 1)
+                    .all(|other| other.id != role.id),
                 "идентификатор роли повторяется: {}",
                 role.id
             );
@@ -122,7 +125,10 @@ mod tests {
     fn size_ceiling_is_checked_not_guessed() {
         let router = get("router").expect("роль есть");
         assert!(fits(router, 1024 * 1024 * 1024));
-        assert!(!fits(router, 3 * 1024 * 1024 * 1024), "3 ГБ в роль router не влезают");
+        assert!(
+            !fits(router, 3 * 1024 * 1024 * 1024),
+            "3 ГБ в роль router не влезают"
+        );
         assert!(get("no-such-role").is_none());
     }
 
