@@ -13,8 +13,8 @@ use tauri::State;
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
-use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
+use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::step::StepResult;
 use crate::tools::{self, ParamSpec, ToolSpec};
@@ -197,7 +197,9 @@ fn profile_op_view(inner: &Inner, operation: &ProfileOperation) -> ProfileOpView
             registry: operation.registry.clone(),
             resolved: String::new(),
             risk: "unknown".into(),
-            decision: Decision::Deny("в реестре нет такой строки").as_str().to_string(),
+            decision: Decision::Deny("в реестре нет такой строки")
+                .as_str()
+                .to_string(),
             decision_reason: "в реестре нет такой строки".into(),
             needs_token: false,
             has_tool: false,

@@ -94,15 +94,23 @@ mod tests {
         let mut seen = std::collections::HashSet::new();
         for profile in all() {
             assert!(
-                profile.slug.chars().all(|c| c.is_ascii_lowercase()
-                    || c.is_ascii_digit()
-                    || c == '-'
-                    || c == '_'),
+                profile
+                    .slug
+                    .chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-' || c == '_'),
                 "слаг «{}» должен быть безопасным именем файла",
                 profile.slug
             );
-            assert!(seen.insert(&profile.slug), "слаг «{}» повторяется", profile.slug);
-            assert!(!profile.app.trim().is_empty(), "у {} нет названия", profile.slug);
+            assert!(
+                seen.insert(&profile.slug),
+                "слаг «{}» повторяется",
+                profile.slug
+            );
+            assert!(
+                !profile.app.trim().is_empty(),
+                "у {} нет названия",
+                profile.slug
+            );
             // У веб-сервисов (умный дом, панели) исполняемого файла нет — это не ошибка,
             // но у обычных программ он обязан быть: иначе непонятно, что открывать.
             if profile.kind == "app" {
