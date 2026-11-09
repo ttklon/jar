@@ -28,7 +28,9 @@
 - [x] Rust-ядро: команды IPC (`registry_snapshot`, `app_status`), логирование в
       `%LOCALAPPDATA%\ZShelper\logs`, тесты реестра (`cargo test`)
 - [ ] Менеджер сайдкаров (llama.cpp/whisper.cpp)
-- [ ] Спайк до основной работы: release-сборка без портов, без DevTools, single-instance, офлайн (см. [`RUNTIME.md`](RUNTIME.md) §5)
+- [x] Release-сборка и установщик NSIS в CI (`job release`), single-instance
+- [ ] Остаток спайка: проверить на живой машине, что порты не слушаются, офлайн-запуск
+      и установка/удаление работают (см. [`RUNTIME.md`](RUNTIME.md) §5)
 - [ ] SQLite-схема (events/jobs/steps/audit/facts), миграции
 - [ ] Нативный слой: скриншот, UIA-дамп, клик/ввод, проверка после действия (**прототип Rust**)
 - [x] Реестр `data/actions.json` загружается как каталог инструментов: индексы по `id` и
