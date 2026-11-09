@@ -29,6 +29,7 @@ pub mod executor;
 pub mod flows;
 pub mod hotkey;
 pub mod ipc;
+pub mod learn;
 pub mod llama;
 pub mod logging;
 pub mod memory;
@@ -137,6 +138,8 @@ pub fn run() {
             ipc::last_plan,
             ipc::draft_plan,
             ipc::fill_plan,
+            ipc::request_learning,
+            ipc::learning_requests,
             ipc::search_episodes,
             ipc::run_plan,
             ipc::speech_status,

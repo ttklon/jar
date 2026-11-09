@@ -166,6 +166,28 @@ impl Memory {
         Ok(())
     }
 
+    /// Все факты с заданным началом ключа: так читаются списки («чему учиться»),
+    /// не заводя под них отдельной таблицы.
+    pub fn facts_with_prefix(&self, prefix: &str) -> Vec<(String, String)> {
+        let conn = self.lock();
+        let mut statement = match conn.prepare(
+            "SELECT key, value FROM facts WHERE key LIKE ?1 ORDER BY key",
+        ) {
+            Ok(statement) => statement,
+            Err(_) => return Vec::new(),
+        };
+
+        let pattern = format!("{prefix}%");
+        let rows = statement.query_map(params![pattern], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+        });
+
+        match rows {
+            Ok(rows) => rows.filter_map(Result::ok).collect(),
+            Err(_) => Vec::new(),
+        }
+    }
+
     /// Запоминает параметры удачного запуска — их подставит интерфейс в следующий раз.
     pub fn remember_params(
         &self,

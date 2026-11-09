@@ -14,6 +14,7 @@ use tauri::State;
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::download::{self, Downloaded};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
+use crate::learn::{self, Learning};
 use crate::llama;
 use crate::memory::{Episode, Memory, RunRecord};
 use crate::models::{self, ModelFile};
@@ -753,6 +754,39 @@ pub fn fill_plan(
 
     let _ = plan::remember(&state.inner.memory, &parsed);
     Ok(check_plan(state, rechecked))
+}
+
+/// Записать просьбу как задачу на обучение и рассказать, что для неё нужно.
+///
+/// Вызывается, когда приложение не нашло, чем выполнить сказанное. `None` означает
+/// «учиться нечему»: либо это уже умеем, либо в реестре такого нет вовсе.
+#[tauri::command]
+pub fn request_learning(
+    state: State<'_, AppState>,
+    query: String,
+) -> Result<Option<Learning>, String> {
+    let inner = &state.inner;
+
+    // Первая строка, которую человек имел в виду: если у неё уже есть рука — учиться
+    // нечему, и молчать об этом честнее, чем записывать в список дел.
+    let Some(item) = planner::plan(&inner.registry, &query, 8).into_iter().next() else {
+        return Ok(None);
+    };
+    if item.tool.is_some() {
+        return Ok(None);
+    }
+
+    let Some(action) = inner.registry.by_key(&item.key) else {
+        return Ok(None);
+    };
+
+    learn::request(&inner.memory, action, &query, audit::now_ms()).map(Some)
+}
+
+/// Всё, чему приложение ещё не научилось, — самое просимое сверху.
+#[tauri::command]
+pub fn learning_requests(state: State<'_, AppState>) -> Vec<Learning> {
+    learn::all(&state.inner.memory, &state.inner.registry)
 }
 
 /// Последний сохранённый план, если он был.

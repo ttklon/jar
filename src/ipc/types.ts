@@ -124,6 +124,29 @@ export interface ModelFile {
   hash: string | null;
 }
 
+/** Шаг обучения: что уже сделано, а что нет. */
+export interface LearningStep {
+  title: string;
+  done: boolean;
+}
+
+/** Задача на обучение: просьба плюс всё, что известно о том, как её выполнить. */
+export interface Learning {
+  registry: string;
+  /** Фраза-пример из реестра: по ней проверяется, что научились. */
+  example: string;
+  /** Как это попросили — дословно. */
+  query: string;
+  /** Чем это делается по реестру: API, программы, приёмы. */
+  implementation: string[];
+  risk: string;
+  notes: string;
+  asked_ms: number;
+  /** Сколько раз просили: частота решает, чему учиться первым. */
+  times: number;
+  steps: LearningStep[];
+}
+
 /** Что известно о локальном распознавании речи. */
 export interface SpeechStatus {
   /** Найден ли `whisper-server.exe` рядом с приложением или в `PATH`. */

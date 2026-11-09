@@ -5,11 +5,12 @@ import {
   draftPlan,
   fillPlan,
   planFor,
+  requestLearning,
   runPlan,
   speechStatus,
   transcribeLocal,
 } from "../ipc";
-import type { PlanCheck, PlanItem, PlanReport, SpeechStatus } from "../ipc";
+import type { Learning, PlanCheck, PlanItem, PlanReport, SpeechStatus } from "../ipc";
 import { speak } from "../lib/voice";
 import { useVoice } from "../lib/useVoice";
 import { ActionList } from "../components/ActionList";
@@ -101,6 +102,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [learning, setLearning] = useState<Learning | null>(null);
 
   const search = useCallback((phrase: string) => {
     const query = phrase.trim();
@@ -122,6 +124,16 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         const proposal = await draftPlan(query).catch(() => null);
         setDraft(proposal);
         setAnswers({});
+        setLearning(null);
+
+        // Не умеем — не тупик: записываем задачу на обучение и говорим, что для неё
+        // нужно. Учиться приложение должно уметь само, но молча — нельзя.
+        const promise = proposal ? null : await requestLearning(query).catch(() => null);
+        if (promise) {
+          setLearning(promise);
+          speak(voice.learnSpoken(promise.example));
+          return;
+        }
 
         // Данных не хватает — спрашиваем вслух, а не показываем красную строку.
         const first = proposal?.questions[0];
@@ -392,6 +404,34 @@ export function Voice({ onOpen }: VoiceScreenProps) {
               </Text>
             ) : null}
           </div>
+        </section>
+      ) : null}
+
+      {learning ? (
+        <section className={styles.draft}>
+          <Text weight="semibold">{voice.learnTitle}</Text>
+          <Text className={styles.note}>
+            {`${voice.learnNothing}: «${learning.example}» · ${voice.learnTimes(learning.times)}`}
+          </Text>
+          {learning.implementation.length > 0 ? (
+            <>
+              <Text className={styles.note}>{voice.learnHow}</Text>
+              <ul className={styles.problems}>
+                {learning.implementation.map((how) => (
+                  <li key={how}>{how}</li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+          <Text className={styles.note}>{voice.learnSteps}</Text>
+          <ul className={styles.problems}>
+            {learning.steps.map((step) => (
+              <li key={step.title}>
+                {step.done ? "✓" : "—"} {step.title}
+              </li>
+            ))}
+          </ul>
+          <Text className={styles.note}>{voice.learnRisk(learning.risk)}</Text>
         </section>
       ) : null}
 

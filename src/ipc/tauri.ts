@@ -10,6 +10,7 @@ import type {
   Downloaded,
   EngineStatus,
   Episode,
+  Learning,
   FlowView,
   HashCheck,
   ModelsView,
@@ -93,6 +94,14 @@ export function assignRole(role: string, name: string): Promise<RoleView[]> {
 
 export function clearRole(role: string): Promise<RoleView[]> {
   return invoke<RoleView[]>("clear_role", { role });
+}
+
+export function requestLearning(query: string): Promise<Learning | null> {
+  return invoke<Learning | null>("request_learning", { query });
+}
+
+export function learningRequests(): Promise<Learning[]> {
+  return invoke<Learning[]>("learning_requests");
 }
 
 export function speechStatus(): Promise<SpeechStatus> {

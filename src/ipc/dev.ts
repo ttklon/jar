@@ -121,6 +121,7 @@ import type {
   Downloaded,
   EngineStatus,
   Episode,
+  Learning,
   HashCheck,
   ModelsView,
   Plan,
@@ -539,4 +540,51 @@ export async function speechStatus(): Promise<SpeechStatus> {
 
 export async function transcribeLocal(_audio: number[]): Promise<string> {
   throw new Error("локальное распознавание живёт в приложении: движок — файл рядом с ним");
+}
+
+// ── Чему учиться в браузере ─────────────────────────────────────────────────
+//
+// Памяти здесь нет, поэтому счётчик всегда 1: просьба живёт до перезагрузки страницы.
+// Это не притворство — в приложении она хранится, и там счётчик настоящий.
+
+export async function requestLearning(query: string): Promise<Learning | null> {
+  const found = await planFor(query, 8);
+  const item = found[0];
+  if (!item || item.tool) return null;
+
+  const row = ROWS.find((candidate) => `${candidate.domain}|${candidate.verb}|${candidate.object}` === item.key);
+  if (!row) return null;
+
+  const implementation = row.implementation ?? [];
+  return {
+    registry: item.key,
+    example: row.example,
+    query,
+    implementation,
+    risk: row.risk,
+    notes: row.notes ?? "",
+    asked_ms: Date.now(),
+    times: 1,
+    steps: learningSteps(implementation, row.example),
+  };
+}
+
+export async function learningRequests(): Promise<Learning[]> {
+  return [];
+}
+
+/** Тот же чек-лист, что в ядре: галочка стоит только там, где знание уже есть. */
+function learningSteps(implementation: string[], example: string) {
+  return [
+    {
+      title:
+        implementation.length > 0
+          ? `Найти, чем это делается: ${implementation.join(", ")}`
+          : "чем это делается — пока неизвестно: искать документацию и способ",
+      done: implementation.length > 0,
+    },
+    { title: "Проверить, что нужное есть на этой машине (программа, доступ, права)", done: false },
+    { title: "Написать руку и подключить её к реестру", done: false },
+    { title: `Проверить на живом примере: «${example}»`, done: false },
+  ];
 }

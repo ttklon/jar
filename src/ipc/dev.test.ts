@@ -13,6 +13,8 @@ import {
   runPlan,
   draftPlan,
   fillPlan,
+  learningRequests,
+  requestLearning,
   speechStatus,
   transcribeLocal,
   listRoles,
@@ -217,6 +219,29 @@ describe("черновик плана в браузере", () => {
   it("то, чего приложение не делает, черновиком не становится", async () => {
     await expect(draftPlan("оплати счёт за интернет")).resolves.toBeNull();
     await expect(draftPlan("   ")).resolves.toBeNull();
+  });
+});
+
+describe("чему учиться в браузере", () => {
+  it("на то, чего не умею, появляется задача с чек-листом", async () => {
+    const learning = await requestLearning("переименуй фото по дате съёмки");
+
+    // Какая именно строка реестра нашлась — дело поиска; важно, что задача собрана
+    // по строке без руки и с честным чек-листом.
+    expect(learning?.registry).toMatch(/\|/);
+    expect(learning?.steps.length).toBe(4);
+    expect(learning?.times).toBe(1);
+    // Знание есть — галочка стоит; руки нет — вторая половина чек-листа пустая.
+    expect(learning?.steps[0]?.done).toBe(true);
+    expect(learning?.steps[2]?.done).toBe(false);
+  });
+
+  it("на то, что уже умею, задача не заводится", async () => {
+    await expect(requestLearning("проверь свободное место")).resolves.toBeNull();
+  });
+
+  it("в браузере список просьб пуст: хранить их негде", async () => {
+    await expect(learningRequests()).resolves.toEqual([]);
   });
 });
 

@@ -20,6 +20,7 @@ export type {
   FlowStepView,
   FlowView,
   HashCheck,
+  Learning,
   ModelFile,
   ModelsView,
   ParamSpec,
@@ -51,6 +52,7 @@ import type {
   Downloaded,
   EngineStatus,
   Episode,
+  Learning,
   Plan,
   PlanAnswer,
   PlanCheck,
@@ -396,6 +398,31 @@ export async function lastPlan(): Promise<Plan | null> {
     return fromCore();
   }
   const { lastPlan: fromData } = await import("./dev");
+  return fromData();
+}
+
+// ── Чему учиться ────────────────────────────────────────────────────────────
+
+/**
+ * Записать сказанное как задачу на обучение. Вызывается, когда приложение не нашло,
+ * чем это выполнить: «не умею» превращается в задачу, а не в тупик.
+ */
+export async function requestLearning(query: string): Promise<Learning | null> {
+  if (isTauri()) {
+    const { requestLearning: fromCore } = await import("./tauri");
+    return fromCore(query);
+  }
+  const { requestLearning: fromData } = await import("./dev");
+  return fromData(query);
+}
+
+/** Всё, чему приложение ещё не научилось, — самое просимое сверху. */
+export async function learningRequests(): Promise<Learning[]> {
+  if (isTauri()) {
+    const { learningRequests: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { learningRequests: fromData } = await import("./dev");
   return fromData();
 }
 

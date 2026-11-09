@@ -101,6 +101,24 @@ describe("голосовой экран", () => {
     await waitFor(() => expect(run.disabled).toBe(false));
   });
 
+  it("чего не умею — becomes задача на обучение, а не тупик", async () => {
+    render(<Voice />);
+
+    // Такого приложение не умеет: строка в реестре есть, руки нет.
+    fireEvent.change(screen.getByLabelText("Услышал"), {
+      target: { value: "переименуй фото по дате съёмки" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Чему нужно научиться")).toBeTruthy();
+    });
+    // Чек-лист честный: рука не написана, пример для проверки назван.
+    expect(screen.getByText(/Написать руку и подключить её к реестру/)).toBeTruthy();
+    expect(screen.getByText(/Проверить на живом примере/)).toBeTruthy();
+    expect(screen.getByText(/первая просьба/)).toBeTruthy();
+  });
+
   it("под капотом — вход в доказательство, а не второй рабочий стол", () => {
     const onOpen = vi.fn();
     render(<Voice onOpen={onOpen} />);
