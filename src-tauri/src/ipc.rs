@@ -17,7 +17,7 @@ use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::llama;
 use crate::memory::{Episode, Memory, RunRecord};
 use crate::models::{self, ModelFile};
-use crate::plan::{self, Plan, Problem, StepGate};
+use crate::plan::{self, Answer, Plan, Problem, Question, StepGate};
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
@@ -654,6 +654,9 @@ pub struct PlanCheck {
     /// Что можно сразу, а что человек должен разрешить. Считается без разрешений:
     /// интерфейс показывает галочки именно там, где они нужны.
     pub gates: Vec<StepGate>,
+    /// Чего не хватает шагам. Спросить это — дело интерфейса; ответ вернётся в
+    /// `fill_plan`, а не в свободный текст.
+    pub questions: Vec<Question>,
 }
 
 /// Проверяет план из JSON. Ничего не исполняет: это ровно то, что должно случиться
@@ -669,10 +672,12 @@ pub fn check_plan(state: State<'_, AppState>, json: String) -> PlanCheck {
                 problem: error,
             }],
             gates: Vec::new(),
+            questions: Vec::new(),
         },
         Ok(parsed) => PlanCheck {
             problems: plan::check(&parsed, &state.inner.registry),
             gates: plan::gate_plan(&parsed, &state.inner.registry, &[]),
+            questions: plan::questions(&parsed, &state.inner.registry),
             plan: Some(parsed),
         },
     }
@@ -685,11 +690,13 @@ pub fn save_plan(state: State<'_, AppState>, json: String) -> Result<PlanCheck, 
     let parsed = plan::parse(&json)?;
     let problems = plan::check(&parsed, &state.inner.registry);
     let gates = plan::gate_plan(&parsed, &state.inner.registry, &[]);
+    let questions = plan::questions(&parsed, &state.inner.registry);
     if !problems.is_empty() {
         return Ok(PlanCheck {
             plan: Some(parsed),
             problems,
             gates,
+            questions,
         });
     }
 
@@ -698,6 +705,7 @@ pub fn save_plan(state: State<'_, AppState>, json: String) -> Result<PlanCheck, 
         plan: Some(parsed),
         problems: Vec::new(),
         gates,
+        questions,
     })
 }
 
@@ -722,8 +730,29 @@ pub fn draft_plan(state: State<'_, AppState>, query: String) -> Option<PlanCheck
     Some(PlanCheck {
         problems: plan::check(&plan, &inner.registry),
         gates: plan::gate_plan(&plan, &inner.registry, &[]),
+        questions: plan::questions(&plan, &inner.registry),
         plan: Some(plan),
     })
+}
+
+/// Вписывает ответы человека в план и перепроверяет его.
+///
+/// Это и есть уточнение: приложение спросило — человек ответил — план стал исполнимым.
+/// Ничего не запускается: запуск остаётся отдельным решением.
+#[tauri::command]
+pub fn fill_plan(
+    state: State<'_, AppState>,
+    json: String,
+    answers: Vec<Answer>,
+) -> Result<PlanCheck, String> {
+    let mut parsed = plan::parse(&json)?;
+    plan::fill(&mut parsed, &answers)?;
+
+    let rechecked = serde_json::to_string(&parsed)
+        .map_err(|error| format!("план не переписывается: {error}"))?;
+
+    let _ = plan::remember(&state.inner.memory, &parsed);
+    check_plan(state, rechecked)
 }
 
 /// Последний сохранённый план, если он был.

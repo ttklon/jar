@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, Input, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { MicRegular } from "@fluentui/react-icons";
-import { draftPlan, planFor, runPlan, speechStatus, transcribeLocal } from "../ipc";
+import {
+  draftPlan,
+  fillPlan,
+  planFor,
+  runPlan,
+  speechStatus,
+  transcribeLocal,
+} from "../ipc";
 import type { PlanCheck, PlanItem, PlanReport, SpeechStatus } from "../ipc";
 import { speak } from "../lib/voice";
 import { useVoice } from "../lib/useVoice";
@@ -92,6 +99,8 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [approved, setApproved] = useState(false);
   const [report, setReport] = useState<PlanReport | null>(null);
   const [running, setRunning] = useState(false);
+  // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
+  const [answers, setAnswers] = useState<Record<string, string>>({});
 
   const search = useCallback((phrase: string) => {
     const query = phrase.trim();
@@ -112,6 +121,11 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         // сразу — человек сказал задачу, и ответ «могу сделать вот это» полезнее списка.
         const proposal = await draftPlan(query).catch(() => null);
         setDraft(proposal);
+        setAnswers({});
+
+        // Данных не хватает — спрашиваем вслух, а не показываем красную строку.
+        const first = proposal?.questions[0];
+        if (first) speak(voice.askSpoken(first.label));
         // Отвечаем вслух: человек, который говорит, не смотрит в экран.
         const phraseOut = !proposal
           ? found.length === 0
@@ -168,9 +182,40 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     const plan = draft?.plan;
     if (!plan) return;
 
+    const asked = draft.questions.map((question) => ({
+      position: question.position,
+      name: question.name,
+      value: answers[`${question.position}:${question.name}`] ?? "",
+    }));
+
     setRunning(true);
-    runPlan(JSON.stringify(plan), approved ? [1] : [])
+    setError(null);
+
+    // Сначала отвечаем на вопросы и перепроверяем: запускать план, которому всё ещё
+    // чего-то не хватает, значит узнать об этом уже после согласия.
+    const prepared =
+      asked.length > 0
+        ? fillPlan(JSON.stringify(plan), asked).catch((reason: unknown) => {
+            const message = reason instanceof Error ? reason.message : String(reason);
+            setError(message);
+            return null;
+          })
+        : Promise.resolve(draft);
+
+    prepared
+      .then((checked) => {
+        if (!checked) return null;
+        setDraft(checked);
+        if (checked.problems.length > 0) {
+          const message = checked.problems[0]?.problem ?? voice.loadError;
+          setError(message);
+          speak(voice.askSpoken(message));
+          return null;
+        }
+        return runPlan(JSON.stringify(checked.plan), approved ? [1] : []);
+      })
       .then((result) => {
+        if (!result) return;
         setReport(result);
         const phrase = result.stopped
           ? voice.draftSpokenStopped(result.stopped)
@@ -183,7 +228,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         speak(voice.draftSpokenStopped(message));
       })
       .finally(() => setRunning(false));
-  }, [draft, approved]);
+  }, [draft, approved, answers]);
 
   return (
     <div className={styles.root}>
@@ -288,22 +333,58 @@ export function Voice({ onOpen }: VoiceScreenProps) {
               </li>
             ))}
           </ul>
-          {draft.problems.map((problem, index) => (
-            <Text key={`${problem.position}-${index}`} className={styles.error}>
-              {`${voice.draftMissing}: ${problem.problem}`}
-            </Text>
-          ))}
+          {draft.questions.length > 0 ? (
+            <>
+              <Text className={styles.note}>{voice.askTitle}</Text>
+              {draft.questions.map((question) => {
+                const key = `${question.position}:${question.name}`;
+                return (
+                  <Input
+                    key={key}
+                    value={answers[key] ?? ""}
+                    aria-label={question.label}
+                    placeholder={question.hint || question.label}
+                    onChange={(_, data) =>
+                      setAnswers((current) => ({ ...current, [key]: data.value }))
+                    }
+                  />
+                );
+              })}
+            </>
+          ) : null}
+
+          {draft.problems
+            .filter(
+              (problem) =>
+                !(draft.questions.length > 0 && problem.problem.includes("не хватает данных")),
+            )
+            .map((problem, index) => (
+              <Text key={`${problem.position}-${index}`} className={styles.error}>
+                {`${voice.draftMissing}: ${problem.problem}`}
+              </Text>
+            ))}
           <div className={styles.bar}>
             <Button
               appearance="primary"
               disabled={
                 running ||
-                draft.problems.length > 0 ||
-                draft.gates.some((gate) => gate.decision === "confirm" && !approved)
+                draft.gates.some((gate) => gate.decision === "confirm" && !approved) ||
+                draft.questions.some(
+                  (question) =>
+                    (answers[`${question.position}:${question.name}`] ?? "").trim().length === 0,
+                ) ||
+                draft.problems.some(
+                  (problem) =>
+                    !(draft.questions.length > 0 && problem.problem.includes("не хватает данных")),
+                )
               }
               onClick={execute}
             >
-              {running ? voice.draftRunning : voice.draftRun}
+              {running
+                ? voice.draftRunning
+                : draft.questions.length > 0
+                  ? voice.askRun
+                  : voice.draftRun}
             </Button>
             {report ? (
               <Text className={report.stopped ? styles.error : styles.localReady}>

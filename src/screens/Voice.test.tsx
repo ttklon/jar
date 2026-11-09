@@ -77,7 +77,7 @@ describe("голосовой экран", () => {
     ).toBe(false);
   });
 
-  it("если данных для шага нет — это сказано, а не выясняется при запуске", async () => {
+  it("если данных нет — спрашивает, а не падает на середине", async () => {
     render(<Voice />);
 
     fireEvent.change(screen.getByLabelText("Услышал"), {
@@ -85,12 +85,20 @@ describe("голосовой экран", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Найти" }));
 
-    await waitFor(() => {
-      expect(screen.getByText(/шагу не хватает данных/)).toBeTruthy();
-    });
-    expect(
-      (screen.getByRole("button", { name: "Выполнить" }) as HTMLButtonElement).disabled,
-    ).toBe(true);
+    // Вопрос появляется сам: путь, без которого шаг не состоится.
+    const path = await screen.findByLabelText("Путь");
+    expect(path).toBeTruthy();
+
+    const run = screen.getByRole("button", {
+      name: "Ответить и выполнить",
+    }) as HTMLButtonElement;
+    expect(run.disabled).toBe(true);
+
+    fireEvent.change(path, { target: { value: "C:\\tmp\\jar" } });
+
+    // Изменение на диске — с разрешением человеком, и это отдельная галочка.
+    fireEvent.click(screen.getByLabelText("разрешить шаг 1"));
+    await waitFor(() => expect(run.disabled).toBe(false));
   });
 
   it("под капотом — вход в доказательство, а не второй рабочий стол", () => {

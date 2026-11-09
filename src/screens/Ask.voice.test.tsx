@@ -133,6 +133,7 @@ describe("голосовой вход", () => {
     vi.mocked(checkPlan).mockResolvedValue({
       plan: { goal: "диск", source: "human", steps: [{ registry: "files|проверить|размеры и место" }] },
       problems: [],
+      questions: [],
       gates: [
         {
           position: 1,
@@ -177,6 +178,7 @@ describe("голосовой вход", () => {
     vi.mocked(checkPlan).mockResolvedValue({
       plan: { goal: "диск", source: "human", steps: [{ registry: "files|проверить|размеры и место" }] },
       problems: [],
+      questions: [],
       gates: [
         {
           position: 1,

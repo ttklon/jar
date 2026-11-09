@@ -78,6 +78,94 @@ impl Problem {
     }
 }
 
+/// Чего не хватает шагу, чтобы он мог состояться. Спрашиваем ровно это и ничего
+/// больше: лишний вопрос — это не забота, а недоверие.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Question {
+    /// Номер шага, с единицы.
+    pub position: usize,
+    /// Имя параметра: по нему приходит ответ.
+    pub name: String,
+    /// Как спросить по-человечески.
+    pub label: String,
+    /// Подсказка: что именно вписать.
+    pub hint: String,
+}
+
+/// Ответ человека на вопрос шага.
+#[derive(Debug, Clone, Deserialize)]
+pub struct Answer {
+    pub position: usize,
+    pub name: String,
+    pub value: String,
+}
+
+/// Что надо спросить у человека до запуска.
+pub fn questions(plan: &Plan, registry: &Registry) -> Vec<Question> {
+    let mut asked = Vec::new();
+
+    for (index, step) in plan.steps.iter().enumerate() {
+        let Some(spec) = tools::spec(step.registry.trim()) else {
+            continue;
+        };
+        // Неизвестная строка реестра — это проблема плана, а не вопрос человеку.
+        if registry.by_key(step.registry.trim()).is_none() {
+            continue;
+        }
+
+        for param in spec.params.iter().filter(|param| param.required) {
+            if step
+                .params
+                .get(&param.name)
+                .is_some_and(|value| !value.trim().is_empty())
+            {
+                continue;
+            }
+            asked.push(Question {
+                position: index + 1,
+                name: param.name.clone(),
+                label: param.label.clone(),
+                hint: param.hint.clone(),
+            });
+        }
+    }
+
+    asked
+}
+
+/// Вписывает ответы в шаги плана.
+///
+/// Отвечать можно только за параметр, который этот шаг действительно спрашивает:
+/// иначе в плане оказалось бы поле, которого инструмент не понимает, и оно молча
+/// уехало бы в запуск.
+pub fn fill(plan: &mut Plan, answers: &[Answer]) -> Result<(), String> {
+    for answer in answers {
+        let value = answer.value.trim();
+        if value.is_empty() {
+            return Err(format!("пустой ответ на «{}»", answer.name));
+        }
+
+        let step = plan
+            .steps
+            .get_mut(answer.position.saturating_sub(1))
+            .ok_or_else(|| format!("шага {} в плане нет", answer.position))?;
+
+        let spec = tools::spec(step.registry.trim())
+            .ok_or_else(|| format!("у шага {} нет инструмента", answer.position))?;
+        if !spec.params.iter().any(|param| param.name == answer.name) {
+            return Err(format!(
+                "шаг {} не спрашивает «{}»",
+                answer.position, answer.name
+            ));
+        }
+
+        step.params
+            .insert(answer.name.clone(), value.to_string());
+    }
+
+    Ok(())
+}
+
 /// Решение по одному шагу до запуска: что можно делать сразу, а что человек должен
 /// разрешить. Заполняется целиком до первого шага — план либо начинается, либо нет.
 #[derive(Debug, PartialEq, Eq, Serialize)]
@@ -557,5 +645,95 @@ mod tests {
     fn money_never_becomes_a_draft() {
         // Даже если строка нашлась, `deny` — это отказ, а не черновик.
         assert!(draft("оплати счёт за интернет", &registry(), None).is_none());
+    }
+
+    #[test]
+    fn questions_ask_only_for_what_is_missing_and_required() {
+        let plan = Plan {
+            goal: "создай папку".to_string(),
+            source: "registry".to_string(),
+            steps: vec![step("files|создать|папку")],
+        };
+
+        let asked = questions(&plan, &registry());
+        assert_eq!(asked.len(), 1, "спрашиваем только путь: {asked:?}");
+        assert_eq!(asked[0].position, 1);
+        assert!(!asked[0].label.is_empty(), "вопрос задаётся по-человечески");
+
+        // Строка без обязательных данных ничего не спрашивает.
+        let disk = Plan {
+            goal: "свободное место".to_string(),
+            source: "registry".to_string(),
+            steps: vec![step("storage-backup|проверить|свободное место")],
+        };
+        assert_eq!(questions(&disk, &registry()), Vec::new());
+    }
+
+    #[test]
+    fn answers_are_written_into_the_step_and_make_it_ready() {
+        let mut plan = Plan {
+            goal: "создай папку".to_string(),
+            source: "registry".to_string(),
+            steps: vec![step("files|создать|папку")],
+        };
+        let registry = registry();
+
+        let asked = questions(&plan, &registry);
+        let name = asked[0].name.clone();
+        fill(
+            &mut plan,
+            &[Answer {
+                position: 1,
+                name: name.clone(),
+                value: "  C:\\tmp\\jar  ".to_string(),
+            }],
+        )
+        .expect("ответ принят");
+
+        assert_eq!(plan.steps[0].params.get(&name).map(String::as_str), Some("C:\\tmp\\jar"));
+        assert_eq!(questions(&plan, &registry), Vec::new(), "больше спрашивать нечего");
+        assert_eq!(check(&plan, &registry), Vec::new(), "план готов к запуску");
+    }
+
+    #[test]
+    fn a_stranger_field_is_refused_instead_of_quietly_appended() {
+        let mut plan = Plan {
+            goal: "создай папку".to_string(),
+            source: "registry".to_string(),
+            steps: vec![step("files|создать|папку")],
+        };
+
+        let error = fill(
+            &mut plan,
+            &[Answer {
+                position: 1,
+                name: "чужое".to_string(),
+                value: "значение".to_string(),
+            }],
+        )
+        .expect_err("такого параметра шаг не спрашивает");
+        assert!(error.contains("не спрашивает"), "{error}");
+
+        let error = fill(
+            &mut plan,
+            &[Answer {
+                position: 5,
+                name: "path".to_string(),
+                value: "C:\\tmp".to_string(),
+            }],
+        )
+        .expect_err("такого шага нет");
+        assert!(error.contains("шага 5"), "{error}");
+
+        let error = fill(
+            &mut plan,
+            &[Answer {
+                position: 1,
+                name: "path".to_string(),
+                value: "   ".to_string(),
+            }],
+        )
+        .expect_err("пустой ответ");
+        assert!(error.contains("пустой"), "{error}");
     }
 }

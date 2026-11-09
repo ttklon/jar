@@ -12,6 +12,7 @@ import {
   listModels,
   runPlan,
   draftPlan,
+  fillPlan,
   speechStatus,
   transcribeLocal,
   listRoles,
@@ -216,6 +217,31 @@ describe("черновик плана в браузере", () => {
   it("то, чего приложение не делает, черновиком не становится", async () => {
     await expect(draftPlan("оплати счёт за интернет")).resolves.toBeNull();
     await expect(draftPlan("   ")).resolves.toBeNull();
+  });
+});
+
+describe("уточнение плана в браузере", () => {
+  it("вопросы приходят вместе с черновиком", async () => {
+    const draft = await draftPlan("создай папку");
+
+    expect(draft?.questions.length).toBe(1);
+    expect(draft?.questions[0]?.name).toBe("path");
+    expect(draft?.questions[0]?.label).toBe("Путь");
+  });
+
+  it("ответ вписывается в шаг, и вопросов больше нет", async () => {
+    const draft = await draftPlan("создай папку");
+    const plan = draft?.plan;
+    expect(plan).toBeTruthy();
+    if (!plan) return;
+
+    const filled = await fillPlan(JSON.stringify(plan), [
+      { position: 1, name: "path", value: "C:\\tmp\\jar" },
+    ]);
+
+    expect(filled.plan?.steps[0]?.params?.path).toBe("C:\\tmp\\jar");
+    expect(filled.questions).toEqual([]);
+    expect(filled.problems).toEqual([]);
   });
 });
 

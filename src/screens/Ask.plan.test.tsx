@@ -50,7 +50,7 @@ const GOOD = {
 
 describe("проверка плана", () => {
   it("чистый план называется исполнимым", async () => {
-    vi.mocked(checkPlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES });
+    vi.mocked(checkPlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES, questions: [] });
 
     render(<Ask />);
 
@@ -68,6 +68,7 @@ describe("проверка плана", () => {
     vi.mocked(checkPlan).mockResolvedValue({
       plan: GOOD,
       gates: GOOD_GATES,
+      questions: [],
       problems: [
         {
           position: 1,
@@ -94,6 +95,7 @@ describe("проверка плана", () => {
     vi.mocked(checkPlan).mockResolvedValue({
       plan: null,
       gates: [],
+      questions: [],
       problems: [{ position: 0, registry: "", problem: "план не разбирается как JSON" }],
     });
 
@@ -110,8 +112,8 @@ describe("проверка плана", () => {
   });
 
   it("сохранение говорит, что план запомнен", async () => {
-    vi.mocked(checkPlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES });
-    vi.mocked(savePlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES });
+    vi.mocked(checkPlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES, questions: [] });
+    vi.mocked(savePlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES, questions: [] });
 
     render(<Ask />);
 
@@ -159,6 +161,7 @@ describe("запуск плана", () => {
       plan: RISKY,
       problems: [],
       gates: RISKY_GATES,
+      questions: [],
     });
     vi.mocked(runPlan).mockResolvedValue({
       goal: RISKY.goal,
@@ -210,7 +213,7 @@ describe("запуск плана", () => {
   });
 
   it("остановка плана называется причиной, а не молчанием", async () => {
-    vi.mocked(checkPlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES });
+    vi.mocked(checkPlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES, questions: [] });
     vi.mocked(runPlan).mockResolvedValue({
       goal: GOOD.goal,
       steps: [
@@ -243,7 +246,7 @@ describe("запуск плана", () => {
   });
 
   it("отказ ядра виден как отказ, а не как пустой отчёт", async () => {
-    vi.mocked(checkPlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES });
+    vi.mocked(checkPlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES, questions: [] });
     vi.mocked(runPlan).mockRejectedValue(
       new Error("план не запущен: шаг 1 требует подтверждения человеком"),
     );

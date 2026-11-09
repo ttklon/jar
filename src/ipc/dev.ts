@@ -124,6 +124,7 @@ import type {
   HashCheck,
   ModelsView,
   Plan,
+  PlanAnswer,
   PlanCheck,
   PlanReport,
   RoleView,
@@ -344,30 +345,80 @@ export async function draftPlan(query: string): Promise<PlanCheck | null> {
     ],
   };
 
-  const missing = missingParams(item.key);
+  return buildCheck(plan, item.decision, item.risk);
+}
+
+/** Вопросы и проблемы по плану — по тем же данным, что читает ядро. */
+function buildCheck(
+  plan: Plan,
+  decision: string,
+  risk: string,
+): PlanCheck {
+  const questions = (plan.steps ?? []).flatMap((step, index) =>
+    missingQuestions(step.registry, index + 1, step.params ?? {}),
+  );
+
+  const first = plan.steps?.[0];
   return {
     plan,
-    gates: [
-      {
-        position: 1,
-        registry: item.key,
-        decision: item.decision,
-        risk: item.risk,
-        wants_approval: item.decision === "confirm",
-      },
-    ],
-    problems: missing
-      ? [{ position: 1, registry: item.key, problem: `шагу не хватает данных: ${missing}` }]
+    gates: first
+      ? [
+          {
+            position: 1,
+            registry: first.registry,
+            decision: decision as PlanCheck["gates"][number]["decision"],
+            risk,
+            wants_approval: decision === "confirm",
+          },
+        ]
       : [],
+    questions,
+    problems: questions.map((question) => ({
+      position: question.position,
+      registry: first?.registry ?? "",
+      problem: `шагу не хватает данных: не задан параметр «${question.label}»`,
+    })),
   };
 }
 
-/** Какие обязательные параметры инструмента остались незаполненными. */
-function missingParams(key: string): string | null {
+/** Обязательные параметры шага, которых в нём нет. */
+function missingQuestions(
+  key: string,
+  position: number,
+  params: Record<string, string>,
+) {
   const tool = TOOL_SPECS.find((candidate) => candidate.registry === key);
   const required = tool?.params.filter((param) => param.required) ?? [];
-  const names = required.map((param) => param.label || param.name);
-  return names.length > 0 ? names.join(", ") : null;
+
+  return required
+    .filter((param) => (params[param.name] ?? "").trim().length === 0)
+    .map((param) => ({
+      position,
+      name: param.name,
+      label: param.label,
+      hint: param.hint,
+    }));
+}
+
+/**
+ * Ответы вписываются в план и вопросы пересчитываются. Полной проверки здесь нет и
+ * быть не может — политика и руки живут в ядре, а исполнение в браузере всё равно
+ * отказывает; показываем ровно то, что умеем проверить: хватает ли данных.
+ */
+export async function fillPlan(json: string, answers: PlanAnswer[]): Promise<PlanCheck> {
+  const plan = JSON.parse(json) as Plan;
+
+  for (const answer of answers) {
+    const step = plan.steps[answer.position - 1];
+    if (!step) continue;
+    step.params = { ...(step.params ?? {}), [answer.name]: answer.value.trim() };
+  }
+
+  const item = (await planFor(plan.goal, 8)).find(
+    (candidate) => candidate.key === plan.steps[0]?.registry,
+  );
+
+  return buildCheck(plan, item?.decision ?? "allow", item?.risk ?? "read");
 }
 
 // ── Модели в браузере ───────────────────────────────────────────────────────

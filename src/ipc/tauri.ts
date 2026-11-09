@@ -14,6 +14,7 @@ import type {
   HashCheck,
   ModelsView,
   Plan,
+  PlanAnswer,
   PlanCheck,
   PlanReport,
   PlanItem,
@@ -121,6 +122,10 @@ export function savePlan(json: string): Promise<PlanCheck> {
 
 export function draftPlan(query: string): Promise<PlanCheck | null> {
   return invoke<PlanCheck | null>("draft_plan", { query });
+}
+
+export function fillPlan(json: string, answers: PlanAnswer[]): Promise<PlanCheck> {
+  return invoke<PlanCheck>("fill_plan", { json, answers });
 }
 
 export function lastPlan(): Promise<Plan | null> {

@@ -170,6 +170,23 @@ export interface PlanCheck {
   problems: PlanProblem[];
   /** Что можно сразу, а что человек должен разрешить. */
   gates: PlanGate[];
+  /** Чего не хватает шагам: спросить это — работа интерфейса. */
+  questions: PlanQuestion[];
+}
+
+/** Вопрос по шагу: ровно то, без чего шаг не состоится. */
+export interface PlanQuestion {
+  position: number;
+  name: string;
+  label: string;
+  hint: string;
+}
+
+/** Ответ человека: имя параметра и значение. */
+export interface PlanAnswer {
+  position: number;
+  name: string;
+  value: string;
 }
 
 /** Решение по шагу до запуска: политика уже спрошена. */

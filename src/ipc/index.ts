@@ -24,6 +24,7 @@ export type {
   ModelsView,
   ParamSpec,
   Plan,
+  PlanAnswer,
   PlanCheck,
   PlanGate,
   PlanItem,
@@ -51,6 +52,7 @@ import type {
   EngineStatus,
   Episode,
   Plan,
+  PlanAnswer,
   PlanCheck,
   PlanReport,
   RoleView,
@@ -363,6 +365,19 @@ export async function draftPlan(query: string): Promise<PlanCheck | null> {
   }
   const { draftPlan: fromData } = await import("./dev");
   return fromData(query);
+}
+
+/**
+ * Ответить на вопросы плана: вписать недостающие данные и перепроверить.
+ * Это уточнение, а не запуск — запуск остаётся отдельным решением.
+ */
+export async function fillPlan(json: string, answers: PlanAnswer[]): Promise<PlanCheck> {
+  if (isTauri()) {
+    const { fillPlan: fromCore } = await import("./tauri");
+    return fromCore(json, answers);
+  }
+  const { fillPlan: fromData } = await import("./dev");
+  return fromData(json, answers);
 }
 
 /** Сохранить проверенный план в памяти. Невалидный не сохраняется. */

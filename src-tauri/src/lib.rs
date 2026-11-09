@@ -136,6 +136,7 @@ pub fn run() {
             ipc::save_plan,
             ipc::last_plan,
             ipc::draft_plan,
+            ipc::fill_plan,
             ipc::search_episodes,
             ipc::run_plan,
             ipc::speech_status,
