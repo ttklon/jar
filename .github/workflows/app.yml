@@ -135,7 +135,15 @@ jobs:
 
       - name: Tests (реестр встроен в бинарник)
         if: steps.clippy.outputs.status == '0'
-        run: cargo test --manifest-path src-tauri/Cargo.toml
+        shell: bash
+        run: |
+          set +e
+          cargo test --manifest-path src-tauri/Cargo.toml > tests.log 2>&1
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            python scripts/ci_log_annotate.py tests.log --title "cargo test" --tail 60
+          fi
+          exit "$status"
 
       # У разработчика может не быть Rust-тулчейна (песочница, новая машина), а
       # форматирование детерминировано. Поэтому ветку чинит сам CI отдельным

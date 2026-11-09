@@ -136,7 +136,12 @@ describe("профили приложений в браузере", () => {
       for (const operation of profile.operations) {
         const action = byKey.get(operation.resolved);
         expect(action, `${profile.slug}: ${operation.registry}`).toBeTruthy();
-        expect(operation.risk).toBe(action?.risk);
+        // Профиль может быть осторожнее реестра, но не мягче: ранг не ниже.
+        const rank = (risk: string) =>
+          ["read", "write-local", "external", "destructive", "identity", "money"].indexOf(risk);
+        expect(rank(operation.risk), `${profile.slug}: ${operation.registry}`).toBeGreaterThanOrEqual(
+          rank(action?.risk ?? "read"),
+        );
         if (operation.has_tool) executable += 1;
         if (operation.has_tool) expect(tools.has(operation.registry)).toBe(true);
       }

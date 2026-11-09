@@ -53,12 +53,31 @@ pub fn get(slug: &str) -> Option<&'static ProfileSpec> {
     all().iter().find(|profile| profile.slug == slug)
 }
 
-/// Разрешает ссылку профиля в строку реестра: сначала полную, потом короткую
-/// (`domain|verb` — тогда берётся самая рискованная строка этого действия).
+/// Разрешает ссылку профиля в строку реестра.
+///
+/// Ссылка бывает трёх видов: полный ключ (`domain|verb|object`), короткий
+/// (`domain|verb`) и с частью объекта (`domain|verb|документ`). В последних двух
+/// случаях берётся **самая рискованная** подходящая строка: если в реестре есть и
+/// чтение, и удаление одного и того же действия, профиль обязан считаться опасным.
 pub fn resolve<'a>(registry: &'a Registry, key: &str) -> Option<&'a Action> {
+    if let Some(action) = registry.by_key(key) {
+        return Some(action);
+    }
+
+    let mut parts = key.splitn(3, '|');
+    let domain = parts.next()?;
+    let verb = parts.next()?;
+    let object = parts.next().filter(|filter| !filter.is_empty());
+
     registry
-        .by_key(key)
-        .or_else(|| registry.by_short_key(key))
+        .actions()
+        .iter()
+        .filter(|action| {
+            action.domain == domain
+                && action.verb == verb
+                && object.map_or(true, |filter| action.object.contains(filter))
+        })
+        .max_by_key(|action| action.risk)
 }
 
 #[cfg(test)]
@@ -116,18 +135,33 @@ mod tests {
 
     #[test]
     fn operation_risk_is_not_lower_than_the_registry() {
+        // Профиль может объявить риск выше реестра (осторожность разрешена), но не ниже:
+        // иначе «тихая» операция получит подтверждение «чтения».
         let registry = registry();
+        let rank = |risk: &str| match risk {
+            "read" => 0,
+            "write-local" => 1,
+            "external" => 2,
+            "destructive" => 3,
+            "identity" => 4,
+            "money" => 5,
+            _ => -1,
+        };
+
         for profile in all() {
             for operation in &profile.operations {
                 let action = resolve(&registry, &operation.registry).expect("строка реестра");
-                let declared = serde_json::to_value(action.risk)
+                let base = serde_json::to_value(action.risk)
                     .ok()
                     .and_then(|value| value.as_str().map(str::to_string))
                     .unwrap_or_default();
-                assert_eq!(
-                    operation.risk, declared,
+                assert!(
+                    rank(&operation.risk) >= rank(&base),
                     "{}: «{}» объявляет риск {}, а реестр — {}",
-                    profile.slug, operation.name, operation.risk, declared
+                    profile.slug,
+                    operation.name,
+                    operation.risk,
+                    base
                 );
             }
         }
