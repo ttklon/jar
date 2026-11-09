@@ -17,12 +17,14 @@ import {
   HandRightRegular,
   HistoryRegular,
   HomeRegular,
+  MicRegular,
   SearchRegular,
   SettingsRegular,
 } from "@fluentui/react-icons";
 import { isTauri, registrySnapshot } from "./ipc";
 import type { RegistrySnapshot } from "./ipc";
 import { Overview } from "./screens/Overview";
+import { Voice } from "./screens/Voice";
 import { Catalog } from "./screens/Catalog";
 import { Hands } from "./screens/Hands";
 import { Flows } from "./screens/Flows";
@@ -31,10 +33,11 @@ import { Models } from "./screens/Models";
 import { Journal } from "./screens/Journal";
 import { Apps } from "./screens/Apps";
 import { Settings } from "./screens/Settings";
-import { apps, ask, flows, hands, journal, models, t } from "./i18n/ru";
+import { apps, ask, flows, hands, journal, models, t, voice } from "./i18n/ru";
 import { APP_VERSION } from "./version";
 
 type Screen =
+  | "voice"
   | "overview"
   | "catalog"
   | "ask"
@@ -112,7 +115,10 @@ const useStyles = makeStyles({
   error: { display: "flex", flexDirection: "column", gap: "10px", maxWidth: "60ch" },
 });
 
+// Голос первым и по умолчанию: приложение открывается для задачи, а не для осмотра.
+// Остальное — доказательство под капотом, к которому ходят, когда хотят проверить.
 const NAV: { id: Screen; label: string; icon: React.ReactElement }[] = [
+  { id: "voice", label: voice.nav, icon: <MicRegular /> },
   { id: "overview", label: t.navOverview, icon: <HomeRegular /> },
   { id: "catalog", label: t.navCatalog, icon: <AppsListDetailRegular /> },
   { id: "ask", label: ask.nav, icon: <SearchRegular /> },
@@ -126,7 +132,7 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement }[] = [
 
 export function App() {
   const styles = useStyles();
-  const [screen, setScreen] = useState<Screen>("overview");
+  const [screen, setScreen] = useState<Screen>("voice");
   const [dark, setDark] = useState(true);
   const [snapshot, setSnapshot] = useState<RegistrySnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -196,6 +202,8 @@ export function App() {
               <Spinner size="small" />
               <Text>{t.loading}</Text>
             </div>
+          ) : screen === "voice" ? (
+            <Voice onOpen={(next) => setScreen(next as Screen)} />
           ) : screen === "overview" ? (
             <Overview snapshot={snapshot} />
           ) : screen === "catalog" ? (

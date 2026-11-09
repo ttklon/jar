@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import { App } from "./app";
 
 /**
@@ -30,9 +30,33 @@ vi.stubGlobal("matchMedia", (query: string) => ({
 afterEach(cleanup);
 
 describe("App", () => {
-  it("показывает реестр из данных репозитория", async () => {
+  /**
+   * Кнопки навигации ищутся внутри меню: на самом голосовом экране есть ссылки
+   * «Руки», «История» и «Что умею», и они ведут туда же. Это не дубли, а два входа
+   * в одно место — но по имени они совпадают, поэтому ищем в меню.
+   */
+  const nav = () => within(screen.getByRole("navigation"));
+
+  /** Приложение открывается голосом: это и есть проверка «загрузилось». */
+  const loaded = () =>
+    waitFor(
+      () => expect(screen.getByRole("button", { name: "Держать и говорить" })).toBeTruthy(),
+      { timeout: 4000 },
+    );
+
+  it("открывается голосовым экраном, а не списком экранов", async () => {
     render(<App />);
 
+    await loaded();
+    expect(screen.getByText(/Скажите задачу/)).toBeTruthy();
+    expect(screen.getByText(/Пока ничего не сказано/)).toBeTruthy();
+  });
+
+  it("обзор реестра показывает цифры из данных репозитория", async () => {
+    render(<App />);
+    await loaded();
+
+    nav().getByRole("button", { name: "Обзор" }).click();
     await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
 
     const domainsBlock = await screen.findAllByText("49");
@@ -42,9 +66,9 @@ describe("App", () => {
 
   it("экран «Руки» показывает инструменты и их политику", async () => {
     render(<App />);
-    await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
+    await loaded();
 
-    screen.getByRole("button", { name: "Руки" }).click();
+    nav().getByRole("button", { name: "Руки" }).click();
     await waitFor(() => expect(screen.getByText(/\d+ инструментов/)).toBeTruthy());
 
     // Опасное помечено, чтение — нет: политика приходит из того же решения, что и в ядре.
@@ -54,9 +78,9 @@ describe("App", () => {
 
   it("экран «Сценарии» показывает план из шагов и риск", async () => {
     render(<App />);
-    await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
+    await loaded();
 
-    screen.getByRole("button", { name: "Сценарии" }).click();
+    nav().getByRole("button", { name: "Сценарии" }).click();
     await waitFor(() => expect(screen.getByText(/\d+ сценариев/)).toBeTruthy());
 
     // Сценарии собираются из данных: заголовок и его шаги приходят из data/flows.json.
@@ -67,9 +91,9 @@ describe("App", () => {
 
   it("экран «История» честно говорит, что журнала в браузере нет", async () => {
     render(<App />);
-    await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
+    await loaded();
 
-    screen.getByRole("button", { name: "История" }).click();
+    nav().getByRole("button", { name: "История" }).click();
     // Два «Пока пусто» — журнал и память: это разные источники, и оба честно пусты
     // в браузере, где нет ни журнала, ни базы.
     await waitFor(() => expect(screen.getAllByText(/Пока пусто/).length).toBe(2));
@@ -79,9 +103,9 @@ describe("App", () => {
 
   it("экран «Приложения» показывает профили и честно говорит, что исполняется", async () => {
     render(<App />);
-    await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
+    await loaded();
 
-    screen.getByRole("button", { name: "Приложения" }).click();
+    nav().getByRole("button", { name: "Приложения" }).click();
     await waitFor(() => expect(screen.getByText(/87 приложений/)).toBeTruthy());
 
     // Числа приходят из данных: профилей столько, сколько файлов в data/profiles.
@@ -91,9 +115,9 @@ describe("App", () => {
 
   it("каталог фильтрует по фразе", async () => {
     render(<App />);
-    await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
+    await loaded();
 
-    screen.getByRole("button", { name: "Что умею" }).click();
+    nav().getByRole("button", { name: "Что умею" }).click();
     await waitFor(() => expect(screen.getByText("Каталог действий")).toBeTruthy());
 
     const found = await screen.findByText(/Найдено: 829 из 829/);

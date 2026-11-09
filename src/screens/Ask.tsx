@@ -14,7 +14,7 @@ import type { PlanCheck, PlanItem, PlanReport } from "../ipc";
 import { ask } from "../i18n/ru";
 import { speak } from "../lib/voice";
 import { useVoice } from "../lib/useVoice";
-import { RiskBadge } from "../components/RiskBadge";
+import { ActionList } from "../components/ActionList";
 
 const LIMIT = 8;
 
@@ -395,26 +395,7 @@ export function Ask() {
       ) : (
         <>
           <Text className={styles.count}>{ask.found(items.length)}</Text>
-          <div className={styles.list}>
-            {items.map((item) => (
-              <div key={item.key} className={styles.card}>
-                <div className={styles.head}>
-                  <span className={styles.example}>{item.example}</span>
-                  <RiskBadge risk={item.risk} />
-                  <span className={styles.key}>{item.key}</span>
-                </div>
-                <div className={styles.meta}>
-                  {item.tool ? (
-                    <span className={styles.hand}>{ask.canRun}</span>
-                  ) : (
-                    <span className={styles.noHand}>{ask.noHand}</span>
-                  )}
-                  <span>{item.decision_reason}</span>
-                  <span>{ask.score(item.score)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ActionList items={items} />
         </>
       )}
     </div>
