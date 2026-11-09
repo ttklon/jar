@@ -12,6 +12,7 @@ export type {
   AuditKind,
   ConfirmToken,
   Decision,
+  Downloaded,
   Evidence,
   FlowInput,
   FlowStepView,
@@ -36,6 +37,7 @@ export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 import type {
   AuditEvent,
   ConfirmToken,
+  Downloaded,
   FlowView,
   HashCheck,
   ModelsView,
@@ -196,4 +198,21 @@ export async function verifyModel(name: string): Promise<HashCheck> {
   }
   const { verifyModel: fromData } = await import("./dev");
   return fromData(name);
+}
+
+/**
+ * Скачать файл модели по ссылке. Ссылку даёт человек: приложение не знает адресов,
+ * которые не проверило. В браузере скачивания нет — файлов на диске тоже нет.
+ */
+export async function downloadModel(
+  url: string,
+  name: string,
+  sha256?: string,
+): Promise<Downloaded> {
+  if (isTauri()) {
+    const { downloadModel: fromCore } = await import("./tauri");
+    return fromCore(url, name, sha256);
+  }
+  const { downloadModel: fromData } = await import("./dev");
+  return fromData(url, name, sha256);
 }

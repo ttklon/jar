@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
+import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
-import { isTauri, listModels, verifyModel } from "../ipc";
-import type { HashCheck, ModelsView } from "../ipc";
+import { downloadModel, isTauri, listModels, verifyModel } from "../ipc";
+import type { Downloaded, HashCheck, ModelsView } from "../ipc";
 import { models as text } from "../i18n/ru";
 
 const useStyles = makeStyles({
@@ -51,6 +51,19 @@ const useStyles = makeStyles({
   broken: { color: tokens.colorPaletteRedForeground2 },
   changed: { color: tokens.colorPaletteDarkOrangeForeground2 },
   action: { marginTop: "4px" },
+  download: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    padding: "14px 16px",
+    borderRadius: tokens.borderRadiusLarge,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground2,
+    maxWidth: "110ch",
+  },
+  form: { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" },
+  wide: { flex: "3 1 340px", minWidth: "220px" },
+  mid: { flex: "1 1 200px", minWidth: "160px" },
 });
 
 /** Вердикт сверки человеческим языком. Неизвестный вердикт не выдумываем. */
@@ -74,6 +87,12 @@ export function Models() {
   // Результат сверки — по имени файла: у каждой строки свой ответ.
   const [checks, setChecks] = useState<Record<string, HashCheck | { error: string }>>({});
   const [busy, setBusy] = useState<Record<string, boolean>>({});
+  const [url, setUrl] = useState("");
+  const [name, setName] = useState("");
+  const [sha, setSha] = useState("");
+  const [downloading, setDownloading] = useState(false);
+  const [done, setDone] = useState<Downloaded | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const verify = useCallback((name: string) => {
     setBusy((current) => ({ ...current, [name]: true }));
@@ -99,12 +118,87 @@ export function Models() {
 
   useEffect(load, [load]);
 
+  const startDownload = useCallback(() => {
+    const trimmedUrl = url.trim();
+    const trimmedName = name.trim();
+
+    if (trimmedUrl.length === 0) {
+      setDownloadError(text.download.missingUrl);
+      return;
+    }
+    if (!trimmedName.toLowerCase().endsWith(".gguf")) {
+      setDownloadError(text.download.missingName);
+      return;
+    }
+
+    setDownloading(true);
+    setDownloadError(null);
+    setDone(null);
+    downloadModel(trimmedUrl, trimmedName, sha.trim() || undefined)
+      .then((result) => {
+        setDone(result);
+        // Список перечитывается: хеш пришёл из памяти, и таблица должна его показать.
+        load();
+      })
+      .catch((reason: unknown) =>
+        setDownloadError(reason instanceof Error ? reason.message : String(reason)),
+      )
+      .finally(() => setDownloading(false));
+  }, [url, name, sha, load]);
+
   return (
     <div className={styles.root}>
       <Text as="h1" size={700}>
         {text.title}
       </Text>
       <Text className={styles.lead}>{text.lead}</Text>
+
+      <section className={styles.download}>
+        <Text as="h2" size={500}>
+          {text.download.title}
+        </Text>
+        <Text className={styles.note}>{text.download.lead}</Text>
+        <div className={styles.form}>
+          <Input
+            className={styles.wide}
+            value={url}
+            placeholder={text.download.urlPlaceholder}
+            aria-label={text.download.url}
+            onChange={(_, data) => setUrl(data.value)}
+          />
+          <Input
+            className={styles.mid}
+            value={name}
+            placeholder={text.download.namePlaceholder}
+            aria-label={text.download.name}
+            onChange={(_, data) => setName(data.value)}
+          />
+          <Input
+            className={styles.mid}
+            value={sha}
+            placeholder={text.download.shaPlaceholder}
+            aria-label={text.download.sha}
+            onChange={(_, data) => setSha(data.value)}
+          />
+          <Button appearance="primary" disabled={downloading} onClick={startDownload}>
+            {downloading ? text.download.running : text.download.start}
+          </Button>
+        </div>
+        {downloadError ? (
+          <Text className={styles.error}>
+            {text.download.error}: {downloadError}
+          </Text>
+        ) : null}
+        {done ? (
+          <Text className={styles.ok}>
+            {done.verified
+              ? text.download.doneVerified(size(done.bytes))
+              : text.download.doneUnverified(size(done.bytes))}
+            {" · "}
+            <span className={styles.mono}>{done.sha256.slice(0, 12)}</span>
+          </Text>
+        ) : null}
+      </section>
 
       {error ? (
         <Text className={styles.error}>

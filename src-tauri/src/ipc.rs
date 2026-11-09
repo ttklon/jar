@@ -14,6 +14,7 @@ use tauri::State;
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::memory::{Memory, RunRecord};
+use crate::download::{self, Downloaded};
 use crate::models::{self, ModelFile};
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
@@ -389,6 +390,35 @@ pub async fn verify_model(
     })
     .await
     .map_err(|error| format!("проверка не выполнилась: {error}"))?
+}
+
+/// Скачивает файл модели по ссылке: `.part` → sha256 → переименование.
+///
+/// Ссылку даёт человек, а не приложение: выдуманный адрес — это не «удобство», а
+/// скачанный мусор с правильным именем. `sha256` необязателен; если он задан и не
+/// сошёлся, файл не появится вовсе.
+#[tauri::command]
+pub async fn download_model(
+    state: State<'_, AppState>,
+    url: String,
+    name: String,
+    sha256: Option<String>,
+) -> Result<Downloaded, String> {
+    let inner = state.inner.clone();
+    let run = inner.memory.start_run("download", &name).ok();
+
+    let result = tauri::async_runtime::spawn_blocking(move || {
+        download::download(&inner.models_dir, &name, &url, sha256.as_deref(), &inner.memory)
+    })
+    .await
+    .map_err(|error| format!("скачивание не выполнилось: {error}"))?;
+
+    if let Some(run) = run {
+        let outcome = if result.is_ok() { "ok" } else { "failed" };
+        let _ = state.inner.memory.finish_run(run, outcome);
+    }
+
+    result
 }
 
 /// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это

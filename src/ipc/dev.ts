@@ -118,6 +118,7 @@ import flowsJson from "../../data/flows.json";
 import type {
   AuditEvent,
   Decision,
+  Downloaded,
   HashCheck,
   ModelsView,
   PlanItem,
@@ -324,4 +325,13 @@ export async function listModels(): Promise<ModelsView> {
  */
 export async function verifyModel(_name: string): Promise<HashCheck> {
   throw new Error("хеш считает приложение: в браузере нет файлов на диске");
+}
+
+/** Скачивает только ядро: иначе интерфейс обещал бы файл, которого нет. */
+export async function downloadModel(
+  _url: string,
+  _name: string,
+  _sha256?: string,
+): Promise<Downloaded> {
+  throw new Error("скачивание делает приложение: запустите npm run tauri dev");
 }

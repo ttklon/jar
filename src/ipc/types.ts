@@ -124,6 +124,15 @@ export interface ModelFile {
   hash: string | null;
 }
 
+/** Результат скачивания: файл уже лежит в папке моделей и хеш посчитан. */
+export interface Downloaded {
+  name: string;
+  bytes: number;
+  sha256: string;
+  /** `true` — эталон был задан и совпал; `false` — эталона не было. */
+  verified: boolean;
+}
+
 /** Результат сверки хеша. `verdict`: `first` | `same` | `changed`. */
 export interface HashCheck {
   name: string;

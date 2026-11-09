@@ -11,6 +11,8 @@
 //! * по фразе человека находит действия в реестре (`planner`) и честно говорит, что из
 //!   них выполнимо;
 //! * читает папку моделей (`models`) и показывает, какие `.gguf` там лежат и целы ли они;
+//! * скачивает файл модели через системный `curl` (`download`): сначала `.part`, потом
+//!   проверка sha256, и только затем переименование;
 //! * знает, как это делается в 87 программах (`profiles`), и честно показывает, что из
 //!   этого уже исполняется;
 //! * вызывается из любой программы по `Ctrl+Alt+Z` (`hotkey`).
@@ -19,6 +21,7 @@
 
 pub mod audit;
 pub mod executor;
+pub mod download;
 pub mod flows;
 pub mod hotkey;
 pub mod ipc;
@@ -108,6 +111,7 @@ pub fn run() {
             ipc::plan_for,
             ipc::list_models,
             ipc::verify_model,
+            ipc::download_model,
             ipc::list_profiles,
             ipc::policy_for,
             ipc::confirm_tool,

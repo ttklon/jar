@@ -7,6 +7,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   AuditEvent,
   ConfirmToken,
+  Downloaded,
   FlowView,
   HashCheck,
   ModelsView,
@@ -48,6 +49,14 @@ export function listModels(): Promise<ModelsView> {
 
 export function verifyModel(name: string): Promise<HashCheck> {
   return invoke<HashCheck>("verify_model", { name });
+}
+
+export function downloadModel(
+  url: string,
+  name: string,
+  sha256?: string,
+): Promise<Downloaded> {
+  return invoke<Downloaded>("download_model", { url, name, sha256: sha256 ?? null });
 }
 
 export function listTools(): Promise<ToolView[]> {

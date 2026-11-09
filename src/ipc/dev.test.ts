@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   auditTail,
   buildStats,
+  downloadModel,
   listFlows,
   listProfiles,
   listTools,
@@ -193,5 +194,11 @@ describe("модели в браузере", () => {
 
   it("хеш не выдумывается: сверку делает только приложение", async () => {
     await expect(verifyModel("qwen3-1.7b.gguf")).rejects.toThrow(/приложение/);
+  });
+
+  it("скачивание в браузере не притворяется успешным", async () => {
+    await expect(downloadModel("https://example.com/m.gguf", "m.gguf")).rejects.toThrow(
+      /приложение/,
+    );
   });
 });

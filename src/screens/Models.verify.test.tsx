@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { listModels, verifyModel } from "../ipc";
+import { downloadModel, listModels, verifyModel } from "../ipc";
 import { Models } from "./Models";
 
 /**
@@ -14,6 +14,7 @@ vi.mock("../ipc", () => ({
   isTauri: () => true,
   listModels: vi.fn(),
   verifyModel: vi.fn(),
+  downloadModel: vi.fn(),
 }));
 
 class ResizeObserverStub {
@@ -28,6 +29,7 @@ afterEach(() => {
   cleanup();
   vi.mocked(listModels).mockReset();
   vi.mocked(verifyModel).mockReset();
+  vi.mocked(downloadModel).mockReset();
 });
 
 const FILE = {
@@ -84,6 +86,49 @@ describe("сверка хеша на экране «Модели»", () => {
       expect(screen.getByText(/файл изменился с прошлой сверки/i)).toBeTruthy();
     });
     expect(screen.queryByText(/совпадает с прошлым/i)).toBeNull();
+  });
+
+  it("скачивание без эталона так и говорит: хеш записан, а не проверен", async () => {
+    vi.mocked(listModels).mockResolvedValue({ dir: "C:/models", items: [], error: null });
+    vi.mocked(downloadModel).mockResolvedValue({
+      name: "qwen3-1.7b.gguf",
+      bytes: 1_100_000_000,
+      sha256: "c".repeat(64),
+      verified: false,
+    });
+
+    render(<Models />);
+
+    const [urlInput] = screen.getAllByRole("textbox");
+    fireEvent.change(urlInput!, {
+      target: { value: "https://huggingface.co/x/resolve/main/model.gguf" },
+    });
+    fireEvent.change(screen.getByLabelText(/имя файла/i), {
+      target: { value: "qwen3-1.7b.gguf" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^скачать$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/эталона не было — хеш записан/i)).toBeTruthy();
+    });
+    expect(vi.mocked(downloadModel)).toHaveBeenCalledWith(
+      "https://huggingface.co/x/resolve/main/model.gguf",
+      "qwen3-1.7b.gguf",
+      undefined,
+    );
+  });
+
+  it("без ссылки скачивание не начинается", async () => {
+    vi.mocked(listModels).mockResolvedValue({ dir: "C:/models", items: [], error: null });
+
+    render(<Models />);
+
+    fireEvent.click(screen.getByRole("button", { name: /^скачать$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/укажите ссылку/i)).toBeTruthy();
+    });
+    expect(vi.mocked(downloadModel)).not.toHaveBeenCalled();
   });
 
   it("ошибка сверки показывается как ошибка", async () => {
