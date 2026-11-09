@@ -322,7 +322,7 @@ fn migrate(conn: &Connection) -> Result<(), rusqlite::Error> {
 
 /// Слова запроса: нижний регистр, без повторов, короткие отбрасываются.
 fn words(query: &str) -> Vec<String> {
-    let mut words: Vec<String> = query
+    let words: Vec<String> = query
         .to_lowercase()
         .split(|symbol: char| !symbol.is_alphanumeric())
         .filter(|word| word.chars().count() >= 2)
