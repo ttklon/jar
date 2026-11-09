@@ -780,7 +780,8 @@ pub fn request_learning(
         return Ok(None);
     };
 
-    learn::request(&inner.memory, action, &query, now_ms()).map(Some)
+    // Журнал считает время в `u128`, память — в `u64`: просьбе хватает миллисекунд.
+    learn::request(&inner.memory, action, &query, now_ms() as u64).map(Some)
 }
 
 /// Всё, чему приложение ещё не научилось, — самое просимое сверху.
