@@ -94,12 +94,13 @@ mod imp {
         CloseHandle, SetHandleInformation, HANDLE, HANDLE_FLAG_INHERIT, WAIT_OBJECT_0, WAIT_TIMEOUT,
     };
     use windows_sys::Win32::Security::{
-        CreateRestrictedToken, CreateWellKnownSid, SID_AND_ATTRIBUTES, DISABLE_MAX_PRIVILEGE,
-        TOKEN_ASSIGN_PRIMARY, TOKEN_DUPLICATE, TOKEN_QUERY, WinBuiltinAdministratorsSid,
+        CreateRestrictedToken, CreateWellKnownSid, WinBuiltinAdministratorsSid,
+        DISABLE_MAX_PRIVILEGE, SID_AND_ATTRIBUTES, TOKEN_ASSIGN_PRIMARY, TOKEN_DUPLICATE,
+        TOKEN_QUERY,
     };
     use windows_sys::Win32::System::Threading::{
-        CreateProcessAsUserW, GetCurrentProcess, GetExitCodeProcess, OpenProcessToken, ResumeThread,
-        TerminateProcess, WaitForSingleObject, CREATE_NO_WINDOW, CREATE_SUSPENDED,
+        CreateProcessAsUserW, GetCurrentProcess, GetExitCodeProcess, OpenProcessToken,
+        ResumeThread, TerminateProcess, WaitForSingleObject, CREATE_NO_WINDOW, CREATE_SUSPENDED,
         PROCESS_INFORMATION, STARTF_USESTDHANDLES, STARTUPINFOW,
     };
 
@@ -117,10 +118,8 @@ mod imp {
     ) -> Result<ExecOutput, String> {
         let started = Instant::now();
         let number = RUNS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        let dir = std::env::temp_dir().join(format!(
-            "zshelper-bez-prav-{}-{number}",
-            std::process::id()
-        ));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-bez-prav-{}-{number}", std::process::id()));
         std::fs::create_dir_all(&dir).map_err(|error| format!("папка вывода: {error}"))?;
 
         let out_file = dir.join("stdout.txt");
@@ -390,7 +389,10 @@ mod tests {
 
     #[test]
     fn an_argument_with_a_space_is_quoted_as_one_argument() {
-        let line = command_line("powershell.exe", &["-Command".into(), "Write-Output 1".into()]);
+        let line = command_line(
+            "powershell.exe",
+            &["-Command".into(), "Write-Output 1".into()],
+        );
         assert_eq!(line, "powershell.exe -Command \"Write-Output 1\"");
     }
 
@@ -407,7 +409,10 @@ mod tests {
 
     #[test]
     fn a_plain_argument_stays_plain() {
-        assert_eq!(command_line("cmd.exe", &["/c".into(), "exit".into()]), "cmd.exe /c exit");
+        assert_eq!(
+            command_line("cmd.exe", &["/c".into(), "exit".into()]),
+            "cmd.exe /c exit"
+        );
     }
 
     #[test]
@@ -481,7 +486,6 @@ mod tests {
         )
     }
 
-
     #[cfg(windows)]
     #[test]
     fn a_restricted_process_runs_under_the_ceiling_too() {
@@ -498,7 +502,11 @@ mod tests {
         let output = run(&request, Some(limits), &cancel)
             .unwrap_or_else(|error| panic!("ограниченный запуск провалился: {error}"));
 
-        assert!(output.limits_note.contains("под потолком"), "{}", output.limits_note);
+        assert!(
+            output.limits_note.contains("под потолком"),
+            "{}",
+            output.limits_note
+        );
         assert!(!output.timed_out, "остановить должен потолок");
         assert_ne!(output.exit_code, Some(0));
         assert!(started.elapsed().as_secs() < 20, "потолок не сработал");
