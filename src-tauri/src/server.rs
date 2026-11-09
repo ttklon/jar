@@ -46,6 +46,7 @@ impl ServerSpec {
 }
 
 /// Запущенный процесс.
+#[derive(Debug)]
 pub struct Server {
     child: Child,
     spec: ServerSpec,
