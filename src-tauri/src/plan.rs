@@ -159,8 +159,7 @@ pub fn fill(plan: &mut Plan, answers: &[Answer]) -> Result<(), String> {
             ));
         }
 
-        step.params
-            .insert(answer.name.clone(), value.to_string());
+        step.params.insert(answer.name.clone(), value.to_string());
     }
 
     Ok(())
@@ -690,8 +689,15 @@ mod tests {
         )
         .expect("ответ принят");
 
-        assert_eq!(plan.steps[0].params.get(&name).map(String::as_str), Some("C:\\tmp\\jar"));
-        assert_eq!(questions(&plan, &registry), Vec::new(), "больше спрашивать нечего");
+        assert_eq!(
+            plan.steps[0].params.get(&name).map(String::as_str),
+            Some("C:\\tmp\\jar")
+        );
+        assert_eq!(
+            questions(&plan, &registry),
+            Vec::new(),
+            "больше спрашивать нечего"
+        );
         assert_eq!(check(&plan, &registry), Vec::new(), "план готов к запуску");
     }
 
