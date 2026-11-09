@@ -105,7 +105,9 @@ pub fn request(
     now_ms: u64,
 ) -> Result<Learning, String> {
     let key = action.key();
-    let times = asked_of(memory, &key).map(|asked| asked.times + 1).unwrap_or(1);
+    let times = asked_of(memory, &key)
+        .map(|asked| asked.times + 1)
+        .unwrap_or(1);
 
     let asked = Asked {
         times,

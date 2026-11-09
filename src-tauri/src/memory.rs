@@ -170,12 +170,11 @@ impl Memory {
     /// не заводя под них отдельной таблицы.
     pub fn facts_with_prefix(&self, prefix: &str) -> Vec<(String, String)> {
         let conn = self.lock();
-        let mut statement = match conn.prepare(
-            "SELECT key, value FROM facts WHERE key LIKE ?1 ORDER BY key",
-        ) {
-            Ok(statement) => statement,
-            Err(_) => return Vec::new(),
-        };
+        let mut statement =
+            match conn.prepare("SELECT key, value FROM facts WHERE key LIKE ?1 ORDER BY key") {
+                Ok(statement) => statement,
+                Err(_) => return Vec::new(),
+            };
 
         let pattern = format!("{prefix}%");
         let rows = statement.query_map(params![pattern], |row| {
