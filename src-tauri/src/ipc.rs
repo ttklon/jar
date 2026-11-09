@@ -817,6 +817,8 @@ pub async fn transcribe_local(
     }
 
     let run = inner.memory.start_run("speech", "локальное распознавание").ok();
+    // Копия для записи итога: замыкание забирает свою.
+    let memory_owner = inner.clone();
 
     let result = tauri::async_runtime::spawn_blocking(move || {
         let port = server::free_port()?;
@@ -845,7 +847,7 @@ pub async fn transcribe_local(
 
     if let Some(run) = run {
         let outcome = if result.is_ok() { "ok" } else { "failed" };
-        let _ = inner.memory.finish_run(run, outcome);
+        let _ = memory_owner.memory.finish_run(run, outcome);
     }
 
     result

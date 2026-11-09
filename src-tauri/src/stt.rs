@@ -239,7 +239,6 @@ pub fn post(port: u16, wav: &[u8], timeout: Duration) -> Result<String, String> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::Read as _;
     use std::net::TcpListener;
     use std::thread;
 
