@@ -465,7 +465,7 @@ pub struct EngineStatus {
     pub pid: Option<u32>,
 }
 
-fn engine_status(state: &AppState) -> EngineStatus {
+fn read_engine_status(state: &AppState) -> EngineStatus {
     let program = llama::find_program(&state.inner.base_dir);
 
     let (running, port, pid) = match state.inner.engine.lock() {
@@ -490,7 +490,7 @@ fn engine_status(state: &AppState) -> EngineStatus {
 /// Состояние движка. Ничего не запускает — просто отвечает, что есть.
 #[tauri::command]
 pub fn engine_status(state: State<'_, AppState>) -> EngineStatus {
-    engine_status(&state)
+    read_engine_status(&state)
 }
 
 /// Запускает `llama-server` с файлом модели `name`.
@@ -545,7 +545,7 @@ pub async fn start_engine(state: State<'_, AppState>, name: String) -> Result<En
         let _ = state.inner.memory.finish_run(run, outcome);
     }
 
-    result.map(|()| engine_status(&state))
+    result.map(|()| read_engine_status(&state))
 }
 
 /// Останавливает движок. Не запущен — не ошибка: цель достигнута.
@@ -564,7 +564,7 @@ pub fn stop_engine(state: State<'_, AppState>) -> EngineStatus {
         }
     }
 
-    engine_status(&state)
+    read_engine_status(&state)
 }
 
 /// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это

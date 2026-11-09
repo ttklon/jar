@@ -46,6 +46,8 @@ pub mod verifier;
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 
+use tauri::Manager;
+
 use audit::Audit;
 use ipc::{AppState, Inner};
 use memory::Memory;
