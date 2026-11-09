@@ -444,22 +444,47 @@ mod tests {
     fn seeded(name: &str) -> (Memory, PathBuf) {
         let (memory, dir) = temp_memory(name);
 
-        let clean = memory.start_run("tool", "Уборка в Загрузках").expect("запуск");
+        let clean = memory
+            .start_run("tool", "Уборка в Загрузках")
+            .expect("запуск");
         memory
-            .add_step(clean, 1, "files|удалить|в корзину", true, "", "path_missing")
+            .add_step(
+                clean,
+                1,
+                "files|удалить|в корзину",
+                true,
+                "",
+                "path_missing",
+            )
             .expect("шаг");
         memory
-            .add_step(clean, 2, "files|проверить|дубликаты по хэшу", true, "", "duplicates=3")
+            .add_step(
+                clean,
+                2,
+                "files|проверить|дубликаты по хэшу",
+                true,
+                "",
+                "duplicates=3",
+            )
             .expect("шаг");
         memory.finish_run(clean, "ok").expect("итог");
 
         let disk = memory.start_run("tool", "Свободное место").expect("запуск");
         memory
-            .add_step(disk, 1, "storage-backup|проверить|свободное место", true, "", "free_gb=12")
+            .add_step(
+                disk,
+                1,
+                "storage-backup|проверить|свободное место",
+                true,
+                "",
+                "free_gb=12",
+            )
             .expect("шаг");
         memory.finish_run(disk, "ok").expect("итог");
 
-        let model = memory.start_run("download", "qwen2.5-1.5b.gguf").expect("запуск");
+        let model = memory
+            .start_run("download", "qwen2.5-1.5b.gguf")
+            .expect("запуск");
         memory.finish_run(model, "ok").expect("итог");
 
         (memory, dir)
@@ -482,11 +507,17 @@ mod tests {
         let (memory, dir) = seeded("search-two");
 
         // «папк» есть в шаге уборки, «диска» нет нигде — пустой ответ, а не «примерно».
-        assert!(memory.search("загрузки диска", 10).expect("поиск").is_empty());
+        assert!(memory
+            .search("загрузки диска", 10)
+            .expect("поиск")
+            .is_empty());
 
         let found = memory.search("уборка хэшу", 10).expect("поиск");
         assert_eq!(found.len(), 1);
-        assert_eq!(found[0].matched, vec!["уборка".to_string(), "хэшу".to_string()]);
+        assert_eq!(
+            found[0].matched,
+            vec!["уборка".to_string(), "хэшу".to_string()]
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -496,7 +527,11 @@ mod tests {
         let (memory, dir) = seeded("search-steps");
 
         let found = memory.search("duplicates", 10).expect("поиск");
-        assert_eq!(found.len(), 1, "слово из доказательства шага тоже считается");
+        assert_eq!(
+            found.len(),
+            1,
+            "слово из доказательства шага тоже считается"
+        );
         assert!(found[0].run.subject.contains("Загрузк"));
 
         let _ = std::fs::remove_dir_all(&dir);
