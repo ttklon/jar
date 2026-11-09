@@ -69,9 +69,14 @@ jobs:
         shell: bash
         run: npm run tauri build > bundle.log 2>&1
 
+      # `continue-on-error` здесь не для красоты: упавший отчёт делает `success()`
+      # ложным, и гейт ниже молча пропускается — сборка «зелёная» без установщика.
       - name: Report bundle errors
         if: steps.bundle.outcome == 'failure'
         shell: bash
+        continue-on-error: true
+        env:
+          PYTHONIOENCODING: utf-8
         run: |
           tail -120 bundle.log
           python scripts/ci_log_annotate.py bundle.log --title "tauri build" \
