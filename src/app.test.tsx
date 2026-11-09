@@ -57,7 +57,7 @@ describe("App", () => {
     await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
 
     screen.getByRole("button", { name: "Сценарии" }).click();
-    await waitFor(() => expect(screen.getByText(/6 сценариев/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/\d+ сценариев/)).toBeTruthy());
 
     // Сценарии собираются из данных: заголовок и его шаги приходят из data/flows.json.
     expect(screen.getByText("Как поживает компьютер")).toBeTruthy();

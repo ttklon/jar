@@ -146,6 +146,13 @@
   "params": []
  },
  {
+  "registry": "hardware-diag|показать|характеристики железа",
+  "title": "Что за компьютер",
+  "summary": "Процессор, память, видеокарты, накопители и версия Windows — одним отчётом. Нужно, чтобы понимать, что эта машина потянет. Только чтение.",
+  "implementation": "PowerShell Get-CimInstance (Win32_Processor, ComputerSystem, VideoController, OperatingSystem, Get-PhysicalDisk)",
+  "params": []
+ },
+ {
   "registry": "network|проверить|подключение",
   "title": "Проверить подключение",
   "summary": "Пингует 1.1.1.1 и проверяет DNS: отвечает ли сеть и резолвятся ли имена.",

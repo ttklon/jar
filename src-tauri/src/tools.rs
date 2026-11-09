@@ -111,6 +111,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         }
         "storage-backup|проверить|SMART диска" => simple(registry, SMART, 30, cancel),
         "system-power|проверить|батарею" => simple(registry, BATTERY, 30, cancel),
+        "hardware-diag|показать|характеристики железа" => {
+            simple(registry, HARDWARE, 60, cancel)
+        }
         "processes-services|проанализировать|автозапуск" => {
             simple(registry, STARTUP, 60, cancel)
         }
@@ -396,6 +399,21 @@ if ($batteries.Count -eq 0) {
 Write-Output ('ZSHELPER-OK batteries={0}' -f $batteries.Count)
 $batteries | ForEach-Object {
   Write-Output ('{0}: заряд {1}%, состояние {2}' -f $_.Name, $_.EstimatedChargeRemaining, $_.BatteryStatus)
+}"#;
+
+const HARDWARE: &str = r#"$cpu = Get-CimInstance Win32_Processor | Select-Object -First 1
+$system = Get-CimInstance Win32_ComputerSystem
+$os = Get-CimInstance Win32_OperatingSystem
+$ram = [math]::Round($system.TotalPhysicalMemory / 1GB, 1)
+Write-Output ('ZSHELPER-OK cpu={0}' -f $cpu.Name.Trim())
+Write-Output ('ядра: {0}, потоки: {1}' -f $cpu.NumberOfCores, $cpu.NumberOfLogicalProcessors)
+Write-Output ('память: {0} ГБ' -f $ram)
+Write-Output ('система: {0}, версия {1}' -f $os.Caption, $os.Version)
+Get-CimInstance Win32_VideoController | ForEach-Object {
+  Write-Output ('видео: {0}' -f $_.Name)
+}
+Get-PhysicalDisk -ErrorAction SilentlyContinue | ForEach-Object {
+  Write-Output ('диск: {0}, {1} ГБ, {2}' -f $_.FriendlyName, [math]::Round($_.Size / 1GB), $_.MediaType)
 }"#;
 
 const OPEN_PORTS: &str = r#"$listeners = @(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Sort-Object LocalPort | Select-Object -First 100)
