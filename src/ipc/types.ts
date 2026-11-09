@@ -107,6 +107,28 @@ export interface PlanItem {
   score: number;
 }
 
+/**
+ * Файл в папке моделей. `ok` значит «заголовок GGUF прочитан», а не «модель работает»:
+ * запускать пока нечем, и интерфейс этого не обещает.
+ */
+export interface ModelFile {
+  name: string;
+  size_bytes: number;
+  ok: boolean;
+  note: string;
+  version: number | null;
+  tensors: number | null;
+  architecture: string | null;
+  quant: string | null;
+}
+
+export interface ModelsView {
+  dir: string;
+  items: ModelFile[];
+  /** Папку не прочитать — это не то же самое, что пустая папка. */
+  error: string | null;
+}
+
 /** Запуск из памяти приложения (SQLite). */
 export interface RunRecord {
   id: number;

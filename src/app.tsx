@@ -12,6 +12,7 @@ import {
 import {
   AppsListDetailRegular,
   AppGenericRegular,
+  BrainCircuitRegular,
   BranchRegular,
   HandRightRegular,
   HistoryRegular,
@@ -26,10 +27,11 @@ import { Catalog } from "./screens/Catalog";
 import { Hands } from "./screens/Hands";
 import { Flows } from "./screens/Flows";
 import { Ask } from "./screens/Ask";
+import { Models } from "./screens/Models";
 import { Journal } from "./screens/Journal";
 import { Apps } from "./screens/Apps";
 import { Settings } from "./screens/Settings";
-import { apps, ask, flows, hands, journal, t } from "./i18n/ru";
+import { apps, ask, flows, hands, journal, models, t } from "./i18n/ru";
 import { APP_VERSION } from "./version";
 
 type Screen =
@@ -39,6 +41,7 @@ type Screen =
   | "hands"
   | "flows"
   | "apps"
+  | "models"
   | "journal"
   | "settings";
 
@@ -116,6 +119,7 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement }[] = [
   { id: "hands", label: hands.nav, icon: <HandRightRegular /> },
   { id: "flows", label: flows.nav, icon: <BranchRegular /> },
   { id: "apps", label: apps.nav, icon: <AppGenericRegular /> },
+  { id: "models", label: models.nav, icon: <BrainCircuitRegular /> },
   { id: "journal", label: journal.nav, icon: <HistoryRegular /> },
   { id: "settings", label: t.navSettings, icon: <SettingsRegular /> },
 ];
@@ -204,6 +208,8 @@ export function App() {
             <Flows />
           ) : screen === "apps" ? (
             <Apps />
+          ) : screen === "models" ? (
+            <Models />
           ) : screen === "journal" ? (
             <Journal />
           ) : (

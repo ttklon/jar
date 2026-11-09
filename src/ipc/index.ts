@@ -16,6 +16,8 @@ export type {
   FlowInput,
   FlowStepView,
   FlowView,
+  ModelFile,
+  ModelsView,
   ParamSpec,
   PlanItem,
   ProfileOpView,
@@ -34,6 +36,7 @@ import type {
   AuditEvent,
   ConfirmToken,
   FlowView,
+  ModelsView,
   PlanItem,
   ProfileView,
   RunRecord,
@@ -166,4 +169,19 @@ export async function planFor(query: string, limit = 8): Promise<PlanItem[]> {
   }
   const { planFor: fromData } = await import("./dev");
   return fromData(query, limit);
+}
+
+// ── Модели ──────────────────────────────────────────────────────────────────
+
+/**
+ * Что лежит в папке моделей. Ядро читает заголовки `.gguf`; в браузере папки нет,
+ * поэтому список пуст, а путь пустой — экран честно об этом говорит.
+ */
+export async function listModels(): Promise<ModelsView> {
+  if (isTauri()) {
+    const { listModels: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { listModels: fromData } = await import("./dev");
+  return fromData();
 }

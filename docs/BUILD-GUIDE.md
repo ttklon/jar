@@ -740,7 +740,7 @@ python tools/check_all.py           # данные (обязательно пе�
 ```
 
 Что уже стоит в репозитории на момент написания (проверять, а не предполагать):
-`src-tauri/src/{registry,policy,tools,flows,profiles,memory,planner,ipc,tray,logging,lib}.rs`,
+`src-tauri/src/{registry,policy,tools,flows,profiles,memory,planner,models,ipc,tray,logging,lib}.rs`,
 `src/{app,screens,components,ipc,lib,i18n}`, `scripts/make_icons.py`, джобы `ui`, `core` и `release`
 в `.github/workflows/app.yml`.
 

@@ -14,6 +14,7 @@ use tauri::State;
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::memory::{Memory, RunRecord};
+use crate::models::{self, ModelFile};
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
@@ -26,6 +27,8 @@ pub struct Inner {
     pub registry: Registry,
     pub audit: Audit,
     pub memory: Memory,
+    /// Папка моделей: модели весят гигабайты, поэтому путь явный, а не «где-то рядом».
+    pub models_dir: std::path::PathBuf,
     pub policy: PolicyState,
     pub cancel: AtomicBool,
 }
@@ -333,6 +336,36 @@ pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
 #[tauri::command]
 pub fn plan_for(state: State<'_, AppState>, query: String, limit: usize) -> Vec<PlanItem> {
     planner::plan(&state.inner.registry, &query, limit.clamp(1, 50))
+}
+
+/// Что лежит в папке моделей.
+///
+/// `error` заполняется, если папку не прочитать: «моделей нет» и «папки нет» — разные
+/// вещи, и интерфейс обязан их различать, а не показывать пустой список в обоих случаях.
+#[derive(Debug, Serialize)]
+pub struct ModelsView {
+    pub dir: String,
+    pub items: Vec<ModelFile>,
+    pub error: Option<String>,
+}
+
+/// Список `.gguf` в папке моделей. Ничего не скачивает и не запускает — только читает
+/// заголовки, поэтому вызывать можно сколько угодно.
+#[tauri::command]
+pub fn list_models(state: State<'_, AppState>) -> ModelsView {
+    let dir = &state.inner.models_dir;
+    match models::scan(dir) {
+        Ok(items) => ModelsView {
+            dir: dir.display().to_string(),
+            items,
+            error: None,
+        },
+        Err(error) => ModelsView {
+            dir: dir.display().to_string(),
+            items: Vec::new(),
+            error: Some(error),
+        },
+    }
 }
 
 /// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это

@@ -10,6 +10,7 @@
 //!   одно и то же дважды;
 //! * по фразе человека находит действия в реестре (`planner`) и честно говорит, что из
 //!   них выполнимо;
+//! * читает папку моделей (`models`) и показывает, какие `.gguf` там лежат и целы ли они;
 //! * знает, как это делается в 87 программах (`profiles`), и честно показывает, что из
 //!   этого уже исполняется;
 //! * вызывается из любой программы по `Ctrl+Alt+Z` (`hotkey`).
@@ -23,6 +24,7 @@ pub mod hotkey;
 pub mod ipc;
 pub mod logging;
 pub mod memory;
+pub mod models;
 pub mod planner;
 pub mod policy;
 pub mod profiles;
@@ -81,6 +83,7 @@ pub fn run() {
             registry,
             audit,
             memory,
+            models_dir: models::dir(&base),
             policy: PolicyState::new(),
             cancel: AtomicBool::new(false),
         }),
@@ -103,6 +106,7 @@ pub fn run() {
             ipc::audit_tail,
             ipc::memory_runs,
             ipc::plan_for,
+            ipc::list_models,
             ipc::list_profiles,
             ipc::policy_for,
             ipc::confirm_tool,

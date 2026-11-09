@@ -118,6 +118,7 @@ import flowsJson from "../../data/flows.json";
 import type {
   AuditEvent,
   Decision,
+  ModelsView,
   PlanItem,
   RunRecord,
   FlowStepView,
@@ -305,4 +306,13 @@ export async function planFor(query: string, limit = 8): Promise<PlanItem[]> {
     query,
     Math.min(Math.max(limit, 1), 50),
   );
+}
+
+// ── Модели в браузере ───────────────────────────────────────────────────────
+//
+// Браузер не видит файловую систему, поэтому и списка нет. Пустой путь и пустой
+// список — не ошибка: экран сам скажет, что смотреть надо в приложении.
+
+export async function listModels(): Promise<ModelsView> {
+  return { dir: "", items: [], error: null };
 }

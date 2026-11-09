@@ -5,6 +5,7 @@ import {
   listFlows,
   listProfiles,
   listTools,
+  listModels,
   memoryRuns,
   planFor,
   registrySnapshot,
@@ -178,5 +179,14 @@ describe("поиск по реестру в браузере", () => {
     const money = (await planFor("оплати счёт", 20)).find((item) => item.risk === "money");
     expect(money?.decision).toBe("deny");
     expect(money?.tool).toBeNull();
+  });
+});
+
+describe("модели в браузере", () => {
+  it("список пуст без ошибки: папку видит только приложение", async () => {
+    const view = await listModels();
+    expect(view.items).toEqual([]);
+    expect(view.dir).toBe("");
+    expect(view.error).toBeNull();
   });
 });
