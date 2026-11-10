@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, Input, makeStyles, Text, tokens } from "@fluentui/react-components";
+import { Button, Input, makeStyles, Switch, Text, tokens } from "@fluentui/react-components";
 import { MicRegular } from "@fluentui/react-icons";
 import {
   draftPlan,
@@ -112,6 +112,8 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [learning, setLearning] = useState<Learning | null>(null);
+  /** Режим «слушаю всегда»: микрофон открыт, фразу вырезает тишина. */
+  const [always, setAlways] = useState(false);
 
   const search = useCallback((phrase: string) => {
     const query = phrase.trim();
@@ -174,6 +176,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
 
   const mic = useVoice({
     local: localEngine,
+    always,
     onText: (heard) => {
       setVoiceError(null);
       setText(heard);
@@ -273,27 +276,64 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         className={mic.listening ? styles.micListening : styles.mic}
         appearance="primary"
         icon={<MicRegular />}
-        aria-label={voice.hold}
+        aria-label={always ? voice.always : voice.hold}
         onPointerDown={(event) => {
           event.preventDefault();
+          // В режиме «слушаю всегда» нажатие — это переключатель, а не «держать».
+          if (always) {
+            if (mic.listening) mic.stop();
+            else mic.start();
+            return;
+          }
           mic.start();
         }}
-        onPointerUp={() => mic.stop()}
-        onPointerLeave={() => mic.stop()}
-        onPointerCancel={() => mic.stop()}
+        onPointerUp={() => {
+          if (!always) mic.stop();
+        }}
+        onPointerLeave={() => {
+          if (!always) mic.stop();
+        }}
+        onPointerCancel={() => {
+          if (!always) mic.stop();
+        }}
         onKeyDown={(event) => {
           if (event.key !== " " && event.key !== "Enter") return;
           event.preventDefault();
-          if (!event.repeat) mic.start();
+          if (event.repeat) return;
+          if (always && mic.listening) mic.stop();
+          else mic.start();
         }}
         onKeyUp={(event) => {
+          if (always) return;
           if (event.key !== " " && event.key !== "Enter") return;
           event.preventDefault();
           mic.stop();
         }}
       >
-        {mic.listening ? voice.listening(seconds) : voice.hold}
+        {always
+          ? mic.listening
+            ? mic.speaking
+              ? voice.alwaysSpeaking
+              : voice.alwaysOn
+            : voice.switchToAlways
+          : mic.listening
+            ? voice.listening(seconds)
+            : voice.hold}
       </Button>
+
+      <Switch
+        checked={always}
+        disabled={!mic.alwaysSupported}
+        label={voice.always}
+        onChange={(_event, data) => {
+          setAlways(data.checked);
+          if (!data.checked && mic.listening) mic.stop();
+        }}
+      />
+      <Text className={styles.note}>{voice.alwaysHint}</Text>
+      {!mic.alwaysSupported ? (
+        <Text className={styles.note}>{voice.alwaysNoEngine}</Text>
+      ) : null}
 
       <Text className={styles.note}>{voice.hotkey}</Text>
       <Text className={styles.note}>{voice.privacy}</Text>

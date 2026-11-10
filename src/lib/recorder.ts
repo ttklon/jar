@@ -5,7 +5,10 @@
  * и проверяется без звука. Здесь только то, что требует браузера: разрешение на
  * микрофон, граф, накопление кусков и остановка.
  *
- * Чего здесь нет и почему: обрезки по тишине в реальном времени и потоковой отправки.
+ * Куски отдаются наружу (`FrameSink`), но решений о том, когда человек заговорил, здесь
+ * нет: это `vad.ts`, и он проверяется без микрофона.
+ *
+ * Чего здесь нет и почему: потоковой отправки звука.
  * Сначала пусть работает простой путь «записали — распознали»; потоковая передача
  * нужна, когда распознавание станет локальным и быстрым настолько, что будет
  * успевать за речью.
@@ -26,6 +29,16 @@ export interface Recording {
 export interface Recorder {
   stop(): Promise<Recording>;
 }
+
+/**
+ * Что делать с каждым куском звука по мере записи.
+ *
+ * Нужен режиму «слушаю всегда»: пока пишем, кто-то должен решать, началась ли фраза.
+ * Возвращённое `false` означает «запись больше не нужна» — рекордер аккуратно
+ * останавливается сам, чтобы не держать микрофон открытым.
+ */
+export type FrameSink = (frame: Float32Array, sampleRate: number) => boolean | void;
+
 
 interface AudioBufferLike {
   getChannelData(channel: number): Float32Array;
@@ -70,7 +83,10 @@ export function microphoneAvailable(): boolean {
  * Начинает запись. Ошибки называют причину: «нет доступа» и «нет микрофона» — это
  * разные вещи, и человеку нужно знать, какую из них чинить.
  */
-export async function startRecording(rate = TARGET_RATE): Promise<Recorder> {
+export async function startRecording(
+  rate = TARGET_RATE,
+  onFrame?: FrameSink,
+): Promise<Recorder> {
   const devices = (navigator as unknown as { mediaDevices?: MediaDevicesLike }).mediaDevices;
   if (!devices || typeof devices.getUserMedia !== "function") {
     throw new Error(NO_MIC);
@@ -94,7 +110,10 @@ export async function startRecording(rate = TARGET_RATE): Promise<Recorder> {
     .AudioContext;
   const context = new Context({ sampleRate: rate });
   const source = context.createMediaStreamSource(stream);
-  const processor = context.createScriptProcessor(4096, 1, 1);
+  // Куски по 1024 отсчёта: при 16 кГц это 64 мс — достаточно часто, чтобы заметить начало
+  // фразы, и достаточно редко, чтобы не занимать поток. Длину куска в миллисекундах
+  // считает тот, кто его получает: частота известна только здесь.
+  const processor = context.createScriptProcessor(1024, 1, 1);
 
   // Уводим звук в «тишину»: граф должен быть подключён, иначе браузер не станет
   // вызывать обработчик, но слышать себя в колонках человек не должен.
@@ -104,7 +123,13 @@ export async function startRecording(rate = TARGET_RATE): Promise<Recorder> {
   const chunks: Float32Array[] = [];
   processor.onaudioprocess = (event) => {
     // Копия обязательна: буфер переиспользуется, и без копии мы запомнили бы пустоту.
-    chunks.push(new Float32Array(event.inputBuffer.getChannelData(0)));
+    const copy = new Float32Array(event.inputBuffer.getChannelData(0));
+    chunks.push(copy);
+
+    if (onFrame && onFrame(copy, context.sampleRate) === false) {
+      // Слушать больше нечего: закрываем микрофон, а не оставляем его включённым.
+      processor.onaudioprocess = null;
+    }
   };
 
   source.connect(processor);

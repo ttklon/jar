@@ -61,6 +61,16 @@ describe("голосовой экран", () => {
     expect(screen.getByText(/звук распознаёт служба системы/)).toBeTruthy();
   });
 
+  it("предлагает слушать всегда и честно говорит, почему сейчас нельзя", async () => {
+    render(<Voice onOpen={() => {}} />);
+
+    const toggle = await screen.findByLabelText(/Слушаю всегда/);
+    // Без своего движка фразу не вырезать: переключатель выключен, а не «почти работает».
+    expect((toggle as HTMLInputElement).disabled).toBe(true);
+    expect(screen.getByText(/работает со своим движком распознавания/)).toBeTruthy();
+    expect(screen.getByText(/фразу вырезает тишина/)).toBeTruthy();
+  });
+
   it("говорит, что станет с запущенной командой, если она ошибётся", async () => {
     render(<Voice onOpen={() => {}} />);
     await waitFor(() => {

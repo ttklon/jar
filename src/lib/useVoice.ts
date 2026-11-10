@@ -14,6 +14,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { microphoneAvailable, startRecording, type Recorder } from "./recorder";
+import { createVad, type Vad } from "./vad";
 import { listen, speechSupported, stopSpeaking, type Voice } from "./voice";
 
 /** Сколько ждём разбор после того, как человек отпустил кнопку. */
@@ -35,11 +36,21 @@ export interface VoiceOptions {
    * компьютере. Нет — слушаем тем, что даёт система.
    */
   local?: { transcribe(wav: Uint8Array): Promise<string> } | null;
+  /**
+   * Режим «слушаю всегда»: микрофон открыт, фразу вырезает `vad`, разбор запускается сам.
+   * Работает только со своим движком: системное распознавание однократное, и делать вид,
+   * что оно слушает круглосуточно, было бы обманом.
+   */
+  always?: boolean;
 }
 
 export interface VoiceControl {
   listening: boolean;
   supported: boolean;
+  /** Идёт ли сейчас фраза в режиме «слушаю всегда». */
+  speaking: boolean;
+  /** Можно ли включать режим «слушаю всегда» на этой машине. */
+  alwaysSupported: boolean;
   start(): void;
   stop(): void;
 }
@@ -65,14 +76,21 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     grace = GRACE_MS,
     nothingHeard = "не разобрал — попробуйте ещё раз",
     local = null,
+    always = false,
   } = options;
   const [listening, setListening] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
   const voiceRef = useRef<Voice | null>(null);
   const recorderRef = useRef<Recorder | null>(null);
   const graceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heardRef = useRef(false);
   const activeRef = useRef(false);
+  /** Режим «слушаю всегда» живёт в ссылке: он меняется, не пересоздавая слушание. */
+  const alwaysRef = useRef(always);
+  alwaysRef.current = always;
+  /** Чем остановить текущую всегда-запись, если человек передумал. */
+  const alwaysStop = useRef<(() => void) | null>(null);
 
   // Колбэки живут в ссылке: иначе каждое изменение пропсов пересоздавало бы слушание.
   const callbacks = useRef({ onText, onError, nothingHeard, local });
@@ -92,6 +110,91 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     setListening(false);
   }, [clearGrace]);
 
+  /**
+   * Один цикл «слушаю всегда»: запись → `vad` находит начало и конец фразы → разбор →
+   * снова запись. Цикл останавливается, когда человек выключил режим или ушёл с экрана.
+   */
+  const listenAlways = useCallback(() => {
+    const engine = callbacks.current.local;
+    if (!engine) return;
+
+    const run = () => {
+      if (!activeRef.current) return;
+
+      let recorder: Recorder | null = null;
+      let vad: Vad | null = null;
+      let ended = false;
+      let stopWhenReady = false;
+
+      const close = () => {
+        const current = recorder;
+        recorder = null;
+        if (!current) {
+          stopWhenReady = true;
+          return;
+        }
+
+        current
+          .stop()
+          .then((recording) => (recording.seconds === 0 ? null : engine.transcribe(recording.wav)))
+          .then((text) => {
+            // Пустая расшифровка в этом режиме — не ошибка: человек мог кашлянуть.
+            // Ругаться на каждый шум значит приучить его не слушать приложение.
+            if (text && text.trim().length > 0) callbacks.current.onText(text.trim());
+          })
+          .catch((error: unknown) => {
+            callbacks.current.onError(error instanceof Error ? error.message : String(error));
+          })
+          .finally(() => {
+            if (activeRef.current) run();
+          });
+      };
+
+      startRecording(undefined, (frame, sampleRate) => {
+        if (!vad) {
+          vad = createVad({ frameMs: (frame.length / sampleRate) * 1000 });
+        }
+
+        const event = vad.feed(frame);
+        if (event === "start") setSpeaking(true);
+
+        if (event === "end" && !ended) {
+          ended = true;
+          setSpeaking(false);
+          // Микрофон закрываем вне обработчика звука: останавливать граф изнутри него
+          // значит ловить зависание на некоторых системах.
+          setTimeout(close, 0);
+          return false;
+        }
+
+        return true;
+      })
+        .then((opened) => {
+          recorder = opened;
+          if (stopWhenReady) {
+            stopWhenReady = false;
+            setTimeout(close, 0);
+          }
+          if (!activeRef.current) close();
+        })
+        .catch((error: unknown) => {
+          finish();
+          callbacks.current.onError(
+            error instanceof Error ? error.message : String(error),
+          );
+        });
+    };
+
+    alwaysStop.current = () => {
+      activeRef.current = false;
+      setListening(false);
+      setSpeaking(false);
+      alwaysStop.current = null;
+    };
+
+    run();
+  }, [finish]);
+
   const start = useCallback(() => {
     if (activeRef.current) return;
 
@@ -101,6 +204,11 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     setListening(true);
 
     const engine = callbacks.current.local;
+    if (engine && alwaysRef.current) {
+      listenAlways();
+      return;
+    }
+
     if (engine) {
       // Свой движок: пишем звук, распознаём после отпускания. Разрешение на микрофон
       // спрашивается здесь же, и отказ должен быть слышен, а не проглочен.
@@ -138,10 +246,17 @@ export function useVoice(options: VoiceOptions): VoiceControl {
         if (heardRef.current) finish();
       },
     });
-  }, [finish]);
+  }, [finish, listenAlways]);
 
   const stop = useCallback(() => {
     if (!activeRef.current) return;
+
+    const stopAlways = alwaysStop.current;
+    if (stopAlways) {
+      // Режим «слушаю всегда» выключается целиком, а не «заканчивает фразу».
+      stopAlways();
+      return;
+    }
 
     const engine = callbacks.current.local;
     if (engine) {
@@ -224,14 +339,26 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     () => () => {
       clearGrace();
       activeRef.current = false;
+      alwaysStop.current?.();
       voiceRef.current?.stop();
       recorderRef.current?.stop().catch(() => {});
     },
     [clearGrace],
   );
 
+  // Режим выключили, а микрофон ещё открыт — закрываем, не дожидаясь следующей фразы.
+  useEffect(() => {
+    if (!always) {
+      alwaysStop.current?.();
+    }
+  }, [always]);
+
   // В локальном режиме нужен микрофон, а не системное распознавание: это разные вещи.
   const supported = local ? microphoneAvailable() : speechSupported();
 
-  return { listening, supported, start, stop };
+  // Режим «слушаю всегда» возможен только со своим движком: без него фразу не вырезать,
+  // а системное распознавание однократное.
+  const alwaysSupported = local !== null && microphoneAvailable();
+
+  return { listening, supported, speaking, alwaysSupported, start, stop };
 }
