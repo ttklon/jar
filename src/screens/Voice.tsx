@@ -22,6 +22,7 @@ import type {
   SpeechStatus,
 } from "../ipc";
 import { speak } from "../lib/voice";
+import { aroundPhrase, rankForWindow } from "../lib/context";
 import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
 import { ActionList } from "../components/ActionList";
@@ -112,6 +113,13 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   /** Что перед человеком: спрашиваем в момент, когда он заговорил, а не один раз. */
   const [front, setFront] = useState<ForegroundWindow | null>(null);
   const [frontError, setFrontError] = useState<string | null>(null);
+  /**
+   * Окно для поиска. Держим в ссылке: колбэк микрофона живёт дольше одного рендера и
+   * иначе увидел бы окно, которое было открыто в момент его создания.
+   */
+  const frontRef = useRef<ForegroundWindow | null>(null);
+  /** Что именно учтено в этом поиске — иначе «учли контекст» превращается в обещание. */
+  const [usedAround, setUsedAround] = useState<string | null>(null);
   const [draft, setDraft] = useState<PlanCheck | null>(null);
   const [approved, setApproved] = useState(false);
   const [report, setReport] = useState<PlanReport | null>(null);
@@ -140,7 +148,11 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     setBusy(true);
     setError(null);
     planFor(query, LIMIT)
-      .then(async (found) => {
+      .then(async (raw) => {
+        // Сначала то, что про программу перед человеком. Решения и опасность не меняются.
+        const ranked = rankForWindow(raw, frontRef.current);
+        const found = ranked.items;
+        setUsedAround(ranked.moved > 0 && frontRef.current ? aroundPhrase(frontRef.current) : null);
         setItems(found);
         setReport(null);
         setApproved(false);
@@ -222,6 +234,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     },
     onError: (message) => setVoiceError(message),
   });
+
+  useEffect(() => {
+    frontRef.current = front;
+  }, [front]);
 
   // Активное окно спрашиваем в тот момент, когда человек заговорил: он говорит про то,
   // что видит сейчас, а не про то, что было при открытии приложения.
@@ -431,6 +447,9 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         <Text className={styles.note}>
           {`${voice.contextTitle}: ${voice.contextLine(front.title, front.process)}`}
         </Text>
+      ) : null}
+      {usedAround ? (
+        <Text className={styles.note}>{voice.contextUsing(usedAround)}</Text>
       ) : null}
       {frontError ? (
         <Text className={styles.note}>{voice.contextNone(frontError)}</Text>

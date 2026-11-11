@@ -14,6 +14,7 @@ vi.mock("../ipc", () => ({
   isTauri: () => true,
   planFor: vi.fn().mockResolvedValue([]),
   draftPlan: vi.fn().mockResolvedValue(null),
+  requestLearning: vi.fn().mockResolvedValue(null),
   runPlan: vi.fn(),
   speechStatus: vi.fn(),
   foregroundWindow: vi.fn().mockResolvedValue({
@@ -75,6 +76,47 @@ describe("локальное распознавание на экране", () =
     await waitFor(() => {
       expect(screen.getByText(/Сейчас перед вами: Видео — браузер — chrome\.exe/)).toBeTruthy();
     });
+  });
+
+  it("ставит первым то, что про программу перед человеком, и говорит об этом", async () => {
+    vi.mocked(planFor).mockResolvedValueOnce([
+      {
+        key: "звук|поставить|пауза в музыке",
+        example: "поставить на паузу музыку",
+        risk: "read",
+        decision: "allow",
+        decision_reason: "",
+        needs_token: false,
+        tool: "звук|поставить|пауза в музыке",
+        score: 9,
+      },
+      {
+        key: "браузер|включить|субтитры",
+        example: "включить субтитры в видео на сайте",
+        risk: "read",
+        decision: "allow",
+        decision_reason: "",
+        needs_token: false,
+        tool: "браузер|включить|субтитры",
+        score: 2,
+      },
+    ]);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), {
+      target: { value: "включи субтитры" },
+    });
+    fireEvent.click(screen.getByText("Найти"));
+
+    // Порядок: браузерная строка выше музыкальной, хотя счёт у неё меньше.
+    await waitFor(() => {
+      const subtitles = screen.getByText("включить субтитры в видео на сайте");
+      const music = screen.getByText("поставить на паузу музыку");
+      expect(subtitles.compareDocumentPosition(music) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+    expect(screen.getByText(/подсказки про это: Видео — браузер — chrome\.exe/)).toBeTruthy();
   });
 
   it("держу и говорю — запись уходит своему движку", async () => {
