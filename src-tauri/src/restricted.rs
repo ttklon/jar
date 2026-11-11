@@ -164,14 +164,14 @@ mod imp {
         CloseHandle, SetHandleInformation, HANDLE, HANDLE_FLAG_INHERIT, WAIT_OBJECT_0, WAIT_TIMEOUT,
     };
     use windows_sys::Win32::Security::{
-        CreateRestrictedToken, CreateWellKnownSid, WinBuiltinAdministratorsSid,
+        CreateRestrictedToken, CreateWellKnownSid, WinBuiltinAdministratorsSid, WinWorldSid,
         DISABLE_MAX_PRIVILEGE, SID_AND_ATTRIBUTES, TOKEN_ASSIGN_PRIMARY, TOKEN_DUPLICATE,
         TOKEN_QUERY,
     };
     use windows_sys::Win32::System::Threading::{
         CreateProcessAsUserW, GetCurrentProcess, GetExitCodeProcess, OpenProcessToken,
         ResumeThread, TerminateProcess, WaitForSingleObject, CREATE_NO_WINDOW, CREATE_SUSPENDED,
-        PROCESS_INFORMATION, STARTF_USESTDHANDLES, STARTUPINFOW,
+        CREATE_UNICODE_ENVIRONMENT, PROCESS_INFORMATION, STARTF_USESTDHANDLES, STARTUPINFOW,
     };
 
     const POLL_MS: u32 = 30;
