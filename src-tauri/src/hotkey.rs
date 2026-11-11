@@ -156,7 +156,11 @@ mod tests {
     #[test]
     fn the_talk_key_is_its_own_keyboard_combination() {
         let parsed = Shortcut::from_str(TALK_ACCELERATOR).expect("акселератор разбирается");
-        assert_eq!(parsed, talk_shortcut(), "подсказка должна совпадать с клавишей");
+        assert_eq!(
+            parsed,
+            talk_shortcut(),
+            "подсказка должна совпадать с клавишей"
+        );
         assert_ne!(
             talk_shortcut(),
             shortcut(),
