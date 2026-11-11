@@ -164,9 +164,9 @@ mod imp {
         CloseHandle, SetHandleInformation, HANDLE, HANDLE_FLAG_INHERIT, WAIT_OBJECT_0, WAIT_TIMEOUT,
     };
     use windows_sys::Win32::Security::{
-        CreateRestrictedToken, CreateWellKnownSid, WinBuiltinAdministratorsSid, WinWorldSid,
-        DISABLE_MAX_PRIVILEGE, SID_AND_ATTRIBUTES, TOKEN_ASSIGN_PRIMARY, TOKEN_DUPLICATE,
-        TOKEN_QUERY,
+        CreateRestrictedToken, CreateWellKnownSid, WinBuiltinAdministratorsSid, WinInteractiveSid,
+        WinWorldSid, DISABLE_MAX_PRIVILEGE, SID_AND_ATTRIBUTES, TOKEN_ASSIGN_PRIMARY,
+        TOKEN_DUPLICATE, TOKEN_QUERY,
     };
     use windows_sys::Win32::System::Threading::{
         CreateProcessAsUserW, GetCurrentProcess, GetExitCodeProcess, OpenProcessToken,
@@ -408,33 +408,44 @@ mod imp {
             Attributes: 0,
         };
 
-        // Ограничивающий SID: доступ выдаётся, только если разрешил и он. `Everyone` есть
-        // ровно в одном месте — в ACL папки пробного запуска.
-        let mut everyone_buffer = [0u8; 68];
-        let mut everyone_size = everyone_buffer.len() as u32;
+        // Ограничивающие SID: доступ выдаётся, только если разрешил и один из них.
+        // `Everyone` есть ровно в одном месте — в ACL папки пробного запуска. `INTERACTIVE`
+        // нужен не для файлов, а для рабочего стола: без него процесс не проходит
+        // инициализацию библиотек (0xC0000142) и не запускается вообще. Личные папки
+        // человека `INTERACTIVE` не открывает.
+        let mut sid_buffers = [[0u8; 68]; 2];
+        let mut restrict = [
+            SID_AND_ATTRIBUTES {
+                Sid: std::ptr::null_mut(),
+                Attributes: 0,
+            },
+            SID_AND_ATTRIBUTES {
+                Sid: std::ptr::null_mut(),
+                Attributes: 0,
+            },
+        ];
         let mut restrict_count = 0u32;
-        let mut everyone = SID_AND_ATTRIBUTES {
-            Sid: std::ptr::null_mut(),
-            Attributes: 0,
-        };
 
         if jailed {
-            let made = CreateWellKnownSid(
-                WinWorldSid,
-                std::ptr::null_mut(),
-                everyone_buffer.as_mut_ptr() as *mut core::ffi::c_void,
-                &mut everyone_size,
-            );
-            if made == 0 {
-                CloseHandle(own);
-                return Err(format!(
-                    "SID Everyone не получен: {}",
-                    std::io::Error::last_os_error()
-                ));
-            }
+            for (index, kind) in [WinWorldSid, WinInteractiveSid].into_iter().enumerate() {
+                let mut size = sid_buffers[index].len() as u32;
+                let made = CreateWellKnownSid(
+                    kind,
+                    std::ptr::null_mut(),
+                    sid_buffers[index].as_mut_ptr() as *mut core::ffi::c_void,
+                    &mut size,
+                );
+                if made == 0 {
+                    CloseHandle(own);
+                    return Err(format!(
+                        "ограничивающий SID не получен: {}",
+                        std::io::Error::last_os_error()
+                    ));
+                }
 
-            everyone.Sid = everyone_buffer.as_mut_ptr() as *mut core::ffi::c_void;
-            restrict_count = 1;
+                restrict[index].Sid = sid_buffers[index].as_mut_ptr() as *mut core::ffi::c_void;
+                restrict_count += 1;
+            }
         }
 
         let mut restricted: HANDLE = std::ptr::null_mut();
@@ -446,7 +457,11 @@ mod imp {
             0,
             std::ptr::null(),
             restrict_count,
-            if jailed { &everyone } else { std::ptr::null() },
+            if jailed {
+                restrict.as_ptr()
+            } else {
+                std::ptr::null()
+            },
             &mut restricted,
         );
 
