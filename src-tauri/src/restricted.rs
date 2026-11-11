@@ -67,7 +67,10 @@ pub fn environment_block(
     if let Some(dir) = dir {
         let path = dir.display().to_string();
         for name in ["TEMP", "TMP"] {
-            match vars.iter_mut().find(|(key, _)| key.eq_ignore_ascii_case(name)) {
+            match vars
+                .iter_mut()
+                .find(|(key, _)| key.eq_ignore_ascii_case(name))
+            {
                 Some(entry) => entry.1 = path.clone(),
                 None => vars.push((name.to_string(), path.clone())),
             }
@@ -508,8 +511,7 @@ mod tests {
         // токеном различать нечего, и тест об этом говорит, а не притворяется.
         let admin = r"([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)";
         let plain_admin = crate::executor::run(&request(admin), &cancel).expect("обычный запуск");
-        let restricted_admin =
-            run(&request(admin), None, &cancel).expect("ограниченный запуск");
+        let restricted_admin = run(&request(admin), None, &cancel).expect("ограниченный запуск");
 
         assert_eq!(
             restricted_admin.stdout.trim(),
@@ -549,7 +551,10 @@ mod tests {
         let text: String = String::from_utf16_lossy(&block);
 
         assert!(text.contains("TEMP=C:\\jail"), "{text:?}");
-        assert!(text.contains("Path=C:\\Windows"), "наследованное не теряется: {text:?}");
+        assert!(
+            text.contains("Path=C:\\Windows"),
+            "наследованное не теряется: {text:?}"
+        );
         assert!(text.ends_with('\u{0}'), "блок заканчивается нулём");
     }
 
