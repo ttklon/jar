@@ -26,13 +26,13 @@ use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::restricted;
-use crate::window;
 use crate::roles;
 use crate::sandbox::{self, Verdict};
 use crate::server::{self, Server};
 use crate::step::StepResult;
 use crate::stt;
 use crate::tools::{self, ParamSpec, ToolSpec};
+use crate::window;
 
 /// Всё, что нужно командам. Один `Arc`, чтобы клонировать в фоновый поток.
 pub struct Inner {

@@ -55,8 +55,8 @@ mod imp {
     use super::{clean_title, process_name, Foreground};
     use windows_sys::Win32::Foundation::{CloseHandle, MAX_PATH};
     use windows_sys::Win32::System::Threading::{
-        GetCurrentProcessId, OpenProcess, QueryFullProcessImageNameW,
-        PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION,
+        GetCurrentProcessId, OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_WIN32,
+        PROCESS_QUERY_LIMITED_INFORMATION,
     };
     use windows_sys::Win32::UI::WindowsAndMessaging::{
         GetForegroundWindow, GetWindowTextW, GetWindowThreadProcessId,
@@ -67,7 +67,9 @@ mod imp {
         unsafe {
             let window = GetForegroundWindow();
             if window.is_null() {
-                return Err("переднего окна нет: рабочий стол или заблокированный экран".to_string());
+                return Err(
+                    "переднего окна нет: рабочий стол или заблокированный экран".to_string()
+                );
             }
 
             let mut buffer = [0u16; 512];
@@ -101,7 +103,11 @@ mod imp {
                 None => String::from("неизвестная программа"),
             };
 
-            Ok(Foreground { title, process, pid })
+            Ok(Foreground {
+                title,
+                process,
+                pid,
+            })
         }
     }
 
@@ -113,7 +119,8 @@ mod imp {
 
         let mut buffer = [0u16; MAX_PATH as usize];
         let mut size = buffer.len() as u32;
-        let ok = QueryFullProcessImageNameW(process, PROCESS_NAME_WIN32, buffer.as_mut_ptr(), &mut size);
+        let ok =
+            QueryFullProcessImageNameW(process, PROCESS_NAME_WIN32, buffer.as_mut_ptr(), &mut size);
         CloseHandle(process);
 
         if ok == 0 {
@@ -141,14 +148,20 @@ mod tests {
 
     #[test]
     fn a_title_loses_its_invisible_tails() {
-        assert_eq!(clean_title("\0 Документ — Блокнот \r\n\0"), "Документ — Блокнот");
+        assert_eq!(
+            clean_title("\0 Документ — Блокнот \r\n\0"),
+            "Документ — Блокнот"
+        );
         assert_eq!(clean_title(""), "");
         assert_eq!(clean_title("\0\0"), "");
     }
 
     #[test]
     fn a_program_name_is_the_last_part_of_the_path() {
-        assert_eq!(process_name("C:\\Program Files\\Google\\Chrome\\chrome.exe"), "chrome.exe");
+        assert_eq!(
+            process_name("C:\\Program Files\\Google\\Chrome\\chrome.exe"),
+            "chrome.exe"
+        );
         assert_eq!(process_name("chrome.exe"), "chrome.exe");
         assert_eq!(process_name(""), "");
     }
