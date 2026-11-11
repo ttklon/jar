@@ -359,14 +359,8 @@ pub fn trial(
         ));
     }
 
-    // Папка пробного запуска — это забор: внутри можно всё, снаружи только то, что открыто
-    // всему миру. Если забор не поставить, честнее не запускать вовсе.
-    if crate::restricted::available() {
-        crate::restricted::jail(dir)?;
-    } else {
-        std::fs::create_dir_all(dir)
-            .map_err(|error| format!("папка пробного запуска не создаётся: {error}"))?;
-    }
+    std::fs::create_dir_all(dir)
+        .map_err(|error| format!("папка пробного запуска не создаётся: {error}"))?;
 
     let limits = crate::isolation::Limits {
         timeout_ms: timeout.as_millis() as u64,
@@ -390,7 +384,7 @@ pub fn trial(
     // Недоверенная команда идёт и без прав, и под потолком. Если ограниченный запуск на
     // этой системе недоступен, честнее сказать это в отчёте, чем молча запустить как есть.
     let output = if crate::restricted::available() {
-        crate::restricted::run(&request, Some(limits), &cancel, Some(dir))
+        crate::restricted::run(&request, Some(limits), &cancel)
     } else {
         crate::executor::run(&request, &cancel).map_err(|error| error.to_string())
     }
