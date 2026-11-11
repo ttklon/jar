@@ -15,6 +15,7 @@ import {
   fillPlan,
   learningRequests,
   requestLearning,
+  foregroundWindow,
   isolationStatus,
   speechStatus,
   transcribeLocal,
@@ -136,6 +137,10 @@ describe("сценарии в браузере", () => {
 });
 
 describe("журнал в браузере", () => {
+  it("в браузере активного окна нет, и это ошибка, а не выдумка", async () => {
+    await expect(foregroundWindow()).rejects.toThrow(/только приложение/);
+  });
+
   it("в браузере потолков запуска нет, и это сказано прямо", async () => {
     const status = await isolationStatus();
     expect(status.available).toBe(false);

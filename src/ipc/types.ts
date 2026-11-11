@@ -152,6 +152,15 @@ export interface Learning {
   steps: LearningStep[];
 }
 
+/** Окно, которое сейчас перед человеком. */
+export interface ForegroundWindow {
+  /** Заголовок. Бывает пустым — и это нормально. */
+  title: string;
+  /** Имя программы без пути: `chrome.exe`. */
+  process: string;
+  pid: number;
+}
+
 /** Потолки запуска: что есть на этой машине на самом деле. */
 export interface IsolationStatus {
   /** Держит ли система потолки (job object есть только на Windows). */

@@ -50,6 +50,7 @@ pub mod stt;
 pub mod tools;
 pub mod tray;
 pub mod verifier;
+pub mod window;
 
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
@@ -148,6 +149,7 @@ pub fn run() {
             ipc::run_plan,
             ipc::speech_status,
             ipc::isolation_status,
+            ipc::foreground_window,
             ipc::transcribe_local,
             ipc::list_profiles,
             ipc::policy_for,

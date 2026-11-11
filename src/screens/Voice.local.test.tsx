@@ -16,6 +16,11 @@ vi.mock("../ipc", () => ({
   draftPlan: vi.fn().mockResolvedValue(null),
   runPlan: vi.fn(),
   speechStatus: vi.fn(),
+  foregroundWindow: vi.fn().mockResolvedValue({
+    title: "Видео — браузер",
+    process: "chrome.exe",
+    pid: 4321,
+  }),
   isolationStatus: vi.fn().mockResolvedValue({
     available: true,
     summary: "не больше 256 МБ памяти, 5 с процессорного времени, 8 процессов",
@@ -62,6 +67,14 @@ describe("локальное распознавание на экране", () =
       expect(screen.getByText(/локальное распознавание готово/)).toBeTruthy();
     });
     expect(screen.getByText(/звук не покидает компьютер/)).toBeTruthy();
+  });
+
+  it("показывает, где оно находится: заголовок и программа окна", async () => {
+    render(<Voice onOpen={() => {}} />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Сейчас перед вами: Видео — браузер — chrome\.exe/)).toBeTruthy();
+    });
   });
 
   it("держу и говорю — запись уходит своему движку", async () => {

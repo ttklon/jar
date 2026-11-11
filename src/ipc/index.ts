@@ -39,6 +39,7 @@ export type {
   RunStep,
   Risk,
   RoleView,
+  ForegroundWindow,
   IsolationStatus,
   SpeechStatus,
   StepResult,
@@ -53,6 +54,7 @@ import type {
   Downloaded,
   EngineStatus,
   Episode,
+  ForegroundWindow,
   IsolationStatus,
   Learning,
   Plan,
@@ -429,6 +431,16 @@ export async function learningRequests(): Promise<Learning[]> {
 }
 
 // ── Локальное распознавание ─────────────────────────────────────────────────
+
+/** Что сейчас перед человеком. В браузере этого нет и быть не может. */
+export async function foregroundWindow(): Promise<ForegroundWindow> {
+  if (isTauri()) {
+    const { foregroundWindow: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { foregroundWindow: fromData } = await import("./dev");
+  return fromData();
+}
 
 /** Потолки запуска на этой машине: что есть и чего нет. */
 export async function isolationStatus(): Promise<IsolationStatus> {

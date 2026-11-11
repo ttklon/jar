@@ -4,6 +4,7 @@ import { MicRegular } from "@fluentui/react-icons";
 import {
   draftPlan,
   fillPlan,
+  foregroundWindow,
   planFor,
   requestLearning,
   runPlan,
@@ -12,6 +13,7 @@ import {
   transcribeLocal,
 } from "../ipc";
 import type {
+  ForegroundWindow,
   IsolationStatus,
   Learning,
   PlanCheck,
@@ -107,6 +109,9 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [spoken, setSpoken] = useState<string | null>(null);
   const [speech, setSpeech] = useState<SpeechStatus | null>(null);
   const [isolation, setIsolation] = useState<IsolationStatus | null>(null);
+  /** Что перед человеком: спрашиваем в момент, когда он заговорил, а не один раз. */
+  const [front, setFront] = useState<ForegroundWindow | null>(null);
+  const [frontError, setFrontError] = useState<string | null>(null);
   const [draft, setDraft] = useState<PlanCheck | null>(null);
   const [approved, setApproved] = useState(false);
   const [report, setReport] = useState<PlanReport | null>(null);
@@ -217,6 +222,31 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     },
     onError: (message) => setVoiceError(message),
   });
+
+  // Активное окно спрашиваем в тот момент, когда человек заговорил: он говорит про то,
+  // что видит сейчас, а не про то, что было при открытии приложения.
+  useEffect(() => {
+    if (!mic.listening) return;
+
+    foregroundWindow()
+      .then((window) => {
+        setFront(window);
+        setFrontError(null);
+      })
+      .catch((reason: unknown) => {
+        setFront(null);
+        setFrontError(reason instanceof Error ? reason.message : String(reason));
+      });
+  }, [mic.listening]);
+
+  // Первый взгляд на экран тоже полезен: видно, что приложение понимает, где оно.
+  useEffect(() => {
+    foregroundWindow()
+      .then(setFront)
+      .catch((reason: unknown) =>
+        setFrontError(reason instanceof Error ? reason.message : String(reason)),
+      );
+  }, []);
 
   // Удержание из любой программы: человек говорит в браузере или поверх видео, а окно
   // помощника даже не в фокусе. Где глобальных клавиш нет (браузер) — подписка пустая.
@@ -395,6 +425,15 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       <Text className={styles.note}>{voice.alwaysHint}</Text>
       {!mic.alwaysSupported ? (
         <Text className={styles.note}>{voice.alwaysNoEngine}</Text>
+      ) : null}
+
+      {front ? (
+        <Text className={styles.note}>
+          {`${voice.contextTitle}: ${voice.contextLine(front.title, front.process)}`}
+        </Text>
+      ) : null}
+      {frontError ? (
+        <Text className={styles.note}>{voice.contextNone(frontError)}</Text>
       ) : null}
 
       <Text className={styles.note}>{voice.hotkey}</Text>

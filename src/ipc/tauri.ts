@@ -21,6 +21,7 @@ import type {
   PlanItem,
   ProfileView,
   RoleView,
+  ForegroundWindow,
   IsolationStatus,
   SpeechStatus,
   RegistrySnapshot,
@@ -103,6 +104,11 @@ export function requestLearning(query: string): Promise<Learning | null> {
 
 export function learningRequests(): Promise<Learning[]> {
   return invoke<Learning[]>("learning_requests");
+}
+
+/** Что сейчас перед человеком: заголовок и программа. Только чтение. */
+export function foregroundWindow(): Promise<ForegroundWindow> {
+  return invoke<ForegroundWindow>("foreground_window");
 }
 
 /** Потолки запуска: что есть на самом деле. Ничего не запускает. */

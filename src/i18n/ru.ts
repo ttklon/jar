@@ -501,6 +501,10 @@ export const voice = {
     destructive: "уничтожение",
     unknown: "неизвестно",
   } as Record<string, string>,
+  contextTitle: "Сейчас перед вами",
+  contextLine: (title: string, process: string) =>
+    title.length > 0 ? `${title} — ${process}` : process,
+  contextNone: (reason: string) => `активное окно не прочитать: ${reason}`,
   ceilings: (summary: string, note: string) => `потолки запуска: ${summary}. ${note}`,
   ceilingsNone: (note: string) => `потолки запуска: ${note}`,
   localReady: (program: string) => `локальное распознавание готово: ${program} — звук не покидает компьютер`,

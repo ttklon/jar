@@ -26,6 +26,7 @@ use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::restricted;
+use crate::window;
 use crate::roles;
 use crate::sandbox::{self, Verdict};
 use crate::server::{self, Server};
@@ -884,6 +885,12 @@ fn read_speech_status(state: &AppState) -> SpeechStatus {
         search_dir: inner.base_dir.join("sidecars").display().to_string(),
         models_dir: inner.models_dir.display().to_string(),
     }
+}
+
+/// Что сейчас перед человеком. Только чтение: ни клика, ни переключения окон.
+#[tauri::command]
+pub fn foreground_window() -> Result<window::Foreground, String> {
+    window::foreground().map_err(|reason| format!("{reason}. {}", window::note()))
 }
 
 /// Что известно о потолках запуска на этой машине.

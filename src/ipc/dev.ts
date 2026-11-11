@@ -129,6 +129,7 @@ import type {
   PlanCheck,
   PlanReport,
   RoleView,
+  ForegroundWindow,
   IsolationStatus,
   SpeechStatus,
   PlanItem,
@@ -527,6 +528,14 @@ export async function runPlan(_json: string, _approved: number[]): Promise<PlanR
 }
 
 // ── Локальное распознавание в браузере ──────────────────────────────────────
+
+// ── Активное окно в браузере ────────────────────────────────────────────────
+
+export async function foregroundWindow(): Promise<ForegroundWindow> {
+  // В браузере окон Windows нет. Придумывать «Блокнот» было бы хуже пустоты: человек
+  // решил бы, что приложение видит его экран.
+  throw new Error("активное окно видит только приложение: в браузере окон системы нет");
+}
 
 // ── Потолки запуска в браузере ──────────────────────────────────────────────
 
