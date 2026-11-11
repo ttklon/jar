@@ -896,7 +896,7 @@ pub struct Fact {
 
 /// Что приложение уже знает. Пустая память — пустой список, а не ошибка.
 #[tauri::command]
-pub fn facts(state: State<'_, Shared>) -> Vec<Fact> {
+pub fn facts(state: State<'_, AppState>) -> Vec<Fact> {
     state
         .inner
         .memory
@@ -908,7 +908,7 @@ pub fn facts(state: State<'_, Shared>) -> Vec<Fact> {
 
 /// Запомнить сказанное, чтобы не спрашивать второй раз.
 #[tauri::command]
-pub fn remember_fact(state: State<'_, Shared>, key: String, value: String) -> Result<(), String> {
+pub fn remember_fact(state: State<'_, AppState>, key: String, value: String) -> Result<(), String> {
     let key = key.trim();
     let value = value.trim();
     if key.is_empty() || value.is_empty() {
@@ -924,7 +924,7 @@ pub fn remember_fact(state: State<'_, Shared>, key: String, value: String) -> Re
 
 /// Забыть факт: человек имеет право на «я этого больше не говорил».
 #[tauri::command]
-pub fn forget_fact(state: State<'_, Shared>, key: String) -> Result<(), String> {
+pub fn forget_fact(state: State<'_, AppState>, key: String) -> Result<(), String> {
     state
         .inner
         .memory
