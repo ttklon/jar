@@ -94,13 +94,16 @@ mod imp {
             .map_err(|error| format!("папка пробного запуска не создаётся: {error}"))?;
 
         let name = wide(PROFILE);
+        // Описание обязательно: с пустым указателем Windows отвечает `E_INVALIDARG`
+        // (0x80070057) — проверено на живой машине, а не выведено из документации.
+        let description = wide("ZShelper: пробный запуск недоверенных команд");
         let mut sid: PSID = std::ptr::null_mut();
 
         let created = unsafe {
             CreateAppContainerProfile(
                 name.as_ptr(),
                 name.as_ptr(),
-                std::ptr::null(),
+                description.as_ptr(),
                 std::ptr::null(),
                 0,
                 &mut sid,
