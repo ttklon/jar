@@ -481,6 +481,12 @@ export const voice = {
   askTitle: "Нужно уточнить",
   askSpoken: (label: string) => `уточните: ${label}`,
   askRun: "Ответить и выполнить",
+  answerSay: "Сказать ответ",
+  answerListening: "Слушаю ответ…",
+  answerHeard: (value: string) => `услышал: ${value}`,
+  answerHint:
+    "Печатать не обязательно: зажмите «сказать ответ», проговорите — и поле заполнится. " +
+    "Следующий вопрос приложение задаст вслух",
   draftRunning: "выполняю…",
   draftDone: "готово",
   draftFailed: "не получилось",

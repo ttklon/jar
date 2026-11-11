@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, makeStyles, Switch, Text, tokens } from "@fluentui/react-components";
 import { MicRegular } from "@fluentui/react-icons";
 import {
@@ -59,6 +59,7 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorPaletteRedBackground2,
     color: tokens.colorPaletteRedForeground2,
   },
+  answer: { display: "flex", gap: "8px", alignItems: "center" },
   bar: { display: "flex", gap: "10px", alignItems: "center" },
   input: { flex: 1 },
   error: { color: tokens.colorPaletteRedForeground2 },
@@ -114,6 +115,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [learning, setLearning] = useState<Learning | null>(null);
   /** Режим «слушаю всегда»: микрофон открыт, фразу вырезает тишина. */
   const [always, setAlways] = useState(false);
+  /**
+   * Вопрос, на который человек отвечает голосом. Пока он задан, услышанное идёт в поле,
+   * а не в новый поиск: иначе ответ «C:\tmp» приложение приняло бы за новую задачу.
+   */
+  const [answerTarget, setAnswerTarget] = useState<{
+    position: number;
+    name: string;
+  } | null>(null);
 
   const search = useCallback((phrase: string) => {
     const query = phrase.trim();
@@ -174,11 +183,34 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       ? { transcribe: (wav: Uint8Array) => transcribeLocal(Array.from(wav)) }
       : null;
 
+  // Колбэк микрофона живёт дольше одного рендера, поэтому «какой вопрос слушаем» читаем
+  // из ссылки: иначе в замыкании осталось бы старое значение.
+  const answerTargetRef = useRef(answerTarget);
+  answerTargetRef.current = answerTarget;
+
   const mic = useVoice({
     local: localEngine,
     always,
     onText: (heard) => {
       setVoiceError(null);
+      const target = answerTargetRef.current;
+
+      if (target) {
+        const value = heard.trim();
+        setAnswerTarget(null);
+        setAnswers((current) => ({ ...current, [`${target.position}:${target.name}`]: value }));
+        speak(voice.answerHeard(value));
+
+        // Следующий пустой вопрос задаём вслух: человек, который говорит, не смотрит в экран.
+        const next = draft?.questions.find(
+          (question) =>
+            `${question.position}:${question.name}` !== `${target.position}:${target.name}` &&
+            (answers[`${question.position}:${question.name}`] ?? "").trim().length === 0,
+        );
+        if (next) speak(voice.askSpoken(next.label));
+        return;
+      }
+
       setText(heard);
       search(heard);
     },
@@ -414,18 +446,39 @@ export function Voice({ onOpen }: VoiceScreenProps) {
               <Text className={styles.note}>{voice.askTitle}</Text>
               {draft.questions.map((question) => {
                 const key = `${question.position}:${question.name}`;
+                const target = answerTarget?.position === question.position &&
+                  answerTarget?.name === question.name;
+
                 return (
-                  <Input
-                    key={key}
-                    value={answers[key] ?? ""}
-                    aria-label={question.label}
-                    placeholder={question.hint || question.label}
-                    onChange={(_, data) =>
-                      setAnswers((current) => ({ ...current, [key]: data.value }))
-                    }
-                  />
+                  <div key={key} className={styles.answer}>
+                    <Input
+                      value={answers[key] ?? ""}
+                      aria-label={question.label}
+                      placeholder={question.hint || question.label}
+                      onChange={(_, data) =>
+                        setAnswers((current) => ({ ...current, [key]: data.value }))
+                      }
+                    />
+                    <Button
+                      size="small"
+                      appearance="subtle"
+                      icon={<MicRegular />}
+                      aria-label={`${voice.answerSay}: ${question.label}`}
+                      onPointerDown={(event) => {
+                        event.preventDefault();
+                        setAnswerTarget({ position: question.position, name: question.name });
+                        mic.start();
+                      }}
+                      onPointerUp={() => mic.stop()}
+                      onPointerLeave={() => mic.stop()}
+                      onPointerCancel={() => mic.stop()}
+                    >
+                      {target && mic.listening ? voice.answerListening : voice.answerSay}
+                    </Button>
+                  </div>
                 );
               })}
+              <Text className={styles.note}>{voice.answerHint}</Text>
             </>
           ) : null}
 
