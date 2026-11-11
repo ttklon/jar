@@ -648,7 +648,8 @@ mod tests {
         let output = run(&make(inside), None, &cancel, Some(&dir)).expect("запуск в папке");
         assert!(
             output.stdout.contains("written"),
-            "внутри забора писать можно: {:?} {:?}",
+            "ошибка: внутри забора писать можно: code={:?} stdout={:?} stderr={:?}",
+            output.exit_code,
             output.stdout,
             output.stderr
         );
@@ -664,7 +665,8 @@ mod tests {
         let output = run(&make(outside), None, &cancel, Some(&dir)).expect("запуск в папке");
         assert!(
             output.stdout.contains("denied"),
-            "за забором писать нельзя: {:?} {:?}",
+            "ошибка: за забором писать нельзя: code={:?} stdout={:?} stderr={:?}",
+            output.exit_code,
             output.stdout,
             output.stderr
         );
@@ -672,7 +674,13 @@ mod tests {
         // Читать системное — можно: забор не должен превращать команду в кирпич.
         let read = r"if (Test-Path -LiteralPath 'C:\Windows\win.ini') { 'read' } else { 'no' }";
         let output = run(&make(read.to_string()), None, &cancel, Some(&dir)).expect("запуск");
-        assert!(output.stdout.contains("read"), "{:?}", output.stdout);
+        assert!(
+            output.stdout.contains("read"),
+            "ошибка: системное должно читаться: code={:?} stdout={:?} stderr={:?}",
+            output.exit_code,
+            output.stdout,
+            output.stderr
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }

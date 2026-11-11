@@ -547,7 +547,11 @@ mod tests {
             std::time::Duration::from_secs(20),
         )
         .expect("пробный запуск");
-        assert_eq!(trial.exit_code, Some(0), "{trial:?}");
+        assert_eq!(
+            trial.exit_code,
+            Some(0),
+            "ошибка: пробный запуск в заборе: {trial:?}"
+        );
         assert!(
             trial.limits_note.contains("под потолком"),
             "{}",
