@@ -152,6 +152,12 @@ export interface Learning {
   steps: LearningStep[];
 }
 
+/** Факт, который человек уже говорил: «папка для отчётов — D:\\Отчёты». */
+export interface Fact {
+  key: string;
+  value: string;
+}
+
 /** Окно, которое сейчас перед человеком. */
 export interface ForegroundWindow {
   /** Заголовок. Бывает пустым — и это нормально. */

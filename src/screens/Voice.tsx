@@ -4,8 +4,10 @@ import { MicRegular } from "@fluentui/react-icons";
 import {
   draftPlan,
   fillPlan,
+  facts,
   foregroundWindow,
   planFor,
+  rememberFact,
   requestLearning,
   runPlan,
   isolationStatus,
@@ -13,6 +15,7 @@ import {
   transcribeLocal,
 } from "../ipc";
 import type {
+  Fact,
   ForegroundWindow,
   IsolationStatus,
   Learning,
@@ -23,6 +26,7 @@ import type {
 } from "../ipc";
 import { speak } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
+import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
 import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
 import { ActionList } from "../components/ActionList";
@@ -126,6 +130,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  /** Что приложение уже знает: сказанное раньше человеку не задают второй раз. */
+  const [knownFacts, setKnownFacts] = useState<Fact[]>([]);
+  /** Поля, заполненные из памяти, — экран говорит, откуда значение. */
+  const [remembered, setRemembered] = useState<string[]>([]);
   const [learning, setLearning] = useState<Learning | null>(null);
   /** Режим «слушаю всегда»: микрофон открыт, фразу вырезает тишина. */
   const [always, setAlways] = useState(false);
@@ -161,7 +169,6 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         // сразу — человек сказал задачу, и ответ «могу сделать вот это» полезнее списка.
         const proposal = await draftPlan(query).catch(() => null);
         setDraft(proposal);
-        setAnswers({});
         setLearning(null);
 
         // Не умеем — не тупик: записываем задачу на обучение и говорим, что для неё
@@ -174,7 +181,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         }
 
         // Данных не хватает — спрашиваем вслух, а не показываем красную строку.
-        const first = proposal?.questions[0];
+        // Спрашиваем только то, чего не знаем: вопрос о забытом — это не забота.
+        const first = proposal?.questions.find(
+          (question) => !knownFacts.some((fact) => fact.key === factKey(question)),
+        );
         if (first) speak(voice.askSpoken(first.label));
         // Отвечаем вслух: человек, который говорит, не смотрит в экран.
         const phraseOut = !proposal
@@ -192,7 +202,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         setError(reason instanceof Error ? reason.message : String(reason)),
       )
       .finally(() => setBusy(false));
-  }, []);
+  }, [knownFacts]);
 
   // Свой движок есть — пишем звук и отдаём ему: это единственный путь, где звук не
   // покидает компьютер. Нет — слушаем тем, что даёт система, и говорим об этом выше.
@@ -238,6 +248,20 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   useEffect(() => {
     frontRef.current = front;
   }, [front]);
+
+  // Подставляем известное: путь, маску, имя — то, что человек уже диктовал. Делаем это
+  // эффектом, потому что факты и план приходят в любом порядке; сработав в поиске, мы бы
+  // один из двух порядков пропустили и спросили бы то, что уже сказано.
+  useEffect(() => {
+    if (!draft || knownFacts.length === 0) return;
+
+    const seeded = seedAnswers(draft.questions, knownFacts, answers);
+    if (seeded.remembered.length === 0) return;
+
+    setAnswers((current) => ({ ...current, ...seeded.answers }));
+    setRemembered((current) => [...new Set([...current, ...seeded.remembered])]);
+    // `answers` не в зависимостях намеренно: подстановка не должна запускать саму себя.
+  }, [draft, knownFacts]);
 
   // Активное окно спрашиваем в тот момент, когда человек заговорил: он говорит про то,
   // что видит сейчас, а не про то, что было при открытии приложения.
@@ -306,6 +330,11 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     isolationStatus()
       .then(setIsolation)
       .catch(() => setIsolation(null));
+
+    // Память фактов: то, что человек уже говорил, спрашивать второй раз незачем.
+    facts()
+      .then(setKnownFacts)
+      .catch(() => setKnownFacts([]));
   }, []);
 
   useEffect(() => {
@@ -326,6 +355,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       name: question.name,
       value: answers[`${question.position}:${question.name}`] ?? "",
     }));
+
+    // Сказал один раз — помню. Запоминаем само сказанное, а не «что сработало»:
+    // неудачный запуск не должен подтверждать ответ.
+    const toRemember = factsToRemember(draft.questions, answers);
+    if (toRemember.length > 0) {
+      void Promise.all(toRemember.map((fact) => rememberFact(fact.key, fact.value).catch(() => undefined)))
+        .then(() => facts().then(setKnownFacts).catch(() => undefined));
+    }
 
     setRunning(true);
     setError(null);
@@ -543,10 +580,15 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                       value={answers[key] ?? ""}
                       aria-label={question.label}
                       placeholder={question.hint || question.label}
-                      onChange={(_, data) =>
-                        setAnswers((current) => ({ ...current, [key]: data.value }))
-                      }
+                      onChange={(_, data) => {
+                        setAnswers((current) => ({ ...current, [key]: data.value }));
+                        // Человек поправил — это уже не память, а его слово.
+                        setRemembered((current) => current.filter((field) => field !== key));
+                      }}
                     />
+                    {remembered.includes(key) ? (
+                      <Text className={styles.note}>{voice.fromMemory}</Text>
+                    ) : null}
                     <Button
                       size="small"
                       appearance="subtle"

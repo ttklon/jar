@@ -505,6 +505,7 @@ export const voice = {
   contextLine: (title: string, process: string) =>
     title.length > 0 ? `${title} — ${process}` : process,
   contextNone: (reason: string) => `активное окно не прочитать: ${reason}`,
+  fromMemory: "из памяти — поправьте, если не так",
   contextUsing: (name: string) => `подсказки про это: ${name}`,
   contextUsingSpoken: (name: string) => `Смотрю, что у вас перед глазами: ${name}. Сначала показываю то, что про это.`,
   ceilings: (summary: string, note: string) => `потолки запуска: ${summary}. ${note}`,

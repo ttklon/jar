@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { planFor, speechStatus, transcribeLocal } from "../ipc";
+import { draftPlan, facts, planFor, speechStatus, transcribeLocal } from "../ipc";
 import { startRecording } from "../lib/recorder";
 import { Voice } from "./Voice";
 
@@ -15,6 +15,8 @@ vi.mock("../ipc", () => ({
   planFor: vi.fn().mockResolvedValue([]),
   draftPlan: vi.fn().mockResolvedValue(null),
   requestLearning: vi.fn().mockResolvedValue(null),
+  facts: vi.fn().mockResolvedValue([]),
+  rememberFact: vi.fn().mockResolvedValue(undefined),
   runPlan: vi.fn(),
   speechStatus: vi.fn(),
   foregroundWindow: vi.fn().mockResolvedValue({
@@ -117,6 +119,32 @@ describe("локальное распознавание на экране", () =
       expect(subtitles.compareDocumentPosition(music) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
     expect(screen.getByText(/подсказки про это: Видео — браузер — chrome\.exe/)).toBeTruthy();
+  });
+
+  it("не спрашивает второй раз то, что человек уже говорил", async () => {
+    vi.mocked(facts).mockResolvedValueOnce([{ key: "вопрос:path", value: "D:\\Отчёты" }]);
+    vi.mocked(draftPlan).mockResolvedValueOnce({
+      plan: { goal: "собери отчёт", steps: [] },
+      problems: [],
+      gates: [],
+      questions: [
+        { position: 1, name: "path", label: "Куда сохранить", hint: "" },
+        { position: 2, name: "mask", label: "Маска", hint: "" },
+      ],
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "собери отчёт" } });
+    fireEvent.click(screen.getByText("Найти"));
+
+    // Значение подставлено из памяти, и экран это говорит.
+    await waitFor(() => {
+      expect((screen.getByLabelText("Куда сохранить") as HTMLInputElement).value).toBe("D:\\Отчёты");
+    });
+    expect(screen.getByText("из памяти — поправьте, если не так")).toBeTruthy();
+
+    // Незабытый вопрос остался пустым: память не выдумывает маску.
+    expect((screen.getByLabelText("Маска") as HTMLInputElement).value).toBe("");
   });
 
   it("держу и говорю — запись уходит своему движку", async () => {

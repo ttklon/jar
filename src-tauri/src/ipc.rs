@@ -887,6 +887,51 @@ fn read_speech_status(state: &AppState) -> SpeechStatus {
     }
 }
 
+/// Факт, который человек уже говорил: «папка для отчётов — D:\\Отчёты».
+#[derive(Debug, Serialize)]
+pub struct Fact {
+    pub key: String,
+    pub value: String,
+}
+
+/// Что приложение уже знает. Пустая память — пустой список, а не ошибка.
+#[tauri::command]
+pub fn facts(state: State<'_, Shared>) -> Vec<Fact> {
+    state
+        .inner
+        .memory
+        .facts()
+        .into_iter()
+        .map(|(key, value)| Fact { key, value })
+        .collect()
+}
+
+/// Запомнить сказанное, чтобы не спрашивать второй раз.
+#[tauri::command]
+pub fn remember_fact(state: State<'_, Shared>, key: String, value: String) -> Result<(), String> {
+    let key = key.trim();
+    let value = value.trim();
+    if key.is_empty() || value.is_empty() {
+        return Err("нечего запоминать: нужен и вопрос, и ответ".to_string());
+    }
+
+    state
+        .inner
+        .memory
+        .remember(key, value)
+        .map_err(|error| format!("память не ответила: {error}"))
+}
+
+/// Забыть факт: человек имеет право на «я этого больше не говорил».
+#[tauri::command]
+pub fn forget_fact(state: State<'_, Shared>, key: String) -> Result<(), String> {
+    state
+        .inner
+        .memory
+        .forget(key.trim())
+        .map_err(|error| format!("память не ответила: {error}"))
+}
+
 /// Что сейчас перед человеком. Только чтение: ни клика, ни переключения окон.
 #[tauri::command]
 pub fn foreground_window() -> Result<window::Foreground, String> {

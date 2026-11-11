@@ -16,6 +16,7 @@ export type {
   EngineStatus,
   Episode,
   Evidence,
+  Fact,
   FlowInput,
   FlowStepView,
   FlowView,
@@ -28,6 +29,7 @@ export type {
   PlanAnswer,
   PlanCheck,
   PlanGate,
+  PlanQuestion,
   PlanItem,
   PlanProblem,
   PlanReport,
@@ -54,6 +56,7 @@ import type {
   Downloaded,
   EngineStatus,
   Episode,
+  Fact,
   ForegroundWindow,
   IsolationStatus,
   Learning,
@@ -431,6 +434,36 @@ export async function learningRequests(): Promise<Learning[]> {
 }
 
 // ── Локальное распознавание ─────────────────────────────────────────────────
+
+/** Что приложение уже знает. Пустая память — пустой список, а не ошибка. */
+export async function facts(): Promise<Fact[]> {
+  if (isTauri()) {
+    const { facts: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { facts: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Запомнить сказанное, чтобы не спрашивать второй раз. */
+export async function rememberFact(key: string, value: string): Promise<void> {
+  if (isTauri()) {
+    const { rememberFact: fromCore } = await import("./tauri");
+    return fromCore(key, value);
+  }
+  const { rememberFact: fromData } = await import("./dev");
+  return fromData(key, value);
+}
+
+/** Забыть факт: человек имеет право на «я этого больше не говорил». */
+export async function forgetFact(key: string): Promise<void> {
+  if (isTauri()) {
+    const { forgetFact: fromCore } = await import("./tauri");
+    return fromCore(key);
+  }
+  const { forgetFact: fromData } = await import("./dev");
+  return fromData(key);
+}
 
 /** Что сейчас перед человеком. В браузере этого нет и быть не может. */
 export async function foregroundWindow(): Promise<ForegroundWindow> {

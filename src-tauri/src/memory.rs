@@ -166,6 +166,25 @@ impl Memory {
         Ok(())
     }
 
+    /// Все факты, по ключу. Нужно интерфейсу, чтобы не спрашивать одно и то же дважды.
+    /// Пустая память — пустой список, а не ошибка.
+    pub fn facts(&self) -> Vec<(String, String)> {
+        let conn = self.lock();
+        let mut statement = match conn.prepare("SELECT key, value FROM facts ORDER BY key") {
+            Ok(statement) => statement,
+            Err(_) => return Vec::new(),
+        };
+
+        let rows = statement.query_map([], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+        });
+
+        match rows {
+            Ok(rows) => rows.filter_map(Result::ok).collect(),
+            Err(_) => Vec::new(),
+        }
+    }
+
     /// Все факты с заданным началом ключа: так читаются списки («чему учиться»),
     /// не заводя под них отдельной таблицы.
     pub fn facts_with_prefix(&self, prefix: &str) -> Vec<(String, String)> {
@@ -388,6 +407,35 @@ mod tests {
         let path = dir.join("memory.db");
         let memory = Memory::open(path.clone()).expect("база открывается");
         (memory, dir)
+    }
+
+    #[test]
+    fn facts_are_read_back_and_forgotten() {
+        let (memory, dir) = temp_memory("facts");
+
+        assert!(memory.facts().is_empty(), "пустая память — пустой список");
+
+        memory.remember("вопрос:путь", "D:\\Отчёты").expect("запись");
+        memory.remember("вопрос:браузер", "Chrome").expect("запись");
+
+        let facts = memory.facts();
+        assert_eq!(
+            facts,
+            vec![
+                ("вопрос:браузер".to_string(), "Chrome".to_string()),
+                ("вопрос:путь".to_string(), "D:\\Отчёты".to_string()),
+            ],
+            "факты приходят по ключу, чтобы интерфейс мог их сопоставить"
+        );
+
+        memory.forget("вопрос:путь").expect("забывание");
+        assert_eq!(
+            memory.fact("вопрос:путь"),
+            None,
+            "забытый факт не подставляется второй раз"
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]

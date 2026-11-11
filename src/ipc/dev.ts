@@ -129,6 +129,7 @@ import type {
   PlanCheck,
   PlanReport,
   RoleView,
+  Fact,
   ForegroundWindow,
   IsolationStatus,
   SpeechStatus,
@@ -528,6 +529,53 @@ export async function runPlan(_json: string, _approved: number[]): Promise<PlanR
 }
 
 // ── Локальное распознавание в браузере ──────────────────────────────────────
+
+// ── Память фактов в браузере ────────────────────────────────────────────────
+
+const FACTS_KEY = "jar.facts";
+
+function readFacts(): Fact[] {
+  try {
+    const raw = globalThis.localStorage?.getItem(FACTS_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((row): row is Fact => typeof row === "object" && row !== null)
+      .filter((row) => typeof row.key === "string" && typeof row.value === "string")
+      .sort((left, right) => (left.key < right.key ? -1 : left.key > right.key ? 1 : 0));
+  } catch {
+    // Испорченная память — это пустая память, а не падение экрана.
+    return [];
+  }
+}
+
+function writeFacts(facts: Fact[]): void {
+  try {
+    globalThis.localStorage?.setItem(FACTS_KEY, JSON.stringify(facts));
+  } catch {
+    // Места нет или браузер запретил — сказать об этом нечего, но и врать не надо.
+  }
+}
+
+export async function facts(): Promise<Fact[]> {
+  return readFacts();
+}
+
+export async function rememberFact(key: string, value: string): Promise<void> {
+  const cleanKey = key.trim();
+  const cleanValue = value.trim();
+  if (cleanKey.length === 0 || cleanValue.length === 0) {
+    throw new Error("нечего запоминать: нужен и вопрос, и ответ");
+  }
+
+  const rest = readFacts().filter((fact) => fact.key !== cleanKey);
+  writeFacts([...rest, { key: cleanKey, value: cleanValue }].sort((a, b) => (a.key < b.key ? -1 : 1)));
+}
+
+export async function forgetFact(key: string): Promise<void> {
+  writeFacts(readFacts().filter((fact) => fact.key !== key.trim()));
+}
 
 // ── Активное окно в браузере ────────────────────────────────────────────────
 

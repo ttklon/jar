@@ -21,6 +21,7 @@ import type {
   PlanItem,
   ProfileView,
   RoleView,
+  Fact,
   ForegroundWindow,
   IsolationStatus,
   SpeechStatus,
@@ -104,6 +105,21 @@ export function requestLearning(query: string): Promise<Learning | null> {
 
 export function learningRequests(): Promise<Learning[]> {
   return invoke<Learning[]>("learning_requests");
+}
+
+/** Что приложение уже знает. Пустая память — пустой список, а не ошибка. */
+export function facts(): Promise<Fact[]> {
+  return invoke<Fact[]>("facts");
+}
+
+/** Запомнить сказанное, чтобы не спрашивать второй раз. */
+export function rememberFact(key: string, value: string): Promise<void> {
+  return invoke<void>("remember_fact", { key, value });
+}
+
+/** Забыть факт: человек имеет право на «я этого больше не говорил». */
+export function forgetFact(key: string): Promise<void> {
+  return invoke<void>("forget_fact", { key });
 }
 
 /** Что сейчас перед человеком: заголовок и программа. Только чтение. */
