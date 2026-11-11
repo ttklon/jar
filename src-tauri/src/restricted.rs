@@ -16,10 +16,16 @@
 //!   ставятся **до** первого шага команды. Окна, о котором предупреждал `executor`, тут
 //!   просто нет.
 //!
-//! Чего это **не** делает: не запирает файлы и не отключает сеть. Ограниченный токен — это
-//! про права, а не про песочницу файловой системы: пользователь по-прежнему может писать
-//! в свои папки, и это осознанно (иначе половина честных рук перестанет работать).
-//! Запирание файлов — отдельная работа через ACL и AppContainer.
+//! **Запирание файлов** делается вторым списком токена — *ограничивающими* SID (restricted
+//! SIDs). Windows проверяет доступ дважды: обычным списком и ограничивающим, и доступ
+//! выдаётся только если **оба** разрешили. В ограничивающий список кладётся `Everyone`, а
+//! папка пробного запуска получает единственную запись в ACL — полный доступ для
+//! `Everyone`. Итог: в этой папке можно всё, за её пределами — только то, что открыто
+//! всему миру (системные файлы для чтения), а личные папки человека закрыты.
+//!
+//! Чего это **не** делает: не отключает сеть. Сеть закрывается другим механизмом
+//! (AppContainer без возможности `internetClient`), и пока его нет, это написано и на
+//! экране, и здесь: команда не может тронуть ваши файлы, но может выйти в интернет.
 //!
 //! Вывод забирается через файлы, а не через каналы: у `CreateProcessAsUserW` наследование
 //! дескрипторов работает, но каналы пришлось бы читать параллельно из потоков, а пробный
@@ -33,12 +39,76 @@ pub fn available() -> bool {
 /// Что сказать человеку — без обещаний, которых нет.
 pub fn note() -> String {
     if available() {
-        "недоверенная команда запускается с ограниченным токеном: без привилегий и без прав \
-         администратора; файлы и сеть при этом остаются доступны"
+        "недоверенная команда идёт с ограниченным токеном: без привилегий, без прав \
+         администратора и за забором — писать можно только в её собственную папку. Сеть \
+         при этом остаётся доступной"
             .to_string()
     } else {
         "ограниченный токен — это механизм Windows: здесь команда пойдёт без него".to_string()
     }
+}
+
+/// Запирает папку: единственная запись в ACL — полный доступ для `Everyone`, всё
+/// унаследованное снято. Так папка остаётся доступной ограниченному токену (в его
+/// ограничивающем списке тоже `Everyone`) и недостижимой для всего, что вне её.
+pub fn jail(dir: &std::path::Path) -> Result<(), String> {
+    if !available() {
+        return Err("запирание папки — механизм Windows".to_string());
+    }
+
+    std::fs::create_dir_all(dir)
+        .map_err(|error| format!("папка пробного запуска не создаётся: {error}"))?;
+
+    // `/inheritance:r` убирает унаследованные записи, `/grant:r` заменяет свои.
+    // `*S-1-5-1` — это Everyone, записанный SID'ом: имя группы зависит от языка системы,
+    // а SID — нет.
+    let output = std::process::Command::new("icacls")
+        .arg(dir)
+        .args(["/inheritance:r", "/grant:r", "*S-1-5-1:(OI)(CI)F"])
+        .output()
+        .map_err(|error| format!("icacls не запустился: {error}"))?;
+
+    if !output.status.success() {
+        return Err(format!(
+            "папка не заперта: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+
+    Ok(())
+}
+
+/// Переменные окружения для процесса в папке: всё наследуется, но `TEMP` и `TMP`
+/// указывают внутрь папки. Иначе первая же программа, которой нужен временный файл,
+/// упрётся в забор и это будет выглядеть как поломка, а не как защита.
+pub fn environment_block(
+    dir: Option<&std::path::Path>,
+    inherited: &[(String, String)],
+) -> Vec<u16> {
+    let mut vars: Vec<(String, String)> = inherited.to_vec();
+
+    if let Some(dir) = dir {
+        let path = dir.display().to_string();
+        for name in ["TEMP", "TMP"] {
+            match vars.iter_mut().find(|(key, _)| key.eq_ignore_ascii_case(name)) {
+                Some(entry) => entry.1 = path.clone(),
+                None => vars.push((name.to_string(), path.clone())),
+            }
+        }
+    }
+
+    // Windows ждёт «имя=значение» через ноль, отсортированное по имени без учёта регистра,
+    // и два нуля в конце.
+    vars.sort_by(|left, right| left.0.to_uppercase().cmp(&right.0.to_uppercase()));
+
+    let mut block: Vec<u16> = Vec::new();
+    for (name, value) in vars {
+        let line = format!("{name}={value}");
+        block.extend(line.encode_utf16());
+        block.push(0);
+    }
+    block.push(0);
+    block
 }
 
 /// Собирает командную строку по правилам Windows: аргумент с пробелом или кавычкой
@@ -115,6 +185,7 @@ mod imp {
         request: &ExecRequest,
         limits: Option<Limits>,
         cancel: &AtomicBool,
+        jail: Option<&std::path::Path>,
     ) -> Result<ExecOutput, String> {
         let started = Instant::now();
         let number = RUNS.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -134,7 +205,7 @@ mod imp {
         let mut limits_note = String::from("права сняты: ограниченный токен");
         let mut guard = None;
 
-        let spawned = unsafe { spawn(request, stdout_handle, stderr_handle, stdin_handle) };
+        let spawned = unsafe { spawn(request, stdout_handle, stderr_handle, stdin_handle, jail) };
 
         let (process, thread, pid) = match spawned {
             Ok(triple) => triple,
@@ -251,13 +322,16 @@ mod imp {
         stdout_handle: HANDLE,
         stderr_handle: HANDLE,
         stdin_handle: HANDLE,
+        jail: Option<&std::path::Path>,
     ) -> Result<(HANDLE, HANDLE, u32), String> {
-        let token = restricted_token()?;
+        let token = restricted_token(jail.is_some())?;
 
         // Программу не подставляем отдельным аргументом: с `lpApplicationName` Windows не
         // ищет файл в PATH, и `powershell.exe` превращается в «файл не найден». Первый
         // элемент командной строки делает то же самое, но с поиском.
         let mut line_wide = wide(&command_line(&request.program, &request.argv));
+        let mut environment = super::environment_block(jail, &std::env::vars().collect::<Vec<_>>());
+        let directory = jail.map(|dir| wide(&dir.display().to_string()));
 
         let mut si: STARTUPINFOW = std::mem::zeroed();
         si.cb = std::mem::size_of::<STARTUPINFOW>() as u32;
@@ -274,9 +348,12 @@ mod imp {
             std::ptr::null(),
             std::ptr::null(),
             1,
-            CREATE_NO_WINDOW | CREATE_SUSPENDED,
-            std::ptr::null(),
-            std::ptr::null(),
+            CREATE_NO_WINDOW | CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT,
+            environment.as_mut_ptr() as *const core::ffi::c_void,
+            directory
+                .as_ref()
+                .map(|wide| wide.as_ptr())
+                .unwrap_or(std::ptr::null()),
             &si,
             &mut pi,
         );
@@ -293,8 +370,9 @@ mod imp {
         Ok((pi.hProcess, pi.hThread, pi.dwProcessId))
     }
 
-    /// Ограниченный токен: без привилегий, администраторы — только для отказа.
-    unsafe fn restricted_token() -> Result<HANDLE, String> {
+    /// Ограниченный токен: без привилегий, администраторы — только для отказа, и, если
+    /// нужен забор для файлов, ограничивающий SID `Everyone`.
+    unsafe fn restricted_token(jailed: bool) -> Result<HANDLE, String> {
         let mut own: HANDLE = std::ptr::null_mut();
         let opened = OpenProcessToken(
             GetCurrentProcess(),
@@ -330,6 +408,35 @@ mod imp {
             Attributes: 0,
         };
 
+        // Ограничивающий SID: доступ выдаётся, только если разрешил и он. `Everyone` есть
+        // ровно в одном месте — в ACL папки пробного запуска.
+        let mut everyone_buffer = [0u8; 68];
+        let mut everyone_size = everyone_buffer.len() as u32;
+        let mut restrict_count = 0u32;
+        let mut everyone = SID_AND_ATTRIBUTES {
+            Sid: std::ptr::null_mut(),
+            Attributes: 0,
+        };
+
+        if jailed {
+            let made = CreateWellKnownSid(
+                WinWorldSid,
+                std::ptr::null_mut(),
+                everyone_buffer.as_mut_ptr() as *mut core::ffi::c_void,
+                &mut everyone_size,
+            );
+            if made == 0 {
+                CloseHandle(own);
+                return Err(format!(
+                    "SID Everyone не получен: {}",
+                    std::io::Error::last_os_error()
+                ));
+            }
+
+            everyone.Sid = everyone_buffer.as_mut_ptr() as *mut core::ffi::c_void;
+            restrict_count = 1;
+        }
+
         let mut restricted: HANDLE = std::ptr::null_mut();
         let created = CreateRestrictedToken(
             own,
@@ -338,8 +445,8 @@ mod imp {
             &admins,
             0,
             std::ptr::null(),
-            0,
-            std::ptr::null(),
+            restrict_count,
+            if jailed { &everyone } else { std::ptr::null() },
             &mut restricted,
         );
 
@@ -370,6 +477,7 @@ mod imp {
         _request: &ExecRequest,
         _limits: Option<Limits>,
         _cancel: &AtomicBool,
+        _jail: Option<&std::path::Path>,
     ) -> Result<ExecOutput, String> {
         Err("ограниченный токен есть только на Windows".to_string())
     }
@@ -436,7 +544,7 @@ mod tests {
         let script = r"@(whoami /priv | Select-String -Pattern 'Se\w+Privilege' -AllMatches | ForEach-Object { $_.Matches.Value } | Where-Object { $_ -ne 'SeChangeNotifyPrivilege' }).Count";
 
         let cancel = AtomicBool::new(false);
-        let restricted = run(&request(script), None, &cancel)
+        let restricted = run(&request(script), None, &cancel, None)
             .unwrap_or_else(|error| panic!("ограниченный запуск провалился: {error}"));
 
         assert!(
@@ -458,7 +566,8 @@ mod tests {
         // токеном различать нечего, и тест об этом говорит, а не притворяется.
         let admin = r"([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)";
         let plain_admin = crate::executor::run(&request(admin), &cancel).expect("обычный запуск");
-        let restricted_admin = run(&request(admin), None, &cancel).expect("ограниченный запуск");
+        let restricted_admin =
+            run(&request(admin), None, &cancel, None).expect("ограниченный запуск");
 
         assert_eq!(
             restricted_admin.stdout.trim(),
@@ -486,6 +595,88 @@ mod tests {
         )
     }
 
+    #[test]
+    fn the_environment_points_temp_inside_the_folder() {
+        let dir = std::path::Path::new("C:\\jail");
+        let inherited = vec![
+            ("Path".to_string(), "C:\\Windows".to_string()),
+            ("TEMP".to_string(), "C:\\Users\\x\\Temp".to_string()),
+        ];
+
+        let block = environment_block(Some(dir), &inherited);
+        let text: String = String::from_utf16_lossy(&block);
+
+        assert!(text.contains("TEMP=C:\\jail"), "{text:?}");
+        assert!(text.contains("Path=C:\\Windows"), "наследованное не теряется: {text:?}");
+        assert!(text.ends_with('\u{0}'), "блок заканчивается нулём");
+    }
+
+    #[test]
+    fn without_a_folder_the_environment_is_left_alone() {
+        let inherited = vec![("TEMP".to_string(), "C:\\Users\\x\\Temp".to_string())];
+        let text = String::from_utf16_lossy(&environment_block(None, &inherited));
+        assert!(text.contains("TEMP=C:\\Users\\x\\Temp"), "{text:?}");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn the_jail_lets_writing_inside_and_stops_it_outside() {
+        let dir = std::env::temp_dir().join("zshelper-zabor");
+        let _ = std::fs::remove_dir_all(&dir);
+        jail(&dir).expect("папка заперта");
+
+        let make = |script: String| {
+            ExecRequest::new(
+                "powershell.exe",
+                vec![
+                    "-NoProfile".to_string(),
+                    "-NonInteractive".to_string(),
+                    "-Command".to_string(),
+                    script,
+                ],
+            )
+        };
+
+        let cancel = AtomicBool::new(false);
+
+        // Внутри папки — можно: иначе забор был бы поломкой, а не защитой.
+        let inside = format!(
+            "try {{ Set-Content -LiteralPath '{}\\inside.txt' -Value 'ok' -ErrorAction Stop; 'written' }} \
+             catch {{ 'denied' }}",
+            dir.display()
+        );
+        let output = run(&make(inside), None, &cancel, Some(&dir)).expect("запуск в папке");
+        assert!(
+            output.stdout.contains("written"),
+            "внутри забора писать можно: {:?} {:?}",
+            output.stdout,
+            output.stderr
+        );
+
+        // Снаружи — нельзя: это и есть забор.
+        let outside_path = std::env::temp_dir().join("zshelper-outside.txt");
+        let _ = std::fs::remove_file(&outside_path);
+        let outside = format!(
+            "try {{ Set-Content -LiteralPath '{}' -Value 'ok' -ErrorAction Stop; 'written' }} \
+             catch {{ 'denied' }}",
+            outside_path.display()
+        );
+        let output = run(&make(outside), None, &cancel, Some(&dir)).expect("запуск в папке");
+        assert!(
+            output.stdout.contains("denied"),
+            "за забором писать нельзя: {:?} {:?}",
+            output.stdout,
+            output.stderr
+        );
+
+        // Читать системное — можно: забор не должен превращать команду в кирпич.
+        let read = r"if (Test-Path -LiteralPath 'C:\Windows\win.ini') { 'read' } else { 'no' }";
+        let output = run(&make(read.to_string()), None, &cancel, Some(&dir)).expect("запуск");
+        assert!(output.stdout.contains("read"), "{:?}", output.stdout);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
     #[cfg(windows)]
     #[test]
     fn a_restricted_process_runs_under_the_ceiling_too() {
@@ -499,7 +690,7 @@ mod tests {
 
         let started = std::time::Instant::now();
         let cancel = AtomicBool::new(false);
-        let output = run(&request, Some(limits), &cancel)
+        let output = run(&request, Some(limits), &cancel, None)
             .unwrap_or_else(|error| panic!("ограниченный запуск провалился: {error}"));
 
         assert!(
