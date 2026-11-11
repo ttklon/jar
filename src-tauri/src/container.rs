@@ -65,7 +65,7 @@ mod imp {
         CreateAppContainerProfile, DeriveAppContainerSidFromAppContainerName,
     };
     use windows_sys::Win32::Security::{
-        Authorization::ConvertSidToStringSidW, FreeSid, SECURITY_CAPABILITIES, PSID,
+        Authorization::ConvertSidToStringSidW, FreeSid, PSID, SECURITY_CAPABILITIES,
     };
     use windows_sys::Win32::System::Threading::{
         CreateProcessAsUserW, DeleteProcThreadAttributeList, GetExitCodeProcess,
@@ -127,9 +127,8 @@ mod imp {
             }
 
             // Профиль уже был: берём его SID по имени.
-            let derived = unsafe {
-                DeriveAppContainerSidFromAppContainerName(name.as_ptr(), &mut sid)
-            };
+            let derived =
+                unsafe { DeriveAppContainerSidFromAppContainerName(name.as_ptr(), &mut sid) };
             if derived < 0 {
                 return Err(format!("SID контейнера не получен: 0x{derived:08X}"));
             }
@@ -204,25 +203,20 @@ mod imp {
         ) -> Result<ExecOutput, String> {
             let started = Instant::now();
             let number = RUNS.fetch_add(1, Ordering::Relaxed);
-            let outdir = std::env::temp_dir().join(format!(
-                "zshelper-kletka-{}-{number}",
-                std::process::id()
-            ));
-            std::fs::create_dir_all(&outdir)
-                .map_err(|error| format!("папка вывода: {error}"))?;
+            let outdir = std::env::temp_dir()
+                .join(format!("zshelper-kletka-{}-{number}", std::process::id()));
+            std::fs::create_dir_all(&outdir).map_err(|error| format!("папка вывода: {error}"))?;
 
             let out_file = outdir.join("stdout.txt");
             let err_file = outdir.join("stderr.txt");
 
             let (stdout_handle, stdout_file) = open_inheritable(&out_file)?;
             let (stderr_handle, stderr_file) = open_inheritable(&err_file)?;
-            let (stdin_handle, stdin_file) =
-                open_inheritable(std::path::Path::new("NUL"))?;
+            let (stdin_handle, stdin_file) = open_inheritable(std::path::Path::new("NUL"))?;
 
             let mut limits_note = "клетка: AppContainer, без сети".to_string();
-            let spawned = unsafe {
-                self.spawn(request, stdout_handle, stderr_handle, stdin_handle)
-            };
+            let spawned =
+                unsafe { self.spawn(request, stdout_handle, stderr_handle, stdin_handle) };
 
             let (process, thread, pid) = match spawned {
                 Ok(triple) => triple,
@@ -511,7 +505,9 @@ mod tests {
             match open(&dir("zshelper-kletka-pochemu")) {
                 Ok(cell) => assert!(cell.dir().exists()),
                 Err(reason) => assert!(
-                    reason.contains("профиль") || reason.contains("icacls") || reason.contains("SID"),
+                    reason.contains("профиль")
+                        || reason.contains("icacls")
+                        || reason.contains("SID"),
                     "ошибка: причина непонятна: {reason}"
                 ),
             }
@@ -580,10 +576,11 @@ mod tests {
                 "curl.exe",
                 &["-s", "-m", "5", "-o", "NUL", "http://example.com"],
             );
-            let inside = sandbox.run(&probe, None, &cancel).unwrap_or_else(|error| panic!("ошибка: запуск в клетке: {error}"));
-            let outside_network =
-                crate::executor::run(&probe, &cancel)
-                    .unwrap_or_else(|error| panic!("ошибка: запуск вне клетки: {error}"));
+            let inside = sandbox
+                .run(&probe, None, &cancel)
+                .unwrap_or_else(|error| panic!("ошибка: запуск в клетке: {error}"));
+            let outside_network = crate::executor::run(&probe, &cancel)
+                .unwrap_or_else(|error| panic!("ошибка: запуск вне клетки: {error}"));
 
             assert_eq!(
                 outside_network.exit_code,
