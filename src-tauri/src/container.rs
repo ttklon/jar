@@ -18,6 +18,17 @@
 //! Токен при этом остаётся ограниченным (`restricted`): AppContainer убирает доступ к
 //! чужим файлам, ограниченный токен — привилегии и права администратора. Одно без
 //! другого неполно, поэтому здесь оба.
+//!
+//! **Что проверено, а что нет.** Проверено на живой машине: `CreateAppContainerProfile`
+//! без описания отвечает `E_INVALIDARG` (0x80070057) — описание обязательно. Не проверено:
+//! сама клетка. В сессии CI профиль контейнера не создаётся вовсе (`0x8007000A`,
+//! `ERROR_BAD_ENVIRONMENT`), поэтому две проверки забора помечены `#[ignore]` с причиной,
+//! а не зелёной галочкой на пустом месте. Их надо запустить на обычном рабочем столе:
+//! `cargo test --lib container -- --ignored`.
+//!
+//! Пока клетка не открылась, пробный запуск не притворяется защищённым: он идёт с
+//! ограниченным токеном, а в отчёте появляется строка «клетка не открылась: <причина>;
+//! запуск без клетки».
 
 use std::path::{Path, PathBuf};
 
@@ -489,7 +500,25 @@ mod tests {
             path
         }
 
+        /// Проверки клетки требуют живой пользовательской сессии. В сессии CI
+        /// `CreateAppContainerProfile` отвечает `0x8007000A` (`ERROR_BAD_ENVIRONMENT`),
+        /// поэтому здесь они помечены как ручные: врать зелёной галочкой хуже, чем не
+        /// запускать их вовсе.
         #[test]
+        fn the_cell_says_why_it_could_not_open() {
+            // Даже когда клетка недоступна, причина обязана быть внятной: именно она
+            // попадает в отчёт человеку.
+            match open(&dir("zshelper-kletka-pochemu")) {
+                Ok(cell) => assert!(cell.dir().exists()),
+                Err(reason) => assert!(
+                    reason.contains("профиль") || reason.contains("icacls") || reason.contains("SID"),
+                    "ошибка: причина непонятна: {reason}"
+                ),
+            }
+        }
+
+        #[test]
+        #[ignore = "нужна живая сессия: в CI профиль контейнера не создаётся (0x8007000A)"]
         fn a_container_starts_a_simple_program() {
             let sandbox = open(&dir("zshelper-kletka-start"))
                 .unwrap_or_else(|error| panic!("ошибка: клетка не открылась: {error}"));
@@ -510,6 +539,7 @@ mod tests {
         }
 
         #[test]
+        #[ignore = "нужна живая сессия: в CI профиль контейнера не создаётся (0x8007000A)"]
         fn the_fence_holds_for_files_and_network() {
             let sandbox = open(&dir("zshelper-kletka-zabor"))
                 .unwrap_or_else(|error| panic!("ошибка: клетка не открылась: {error}"));

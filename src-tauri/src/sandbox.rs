@@ -382,15 +382,25 @@ pub fn trial(
     let started = std::time::Instant::now();
 
     // Недоверенная команда идёт и без прав, и под потолком, и — если система умеет — в
-    // клетке: без чужих файлов и без сети. Что именно применилось, видно в отчёте.
+    // клетке: без чужих файлов и без сети. Если клетка не открылась, это не повод молча
+    // запустить как есть: причина попадает в отчёт, и человек видит, чем именно рискует.
+    let mut shelter = String::new();
     let output = if crate::container::available() {
         match crate::container::open(dir) {
-            Ok(cells) => cells.run(&request, Some(limits), &cancel),
-            Err(reason) => Err(format!("клетка не открылась: {reason}")),
+            Ok(cell) => {
+                shelter = "клетка: AppContainer, без чужих файлов и без сети".to_string();
+                cell.run(&request, Some(limits), &cancel)
+            }
+            Err(reason) => {
+                shelter = format!("клетка не открылась: {reason}; запуск без клетки");
+                crate::restricted::run(&request, Some(limits), &cancel)
+            }
         }
     } else if crate::restricted::available() {
+        shelter = "без клетки: только права сняты".to_string();
         crate::restricted::run(&request, Some(limits), &cancel)
     } else {
+        shelter = "без клетки и без прав: система этого не умеет".to_string();
         crate::executor::run(&request, &cancel).map_err(|error| error.to_string())
     }
     .map_err(|error| format!("пробный запуск не удался: {error}"))?;
@@ -401,7 +411,7 @@ pub fn trial(
         stderr: crate::step::tail(&output.stderr, 400),
         timed_out: output.timed_out,
         duration_ms: started.elapsed().as_millis() as u64,
-        limits_note: output.limits_note.clone(),
+        limits_note: format!("{shelter}; {}", output.limits_note),
         verdict,
     })
 }
