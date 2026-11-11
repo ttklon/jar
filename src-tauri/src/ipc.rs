@@ -899,9 +899,11 @@ pub struct IsolationStatus {
 
 /// Что за клетка у недоверенной команды: AppContainer или (если его нет) хотя бы
 /// ограниченный токен.
-fn shelter_note() -> String {
+fn shelter_note(inner: &Inner) -> String {
     if container::available() {
-        container::note()
+        // Проверяем на месте: система умеет, но профиль может не создаться (так бывает в
+        // служебных сессиях), и тогда обещать забор нельзя.
+        container::state_note(&inner.base_dir.join("sandbox-probe"))
     } else {
         restricted::note()
     }
@@ -909,11 +911,11 @@ fn shelter_note() -> String {
 
 /// Потолки для запуска: что есть на самом деле, а не что хотелось бы.
 #[tauri::command]
-pub fn isolation_status() -> IsolationStatus {
+pub fn isolation_status(state: State<'_, AppState>) -> IsolationStatus {
     IsolationStatus {
         available: isolation::available(),
         summary: isolation::Limits::trial().describe(),
-        note: format!("{}. {}", isolation::note(), shelter_note()),
+        note: format!("{}. {}", isolation::note(), shelter_note(&state.inner)),
     }
 }
 

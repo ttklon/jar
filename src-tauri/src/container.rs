@@ -464,6 +464,26 @@ mod imp {
 
 pub use imp::{open, Sandbox};
 
+/// Проверка на месте: открывается ли клетка **здесь**. Профиль создаётся и папка
+/// открывается по-настоящему — притворяться, что забор есть, хуже, чем его не иметь.
+pub fn probe(dir: &std::path::Path) -> Result<(), String> {
+    open(dir).map(|_| ())
+}
+
+/// Что сказать про клетку на этой машине: с проверкой, а не по наличию системы.
+pub fn state_note(dir: &std::path::Path) -> String {
+    if !available() {
+        return note();
+    }
+
+    match probe(dir) {
+        Ok(()) => note(),
+        Err(reason) => format!(
+            "клетка здесь не открывается: {reason}. Пробный запуск идёт с ограниченным              токеном, и это написано в отчёте"
+        ),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
