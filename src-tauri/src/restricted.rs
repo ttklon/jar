@@ -347,7 +347,10 @@ mod imp {
     }
 
     /// Ограниченный токен: без привилегий, администраторы — только для отказа.
-    unsafe fn restricted_token() -> Result<HANDLE, String> {
+    ///
+    /// Наружу нужен клетке (`container`): AppContainer убирает доступ к чужим файлам, а
+    /// привилегии отбирает этот токен. Одно без другого неполно.
+    pub(crate) unsafe fn restricted_token() -> Result<HANDLE, String> {
         let mut own: HANDLE = std::ptr::null_mut();
         let opened = OpenProcessToken(
             GetCurrentProcess(),
@@ -429,6 +432,9 @@ mod imp {
 }
 
 pub use imp::run;
+
+#[cfg(windows)]
+pub(crate) use imp::restricted_token as token;
 
 #[cfg(test)]
 mod tests {

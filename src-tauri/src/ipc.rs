@@ -14,6 +14,7 @@ use tauri::State;
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::download::{self, Downloaded};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
+use crate::container;
 use crate::isolation;
 use crate::learn::{self, Learning};
 use crate::llama;
@@ -896,13 +897,23 @@ pub struct IsolationStatus {
     pub note: String,
 }
 
+/// Что за клетка у недоверенной команды: AppContainer или (если его нет) хотя бы
+/// ограниченный токен.
+fn shelter_note() -> String {
+    if container::available() {
+        container::note()
+    } else {
+        restricted::note()
+    }
+}
+
 /// Потолки для запуска: что есть на самом деле, а не что хотелось бы.
 #[tauri::command]
 pub fn isolation_status() -> IsolationStatus {
     IsolationStatus {
         available: isolation::available(),
         summary: isolation::Limits::trial().describe(),
-        note: format!("{}. {}", isolation::note(), restricted::note()),
+        note: format!("{}. {}", isolation::note(), shelter_note()),
     }
 }
 

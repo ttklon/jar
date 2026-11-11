@@ -24,6 +24,7 @@
 //! Чего ещё нет: планировщика, моделей, голоса, памяти, MCP — они следующие.
 
 pub mod audit;
+pub mod container;
 pub mod download;
 pub mod executor;
 pub mod flows;

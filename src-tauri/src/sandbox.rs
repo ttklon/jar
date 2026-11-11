@@ -381,9 +381,14 @@ pub fn trial(
     let cancel = std::sync::atomic::AtomicBool::new(false);
     let started = std::time::Instant::now();
 
-    // Недоверенная команда идёт и без прав, и под потолком. Если ограниченный запуск на
-    // этой системе недоступен, честнее сказать это в отчёте, чем молча запустить как есть.
-    let output = if crate::restricted::available() {
+    // Недоверенная команда идёт и без прав, и под потолком, и — если система умеет — в
+    // клетке: без чужих файлов и без сети. Что именно применилось, видно в отчёте.
+    let output = if crate::container::available() {
+        match crate::container::open(dir) {
+            Ok(cells) => cells.run(&request, Some(limits), &cancel),
+            Err(reason) => Err(format!("клетка не открылась: {reason}")),
+        }
+    } else if crate::restricted::available() {
         crate::restricted::run(&request, Some(limits), &cancel)
     } else {
         crate::executor::run(&request, &cancel).map_err(|error| error.to_string())
