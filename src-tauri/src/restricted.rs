@@ -99,7 +99,7 @@ pub fn environment_block(
 
     // Windows ждёт «имя=значение» через ноль, отсортированное по имени без учёта регистра,
     // и два нуля в конце.
-    vars.sort_by(|left, right| left.0.to_uppercase().cmp(&right.0.to_uppercase()));
+    vars.sort_by_key(|(name, _)| name.to_uppercase());
 
     let mut block: Vec<u16> = Vec::new();
     for (name, value) in vars {
