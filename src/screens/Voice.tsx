@@ -20,6 +20,7 @@ import type {
   SpeechStatus,
 } from "../ipc";
 import { speak } from "../lib/voice";
+import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
 import { ActionList } from "../components/ActionList";
 import { voice } from "../i18n/ru";
@@ -216,6 +217,35 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     },
     onError: (message) => setVoiceError(message),
   });
+
+  // Удержание из любой программы: человек говорит в браузере или поверх видео, а окно
+  // помощника даже не в фокусе. Где глобальных клавиш нет (браузер) — подписка пустая.
+  useEffect(() => {
+    let off: (() => void) | null = null;
+    let alive = true;
+
+    subscribeGlobalTalk({
+      down: () => {
+        if (always && mic.listening) mic.stop();
+        else mic.start();
+      },
+      up: () => {
+        if (!always) mic.stop();
+      },
+    })
+      .then((unsubscribe) => {
+        if (alive) off = unsubscribe;
+        else unsubscribe();
+      })
+      .catch(() => {
+        // Без глобальной клавиши всё равно работает кнопка на экране.
+      });
+
+    return () => {
+      alive = false;
+      off?.();
+    };
+  }, [always, mic.listening, mic.start, mic.stop]);
 
   // Чем распознаём — видно сразу: пока своего движка нет, звук уходит наружу, и
   // человек должен знать это до того, как заговорит, а не после.
