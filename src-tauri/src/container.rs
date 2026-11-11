@@ -488,12 +488,13 @@ mod tests {
 
         #[test]
         fn a_container_starts_a_simple_program() {
-            let sandbox = open(&dir("zshelper-kletka-start")).expect("клетка открыта");
+            let sandbox = open(&dir("zshelper-kletka-start"))
+                .unwrap_or_else(|error| panic!("ошибка: клетка не открылась: {error}"));
             let cancel = AtomicBool::new(false);
 
             let output = sandbox
                 .run(&request("cmd.exe", &["/c", "echo ok"]), None, &cancel)
-                .expect("запуск в клетке");
+                .unwrap_or_else(|error| panic!("ошибка: запуск в клетке: {error}"));
 
             assert_eq!(
                 output.exit_code,
@@ -507,7 +508,8 @@ mod tests {
 
         #[test]
         fn the_fence_holds_for_files_and_network() {
-            let sandbox = open(&dir("zshelper-kletka-zabor")).expect("клетка открыта");
+            let sandbox = open(&dir("zshelper-kletka-zabor"))
+                .unwrap_or_else(|error| panic!("ошибка: клетка не открылась: {error}"));
             let cancel = AtomicBool::new(false);
 
             // 1. Внутри своей папки писать можно — иначе клетка была бы поломкой.
@@ -517,7 +519,7 @@ mod tests {
                     None,
                     &cancel,
                 )
-                .expect("запуск");
+                .unwrap_or_else(|error| panic!("ошибка: запуск в клетке: {error}"));
             assert!(
                 sandbox.dir().join("inside.txt").exists(),
                 "ошибка: внутри папки писать нельзя: code={:?} stdout={:?} stderr={:?}",
@@ -532,7 +534,7 @@ mod tests {
             let target = format!("echo x > \"{}\"", outside.display());
             sandbox
                 .run(&request("cmd.exe", &["/c", &target]), None, &cancel)
-                .expect("запуск");
+                .unwrap_or_else(|error| panic!("ошибка: запуск в клетке: {error}"));
 
             assert!(
                 std::fs::metadata(&outside).is_err(),
@@ -545,9 +547,10 @@ mod tests {
                 "curl.exe",
                 &["-s", "-m", "5", "-o", "NUL", "http://example.com"],
             );
-            let inside = sandbox.run(&probe, None, &cancel).expect("запуск");
+            let inside = sandbox.run(&probe, None, &cancel).unwrap_or_else(|error| panic!("ошибка: запуск в клетке: {error}"));
             let outside_network =
-                crate::executor::run(&probe, &cancel).expect("запуск вне клетки");
+                crate::executor::run(&probe, &cancel)
+                    .unwrap_or_else(|error| panic!("ошибка: запуск вне клетки: {error}"));
 
             assert_eq!(
                 outside_network.exit_code,
