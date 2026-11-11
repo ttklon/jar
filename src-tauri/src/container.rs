@@ -205,7 +205,7 @@ mod imp {
             let (stdin_handle, stdin_file) =
                 open_inheritable(std::path::Path::new("NUL"))?;
 
-            let mut limits_note = String::from("клетка: AppContainer, без сети".to_string());
+            let mut limits_note = "клетка: AppContainer, без сети".to_string();
             let spawned = unsafe {
                 self.spawn(request, stdout_handle, stderr_handle, stdin_handle)
             };
