@@ -415,7 +415,9 @@ mod tests {
 
         assert!(memory.facts().is_empty(), "пустая память — пустой список");
 
-        memory.remember("вопрос:путь", "D:\\Отчёты").expect("запись");
+        memory
+            .remember("вопрос:путь", "D:\\Отчёты")
+            .expect("запись");
         memory.remember("вопрос:браузер", "Chrome").expect("запись");
 
         let facts = memory.facts();
