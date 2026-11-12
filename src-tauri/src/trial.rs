@@ -59,7 +59,8 @@ pub fn fact_key(key: &str) -> String {
 
 /// Запомнить отчёт: следующий разговор начнётся с того, что уже проверено.
 pub fn save(memory: &Memory, report: &Report) -> Result<(), String> {
-    let json = serde_json::to_string(report).map_err(|error| format!("отчёт не пишется: {error}"))?;
+    let json =
+        serde_json::to_string(report).map_err(|error| format!("отчёт не пишется: {error}"))?;
     memory
         .remember(&fact_key(&report.key), &json)
         .map_err(|error| format!("отчёт не сохранился: {error}"))
@@ -235,14 +236,27 @@ mod tests {
 
         assert!(!report.ran, "запуска не было");
         assert!(!report.ok);
-        assert!(report.cell.contains("клетка не открылась"), "{}", report.cell);
-        assert!(report.cell.contains("без забора не запускается"), "{}", report.cell);
+        assert!(
+            report.cell.contains("клетка не открылась"),
+            "{}",
+            report.cell
+        );
+        assert!(
+            report.cell.contains("без забора не запускается"),
+            "{}",
+            report.cell
+        );
         assert_eq!(report.note, "проба не выполнялась: нужна клетка");
     }
 
     #[test]
     fn a_report_with_a_cell_keeps_the_code_the_output_and_the_note() {
-        let report = report("k", &output(Some(0), false), "клетка: AppContainer, без сети", 1000);
+        let report = report(
+            "k",
+            &output(Some(0), false),
+            "клетка: AppContainer, без сети",
+            1000,
+        );
 
         assert!(report.ran && report.ok);
         assert_eq!(report.exit_code, Some(0));
@@ -259,7 +273,9 @@ mod tests {
         save(&memory, &report).expect("сохранён");
         assert_eq!(get(&memory, "k"), Some(report));
 
-        memory.remember(&fact_key("k"), "{ это не json").expect("испорченный факт");
+        memory
+            .remember(&fact_key("k"), "{ это не json")
+            .expect("испорченный факт");
         assert_eq!(get(&memory, "k"), None, "битый отчёт — это «не пробовали»");
 
         let _ = std::fs::remove_dir_all(&dir);

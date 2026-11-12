@@ -21,7 +21,6 @@ use crate::isolation;
 use crate::learn::{self, Learning};
 use crate::llama;
 use crate::llm;
-use crate::trial;
 use crate::memory::{Episode, Memory, RunRecord};
 use crate::models::{self, ModelFile};
 use crate::plan::{self, Answer, Plan, Problem, Question, StepGate};
@@ -36,6 +35,7 @@ use crate::server::{self, Server};
 use crate::step::StepResult;
 use crate::stt;
 use crate::tools::{self, ParamSpec, ToolSpec};
+use crate::trial;
 use crate::window;
 
 /// Всё, что нужно командам. Один `Arc`, чтобы клонировать в фоновый поток.
@@ -429,10 +429,7 @@ pub async fn draft_hand(state: State<'_, AppState>, key: String) -> Result<hand:
 /// Если клетка не открылась, отчёт говорит это прямо, и запуска не будет: чужой текст без
 /// забора не исполняется — ровно для этого клетка и писалась.
 #[tauri::command]
-pub async fn trial_hand(
-    state: State<'_, AppState>,
-    key: String,
-) -> Result<trial::Report, String> {
+pub async fn trial_hand(state: State<'_, AppState>, key: String) -> Result<trial::Report, String> {
     let inner = state.inner.clone();
     let draft = hand::get(&inner.memory, &key)
         .ok_or_else(|| format!("черновика для этой строки нет: {key}"))?;
@@ -442,11 +439,10 @@ pub async fn trial_hand(
 
     let started = now_ms() as u64;
     let code = draft.code.clone();
-    let report = tauri::async_runtime::spawn_blocking(move || {
-        trial::run(&key, &code, &dir, started)
-    })
-    .await
-    .map_err(|error| format!("проба не выполнилась: {error}"))?;
+    let report =
+        tauri::async_runtime::spawn_blocking(move || trial::run(&key, &code, &dir, started))
+            .await
+            .map_err(|error| format!("проба не выполнилась: {error}"))?;
 
     trial::save(&inner.memory, &report)?;
     Ok(report)

@@ -29,7 +29,6 @@ pub mod download;
 pub mod executor;
 pub mod flows;
 pub mod hand;
-pub mod trial;
 pub mod hotkey;
 pub mod intent;
 pub mod ipc;
@@ -53,6 +52,7 @@ pub mod step;
 pub mod stt;
 pub mod tools;
 pub mod tray;
+pub mod trial;
 pub mod verifier;
 pub mod window;
 
