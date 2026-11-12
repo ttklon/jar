@@ -29,6 +29,7 @@ pub mod download;
 pub mod executor;
 pub mod flows;
 pub mod hotkey;
+pub mod intent;
 pub mod ipc;
 pub mod isolation;
 pub mod learn;
@@ -51,7 +52,6 @@ pub mod tools;
 pub mod tray;
 pub mod verifier;
 pub mod window;
-pub mod intent;
 
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;

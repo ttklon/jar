@@ -112,7 +112,11 @@ pub fn prompt(
 
     if let Some(window) = around {
         out.push_str("Перед человеком сейчас:\n");
-        out.push_str(&format!("{} ({})\n\n", window.title.trim(), window.process.trim()));
+        out.push_str(&format!(
+            "{} ({})\n\n",
+            window.title.trim(),
+            window.process.trim()
+        ));
     }
 
     if !facts.is_empty() {
@@ -133,7 +137,11 @@ pub fn prompt(
                 candidate.registry,
                 candidate.example.trim(),
                 candidate.risk,
-                if candidate.executable { "" } else { " | только описание" },
+                if candidate.executable {
+                    ""
+                } else {
+                    " | только описание"
+                },
             ));
         }
     }
@@ -290,7 +298,9 @@ fn params(value: Option<&serde_json::Value>) -> Result<BTreeMap<String, String>,
     };
 
     let Some(map) = value.as_object() else {
-        return Err(IntentError::Broken("params должен быть объектом".to_string()));
+        return Err(IntentError::Broken(
+            "params должен быть объектом".to_string(),
+        ));
     };
 
     let mut out = BTreeMap::new();
@@ -374,7 +384,11 @@ mod tests {
         let proposal = parse(answer, &known()).expect("разбирается");
 
         match proposal {
-            Proposal::Call { registry, params, why } => {
+            Proposal::Call {
+                registry,
+                params,
+                why,
+            } => {
                 assert_eq!(registry, "звук|убавить|громкость");
                 assert_eq!(params.get("level").map(String::as_str), Some("10"));
                 assert_eq!(why, "просил тише");
@@ -413,16 +427,36 @@ mod tests {
     #[test]
     fn silence_and_chatter_are_both_errors() {
         assert_eq!(parse("   ", &known()), Err(IntentError::Empty));
-        assert_eq!(parse("я не знаю, что делать", &known()), Err(IntentError::NoJson));
-        assert_eq!(parse("{ сломано }", &known()), Err(IntentError::Broken("key must be a string at line 1 column 3".to_string())));
+        assert_eq!(
+            parse("я не знаю, что делать", &known()),
+            Err(IntentError::NoJson)
+        );
+        assert_eq!(
+            parse("{ сломано }", &known()),
+            Err(IntentError::Broken(
+                "key must be a string at line 1 column 3".to_string()
+            ))
+        );
     }
 
     #[test]
     fn a_bare_kind_is_not_enough_to_act() {
-        assert_eq!(parse(r#"{"kind":"call","params":{}}"#, &known()), Err(IntentError::Missing("registry")));
-        assert_eq!(parse(r#"{"kind":"learn"}"#, &known()), Err(IntentError::Missing("goal")));
-        assert_eq!(parse(r#"{"kind":"ask","question":"  "}"#, &known()), Err(IntentError::Missing("question")));
-        assert_eq!(parse(r#"{"kind":"refuse"}"#, &known()), Err(IntentError::Missing("reason")));
+        assert_eq!(
+            parse(r#"{"kind":"call","params":{}}"#, &known()),
+            Err(IntentError::Missing("registry"))
+        );
+        assert_eq!(
+            parse(r#"{"kind":"learn"}"#, &known()),
+            Err(IntentError::Missing("goal"))
+        );
+        assert_eq!(
+            parse(r#"{"kind":"ask","question":"  "}"#, &known()),
+            Err(IntentError::Missing("question"))
+        );
+        assert_eq!(
+            parse(r#"{"kind":"refuse"}"#, &known()),
+            Err(IntentError::Missing("reason"))
+        );
     }
 
     #[test]
@@ -441,13 +475,20 @@ mod tests {
             Proposal::Call { params, .. } => {
                 assert_eq!(params.get("a").map(String::as_str), Some("1"));
                 assert_eq!(params.get("b").map(String::as_str), Some("true"));
-                assert!(!params.contains_key("c"), "null — это «не задано», а не пустая строка");
+                assert!(
+                    !params.contains_key("c"),
+                    "null — это «не задано», а не пустая строка"
+                );
             }
             other => panic!("ожидался вызов, получено {other:?}"),
         }
 
-        let nested = r#"{"kind":"call","registry":"браузер|включить|субтитры","params":{"a":{"b":1}}}"#;
-        assert!(matches!(parse(nested, &known()), Err(IntentError::Broken(_))));
+        let nested =
+            r#"{"kind":"call","registry":"браузер|включить|субтитры","params":{"a":{"b":1}}}"#;
+        assert!(matches!(
+            parse(nested, &known()),
+            Err(IntentError::Broken(_))
+        ));
     }
 
     #[test]
@@ -471,9 +512,12 @@ mod tests {
 
     #[test]
     fn braces_inside_strings_do_not_confuse_the_scanner() {
-        let answer = r#"{"kind":"ask","question":"Что открыть: {папку} или файл?","why":"два варианта"}"#;
+        let answer =
+            r#"{"kind":"ask","question":"Что открыть: {папку} или файл?","why":"два варианта"}"#;
         match parse(answer, &known()).expect("разбирается") {
-            Proposal::Ask { question, .. } => assert_eq!(question, "Что открыть: {папку} или файл?"),
+            Proposal::Ask { question, .. } => {
+                assert_eq!(question, "Что открыть: {папку} или файл?")
+            }
             other => panic!("ожидался вопрос, получено {other:?}"),
         }
     }
