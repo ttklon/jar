@@ -15,6 +15,7 @@ use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::container;
 use crate::download::{self, Downloaded};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
+use crate::intent;
 use crate::isolation;
 use crate::learn::{self, Learning};
 use crate::llama;
@@ -366,6 +367,29 @@ pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
 #[tauri::command]
 pub fn plan_for(state: State<'_, AppState>, query: String, limit: usize) -> Vec<PlanItem> {
     planner::plan(&state.inner.registry, &query, limit.clamp(1, 50))
+}
+
+/// Что мы спросим у модели по этой фразе.
+///
+/// Это не ответ модели и не выполнение: команда собирает вопрос — задачу, окно перед
+/// человеком, память фактов и найденные руки. Нужна, чтобы разговор с моделью был виден
+/// целиком, а не прятался в логах. Модели нет — вопрос всё равно есть.
+#[tauri::command]
+pub fn model_prompt(
+    state: State<'_, AppState>,
+    query: String,
+    around: Option<intent::Around>,
+) -> String {
+    let inner = &state.inner;
+    let found = planner::plan(&inner.registry, &query, intent::MAX_CANDIDATES);
+    let facts = inner
+        .memory
+        .facts_with_prefix("вопрос:")
+        .into_iter()
+        .take(intent::MAX_FACTS)
+        .collect::<Vec<_>>();
+
+    intent::prompt(&query, around.as_ref(), &facts, &intent::candidates(&found))
 }
 
 /// Что лежит в папке моделей.

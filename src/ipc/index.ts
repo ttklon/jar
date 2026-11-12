@@ -435,6 +435,19 @@ export async function learningRequests(): Promise<Learning[]> {
 
 // ── Локальное распознавание ─────────────────────────────────────────────────
 
+/** Что мы спросим у модели по этой фразе: задача, окно, память и найденные руки. */
+export async function modelPrompt(
+  query: string,
+  around: { title: string; process: string } | null = null,
+): Promise<string> {
+  if (isTauri()) {
+    const { modelPrompt: fromCore } = await import("./tauri");
+    return fromCore(query, around);
+  }
+  const { modelPrompt: fromData } = await import("./dev");
+  return fromData();
+}
+
 /** Что приложение уже знает. Пустая память — пустой список, а не ошибка. */
 export async function facts(): Promise<Fact[]> {
   if (isTauri()) {

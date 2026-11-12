@@ -6,6 +6,7 @@ import {
   fillPlan,
   facts,
   foregroundWindow,
+  modelPrompt,
   planFor,
   rememberFact,
   requestLearning,
@@ -66,6 +67,17 @@ const useStyles = makeStyles({
     gap: "12px",
     backgroundColor: tokens.colorPaletteRedBackground2,
     color: tokens.colorPaletteRedForeground2,
+  },
+  prompt: {
+    maxHeight: "14rem",
+    overflow: "auto",
+    whiteSpace: "pre-wrap",
+    fontFamily: tokens.fontFamilyMonospace,
+    fontSize: tokens.fontSizeBase200,
+    background: tokens.colorNeutralBackground3,
+    borderRadius: tokens.borderRadiusMedium,
+    padding: "8px 10px",
+    margin: "4px 0 0",
   },
   answer: { display: "flex", gap: "8px", alignItems: "center" },
   bar: { display: "flex", gap: "10px", alignItems: "center" },
@@ -130,6 +142,9 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  /** Что именно уйдёт модели — по кнопке и честно, без «доверьтесь нам». */
+  const [promptText, setPromptText] = useState<string | null>(null);
+  const [promptError, setPromptError] = useState<string | null>(null);
   /** Что приложение уже знает: сказанное раньше человеку не задают второй раз. */
   const [knownFacts, setKnownFacts] = useState<Fact[]>([]);
   /** Поля, заполненные из памяти, — экран говорит, откуда значение. */
@@ -532,6 +547,41 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           {voice.find}
         </Button>
       </form>
+
+      {text.trim().length > 0 ? (
+        <div>
+          <Button
+            size="small"
+            appearance="subtle"
+            onClick={() => {
+              if (promptText !== null) {
+                setPromptText(null);
+                return;
+              }
+              modelPrompt(text.trim(), front ? { title: front.title, process: front.process } : null)
+                .then((value) => {
+                  setPromptText(value);
+                  setPromptError(null);
+                })
+                .catch((reason: unknown) => {
+                  setPromptText(null);
+                  setPromptError(reason instanceof Error ? reason.message : String(reason));
+                });
+            }}
+          >
+            {promptText === null ? voice.modelPromptShow : voice.modelPromptHide}
+          </Button>
+          {promptError ? (
+            <Text className={styles.note}>{`${voice.modelPromptNone}: ${promptError}`}</Text>
+          ) : null}
+          {promptText !== null ? (
+            <>
+              <Text className={styles.note}>{voice.modelPromptTitle}</Text>
+              <pre className={styles.prompt}>{promptText}</pre>
+            </>
+          ) : null}
+        </div>
+      ) : null}
 
       {spoken ? <Text className={styles.spoken}>{spoken}</Text> : null}
 

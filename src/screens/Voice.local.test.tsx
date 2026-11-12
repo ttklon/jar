@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { draftPlan, facts, planFor, speechStatus, transcribeLocal } from "../ipc";
+import { draftPlan, facts, modelPrompt, planFor, speechStatus, transcribeLocal } from "../ipc";
 import { startRecording } from "../lib/recorder";
 import { Voice } from "./Voice";
 
@@ -16,6 +16,9 @@ vi.mock("../ipc", () => ({
   draftPlan: vi.fn().mockResolvedValue(null),
   requestLearning: vi.fn().mockResolvedValue(null),
   facts: vi.fn().mockResolvedValue([]),
+  modelPrompt: vi.fn().mockResolvedValue(
+    "Ты выбираешь одно действие для помощника на Windows.\nЗадача человека:\nубавить громкость",
+  ),
   rememberFact: vi.fn().mockResolvedValue(undefined),
   runPlan: vi.fn(),
   speechStatus: vi.fn(),
@@ -145,6 +148,26 @@ describe("локальное распознавание на экране", () =
 
     // Незабытый вопрос остался пустым: память не выдумывает маску.
     expect((screen.getByLabelText("Маска") as HTMLInputElement).value).toBe("");
+  });
+
+  it("показывает по просьбе, что именно уйдёт модели", async () => {
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "убавить громкость" } });
+    fireEvent.click(screen.getByText("Что спросим у модели"));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Задача человека:\s*убавить громкость/)).toBeTruthy();
+    });
+
+    // Окно перед человеком уходит в вопрос: без него «сделай это» не имеет адресата.
+    await waitFor(() => {
+      expect(vi.mocked(modelPrompt).mock.calls[0]?.[1]).toEqual({
+        title: "Видео — браузер",
+        process: "chrome.exe",
+      });
+    });
   });
 
   it("держу и говорю — запись уходит своему движку", async () => {

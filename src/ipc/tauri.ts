@@ -107,6 +107,14 @@ export function learningRequests(): Promise<Learning[]> {
   return invoke<Learning[]>("learning_requests");
 }
 
+/** Что мы спросим у модели. Вопрос собирает ядро: в браузере его не собрать. */
+export function modelPrompt(
+  query: string,
+  around: { title: string; process: string } | null,
+): Promise<string> {
+  return invoke<string>("model_prompt", { query, around });
+}
+
 /** Что приложение уже знает. Пустая память — пустой список, а не ошибка. */
 export function facts(): Promise<Fact[]> {
   return invoke<Fact[]>("facts");

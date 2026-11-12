@@ -51,6 +51,7 @@ pub mod tools;
 pub mod tray;
 pub mod verifier;
 pub mod window;
+pub mod intent;
 
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
@@ -150,6 +151,7 @@ pub fn run() {
             ipc::speech_status,
             ipc::isolation_status,
             ipc::foreground_window,
+            ipc::model_prompt,
             ipc::facts,
             ipc::remember_fact,
             ipc::forget_fact,
