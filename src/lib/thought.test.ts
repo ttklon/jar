@@ -2,23 +2,40 @@ import { describe, expect, it } from "vitest";
 import { describeThought } from "./thought";
 import type { Thought } from "../ipc";
 
-function thought(proposal: Thought["proposal"], problem: string | null = null): Thought {
-  return { prompt: "…", answer: "…", proposal, problem };
+function thought(
+  proposal: Thought["proposal"],
+  problem: string | null = null,
+  plan: Thought["plan"] = null,
+): Thought {
+  return { prompt: "…", answer: "…", proposal, plan, problem };
 }
 
 describe("что сказать про ответ модели", () => {
   it("называет руку и причину — этого достаточно, чтобы согласиться или нет", () => {
+    const plan = {
+      plan: { goal: "потише", steps: [] },
+      problems: [],
+      gates: [],
+      questions: [],
+    };
     expect(
       describeThought(
-        thought({ Call: { registry: "звук|убавить|громкость", params: {}, why: "просил тише" } }),
+        thought({ Call: { registry: "звук|убавить|громкость", params: {}, why: "просил тише" } }, null, plan),
       ),
     ).toBe("модель предлагает: звук|убавить|громкость — просил тише");
   });
 
-  it("без причины не выдумывает её", () => {
-    expect(describeThought(thought({ Call: { registry: "браузер|включить|субтитры", params: {}, why: "" } }))).toBe(
-      "модель предлагает: браузер|включить|субтитры",
+  it("выбор без руки называет себя описанием, а не делом", () => {
+    expect(describeThought(thought({ Call: { registry: "видео|включить|субтитры", params: {}, why: "" } }))).toBe(
+      "модель выбрала видео|включить|субтитры, но руки для этого пока нет: это только описание",
     );
+  });
+
+  it("без причины не выдумывает её", () => {
+    const plan = { plan: { goal: "субтитры", steps: [] }, problems: [], gates: [], questions: [] };
+    expect(
+      describeThought(thought({ Call: { registry: "браузер|включить|субтитры", params: {}, why: "" } }, null, plan)),
+    ).toBe("модель предлагает: браузер|включить|субтитры");
   });
 
   it("про неумение говорит, чему учиться, а не «не могу»", () => {

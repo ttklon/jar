@@ -164,6 +164,8 @@ export interface Thought {
   prompt: string;
   answer: string;
   proposal: Proposal | null;
+  /** План из предложения `call`: уже с политикой, вопросами и подтверждениями. */
+  plan: PlanCheck | null;
   problem: string | null;
 }
 

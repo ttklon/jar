@@ -177,6 +177,7 @@ describe("локальное распознавание на экране", () =
       prompt: "…",
       answer: "…",
       proposal: { Learn: { goal: "поставить будильник", why: "такого умения нет" } },
+      plan: null,
       problem: null,
     });
 
@@ -190,11 +191,60 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/предложение модели ничего не выполняет/)).toBeTruthy();
   });
 
+  it("план модели становится обычным планом: с подтверждением, а не сразу делом", async () => {
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Call: { registry: "storage-backup|проверить|свободное место", params: {}, why: "просил про диск" },
+      },
+      plan: {
+        plan: {
+          goal: "что с диском",
+          source: "model",
+          steps: [
+            {
+              registry: "storage-backup|проверить|свободное место",
+              params: {},
+              why: "просил про диск",
+            },
+          ],
+        },
+        problems: [],
+        gates: [
+          {
+            position: 1,
+            registry: "storage-backup|проверить|свободное место",
+            risk: "read",
+            decision: "confirm",
+            wants_approval: true,
+          },
+        ],
+        questions: [],
+      },
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "что с диском" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    // Черновик плана на месте: модель не обходит ни политику, ни человека.
+    await waitFor(() =>
+      expect(screen.getAllByText(/storage-backup\|проверить\|свободное место/).length).toBeGreaterThan(0),
+    );
+    // И подтверждение на месте: план модели без «да» человека не выполняется.
+    expect(screen.getByText("Что могу сделать")).toBeTruthy();
+    expect(screen.getByText(/нужно ваше разрешение/)).toBeTruthy();
+    expect(screen.getByLabelText("разрешить шаг 1")).toBeTruthy();
+  });
+
   it("неразобранный ответ модели показывает её слова, а не прячет их", async () => {
     vi.mocked(think).mockResolvedValueOnce({
       prompt: "…",
       answer: "{\"kind\":\"call\",\"registry\":\"выдуманная|рука\"}",
       proposal: null,
+      plan: null,
       problem: "руки `выдуманная|рука` нет в реестре: выдуманное не выполняется",
     });
 

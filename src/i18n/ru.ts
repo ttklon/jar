@@ -512,6 +512,10 @@ export const voice = {
     why.length > 0
       ? `модель предлагает: ${registry} — ${why}`
       : `модель предлагает: ${registry}`,
+  thinkCallOnlyDescription: (registry: string) =>
+    `модель выбрала ${registry}, но руки для этого пока нет: это только описание`,
+  thinkPlanReady: (steps: number) =>
+    `план от модели готов: шагов — ${steps}. Дальше — обычная проверка и ваше слово`,
   thinkLearn: (goal: string) => `модель говорит, что этого пока не умею: надо научиться — ${goal}`,
   thinkAsk: (question: string) => `модель переспрашивает: ${question}`,
   thinkRefuse: (reason: string) => `модель отказывается: ${reason}`,

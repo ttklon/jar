@@ -599,7 +599,20 @@ export function Voice({ onOpen }: VoiceScreenProps) {
               think(text.trim(), front ? { title: front.title, process: front.process } : null)
                 .then((answer) => {
                   setThought(answer);
-                  const phrase = describeThought(answer);
+
+                  // План модели — это обычный план: политика, вопросы и подтверждение те же.
+                  // Никакого «модель сказала, значит можно».
+                  if (answer.plan) {
+                    setDraft(answer.plan);
+                    setAnswers({});
+                    setRemembered([]);
+                    setApproved(false);
+                    setReport(null);
+                  }
+
+                  const phrase = answer.plan
+                    ? `${describeThought(answer)}. ${voice.thinkPlanReady(answer.plan.plan?.steps.length ?? 0)}`
+                    : describeThought(answer);
                   speak(phrase);
                 })
                 .catch((reason: unknown) =>

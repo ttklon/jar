@@ -358,6 +358,50 @@ pub fn draft(
     })
 }
 
+/// План из выбора модели: одна рука, названная ею, с её параметрами.
+///
+/// Здесь модель ничего не решает окончательно. Её выбор проходит те же проверки, что и
+/// найденное по словам: ключ обязан быть в реестре, рука обязана существовать, а
+/// параметры — быть известными этой руке. Выдуманный параметр не «передастся как-нибудь»,
+/// он отбрасывается: чужое имя в командной строке — это не мелочь.
+///
+/// `None` — брать нечего: ключа нет, руки нет (одно описание) или это не наша строка.
+pub fn chosen(
+    goal: &str,
+    key: &str,
+    params: BTreeMap<String, String>,
+    registry: &Registry,
+    why: &str,
+) -> Option<Plan> {
+    let action = registry.by_key(key)?;
+    let spec = tools::spec(key)?;
+
+    // Берём только те параметры, которые рука действительно принимает, и только
+    // непустые: пустое значение — это «не задано», а не пустая строка в команде.
+    let params = params
+        .into_iter()
+        .filter(|(name, value)| {
+            !value.trim().is_empty() && spec.params.iter().any(|param| &param.name == name)
+        })
+        .collect::<BTreeMap<_, _>>();
+
+    let why = if why.trim().is_empty() {
+        format!("выбрано моделью: {}", action.example)
+    } else {
+        why.trim().to_string()
+    };
+
+    Some(Plan {
+        goal: goal.to_string(),
+        source: "model".to_string(),
+        steps: vec![PlanStep {
+            registry: key.to_string(),
+            params,
+            why,
+        }],
+    })
+}
+
 /// Запоминает план (JSON как есть) и возвращает его разобранным.
 pub fn remember(memory: &Memory, plan: &Plan) -> Result<(), String> {
     let json = serde_json::to_string(plan).map_err(|error| format!("план не пишется: {error}"))?;
@@ -387,6 +431,45 @@ mod tests {
             params: BTreeMap::new(),
             why: "нужно, чтобы двигаться дальше".to_string(),
         }
+    }
+
+    #[test]
+    fn the_model_choice_becomes_a_plan_only_with_a_real_hand() {
+        let registry = registry();
+        let key = "storage-backup|проверить|свободное место";
+
+        let plan = chosen("что с диском", key, BTreeMap::new(), &registry, "просил про диск")
+            .expect("рука есть — план собирается");
+        assert_eq!(plan.source, "model");
+        assert_eq!(plan.steps[0].registry, key);
+        assert_eq!(plan.steps[0].why, "просил про диск");
+
+        assert!(
+            chosen("что-то", "нет|такой|строки", BTreeMap::new(), &registry, "").is_none(),
+            "выдуманного ключа в реестре нет"
+        );
+    }
+
+    #[test]
+    fn parameters_the_hand_does_not_take_are_dropped() {
+        let registry = registry();
+        let key = "files|создать|папку";
+        let spec = tools::spec(key).expect("рука есть");
+
+        let mut params = BTreeMap::new();
+        params.insert("путь".to_string(), "D:\\Отчёты".to_string());
+        params.insert("выдуманный".to_string(), "что-то".to_string());
+        params.insert(spec.params[0].name.clone(), String::new());
+
+        let plan = chosen("создай папку", key, params, &registry, "").expect("план");
+        let kept = &plan.steps[0].params;
+
+        assert!(!kept.contains_key("выдуманный"), "чужое имя отбрасывается");
+        assert!(
+            !kept.contains_key(&spec.params[0].name),
+            "пустое значение — это «не задано», а не пустая строка"
+        );
+        assert!(plan.steps[0].why.contains("выбрано моделью"), "без «зачем» план не собирается");
     }
 
     #[test]

@@ -19,6 +19,10 @@ export function describeThought(thought: Thought): string {
 
   const proposal = thought.proposal;
   if ("Call" in proposal) {
+    // План может не собраться: рука только описана. Тогда говорим это, а не «сейчас сделаю».
+    if (thought.plan === null) {
+      return voice.thinkCallOnlyDescription(proposal.Call.registry);
+    }
     return voice.thinkCall(proposal.Call.registry, proposal.Call.why);
   }
   if ("Learn" in proposal) {

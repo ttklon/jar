@@ -379,6 +379,9 @@ pub struct Thought {
     pub answer: String,
     /// Разобранное предложение. `None` — ответ не разобрался, и тогда `problem` говорит почему.
     pub proposal: Option<intent::Proposal>,
+    /// План из предложения `call`, уже проведённый через политику, вопросы и подтверждения.
+    /// `None` — плана нет: рука только описана, либо модель выбрала не то.
+    pub plan: Option<PlanCheck>,
     pub problem: Option<String>,
 }
 
@@ -439,6 +442,7 @@ pub async fn think(
             prompt,
             answer: answered,
             proposal: None,
+            plan: None,
             problem: Some(error.to_string()),
         },
     })
