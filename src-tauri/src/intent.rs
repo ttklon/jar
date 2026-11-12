@@ -224,16 +224,28 @@ pub fn parse(answer: &str, known: &[String]) -> Result<Proposal, IntentError> {
 /// Больше одного объекта — ошибка: два ответа означают, что модель не решила, а выбор из
 /// двух — работа человека, а не угадывание.
 fn single_json(text: &str) -> Result<String, IntentError> {
-    let bytes = text.as_bytes();
-    let mut starts: Vec<usize> = Vec::new();
+    let found = top_level_objects(text);
+
+    match found.as_slice() {
+        [] => Err(IntentError::NoJson),
+        [_] => {
+            let (start, end) = found[0];
+            String::from_utf8(text.as_bytes()[start..end].to_vec()).map_err(|_| IntentError::NoJson)
+        }
+        _ => Err(IntentError::ManyJson),
+    }
+}
+
+/// Границы объектов верхнего уровня: кавычки, экранирование и вложенность учитываются,
+/// поэтому `{` внутри строки или во вложенном объекте не рвёт поиск.
+fn top_level_objects(text: &str) -> Vec<(usize, usize)> {
+    let mut found = Vec::new();
     let mut depth = 0usize;
+    let mut open_at = 0usize;
     let mut in_string = false;
     let mut escaped = false;
-    let mut open_at = 0usize;
 
-    let mut index = 0usize;
-    while index < bytes.len() {
-        let symbol = bytes[index];
+    for (index, symbol) in text.bytes().enumerate() {
         if in_string {
             if escaped {
                 escaped = false;
@@ -242,7 +254,6 @@ fn single_json(text: &str) -> Result<String, IntentError> {
             } else if symbol == b'"' {
                 in_string = false;
             }
-            index += 1;
             continue;
         }
 
@@ -254,62 +265,22 @@ fn single_json(text: &str) -> Result<String, IntentError> {
                 }
                 depth += 1;
             }
-            b'}' => {
-                if depth > 0 {
-                    depth -= 1;
-                    if depth == 0 {
-                        starts.push(open_at);
-                    }
-                }
-            }
-            _ => {}
-        }
-        index += 1;
-    }
-
-    if depth != 0 || starts.is_empty() {
-        return Err(IntentError::NoJson);
-    }
-
-    if starts.len() > 1 {
-        return Err(IntentError::ManyJson);
-    }
-
-    // Второй проход: точная граница объекта — тот же алгоритм, но с запоминанием конца.
-    let start = starts[0];
-    let mut depth = 0usize;
-    let mut in_string = false;
-    let mut escaped = false;
-    let mut end = None;
-
-    for (offset, symbol) in bytes.iter().enumerate().skip(start) {
-        if in_string {
-            if escaped {
-                escaped = false;
-            } else if *symbol == b'\\' {
-                escaped = true;
-            } else if *symbol == b'"' {
-                in_string = false;
-            }
-            continue;
-        }
-
-        match symbol {
-            b'"' => in_string = true,
-            b'{' => depth += 1,
-            b'}' => {
+            b'}' if depth > 0 => {
                 depth -= 1;
                 if depth == 0 {
-                    end = Some(offset + 1);
-                    break;
+                    found.push((open_at, index + 1));
                 }
             }
             _ => {}
         }
     }
 
-    let end = end.ok_or(IntentError::NoJson)?;
-    String::from_utf8(bytes[start..end].to_vec()).map_err(|_| IntentError::NoJson)
+    // Незакрытая скобка — не объект: обрывок ответа выполнять нельзя.
+    if depth != 0 {
+        return Vec::new();
+    }
+
+    found
 }
 
 /// Параметры: строка, число и `true`/`false` становятся строкой. Вложенное — ошибка.
