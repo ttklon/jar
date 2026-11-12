@@ -35,6 +35,7 @@ pub mod isolation;
 pub mod learn;
 pub mod llama;
 pub mod llm;
+pub mod hand;
 pub mod logging;
 pub mod memory;
 pub mod models;
@@ -154,6 +155,9 @@ pub fn run() {
             ipc::foreground_window,
             ipc::model_prompt,
             ipc::think,
+            ipc::draft_hand,
+            ipc::hand_drafts,
+            ipc::forget_hand,
             ipc::facts,
             ipc::remember_fact,
             ipc::forget_fact,

@@ -35,5 +35,9 @@ export function describeThought(thought: Thought): string {
   if ("Ask" in proposal) {
     return voice.thinkAsk(proposal.Ask.question);
   }
+  if ("Hand" in proposal) {
+    // Черновик — не умение: так и говорим, иначе человек решит, что уже умеем.
+    return voice.thinkHandDraft(proposal.Hand.goal);
+  }
   return voice.thinkRefuse(proposal.Refuse.reason);
 }

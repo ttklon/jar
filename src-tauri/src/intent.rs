@@ -56,6 +56,12 @@ pub enum Proposal {
     },
     /// Такого умения нет — человеку надо его добыть (найти, скачать, занести).
     Learn { goal: String, why: String },
+    /// Черновик новой руки. Это текст, а не умение: исполнить его нечем и нельзя.
+    Hand {
+        goal: String,
+        code: String,
+        why: String,
+    },
     /// Не хватает одного ответа человека.
     Ask { question: String, why: String },
     /// Политика запрещает — единственный случай, когда отказ допустим.
@@ -97,6 +103,7 @@ pub fn prompt(
          Виды ответа:\n\
          {\"kind\":\"call\",\"registry\":\"<ключ из списка>\",\"params\":{},\"why\":\"<почему>\"}\n\
          {\"kind\":\"learn\",\"goal\":\"<чему научиться>\",\"why\":\"<почему>\"}\n\
+         {\"kind\":\"hand\",\"goal\":\"<что делает>\",\"code\":\"<скрипт>\",\"why\":\"<почему>\"}\n\
          {\"kind\":\"ask\",\"question\":\"<один вопрос>\",\"why\":\"<почему>\"}\n\
          {\"kind\":\"refuse\",\"reason\":\"<что запрещено>\"}\n\n\
          Правила:\n\
@@ -212,6 +219,11 @@ pub fn parse(answer: &str, known: &[String]) -> Result<Proposal, IntentError> {
                 why: field(map, "why"),
             })
         }
+        "hand" => Ok(Proposal::Hand {
+            goal: required(map, "goal")?,
+            code: required(map, "code")?,
+            why: field(map, "why"),
+        }),
         "learn" => Ok(Proposal::Learn {
             goal: required(map, "goal")?,
             why: field(map, "why"),
@@ -464,6 +476,25 @@ mod tests {
         assert_eq!(
             parse(r#"{"kind":"выполнить"}"#, &known()),
             Err(IntentError::UnknownKind("выполнить".to_string()))
+        );
+    }
+
+    #[test]
+    fn a_draft_hand_is_read_as_text_and_never_as_a_call() {
+        let answer = r#"{"kind":"hand","goal":"показать диски","code":"Get-PSDrive","why":"проще"}"#;
+        assert_eq!(
+            parse(answer, &known()).expect("разбирается"),
+            Proposal::Hand {
+                goal: "показать диски".to_string(),
+                code: "Get-PSDrive".to_string(),
+                why: "проще".to_string(),
+            }
+        );
+
+        // Без кода это не черновик: пустая рука хуже отсутствия руки.
+        assert_eq!(
+            parse(r#"{"kind":"hand","goal":"показать диски"}"#, &known()),
+            Err(IntentError::Missing("code"))
         );
     }
 

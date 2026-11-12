@@ -15,6 +15,7 @@ use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::container;
 use crate::download::{self, Downloaded};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
+use crate::hand;
 use crate::intent;
 use crate::isolation;
 use crate::learn::{self, Learning};
@@ -368,6 +369,84 @@ pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
 #[tauri::command]
 pub fn plan_for(state: State<'_, AppState>, query: String, limit: usize) -> Vec<PlanItem> {
     planner::plan(&state.inner.registry, &query, limit.clamp(1, 50))
+}
+
+/// Просьба написать черновик новой руки для строки реестра `key`.
+///
+/// Черновик — это **текст**. Он сохраняется, показывается человеку и не исполняется: у него
+/// нет пути к запуску ни в плане, ни в руках. Фильтр отсеивает очевидно недопустимое, но
+/// безопасность он не гарантирует, и притворяться иначе было бы худшим из обманов.
+#[tauri::command]
+pub async fn draft_hand(
+    state: State<'_, AppState>,
+    key: String,
+) -> Result<hand::Draft, String> {
+    let inner = state.inner.clone();
+
+    let action = inner
+        .registry
+        .by_key(&key)
+        .ok_or_else(|| format!("такой строки нет в реестре: {key}"))?;
+    let example = action.example.clone();
+    let implementation = action.implementation.join(", ");
+
+    let port = match inner.engine.lock() {
+        Ok(guard) => match guard.as_ref() {
+            Some(server) => server.port(),
+            None => {
+                return Err("движок не запущен: откройте «Модели» и запустите модель".to_string())
+            }
+        },
+        Err(_) => return Err("движок не под контролем приложения: перезапустите его".to_string()),
+    };
+
+    let prompt = hand::prompt(&example, &example, &implementation);
+    let body = llm::chat_body(&prompt, "local");
+    let answered =
+        tauri::async_runtime::spawn_blocking(move || llm::ask(port, &body, llm::TIMEOUT))
+            .await
+            .map_err(|error| format!("разговор с моделью не выполнился: {error}"))??;
+
+    // Рука не в реестре — значит `call` тут невозможен; принимаем только `hand`.
+    match intent::parse(&answered, &[]) {
+        Ok(intent::Proposal::Hand { goal, code, why }) => {
+            let draft = hand::accept(&key, &goal, &code, &why, now_ms() as u64)?;
+            hand::save(&inner.memory, &draft)?;
+            Ok(draft)
+        }
+        Ok(intent::Proposal::Refuse { reason }) => Err(format!("модель отказалась: {reason}")),
+        Ok(other) => Err(format!(
+            "ожидался черновик руки, а пришло другое: {other:?}"
+        )),
+        Err(_) => Err(format!(
+            "ответ модели не разобрался: {}",
+            truncate_words(&answered)
+        )),
+    }
+}
+
+/// Черновики рук, свежие сверху. Ничего не запускают.
+#[tauri::command]
+pub fn hand_drafts(state: State<'_, AppState>) -> Vec<hand::Draft> {
+    hand::all(&state.inner.memory)
+}
+
+/// Забыть черновик: человек прочитал и не хочет его держать.
+#[tauri::command]
+pub fn forget_hand(state: State<'_, AppState>, key: String) -> Result<(), String> {
+    hand::forget(&state.inner.memory, &key.trim().to_string())
+}
+
+/// Первые слова ответа модели — чтобы ошибка что-то объясняла, а не была пустой.
+fn truncate_words(text: &str) -> String {
+    let clean = text.replace(['\n', '\r'], " ");
+    let trimmed = clean.trim();
+    let cut: String = trimmed.chars().take(200).collect();
+    if trimmed.chars().count() > 200 {
+        format!("{cut}…")
+    } else {
+        cut
+    }
 }
 
 /// Что модель предлагает сделать. Не выполнено и не подтверждено: решает человек.

@@ -153,9 +153,19 @@ export interface Learning {
 }
 
 /** Что модель предложила. Не выполнено и не подтверждено: решает человек. */
+/** Черновик руки: текст, который ничего не исполняет. */
+export interface HandDraft {
+  key: string;
+  goal: string;
+  code: string;
+  why: string;
+  created_ms: number;
+}
+
 export type Proposal =
   | { Call: { registry: string; params: Record<string, string>; why: string } }
   | { Learn: { goal: string; why: string } }
+  | { Hand: { goal: string; code: string; why: string } }
   | { Ask: { question: string; why: string } }
   | { Refuse: { reason: string } };
 

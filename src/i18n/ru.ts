@@ -514,6 +514,11 @@ export const voice = {
       : `модель предлагает: ${registry}`,
   thinkCallOnlyDescription: (registry: string) =>
     `модель выбрала ${registry}, но руки для этого пока нет: это только описание`,
+  thinkHandDraft: (goal: string) =>
+    `модель написала черновик руки: ${goal}. Это текст, а не умение — и он не исполняется`,
+  handTitle: "Черновик руки",
+  handNever: "Черновик ничего не исполняет: у него нет пути к запуску ни в плане, ни в руках",
+  handFilter: (reason: string) => `черновик не принят: ${reason}`,
   thinkPlanReady: (steps: number) =>
     `план от модели готов: шагов — ${steps}. Дальше — обычная проверка и ваше слово`,
   thinkLearn: (goal: string) => `модель говорит, что этого пока не умею: надо научиться — ${goal}`,

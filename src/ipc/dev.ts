@@ -130,6 +130,7 @@ import type {
   PlanReport,
   RoleView,
   Fact,
+  HandDraft,
   ForegroundWindow,
   IsolationStatus,
   SpeechStatus,
@@ -529,6 +530,22 @@ export async function runPlan(_json: string, _approved: number[]): Promise<PlanR
 }
 
 // ── Локальное распознавание в браузере ──────────────────────────────────────
+
+// ── Черновики рук в браузере ────────────────────────────────────────────────
+
+export async function draftHand(): Promise<never> {
+  throw new Error("черновик руки пишет модель: в браузере её нет");
+}
+
+export async function handDrafts(): Promise<HandDraft[]> {
+  // В браузере память лежит в localStorage — читаем те же черновики, что записало приложение
+  // при последнем запуске на этой машине, но ничего не придумываем.
+  return [];
+}
+
+export async function forgetHand(): Promise<void> {
+  // Нечего забывать: черновики тут не создаются.
+}
 
 // ── Модель в браузере ───────────────────────────────────────────────────────
 

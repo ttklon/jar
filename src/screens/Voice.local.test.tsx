@@ -1,7 +1,16 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { draftPlan, facts, modelPrompt, planFor, speechStatus, think, transcribeLocal } from "../ipc";
+import {
+  draftHand,
+  draftPlan,
+  facts,
+  modelPrompt,
+  planFor,
+  speechStatus,
+  think,
+  transcribeLocal,
+} from "../ipc";
 import { startRecording } from "../lib/recorder";
 import { Voice } from "./Voice";
 
@@ -17,6 +26,7 @@ vi.mock("../ipc", () => ({
   requestLearning: vi.fn().mockResolvedValue(null),
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn(),
+  draftHand: vi.fn(),
   speak: vi.fn(),
   modelPrompt: vi.fn().mockResolvedValue(
     "Ты выбираешь одно действие для помощника на Windows.\nЗадача человека:\nубавить громкость",
@@ -268,6 +278,77 @@ describe("локальное распознавание на экране", () =
     await waitFor(() => expect(screen.getByText("Чему нужно научиться")).toBeTruthy());
     expect(screen.getAllByText(/включить субтитры в видео/).length).toBeGreaterThan(0);
     expect(screen.getByText(/записал в обучение/)).toBeTruthy();
+  });
+
+  it("показывает черновик руки и говорит, что он ничего не исполняет", async () => {
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Learn: { goal: "показать диски", why: "" } },
+      plan: null,
+      learning: {
+        registry: "storage-backup|проверить|свободное место",
+        example: "проверить свободное место",
+        query: "сколько места",
+        implementation: ["PowerShell"],
+        risk: "read",
+        notes: "",
+        asked_ms: 1,
+        times: 1,
+        steps: [],
+      },
+      problem: null,
+    });
+    vi.mocked(draftHand).mockResolvedValueOnce({
+      key: "storage-backup|проверить|свободное место",
+      goal: "показать свободное место",
+      code: "Get-PSDrive -PSProvider FileSystem | Select-Object Name,Free",
+      why: "так короче",
+      created_ms: 1,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сколько места" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Чему нужно научиться")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Черновик руки"));
+
+    await waitFor(() => expect(screen.getByText(/Get-PSDrive -PSProvider FileSystem/)).toBeTruthy());
+    expect(screen.getByText(/Черновик ничего не исполняет/)).toBeTruthy();
+  });
+
+  it("не принятый черновик объясняет, что в нём не так", async () => {
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Learn: { goal: "скачать что-нибудь", why: "" } },
+      plan: null,
+      learning: {
+        registry: "storage-backup|проверить|свободное место",
+        example: "проверить свободное место",
+        query: "сколько места",
+        implementation: [],
+        risk: "read",
+        notes: "",
+        asked_ms: 1,
+        times: 1,
+        steps: [],
+      },
+      problem: null,
+    });
+    vi.mocked(draftHand).mockRejectedValueOnce(
+      new Error("в черновике есть то, чего нельзя: `downloadstring` — скачивание из сети"),
+    );
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сколько места" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Чему нужно научиться")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Черновик руки"));
+
+    await waitFor(() => expect(screen.getByText(/скачивание из сети/)).toBeTruthy());
   });
 
   it("неразобранный ответ модели показывает её слова, а не прячет их", async () => {

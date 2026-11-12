@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, makeStyles, Switch, Text, tokens } from "@fluentui/react-components";
 import { MicRegular } from "@fluentui/react-icons";
 import {
+  draftHand,
   draftPlan,
   fillPlan,
   facts,
@@ -18,6 +19,7 @@ import {
 } from "../ipc";
 import type {
   Fact,
+  HandDraft,
   Thought,
   ForegroundWindow,
   IsolationStatus,
@@ -145,6 +147,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  /** Черновик руки. Это текст: у него нет пути к запуску, и это сказано на экране. */
+  const [handDraft, setHandDraft] = useState<HandDraft | null>(null);
+  const [handError, setHandError] = useState<string | null>(null);
+  const [handBusy, setHandBusy] = useState(false);
   /** Что модель предложила. Предложение, а не действие: выполнять его пока нечем. */
   const [thought, setThought] = useState<Thought | null>(null);
   const [thinking, setThinking] = useState(false);
@@ -791,6 +797,42 @@ export function Voice({ onOpen }: VoiceScreenProps) {
             ))}
           </ul>
           <Text className={styles.note}>{voice.learnRisk(learning.risk)}</Text>
+
+          <Button
+            size="small"
+            appearance="subtle"
+            disabled={handBusy}
+            onClick={() => {
+              setHandBusy(true);
+              setHandError(null);
+              draftHand(learning.registry)
+                .then((draft) => {
+                  setHandDraft(draft);
+                  speak(voice.thinkHandDraft(draft.goal));
+                })
+                .catch((reason: unknown) =>
+                  setHandError(reason instanceof Error ? reason.message : String(reason)),
+                )
+                .finally(() => setHandBusy(false));
+            }}
+          >
+            {voice.handTitle}
+          </Button>
+
+          {handError ? (
+            <Text className={styles.error}>{voice.handFilter(handError)}</Text>
+          ) : null}
+
+          {handDraft ? (
+            <>
+              <Text weight="semibold">{`${voice.handTitle}: ${handDraft.goal}`}</Text>
+              <Text className={styles.note}>{voice.handNever}</Text>
+              <pre className={styles.prompt}>{handDraft.code}</pre>
+              {handDraft.why.length > 0 ? (
+                <Text className={styles.note}>{handDraft.why}</Text>
+              ) : null}
+            </>
+          ) : null}
         </section>
       ) : null}
 

@@ -42,6 +42,7 @@ export type {
   Risk,
   RoleView,
   ForegroundWindow,
+  HandDraft,
   IsolationStatus,
   Proposal,
   Thought,
@@ -53,6 +54,7 @@ export type {
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
 import type {
+  HandDraft,
   Thought,
   AuditEvent,
   ConfirmToken,
@@ -437,6 +439,36 @@ export async function learningRequests(): Promise<Learning[]> {
 }
 
 // ── Локальное распознавание ─────────────────────────────────────────────────
+
+/** Попросить модель написать черновик руки. Черновик не исполняется никогда. */
+export async function draftHand(key: string): Promise<HandDraft> {
+  if (isTauri()) {
+    const { draftHand: fromCore } = await import("./tauri");
+    return fromCore(key);
+  }
+  const { draftHand: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Черновики рук, свежие сверху. */
+export async function handDrafts(): Promise<HandDraft[]> {
+  if (isTauri()) {
+    const { handDrafts: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { handDrafts: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Забыть черновик. */
+export async function forgetHand(key: string): Promise<void> {
+  if (isTauri()) {
+    const { forgetHand: fromCore } = await import("./tauri");
+    return fromCore(key);
+  }
+  const { forgetHand: fromData } = await import("./dev");
+  return fromData();
+}
 
 /** Спросить модель, что делать. Ничего не выполняет: предложение — не действие. */
 export async function think(

@@ -22,6 +22,7 @@ import type {
   ProfileView,
   RoleView,
   Fact,
+  HandDraft,
   Thought,
   ForegroundWindow,
   IsolationStatus,
@@ -106,6 +107,21 @@ export function requestLearning(query: string): Promise<Learning | null> {
 
 export function learningRequests(): Promise<Learning[]> {
   return invoke<Learning[]>("learning_requests");
+}
+
+/** Попросить модель написать черновик руки. Черновик не исполняется никогда. */
+export function draftHand(key: string): Promise<HandDraft> {
+  return invoke<HandDraft>("draft_hand", { key });
+}
+
+/** Черновики рук, свежие сверху. */
+export function handDrafts(): Promise<HandDraft[]> {
+  return invoke<HandDraft[]>("hand_drafts");
+}
+
+/** Забыть черновик. */
+export function forgetHand(key: string): Promise<void> {
+  return invoke<void>("forget_hand", { key });
 }
 
 /** Спросить модель, что делать. Ничего не выполняет. */
