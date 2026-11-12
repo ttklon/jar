@@ -157,7 +157,11 @@ pub fn run(key: &str, code: &str, dir: &Path, now_ms: u64) -> Report {
 
     let cancel = AtomicBool::new(false);
     match sandbox.run(&request, Some(Limits::trial()), &cancel) {
-        Ok(output) => report(key, &output, container::note(), now_ms),
+        Ok(output) => {
+            // Где это было: подпись клетки берём у самого модуля клетки, а не сочиняем.
+            let cell = container::note();
+            report(key, &output, &cell, now_ms)
+        }
         Err(reason) => skipped(key, &reason, now_ms),
     }
 }
