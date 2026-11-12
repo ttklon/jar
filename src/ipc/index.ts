@@ -43,6 +43,8 @@ export type {
   RoleView,
   ForegroundWindow,
   IsolationStatus,
+  Proposal,
+  Thought,
   SpeechStatus,
   StepResult,
   Tier,
@@ -51,6 +53,7 @@ export type {
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
 import type {
+  Thought,
   AuditEvent,
   ConfirmToken,
   Downloaded,
@@ -434,6 +437,19 @@ export async function learningRequests(): Promise<Learning[]> {
 }
 
 // ── Локальное распознавание ─────────────────────────────────────────────────
+
+/** Спросить модель, что делать. Ничего не выполняет: предложение — не действие. */
+export async function think(
+  query: string,
+  around: { title: string; process: string } | null = null,
+): Promise<Thought> {
+  if (isTauri()) {
+    const { think: fromCore } = await import("./tauri");
+    return fromCore(query, around);
+  }
+  const { think: fromData } = await import("./dev");
+  return fromData();
+}
 
 /** Что мы спросим у модели по этой фразе: задача, окно, память и найденные руки. */
 export async function modelPrompt(

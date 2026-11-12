@@ -30,6 +30,7 @@ pub mod executor;
 pub mod flows;
 pub mod hotkey;
 pub mod intent;
+pub mod llm;
 pub mod ipc;
 pub mod isolation;
 pub mod learn;
@@ -152,6 +153,7 @@ pub fn run() {
             ipc::isolation_status,
             ipc::foreground_window,
             ipc::model_prompt,
+            ipc::think,
             ipc::facts,
             ipc::remember_fact,
             ipc::forget_fact,

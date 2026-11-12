@@ -506,6 +506,18 @@ export const voice = {
     title.length > 0 ? `${title} — ${process}` : process,
   contextNone: (reason: string) => `активное окно не прочитать: ${reason}`,
   fromMemory: "из памяти — поправьте, если не так",
+  thinkShow: "Спросить модель",
+  thinkThinking: "спрашиваю модель — это может занять минуту",
+  thinkCall: (registry: string, why: string) =>
+    why.length > 0
+      ? `модель предлагает: ${registry} — ${why}`
+      : `модель предлагает: ${registry}`,
+  thinkLearn: (goal: string) => `модель говорит, что этого пока не умею: надо научиться — ${goal}`,
+  thinkAsk: (question: string) => `модель переспрашивает: ${question}`,
+  thinkRefuse: (reason: string) => `модель отказывается: ${reason}`,
+  thinkBroken: (problem: string) => `модель ответила, но разобрать не удалось: ${problem}`,
+  thinkError: (message: string) => `модель не ответила: ${message}`,
+  thinkNotExecuted: "предложение модели ничего не выполняет: действие — только с вашего слова",
   modelPromptShow: "Что спросим у модели",
   modelPromptHide: "Скрыть вопрос к модели",
   modelPromptTitle: "Модели уйдёт ровно это — задача, окно, память и найденные руки:",

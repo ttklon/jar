@@ -16,6 +16,7 @@ use crate::container;
 use crate::download::{self, Downloaded};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::intent;
+use crate::llm;
 use crate::isolation;
 use crate::learn::{self, Learning};
 use crate::llama;
@@ -367,6 +368,80 @@ pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
 #[tauri::command]
 pub fn plan_for(state: State<'_, AppState>, query: String, limit: usize) -> Vec<PlanItem> {
     planner::plan(&state.inner.registry, &query, limit.clamp(1, 50))
+}
+
+/// Что модель предлагает сделать. Не выполнено и не подтверждено: решает человек.
+#[derive(Debug, Serialize)]
+pub struct Thought {
+    /// Вопрос, который ушёл модели. Показывается целиком — без «доверьтесь нам».
+    pub prompt: String,
+    /// Что она ответила словами, до разбора. Видно, если разбор не удался.
+    pub answer: String,
+    /// Разобранное предложение. `None` — ответ не разобрался, и тогда `problem` говорит почему.
+    pub proposal: Option<intent::Proposal>,
+    pub problem: Option<String>,
+}
+
+/// Спросить модель, что делать. Ничего не выполняет.
+///
+/// Ошибки разделены: «движок не запущен» (надо запустить), «движок не отвечает» (умер),
+/// «ответ не разобрался» (модель сказала ерунду). Смешивать их в одно «не получилось»
+/// значит отнять у человека единственную подсказку.
+#[tauri::command]
+pub async fn think(
+    state: State<'_, AppState>,
+    query: String,
+    around: Option<intent::Around>,
+) -> Result<Thought, String> {
+    let inner = state.inner.clone();
+
+    let port = match inner.engine.lock() {
+        Ok(guard) => match guard.as_ref() {
+            Some(server) => server.port(),
+            None => {
+                return Err(
+                    "движок не запущен: откройте «Модели» и запустите модель".to_string()
+                )
+            }
+        },
+        Err(_) => return Err("движок не под контролем приложения: перезапустите его".to_string()),
+    };
+
+    let found = planner::plan(&inner.registry, &query, intent::MAX_CANDIDATES);
+    let facts = inner
+        .memory
+        .facts_with_prefix("вопрос:")
+        .into_iter()
+        .take(intent::MAX_FACTS)
+        .collect::<Vec<_>>();
+    let prompt = intent::prompt(&query, around.as_ref(), &facts, &intent::candidates(&found));
+
+    // Разговор блокирующий: ждать модель надо вне потока интерфейса, иначе окно замрёт.
+    let body = llm::chat_body(&prompt, "local");
+    let answered = tauri::async_runtime::spawn_blocking(move || {
+        llm::ask(port, &body, llm::TIMEOUT)
+    })
+    .await
+    .map_err(|error| format!("разговор с моделью не выполнился: {error}"))??;
+
+    let known = found.iter().map(|item| item.key.clone()).collect::<Vec<_>>();
+
+    Ok(match intent::parse(&answered, &known) {
+        Ok(proposal) => Thought {
+            prompt,
+            answer: answered,
+            proposal: Some(proposal),
+            problem: None,
+        },
+        // Ответ есть, но не разобрался — это не ошибка команды: показать его человеку
+        // полезнее, чем спрятать за «не получилось».
+        Err(error) => Thought {
+            prompt,
+            answer: answered,
+            proposal: None,
+            problem: Some(error.to_string()),
+        },
+    })
 }
 
 /// Что мы спросим у модели по этой фразе.

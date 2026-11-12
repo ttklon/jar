@@ -22,6 +22,7 @@ import type {
   ProfileView,
   RoleView,
   Fact,
+  Thought,
   ForegroundWindow,
   IsolationStatus,
   SpeechStatus,
@@ -105,6 +106,14 @@ export function requestLearning(query: string): Promise<Learning | null> {
 
 export function learningRequests(): Promise<Learning[]> {
   return invoke<Learning[]>("learning_requests");
+}
+
+/** Спросить модель, что делать. Ничего не выполняет. */
+export function think(
+  query: string,
+  around: { title: string; process: string } | null,
+): Promise<Thought> {
+  return invoke<Thought>("think", { query, around });
 }
 
 /** Что мы спросим у модели. Вопрос собирает ядро: в браузере его не собрать. */

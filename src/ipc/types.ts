@@ -152,6 +152,21 @@ export interface Learning {
   steps: LearningStep[];
 }
 
+/** Что модель предложила. Не выполнено и не подтверждено: решает человек. */
+export type Proposal =
+  | { Call: { registry: string; params: Record<string, string>; why: string } }
+  | { Learn: { goal: string; why: string } }
+  | { Ask: { question: string; why: string } }
+  | { Refuse: { reason: string } };
+
+/** Ответ модели: вопрос, её слова, разобранное предложение и что с ним не так. */
+export interface Thought {
+  prompt: string;
+  answer: string;
+  proposal: Proposal | null;
+  problem: string | null;
+}
+
 /** Факт, который человек уже говорил: «папка для отчётов — D:\\Отчёты». */
 export interface Fact {
   key: string;

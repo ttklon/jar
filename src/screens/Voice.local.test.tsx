@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { draftPlan, facts, modelPrompt, planFor, speechStatus, transcribeLocal } from "../ipc";
+import { draftPlan, facts, modelPrompt, planFor, speechStatus, think, transcribeLocal } from "../ipc";
 import { startRecording } from "../lib/recorder";
 import { Voice } from "./Voice";
 
@@ -16,6 +16,8 @@ vi.mock("../ipc", () => ({
   draftPlan: vi.fn().mockResolvedValue(null),
   requestLearning: vi.fn().mockResolvedValue(null),
   facts: vi.fn().mockResolvedValue([]),
+  think: vi.fn(),
+  speak: vi.fn(),
   modelPrompt: vi.fn().mockResolvedValue(
     "Ты выбираешь одно действие для помощника на Windows.\nЗадача человека:\nубавить громкость",
   ),
@@ -168,6 +170,43 @@ describe("локальное распознавание на экране", () =
         process: "chrome.exe",
       });
     });
+  });
+
+  it("спрашивает модель и говорит, что она предложила, ничего не выполняя", async () => {
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Learn: { goal: "поставить будильник", why: "такого умения нет" } },
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "разбуди меня в семь" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    await waitFor(() => {
+      expect(screen.getByText(/надо научиться — поставить будильник/)).toBeTruthy();
+    });
+    expect(screen.getByText(/предложение модели ничего не выполняет/)).toBeTruthy();
+  });
+
+  it("неразобранный ответ модели показывает её слова, а не прячет их", async () => {
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "{\"kind\":\"call\",\"registry\":\"выдуманная|рука\"}",
+      proposal: null,
+      problem: "руки `выдуманная|рука` нет в реестре: выдуманное не выполняется",
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "что-нибудь" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    await waitFor(() => {
+      expect(screen.getByText(/выдуманное не выполняется/)).toBeTruthy();
+    });
+    // Сырой ответ модели виден целиком: человек должен видеть, что она сказала на самом деле.
+    expect(screen.getAllByText(/выдуманная\|рука/).length).toBeGreaterThan(0);
   });
 
   it("держу и говорю — запись уходит своему движку", async () => {

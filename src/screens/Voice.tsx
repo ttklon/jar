@@ -8,6 +8,7 @@ import {
   foregroundWindow,
   modelPrompt,
   planFor,
+  think,
   rememberFact,
   requestLearning,
   runPlan,
@@ -17,6 +18,7 @@ import {
 } from "../ipc";
 import type {
   Fact,
+  Thought,
   ForegroundWindow,
   IsolationStatus,
   Learning,
@@ -28,6 +30,7 @@ import type {
 import { speak } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
 import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
+import { describeThought } from "../lib/thought";
 import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
 import { ActionList } from "../components/ActionList";
@@ -142,6 +145,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  /** Что модель предложила. Предложение, а не действие: выполнять его пока нечем. */
+  const [thought, setThought] = useState<Thought | null>(null);
+  const [thinking, setThinking] = useState(false);
+  const [thinkError, setThinkError] = useState<string | null>(null);
   /** Что именно уйдёт модели — по кнопке и честно, без «доверьтесь нам». */
   const [promptText, setPromptText] = useState<string | null>(null);
   const [promptError, setPromptError] = useState<string | null>(null);
@@ -578,6 +585,44 @@ export function Voice({ onOpen }: VoiceScreenProps) {
             <>
               <Text className={styles.note}>{voice.modelPromptTitle}</Text>
               <pre className={styles.prompt}>{promptText}</pre>
+            </>
+          ) : null}
+
+          <Button
+            size="small"
+            appearance="subtle"
+            disabled={thinking}
+            onClick={() => {
+              setThinking(true);
+              setThinkError(null);
+              setThought(null);
+              think(text.trim(), front ? { title: front.title, process: front.process } : null)
+                .then((answer) => {
+                  setThought(answer);
+                  const phrase = describeThought(answer);
+                  speak(phrase);
+                })
+                .catch((reason: unknown) =>
+                  setThinkError(reason instanceof Error ? reason.message : String(reason)),
+                )
+                .finally(() => setThinking(false));
+            }}
+          >
+            {thinking ? voice.thinkThinking : voice.thinkShow}
+          </Button>
+          {thinkError ? (
+            <Text className={styles.error}>{voice.thinkError(thinkError)}</Text>
+          ) : null}
+          {thought?.proposal ? (
+            <>
+              <Text className={styles.spoken}>{describeThought(thought)}</Text>
+              <Text className={styles.note}>{voice.thinkNotExecuted}</Text>
+            </>
+          ) : null}
+          {thought && !thought.proposal ? (
+            <>
+              <Text className={styles.error}>{voice.thinkBroken(thought.problem ?? "")}</Text>
+              <pre className={styles.prompt}>{thought.answer}</pre>
             </>
           ) : null}
         </div>
