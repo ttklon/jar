@@ -239,7 +239,10 @@ mod tests {
 
         let again = request_for_goal(&memory, &registry, &action.example, "сделай это", 2000)
             .expect("повтор тоже записан");
-        assert_eq!(again.times, 2, "повтор поднимает счётчик, а не заводит вторую запись");
+        assert_eq!(
+            again.times, 2,
+            "повтор поднимает счётчик, а не заводит вторую запись"
+        );
 
         // Переживает перезапуск: это память, а не строка в интерфейсе.
         let listed = all(&memory, &registry);
