@@ -16,10 +16,10 @@ use crate::container;
 use crate::download::{self, Downloaded};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::intent;
-use crate::llm;
 use crate::isolation;
 use crate::learn::{self, Learning};
 use crate::llama;
+use crate::llm;
 use crate::memory::{Episode, Memory, RunRecord};
 use crate::models::{self, ModelFile};
 use crate::plan::{self, Answer, Plan, Problem, Question, StepGate};
@@ -399,9 +399,7 @@ pub async fn think(
         Ok(guard) => match guard.as_ref() {
             Some(server) => server.port(),
             None => {
-                return Err(
-                    "движок не запущен: откройте «Модели» и запустите модель".to_string()
-                )
+                return Err("движок не запущен: откройте «Модели» и запустите модель".to_string())
             }
         },
         Err(_) => return Err("движок не под контролем приложения: перезапустите его".to_string()),
@@ -418,13 +416,15 @@ pub async fn think(
 
     // Разговор блокирующий: ждать модель надо вне потока интерфейса, иначе окно замрёт.
     let body = llm::chat_body(&prompt, "local");
-    let answered = tauri::async_runtime::spawn_blocking(move || {
-        llm::ask(port, &body, llm::TIMEOUT)
-    })
-    .await
-    .map_err(|error| format!("разговор с моделью не выполнился: {error}"))??;
+    let answered =
+        tauri::async_runtime::spawn_blocking(move || llm::ask(port, &body, llm::TIMEOUT))
+            .await
+            .map_err(|error| format!("разговор с моделью не выполнился: {error}"))??;
 
-    let known = found.iter().map(|item| item.key.clone()).collect::<Vec<_>>();
+    let known = found
+        .iter()
+        .map(|item| item.key.clone())
+        .collect::<Vec<_>>();
 
     Ok(match intent::parse(&answered, &known) {
         Ok(proposal) => Thought {

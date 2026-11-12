@@ -104,10 +104,7 @@ pub fn post(port: u16, path: &str, body: &str, timeout: Duration) -> Result<Stri
     let text = String::from_utf8_lossy(&text).to_string();
 
     if !(200..300).contains(&status) {
-        return Err(format!(
-            "движок ответил {status}: {}",
-            snippet(text.trim())
-        ));
+        return Err(format!("движок ответил {status}: {}", snippet(text.trim())));
     }
 
     Ok(text)
@@ -168,8 +165,8 @@ fn unchunk(body: &[u8]) -> Result<Vec<u8>, String> {
 
 /// Текст ответа модели из тела чата: `choices[0].message.content`.
 pub fn content(json: &str) -> Result<String, String> {
-    let parsed: serde_json::Value = serde_json::from_str(json)
-        .map_err(|error| format!("движок ответил не JSON: {error}"))?;
+    let parsed: serde_json::Value =
+        serde_json::from_str(json).map_err(|error| format!("движок ответил не JSON: {error}"))?;
 
     if let Some(error) = parsed.get("error") {
         let message = error
@@ -186,7 +183,12 @@ pub fn content(json: &str) -> Result<String, String> {
         .and_then(|choice| choice.get("message"))
         .and_then(|message| message.get("content"))
         .and_then(|content| content.as_str())
-        .ok_or_else(|| format!("в ответе нет поля choices[0].message.content: {}", snippet(json)))?;
+        .ok_or_else(|| {
+            format!(
+                "в ответе нет поля choices[0].message.content: {}",
+                snippet(json)
+            )
+        })?;
 
     let text = text.trim().to_string();
     if text.is_empty() {
@@ -217,7 +219,10 @@ mod tests {
         let body = chat_body("убавить громкость", "qwen.gguf");
         let text = String::from_utf8_lossy(&request(CHAT_PATH, &body)).to_string();
 
-        assert!(text.starts_with("POST /v1/chat/completions HTTP/1.1\r\n"), "{text}");
+        assert!(
+            text.starts_with("POST /v1/chat/completions HTTP/1.1\r\n"),
+            "{text}"
+        );
         assert!(text.contains("Content-Type: application/json"));
         assert!(text.contains(&format!("Content-Length: {}\r\n", body.len())));
         // Тело без истории: одна реплика, низкая температура, без потока.
@@ -288,8 +293,12 @@ mod tests {
         let (sender, receiver) = std::sync::mpsc::channel();
         let port = serve(answer.into_bytes(), sender);
 
-        let text = ask(port, &chat_body("заплати", "m.gguf"), Duration::from_secs(5))
-            .expect("ответ получен");
+        let text = ask(
+            port,
+            &chat_body("заплати", "m.gguf"),
+            Duration::from_secs(5),
+        )
+        .expect("ответ получен");
         assert_eq!(text, r#"{"kind":"refuse","reason":"деньги"}"#);
 
         let seen = receiver.recv().expect("сервер увидел запрос");
@@ -331,6 +340,9 @@ mod tests {
         let port = serve(b"OK".to_vec(), sender);
 
         let error = ask(port, "{}", Duration::from_secs(5)).expect_err("это не HTTP");
-        assert!(error.contains("не HTTP") || error.contains("нет кода"), "{error}");
+        assert!(
+            error.contains("не HTTP") || error.contains("нет кода"),
+            "{error}"
+        );
     }
 }
