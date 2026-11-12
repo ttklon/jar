@@ -73,7 +73,10 @@ pub struct Candidate {
 }
 
 /// Что человек видит прямо сейчас — только то, что нужно для «это».
-#[derive(Debug, Clone, Serialize)]
+///
+/// Приходит из интерфейса, поэтому и разбирается: без `Deserialize` команда не примет его
+/// и вопрос к модели остался бы без окна — то есть без адресата у слова «это».
+#[derive(Debug, Clone, Serialize, serde::Deserialize)]
 pub struct Around {
     pub title: String,
     pub process: String,
