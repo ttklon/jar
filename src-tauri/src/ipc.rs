@@ -438,13 +438,14 @@ pub async fn think(
                     registry,
                     params,
                     why,
-                } => plan::chosen(&query, registry, params.clone(), &inner.registry, why)
-                    .map(|plan| PlanCheck {
+                } => plan::chosen(&query, registry, params.clone(), &inner.registry, why).map(
+                    |plan| PlanCheck {
                         problems: plan::check(&plan, &inner.registry),
                         gates: plan::gate_plan(&plan, &inner.registry, &[]),
                         questions: plan::questions(&plan, &inner.registry),
                         plan: Some(plan),
-                    }),
+                    },
+                ),
                 _ => None,
             };
 

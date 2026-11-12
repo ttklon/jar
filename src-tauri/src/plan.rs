@@ -438,8 +438,14 @@ mod tests {
         let registry = registry();
         let key = "storage-backup|проверить|свободное место";
 
-        let plan = chosen("что с диском", key, BTreeMap::new(), &registry, "просил про диск")
-            .expect("рука есть — план собирается");
+        let plan = chosen(
+            "что с диском",
+            key,
+            BTreeMap::new(),
+            &registry,
+            "просил про диск",
+        )
+        .expect("рука есть — план собирается");
         assert_eq!(plan.source, "model");
         assert_eq!(plan.steps[0].registry, key);
         assert_eq!(plan.steps[0].why, "просил про диск");
@@ -469,7 +475,10 @@ mod tests {
             !kept.contains_key(&spec.params[0].name),
             "пустое значение — это «не задано», а не пустая строка"
         );
-        assert!(plan.steps[0].why.contains("выбрано моделью"), "без «зачем» план не собирается");
+        assert!(
+            plan.steps[0].why.contains("выбрано моделью"),
+            "без «зачем» план не собирается"
+        );
     }
 
     #[test]
