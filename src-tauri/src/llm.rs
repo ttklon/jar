@@ -253,7 +253,7 @@ mod tests {
 
     #[test]
     fn a_chunked_answer_is_glued_back_together() {
-        let body = b"7\r\n{\"hello\r\n6\r\n\":1}\r\n0\r\n\r\n";
+        let body = b"7\r\n{\"hello\r\n4\r\n\":1}\r\n0\r\n\r\n";
         assert_eq!(unchunk(body).expect("куски"), b"{\"hello\":1}");
 
         assert!(unchunk(b"7\r\nabc").is_err(), "обрезанный кусок — ошибка");
