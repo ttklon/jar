@@ -434,7 +434,7 @@ pub fn hand_drafts(state: State<'_, AppState>) -> Vec<hand::Draft> {
 /// Забыть черновик: человек прочитал и не хочет его держать.
 #[tauri::command]
 pub fn forget_hand(state: State<'_, AppState>, key: String) -> Result<(), String> {
-    hand::forget(&state.inner.memory, &key.trim().to_string())
+    hand::forget(&state.inner.memory, key.trim())
 }
 
 /// Первые слова ответа модели — чтобы ошибка что-то объясняла, а не была пустой.
