@@ -162,6 +162,21 @@ export interface HandDraft {
   created_ms: number;
 }
 
+/** Отчёт о пробе черновика в клетке. Отчёт — не умение. */
+export interface TrialReport {
+  key: string;
+  ran: boolean;
+  ok: boolean;
+  exit_code: number | null;
+  stdout: string;
+  stderr: string;
+  timed_out: boolean;
+  cell: string;
+  duration_ms: number;
+  note: string;
+  created_ms: number;
+}
+
 export type Proposal =
   | { Call: { registry: string; params: Record<string, string>; why: string } }
   | { Learn: { goal: string; why: string } }

@@ -131,6 +131,7 @@ import type {
   RoleView,
   Fact,
   HandDraft,
+  TrialReport,
   ForegroundWindow,
   IsolationStatus,
   SpeechStatus,
@@ -535,6 +536,16 @@ export async function runPlan(_json: string, _approved: number[]): Promise<PlanR
 
 export async function draftHand(): Promise<never> {
   throw new Error("черновик руки пишет модель: в браузере её нет");
+}
+
+export async function trialHand(): Promise<never> {
+  // Клетка — это Windows и настоящее рабочее место. В браузере пробы нет, и выдумывать
+  // «код 0» нельзя: человек поверил бы, что черновик проверен.
+  throw new Error("проба идёт в клетке Windows: в браузере её нет");
+}
+
+export async function trialReport(): Promise<TrialReport | null> {
+  return null;
 }
 
 export async function handDrafts(): Promise<HandDraft[]> {

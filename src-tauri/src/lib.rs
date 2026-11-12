@@ -29,6 +29,7 @@ pub mod download;
 pub mod executor;
 pub mod flows;
 pub mod hand;
+pub mod trial;
 pub mod hotkey;
 pub mod intent;
 pub mod ipc;
@@ -157,6 +158,8 @@ pub fn run() {
             ipc::think,
             ipc::draft_hand,
             ipc::hand_drafts,
+            ipc::trial_hand,
+            ipc::trial_report,
             ipc::forget_hand,
             ipc::facts,
             ipc::remember_fact,

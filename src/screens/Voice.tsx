@@ -10,6 +10,7 @@ import {
   modelPrompt,
   planFor,
   think,
+  trialHand,
   rememberFact,
   requestLearning,
   runPlan,
@@ -20,6 +21,7 @@ import {
 import type {
   Fact,
   HandDraft,
+  TrialReport,
   Thought,
   ForegroundWindow,
   IsolationStatus,
@@ -151,6 +153,9 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [handDraft, setHandDraft] = useState<HandDraft | null>(null);
   const [handError, setHandError] = useState<string | null>(null);
   const [handBusy, setHandBusy] = useState(false);
+  /** Отчёт о пробе в клетке. Отчёт, а не «научились». */
+  const [trial, setTrial] = useState<TrialReport | null>(null);
+  const [trialBusy, setTrialBusy] = useState(false);
   /** Что модель предложила. Предложение, а не действие: выполнять его пока нечем. */
   const [thought, setThought] = useState<Thought | null>(null);
   const [thinking, setThinking] = useState(false);
@@ -830,6 +835,46 @@ export function Voice({ onOpen }: VoiceScreenProps) {
               <pre className={styles.prompt}>{handDraft.code}</pre>
               {handDraft.why.length > 0 ? (
                 <Text className={styles.note}>{handDraft.why}</Text>
+              ) : null}
+
+              <Button
+                size="small"
+                appearance="subtle"
+                disabled={trialBusy}
+                onClick={() => {
+                  setTrialBusy(true);
+                  setTrial(null);
+                  trialHand(handDraft.key)
+                    .then((report) => {
+                      setTrial(report);
+                      speak(report.note);
+                    })
+                    .catch((reason: unknown) => {
+                      const message = reason instanceof Error ? reason.message : String(reason);
+                      setTrial(null);
+                      setHandError(message);
+                    })
+                    .finally(() => setTrialBusy(false));
+                }}
+              >
+                {trialBusy ? voice.trialRunning : voice.trialRun}
+              </Button>
+
+              {trial ? (
+                <>
+                  <Text weight="semibold">{trial.note}</Text>
+                  <Text className={styles.note}>{voice.trialCell(trial.cell)}</Text>
+                  <Text className={styles.note}>{voice.trialNotHand}</Text>
+                  {trial.ran && trial.stdout.length > 0 ? (
+                    <pre className={styles.prompt}>{trial.stdout}</pre>
+                  ) : null}
+                  {trial.ran && trial.stderr.length > 0 ? (
+                    <pre className={styles.prompt}>{trial.stderr}</pre>
+                  ) : null}
+                  {!trial.ran ? (
+                    <Text className={styles.error}>{voice.trialNotRan(trial.note)}</Text>
+                  ) : null}
+                </>
               ) : null}
             </>
           ) : null}

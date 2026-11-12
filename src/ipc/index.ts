@@ -45,6 +45,7 @@ export type {
   HandDraft,
   IsolationStatus,
   Proposal,
+  TrialReport,
   Thought,
   SpeechStatus,
   StepResult,
@@ -55,6 +56,7 @@ export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
 import type {
   HandDraft,
+  TrialReport,
   Thought,
   AuditEvent,
   ConfirmToken,
@@ -447,6 +449,26 @@ export async function draftHand(key: string): Promise<HandDraft> {
     return fromCore(key);
   }
   const { draftHand: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Проба черновика в клетке. Отчёт, а не умение. */
+export async function trialHand(key: string): Promise<TrialReport> {
+  if (isTauri()) {
+    const { trialHand: fromCore } = await import("./tauri");
+    return fromCore(key);
+  }
+  const { trialHand: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Последний отчёт о пробе. `null` — не пробовали. */
+export async function trialReport(key: string): Promise<TrialReport | null> {
+  if (isTauri()) {
+    const { trialReport: fromCore } = await import("./tauri");
+    return fromCore(key);
+  }
+  const { trialReport: fromData } = await import("./dev");
   return fromData();
 }
 

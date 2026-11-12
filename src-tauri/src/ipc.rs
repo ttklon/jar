@@ -21,6 +21,7 @@ use crate::isolation;
 use crate::learn::{self, Learning};
 use crate::llama;
 use crate::llm;
+use crate::trial;
 use crate::memory::{Episode, Memory, RunRecord};
 use crate::models::{self, ModelFile};
 use crate::plan::{self, Answer, Plan, Problem, Question, StepGate};
@@ -420,6 +421,41 @@ pub async fn draft_hand(state: State<'_, AppState>, key: String) -> Result<hand:
             truncate_words(&answered)
         )),
     }
+}
+
+/// Проба черновика в клетке: запустить и показать отчёт.
+///
+/// Проба **не делает черновик умением**: она только отвечает на вопрос «что он делает».
+/// Если клетка не открылась, отчёт говорит это прямо, и запуска не будет: чужой текст без
+/// забора не исполняется — ровно для этого клетка и писалась.
+#[tauri::command]
+pub async fn trial_hand(
+    state: State<'_, AppState>,
+    key: String,
+) -> Result<trial::Report, String> {
+    let inner = state.inner.clone();
+    let draft = hand::get(&inner.memory, &key)
+        .ok_or_else(|| format!("черновика для этой строки нет: {key}"))?;
+
+    let dir = inner.base_dir.join("trial");
+    std::fs::create_dir_all(&dir).map_err(|error| format!("папка пробы: {error}"))?;
+
+    let started = now_ms() as u64;
+    let code = draft.code.clone();
+    let report = tauri::async_runtime::spawn_blocking(move || {
+        trial::run(&key, &code, &dir, started)
+    })
+    .await
+    .map_err(|error| format!("проба не выполнилась: {error}"))?;
+
+    trial::save(&inner.memory, &report)?;
+    Ok(report)
+}
+
+/// Последний отчёт о пробе для этой строки. Есть — значит, уже пробовали.
+#[tauri::command]
+pub fn trial_report(state: State<'_, AppState>, key: String) -> Option<trial::Report> {
+    trial::get(&state.inner.memory, &key)
 }
 
 /// Черновики рук, свежие сверху. Ничего не запускают.

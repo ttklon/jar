@@ -23,6 +23,7 @@ import type {
   RoleView,
   Fact,
   HandDraft,
+  TrialReport,
   Thought,
   ForegroundWindow,
   IsolationStatus,
@@ -112,6 +113,16 @@ export function learningRequests(): Promise<Learning[]> {
 /** Попросить модель написать черновик руки. Черновик не исполняется никогда. */
 export function draftHand(key: string): Promise<HandDraft> {
   return invoke<HandDraft>("draft_hand", { key });
+}
+
+/** Проба черновика в клетке. Отчёт, а не умение. */
+export function trialHand(key: string): Promise<TrialReport> {
+  return invoke<TrialReport>("trial_hand", { key });
+}
+
+/** Последний отчёт о пробе. `null` — не пробовали. */
+export function trialReport(key: string): Promise<TrialReport | null> {
+  return invoke<TrialReport | null>("trial_report", { key });
 }
 
 /** Черновики рук, свежие сверху. */

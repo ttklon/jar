@@ -9,6 +9,7 @@ import {
   planFor,
   speechStatus,
   think,
+  trialHand,
   transcribeLocal,
 } from "../ipc";
 import { startRecording } from "../lib/recorder";
@@ -27,6 +28,7 @@ vi.mock("../ipc", () => ({
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn(),
   draftHand: vi.fn(),
+  trialHand: vi.fn(),
   speak: vi.fn(),
   modelPrompt: vi.fn().mockResolvedValue(
     "Ты выбираешь одно действие для помощника на Windows.\nЗадача человека:\nубавить громкость",
@@ -316,6 +318,115 @@ describe("локальное распознавание на экране", () =
 
     await waitFor(() => expect(screen.getByText(/Get-PSDrive -PSProvider FileSystem/)).toBeTruthy());
     expect(screen.getByText(/Черновик ничего не исполняет/)).toBeTruthy();
+  });
+
+  it("проба показывает отчёт из клетки и не выдаёт его за умение", async () => {
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Learn: { goal: "показать диски", why: "" } },
+      plan: null,
+      learning: {
+        registry: "storage-backup|проверить|свободное место",
+        example: "проверить свободное место",
+        query: "сколько места",
+        implementation: ["PowerShell"],
+        risk: "read",
+        notes: "",
+        asked_ms: 1,
+        times: 1,
+        steps: [],
+      },
+      problem: null,
+    });
+    vi.mocked(draftHand).mockResolvedValueOnce({
+      key: "storage-backup|проверить|свободное место",
+      goal: "показать свободное место",
+      code: "Get-PSDrive",
+      why: "",
+      created_ms: 1,
+    });
+    vi.mocked(trialHand).mockResolvedValueOnce({
+      key: "storage-backup|проверить|свободное место",
+      ran: true,
+      ok: true,
+      exit_code: 0,
+      stdout: "Name Free\nC 42",
+      stderr: "",
+      timed_out: false,
+      cell: "клетка: AppContainer, без сети",
+      duration_ms: 120,
+      note: "проба прошла: код 0",
+      created_ms: 2,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сколько места" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Чему нужно научиться")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Черновик руки"));
+    await waitFor(() => expect(screen.getByText(/Get-PSDrive/)).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Проверить в клетке"));
+
+    await waitFor(() => expect(screen.getByText("проба прошла: код 0")).toBeTruthy());
+    expect(screen.getByText(/AppContainer, без сети/)).toBeTruthy();
+    expect(screen.getByText(/проба — это отчёт, а не умение/)).toBeTruthy();
+  });
+
+  it("если клетка не открылась — проба не состоялась, и это сказано", async () => {
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Learn: { goal: "показать диски", why: "" } },
+      plan: null,
+      learning: {
+        registry: "storage-backup|проверить|свободное место",
+        example: "проверить свободное место",
+        query: "сколько места",
+        implementation: [],
+        risk: "read",
+        notes: "",
+        asked_ms: 1,
+        times: 1,
+        steps: [],
+      },
+      problem: null,
+    });
+    vi.mocked(draftHand).mockResolvedValueOnce({
+      key: "storage-backup|проверить|свободное место",
+      goal: "показать свободное место",
+      code: "Get-PSDrive",
+      why: "",
+      created_ms: 1,
+    });
+    vi.mocked(trialHand).mockResolvedValueOnce({
+      key: "storage-backup|проверить|свободное место",
+      ran: false,
+      ok: false,
+      exit_code: null,
+      stdout: "",
+      stderr: "",
+      timed_out: false,
+      cell: "клетка не открылась: ERROR_BAD_ENVIRONMENT; чужой текст без забора не запускается — проба не выполнялась",
+      duration_ms: 0,
+      note: "проба не выполнялась: нужна клетка",
+      created_ms: 2,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сколько места" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Чему нужно научиться")).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Черновик руки"));
+    await waitFor(() => expect(screen.getByText(/Get-PSDrive/)).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Проверить в клетке"));
+
+    await waitFor(() => expect(screen.getByText(/проба не состоялась/)).toBeTruthy());
+    expect(screen.getByText(/ERROR_BAD_ENVIRONMENT/)).toBeTruthy();
   });
 
   it("не принятый черновик объясняет, что в нём не так", async () => {
