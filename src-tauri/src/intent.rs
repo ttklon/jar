@@ -481,7 +481,8 @@ mod tests {
 
     #[test]
     fn a_draft_hand_is_read_as_text_and_never_as_a_call() {
-        let answer = r#"{"kind":"hand","goal":"показать диски","code":"Get-PSDrive","why":"проще"}"#;
+        let answer =
+            r#"{"kind":"hand","goal":"показать диски","code":"Get-PSDrive","why":"проще"}"#;
         assert_eq!(
             parse(answer, &known()).expect("разбирается"),
             Proposal::Hand {

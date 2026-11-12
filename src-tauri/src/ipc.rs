@@ -377,10 +377,7 @@ pub fn plan_for(state: State<'_, AppState>, query: String, limit: usize) -> Vec<
 /// нет пути к запуску ни в плане, ни в руках. Фильтр отсеивает очевидно недопустимое, но
 /// безопасность он не гарантирует, и притворяться иначе было бы худшим из обманов.
 #[tauri::command]
-pub async fn draft_hand(
-    state: State<'_, AppState>,
-    key: String,
-) -> Result<hand::Draft, String> {
+pub async fn draft_hand(state: State<'_, AppState>, key: String) -> Result<hand::Draft, String> {
     let inner = state.inner.clone();
 
     let action = inner
