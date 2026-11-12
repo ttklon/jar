@@ -517,6 +517,12 @@ export const voice = {
   thinkPlanReady: (steps: number) =>
     `план от модели готов: шагов — ${steps}. Дальше — обычная проверка и ваше слово`,
   thinkLearn: (goal: string) => `модель говорит, что этого пока не умею: надо научиться — ${goal}`,
+  thinkLearnRecorded: (goal: string, example: string) =>
+    `этого пока не умею, поэтому записал в обучение: ${goal} (по реестру — «${example}»). ` +
+    "Список задач видно в журнале, и он переживёт перезапуск",
+  thinkLearnUnsure: (goal: string) =>
+    `модель говорит, что надо научиться — ${goal}, но такой строки в реестре нет: ` +
+    "записать урок не по чему, и притворяться не буду",
   thinkAsk: (question: string) => `модель переспрашивает: ${question}`,
   thinkRefuse: (reason: string) => `модель отказывается: ${reason}`,
   thinkBroken: (problem: string) => `модель ответила, но разобрать не удалось: ${problem}`,

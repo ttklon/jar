@@ -178,6 +178,7 @@ describe("локальное распознавание на экране", () =
       answer: "…",
       proposal: { Learn: { goal: "поставить будильник", why: "такого умения нет" } },
       plan: null,
+      learning: null,
       problem: null,
     });
 
@@ -222,6 +223,7 @@ describe("локальное распознавание на экране", () =
         ],
         questions: [],
       },
+      learning: null,
       problem: null,
     });
 
@@ -239,12 +241,42 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByLabelText("разрешить шаг 1")).toBeTruthy();
   });
 
+  it("просьба модели об обучении остаётся карточкой, а не фразой в воздух", async () => {
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Learn: { goal: "включи субтитры", why: "руки нет" } },
+      plan: null,
+      learning: {
+        registry: "видео|включить|субтитры",
+        example: "включить субтитры в видео",
+        query: "включи субтитры",
+        implementation: ["UI Automation"],
+        risk: "read",
+        notes: "",
+        asked_ms: 1,
+        times: 1,
+        steps: [{ title: "написать руку", done: false }],
+      },
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "включи субтитры" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    await waitFor(() => expect(screen.getByText("Чему нужно научиться")).toBeTruthy());
+    expect(screen.getAllByText(/включить субтитры в видео/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/записал в обучение/)).toBeTruthy();
+  });
+
   it("неразобранный ответ модели показывает её слова, а не прячет их", async () => {
     vi.mocked(think).mockResolvedValueOnce({
       prompt: "…",
       answer: "{\"kind\":\"call\",\"registry\":\"выдуманная|рука\"}",
       proposal: null,
       plan: null,
+      learning: null,
       problem: "руки `выдуманная|рука` нет в реестре: выдуманное не выполняется",
     });
 

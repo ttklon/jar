@@ -166,6 +166,8 @@ export interface Thought {
   proposal: Proposal | null;
   /** План из предложения `call`: уже с политикой, вопросами и подтверждениями. */
   plan: PlanCheck | null;
+  /** Задача на обучение из предложения `learn`: записана в память и переживёт перезапуск. */
+  learning: Learning | null;
   problem: string | null;
 }
 

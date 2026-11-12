@@ -6,9 +6,22 @@ function thought(
   proposal: Thought["proposal"],
   problem: string | null = null,
   plan: Thought["plan"] = null,
+  learning: Thought["learning"] = null,
 ): Thought {
-  return { prompt: "…", answer: "…", proposal, plan, problem };
+  return { prompt: "…", answer: "…", proposal, plan, learning, problem };
 }
+
+const learning = {
+  registry: "видео|включить|субтитры",
+  example: "включить субтитры в видео",
+  query: "включи субтитры",
+  implementation: ["UI Automation"],
+  risk: "read",
+  notes: "",
+  asked_ms: 1,
+  times: 1,
+  steps: [],
+};
 
 describe("что сказать про ответ модели", () => {
   it("называет руку и причину — этого достаточно, чтобы согласиться или нет", () => {
@@ -38,9 +51,18 @@ describe("что сказать про ответ модели", () => {
     ).toBe("модель предлагает: браузер|включить|субтитры");
   });
 
-  it("про неумение говорит, чему учиться, а не «не могу»", () => {
-    expect(describeThought(thought({ Learn: { goal: "поставить будильник", why: "" } }))).toBe(
-      "модель говорит, что этого пока не умею: надо научиться — поставить будильник",
+  it("про неумение говорит, что просьба записана и переживёт перезапуск", () => {
+    expect(
+      describeThought(
+        thought({ Learn: { goal: "включи субтитры", why: "" } }, null, null, learning),
+      ),
+    ).toContain("записал в обучение: включи субтитры");
+  });
+
+  it("если урок записать не по чему — так и говорит, а не обещает", () => {
+    expect(describeThought(thought({ Learn: { goal: "жжжж", why: "" } }))).toBe(
+      "модель говорит, что надо научиться — жжжж, но такой строки в реестре нет: " +
+        "записать урок не по чему, и притворяться не буду",
     );
   });
 

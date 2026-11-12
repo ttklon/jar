@@ -26,7 +26,11 @@ export function describeThought(thought: Thought): string {
     return voice.thinkCall(proposal.Call.registry, proposal.Call.why);
   }
   if ("Learn" in proposal) {
-    return voice.thinkLearn(proposal.Learn.goal);
+    // Просьба записана — так и говорим. Не записалась — не обещаем урок.
+    if (thought.learning) {
+      return voice.thinkLearnRecorded(proposal.Learn.goal, thought.learning.example);
+    }
+    return voice.thinkLearnUnsure(proposal.Learn.goal);
   }
   if ("Ask" in proposal) {
     return voice.thinkAsk(proposal.Ask.question);

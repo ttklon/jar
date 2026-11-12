@@ -602,6 +602,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
 
                   // План модели — это обычный план: политика, вопросы и подтверждение те же.
                   // Никакого «модель сказала, значит можно».
+                  // Просьба об обучении уже записана ядром — показываем её карточкой, а не
+                  // только словами: человек видит, что задача осталась, а не исчезла с фразой.
+                  if (answer.learning) setLearning(answer.learning);
+
                   if (answer.plan) {
                     setDraft(answer.plan);
                     setAnswers({});

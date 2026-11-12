@@ -382,6 +382,9 @@ pub struct Thought {
     /// План из предложения `call`, уже проведённый через политику, вопросы и подтверждения.
     /// `None` — плана нет: рука только описана, либо модель выбрала не то.
     pub plan: Option<PlanCheck>,
+    /// Задача на обучение из предложения `learn`: записана в память и переживёт перезапуск.
+    /// `None` — учиться не по чему (цель уже умеем или её нет в реестре).
+    pub learning: Option<Learning>,
     pub problem: Option<String>,
 }
 
@@ -449,11 +452,25 @@ pub async fn think(
                 _ => None,
             };
 
+            // «Надо научиться» — это не фраза в воздух: просьба записывается так же, как
+            // любая другая, и повтор поднимает её в очереди.
+            let learning = match &proposal {
+                intent::Proposal::Learn { goal, .. } => learn::request_for_goal(
+                    &inner.memory,
+                    &inner.registry,
+                    goal,
+                    &query,
+                    now_ms() as u64,
+                ),
+                _ => None,
+            };
+
             Thought {
                 prompt,
                 answer: answered,
                 proposal: Some(proposal),
                 plan,
+                learning,
                 problem: None,
             }
         }
@@ -464,6 +481,7 @@ pub async fn think(
             answer: answered,
             proposal: None,
             plan: None,
+            learning: None,
             problem: Some(error.to_string()),
         },
     })

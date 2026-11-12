@@ -16,7 +16,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::memory::Memory;
+use crate::planner;
 use crate::registry::{Action, Registry};
+use crate::tools;
 
 /// Ключ факта для одной просьбы.
 pub fn fact_key(registry: &str) -> String {
@@ -133,6 +135,33 @@ pub fn request(
     })
 }
 
+/// Просьба, которую назвала модель: «надо научиться вот этому».
+///
+/// Модель не диктует урок — она называет цель. Строку реестра под цель ищет поиск: если
+/// нашлась строка без руки, просьба записывается как обычная (и повтор поднимает счётчик).
+///
+/// `None` — учиться нечему или не по чему: цель уже умеем, либо в реестре нет такой
+/// строки. Заводить «обучение» на пустом месте значит обещать урок, которого не будет.
+pub fn request_for_goal(
+    memory: &Memory,
+    registry: &Registry,
+    goal: &str,
+    query: &str,
+    now_ms: u64,
+) -> Option<Learning> {
+    let item = planner::plan(registry, goal, 8).into_iter().next()?;
+    if item.tool.is_some() {
+        return None;
+    }
+
+    let action = registry.by_key(&item.key)?;
+    if !action.is_offerable() || tools::spec(&action.key()).is_some() {
+        return None;
+    }
+
+    request(memory, action, query, now_ms).ok()
+}
+
 /// Все задачи на обучение, самые просимые сверху.
 ///
 /// Строки, которых больше нет в реестре, пропускаются: учиться тому, чего нет,
@@ -194,6 +223,52 @@ mod tests {
             .find(|action| crate::tools::spec(&action.key()).is_none() && action.is_offerable())
             .cloned()
             .expect("в реестре есть то, чего мы не умеем")
+    }
+
+    #[test]
+    fn a_goal_named_by_the_model_leaves_a_trace_that_survives() {
+        let (memory, dir) = memory("goal");
+        let registry = registry();
+        let action = without_hand(&registry);
+
+        // Модель называет цель словами примера — поиск обязан найти ту же строку.
+        let first = request_for_goal(&memory, &registry, &action.example, "сделай это", 1000)
+            .expect("просьба записана");
+        assert_eq!(first.registry, action.key());
+        assert_eq!(first.times, 1);
+
+        let again = request_for_goal(&memory, &registry, &action.example, "сделай это", 2000)
+            .expect("повтор тоже записан");
+        assert_eq!(again.times, 2, "повтор поднимает счётчик, а не заводит вторую запись");
+
+        // Переживает перезапуск: это память, а не строка в интерфейсе.
+        let listed = all(&memory, &registry);
+        assert!(listed.iter().any(|item| item.registry == action.key()));
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_goal_with_a_hand_or_without_a_row_is_not_promised_as_a_lesson() {
+        let (memory, dir) = memory("nohand");
+        let registry = registry();
+
+        let known = registry
+            .actions()
+            .iter()
+            .find(|action| tools::spec(&action.key()).is_some())
+            .expect("рука есть");
+        assert!(
+            request_for_goal(&memory, &registry, &known.example, "сделай это", 1000).is_none(),
+            "чему уже умеем — не учим"
+        );
+
+        assert!(
+            request_for_goal(&memory, &registry, "жжжж", "сделай это", 1000).is_none(),
+            "цели нет в реестре — урок не выдумывается"
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
