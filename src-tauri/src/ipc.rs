@@ -430,12 +430,32 @@ pub async fn think(
         .collect::<Vec<_>>();
 
     Ok(match intent::parse(&answered, &known) {
-        Ok(proposal) => Thought {
-            prompt,
-            answer: answered,
-            proposal: Some(proposal),
-            problem: None,
-        },
+        Ok(proposal) => {
+            // Выбор модели не идёт в обход: тот же план, те же проверки, те же вопросы и
+            // то же подтверждение, что и у найденного по словам.
+            let plan = match &proposal {
+                intent::Proposal::Call {
+                    registry,
+                    params,
+                    why,
+                } => plan::chosen(&query, registry, params.clone(), &inner.registry, why)
+                    .map(|plan| PlanCheck {
+                        problems: plan::check(&plan, &inner.registry),
+                        gates: plan::gate_plan(&plan, &inner.registry, &[]),
+                        questions: plan::questions(&plan, &inner.registry),
+                        plan: Some(plan),
+                    }),
+                _ => None,
+            };
+
+            Thought {
+                prompt,
+                answer: answered,
+                proposal: Some(proposal),
+                plan,
+                problem: None,
+            }
+        }
         // Ответ есть, но не разобрался — это не ошибка команды: показать его человеку
         // полезнее, чем спрятать за «не получилось».
         Err(error) => Thought {
