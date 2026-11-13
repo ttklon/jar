@@ -1303,12 +1303,13 @@ pub async fn ui_press(
 
     // Журнал считает время в u128, поле длительности — в u64: миллисекунд хватает обоим.
     let duration = now_ms().saturating_sub(started) as u64;
-    let (outcome, note) = match &outcome {
+    // Именно `status`, а не `outcome`: ниже возвращается сам результат нажатия, и затереть
+    // его строкой для журнала — ошибка, которую компилятор поймал.
+    let (status, note) = match &outcome {
         Ok(press) => ("ok", press.note.clone()),
         Err(reason) => ("failed", reason.clone()),
     };
-    // Строка живёт до записи в журнал: `&format!` в поле структуры не приведётся к `&str`.
-    let line = format!("{outcome}: {note}");
+    let line = format!("{status}: {note}");
 
     audit(
         &inner,
