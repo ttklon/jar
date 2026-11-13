@@ -1301,7 +1301,8 @@ pub async fn ui_press(
     .await
     .map_err(|error| format!("нажатие прервано: {error}"))?;
 
-    let duration = now_ms().saturating_sub(started);
+    // Журнал считает время в u128, поле длительности — в u64: миллисекунд хватает обоим.
+    let duration = now_ms().saturating_sub(started) as u64;
     let (outcome, note) = match &outcome {
         Ok(press) => ("ok", press.note.clone()),
         Err(reason) => ("failed", reason.clone()),
