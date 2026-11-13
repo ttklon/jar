@@ -494,9 +494,9 @@ mod imp {
     };
     use windows::Win32::UI::Accessibility::{
         CUIAutomation, IUIAutomation, IUIAutomationElement, IUIAutomationInvokePattern,
-        IUIAutomationValuePattern,
-        UIA_ExpandCollapsePatternId, UIA_InvokePatternId, UIA_SelectionItemPatternId,
-        UIA_TextPatternId, UIA_TogglePatternId, UIA_ValuePatternId, UIA_PATTERN_ID,
+        IUIAutomationValuePattern, UIA_ExpandCollapsePatternId, UIA_InvokePatternId,
+        UIA_SelectionItemPatternId, UIA_TextPatternId, UIA_TogglePatternId, UIA_ValuePatternId,
+        UIA_PATTERN_ID,
     };
     use windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow;
 
@@ -735,11 +735,7 @@ mod imp {
     }
 
     /// Ввести текст в поле по имени и прочитать обратно то, что в поле оказалось.
-    pub fn type_text(
-        max_nodes: usize,
-        wanted: &str,
-        text: &str,
-    ) -> Result<super::Typed, String> {
+    pub fn type_text(max_nodes: usize, wanted: &str, text: &str) -> Result<super::Typed, String> {
         use super::{locate, may_type, read_back_verdict, Target};
 
         if text.trim().is_empty() {
@@ -761,9 +757,10 @@ mod imp {
             .get(node_index)
             .ok_or_else(|| "поле исчезло между обходом и вводом".to_string())?;
 
-        let pattern: IUIAutomationValuePattern =
-            unsafe { node.GetCurrentPatternAs(UIA_ValuePatternId) }
-                .map_err(|error| format!("окно не дало ввести в «{}»: {error}", before[index].name))?;
+        let pattern: IUIAutomationValuePattern = unsafe {
+            node.GetCurrentPatternAs(UIA_ValuePatternId)
+        }
+        .map_err(|error| format!("окно не дало ввести в «{}»: {error}", before[index].name))?;
 
         unsafe { pattern.SetValue(&BSTR::from(text)) }
             .map_err(|error| format!("текст не отправился: {error}"))?;
@@ -1097,8 +1094,12 @@ mod tests {
         let text = may_type(&element("Привет", "текст", &[])).expect_err("текст не поле");
         assert!(text.contains("нельзя ввести"));
 
-        let button = may_type(&element("Войти", "кнопка", &["invoke"])).expect_err("кнопка не поле");
-        assert!(button.contains("invoke"), "должно быть сказано, что доступно");
+        let button =
+            may_type(&element("Войти", "кнопка", &["invoke"])).expect_err("кнопка не поле");
+        assert!(
+            button.contains("invoke"),
+            "должно быть сказано, что доступно"
+        );
     }
 
     #[test]

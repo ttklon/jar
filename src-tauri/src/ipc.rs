@@ -1362,7 +1362,10 @@ pub async fn ui_type(
 
     let duration = now_ms().saturating_sub(started) as u64;
     let (status, note) = match &outcome {
-        Ok(typed) => (if typed.verified { "ok" } else { "unverified" }, typed.note.clone()),
+        Ok(typed) => (
+            if typed.verified { "ok" } else { "unverified" },
+            typed.note.clone(),
+        ),
         Err(reason) => ("failed", reason.clone()),
     };
     let line = format!("{status}: {note}");
