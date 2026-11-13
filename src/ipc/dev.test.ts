@@ -16,6 +16,7 @@ import {
   learningRequests,
   requestLearning,
   foregroundWindow,
+  uiDump,
   isolationStatus,
   speechStatus,
   transcribeLocal,
@@ -139,6 +140,9 @@ describe("сценарии в браузере", () => {
 describe("журнал в браузере", () => {
   it("в браузере активного окна нет, и это ошибка, а не выдумка", async () => {
     await expect(foregroundWindow()).rejects.toThrow(/только приложение/);
+
+    // Элементы окна — тоже только приложение: выдуманное дерево здесь было бы обманом.
+    await expect(uiDump()).rejects.toThrow(/UI Automation/);
   });
 
   it("в браузере потолков запуска нет, и это сказано прямо", async () => {

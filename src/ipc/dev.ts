@@ -11,7 +11,7 @@
  */
 
 import actionsJson from "../../data/actions.json";
-import type { Action, RegistrySnapshot, RegistryStats } from "./types";
+import type { Action, RegistrySnapshot, RegistryStats, UiDump } from "./types";
 import { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
 const ROWS = actionsJson as unknown as Action[];
@@ -649,6 +649,15 @@ export async function foregroundWindow(): Promise<ForegroundWindow> {
   // В браузере окон Windows нет. Придумывать «Блокнот» было бы хуже пустоты: человек
   // решил бы, что приложение видит его экран.
   throw new Error("активное окно видит только приложение: в браузере окон системы нет");
+}
+
+export async function uiDump(): Promise<UiDump> {
+  // В браузере нет ни UI Automation, ни окон Windows. Придумать дерево «Вход → кнопка»
+  // было бы особенно соблазнительно и особенно вредно: человек решил бы, что помощник
+  // видит его экран, а он не видит ничего.
+  throw new Error(
+    "элементы окна видит только приложение: в браузере нет UI Automation",
+  );
 }
 
 // ── Потолки запуска в браузере ──────────────────────────────────────────────

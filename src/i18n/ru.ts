@@ -511,6 +511,12 @@ export const voice = {
   cancelShow: "Отмена",
   cancelled: "отменил — запись выброшена и никуда не ушла",
   thinkShow: "Спросить модель",
+  screenShow: "Что на экране",
+  screenReading: "Читаю окно…",
+  screenTitle: "Что видно в активном окне",
+  screenError: (reason: string) =>
+    `экран не прочитан: ${reason}. Это не мешает искать по словам — но «эта кнопка» пока без адресата`,
+  screenNote: "только чтение: ничего не нажималось и не вводилось",
   thinkThinking: "спрашиваю модель — это может занять минуту",
   thinkCall: (registry: string, why: string) =>
     why.length > 0

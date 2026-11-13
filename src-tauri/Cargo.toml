@@ -36,6 +36,14 @@ windows-sys = { version = "0.61", features = [
   "Win32_System_Threading",
   "Win32_UI_WindowsAndMessaging",
 ] }
+# UI Automation — чтение активного окна. Здесь нужен `windows`, а не `windows-sys`:
+# интерфейсы UIA вызываются через COM-обёртки, а не через голые указатели.
+windows = { version = "0.60", features = [
+  "Win32_Foundation",
+  "Win32_System_Com",
+  "Win32_UI_Accessibility",
+  "Win32_UI_WindowsAndMessaging",
+] }
 
 [profile.release]
 codegen-units = 1

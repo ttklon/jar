@@ -4,36 +4,7 @@
  */
 
 import { invoke } from "@tauri-apps/api/core";
-import type {
-  AuditEvent,
-  ConfirmToken,
-  Downloaded,
-  EngineStatus,
-  Episode,
-  Learning,
-  FlowView,
-  HashCheck,
-  ModelsView,
-  Plan,
-  PlanAnswer,
-  PlanCheck,
-  PlanReport,
-  PlanItem,
-  ProfileView,
-  RoleView,
-  CustomHand,
-  Fact,
-  HandDraft,
-  TrialReport,
-  Thought,
-  ForegroundWindow,
-  IsolationStatus,
-  SpeechStatus,
-  RegistrySnapshot,
-  RunRecord,
-  StepResult,
-  ToolView,
-} from "./types";
+import type { AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RegistrySnapshot, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
 
 export interface AppStatus {
   version: string;
@@ -164,7 +135,7 @@ export function forgetHand(key: string): Promise<void> {
 /** Спросить модель, что делать. Ничего не выполняет. */
 export function think(
   query: string,
-  around: { title: string; process: string } | null,
+  around: { title: string; process: string; screen?: string | null } | null,
 ): Promise<Thought> {
   return invoke<Thought>("think", { query, around });
 }
@@ -172,7 +143,7 @@ export function think(
 /** Что мы спросим у модели. Вопрос собирает ядро: в браузере его не собрать. */
 export function modelPrompt(
   query: string,
-  around: { title: string; process: string } | null,
+  around: { title: string; process: string; screen?: string | null } | null,
 ): Promise<string> {
   return invoke<string>("model_prompt", { query, around });
 }
@@ -195,6 +166,11 @@ export function forgetFact(key: string): Promise<void> {
 /** Что сейчас перед человеком: заголовок и программа. Только чтение. */
 export function foregroundWindow(): Promise<ForegroundWindow> {
   return invoke<ForegroundWindow>("foreground_window");
+}
+
+/** Что видно в активном окне: элементы, а не пиксели. Только чтение. */
+export function uiDump(max?: number): Promise<UiDump> {
+  return invoke<UiDump>("ui_dump", { max: max ?? null });
 }
 
 /** Потолки запуска: что есть на самом деле. Ничего не запускает. */

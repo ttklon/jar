@@ -52,38 +52,12 @@ export type {
   StepResult,
   Tier,
   ToolView,
+  UiDump,
+  UiElement,
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type {
-  CustomHand,
-  HandDraft,
-  TrialReport,
-  Thought,
-  AuditEvent,
-  ConfirmToken,
-  Downloaded,
-  EngineStatus,
-  Episode,
-  Fact,
-  ForegroundWindow,
-  IsolationStatus,
-  Learning,
-  Plan,
-  PlanAnswer,
-  PlanCheck,
-  PlanReport,
-  RoleView,
-  SpeechStatus,
-  FlowView,
-  HashCheck,
-  ModelsView,
-  PlanItem,
-  ProfileView,
-  RunRecord,
-  StepResult,
-  ToolView,
-} from "./types";
+import type { AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -547,7 +521,7 @@ export async function forgetHand(key: string): Promise<void> {
 /** Спросить модель, что делать. Ничего не выполняет: предложение — не действие. */
 export async function think(
   query: string,
-  around: { title: string; process: string } | null = null,
+  around: { title: string; process: string; screen?: string | null } | null = null,
 ): Promise<Thought> {
   if (isTauri()) {
     const { think: fromCore } = await import("./tauri");
@@ -560,7 +534,7 @@ export async function think(
 /** Что мы спросим у модели по этой фразе: задача, окно, память и найденные руки. */
 export async function modelPrompt(
   query: string,
-  around: { title: string; process: string } | null = null,
+  around: { title: string; process: string; screen?: string | null } | null = null,
 ): Promise<string> {
   if (isTauri()) {
     const { modelPrompt: fromCore } = await import("./tauri");
@@ -607,6 +581,16 @@ export async function foregroundWindow(): Promise<ForegroundWindow> {
     return fromCore();
   }
   const { foregroundWindow: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Что видно в активном окне — по элементам. В браузере этого нет и быть не может. */
+export async function uiDump(max?: number): Promise<UiDump> {
+  if (isTauri()) {
+    const { uiDump: fromCore } = await import("./tauri");
+    return fromCore(max);
+  }
+  const { uiDump: fromData } = await import("./dev");
   return fromData();
 }
 

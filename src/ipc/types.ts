@@ -221,6 +221,36 @@ export interface ForegroundWindow {
   pid: number;
 }
 
+/**
+ * Один элемент активного окна, как его прочитал UI Automation.
+ *
+ * Имя может быть пустым, а элемент — недоступным: это правда о экране, и её нельзя
+ * прятать. `actions` — то, что окно само объявило доступным, а не то, что помощник умеет.
+ */
+export interface UiElement {
+  /** Насколько глубоко от окна: окно — нулевой уровень. */
+  depth: number;
+  /** Вид элемента по-русски: «кнопка», «поле ввода», «текст». */
+  kind: string;
+  name: string;
+  id: string;
+  enabled: boolean;
+  actions: string[];
+}
+
+/** Разобранное активное окно. */
+export interface UiDump {
+  title: string;
+  process: string;
+  elements: UiElement[];
+  /** Дерево не поместилось в потолки — значит, это не весь экран. */
+  truncated: boolean;
+  /** Честная приписка о том, как это получено. */
+  note: string;
+  /** То же самое текстом — ровно то, что уходит модели. */
+  text: string;
+}
+
 /** Потолки запуска: что есть на этой машине на самом деле. */
 export interface IsolationStatus {
   /** Держит ли система потолки (job object есть только на Windows). */

@@ -54,6 +54,7 @@ pub mod stt;
 pub mod tools;
 pub mod tray;
 pub mod trial;
+pub mod uia;
 pub mod verifier;
 pub mod window;
 
@@ -155,6 +156,7 @@ pub fn run() {
             ipc::speech_status,
             ipc::isolation_status,
             ipc::foreground_window,
+            ipc::ui_dump,
             ipc::model_prompt,
             ipc::think,
             ipc::draft_hand,

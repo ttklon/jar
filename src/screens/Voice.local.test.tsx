@@ -12,6 +12,7 @@ import {
   think,
   trialHand,
   transcribeLocal,
+  uiDump,
 } from "../ipc";
 import { startRecording } from "../lib/recorder";
 import { Voice } from "./Voice";
@@ -28,6 +29,7 @@ vi.mock("../ipc", () => ({
   requestLearning: vi.fn().mockResolvedValue(null),
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn().mockResolvedValue(null),
+  uiDump: vi.fn().mockRejectedValue(new Error("в браузере нет UI Automation")),
   draftHand: vi.fn(),
   trialHand: vi.fn(),
   speak: vi.fn(),
@@ -70,6 +72,7 @@ afterEach(() => {
   vi.mocked(planFor).mockReset().mockResolvedValue([]);
   vi.mocked(draftPlan).mockReset().mockResolvedValue(null);
   vi.mocked(think).mockReset().mockResolvedValue(null as never);
+  vi.mocked(uiDump).mockReset().mockRejectedValue(new Error("в браузере нет UI Automation"));
   vi.mocked(requestLearning).mockReset().mockResolvedValue(null);
   vi.mocked(planFor).mockClear();
   vi.mocked(transcribeLocal).mockReset();
@@ -203,14 +206,67 @@ describe("локальное распознавание на экране", () =
     // Модель спросили сама, с окном перед человеком: без него «это» не имеет адресата.
     await waitFor(() => expect(vi.mocked(think)).toHaveBeenCalled());
     expect(vi.mocked(think).mock.calls[0]?.[0]).toBe("сделай потише");
-    expect(vi.mocked(think).mock.calls[0]?.[1]).toEqual({
+    // В браузере UI Automation нет, экран не читается — и это честно передаётся как null.
+    expect(vi.mocked(think).mock.calls[0]?.[1]).toMatchObject({
       title: "Видео — браузер",
       process: "chrome.exe",
+      screen: null,
     });
 
     await waitFor(() =>
       expect(screen.getAllByText(/звук\|убавить\|громкость/).length).toBeGreaterThan(0),
     );
+  });
+
+  it("модель получает элементы окна, а не только заголовок", async () => {
+    vi.mocked(uiDump).mockResolvedValueOnce({
+      title: "Вход",
+      process: "chrome.exe",
+      elements: [],
+      truncated: false,
+      note: "чтение экрана: UI Automation, только чтение",
+      text: "Вход (chrome.exe)\n  - кнопка «Войти» #submit [invoke]",
+    });
+    vi.mocked(planFor).mockResolvedValueOnce([]);
+    vi.mocked(draftPlan).mockResolvedValueOnce(null);
+    vi.mocked(think).mockResolvedValueOnce(null as never);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "нажми эту кнопку" } });
+    fireEvent.click(screen.getByText("Найти"));
+
+    // У «этой кнопки» появляется адресат: имя, вид и то, нажимается ли она.
+    await waitFor(() =>
+      expect(vi.mocked(think).mock.calls[0]?.[1]).toMatchObject({
+        screen: "Вход (chrome.exe)\n  - кнопка «Войти» #submit [invoke]",
+      }),
+    );
+
+    // И человек видит ровно тот же текст, что ушёл модели, — без «доверьтесь нам».
+    await waitFor(() =>
+      expect(screen.getAllByText(/кнопка «Войти» #submit/).length).toBeGreaterThan(0),
+    );
+    expect(screen.getByText(/только чтение/)).toBeTruthy();
+  });
+
+  it("окно не читается — об этом сказано, и поиск по словам всё равно работает", async () => {
+    vi.mocked(uiDump).mockRejectedValueOnce(new Error("UI Automation не поднялся"));
+    vi.mocked(planFor).mockResolvedValueOnce([]);
+    vi.mocked(draftPlan).mockResolvedValueOnce(null);
+    vi.mocked(think).mockResolvedValueOnce(null as never);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "нажми эту кнопку" } });
+    fireEvent.click(screen.getByText("Найти"));
+
+    await waitFor(() =>
+      expect(screen.getByText(/экран не прочитан: UI Automation не поднялся/)).toBeTruthy(),
+    );
+    expect(vi.mocked(think).mock.calls[0]?.[1]).toMatchObject({ screen: null });
   });
 
   it("модель не ответила — фраза всё равно не пропадает: записываем в обучение", async () => {

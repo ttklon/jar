@@ -18,6 +18,7 @@ import {
   isolationStatus,
   speechStatus,
   transcribeLocal,
+  uiDump,
 } from "../ipc";
 import type {
   CustomHand,
@@ -32,6 +33,7 @@ import type {
   PlanItem,
   PlanReport,
   SpeechStatus,
+  UiDump,
 } from "../ipc";
 import { speak } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
@@ -52,6 +54,9 @@ import { voice } from "../i18n/ru";
  */
 
 const LIMIT = 8;
+
+/** Сколько элементов окна просим. Больше — экран подробнее, но и подсказка длиннее. */
+const SCREEN_NODES = 120;
 
 const useStyles = makeStyles({
   root: { display: "flex", flexDirection: "column", gap: "16px", maxWidth: "96ch" },
@@ -88,6 +93,8 @@ const useStyles = makeStyles({
     padding: "8px 10px",
     margin: "4px 0 0",
   },
+  section: { display: "flex", flexDirection: "column", gap: "6px", maxWidth: "96ch" },
+  title: { fontWeight: tokens.fontWeightSemibold },
   answer: { display: "flex", gap: "8px", alignItems: "center" },
   bar: { display: "flex", gap: "10px", alignItems: "center" },
   input: { flex: 1 },
@@ -162,6 +169,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [trialBusy, setTrialBusy] = useState(false);
   /** Принятые руки: отдельно от встроенных и не исполняются. */
   const [adopted, setAdopted] = useState<CustomHand | null>(null);
+  /** Что видно в активном окне: элементы, прочитанные UI Automation. Только чтение. */
+  const [screen, setScreen] = useState<UiDump | null>(null);
+  const [screenError, setScreenError] = useState<string | null>(null);
+  const [screenBusy, setScreenBusy] = useState(false);
   /** Что модель предложила. Предложение, а не действие: выполнять его пока нечем. */
   const [thought, setThought] = useState<Thought | null>(null);
   const [thinking, setThinking] = useState(false);
@@ -184,6 +195,28 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     position: number;
     name: string;
   } | null>(null);
+
+  /**
+   * Прочитать активное окно по элементам.
+   *
+   * Ошибка чтения — не ошибка задачи: без экрана помощник просто менее зрячий, и об этом
+   * говорится вслух. Молча подставлять «наверное, браузер» было бы хуже пустоты.
+   */
+  const readScreen = useCallback(async (): Promise<string | null> => {
+    setScreenBusy(true);
+    try {
+      const dump = await uiDump(SCREEN_NODES);
+      setScreen(dump);
+      setScreenError(null);
+      return dump.text.trim().length > 0 ? dump.text : null;
+    } catch (reason: unknown) {
+      setScreen(null);
+      setScreenError(reason instanceof Error ? reason.message : String(reason));
+      return null;
+    } finally {
+      setScreenBusy(false);
+    }
+  }, []);
 
   const search = useCallback((phrase: string) => {
     const query = phrase.trim();
@@ -215,11 +248,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         // превращать такую фразу в «не умею» было бы обиднее всего.
         let answered: Thought | null = null;
         if (!proposal) {
+          const window = frontRef.current;
+          // Экран читаем до вопроса: без него у «нажми эту кнопку» нет адресата.
+          const screenText = window ? await readScreen() : null;
           answered = await Promise.resolve(
             think(
               query,
-              frontRef.current
-                ? { title: frontRef.current.title, process: frontRef.current.process }
+              window
+                ? { title: window.title, process: window.process, screen: screenText }
                 : null,
             ),
           ).catch(() => null);
@@ -665,7 +701,15 @@ export function Voice({ onOpen }: VoiceScreenProps) {
               setThinking(true);
               setThinkError(null);
               setThought(null);
-              think(text.trim(), front ? { title: front.title, process: front.process } : null)
+              readScreen()
+                .then((screenText) =>
+                  think(
+                    text.trim(),
+                    front
+                      ? { title: front.title, process: front.process, screen: screenText }
+                      : null,
+                  ),
+                )
                 .then((answer) => {
                   setThought(answer);
 
@@ -696,6 +740,16 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           >
             {thinking ? voice.thinkThinking : voice.thinkShow}
           </Button>
+          <Button
+            size="small"
+            appearance="subtle"
+            disabled={screenBusy}
+            onClick={() => {
+              void readScreen();
+            }}
+          >
+            {screenBusy ? voice.screenReading : voice.screenShow}
+          </Button>
           {thinkError ? (
             <Text className={styles.error}>{voice.thinkError(thinkError)}</Text>
           ) : null}
@@ -710,6 +764,17 @@ export function Voice({ onOpen }: VoiceScreenProps) {
               <Text className={styles.error}>{voice.thinkBroken(thought.problem ?? "")}</Text>
               <pre className={styles.prompt}>{thought.answer}</pre>
             </>
+          ) : null}
+        </div>
+      ) : null}
+
+      {screen || screenError ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>{voice.screenTitle}</Text>
+          {screen ? <Text className={styles.note}>{screen.note}</Text> : null}
+          {screen ? <pre className={styles.prompt}>{screen.text}</pre> : null}
+          {screenError ? (
+            <Text className={styles.error}>{voice.screenError(screenError)}</Text>
           ) : null}
         </div>
       ) : null}

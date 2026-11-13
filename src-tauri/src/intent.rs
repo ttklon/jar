@@ -86,6 +86,10 @@ pub struct Candidate {
 pub struct Around {
     pub title: String,
     pub process: String,
+    /// Что видно в окне — строками, как их прочитал UIA. Необязательно: без прав или
+    /// без UI Automation окно остаётся просто окном, и это не ошибка.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub screen: Option<String>,
 }
 
 /// Вопрос к модели. Один и тот же для одного и того же входа: иначе нельзя проверить.
@@ -120,10 +124,23 @@ pub fn prompt(
     if let Some(window) = around {
         out.push_str("Перед человеком сейчас:\n");
         out.push_str(&format!(
-            "{} ({})\n\n",
+            "{} ({})\n",
             window.title.trim(),
             window.process.trim()
         ));
+
+        // Экран — это адрес для слова «это». Даём его, только если он действительно
+        // прочитан: пустой список элементов ничего не объясняет, а место занимает.
+        if let Some(screen) = window.screen.as_deref().map(str::trim) {
+            if !screen.is_empty() {
+                out.push_str("\nНа экране (сверху вниз, с отступами по вложенности):\n");
+                for line in screen.lines().take(MAX_SCREEN_LINES) {
+                    out.push_str(line.trim_end());
+                    out.push('\n');
+                }
+            }
+        }
+        out.push('\n');
     }
 
     if !facts.is_empty() {
@@ -161,6 +178,10 @@ pub fn prompt(
 ///
 /// Берём ровно те строки, что уже нашёл поиск: модель выбирает из них, а не из всего
 /// реестра на 829 действий. Иначе она выбирает красиво, а не по делу.
+/// Сколько строк экрана отдаём модели. Больше — она утонет в дереве, меньше — не увидит
+/// кнопку, о которой человек говорит.
+pub const MAX_SCREEN_LINES: usize = 60;
+
 pub fn candidates(found: &[crate::planner::PlanItem]) -> Vec<Candidate> {
     found
         .iter()
@@ -371,6 +392,7 @@ mod tests {
             Some(&Around {
                 title: "Видео".to_string(),
                 process: "chrome.exe".to_string(),
+                screen: None,
             }),
             &[("вопрос:браузер".to_string(), "Chrome".to_string())],
             &[Candidate {
@@ -388,6 +410,62 @@ mod tests {
         assert!(text.contains("Ответ одним объектом JSON"));
         // Пустоту в кандидатах модель тоже должна увидеть словами, а не догадаться.
         assert!(prompt("что-нибудь", None, &[], &[]).contains("пусто"));
+    }
+
+    #[test]
+    fn the_screen_is_the_address_for_the_word_this() {
+        // Без экрана «нажми эту кнопку» — фраза без адресата. С экраном у модели есть
+        // и имя кнопки, и её вид, и то, нажимается ли она вообще.
+        let text = prompt(
+            "нажми эту кнопку",
+            Some(&Around {
+                title: "Вход".to_string(),
+                process: "chrome.exe".to_string(),
+                screen: Some(
+                    "Вход (chrome.exe)\n  - кнопка «Войти» #submit [invoke]\n  - поле ввода «Пароль» [value]"
+                        .to_string(),
+                ),
+            }),
+            &[],
+            &[],
+        );
+
+        assert!(text.contains("На экране"));
+        assert!(text.contains("кнопка «Войти» #submit [invoke]"));
+        assert!(text.contains("поле ввода «Пароль» [value]"));
+    }
+
+    #[test]
+    fn a_long_screen_is_cut_but_an_empty_one_is_not_shown_at_all() {
+        let many: String = (0..200)
+            .map(|number| format!("  - текст «строка {number}»\n"))
+            .collect();
+
+        let text = prompt(
+            "найди строку",
+            Some(&Around {
+                title: "Документ".to_string(),
+                process: "notepad.exe".to_string(),
+                screen: Some(many),
+            }),
+            &[],
+            &[],
+        );
+        assert!(text.contains("«строка 0»"));
+        assert!(!text.contains("«строка 100»"), "потолок строк должен работать");
+
+        // Пустой экран — это не «экран пуст», а «экрана не прочитали»: молчим о нём.
+        let quiet = prompt(
+            "найди строку",
+            Some(&Around {
+                title: "Документ".to_string(),
+                process: "notepad.exe".to_string(),
+                screen: Some("   ".to_string()),
+            }),
+            &[],
+            &[],
+        );
+        assert!(!quiet.contains("На экране"));
     }
 
     #[test]

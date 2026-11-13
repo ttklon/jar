@@ -1269,6 +1269,20 @@ pub fn foreground_window() -> Result<window::Foreground, String> {
     window::foreground().map_err(|reason| format!("{reason}. {}", window::note()))
 }
 
+/// Что видно в активном окне — по элементам, а не по пикселям.
+///
+/// Чтение идёт в отдельном потоке: UIA разговаривает с чужой программой, и если та
+/// задумалась, интерфейс не должен замирать вместе с ней. Потолок числа элементов
+/// задаёт вызывающий — экран и подсказка модели требуют разного.
+#[tauri::command]
+pub async fn ui_dump(max: Option<usize>) -> Result<uia::Snapshot, String> {
+    let limit = max.unwrap_or(uia::MAX_NODES).clamp(1, uia::MAX_NODES);
+
+    tauri::async_runtime::spawn_blocking(move || uia::dump(limit))
+        .await
+        .map_err(|error| format!("чтение экрана прервано: {error}"))?
+}
+
 /// Что известно о потолках запуска на этой машине.
 #[derive(Debug, Serialize)]
 pub struct IsolationStatus {
