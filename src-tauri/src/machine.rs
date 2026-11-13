@@ -149,7 +149,14 @@ pub fn decide(sample: &Sample) -> Budget {
 /// Считается по разнице: полное время = ядра + пользователь (ядро уже включает простой),
 /// значит занятость = 1 − простой/полное. Ноль в знаменателе — не «занято 100%», а «мерить
 /// нечего», и это честно превращается в ноль.
-pub fn cpu_percent(idle: u64, kernel: u64, user: u64, idle_prev: u64, kernel_prev: u64, user_prev: u64) -> u8 {
+pub fn cpu_percent(
+    idle: u64,
+    kernel: u64,
+    user: u64,
+    idle_prev: u64,
+    kernel_prev: u64,
+    user_prev: u64,
+) -> u8 {
     let total = (kernel + user).saturating_sub(kernel_prev + user_prev);
     if total == 0 {
         return 0;
@@ -226,7 +233,7 @@ mod imp {
     // В этих привязках `GetSystemTimes` живёт рядом с потоками, а не с общей информацией
     // о системе: так разложен заголовок, и спорить с ним бесполезно.
     use windows_sys::Win32::System::SystemInformation::{
-        GlobalMemoryStatusEx, GetTickCount, MEMORYSTATUSEX,
+        GetTickCount, GlobalMemoryStatusEx, MEMORYSTATUSEX,
     };
     use windows_sys::Win32::System::Threading::GetSystemTimes;
     use windows_sys::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
