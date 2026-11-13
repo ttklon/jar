@@ -25,6 +25,7 @@
 
 pub mod audit;
 pub mod container;
+pub mod custom;
 pub mod download;
 pub mod executor;
 pub mod flows;
@@ -53,7 +54,6 @@ pub mod stt;
 pub mod tools;
 pub mod tray;
 pub mod trial;
-pub mod custom;
 pub mod verifier;
 pub mod window;
 

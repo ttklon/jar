@@ -77,8 +77,15 @@ pub fn forget(memory: &Memory, key: &str) -> Result<(), String> {
 /// Принять черновик в руки. Требования названы и проверяются, а не подразумеваются:
 /// черновик должен существовать, проба должна быть **выполнена и успешна**, а скрипт —
 /// проходить фильтр (повторно: между черновиком и приёмом он мог измениться руками).
-pub fn adopt(memory: &Memory, key: &str, title: &str, risk: &str, now_ms: u64) -> Result<CustomHand, String> {
-    let draft = hand::get(memory, key).ok_or_else(|| format!("черновика для этой строки нет: {key}"))?;
+pub fn adopt(
+    memory: &Memory,
+    key: &str,
+    title: &str,
+    risk: &str,
+    now_ms: u64,
+) -> Result<CustomHand, String> {
+    let draft =
+        hand::get(memory, key).ok_or_else(|| format!("черновика для этой строки нет: {key}"))?;
 
     let report = trial::get(memory, key).ok_or_else(|| {
         "этот черновик ещё не пробовали в клетке: рукой становится только проверенное".to_string()
@@ -214,8 +221,17 @@ mod tests {
     #[test]
     fn a_tried_draft_becomes_a_marked_hand_that_can_be_removed() {
         let (memory, dir) = memory("ok");
-        draft_with_code(&memory, "storage-backup|проверить|свободное место", "Get-PSDrive");
-        trial_report(&memory, "storage-backup|проверить|свободное место", true, true);
+        draft_with_code(
+            &memory,
+            "storage-backup|проверить|свободное место",
+            "Get-PSDrive",
+        );
+        trial_report(
+            &memory,
+            "storage-backup|проверить|свободное место",
+            true,
+            true,
+        );
 
         let hand = adopt(
             &memory,
@@ -226,13 +242,22 @@ mod tests {
         )
         .expect("рука принята");
 
-        assert_eq!(hand.title, "показать диски", "без названия берём слова черновика");
+        assert_eq!(
+            hand.title, "показать диски",
+            "без названия берём слова черновика"
+        );
         assert!(hand.source.contains("проверен в клетке"), "{}", hand.source);
         assert_eq!(all(&memory), vec![hand.clone()]);
-        assert_eq!(get(&memory, "storage-backup|проверить|свободное место"), Some(hand.clone()));
+        assert_eq!(
+            get(&memory, "storage-backup|проверить|свободное место"),
+            Some(hand.clone())
+        );
 
         forget(&memory, "storage-backup|проверить|свободное место").expect("удалена");
-        assert!(all(&memory).is_empty(), "человек имеет право убрать добавленное");
+        assert!(
+            all(&memory).is_empty(),
+            "человек имеет право убрать добавленное"
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
