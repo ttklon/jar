@@ -47,13 +47,14 @@ import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
 import { describeThought } from "../lib/thought";
 import {
   add,
-  next,
+  markScreen,
+  pick,
   setState,
   stopRemaining,
   summary,
   unattended,
+  usesScreen,
   type QueueItem,
-  type QueueState,
 } from "../lib/queue";
 import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
@@ -243,39 +244,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
    * говорится вслух. Молча подставлять «наверное, браузер» было бы хуже пустоты.
    */
   /**
-   * Одно дело из очереди: собрать план, проверить, можно ли без человека, и исполнить.
-   *
-   * Ничего нового здесь не решается: политика та же, что и в ручном режиме. Разница одна —
-   * если плану нужно подтверждение или ответ, дело помечается «ваше слово» и очередь идёт
-   * дальше. Исполнить такое молча было бы подлогом.
-   */
-  const runQueuedGoal = useCallback(
-    async (goal: string): Promise<{ state: QueueState; note: string }> => {
-      const check = await draftPlan(goal).catch(() => null);
-      const verdict = unattended(check);
-
-      if (!verdict.can || !check?.plan) {
-        return { state: "held", note: verdict.why };
-      }
-
-      const report = await runPlan(JSON.stringify(check.plan), []).catch(() => null);
-      if (!report) {
-        return { state: "failed", note: "запуск не состоялся: ядро не ответило" };
-      }
-      if (report.stopped) {
-        return { state: "failed", note: report.stopped };
-      }
-
-      return { state: "done", note: `шагов: ${report.steps.length}, всё выполнено` };
-    },
-    [],
-  );
-
-  /**
    * Идти по очереди, пока не скажут «стоп».
    *
    * Перед каждым делом спрашиваем машину заново: за время работы человек мог вернуться,
    * а память — кончиться. Один раз спросить и решить на весь вечер было бы самонадеянно.
+   *
+   * Дела идут одновременно, но не все: бюджет машины задаёт ширину, а правило про экран —
+   * вторую границу. План каждого дела сначала собирается, чтобы знать, трогает ли оно
+   * чужое окно; знать это по словам человека нельзя.
    */
   const startQueue = useCallback(async () => {
     if (queueRunningRef.current) return;
@@ -286,6 +262,45 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     setQueueIdle(null);
 
     let items = queueRef.current;
+    const plans = new Map<string, PlanCheck | null>();
+    const inFlight = new Map<string, Promise<void>>();
+
+    const sync = (next: QueueItem[]) => {
+      items = next;
+      queueRef.current = items;
+      setQueue(items);
+    };
+
+    /** Одно дело: план, проверка «можно ли без человека», запуск и итог. */
+    const launch = (item: QueueItem) => {
+      const task = (async () => {
+        const check = plans.get(item.id) ?? null;
+        const verdict = unattended(check);
+
+        if (!verdict.can || !check?.plan) {
+          sync(setState(items, item.id, "held", verdict.why));
+          return;
+        }
+
+        sync(setState(items, item.id, "running", ""));
+
+        const report = await runPlan(JSON.stringify(check.plan), []).catch(() => null);
+        if (!report) {
+          sync(setState(items, item.id, "failed", "запуск не состоялся: ядро не ответило"));
+          return;
+        }
+        if (report.stopped) {
+          sync(setState(items, item.id, "failed", report.stopped));
+          return;
+        }
+
+        sync(setState(items, item.id, "done", `шагов: ${report.steps.length}, всё выполнено`));
+      })().finally(() => {
+        inFlight.delete(item.id);
+      });
+
+      inFlight.set(item.id, task);
+    };
 
     try {
       for (;;) {
@@ -294,37 +309,49 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           break;
         }
 
+        // Экранность дела узнаётся только планом: пока план не собран, флаг неизвестен.
+        const unknown = items.filter(
+          (item) => item.state === "waiting" && item.touchesScreen === undefined,
+        );
+        for (const item of unknown.slice(0, 3)) {
+          const check = await draftPlan(item.goal).catch(() => null);
+          plans.set(item.id, check);
+          sync(markScreen(items, item.id, usesScreen(check)));
+        }
+
         const machine = await Promise.resolve(machineState()).catch(() => null);
-        const decision = next(items, {
+        const decision = pick(items, {
           parallel: machine?.budget.parallel ?? 1,
           mayStart: machine?.budget.may_start ?? true,
           // Без измерения «ушёл» не подтверждено: сам идти не начинаю.
           away: machine?.budget.mode === "away",
         });
 
-        if (decision.index < 0) {
-          setQueueIdle(decision.reason);
-          break;
+        for (const index of decision.indices) {
+          const item = items[index];
+          if (!item || item.state !== "waiting") continue;
+          launch(item);
         }
 
-        const item = items[decision.index];
-        if (!item) break;
+        if (decision.indices.length > 0) continue;
 
-        items = setState(items, item.id, "running", "");
-        queueRef.current = items;
-        setQueue(items);
+        if (inFlight.size > 0) {
+          // Ждём, пока освободится дело или место в бюджете: иначе очередь встанет навсегда.
+          await Promise.race([...inFlight.values()]);
+          continue;
+        }
 
-        const outcome = await runQueuedGoal(item.goal);
-
-        items = setState(items, item.id, outcome.state, outcome.note);
-        queueRef.current = items;
-        setQueue(items);
+        setQueueIdle(decision.reason);
+        break;
       }
     } finally {
+      // Начатое доводим до конца, даже если человек сказал «стоп»: бросить на середине
+      // значит оставить чужое окно в непонятном состоянии.
+      await Promise.all([...inFlight.values()].map((task) => task.catch(() => undefined)));
       queueRunningRef.current = false;
       setQueueOn(false);
     }
-  }, [runQueuedGoal]);
+  }, []);
 
   const stopQueue = useCallback(() => {
     queueStopRef.current = true;

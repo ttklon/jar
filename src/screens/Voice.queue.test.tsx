@@ -150,6 +150,86 @@ describe("очередь дел на экране", () => {
     expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1);
   });
 
+  it("два дела без окон идут одновременно, а не по очереди", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(safePlan as never);
+
+    // Запуск, который висит, пока его не отпустят: так видно, ждёт ли второе дело первого.
+    const releases: Array<() => void> = [];
+    vi.mocked(runPlan).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          releases.push(() =>
+            resolve({
+              goal: "убавить громкость",
+              steps: [
+                {
+                  position: 1,
+                  registry: "звук|убавить|громкость",
+                  status: "ok",
+                  reason: "сделано",
+                  evidence: "system",
+                  duration_ms: 5,
+                },
+              ],
+              stopped: null,
+              run_id: 1,
+            } as never),
+          );
+        }),
+    );
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    addToQueue("убавить громкость");
+    addToQueue("проверить свободное место");
+    fireEvent.click(screen.getByText("Работать без меня"));
+
+    // Оба дела уже в работе: второй запуск не ждёт первого.
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(2));
+    expect(screen.getAllByText(/^делаю · /).length).toBe(2);
+
+    releases.forEach((release) => release());
+    await waitFor(() => expect(screen.getAllByText(/готово · /).length).toBe(2));
+  });
+
+  it("два дела в одно окно одновременно не идут: второе честно ждёт", async () => {
+    const screenPlan = {
+      plan: {
+        goal: "нажать",
+        steps: [{ registry: "apps-windows|нажать|кнопку", params: { name: "Войти" } }],
+      },
+      problems: [],
+      gates: [],
+      questions: [],
+    };
+    vi.mocked(draftPlan).mockResolvedValue(screenPlan as never);
+
+    const releases: Array<() => void> = [];
+    vi.mocked(runPlan).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          releases.push(() =>
+            resolve({ goal: "нажать", steps: [], stopped: null, run_id: 1 } as never),
+          );
+        }),
+    );
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    addToQueue("нажать войти");
+    addToQueue("нажать готово");
+    fireEvent.click(screen.getByText("Работать без меня"));
+
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1));
+    // Второе не запущено: одновременно в окно нельзя.
+    expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1);
+
+    releases.forEach((release) => release());
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(2));
+  });
+
   it("человек вернулся — очередь новые дела не начинает", async () => {
     vi.mocked(machineState).mockResolvedValue({
       ...away,

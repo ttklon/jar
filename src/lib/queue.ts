@@ -25,6 +25,18 @@ import type { PlanCheck } from "../ipc";
 /** Что сейчас с делом. */
 export type QueueState = "waiting" | "running" | "done" | "failed" | "held" | "stopped";
 
+/**
+ * Шаги, которые трогают чужое окно: нажатие и ввод.
+ *
+ * Зачем этот список здесь. Два дела, которые одновременно нажимают в одном окне, — это
+ * не скорость, а гонка: одно нажмёт «Удалить», пока второе ищет «Сохранить». Поэтому
+ * экранных дел одновременно ведётся не больше одного, а остальные ждут честно.
+ */
+export const SCREEN_STEPS: ReadonlySet<string> = new Set([
+  "apps-windows|нажать|кнопку",
+  "apps-windows|ввести|текст",
+]);
+
 /** Одно дело в очереди. */
 export interface QueueItem {
   /** Устойчивый номер: по нему находятся обновления, даже если очередь пересобрали. */
@@ -34,6 +46,11 @@ export interface QueueItem {
   state: QueueState;
   /** Что случилось или чего ждём — одной строкой. Пусто, пока нечего сказать. */
   note: string;
+  /**
+   * Трогает ли дело чужое окно. `undefined` — ещё не знаем, план не собран.
+   * Знание появляется после плана, а не из догадки по словам.
+   */
+  touchesScreen?: boolean;
 }
 
 /** Сколько сейчас можно — ответ машины, а не мнение очереди. */
@@ -107,6 +124,112 @@ export function next(items: readonly QueueItem[], budget: QueueBudget): Decision
   }
 
   return { index: waiting, reason: "можно начинать следующее" };
+}
+
+/**
+ * Трогает ли этот план чужое окно. Смотрим на шаги, а не на слова человека: «нажми
+ * сохранить» может оказаться планом из одного чтения, и наоборот.
+ */
+export function usesScreen(check: PlanCheck | null): boolean {
+  const steps = check?.plan?.steps ?? [];
+  return steps.some((step) => SCREEN_STEPS.has(step.registry));
+}
+
+/** Что можно начать прямо сейчас: список индексов и причина, если ничего. */
+export interface Started {
+  /** Индексы дел, которые можно запускать одновременно. */
+  indices: number[];
+  /** Почему их столько: без причины «почему стоит» неотличимо от «почему сломалось». */
+  reason: string;
+}
+
+/**
+ * Сколько дел начать прямо сейчас.
+ *
+ * Бюджет машины задаёт верхнюю границу, а правило про экран — вторую: одновременно
+ * идёт не больше одного дела, которое нажимает или вводит. Остальные ждут, и очередь
+ * говорит, чего именно она ждёт.
+ */
+export function pick(items: readonly QueueItem[], budget: QueueBudget): Started {
+  if (!budget.mayStart) {
+    return {
+      indices: [],
+      reason: "машина просит не начинать: памяти на исходе — жду, а не толкаюсь",
+    };
+  }
+
+  if (!budget.away) {
+    return {
+      indices: [],
+      reason: "человек за машиной — новые дела не начинаю, чтобы не мешать",
+    };
+  }
+
+  const running = items.filter((item) => item.state === "running");
+  const parallel = Math.max(0, budget.parallel);
+  const slots = parallel - running.length;
+  if (slots <= 0) {
+    return {
+      indices: [],
+      reason:
+        parallel === 0
+          ? "сейчас нельзя ничего: так решила машина"
+          : `уже идёт ${running.length} из ${parallel} — больше бюджет машины не разрешает`,
+    };
+  }
+
+  const waiting = items
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => item.state === "waiting");
+
+  if (waiting.length === 0) {
+    return { indices: [], reason: "начинать нечего: в очереди пусто" };
+  }
+
+  let screenBusy = running.some((item) => item.touchesScreen === true);
+  const indices: number[] = [];
+  let heldByScreen = 0;
+
+  for (const { item, index } of waiting) {
+    if (indices.length >= slots) break;
+
+    if (item.touchesScreen === true) {
+      if (screenBusy) {
+        heldByScreen += 1;
+        continue;
+      }
+      screenBusy = true;
+    }
+
+    indices.push(index);
+  }
+
+  if (indices.length === 0) {
+    return {
+      indices,
+      reason:
+        heldByScreen > 0
+          ? "ждут экрана: другое дело уже работает с окном, одновременно туда нельзя"
+          : "начинать нечего: всё ждёт",
+    };
+  }
+
+  return {
+    indices,
+    reason:
+      indices.length > 1
+        ? `беру ${indices.length} дела сразу: бюджет машины позволяет, окна они не трогают`
+        : "беру одно дело: так разрешает бюджет или экран занят",
+  };
+}
+
+/** Отметить, трогает ли дело экран — по собранному плану, а не по догадке. */
+export function markScreen(
+  items: readonly QueueItem[],
+  id: string,
+  touchesScreen: boolean,
+): QueueItem[] {
+  return items.map((item) => (item.id === id ? { ...item, touchesScreen } : item));
 }
 
 /** Остановить всё, что ещё не начато. Начатое не трогаем: его доводят до шага. */

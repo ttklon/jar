@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   add,
+  markScreen,
   next,
+  pick,
   setState,
   stopRemaining,
   summary,
   unattended,
+  usesScreen,
   type QueueItem,
 } from "./queue";
 import type { PlanCheck } from "../ipc";
@@ -88,6 +91,69 @@ describe("очередь дел", () => {
     items = setState(items, "2", "held", "нужно ваше слово");
 
     expect(summary(items)).toEqual({ waiting: 1, running: 0, done: 1, failed: 0, held: 1 });
+  });
+});
+
+describe("сколько дел идёт сразу", () => {
+  it("бюджет машины задаёт верхнюю границу, и он назван", () => {
+    const items = add(add(add([], "а", "1"), "б", "2"), "в", "3");
+
+    const picked = pick(items, budget({ parallel: 3 }));
+    expect(picked.indices).toEqual([0, 1, 2]);
+    expect(picked.reason).toContain("3 дела");
+
+    expect(pick(items, budget({ parallel: 1 })).indices).toEqual([0]);
+    expect(pick(items, budget({ parallel: 0 })).indices).toEqual([]);
+  });
+
+  it("два дела в одном окне одновременно — не скорость, а гонка: экранных не больше одного", () => {
+    let items = add(add([], "убавить громкость", "1"), "нажать сохранить в Word", "2");
+    items = markScreen(items, "2", true);
+
+    // Первое окна не трогает — его можно, второе тоже: они не мешают друг другу.
+    expect(pick(items, budget({ parallel: 3 })).indices).toEqual([0, 1]);
+
+    // А два экранных дела — нет: второе ждёт, и причина названа.
+    let two = add(add([], "нажать сохранить", "1"), "нажать удалить", "2");
+    two = markScreen(markScreen(two, "1", true), "2", true);
+    expect(pick(two, budget({ parallel: 3 })).indices).toEqual([0]);
+
+    // Теперь одно уже идёт в окне — второе ждёт экрана, и очередь говорит об этом.
+    const busy = setState(two, "1", "running", "");
+    const waiting = pick(busy, budget({ parallel: 3 }));
+    expect(waiting.indices).toEqual([]);
+    expect(waiting.reason).toContain("ждут экрана");
+  });
+
+  it("человек за машиной или память на исходе — не начинается ничего", () => {
+    const items = add([], "а", "1");
+    expect(pick(items, budget({ away: false })).reason).toContain("чтобы не мешать");
+    expect(pick(items, budget({ mayStart: false })).reason).toContain("памяти на исходе");
+  });
+
+  it("план узнаётся по шагам, а не по словам", () => {
+    const press = {
+      plan: {
+        goal: "нажать",
+        steps: [{ registry: "apps-windows|нажать|кнопку", params: {} }],
+      },
+      problems: [],
+      gates: [],
+      questions: [],
+    };
+    const read = {
+      plan: {
+        goal: "место",
+        steps: [{ registry: "storage-backup|проверить|свободное место", params: {} }],
+      },
+      problems: [],
+      gates: [],
+      questions: [],
+    };
+
+    expect(usesScreen(press)).toBe(true);
+    expect(usesScreen(read)).toBe(false);
+    expect(usesScreen(null)).toBe(false);
   });
 });
 
