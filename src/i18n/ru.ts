@@ -511,6 +511,8 @@ export const voice = {
   cancelShow: "Отмена",
   cancelled: "отменил — запись выброшена и никуда не ушла",
   thinkShow: "Спросить модель",
+  sightTitle: "Что видно после работы",
+  sightNote: (note: string) => `экран: ${note}`,
   thinkChain: (goal: string, steps: number) =>
     `модель собрала цепочку из ${steps} шагов: ${goal} — каждый шаг спросит вашего слова, ничего не выполнено`,
   thinkChainBroken: (goal: string) =>

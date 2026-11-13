@@ -85,6 +85,8 @@ afterEach(() => {
   vi.mocked(draftPlan).mockReset().mockResolvedValue(null);
   vi.mocked(think).mockReset().mockResolvedValue(null as never);
   vi.mocked(uiDump).mockReset().mockRejectedValue(new Error("в браузере нет UI Automation"));
+  // Запуск плана тоже: иначе «не выполнялось» в одном тесте зависит от другого.
+  vi.mocked(runPlan).mockReset();
   vi.mocked(uiPress).mockReset().mockRejectedValue(new Error("в браузере окон нет"));
   vi.mocked(uiType).mockReset().mockRejectedValue(new Error("в браузере окон нет"));
   vi.mocked(machineState).mockReset().mockResolvedValue({
@@ -549,6 +551,55 @@ describe("локальное распознавание на экране", () =
       expect(screen.getByText(/надо научиться — поставить будильник/)).toBeTruthy();
     });
     expect(screen.getByText(/предложение модели ничего не выполняет/)).toBeTruthy();
+  });
+
+  it("после работы показывается, что видно на экране, — а не «готово и точка»", async () => {
+    vi.mocked(planFor).mockResolvedValueOnce([]);
+    vi.mocked(draftPlan).mockResolvedValueOnce({
+      plan: {
+        goal: "отправить форму",
+        steps: [{ registry: "apps-windows|нажать|кнопку", params: { name: "Отправить" } }],
+      },
+      problems: [],
+      gates: [],
+      questions: [],
+    });
+    vi.mocked(runPlan).mockResolvedValueOnce({
+      goal: "отправить форму",
+      steps: [
+        {
+          position: 1,
+          registry: "apps-windows|нажать|кнопку",
+          status: "ok",
+          reason: "нажато, и экран изменился",
+          evidence: "ui_changed",
+          duration_ms: 40,
+        },
+      ],
+      stopped: null,
+      run_id: 7,
+      sight: {
+        title: "Письмо",
+        changed: true,
+        comparable: true,
+        text: "Письмо (chrome.exe)\n  - текст «Отправлено»",
+        note: "экран изменился: видно не то, что было до работы",
+      },
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "отправь форму" } });
+    fireEvent.click(screen.getByText("Найти"));
+
+    await waitFor(() => expect(screen.getByText("Выполнить")).toBeTruthy());
+    fireEvent.click(screen.getByText("Выполнить"));
+
+    // Итог — не «готово», а «вот что видно после работы».
+    await waitFor(() => expect(screen.getByText("Что видно после работы")).toBeTruthy());
+    expect(screen.getByText(/экран: экран изменился/)).toBeTruthy();
+    expect(screen.getByText(/текст «Отправлено»/)).toBeTruthy();
   });
 
   it("цепочка модели видна по шагам и не выполняется сама", async () => {

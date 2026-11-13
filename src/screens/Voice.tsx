@@ -1301,6 +1301,17 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                 {report.stopped ? report.stopped : voice.draftDone}
               </Text>
             ) : null}
+            {report?.sight ? (
+              <>
+                <Text className={styles.title}>{voice.sightTitle}</Text>
+                <Text className={report.sight.changed ? styles.localReady : styles.note}>
+                  {voice.sightNote(report.sight.note)}
+                </Text>
+                {report.sight.text ? (
+                  <pre className={styles.prompt}>{report.sight.text}</pre>
+                ) : null}
+              </>
+            ) : null}
           </div>
         </section>
       ) : null}

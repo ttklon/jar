@@ -158,6 +158,7 @@ describe("голосовой вход", () => {
       ],
       stopped: null,
       run_id: 1,
+      sight: null,
     });
 
     render(<Ask />);
@@ -189,7 +190,13 @@ describe("голосовой вход", () => {
         },
       ],
     });
-    vi.mocked(runPlan).mockResolvedValue({ goal: "диск", steps: [], stopped: "шаг 1 не выполнен", run_id: 2 });
+    vi.mocked(runPlan).mockResolvedValue({
+      goal: "диск",
+      steps: [],
+      stopped: "шаг 1 не выполнен",
+      run_id: 2,
+      sight: null,
+    });
 
     render(<Ask />);
 

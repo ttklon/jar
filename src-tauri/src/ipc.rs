@@ -1776,6 +1776,9 @@ pub struct PlanReport {
     pub steps: Vec<PlanStepRun>,
     pub stopped: Option<String>,
     pub run_id: Option<i64>,
+    /// Что видно на экране после работы. Только у планов, которые трогают окно: для
+    /// остальных смотреть нечего, и выдумывать «итог» было бы хуже пустоты.
+    pub sight: Option<uia::Sight>,
 }
 
 /// Запускает план шаг за шагом. `approved` — номера шагов, которые человек разрешил
@@ -1810,6 +1813,20 @@ pub async fn run_plan(
 
     let run_id = inner.memory.start_run("plan", &plan.goal).ok();
     inner.cancel.store(false, Ordering::Relaxed);
+
+    // Если план трогает чужое окно, снимаем экран до работы: иначе после работы не с чем
+    // сравнить, и «итог» стал бы догадкой.
+    let touches_screen = plan.steps.iter().any(|step| {
+        matches!(
+            step.registry.as_str(),
+            "apps-windows|нажать|кнопку" | "apps-windows|ввести|текст"
+        )
+    });
+    let before = if touches_screen {
+        uia::dump(uia::MAX_NODES / 3).ok().map(|snapshot| snapshot.elements)
+    } else {
+        None
+    };
 
     let mut steps = Vec::new();
     let mut stopped: Option<String> = None;
@@ -1922,11 +1939,34 @@ pub async fn run_plan(
         let _ = inner.memory.finish_run(run_id, summary);
     }
 
+    // Итог по экрану — не «задача выполнена», а «вот что видно». Приложение не знает,
+    // чего хотел человек, и притворяться, что знает, здесь особенно дорого.
+    let sight = if touches_screen {
+        match uia::dump(uia::MAX_NODES / 3) {
+            Ok(snapshot) => Some(uia::sight(
+                before.as_deref(),
+                &snapshot.title,
+                &snapshot.elements,
+            )),
+            // Окно уже не прочитать (закрылось, потеряло фокус) — говорим это прямо.
+            Err(reason) => Some(uia::Sight {
+                title: String::new(),
+                changed: false,
+                comparable: false,
+                text: String::new(),
+                note: format!("экран после работы не прочитался: {reason}"),
+            }),
+        }
+    } else {
+        None
+    };
+
     Ok(PlanReport {
         goal: plan.goal.clone(),
         steps,
         stopped,
         run_id,
+        sight,
     })
 }
 

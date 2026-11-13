@@ -185,6 +185,7 @@ describe("запуск плана", () => {
       ],
       stopped: null,
       run_id: 9,
+      sight: null,
     });
 
     render(<Ask />);
@@ -228,6 +229,7 @@ describe("запуск плана", () => {
       ],
       stopped: "шаг 1 не выполнен: powershell не ответил",
       run_id: 10,
+      sight: null,
     });
 
     render(<Ask />);

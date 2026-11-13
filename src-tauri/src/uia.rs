@@ -111,7 +111,7 @@ impl Snapshot {
 
 impl Element {
     /// `  - кнопка «Войти» [invoke]` — одна строка на элемент.
-    fn line(&self) -> String {
+    pub(crate) fn line(&self) -> String {
         let mut line = String::with_capacity(32);
         for _ in 0..self.depth {
             line.push_str("  ");
@@ -391,6 +391,54 @@ pub fn changed(before: &[Element], after: &[Element]) -> bool {
             .join("|")
     };
     shape(before) != shape(after)
+}
+
+/// Что видно на экране после работы — и изменилось ли это «видно» с начала.
+#[derive(Debug, Clone, Serialize)]
+pub struct Sight {
+    /// Заголовок окна, которое смотрели.
+    pub title: String,
+    /// Экран отличается от того, что было перед работой.
+    pub changed: bool,
+    /// Что было сравнимо: если снимка «до» не было, сравнение невозможно, и это сказано.
+    pub comparable: bool,
+    /// Первые строки того, что видно сейчас.
+    pub text: String,
+    /// Честные слова для человека.
+    pub note: String,
+}
+
+/// Итог по экрану: сравнить «до» и «после» и сказать, что видно.
+///
+/// Это не «проверка, что задача выполнена»: приложение не знает, чего хотел человек,
+/// поэтому оно честно говорит, что видит и изменилось ли что-то. Придумать «получилось»
+/// здесь было бы легче всего — и хуже всего.
+pub fn sight(before: Option<&[Element]>, after_title: &str, after: &[Element]) -> Sight {
+    let comparable = before.is_some();
+    let changed = before.map(|was| changed(was, after)).unwrap_or(false);
+
+    let note = match (comparable, changed) {
+        (false, _) => "экрана до работы не было видно — сравнить не с чем".to_string(),
+        (true, true) => "экран изменился: видно не то, что было до работы".to_string(),
+        (true, false) => {
+            "экран такой же, как до работы: возможно, действие не изменило видимого, а возможно — \
+             не сработало"
+                .to_string()
+        }
+    };
+
+    Sight {
+        title: tidy(after_title),
+        changed,
+        comparable,
+        text: after
+            .iter()
+            .take(8)
+            .map(Element::line)
+            .collect::<Vec<String>>()
+            .join("\n"),
+        note,
+    }
 }
 
 /// Нажать элемент активного окна по имени.
@@ -1117,6 +1165,30 @@ mod tests {
         // Поле осталось пустым: отказ, а не «вроде ввели».
         let (ok, _) = read_back_verdict("текст", "");
         assert!(!ok);
+    }
+
+    #[test]
+    fn the_sight_says_what_is_visible_now_and_whether_it_moved() {
+        let before = vec![element("Войти", "кнопка", &["invoke"])];
+
+        let same = sight(Some(&before), "  Вход  ", &before);
+        assert_eq!(same.title, "Вход");
+        assert!(same.comparable);
+        assert!(!same.changed);
+        assert!(same.note.contains("такой же"));
+
+        let mut after = before.clone();
+        after.push(element("Добро пожаловать", "текст", &[]));
+        let moved = sight(Some(&before), "Вход", &after);
+        assert!(moved.changed);
+        assert!(moved.note.contains("изменился"));
+        assert!(moved.text.contains("Добро пожаловать"));
+
+        // Снимка «до» не было — сравнивать не с чем, и это не выдаётся за «не изменилось».
+        let blind = sight(None, "Вход", &after);
+        assert!(!blind.comparable);
+        assert!(!blind.changed);
+        assert!(blind.note.contains("сравнить не с чем"));
     }
 
     #[test]

@@ -422,11 +422,24 @@ export interface PlanStepRun {
 }
 
 /** Отчёт о запуске: `stopped` пуст, только если план прошёл целиком. */
+/** Что видно на экране после работы — и изменилось ли это «видно» с начала. */
+export interface Sight {
+  title: string;
+  changed: boolean;
+  /** Был ли снимок «до»: без него сравнение невозможно, и это сказано. */
+  comparable: boolean;
+  /** Первые строки того, что видно сейчас. */
+  text: string;
+  note: string;
+}
+
 export interface PlanReport {
   goal: string;
   steps: PlanStepRun[];
   stopped: string | null;
   run_id: number | null;
+  /** Только у планов, которые трогают окно: для остальных смотреть нечего. */
+  sight: Sight | null;
 }
 
 /** Роль модели: требование к роли плюс то, что на неё назначено. */

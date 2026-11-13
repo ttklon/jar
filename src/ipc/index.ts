@@ -49,6 +49,7 @@ export type {
   TrialReport,
   Thought,
   SpeechStatus,
+  Sight,
   StepResult,
   Tier,
   ToolView,
