@@ -1,0 +1,100 @@
+# Уборка хранилища Actions: кеши и артефакты.
+#
+# Зачем это отдельным файлом. Кеши `rust-cache` весят по 400–900 МБ каждый, и каждый
+# прогон может завести новый: ключ зависит от версии компилятора и набора зависимостей,
+# а старые кеши GitHub сам не удаляет. За пару дней это выросло в 10 ГБ и уперлось в
+# потолок хранилища — при том что старые кеши уже никто никогда не использует.
+#
+# Правила здесь простые и нарочно осторожные:
+#  * удаляются только кеши **этого** репозитория и только старые: три самых свежих
+#    остаются, чтобы ближайший прогон не собирал всё с нуля;
+#  * артефакты (собранные установщики, отчёты) не трогаются, пока им меньше 14 дней:
+#    это могут быть нужные человеку файлы, а не мусор;
+#  * ничего не удаляется «на всякий случай» по маске — только по возрасту.
+#
+# Запускается по push в основную ветку, по расписанию и руками. Отдельного секрета не
+# нужно: `GITHUB_TOKEN` с правом `actions: write` умеет удалять кеши своего репозитория.
+
+name: storage
+
+on:
+  push:
+    branches:
+      - main
+      # Рабочая ветка на время, пока хранилище уже переполнено: уборка нужна сегодня,
+      # а не после слияния. Когда ветка станет не нужна, строку можно убрать.
+      - arena/564637fa-jar
+  schedule:
+    # Раз в неделю: хранилище не должно копиться незаметно.
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: storage
+  cancel-in-progress: false
+
+jobs:
+  prune:
+    name: уборка кешей и артефактов
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Сколько занято до уборки
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          caches=$(gh api --paginate "repos/${{ github.repository }}/actions/caches?per_page=100" \
+            --jq '[.actions_caches[].size_in_bytes] | add // 0')
+          artifacts=$(gh api --paginate "repos/${{ github.repository }}/actions/artifacts?per_page=100" \
+            --jq '[.artifacts[].size_in_bytes] | add // 0')
+          echo "кеши: $((caches / 1048576)) МБ, артефакты: $((artifacts / 1048576)) МБ"
+          echo "caches_before=$((caches / 1048576))" >> "$GITHUB_STEP_SUMMARY"
+          echo "artifacts_before=$((artifacts / 1048576))" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Удалить старые кеши, оставив три самых свежих
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Сначала считаем возраст: сразу удалять в том же потоке, из которого читаем
+          # список, — значит получить обрезанную страницу и потерять часть кешей.
+          ids=$(gh api --paginate "repos/${{ github.repository }}/actions/caches?per_page=100" \
+            --jq '[.actions_caches] | flatten | sort_by(.created_at) | reverse | .[3:] | .[].id')
+
+          removed=0
+          for id in $ids; do
+            if gh api -X DELETE "repos/${{ github.repository }}/actions/caches/$id" >/dev/null; then
+              removed=$((removed + 1))
+            fi
+          done
+          echo "удалено кешей: $removed" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Удалить артефакты старше четырнадцати дней
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cutoff=$(date -u -d '14 days ago' +%Y-%m-%dT%H:%M:%SZ)
+          ids=$(gh api --paginate "repos/${{ github.repository }}/actions/artifacts?per_page=100" \
+            --jq --arg cutoff "$cutoff" '[.artifacts[] | select(.created_at < $cutoff) | .id]')
+
+          removed=0
+          for id in $ids; do
+            if gh api -X DELETE "repos/${{ github.repository }}/actions/artifacts/$id" >/dev/null; then
+              removed=$((removed + 1))
+            fi
+          done
+          echo "удалено артефактов старше 14 дней: $removed" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Сколько занято после уборки
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          caches=$(gh api --paginate "repos/${{ github.repository }}/actions/caches?per_page=100" \
+            --jq '[.actions_caches[].size_in_bytes] | add // 0')
+          artifacts=$(gh api --paginate "repos/${{ github.repository }}/actions/artifacts?per_page=100" \
+            --jq '[.artifacts[].size_in_bytes] | add // 0')
+          echo "кеши: $((caches / 1048576)) МБ, артефакты: $((artifacts / 1048576)) МБ"
+          echo "caches_after=$((caches / 1048576))" >> "$GITHUB_STEP_SUMMARY"
