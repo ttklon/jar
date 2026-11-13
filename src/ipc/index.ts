@@ -14,6 +14,7 @@ export type {
   Decision,
   Downloaded,
   EngineStatus,
+  CustomHand,
   Episode,
   Evidence,
   Fact,
@@ -55,6 +56,7 @@ export type {
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
 import type {
+  CustomHand,
   HandDraft,
   TrialReport,
   Thought,
@@ -449,6 +451,36 @@ export async function draftHand(key: string): Promise<HandDraft> {
     return fromCore(key);
   }
   const { draftHand: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Принять проверенный черновик в привнесённые руки. Явное действие человека. */
+export async function adoptHand(key: string, title = ""): Promise<CustomHand> {
+  if (isTauri()) {
+    const { adoptHand: fromCore } = await import("./tauri");
+    return fromCore(key, title);
+  }
+  const { adoptHand: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Привнесённые руки: то, что человек добавил сам. */
+export async function customHands(): Promise<CustomHand[]> {
+  if (isTauri()) {
+    const { customHands: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { customHands: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Убрать привнесённую руку. */
+export async function removeCustomHand(key: string): Promise<void> {
+  if (isTauri()) {
+    const { removeCustomHand: fromCore } = await import("./tauri");
+    return fromCore(key);
+  }
+  const { removeCustomHand: fromData } = await import("./dev");
   return fromData();
 }
 

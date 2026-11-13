@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
-import { isTauri, listTools } from "../ipc";
-import type { ToolView } from "../ipc";
-import { hands } from "../i18n/ru";
+import { customHands, isTauri, listTools, removeCustomHand } from "../ipc";
+import type { CustomHand, ToolView } from "../ipc";
+import { hands, voice } from "../i18n/ru";
 import { ToolCard } from "../components/ToolCard";
 
 const useStyles = makeStyles({
@@ -26,6 +26,8 @@ export function Hands() {
   const styles = useStyles();
   const [tools, setTools] = useState<ToolView[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /** Привнесённые руки: отдельный список, потому что они не часть сборки. */
+  const [own, setOwn] = useState<CustomHand[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -35,6 +37,13 @@ export function Hands() {
       })
       .catch((reason: unknown) => {
         if (alive) setError(reason instanceof Error ? reason.message : String(reason));
+      });
+    customHands()
+      .then((list) => {
+        if (alive) setOwn(list);
+      })
+      .catch(() => {
+        // Список своих рук не должен ронять экран: встроенные важнее.
       });
     return () => {
       alive = false;
@@ -75,6 +84,43 @@ export function Hands() {
           <Text>{hands.count(0)}</Text>
         </div>
       ) : null}
+
+      <section>
+        <Text weight="semibold" block>
+          {voice.customTitle}
+        </Text>
+        <Text className={styles.note} block>
+          {voice.customNote}
+        </Text>
+        {own.length === 0 ? (
+          <Text className={styles.note} block>
+            {voice.customNone}
+          </Text>
+        ) : (
+          <ul>
+            {own.map((hand) => (
+              <li key={hand.key}>
+                <Text>
+                  {hand.title} · {hands.riskLabel(hand.risk)}
+                </Text>
+                <pre className={styles.note}>{hand.code}</pre>
+                <button
+                  type="button"
+                  onClick={() =>
+                    removeCustomHand(hand.key)
+                      .then(() => setOwn((current) => current.filter((item) => item.key !== hand.key)))
+                      .catch((reason: unknown) =>
+                        setError(reason instanceof Error ? reason.message : String(reason)),
+                      )
+                  }
+                >
+                  {voice.customRemove(hand.title)}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {tools ? (
         <>

@@ -13,6 +13,7 @@ use tauri::State;
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::container;
+use crate::custom;
 use crate::download::{self, Downloaded};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::hand;
@@ -446,6 +447,39 @@ pub async fn trial_hand(state: State<'_, AppState>, key: String) -> Result<trial
 
     trial::save(&inner.memory, &report)?;
     Ok(report)
+}
+
+/// Принять проверенный черновик в привнесённые руки.
+///
+/// Это явное действие человека: черновик уже прочитан, проба пройдена. Привнесённая рука
+/// **отделена** от встроенных и **не исполняется**: у неё нет пути в реестр, план или
+/// `tools::spec`. Исполнение таких рук — отдельный шаг с отдельными правилами.
+#[tauri::command]
+pub fn adopt_hand(
+    state: State<'_, AppState>,
+    key: String,
+    title: String,
+) -> Result<custom::CustomHand, String> {
+    let risk = state
+        .inner
+        .registry
+        .by_key(&key)
+        .map(|action| action.risk.as_str().to_string())
+        .ok_or_else(|| format!("такой строки нет в реестре: {key}"))?;
+
+    custom::adopt(&state.inner.memory, &key, &title, &risk, now_ms() as u64)
+}
+
+/// Привнесённые руки: добавленные человеком на его машине, отдельно от встроенных.
+#[tauri::command]
+pub fn custom_hands(state: State<'_, AppState>) -> Vec<custom::CustomHand> {
+    custom::all(&state.inner.memory)
+}
+
+/// Убрать привнесённую руку.
+#[tauri::command]
+pub fn remove_custom_hand(state: State<'_, AppState>, key: String) -> Result<(), String> {
+    custom::forget(&state.inner.memory, key.trim())
 }
 
 /// Последний отчёт о пробе для этой строки. Есть — значит, уже пробовали.

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, makeStyles, Switch, Text, tokens } from "@fluentui/react-components";
 import { MicRegular } from "@fluentui/react-icons";
 import {
+  adoptHand,
   draftHand,
   draftPlan,
   fillPlan,
@@ -19,6 +20,7 @@ import {
   transcribeLocal,
 } from "../ipc";
 import type {
+  CustomHand,
   Fact,
   HandDraft,
   TrialReport,
@@ -156,6 +158,8 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   /** Отчёт о пробе в клетке. Отчёт, а не «научились». */
   const [trial, setTrial] = useState<TrialReport | null>(null);
   const [trialBusy, setTrialBusy] = useState(false);
+  /** Принятые руки: отдельно от встроенных и не исполняются. */
+  const [adopted, setAdopted] = useState<CustomHand | null>(null);
   /** Что модель предложила. Предложение, а не действие: выполнять его пока нечем. */
   const [thought, setThought] = useState<Thought | null>(null);
   const [thinking, setThinking] = useState(false);
@@ -874,6 +878,28 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                   {!trial.ran ? (
                     <Text className={styles.error}>{voice.trialNotRan(trial.note)}</Text>
                   ) : null}
+
+                  {/* Рукой черновик становится только по слову человека и только после пробы. */}
+                  {trial.ok ? (
+                    <Button
+                      size="small"
+                      appearance="subtle"
+                      onClick={() =>
+                        adoptHand(handDraft.key, handDraft.goal)
+                          .then((hand) => {
+                            setAdopted(hand);
+                            speak(voice.adoptDone(hand.title));
+                          })
+                          .catch((reason: unknown) =>
+                            setHandError(reason instanceof Error ? reason.message : String(reason)),
+                          )
+                      }
+                    >
+                      {voice.adoptShow}
+                    </Button>
+                  ) : null}
+
+                  {adopted ? <Text className={styles.note}>{voice.adoptDone(adopted.title)}</Text> : null}
                 </>
               ) : null}
             </>

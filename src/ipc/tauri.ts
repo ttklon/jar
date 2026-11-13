@@ -21,6 +21,7 @@ import type {
   PlanItem,
   ProfileView,
   RoleView,
+  CustomHand,
   Fact,
   HandDraft,
   TrialReport,
@@ -113,6 +114,21 @@ export function learningRequests(): Promise<Learning[]> {
 /** Попросить модель написать черновик руки. Черновик не исполняется никогда. */
 export function draftHand(key: string): Promise<HandDraft> {
   return invoke<HandDraft>("draft_hand", { key });
+}
+
+/** Принять проверенный черновик в привнесённые руки. Явное действие человека. */
+export function adoptHand(key: string, title = ""): Promise<CustomHand> {
+  return invoke<CustomHand>("adopt_hand", { key, title });
+}
+
+/** Привнесённые руки. */
+export function customHands(): Promise<CustomHand[]> {
+  return invoke<CustomHand[]>("custom_hands");
+}
+
+/** Убрать привнесённую руку. */
+export function removeCustomHand(key: string): Promise<void> {
+  return invoke<void>("remove_custom_hand", { key });
 }
 
 /** Проба черновика в клетке. Отчёт, а не умение. */

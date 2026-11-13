@@ -53,6 +53,7 @@ pub mod stt;
 pub mod tools;
 pub mod tray;
 pub mod trial;
+pub mod custom;
 pub mod verifier;
 pub mod window;
 
@@ -160,6 +161,9 @@ pub fn run() {
             ipc::hand_drafts,
             ipc::trial_hand,
             ipc::trial_report,
+            ipc::adopt_hand,
+            ipc::custom_hands,
+            ipc::remove_custom_hand,
             ipc::forget_hand,
             ipc::facts,
             ipc::remember_fact,

@@ -129,6 +129,7 @@ import type {
   PlanCheck,
   PlanReport,
   RoleView,
+  CustomHand,
   Fact,
   HandDraft,
   TrialReport,
@@ -536,6 +537,19 @@ export async function runPlan(_json: string, _approved: number[]): Promise<PlanR
 
 export async function draftHand(): Promise<never> {
   throw new Error("черновик руки пишет модель: в браузере её нет");
+}
+
+export async function adoptHand(): Promise<never> {
+  // Принять руку можно только после пробы в клетке, а клетки в браузере нет.
+  throw new Error("привнесённые руки живут в приложении: без пробы в клетке их не бывает");
+}
+
+export async function customHands(): Promise<CustomHand[]> {
+  return [];
+}
+
+export async function removeCustomHand(): Promise<void> {
+  // Нечего убирать: руки тут не создаются.
 }
 
 export async function trialHand(): Promise<never> {

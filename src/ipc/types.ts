@@ -177,6 +177,16 @@ export interface TrialReport {
   created_ms: number;
 }
 
+/** Привнесённая рука: добавлена человеком, отдельно от встроенных и не исполняется. */
+export interface CustomHand {
+  key: string;
+  title: string;
+  code: string;
+  risk: string;
+  source: string;
+  created_ms: number;
+}
+
 export type Proposal =
   | { Call: { registry: string; params: Record<string, string>; why: string } }
   | { Learn: { goal: string; why: string } }
