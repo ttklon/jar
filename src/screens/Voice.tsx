@@ -133,6 +133,8 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [spoken, setSpoken] = useState<string | null>(null);
+  /** Отменил ли человек запись — чтобы «ничего не ушло» было видно, а не молчало. */
+  const [cancelled, setCancelled] = useState(false);
   const [speech, setSpeech] = useState<SpeechStatus | null>(null);
   const [isolation, setIsolation] = useState<IsolationStatus | null>(null);
   /** Что перед человеком: спрашиваем в момент, когда он заговорил, а не один раз. */
@@ -454,6 +456,20 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         </Text>
       </div>
 
+      {mic.listening && !always ? (
+        <Button
+          appearance="subtle"
+          onClick={() => {
+            mic.cancel();
+            setCancelled(true);
+          }}
+        >
+          {voice.cancelShow}
+        </Button>
+      ) : null}
+
+      {cancelled ? <Text className={styles.note}>{voice.cancelled}</Text> : null}
+
       <Button
         className={mic.listening ? styles.micListening : styles.mic}
         appearance="primary"
@@ -461,6 +477,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         aria-label={always ? voice.always : voice.hold}
         onPointerDown={(event) => {
           event.preventDefault();
+          setCancelled(false);
           // В режиме «слушаю всегда» нажатие — это переключатель, а не «держать».
           if (always) {
             if (mic.listening) mic.stop();

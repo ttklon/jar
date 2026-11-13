@@ -507,6 +507,8 @@ export const voice = {
     title.length > 0 ? `${title} — ${process}` : process,
   contextNone: (reason: string) => `активное окно не прочитать: ${reason}`,
   fromMemory: "из памяти — поправьте, если не так",
+  cancelShow: "Отмена",
+  cancelled: "отменил — запись выброшена и никуда не ушла",
   thinkShow: "Спросить модель",
   thinkThinking: "спрашиваю модель — это может занять минуту",
   thinkCall: (registry: string, why: string) =>

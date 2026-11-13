@@ -483,6 +483,29 @@ describe("локальное распознавание на экране", () =
     expect(screen.getAllByText(/выдуманная\|рука/).length).toBeGreaterThan(0);
   });
 
+  it("отмена во время записи выбрасывает сказанное и говорит об этом", async () => {
+    vi.mocked(speechStatus).mockResolvedValue(FOUND);
+    const wav = new Uint8Array([0x52, 0x49, 0x46, 0x46, 1, 1]);
+    vi.mocked(startRecording).mockResolvedValue({
+      stop: vi.fn().mockResolvedValue({ wav, seconds: 1.2, sampleRate: 16_000 }),
+    });
+    vi.mocked(transcribeLocal).mockResolvedValue("не то");
+
+    render(<Voice />);
+    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+
+    const mic = screen.getByRole("button", { name: "Держать и говорить" });
+    fireEvent.pointerDown(mic);
+    await waitFor(() => expect(vi.mocked(startRecording)).toHaveBeenCalled());
+
+    fireEvent.click(screen.getByText("Отмена"));
+
+    await waitFor(() => expect(screen.getByText(/отменил — запись выброшена/)).toBeTruthy());
+    expect(vi.mocked(transcribeLocal)).not.toHaveBeenCalled();
+    // В поле задачи отменённое не попадает: человек именно этого и не хотел.
+    expect((screen.getByLabelText("Услышал") as HTMLInputElement).value).toBe("");
+  });
+
   it("держу и говорю — запись уходит своему движку", async () => {
     vi.mocked(speechStatus).mockResolvedValue(FOUND);
     const wav = new Uint8Array([0x52, 0x49, 0x46, 0x46, 9, 9]);

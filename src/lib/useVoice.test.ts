@@ -221,3 +221,44 @@ describe("свой движок распознавания", () => {
     expect(onError).toHaveBeenCalledWith("движок не отвечает на 127.0.0.1:8081");
   });
 });
+
+/**
+ * Отмена: «нет, я не то сказал». Запись выбрасывается, разбора нет, упрёка за молчание
+ * тоже нет — иначе человек, передумав, получает ровно то, чего не хотел.
+ */
+describe("отмена записи", () => {
+  it("Esc при удержании выбрасывает запись без разбора и без ошибки", async () => {
+    const onText = vi.fn();
+    const onError = vi.fn();
+    const stopRecording = vi.fn().mockResolvedValue({ wav: new Uint8Array([1]), seconds: 2 });
+    const transcribe = vi.fn().mockResolvedValue("не то");
+
+    vi.mocked(startRecording).mockResolvedValue({ stop: stopRecording } as never);
+
+    const { result } = renderHook(() =>
+      useVoice({ onText, onError, local: { transcribe } }),
+    );
+
+    act(() => result.current.start());
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      await Promise.resolve();
+    });
+
+    expect(onText).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
+    expect(transcribe).not.toHaveBeenCalled();
+    expect(stopRecording).toHaveBeenCalled();
+    expect(result.current.listening).toBe(false);
+  });
+
+  it("отмена без записи ничего не ломает", () => {
+    const onError = vi.fn();
+    const { result } = renderHook(() => useVoice({ onText: vi.fn(), onError }));
+
+    act(() => result.current.cancel());
+
+    expect(onError).not.toHaveBeenCalled();
+    expect(result.current.listening).toBe(false);
+  });
+});

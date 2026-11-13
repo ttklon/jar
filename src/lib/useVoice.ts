@@ -8,6 +8,8 @@
  * * после отпускания даём распознаванию короткую паузу: система отдаёт результат
  *   не мгновенно, и обрывать её на полуслове значит терять последние слова;
  * * если за это время ничего не пришло — так и говорим: «не разобрал»;
+ * * передумал — отмена: запись выбрасывается, разбора нет, ошибки нет. Сказал «нет, не то»
+ *   и не получил ни фразы, ни упрёка;
  * * хоткей не срабатывает, когда человек печатает в поле: пробел должен оставаться
  *   пробелом.
  */
@@ -53,6 +55,14 @@ export interface VoiceControl {
   alwaysSupported: boolean;
   start(): void;
   stop(): void;
+  /**
+   * Отмена: выбросить запись, ничего не разбирать и не сообщать об ошибке.
+   *
+   * Нужна ровно для случая «нет, я не то сказал»: человек не должен ни ждать разбора, ни
+   * получать упрёк за молчание. В режиме «слушаю всегда» отменяется текущая фраза, а
+   * слушание продолжается: там отмена — это «не считается», а не «выключись».
+   */
+  cancel(): void;
 }
 
 /** Печатает ли человек прямо сейчас: тогда хоткей молчит. */
@@ -91,6 +101,11 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   alwaysRef.current = always;
   /** Чем остановить текущую всегда-запись, если человек передумал. */
   const alwaysStop = useRef<(() => void) | null>(null);
+  /**
+   * «Текущая фраза не считается». В режиме «слушаю всегда» это единственный способ
+   * выбросить уже записанное, не выключая микрофон.
+   */
+  const discardRef = useRef(false);
 
   // Колбэки живут в ссылке: иначе каждое изменение пропсов пересоздавало бы слушание.
   const callbacks = useRef({ onText, onError, nothingHeard, local });
@@ -131,6 +146,18 @@ export function useVoice(options: VoiceOptions): VoiceControl {
         recorder = null;
         if (!current) {
           stopWhenReady = true;
+          return;
+        }
+
+        // Фразу отменили: закрываем микрофон и начинаем заново, без разбора.
+        if (discardRef.current) {
+          discardRef.current = false;
+          current
+            .stop()
+            .catch(() => undefined)
+            .finally(() => {
+              if (activeRef.current) run();
+            });
           return;
         }
 
@@ -198,6 +225,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   const start = useCallback(() => {
     if (activeRef.current) return;
 
+    discardRef.current = false;
     stopSpeaking();
     heardRef.current = false;
     activeRef.current = true;
@@ -306,12 +334,42 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     }, grace);
   }, [clearGrace, finish, grace]);
 
+  const cancel = useCallback(() => {
+    if (!activeRef.current) return;
+
+    // «Слушаю всегда»: выбрасываем фразу, микрофон не выключаем.
+    if (alwaysStop.current) {
+      discardRef.current = true;
+      setSpeaking(false);
+      return;
+    }
+
+    const engine = callbacks.current.local;
+    const recorder = recorderRef.current;
+    recorderRef.current = null;
+    clearGrace();
+    finish();
+
+    // Запись выбрасываем молча: разбор отменённой фразы — это отправка того, что человек
+    // передумал говорить.
+    recorder?.stop().catch(() => undefined);
+    if (!engine) voiceRef.current = null;
+  }, [clearGrace, finish]);
+
   // Хоткей «держи и говори»: Ctrl+Space. Печатающему человеку он не мешает.
   useEffect(() => {
     if (!hotkey) return;
 
     const isChord = (event: KeyboardEvent) =>
       event.code === "Space" && (event.ctrlKey || event.metaKey) && !event.altKey;
+
+    // Esc — «нет, не то»: выбрасываем запись, ничего не разбирая и не ругаясь.
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (!activeRef.current) return;
+      event.preventDefault();
+      cancel();
+    };
 
     const down = (event: KeyboardEvent) => {
       if (!isChord(event) || typing(event.target)) return;
@@ -327,12 +385,14 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     };
 
     window.addEventListener("keydown", down);
+    window.addEventListener("keydown", escape);
     window.addEventListener("keyup", up);
     return () => {
       window.removeEventListener("keydown", down);
+      window.removeEventListener("keydown", escape);
       window.removeEventListener("keyup", up);
     };
-  }, [hotkey, start, stop]);
+  }, [cancel, hotkey, start, stop]);
 
   // Ушли с экрана во время разговора — микрофон не остаётся включённым.
   useEffect(
@@ -360,5 +420,5 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   // а системное распознавание однократное.
   const alwaysSupported = local !== null && microphoneAvailable();
 
-  return { listening, supported, speaking, alwaysSupported, start, stop };
+  return { listening, supported, speaking, alwaysSupported, start, stop, cancel };
 }

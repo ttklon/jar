@@ -84,6 +84,35 @@ describe("слушаю всегда", () => {
     expect(onError).not.toHaveBeenCalled();
   });
 
+  it("отмена выбрасывает текущую фразу, не выключая микрофон", async () => {
+    const transcribe = vi.fn(async () => "не то");
+    const onText = vi.fn();
+    const onError = vi.fn();
+
+    const { result } = renderHook(() =>
+      useVoice({ always: true, local: { transcribe }, onText, onError }),
+    );
+
+    act(() => result.current.start());
+    await waitFor(() => expect(sink).not.toBeNull());
+
+    for (let index = 0; index < 5; index += 1) feed(speech());
+    await waitFor(() => expect(result.current.speaking).toBe(true));
+
+    // «Нет, не то»: фраза не считается, но режим продолжает слушать.
+    act(() => result.current.cancel());
+    expect(result.current.listening).toBe(true);
+    expect(result.current.speaking).toBe(false);
+
+    for (let index = 0; index < 20; index += 1) feed(quiet);
+
+    // Даём циклу шанс: отменённое не должно ни разбираться, ни уходить как задача.
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(transcribe).not.toHaveBeenCalled();
+    expect(onText).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
+  });
+
   it("кашель и шум не превращаются в задачу и не ругаются", async () => {
     const transcribe = vi.fn(async () => "");
     const onText = vi.fn();
