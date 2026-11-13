@@ -4,7 +4,9 @@
  */
 
 import { invoke } from "@tauri-apps/api/core";
-import type { AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RegistrySnapshot, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
+import type {
+  MachineState,
+AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RegistrySnapshot, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
 
 export interface AppStatus {
   version: string;
@@ -166,6 +168,11 @@ export function forgetFact(key: string): Promise<void> {
 /** Что сейчас перед человеком: заголовок и программа. Только чтение. */
 export function foregroundWindow(): Promise<ForegroundWindow> {
   return invoke<ForegroundWindow>("foreground_window");
+}
+
+/** Сколько сейчас можно и почему именно столько. Ничего не запускает. */
+export function machineState(): Promise<MachineState> {
+  return invoke<MachineState>("machine_state");
 }
 
 /** Что видно в активном окне: элементы, а не пиксели. Только чтение. */

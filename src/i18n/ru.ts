@@ -512,6 +512,18 @@ export const voice = {
   cancelled: "отменил — запись выброшена и никуда не ушла",
   thinkShow: "Спросить модель",
   screenShow: "Что на экране",
+  machineMeasure: "Что с машиной",
+  machineMeasuring: "Мерю машину…",
+  machineTitle: "Машина",
+  machineSummary: (mode: "near" | "away" | "crowded", parallel: number, reason: string) =>
+    `${mode === "away" ? "человек отошёл" : mode === "near" ? "человек за машиной" : "машина занята"} — ` +
+    `${parallel === 0 ? "новое не начинаю" : parallel === 1 ? "одно дело" : `${parallel} дела сразу`}. ${reason}`,
+  machineNumbers: (cpu: number, free: number, total: number, idle: number) =>
+    `процессор ${cpu}%, память ${Math.round(free / 1024)} из ${Math.round(total / 1024)} ГБ свободна, ввод не трогали ${idle} с`,
+  machineStop:
+    "новое не начинаю: памяти на исходе. Это не «помедленнее», это «нет» — пока не освободится",
+  machineError: (reason: string) =>
+    `машина не измерилась: ${reason}. Работаю по одному делу, без цифр`,
   screenReading: "Читаю окно…",
   screenTitle: "Что видно в активном окне",
   screenError: (reason: string) =>

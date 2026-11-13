@@ -13,6 +13,7 @@ import {
   trialHand,
   transcribeLocal,
   uiDump,
+  machineState,
 } from "../ipc";
 import { startRecording } from "../lib/recorder";
 import { Voice } from "./Voice";
@@ -30,6 +31,12 @@ vi.mock("../ipc", () => ({
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn().mockResolvedValue(null),
   uiDump: vi.fn().mockRejectedValue(new Error("в браузере нет UI Automation")),
+  machineState: vi.fn().mockResolvedValue({
+    sample: null,
+    budget: { parallel: 1, mode: "near", reason: "в браузере машину не измерить", may_start: true },
+    available: false,
+    note: "машина измеряется в приложении",
+  }),
   draftHand: vi.fn(),
   trialHand: vi.fn(),
   speak: vi.fn(),
@@ -73,6 +80,12 @@ afterEach(() => {
   vi.mocked(draftPlan).mockReset().mockResolvedValue(null);
   vi.mocked(think).mockReset().mockResolvedValue(null as never);
   vi.mocked(uiDump).mockReset().mockRejectedValue(new Error("в браузере нет UI Automation"));
+  vi.mocked(machineState).mockReset().mockResolvedValue({
+    sample: null,
+    budget: { parallel: 1, mode: "near", reason: "в браузере машину не измерить", may_start: true },
+    available: false,
+    note: "машина измеряется в приложении",
+  });
   vi.mocked(requestLearning).mockReset().mockResolvedValue(null);
   vi.mocked(planFor).mockClear();
   vi.mocked(transcribeLocal).mockReset();
@@ -249,6 +262,57 @@ describe("локальное распознавание на экране", () =
       expect(screen.getAllByText(/кнопка «Войти» #submit/).length).toBeGreaterThan(0),
     );
     expect(screen.getByText(/только чтение/)).toBeTruthy();
+  });
+
+  it("машина измеряется честно: цифры, решение и причина рядом", async () => {
+    vi.mocked(machineState).mockResolvedValueOnce({
+      sample: { cpu_percent: 14, ram_free_mb: 9_216, ram_total_mb: 16_384, idle_seconds: 900 },
+      budget: {
+        parallel: 3,
+        mode: "away",
+        reason: "человек отошёл (900 с тишины), процессор свободен — можно три дела сразу",
+        may_start: true,
+      },
+      available: true,
+      note: "машина измеряется честно: простой ввода, загрузка процессора, свободная память",
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+    // Кнопки живут рядом с поиском: сначала фраза, потом «что с машиной».
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "что с машиной" } });
+    fireEvent.click(screen.getByText("Найти"));
+    fireEvent.click(screen.getByText("Что с машиной"));
+
+    await waitFor(() => expect(screen.getByText("Машина")).toBeTruthy());
+    // Число без причины — это приказ; причина обязана быть на экране.
+    expect(screen.getByText(/3 дела сразу/)).toBeTruthy();
+    expect(screen.getByText(/процессор 14%, память 9 из 16 ГБ свободна/)).toBeTruthy();
+    expect(screen.getByText(/простой ввода/)).toBeTruthy();
+  });
+
+  it("памяти на исходе — это «нет», а не «помедленнее»", async () => {
+    vi.mocked(machineState).mockResolvedValueOnce({
+      sample: { cpu_percent: 20, ram_free_mb: 300, ram_total_mb: 16_384, idle_seconds: 20 },
+      budget: {
+        parallel: 0,
+        mode: "crowded",
+        reason: "свободной памяти 300 МБ — новое не начинаю, чтобы не подвесить машину",
+        may_start: false,
+      },
+      available: true,
+      note: "машина измеряется честно",
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+    // Кнопки живут рядом с поиском: сначала фраза, потом «что с машиной».
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "что с машиной" } });
+    fireEvent.click(screen.getByText("Найти"));
+    fireEvent.click(screen.getByText("Что с машиной"));
+
+    await waitFor(() => expect(screen.getByText(/новое не начинаю: памяти на исходе/)).toBeTruthy());
+    expect(screen.getByText(/новое не начинаю\. /)).toBeTruthy();
   });
 
   it("окно не читается — об этом сказано, и поиск по словам всё равно работает", async () => {

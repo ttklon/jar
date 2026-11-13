@@ -52,12 +52,13 @@ export type {
   StepResult,
   Tier,
   ToolView,
+  MachineState,
   UiDump,
   UiElement,
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
+import type { AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -581,6 +582,16 @@ export async function foregroundWindow(): Promise<ForegroundWindow> {
     return fromCore();
   }
   const { foregroundWindow: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Сколько сейчас можно: загрузка, память и присутствие человека. Ничего не запускает. */
+export async function machineState(): Promise<MachineState> {
+  if (isTauri()) {
+    const { machineState: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { machineState: fromData } = await import("./dev");
   return fromData();
 }
 

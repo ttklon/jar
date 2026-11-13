@@ -33,7 +33,9 @@ windows-sys = { version = "0.61", features = [
   "Win32_Security_Authorization",
   "Win32_Security_Isolation",
   "Win32_System_JobObjects",
+  "Win32_System_SystemInformation",
   "Win32_System_Threading",
+  "Win32_UI_Input_KeyboardAndMouse",
   "Win32_UI_WindowsAndMessaging",
 ] }
 # UI Automation — чтение активного окна. Здесь нужен `windows`, а не `windows-sys`:

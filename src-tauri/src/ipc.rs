@@ -18,6 +18,7 @@ use crate::download::{self, Downloaded};
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::hand;
 use crate::intent;
+use crate::machine;
 use crate::isolation;
 use crate::learn::{self, Learning};
 use crate::llama;
@@ -1268,6 +1269,17 @@ pub fn forget_fact(state: State<'_, AppState>, key: String) -> Result<(), String
 #[tauri::command]
 pub fn foreground_window() -> Result<window::Foreground, String> {
     window::foreground().map_err(|reason| format!("{reason}. {}", window::note()))
+}
+
+/// Сколько сейчас можно делать и почему именно столько.
+///
+/// Ответ — совет самой себе, а не приказ человеку: загрузку и присутствие видно по
+/// измерению, но решает он. Поэтому рядом с числом всегда стоит причина.
+#[tauri::command]
+pub async fn machine_state() -> Result<machine::State, String> {
+    tauri::async_runtime::spawn_blocking(machine::state)
+        .await
+        .map_err(|error| format!("машина не измерилась: {error}"))?
 }
 
 /// Что видно в активном окне — по элементам, а не по пикселям.

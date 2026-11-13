@@ -17,6 +17,7 @@ import {
   runPlan,
   isolationStatus,
   speechStatus,
+  machineState,
   transcribeLocal,
   uiDump,
 } from "../ipc";
@@ -32,6 +33,7 @@ import type {
   PlanCheck,
   PlanItem,
   PlanReport,
+  MachineState,
   SpeechStatus,
   UiDump,
 } from "../ipc";
@@ -169,6 +171,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [trialBusy, setTrialBusy] = useState(false);
   /** Принятые руки: отдельно от встроенных и не исполняются. */
   const [adopted, setAdopted] = useState<CustomHand | null>(null);
+  /** Что с машиной: загрузка, память, присутствие человека. Ничего не запускает. */
+  const [machine, setMachine] = useState<MachineState | null>(null);
+  const [machineError, setMachineError] = useState<string | null>(null);
+  const [machineBusy, setMachineBusy] = useState(false);
   /** Что видно в активном окне: элементы, прочитанные UI Automation. Только чтение. */
   const [screen, setScreen] = useState<UiDump | null>(null);
   const [screenError, setScreenError] = useState<string | null>(null);
@@ -202,6 +208,23 @@ export function Voice({ onOpen }: VoiceScreenProps) {
    * Ошибка чтения — не ошибка задачи: без экрана помощник просто менее зрячий, и об этом
    * говорится вслух. Молча подставлять «наверное, браузер» было бы хуже пустоты.
    */
+  /**
+   * Померить машину. Это совет самому себе, а не приказ человеку: рядом с числом всегда
+   * стоит причина, иначе «умное» распределение нельзя ни объяснить, ни проверить.
+   */
+  const measureMachine = useCallback(async () => {
+    setMachineBusy(true);
+    try {
+      setMachine(await machineState());
+      setMachineError(null);
+    } catch (reason: unknown) {
+      setMachine(null);
+      setMachineError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setMachineBusy(false);
+    }
+  }, []);
+
   const readScreen = useCallback(async (): Promise<string | null> => {
     setScreenBusy(true);
     try {
@@ -750,6 +773,16 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           >
             {screenBusy ? voice.screenReading : voice.screenShow}
           </Button>
+          <Button
+            size="small"
+            appearance="subtle"
+            disabled={machineBusy}
+            onClick={() => {
+              void measureMachine();
+            }}
+          >
+            {machineBusy ? voice.machineMeasuring : voice.machineMeasure}
+          </Button>
           {thinkError ? (
             <Text className={styles.error}>{voice.thinkError(thinkError)}</Text>
           ) : null}
@@ -764,6 +797,38 @@ export function Voice({ onOpen }: VoiceScreenProps) {
               <Text className={styles.error}>{voice.thinkBroken(thought.problem ?? "")}</Text>
               <pre className={styles.prompt}>{thought.answer}</pre>
             </>
+          ) : null}
+        </div>
+      ) : null}
+
+      {machine || machineError ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>{voice.machineTitle}</Text>
+          {machine ? (
+            <Text className={styles.note}>
+              {voice.machineSummary(
+                machine.budget.mode,
+                machine.budget.parallel,
+                machine.budget.reason,
+              )}
+            </Text>
+          ) : null}
+          {machine?.sample ? (
+            <Text className={styles.note}>
+              {voice.machineNumbers(
+                machine.sample.cpu_percent,
+                machine.sample.ram_free_mb,
+                machine.sample.ram_total_mb,
+                machine.sample.idle_seconds,
+              )}
+            </Text>
+          ) : null}
+          {machine && !machine.budget.may_start ? (
+            <Text className={styles.error}>{voice.machineStop}</Text>
+          ) : null}
+          {machine ? <Text className={styles.note}>{machine.note}</Text> : null}
+          {machineError ? (
+            <Text className={styles.error}>{voice.machineError(machineError)}</Text>
           ) : null}
         </div>
       ) : null}

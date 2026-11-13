@@ -38,6 +38,7 @@ pub mod learn;
 pub mod llama;
 pub mod llm;
 pub mod logging;
+pub mod machine;
 pub mod memory;
 pub mod models;
 pub mod plan;
@@ -157,6 +158,7 @@ pub fn run() {
             ipc::isolation_status,
             ipc::foreground_window,
             ipc::ui_dump,
+            ipc::machine_state,
             ipc::model_prompt,
             ipc::think,
             ipc::draft_hand,

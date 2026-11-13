@@ -251,6 +251,38 @@ export interface UiDump {
   text: string;
 }
 
+/**
+ * Что измерено на машине. Цифры как есть, без «примерно».
+ */
+export interface MachineSample {
+  cpu_percent: number;
+  ram_free_mb: number;
+  ram_total_mb: number;
+  /** Сколько секунд человек не трогал ввод. */
+  idle_seconds: number;
+}
+
+/** Кто сейчас за машиной — по измерению, а не по догадке. */
+export type MachineMode = "near" | "away" | "crowded";
+
+/** Сколько можно взять прямо сейчас и почему именно столько. */
+export interface MachineBudget {
+  /** Сколько дел можно вести одновременно. Ноль — новое не начинать. */
+  parallel: number;
+  mode: MachineMode;
+  reason: string;
+  may_start: boolean;
+}
+
+/** Всё, что приложение знает о машине прямо сейчас. */
+export interface MachineState {
+  /** `null` — машина здесь не измеряется, и это не ошибка. */
+  sample: MachineSample | null;
+  budget: MachineBudget;
+  available: boolean;
+  note: string;
+}
+
 /** Потолки запуска: что есть на этой машине на самом деле. */
 export interface IsolationStatus {
   /** Держит ли система потолки (job object есть только на Windows). */

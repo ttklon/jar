@@ -11,7 +11,7 @@
  */
 
 import actionsJson from "../../data/actions.json";
-import type { Action, RegistrySnapshot, RegistryStats, UiDump } from "./types";
+import type { Action, MachineState, RegistrySnapshot, RegistryStats, UiDump } from "./types";
 import { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
 const ROWS = actionsJson as unknown as Action[];
@@ -649,6 +649,22 @@ export async function foregroundWindow(): Promise<ForegroundWindow> {
   // В браузере окон Windows нет. Придумывать «Блокнот» было бы хуже пустоты: человек
   // решил бы, что приложение видит его экран.
   throw new Error("активное окно видит только приложение: в браузере окон системы нет");
+}
+
+export async function machineState(): Promise<MachineState> {
+  // В браузере машины нет: ни ядер, ни памяти. Отвечаем так, чтобы это было видно, —
+  // «одно дело, осторожно», а не «всё свободно».
+  return {
+    sample: null,
+    budget: {
+      parallel: 1,
+      mode: "near",
+      reason: "в браузере машину не измерить — беру одно дело и осторожно",
+      may_start: true,
+    },
+    available: false,
+    note: "машина измеряется в приложении: здесь её загрузку не видно",
+  };
 }
 
 export async function uiDump(): Promise<UiDump> {
