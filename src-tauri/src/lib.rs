@@ -159,6 +159,7 @@ pub fn run() {
             ipc::foreground_window,
             ipc::ui_dump,
             ipc::ui_press,
+            ipc::ui_type,
             ipc::machine_state,
             ipc::model_prompt,
             ipc::think,

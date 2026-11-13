@@ -21,6 +21,7 @@ import {
   transcribeLocal,
   uiDump,
   uiPress,
+  uiType,
 } from "../ipc";
 import type {
   CustomHand,
@@ -38,6 +39,7 @@ import type {
   SpeechStatus,
   UiDump,
   UiPress,
+  UiTyped,
 } from "../ipc";
 import { speak } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
@@ -197,6 +199,13 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [machineBusy, setMachineBusy] = useState(false);
   /** Элемент, который человек решил нажать: сначала показываем, потом нажимаем. */
   const [pressing, setPressing] = useState<string | null>(null);
+  /** Что человек написал в поле перед вводом: имя поля → текст. */
+  const [fields, setFields] = useState<Record<string, string>>({});
+  /** Поле, которое человек собрался заполнить: сначала спрашиваем, потом вводим. */
+  const [typing, setTyping] = useState<string | null>(null);
+  /** Итог ввода: прочиталось обратно или программа не приняла. */
+  const [typed, setTyped] = useState<UiTyped | null>(null);
+  const [typeError, setTypeError] = useState<string | null>(null);
   /** Итог нажатия: нажато и изменилось, нажато и нет, или отказ. */
   const [pressResult, setPressResult] = useState<UiPress | null>(null);
   const [pressError, setPressError] = useState<string | null>(null);
@@ -362,6 +371,30 @@ export function Voice({ onOpen }: VoiceScreenProps) {
    * потом само нажатие. Один шаг был бы быстрее и ровно тем, чего не должно быть:
    * помощник, который нажимает по своему выбору.
    */
+  /**
+   * Ввести текст в поле. Тоже в два шага: «ввести „Иван“ в „Логин“?» и «Да, ввести».
+   *
+   * Текст в поле — это не нажатие: он остаётся в чужом окне и может уйти дальше сам.
+   * Поэтому и спрашиваем, и потом читаем обратно то, что в поле оказалось.
+   */
+  const typeInto = useCallback(
+    async (name: string, text: string) => {
+      setTypeError(null);
+      setTyped(null);
+      try {
+        const result = await uiType(name, text, true);
+        setTyped(result);
+        // Поле могло измениться (маска, проверка) — перечитываем экран целиком.
+        void readScreen();
+      } catch (reason: unknown) {
+        setTypeError(reason instanceof Error ? reason.message : String(reason));
+      } finally {
+        setTyping(null);
+      }
+    },
+    [readScreen],
+  );
+
   const press = useCallback(async (name: string) => {
     setPressError(null);
     setPressResult(null);
@@ -1050,6 +1083,59 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                   </div>
                 ))
             : null}
+          {screen
+            ? screen.elements
+                .filter((element) => element.actions.includes("value") && element.name.length > 0)
+                .slice(0, 6)
+                .map((element) => (
+                  <div key={`field-${element.name}-${element.id}`} className={styles.bar}>
+                    <Input
+                      className={styles.input}
+                      value={fields[element.name] ?? ""}
+                      aria-label={voice.typeField(element.name)}
+                      placeholder={voice.typePlaceholder(element.kind)}
+                      onChange={(_, data) =>
+                        setFields((current) => ({ ...current, [element.name]: data.value }))
+                      }
+                    />
+                    {typing === element.name ? (
+                      <>
+                        <Text className={styles.note}>
+                          {voice.typeConfirm(element.name, fields[element.name] ?? "")}
+                        </Text>
+                        <Button
+                          size="small"
+                          onClick={() => void typeInto(element.name, fields[element.name] ?? "")}
+                        >
+                          {voice.typeYes}
+                        </Button>
+                        <Button size="small" appearance="subtle" onClick={() => setTyping(null)}>
+                          {voice.pressNo}
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        size="small"
+                        appearance="subtle"
+                        disabled={(fields[element.name] ?? "").trim().length === 0}
+                        onClick={() => {
+                          setTyping(element.name);
+                          setTyped(null);
+                          setTypeError(null);
+                        }}
+                      >
+                        {voice.typeShow(element.name)}
+                      </Button>
+                    )}
+                  </div>
+                ))
+            : null}
+          {typed ? (
+            <Text className={typed.verified ? styles.note : styles.error}>
+              {voice.typeResult(typed.target.name, typed.read_back, typed.note)}
+            </Text>
+          ) : null}
+          {typeError ? <Text className={styles.error}>{voice.typeError(typeError)}</Text> : null}
           {pressResult ? (
             <Text className={pressResult.changed ? styles.note : styles.error}>
               {voice.pressResult(pressResult.target.name, pressResult.changed, pressResult.note)}

@@ -15,6 +15,7 @@ import {
   uiDump,
   machineState,
   uiPress,
+  uiType,
 } from "../ipc";
 import { startRecording } from "../lib/recorder";
 import { Voice } from "./Voice";
@@ -33,6 +34,7 @@ vi.mock("../ipc", () => ({
   think: vi.fn().mockResolvedValue(null),
   uiDump: vi.fn().mockRejectedValue(new Error("в браузере нет UI Automation")),
   uiPress: vi.fn().mockRejectedValue(new Error("в браузере окон нет")),
+  uiType: vi.fn().mockRejectedValue(new Error("в браузере окон нет")),
   machineState: vi.fn().mockResolvedValue({
     sample: null,
     budget: { parallel: 1, mode: "near", reason: "в браузере машину не измерить", may_start: true },
@@ -83,6 +85,7 @@ afterEach(() => {
   vi.mocked(think).mockReset().mockResolvedValue(null as never);
   vi.mocked(uiDump).mockReset().mockRejectedValue(new Error("в браузере нет UI Automation"));
   vi.mocked(uiPress).mockReset().mockRejectedValue(new Error("в браузере окон нет"));
+  vi.mocked(uiType).mockReset().mockRejectedValue(new Error("в браузере окон нет"));
   vi.mocked(machineState).mockReset().mockResolvedValue({
     sample: null,
     budget: { parallel: 1, mode: "near", reason: "в браузере машину не измерить", may_start: true },
@@ -388,6 +391,81 @@ describe("локальное распознавание на экране", () =
     fireEvent.click(screen.getByText("Да, нажать"));
 
     await waitFor(() => expect(screen.getByText(/экран не изменился/)).toBeTruthy());
+  });
+
+  it("ввод в поле спрашивают, а потом показывают, что в поле оказалось", async () => {
+    vi.mocked(uiDump).mockResolvedValue({
+      title: "Вход",
+      process: "chrome.exe",
+      elements: [
+        { depth: 1, kind: "поле ввода", name: "Логин", id: "login", enabled: true, actions: ["value"] },
+      ],
+      truncated: false,
+      note: "чтение экрана: UI Automation, только чтение",
+      text: "Вход (chrome.exe)\n  - поле ввода «Логин» #login [value]",
+    });
+    vi.mocked(uiType).mockResolvedValue({
+      target: { name: "Логин", kind: "поле ввода", id: "login", actions: ["value"] },
+      text: "Иван",
+      read_back: "Иван",
+      verified: true,
+      note: "введено и прочитано обратно: поле показывает то же, что просили",
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "заполни логин" } });
+    fireEvent.click(screen.getByText("Что на экране"));
+
+    await waitFor(() => expect(screen.getByLabelText("Что ввести в «Логин»")).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Что ввести в «Логин»"), { target: { value: "Иван" } });
+    fireEvent.click(screen.getByText("Ввести в «Логин»"));
+
+    // Пока не сказано «да» — не вводим: сначала человек видит текст и поле.
+    expect(vi.mocked(uiType)).not.toHaveBeenCalled();
+    expect(screen.getByText(/ввести «Иван» в «Логин»\?/)).toBeTruthy();
+
+    fireEvent.click(screen.getByText("Да, ввести"));
+
+    await waitFor(() => expect(vi.mocked(uiType)).toHaveBeenCalledWith("Логин", "Иван", true));
+    // Итог — что в поле, а не «вроде ввели».
+    await waitFor(() => expect(screen.getByText(/сейчас в поле «Иван»/)).toBeTruthy());
+  });
+
+  it("программа не приняла текст — так и говорим, а не «введено»", async () => {
+    vi.mocked(uiDump).mockResolvedValue({
+      title: "Вход",
+      process: "chrome.exe",
+      elements: [
+        { depth: 1, kind: "поле ввода", name: "Телефон", id: "", enabled: true, actions: ["value"] },
+      ],
+      truncated: false,
+      note: "чтение экрана",
+      text: "Вход (chrome.exe)\n  - поле ввода «Телефон» [value]",
+    });
+    vi.mocked(uiType).mockResolvedValue({
+      target: { name: "Телефон", kind: "поле ввода", id: "", actions: ["value"] },
+      text: "8 999 123",
+      read_back: "+7 999 123",
+      verified: false,
+      note: "в поле сейчас «+7 999 123» — программа не приняла «8 999 123» как есть (маска, проверка или отказ)",
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "введи телефон" } });
+    fireEvent.click(screen.getByText("Что на экране"));
+
+    await waitFor(() => expect(screen.getByLabelText("Что ввести в «Телефон»")).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Что ввести в «Телефон»"), {
+      target: { value: "8 999 123" },
+    });
+    fireEvent.click(screen.getByText("Ввести в «Телефон»"));
+    fireEvent.click(screen.getByText("Да, ввести"));
+
+    await waitFor(() => expect(screen.getByText(/программа не приняла/)).toBeTruthy());
   });
 
   it("окно не читается — об этом сказано, и поиск по словам всё равно работает", async () => {

@@ -7,6 +7,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   MachineState,
   UiPress,
+  UiTyped,
 AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RegistrySnapshot, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
 
 export interface AppStatus {
@@ -177,6 +178,11 @@ export function foregroundWindow(): Promise<ForegroundWindow> {
  */
 export function uiPress(name: string, confirmed: boolean): Promise<UiPress> {
   return invoke<UiPress>("ui_press", { name, confirmed });
+}
+
+/** Ввести текст в поле активного окна. Без `confirmed` не вводит ничего. */
+export function uiType(name: string, text: string, confirmed: boolean): Promise<UiTyped> {
+  return invoke<UiTyped>("ui_type", { name, text, confirmed });
 }
 
 /** Сколько сейчас можно и почему именно столько. Ничего не запускает. */

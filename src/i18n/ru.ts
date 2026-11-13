@@ -521,6 +521,16 @@ export const voice = {
   pressResult: (name: string, changed: boolean, note: string) =>
     changed ? `«${name}»: ${note}` : `«${name}»: ${note}`,
   pressError: (reason: string) => `нажатие не отправилось: ${reason}`,
+  typeField: (name: string) => `Что ввести в «${name}»`,
+  typePlaceholder: (kind: string) => `${kind}: напишите текст и нажмите «Ввести»`,
+  typeShow: (name: string) => `Ввести в «${name}»`,
+  typeConfirm: (name: string, text: string) => `ввести «${text}» в «${name}»?`,
+  typeYes: "Да, ввести",
+  typeResult: (name: string, readBack: string, note: string) =>
+    readBack.trim().length > 0
+      ? `«${name}»: сейчас в поле «${readBack}». ${note}`
+      : `«${name}»: ${note}`,
+  typeError: (reason: string) => `ввод не отправился: ${reason}`,
   queueAdd: "В очередь",
   queueRun: "Работать без меня",
   queueStop: "Стоп",

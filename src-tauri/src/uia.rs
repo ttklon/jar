@@ -398,6 +398,65 @@ pub fn press(max_nodes: usize, wanted: &str) -> Result<Press, String> {
     imp::press(max_nodes, wanted)
 }
 
+/// Отчёт о вводе текста. Ввод — действие над чужим окном, поэтому отчёт, а не «готово».
+#[derive(Debug, Clone, Serialize)]
+pub struct Typed {
+    /// В какое поле вводили: имя и вид, чтобы человек узнал своё поле.
+    pub target: Target,
+    /// Что просили ввести. Это не секрет от человека — это его же слова.
+    pub text: String,
+    /// Что прочиталось обратно из поля после ввода.
+    pub read_back: String,
+    /// Прочитанное совпало с введённым — проверено чтением, а не верой.
+    pub verified: bool,
+    /// Что сказать человеку: правду, включая «программа не приняла».
+    pub note: String,
+}
+
+/// Можно ли вводить текст в этот элемент — по тому, что окно само про него сказало.
+pub fn may_type(element: &Element) -> Result<(), String> {
+    if element.actions.iter().any(|action| action == "value") {
+        return Ok(());
+    }
+    Err(format!(
+        "«{}» — это {}, в него нельзя ввести текст: {}",
+        element.name,
+        element.kind,
+        if element.actions.is_empty() {
+            "окно не объявило для него никаких действий".to_string()
+        } else {
+            format!("доступно только: {}", element.actions.join(", "))
+        }
+    ))
+}
+
+/// Сравнение введённого и прочитанного. Возвращает вердикт и слова для человека.
+///
+/// Программа может не принять текст: обрезать, отформатировать по маске, отказать в
+/// проверке. Поэтому «введено» — это не «отправили», а «прочитали обратно и совпало».
+pub fn read_back_verdict(text: &str, read_back: &str) -> (bool, String) {
+    if text.trim() == read_back.trim() {
+        return (
+            true,
+            "введено и прочитано обратно: поле показывает то же, что просили".to_string(),
+        );
+    }
+
+    (
+        false,
+        format!(
+            "в поле сейчас «{}» — программа не приняла «{}» как есть (маска, проверка или отказ)",
+            read_back.trim(),
+            text.trim()
+        ),
+    )
+}
+
+/// Ввести текст в поле активного окна, найденное по имени.
+pub fn type_text(max_nodes: usize, wanted: &str, text: &str) -> Result<Typed, String> {
+    imp::type_text(max_nodes, wanted, text)
+}
+
 /// Разобрать активное окно.
 pub fn dump(max_nodes: usize) -> Result<Snapshot, String> {
     let front = crate::window::foreground()?;
@@ -428,12 +487,14 @@ mod imp {
     //! обход и потолки живут выше и проверяются на выдуманном дереве, а тут — только
     //! разговоры с системой.
     use super::{collect, kind_name, tidy, Element, Tree, MAX_DEPTH};
+    use windows::core::BSTR;
     use windows::Win32::System::Com::{
         CoCreateInstance, CoInitializeEx, CoUninitialize, CLSCTX_INPROC_SERVER,
         COINIT_MULTITHREADED,
     };
     use windows::Win32::UI::Accessibility::{
         CUIAutomation, IUIAutomation, IUIAutomationElement, IUIAutomationInvokePattern,
+        IUIAutomationValuePattern,
         UIA_ExpandCollapsePatternId, UIA_InvokePatternId, UIA_SelectionItemPatternId,
         UIA_TextPatternId, UIA_TogglePatternId, UIA_ValuePatternId, UIA_PATTERN_ID,
     };
@@ -672,6 +733,58 @@ mod imp {
         let (elements, truncated, _order, _nodes) = walk(max_nodes)?;
         Ok((elements, truncated))
     }
+
+    /// Ввести текст в поле по имени и прочитать обратно то, что в поле оказалось.
+    pub fn type_text(
+        max_nodes: usize,
+        wanted: &str,
+        text: &str,
+    ) -> Result<super::Typed, String> {
+        use super::{locate, may_type, read_back_verdict, Target};
+
+        if text.trim().is_empty() {
+            return Err("вводить нечего: текст пустой".to_string());
+        }
+
+        let (before, _truncated, order, nodes) = walk(max_nodes)?;
+        if before.is_empty() {
+            return Err("в окне не видно элементов: вводить некуда".to_string());
+        }
+
+        let index = locate(&before, wanted)?;
+        may_type(&before[index])?;
+
+        let node_index = order.borrow().get(index).copied().ok_or_else(|| {
+            "поле нашлось, но потерялось при обходе — вводить вслепую не буду".to_string()
+        })?;
+        let node = nodes
+            .get(node_index)
+            .ok_or_else(|| "поле исчезло между обходом и вводом".to_string())?;
+
+        let pattern: IUIAutomationValuePattern =
+            unsafe { node.GetCurrentPatternAs(UIA_ValuePatternId) }
+                .map_err(|error| format!("окно не дало ввести в «{}»: {error}", before[index].name))?;
+
+        unsafe { pattern.SetValue(&BSTR::from(text)) }
+            .map_err(|error| format!("текст не отправился: {error}"))?;
+
+        // Читаем обратно сразу: маска или проверка поля могут изменить текст, и это надо
+        // увидеть, а не додумать.
+        std::thread::sleep(std::time::Duration::from_millis(200));
+        let read_back = unsafe { pattern.CurrentValue() }
+            .map(|value| value.to_string())
+            .unwrap_or_default();
+
+        let (verified, note) = read_back_verdict(text, &read_back);
+
+        Ok(super::Typed {
+            target: Target::of(&before[index]),
+            text: text.to_string(),
+            read_back,
+            verified,
+            note,
+        })
+    }
 }
 
 #[cfg(not(windows))]
@@ -684,6 +797,14 @@ mod imp {
 
     pub fn press(_max_nodes: usize, _wanted: &str) -> Result<super::Press, String> {
         Err("нажимать элементы можно только на Windows".to_string())
+    }
+
+    pub fn type_text(
+        _max_nodes: usize,
+        _wanted: &str,
+        _text: &str,
+    ) -> Result<super::Typed, String> {
+        Err("вводить текст в чужие окна можно только на Windows".to_string())
     }
 }
 
@@ -967,6 +1088,34 @@ mod tests {
         // Поменялось имя — тоже изменение.
         let renamed = vec![element("Войти как гость", "кнопка", &["invoke"])];
         assert!(changed(&before, &renamed));
+    }
+
+    #[test]
+    fn only_a_field_with_a_value_can_be_typed_into() {
+        assert!(may_type(&element("Поиск", "поле ввода", &["value"])).is_ok());
+
+        let text = may_type(&element("Привет", "текст", &[])).expect_err("текст не поле");
+        assert!(text.contains("нельзя ввести"));
+
+        let button = may_type(&element("Войти", "кнопка", &["invoke"])).expect_err("кнопка не поле");
+        assert!(button.contains("invoke"), "должно быть сказано, что доступно");
+    }
+
+    #[test]
+    fn what_the_field_shows_back_is_what_counts() {
+        // Совпало — это и есть «введено».
+        let (ok, note) = read_back_verdict("Иван", "Иван");
+        assert!(ok);
+        assert!(note.contains("прочитано обратно"));
+
+        // Программа отформатировала по маске — не совпало, и это сказано.
+        let (ok, note) = read_back_verdict("+7 999 1234567", "+79991234567");
+        assert!(!ok);
+        assert!(note.contains("не приняла"));
+
+        // Поле осталось пустым: отказ, а не «вроде ввели».
+        let (ok, _) = read_back_verdict("текст", "");
+        assert!(!ok);
     }
 
     #[test]

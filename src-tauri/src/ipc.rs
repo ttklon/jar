@@ -1327,6 +1327,63 @@ pub async fn ui_press(
     outcome
 }
 
+/// Ввести текст в поле активного окна, найденное по имени.
+///
+/// Так же, как нажатие: без `confirmed` не вводится ничего, а результат проверяется
+/// чтением обратно. «Введено» — это «поле показывает то же», а не «мы отправили».
+#[tauri::command]
+pub async fn ui_type(
+    state: State<'_, AppState>,
+    name: String,
+    text: String,
+    confirmed: bool,
+) -> Result<uia::Typed, String> {
+    let target = name.trim().to_string();
+    if target.is_empty() {
+        return Err("не названо поле: имя элемента пустое".to_string());
+    }
+    if text.trim().is_empty() {
+        return Err("вводить нечего: текст пустой".to_string());
+    }
+    if !confirmed {
+        return Err("ввод не отправлен: без вашего слова ничего не ввожу".to_string());
+    }
+
+    let inner = Arc::clone(&state.inner);
+    let started = now_ms();
+    let field = target.clone();
+    let value = text.clone();
+
+    let outcome = tauri::async_runtime::spawn_blocking(move || {
+        uia::type_text(uia::MAX_NODES / 3, &field, &value)
+    })
+    .await
+    .map_err(|error| format!("ввод прерван: {error}"))?;
+
+    let duration = now_ms().saturating_sub(started) as u64;
+    let (status, note) = match &outcome {
+        Ok(typed) => (if typed.verified { "ok" } else { "unverified" }, typed.note.clone()),
+        Err(reason) => ("failed", reason.clone()),
+    };
+    let line = format!("{status}: {note}");
+
+    // В журнал идёт вид поля и итог, но не сам текст: в поле бывает и личное.
+    audit(
+        &inner,
+        Entry {
+            kind: AuditKind::Finished,
+            subject: &format!("поле: {target}"),
+            risk: "ui",
+            decision: "confirmed",
+            fingerprint: "ui_type",
+            outcome: &line,
+            duration_ms: duration,
+        },
+    );
+
+    outcome
+}
+
 /// Сколько сейчас можно делать и почему именно столько.
 ///
 /// Ответ — совет самой себе, а не приказ человеку: загрузку и присутствие видно по

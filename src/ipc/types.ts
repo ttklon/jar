@@ -297,6 +297,18 @@ export interface UiPress {
   note: string;
 }
 
+/** Отчёт о вводе текста в поле: ввели и прочитали обратно. */
+export interface UiTyped {
+  target: { name: string; kind: string; id: string; actions: string[] };
+  /** Что просили ввести. */
+  text: string;
+  /** Что поле показывает после ввода. */
+  read_back: string;
+  /** Прочитанное совпало с введённым. */
+  verified: boolean;
+  note: string;
+}
+
 /** Потолки запуска: что есть на этой машине на самом деле. */
 export interface IsolationStatus {
   /** Держит ли система потолки (job object есть только на Windows). */
