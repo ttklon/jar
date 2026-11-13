@@ -325,7 +325,7 @@ mod tests {
         let run = report("k", &output(Some(3), false), "клетка", 2000);
 
         save(&memory, &probe).expect("проба сохранена");
-        save_as(&memory, run_key("k"), &run).expect("запуск сохранён");
+        save_as(&memory, &run_key("k"), &run).expect("запуск сохранён");
 
         // Приём руки опирается на пробу: запуск не должен её затирать.
         assert_eq!(get(&memory, "k"), Some(probe));

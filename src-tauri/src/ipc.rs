@@ -516,14 +516,16 @@ pub async fn run_custom_hand(
     .await
     .map_err(|error| format!("запуск не выполнился: {error}"))??;
 
-    trial::save_as(&inner.memory, trial::run_key(&key), &report)?;
+    let prefix = trial::run_key(&key);
+    trial::save_as(&inner.memory, &prefix, &report)?;
     Ok(report)
 }
 
 /// Последний запуск своей руки. `None` — не запускали.
 #[tauri::command]
 pub fn custom_run_report(state: State<'_, AppState>, key: String) -> Option<trial::Report> {
-    trial::get_as(&state.inner.memory, trial::run_key(&key), &key)
+    let prefix = trial::run_key(&key);
+    trial::get_as(&state.inner.memory, &prefix, &key)
 }
 
 /// Последний отчёт о пробе для этой строки. Есть — значит, уже пробовали.
