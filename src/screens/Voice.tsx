@@ -457,6 +457,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       </div>
 
       {mic.listening && !always ? (
+        <Text className={styles.note}>{voice.pauseSend}</Text>
+      ) : null}
+
+      {mic.listening && !always ? (
         <Button
           appearance="subtle"
           onClick={() => {

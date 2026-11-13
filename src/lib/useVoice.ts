@@ -44,6 +44,15 @@ export interface VoiceOptions {
    * что оно слушает круглосуточно, было бы обманом.
    */
   always?: boolean;
+  /**
+   * Отправлять фразу по паузе, а не только по отпусканию (по умолчанию да).
+   *
+   * Нужно для длинной речи: человек говорит, задумывается, продолжает — и не обязан держать
+   * кнопку, пока думает. Каждая фраза уходит, как только он замолчал; микрофон продолжает
+   * слушать, пока кнопка нажата. Без своего движка не работает: паузу вырезает `vad`, а
+   * системное распознавание однократное.
+   */
+  pauseSend?: boolean;
 }
 
 export interface VoiceControl {
@@ -87,6 +96,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     nothingHeard = "не разобрал — попробуйте ещё раз",
     local = null,
     always = false,
+    pauseSend = true,
   } = options;
   const [listening, setListening] = useState(false);
   const [speaking, setSpeaking] = useState(false);
@@ -99,6 +109,11 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   /** Режим «слушаю всегда» живёт в ссылке: он меняется, не пересоздавая слушание. */
   const alwaysRef = useRef(always);
   alwaysRef.current = always;
+  /** Отправка по паузе — тоже в ссылке: переключатель не должен рвать текущую запись. */
+  const pauseSendRef = useRef(pauseSend);
+  pauseSendRef.current = pauseSend;
+  /** Чем закончить текущую фразу, не дожидаясь тишины: нужно при отпускании кнопки. */
+  const flushRef = useRef<(() => void) | null>(null);
   /** Чем остановить текущую всегда-запись, если человек передумал. */
   const alwaysStop = useRef<(() => void) | null>(null);
   /**
@@ -126,10 +141,14 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   }, [clearGrace]);
 
   /**
-   * Один цикл «слушаю всегда»: запись → `vad` находит начало и конец фразы → разбор →
-   * снова запись. Цикл останавливается, когда человек выключил режим или ушёл с экрана.
+   * Цикл «фраза за фразой»: запись → `vad` находит начало и конец → разбор → снова запись.
+   *
+   * Работает в двух случаях, и это одна и та же механика:
+   *  * «слушаю всегда» — пока режим включён;
+   *  * удержание с отправкой по паузе — пока кнопка нажата. Отпустил — текущая фраза
+   *    заканчивается и уходит, а цикл прекращается.
    */
-  const listenAlways = useCallback(() => {
+  const listenSegments = useCallback((forever: boolean) => {
     const engine = callbacks.current.local;
     if (!engine) return;
 
@@ -157,24 +176,48 @@ export function useVoice(options: VoiceOptions): VoiceControl {
             .catch(() => undefined)
             .finally(() => {
               if (activeRef.current) run();
+              else finish();
             });
           return;
         }
 
         current
           .stop()
-          .then((recording) => (recording.seconds === 0 ? null : engine.transcribe(recording.wav)))
+          .then((recording) => {
+            if (recording.seconds === 0) {
+              // При удержании молчание — это «ничего не сказано»: человек ждёт ответа.
+              // В режиме «слушаю всегда» так же молчать правильно: шумят постоянно.
+              if (!forever) callbacks.current.onError(callbacks.current.nothingHeard);
+              return null;
+            }
+            return engine.transcribe(recording.wav);
+          })
           .then((text) => {
-            // Пустая расшифровка в этом режиме — не ошибка: человек мог кашлянуть.
-            // Ругаться на каждый шум значит приучить его не слушать приложение.
-            if (text && text.trim().length > 0) callbacks.current.onText(text.trim());
+            if (text === null) return;
+            const said = text.trim();
+            if (said.length > 0) {
+              callbacks.current.onText(said);
+              return;
+            }
+            // Пустая расшифровка: в «слушаю всегда» это кашель, при удержании — не разобрал.
+            if (!forever) callbacks.current.onError(callbacks.current.nothingHeard);
           })
           .catch((error: unknown) => {
             callbacks.current.onError(error instanceof Error ? error.message : String(error));
           })
           .finally(() => {
             if (activeRef.current) run();
+            else finish();
           });
+      };
+
+      // Отпускание кнопки не ждёт тишины: заканчиваем фразу тем же `close`.
+      flushRef.current = () => {
+        if (!ended) {
+          ended = true;
+          setSpeaking(false);
+        }
+        close();
       };
 
       startRecording(undefined, (frame, sampleRate) => {
@@ -198,9 +241,10 @@ export function useVoice(options: VoiceOptions): VoiceControl {
       })
         .then((opened) => {
           recorder = opened;
+          // Здесь мы уже не внутри обработчика звука: закрывать можно сразу, без таймера.
           if (stopWhenReady) {
             stopWhenReady = false;
-            setTimeout(close, 0);
+            close();
           }
           if (!activeRef.current) close();
         })
@@ -212,12 +256,16 @@ export function useVoice(options: VoiceOptions): VoiceControl {
         });
     };
 
-    alwaysStop.current = () => {
-      activeRef.current = false;
-      setListening(false);
-      setSpeaking(false);
-      alwaysStop.current = null;
-    };
+    // «Слушаю всегда» выключается целиком; удержание — нет, там заканчивается только фраза.
+    if (forever) {
+      alwaysStop.current = () => {
+        activeRef.current = false;
+        setListening(false);
+        setSpeaking(false);
+        alwaysStop.current = null;
+        flushRef.current = null;
+      };
+    }
 
     run();
   }, [finish]);
@@ -233,7 +281,13 @@ export function useVoice(options: VoiceOptions): VoiceControl {
 
     const engine = callbacks.current.local;
     if (engine && alwaysRef.current) {
-      listenAlways();
+      listenSegments(true);
+      return;
+    }
+
+    // Удержание с отправкой по паузе: говорим фразу за фразой, кнопку держим, пока думаем.
+    if (engine && pauseSendRef.current) {
+      listenSegments(false);
       return;
     }
 
@@ -274,7 +328,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
         if (heardRef.current) finish();
       },
     });
-  }, [finish, listenAlways]);
+  }, [finish, listenSegments]);
 
   const stop = useCallback(() => {
     if (!activeRef.current) return;
@@ -283,6 +337,16 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     if (stopAlways) {
       // Режим «слушаю всегда» выключается целиком, а не «заканчивает фразу».
       stopAlways();
+      return;
+    }
+
+    // Отпустили кнопку в режиме «фраза за фразой»: текущая фраза уходит, цикл прекращается.
+    const flush = flushRef.current;
+    if (flush) {
+      flushRef.current = null;
+      activeRef.current = false;
+      setListening(false);
+      flush();
       return;
     }
 
@@ -337,16 +401,29 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   const cancel = useCallback(() => {
     if (!activeRef.current) return;
 
-    // «Слушаю всегда»: выбрасываем фразу, микрофон не выключаем.
+    // «Слушаю всегда»: фраза не считается, микрофон продолжает слушать.
     if (alwaysStop.current) {
       discardRef.current = true;
       setSpeaking(false);
       return;
     }
 
+    // Удержание с паузой: закрываем текущую запись, но ничего не разбираем и не отправляем.
+    const flush = flushRef.current;
+    if (flush) {
+      flushRef.current = null;
+      discardRef.current = true;
+      activeRef.current = false;
+      setListening(false);
+      setSpeaking(false);
+      flush();
+      return;
+    }
+
     const engine = callbacks.current.local;
     const recorder = recorderRef.current;
     recorderRef.current = null;
+    flushRef.current = null;
     clearGrace();
     finish();
 
