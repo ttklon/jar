@@ -329,7 +329,7 @@ mod tests {
 
         // Приём руки опирается на пробу: запуск не должен её затирать.
         assert_eq!(get(&memory, "k"), Some(probe));
-        assert_eq!(get_as(&memory, run_key("k"), "k"), Some(run));
+        assert_eq!(get_as(&memory, &run_key("k"), "k"), Some(run));
 
         let _ = std::fs::remove_dir_all(&dir);
     }
