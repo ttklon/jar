@@ -1306,6 +1306,8 @@ pub async fn ui_press(
         Ok(press) => ("ok", press.note.clone()),
         Err(reason) => ("failed", reason.clone()),
     };
+    // Строка живёт до записи в журнал: `&format!` в поле структуры не приведётся к `&str`.
+    let line = format!("{outcome}: {note}");
 
     audit(
         &inner,
@@ -1316,7 +1318,7 @@ pub async fn ui_press(
             decision: "confirmed",
             fingerprint: "ui_press",
             // В журнал идёт и «нажато, но ничего не изменилось»: это не успех и не сбой.
-            outcome: &format!("{outcome}: {note}"),
+            outcome: &line,
             duration_ms: duration,
         },
     );
