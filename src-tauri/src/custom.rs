@@ -242,10 +242,19 @@ mod tests {
         let (memory, dir) = memory("later");
         let key = "k";
 
-        // Черновик был чистым, пробу прошёл — а потом его подменили на недопустимый.
+        // Черновик был чистым, пробу прошёл — а потом его подменили в памяти на недопустимый
+        // (так бывает: файл памяти правят руками). Фильтр обязан проверить ещё раз.
         draft_with_code(&memory, key, "Get-PSDrive");
         trial_report(&memory, key, true, true);
-        draft_with_code(&memory, key, "Invoke-Expression $x");
+
+        let replaced = hand::Draft {
+            key: key.to_string(),
+            goal: "показать диски".to_string(),
+            code: "Invoke-Expression $x".to_string(),
+            why: String::new(),
+            created_ms: 1500,
+        };
+        hand::save(&memory, &replaced).expect("подменённый черновик сохранён");
 
         let error = adopt(&memory, key, "", "read", 3000).expect_err("фильтр снова проверяет");
         assert!(error.contains("выполнение строки как кода"), "{error}");
