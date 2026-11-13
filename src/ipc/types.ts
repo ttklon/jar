@@ -499,6 +499,7 @@ export type Evidence =
   | { kind: "exit_code"; code: number }
   | { kind: "path_exists"; path: string; exists: boolean }
   | { kind: "stdout_marker"; marker: string; found: boolean }
+  | { kind: "ui_changed"; what: string; changed: boolean }
   | { kind: "failed"; reason: string };
 
 export interface StepResult {

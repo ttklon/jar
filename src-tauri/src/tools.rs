@@ -123,7 +123,83 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "network|проверить|открытые порты" => {
             simple(registry, OPEN_PORTS, 60, cancel)
         }
+        "apps-windows|нажать|кнопку" => press_element(registry, params),
+        "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
+    }
+}
+
+/// Нажатие кнопки в активном окне — как шаг плана, а не как отдельная кнопка на экране.
+///
+/// Проверка здесь та же, что в ручном режиме: элемент находится однозначно, нажимается
+/// только то, что объявляет `invoke`, а результат сравнивается с прежним экраном.
+fn press_element(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
+    let started = Instant::now();
+    let name = param(params, "name").trim();
+    if name.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Имя элемента»");
+    }
+
+    let outcome = crate::uia::press(crate::uia::MAX_NODES / 3, name);
+    let duration_ms = started.elapsed().as_millis() as u64;
+
+    match outcome {
+        Ok(press) => {
+            let mut result = StepResult::ok_with(
+                registry,
+                Evidence::UiChanged {
+                    what: format!("{} «{}»", press.target.kind, press.target.name),
+                    changed: press.changed,
+                },
+                press.note.clone(),
+                duration_ms,
+            );
+            // «Нажато, но ничего не изменилось» — не выполненный шаг: доказательства нет.
+            result.ok = press.changed;
+            result
+        }
+        Err(reason) => StepResult::failed(registry, reason),
+    }
+}
+
+/// Ввод текста в поле активного окна. Доказательство — прочитанное обратно значение.
+fn type_into_field(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let name = param(params, "name").trim();
+    let text = param(params, "text");
+
+    if name.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Имя поля»");
+    }
+    if text.trim().is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Текст»");
+    }
+    if cancel.load(std::sync::atomic::Ordering::Relaxed) {
+        return StepResult::failed(registry, "отменено до начала ввода");
+    }
+
+    let outcome = crate::uia::type_text(crate::uia::MAX_NODES / 3, name, text);
+    let duration_ms = started.elapsed().as_millis() as u64;
+
+    match outcome {
+        Ok(typed) => {
+            let mut result = StepResult::ok_with(
+                registry,
+                Evidence::UiChanged {
+                    what: format!("поле «{}»", typed.target.name),
+                    changed: typed.verified,
+                },
+                typed.note.clone(),
+                duration_ms,
+            );
+            result.ok = typed.verified;
+            result
+        }
+        Err(reason) => StepResult::failed(registry, reason),
     }
 }
 
@@ -562,6 +638,48 @@ mod tests {
         let result = run("files|телепортировать|себя", &BTreeMap::new(), &cancel);
         assert!(!result.ok);
         assert!(result.reason.contains("ещё нет"));
+    }
+
+    #[test]
+    fn pressing_a_button_is_a_declared_hand_and_refuses_without_a_name() {
+        assert!(spec("apps-windows|нажать|кнопку").is_some());
+        assert!(spec("apps-windows|ввести|текст").is_some());
+
+        let cancel = AtomicBool::new(false);
+        let empty = run("apps-windows|нажать|кнопку", &BTreeMap::new(), &cancel);
+        assert!(!empty.ok);
+        assert!(empty.reason.contains("Имя элемента"));
+    }
+
+    #[test]
+    fn typing_refuses_an_empty_text_before_touching_the_window() {
+        let cancel = AtomicBool::new(false);
+        let mut params = BTreeMap::new();
+        params.insert("name".to_string(), "Логин".to_string());
+        params.insert("text".to_string(), "   ".to_string());
+
+        let result = run("apps-windows|ввести|текст", &params, &cancel);
+        assert!(!result.ok);
+        assert!(result.reason.contains("Текст"));
+    }
+
+    /// Живого окна в CI нет, поэтому проверяем второй слой честности: отказ приходит
+    /// словами, а не пустым результатом. Где окно есть — тест всё равно пройдёт, но
+    /// тогда причиной отказа будет уже сама система.
+    #[test]
+    fn a_button_that_cannot_be_pressed_says_why() {
+        let cancel = AtomicBool::new(false);
+        let mut params = BTreeMap::new();
+        params.insert("name".to_string(), "Войти".to_string());
+
+        let result = run("apps-windows|нажать|кнопку", &params, &cancel);
+        if !result.ok {
+            assert!(!result.reason.trim().is_empty(), "отказ обязан быть словами");
+            assert_eq!(result.evidence.kind(), "failed");
+        } else {
+            // Нажатие удалось: значит, есть доказательство, а не «вроде нажали».
+            assert!(matches!(result.evidence.kind(), "ui_changed"));
+        }
     }
 
     #[test]

@@ -13,6 +13,8 @@ pub enum Evidence {
     ExitCode { code: i32 },
     PathExists { path: String, exists: bool },
     StdoutMarker { marker: String, found: bool },
+    /// Действие над чужим окном: проверка — сравнение состояния экрана или чтение значения.
+    UiChanged { what: String, changed: bool },
     Failed { reason: String },
 }
 
@@ -22,6 +24,7 @@ impl Evidence {
             Evidence::ExitCode { .. } => "exit_code",
             Evidence::PathExists { .. } => "path_exists",
             Evidence::StdoutMarker { .. } => "stdout_marker",
+            Evidence::UiChanged { .. } => "ui_changed",
             Evidence::Failed { .. } => "failed",
         }
     }
@@ -42,6 +45,13 @@ impl Evidence {
                     format!("в выводе найден признак «{marker}»")
                 } else {
                     format!("признак «{marker}» в выводе не найден")
+                }
+            }
+            Evidence::UiChanged { what, changed } => {
+                if *changed {
+                    format!("изменение подтверждено: {what}")
+                } else {
+                    format!("изменения не видно: {what}")
                 }
             }
             Evidence::Failed { reason } => format!("не выполнено: {reason}"),
@@ -86,6 +96,32 @@ impl StepResult {
     }
 }
 
+impl StepResult {
+    /// Успех с доказательством: шаг выполнен, и вот чем это подтверждено.
+    ///
+    /// Отдельный конструктор нужен для действий, у которых нет ни кода возврата, ни
+    /// вывода, — нажатия и ввода. Доказательство у них своё и обязательное.
+    pub fn ok_with(
+        registry: &str,
+        evidence: Evidence,
+        reason: impl Into<String>,
+        duration_ms: u64,
+    ) -> Self {
+        Self {
+            registry: registry.to_string(),
+            ok: true,
+            evidence,
+            reason: reason.into(),
+            stdout_tail: String::new(),
+            stderr_tail: String::new(),
+            exit_code: None,
+            timed_out: false,
+            cancelled: false,
+            duration_ms,
+        }
+    }
+}
+
 /// Оставить последние `limit` символов строки (по границе символа, не байта).
 pub fn tail(text: &str, limit: usize) -> String {
     if text.chars().count() <= limit {
@@ -113,6 +149,29 @@ mod tests {
         assert!(!result.ok);
         assert!(matches!(result.evidence, Evidence::Failed { .. }));
         assert_eq!(result.evidence.kind(), "failed");
+    }
+
+    #[test]
+    fn a_ui_step_is_proven_by_what_changed_not_by_hope() {
+        let done = StepResult::ok_with(
+            "apps-windows|нажать|кнопку",
+            Evidence::UiChanged {
+                what: "кнопка «Войти»".to_string(),
+                changed: true,
+            },
+            "нажато, и экран изменился",
+            12,
+        );
+        assert!(done.ok);
+        assert_eq!(done.evidence.kind(), "ui_changed");
+        assert!(done.evidence.summary().contains("изменение подтверждено"));
+
+        // «Не изменилось» — это доказательство отсутствия результата, и оно тоже честное.
+        let same = Evidence::UiChanged {
+            what: "поле «Логин»".to_string(),
+            changed: false,
+        };
+        assert!(same.summary().contains("изменения не видно"));
     }
 
     #[test]

@@ -1,184 +1,221 @@
 [
- {
-  "registry": "files|создать|папку",
-  "title": "Создать папку",
-  "summary": "Создаёт папку по указанному пути вместе с недостающими родителями. Если папка уже есть — это тоже успех.",
-  "implementation": "fs.create_dir_all + проверка, что путь существует",
-  "params": [
-   {
-    "name": "path",
-    "label": "Путь",
-    "placeholder": "C:\\Users\\Имя\\Downloads\\Проект",
-    "hint": "полный путь; переменные вида %USERPROFILE% не раскрываются",
-    "required": true
-   }
-  ]
- },
- {
-  "registry": "files|переместить|файлы/папки",
-  "title": "Переместить файл или папку",
-  "summary": "Переносит файл или папку на новое место. Отказывается работать, если цель уже существует: молча заменить чужой файл хуже, чем остановиться и сказать об этом.",
-  "implementation": "PowerShell Move-Item + двойная проверка: цель появилась, источник исчез",
-  "params": [
-   {
-    "name": "from",
-    "label": "Откуда",
-    "placeholder": "C:\\Users\\Имя\\Downloads\\отчёт.pdf",
-    "hint": "полный путь к файлу или папке",
-    "required": true
-   },
-   {
-    "name": "to",
-    "label": "Куда",
-    "placeholder": "C:\\Users\\Имя\\Documents\\Архив\\отчёт.pdf",
-    "hint": "полный путь; родительская папка должна существовать",
-    "required": true
-   }
-  ]
- },
- {
-  "registry": "apps-windows|запустить|программу",
-  "title": "Открыть программу",
-  "summary": "Запускает указанный .exe и подтверждает, что процесс действительно поднялся. Если файла нет или процесс сразу завершился, это провал, а не «наверное, открылось».",
-  "implementation": "PowerShell Start-Process -PassThru + проверка процесса через секунду",
-  "params": [
-   {
-    "name": "path",
-    "label": "Путь к .exe",
-    "placeholder": "C:\\Program Files\\Notepad++\\notepad++.exe",
-    "hint": "полный путь; ярлыки .lnk не подходят — нужен сам исполняемый файл",
-    "required": true
-   }
-  ]
- },
- {
-  "registry": "apps-windows|показать|установленные программы",
-  "title": "Что установлено",
-  "summary": "Читает список установленных программ из реестра и версии. Только чтение: ничего не удаляет и не запускает.",
-  "implementation": "PowerShell Get-ItemProperty по веткам Uninstall (HKLM/HKCU, 32 и 64 бита)",
-  "params": []
- },
- {
-  "registry": "files|проверить|размеры и место",
-  "title": "Сколько занимает папка",
-  "summary": "Считает файлы, суммарный объём и пять самых частых расширений внутри папки.",
-  "implementation": "PowerShell Get-ChildItem + Measure-Object",
-  "params": [
-   {
-    "name": "path",
-    "label": "Путь к папке",
-    "placeholder": "C:\\Users\\Имя\\Downloads",
-    "hint": "считает рекурсивно; на сетевом диске может занять минуты",
-    "required": true
-   }
-  ]
- },
- {
-  "registry": "files|найти|по имени",
-  "title": "Найти файлы по имени",
-  "summary": "Ищет файлы по маске в папке и во всех вложенных, показывает до 50 совпадений.",
-  "implementation": "PowerShell Get-ChildItem -Filter",
-  "params": [
-   {
-    "name": "path",
-    "label": "Где искать",
-    "placeholder": "C:\\Users\\Имя\\Documents",
-    "hint": "поиск рекурсивный",
-    "required": true
-   },
-   {
-    "name": "query",
-    "label": "Маска имени",
-    "placeholder": "*.pdf или договор*",
-    "hint": "маска PowerShell, не регулярное выражение",
-    "required": true
-   }
-  ]
- },
- {
-  "registry": "files|проверить|дубликаты по хэшу",
-  "title": "Найти дубликаты",
-  "summary": "Группирует файлы папки по SHA-256 и показывает группы одинаковых файлов.",
-  "implementation": "PowerShell Get-FileHash -Algorithm SHA256",
-  "params": [
-   {
-    "name": "path",
-    "label": "Путь к папке",
-    "placeholder": "C:\\Users\\Имя\\Pictures",
-    "hint": "первый проход читает до 5000 файлов; ничего не удаляет",
-    "required": true
-   }
-  ]
- },
- {
-  "registry": "processes-services|показать|топ по нагрузке",
-  "title": "Что грузит компьютер",
-  "summary": "Пять процессов с наибольшим объёмом занятой памяти.",
-  "implementation": "PowerShell Get-Process",
-  "params": []
- },
- {
-  "registry": "processes-services|проанализировать|автозапуск",
-  "title": "Что запускается вместе с Windows",
-  "summary": "Перечисляет записи автозапуска — программы, скрипты и службы, которые стартуют сами. Только чтение: ничего не отключается.",
-  "implementation": "PowerShell Get-CimInstance Win32_StartupCommand",
-  "params": []
- },
- {
-  "registry": "storage-backup|проверить|свободное место",
-  "title": "Свободное место на дисках",
-  "summary": "Список дисков с занятым и свободным объёмом.",
-  "implementation": "PowerShell Get-PSDrive",
-  "params": []
- },
- {
-  "registry": "storage-backup|проверить|SMART диска",
-  "title": "Состояние дисков (SMART)",
-  "summary": "Модель, тип и состояние здоровья физических дисков.",
-  "implementation": "PowerShell Get-PhysicalDisk",
-  "params": []
- },
- {
-  "registry": "system-power|проверить|батарею",
-  "title": "Состояние батареи",
-  "summary": "Показывает заряд и состояние батареи. На настольном компьютере честно отвечает, что батареи нет, а не выдумывает проценты.",
-  "implementation": "PowerShell Get-CimInstance Win32_Battery",
-  "params": []
- },
- {
-  "registry": "hardware-diag|показать|характеристики железа",
-  "title": "Что за компьютер",
-  "summary": "Процессор, память, видеокарты, накопители и версия Windows — одним отчётом. Нужно, чтобы понимать, что эта машина потянет. Только чтение.",
-  "implementation": "PowerShell Get-CimInstance (Win32_Processor, ComputerSystem, VideoController, OperatingSystem, Get-PhysicalDisk)",
-  "params": []
- },
- {
-  "registry": "network|проверить|подключение",
-  "title": "Проверить подключение",
-  "summary": "Пингует 1.1.1.1 и проверяет DNS: отвечает ли сеть и резолвятся ли имена.",
-  "implementation": "PowerShell Test-Connection + Resolve-DnsName",
-  "params": []
- },
- {
-  "registry": "network|проверить|открытые порты",
-  "title": "Кто слушает порты",
-  "summary": "Список портов в состоянии Listen с именами процессов.",
-  "implementation": "PowerShell Get-NetTCPConnection",
-  "params": []
- },
- {
-  "registry": "files|удалить|в корзину",
-  "title": "Удалить в корзину",
-  "summary": "Отправляет файл или папку в корзину: безвозвратного удаления здесь нет.",
-  "implementation": "Microsoft.VisualBasic.FileIO.FileSystem + SendToRecycleBin",
-  "params": [
-   {
-    "name": "path",
-    "label": "Что удалить",
-    "placeholder": "C:\\Users\\Имя\\Downloads\\старое",
-    "hint": "файл или папка; восстанавливается из корзины",
-    "required": true
-   }
-  ]
- }
+  {
+    "registry": "files|создать|папку",
+    "title": "Создать папку",
+    "summary": "Создаёт папку по указанному пути вместе с недостающими родителями. Если папка уже есть — это тоже успех.",
+    "implementation": "fs.create_dir_all + проверка, что путь существует",
+    "params": [
+      {
+        "name": "path",
+        "label": "Путь",
+        "placeholder": "C:\\Users\\Имя\\Downloads\\Проект",
+        "hint": "полный путь; переменные вида %USERPROFILE% не раскрываются",
+        "required": true
+      }
+    ]
+  },
+  {
+    "registry": "files|переместить|файлы/папки",
+    "title": "Переместить файл или папку",
+    "summary": "Переносит файл или папку на новое место. Отказывается работать, если цель уже существует: молча заменить чужой файл хуже, чем остановиться и сказать об этом.",
+    "implementation": "PowerShell Move-Item + двойная проверка: цель появилась, источник исчез",
+    "params": [
+      {
+        "name": "from",
+        "label": "Откуда",
+        "placeholder": "C:\\Users\\Имя\\Downloads\\отчёт.pdf",
+        "hint": "полный путь к файлу или папке",
+        "required": true
+      },
+      {
+        "name": "to",
+        "label": "Куда",
+        "placeholder": "C:\\Users\\Имя\\Documents\\Архив\\отчёт.pdf",
+        "hint": "полный путь; родительская папка должна существовать",
+        "required": true
+      }
+    ]
+  },
+  {
+    "registry": "apps-windows|запустить|программу",
+    "title": "Открыть программу",
+    "summary": "Запускает указанный .exe и подтверждает, что процесс действительно поднялся. Если файла нет или процесс сразу завершился, это провал, а не «наверное, открылось».",
+    "implementation": "PowerShell Start-Process -PassThru + проверка процесса через секунду",
+    "params": [
+      {
+        "name": "path",
+        "label": "Путь к .exe",
+        "placeholder": "C:\\Program Files\\Notepad++\\notepad++.exe",
+        "hint": "полный путь; ярлыки .lnk не подходят — нужен сам исполняемый файл",
+        "required": true
+      }
+    ]
+  },
+  {
+    "registry": "apps-windows|показать|установленные программы",
+    "title": "Что установлено",
+    "summary": "Читает список установленных программ из реестра и версии. Только чтение: ничего не удаляет и не запускает.",
+    "implementation": "PowerShell Get-ItemProperty по веткам Uninstall (HKLM/HKCU, 32 и 64 бита)",
+    "params": []
+  },
+  {
+    "registry": "files|проверить|размеры и место",
+    "title": "Сколько занимает папка",
+    "summary": "Считает файлы, суммарный объём и пять самых частых расширений внутри папки.",
+    "implementation": "PowerShell Get-ChildItem + Measure-Object",
+    "params": [
+      {
+        "name": "path",
+        "label": "Путь к папке",
+        "placeholder": "C:\\Users\\Имя\\Downloads",
+        "hint": "считает рекурсивно; на сетевом диске может занять минуты",
+        "required": true
+      }
+    ]
+  },
+  {
+    "registry": "files|найти|по имени",
+    "title": "Найти файлы по имени",
+    "summary": "Ищет файлы по маске в папке и во всех вложенных, показывает до 50 совпадений.",
+    "implementation": "PowerShell Get-ChildItem -Filter",
+    "params": [
+      {
+        "name": "path",
+        "label": "Где искать",
+        "placeholder": "C:\\Users\\Имя\\Documents",
+        "hint": "поиск рекурсивный",
+        "required": true
+      },
+      {
+        "name": "query",
+        "label": "Маска имени",
+        "placeholder": "*.pdf или договор*",
+        "hint": "маска PowerShell, не регулярное выражение",
+        "required": true
+      }
+    ]
+  },
+  {
+    "registry": "files|проверить|дубликаты по хэшу",
+    "title": "Найти дубликаты",
+    "summary": "Группирует файлы папки по SHA-256 и показывает группы одинаковых файлов.",
+    "implementation": "PowerShell Get-FileHash -Algorithm SHA256",
+    "params": [
+      {
+        "name": "path",
+        "label": "Путь к папке",
+        "placeholder": "C:\\Users\\Имя\\Pictures",
+        "hint": "первый проход читает до 5000 файлов; ничего не удаляет",
+        "required": true
+      }
+    ]
+  },
+  {
+    "registry": "processes-services|показать|топ по нагрузке",
+    "title": "Что грузит компьютер",
+    "summary": "Пять процессов с наибольшим объёмом занятой памяти.",
+    "implementation": "PowerShell Get-Process",
+    "params": []
+  },
+  {
+    "registry": "processes-services|проанализировать|автозапуск",
+    "title": "Что запускается вместе с Windows",
+    "summary": "Перечисляет записи автозапуска — программы, скрипты и службы, которые стартуют сами. Только чтение: ничего не отключается.",
+    "implementation": "PowerShell Get-CimInstance Win32_StartupCommand",
+    "params": []
+  },
+  {
+    "registry": "storage-backup|проверить|свободное место",
+    "title": "Свободное место на дисках",
+    "summary": "Список дисков с занятым и свободным объёмом.",
+    "implementation": "PowerShell Get-PSDrive",
+    "params": []
+  },
+  {
+    "registry": "storage-backup|проверить|SMART диска",
+    "title": "Состояние дисков (SMART)",
+    "summary": "Модель, тип и состояние здоровья физических дисков.",
+    "implementation": "PowerShell Get-PhysicalDisk",
+    "params": []
+  },
+  {
+    "registry": "system-power|проверить|батарею",
+    "title": "Состояние батареи",
+    "summary": "Показывает заряд и состояние батареи. На настольном компьютере честно отвечает, что батареи нет, а не выдумывает проценты.",
+    "implementation": "PowerShell Get-CimInstance Win32_Battery",
+    "params": []
+  },
+  {
+    "registry": "hardware-diag|показать|характеристики железа",
+    "title": "Что за компьютер",
+    "summary": "Процессор, память, видеокарты, накопители и версия Windows — одним отчётом. Нужно, чтобы понимать, что эта машина потянет. Только чтение.",
+    "implementation": "PowerShell Get-CimInstance (Win32_Processor, ComputerSystem, VideoController, OperatingSystem, Get-PhysicalDisk)",
+    "params": []
+  },
+  {
+    "registry": "network|проверить|подключение",
+    "title": "Проверить подключение",
+    "summary": "Пингует 1.1.1.1 и проверяет DNS: отвечает ли сеть и резолвятся ли имена.",
+    "implementation": "PowerShell Test-Connection + Resolve-DnsName",
+    "params": []
+  },
+  {
+    "registry": "network|проверить|открытые порты",
+    "title": "Кто слушает порты",
+    "summary": "Список портов в состоянии Listen с именами процессов.",
+    "implementation": "PowerShell Get-NetTCPConnection",
+    "params": []
+  },
+  {
+    "registry": "files|удалить|в корзину",
+    "title": "Удалить в корзину",
+    "summary": "Отправляет файл или папку в корзину: безвозвратного удаления здесь нет.",
+    "implementation": "Microsoft.VisualBasic.FileIO.FileSystem + SendToRecycleBin",
+    "params": [
+      {
+        "name": "path",
+        "label": "Что удалить",
+        "placeholder": "C:\\Users\\Имя\\Downloads\\старое",
+        "hint": "файл или папка; восстанавливается из корзины",
+        "required": true
+      }
+    ]
+  },
+  {
+    "registry": "apps-windows|нажать|кнопку",
+    "title": "Нажать кнопку по имени",
+    "summary": "Находит в активном окне элемент с этим именем и нажимает его. Имя должно подходить одному элементу; если подходит нескольким — отказ со списком. После нажатия окно читается заново и сравнивается с прежним: «нажато» и «сработало» — разные вещи.",
+    "implementation": "UI Automation: поиск по имени, InvokePattern, сравнение элементов до и после",
+    "params": [
+      {
+        "name": "name",
+        "label": "Имя элемента",
+        "placeholder": "Войти",
+        "hint": "ровно то, что написано на кнопке; сокращать можно, если подходит один элемент",
+        "required": true
+      }
+    ]
+  },
+  {
+    "registry": "apps-windows|ввести|текст",
+    "title": "Ввести текст в поле",
+    "summary": "Находит в активном окне поле с этим именем, вводит текст и читает значение обратно. «Введено» — это «поле показывает то же», а не «отправили»: маска или проверка поля видны в отчёте.",
+    "implementation": "UI Automation: поиск поля по имени, ValuePattern.SetValue, чтение CurrentValue",
+    "params": [
+      {
+        "name": "name",
+        "label": "Имя поля",
+        "placeholder": "Логин",
+        "hint": "имя поля по подписи или подсказке рядом",
+        "required": true
+      },
+      {
+        "name": "text",
+        "label": "Текст",
+        "placeholder": "Иван",
+        "hint": "вводится как есть; маску и проверку делает сама программа",
+        "required": true
+      }
+    ]
+  }
 ]
