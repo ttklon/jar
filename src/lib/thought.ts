@@ -25,6 +25,14 @@ export function describeThought(thought: Thought): string {
     }
     return voice.thinkCall(proposal.Call.registry, proposal.Call.why);
   }
+  if ("Chain" in proposal) {
+    // Цепочка может не собраться: у одного из шагов нет руки. Тогда говорим это, а не
+    // «сейчас всё сделаю»: половина цепочки хуже отказа.
+    if (thought.plan === null) {
+      return voice.thinkChainBroken(proposal.Chain.goal);
+    }
+    return voice.thinkChain(proposal.Chain.goal, proposal.Chain.steps.length);
+  }
   if ("Learn" in proposal) {
     // Просьба записана — так и говорим. Не записалась — не обещаем урок.
     if (thought.learning) {

@@ -62,11 +62,35 @@ pub enum Proposal {
         code: String,
         why: String,
     },
+    /// Цепочка шагов: для результата нужно не одно действие, а несколько подряд.
+    ///
+    /// Это не «рой агентов»: шаги идут строго по порядку, каждый проверяется политикой и
+    /// каждый доказывает свой результат. Цепочка нужна затем, чтобы «зайди и оформи» было
+    /// видно по шагам, а не пряталось за одним туманным «сделаю».
+    Chain {
+        goal: String,
+        steps: Vec<ChainStep>,
+        why: String,
+    },
     /// Не хватает одного ответа человека.
     Ask { question: String, why: String },
     /// Политика запрещает — единственный случай, когда отказ допустим.
     Refuse { reason: String },
 }
+
+/// Один шаг цепочки: та же рука с теми же параметрами, что и в одиночном вызове.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct ChainStep {
+    pub registry: String,
+    pub params: BTreeMap<String, String>,
+    pub why: String,
+}
+
+/// Сколько шагов в цепочке разрешаем.
+///
+/// Пять — не про возможности модели, а про человека: длинную цепочку нельзя ни прочитать,
+/// ни остановить вовремя, а «сделаю двадцать шагов» — обещание без свидетелей.
+pub const MAX_CHAIN_STEPS: usize = 5;
 
 /// Кандидат для вопроса модели: ключ реестра и то, как это называется по-человечески.
 #[derive(Debug, Clone, Serialize)]
@@ -115,6 +139,17 @@ pub fn prompt(
          2. В params только те значения, которые человек назвал или что есть в памяти. Не придумывай пути.\n\
          3. Если нужен один ответ — ask, и в question ровно один вопрос.\n\
          4. refuse только если действие необратимо, стоит денег или выдаёт себя за человека.\n\n",
+    );
+
+    // Цепочка объявлена отдельно от общего контракта: там она заняла бы строку, которую
+    // читают как «одно действие», а это не одно действие.
+    out.push_str(
+        r#"Ещё один вид ответа — цепочка, когда для результата нужно несколько действий подряд:
+{"kind":"chain","goal":"<что получится в итоге>","steps":[{"registry":"<ключ из списка>","params":{},"why":"<зачем шаг>"}],"why":"<почему>"}
+Не больше пяти шагов, и все ключи — только из списка. Цепочка не отменяет ни одного
+подтверждения: каждый шаг спрашивает человека так же, как одиночный вызов.
+
+"#,
     );
 
     out.push_str("Задача человека:\n");
@@ -237,6 +272,57 @@ pub fn parse(answer: &str, known: &[String]) -> Result<Proposal, IntentError> {
             Ok(Proposal::Call {
                 registry,
                 params: params(map.get("params"))?,
+                why: field(map, "why"),
+            })
+        }
+        "chain" => {
+            let goal = required(map, "goal")?;
+            let steps = map
+                .get("steps")
+                .and_then(|value| value.as_array())
+                .ok_or(IntentError::Missing("steps"))?;
+
+            if steps.is_empty() {
+                return Err(IntentError::Missing("steps"));
+            }
+            if steps.len() > MAX_CHAIN_STEPS {
+                return Err(IntentError::Broken(format!(
+                    "шагов {}, а больше {} за раз не беру: такую цепочку человеку не прочитать",
+                    steps.len(),
+                    MAX_CHAIN_STEPS
+                )));
+            }
+
+            let mut chain = Vec::with_capacity(steps.len());
+            for step in steps {
+                let object = step
+                    .as_object()
+                    .ok_or_else(|| IntentError::Broken("шаг цепочки — не объект".to_string()))?;
+
+                let registry = object
+                    .get("registry")
+                    .and_then(|value| value.as_str())
+                    .map(str::trim)
+                    .filter(|key| !key.is_empty())
+                    .ok_or(IntentError::Missing("steps[].registry"))?
+                    .to_string();
+
+                // Выдуманный шаг не пройдёт: цепочка либо целиком из известных рук, либо не
+                // цепочка. Собрать половину и «попробовать» — то, чего здесь не будет.
+                if !known.iter().any(|key| key == &registry) {
+                    return Err(IntentError::UnknownTool(registry));
+                }
+
+                chain.push(ChainStep {
+                    registry,
+                    params: params(object.get("params"))?,
+                    why: field(object, "why"),
+                });
+            }
+
+            Ok(Proposal::Chain {
+                goal,
+                steps: chain,
                 why: field(map, "why"),
             })
         }
@@ -488,6 +574,57 @@ mod tests {
             }
             other => panic!("ожидался вызов, получено {other:?}"),
         }
+    }
+
+    #[test]
+    fn a_chain_of_known_hands_is_read_as_a_chain() {
+        let answer = r#"{"kind":"chain","goal":"наведи порядок","steps":[
+            {"registry":"файлы|создать|папку","params":{"path":"D:\\Отчёты"},"why":"нужна папка"},
+            {"registry":"файлы|создать|папку","params":{},"why":""}
+        ],"why":"по шагам"}"#;
+
+        let known = vec![
+            "файлы|создать|папку".to_string(),
+            "звук|убавить|громкость".to_string(),
+        ];
+
+        match parse(answer, &known).expect("разбирается") {
+            Proposal::Chain { goal, steps, why } => {
+                assert_eq!(goal, "наведи порядок");
+                assert_eq!(why, "по шагам");
+                assert_eq!(steps.len(), 2);
+                assert_eq!(steps[0].params.get("path").map(String::as_str), Some("D:\\Отчёты"));
+                assert_eq!(steps[0].why, "нужна папка");
+            }
+            other => panic!("ожидалась цепочка, получено {other:?}"),
+        }
+    }
+
+    #[test]
+    fn a_chain_with_a_made_up_step_is_not_a_chain() {
+        let known = vec!["файлы|создать|папку".to_string()];
+
+        let unknown = r#"{"kind":"chain","goal":"x","steps":[{"registry":"файлы|создать|папку"},{"registry":"нет|такой|руки"}]}"#;
+        assert!(matches!(
+            parse(unknown, &known),
+            Err(IntentError::UnknownTool(_))
+        ));
+
+        let empty = r#"{"kind":"chain","goal":"x","steps":[]}"#;
+        assert!(parse(empty, &known).is_err());
+
+        // Шесть шагов — отказ: такую цепочку человек не прочитает.
+        let long = r#"{"kind":"chain","goal":"x","steps":[{"registry":"файлы|создать|папку"},{"registry":"файлы|создать|папку"},{"registry":"файлы|создать|папку"},{"registry":"файлы|создать|папку"},{"registry":"файлы|создать|папку"},{"registry":"файлы|создать|папку"}]}"#;
+        let error = parse(long, &known).expect_err("должен быть отказ");
+        assert!(format!("{error:?}").contains("5") || format!("{error:?}").contains("шесть"));
+    }
+
+    #[test]
+    fn the_prompt_offers_the_chain_and_says_what_it_costs() {
+        let text = prompt("оформи заказ", None, &[], &[]);
+        assert!(text.contains("\"kind\":\"chain\""));
+        assert!(text.contains("Не больше пяти шагов"));
+        assert!(text.contains("подтверждения"));
     }
 
     #[test]

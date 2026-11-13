@@ -511,6 +511,12 @@ export const voice = {
   cancelShow: "Отмена",
   cancelled: "отменил — запись выброшена и никуда не ушла",
   thinkShow: "Спросить модель",
+  thinkChain: (goal: string, steps: number) =>
+    `модель собрала цепочку из ${steps} шагов: ${goal} — каждый шаг спросит вашего слова, ничего не выполнено`,
+  thinkChainBroken: (goal: string) =>
+    `цепочку «${goal}» собрать нельзя: у одного из шагов нет руки. Показываю, чего не хватает`,
+  thinkChainStep: (position: number, registry: string, why: string) =>
+    `${position}. ${registry}${why ? ` — ${why}` : ""}`,
   screenShow: "Что на экране",
   machineMeasure: "Что с машиной",
   pressShow: (name: string) => `Нажать «${name}»`,

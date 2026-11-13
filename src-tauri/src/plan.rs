@@ -402,6 +402,57 @@ pub fn chosen(
     })
 }
 
+/// План из цепочки, предложенной моделью.
+///
+/// Собирается только целиком: если хотя бы у одного шага нет руки, плана нет. Half-chain
+/// опаснее отказа — человек увидит «план из трёх шагов», а выполнится один, и непонятно
+/// какой. Параметры каждого шага проходят ту же чистку, что и в одиночном вызове.
+pub fn chain(
+    goal: &str,
+    steps: &[(String, BTreeMap<String, String>, String)],
+    registry: &Registry,
+    why: &str,
+) -> Option<Plan> {
+    if steps.is_empty() {
+        return None;
+    }
+
+    let mut planned = Vec::with_capacity(steps.len());
+    for (key, params, step_why) in steps {
+        let action = registry.by_key(key)?;
+        let spec = tools::spec(key)?;
+
+        let params = params
+            .iter()
+            .filter(|(name, value)| {
+                !value.trim().is_empty() && spec.params.iter().any(|param| &param.name == *name)
+            })
+            .map(|(name, value)| (name.clone(), value.clone()))
+            .collect::<BTreeMap<_, _>>();
+
+        let why = if step_why.trim().is_empty() {
+            format!("шаг цепочки: {}", action.example)
+        } else {
+            step_why.trim().to_string()
+        };
+
+        planned.push(PlanStep {
+            registry: key.clone(),
+            params,
+            why,
+        });
+    }
+
+    // Обоснование модели сохраняем рядом с шагами: у цепочки оно объясняет, зачем нужен
+    // весь путь, а не отдельное действие.
+    let _ = why;
+    Some(Plan {
+        goal: goal.to_string(),
+        source: "model-chain".to_string(),
+        steps: planned,
+    })
+}
+
 /// Запоминает план (JSON как есть) и возвращает его разобранным.
 pub fn remember(memory: &Memory, plan: &Plan) -> Result<(), String> {
     let json = serde_json::to_string(plan).map_err(|error| format!("план не пишется: {error}"))?;
@@ -454,6 +505,40 @@ mod tests {
             chosen("что-то", "нет|такой|строки", BTreeMap::new(), &registry, "").is_none(),
             "выдуманного ключа в реестре нет"
         );
+    }
+
+    #[test]
+    fn a_chain_is_built_whole_or_not_at_all() {
+        let registry = registry();
+        let steps = vec![
+            (
+                "files|создать|папку".to_string(),
+                BTreeMap::new(),
+                "нужна папка".to_string(),
+            ),
+            (
+                "storage-backup|проверить|свободное место".to_string(),
+                BTreeMap::new(),
+                String::new(),
+            ),
+        ];
+
+        let plan = chain("наведи порядок", &steps, &registry, "по шагам").expect("план");
+        assert_eq!(plan.steps.len(), 2);
+        assert_eq!(plan.source, "model-chain");
+        assert!(plan.steps[1].why.contains("шаг цепочки"));
+
+        // Один шаг без руки — и цепочки нет: половина цепочки хуже отказа.
+        let broken = vec![
+            (
+                "files|создать|папку".to_string(),
+                BTreeMap::new(),
+                String::new(),
+            ),
+            ("нет|такой|руки".to_string(), BTreeMap::new(), String::new()),
+        ];
+        assert!(chain("наведи порядок", &broken, &registry, "").is_none());
+        assert!(chain("пусто", &[], &registry, "").is_none());
     }
 
     #[test]

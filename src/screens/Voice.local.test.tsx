@@ -11,6 +11,7 @@ import {
   speechStatus,
   think,
   trialHand,
+  runPlan,
   transcribeLocal,
   uiDump,
   machineState,
@@ -548,6 +549,50 @@ describe("локальное распознавание на экране", () =
       expect(screen.getByText(/надо научиться — поставить будильник/)).toBeTruthy();
     });
     expect(screen.getByText(/предложение модели ничего не выполняет/)).toBeTruthy();
+  });
+
+  it("цепочка модели видна по шагам и не выполняется сама", async () => {
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Chain: {
+          goal: "оформить заказ",
+          steps: [
+            { registry: "apps-windows|ввести|текст", params: { name: "Логин" }, why: "вход" },
+            { registry: "apps-windows|нажать|кнопку", params: { name: "Войти" }, why: "войти" },
+          ],
+          why: "по шагам",
+        },
+      },
+      plan: {
+        plan: {
+          goal: "оформить заказ",
+          source: "model-chain",
+          steps: [
+            { registry: "apps-windows|ввести|текст", params: {}, why: "вход" },
+            { registry: "apps-windows|нажать|кнопку", params: {}, why: "войти" },
+          ],
+        },
+        problems: [],
+        gates: [],
+        questions: [],
+      },
+      learning: null,
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "оформи заказ" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    // Цепочка названа цепочкой, и сказано, что она ничего не выполнила.
+    await waitFor(() => expect(screen.getByText(/цепочку из 2 шагов/)).toBeTruthy());
+    expect(screen.getByText(/1\. apps-windows\|ввести\|текст — вход/)).toBeTruthy();
+    expect(screen.getByText(/2\. apps-windows\|нажать\|кнопку — войти/)).toBeTruthy();
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
   });
 
   it("план модели становится обычным планом: с подтверждением, а не сразу делом", async () => {

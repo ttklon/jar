@@ -640,6 +640,28 @@ pub async fn think(
                         plan: Some(plan),
                     },
                 ),
+                intent::Proposal::Chain { goal, steps, why } => {
+                    // Цепочка — тот же план: те же проверки, те же вопросы, то же
+                    // подтверждение на каждом шаге. Никакого «модель собрала цепочку,
+                    // значит можно».
+                    let pairs = steps
+                        .iter()
+                        .map(|step| {
+                            (
+                                step.registry.clone(),
+                                step.params.clone(),
+                                step.why.clone(),
+                            )
+                        })
+                        .collect::<Vec<_>>();
+
+                    plan::chain(goal, &pairs, &inner.registry, why).map(|plan| PlanCheck {
+                        problems: plan::check(&plan, &inner.registry),
+                        gates: plan::gate_plan(&plan, &inner.registry, &[]),
+                        questions: plan::questions(&plan, &inner.registry),
+                        plan: Some(plan),
+                    })
+                }
                 _ => None,
             };
 

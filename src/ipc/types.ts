@@ -187,8 +187,17 @@ export interface CustomHand {
   created_ms: number;
 }
 
+/** Один шаг цепочки: та же рука с теми же параметрами, что и в одиночном вызове. */
+export interface ChainStep {
+  registry: string;
+  params: Record<string, string>;
+  why: string;
+}
+
 export type Proposal =
   | { Call: { registry: string; params: Record<string, string>; why: string } }
+  /** Цепочка: несколько действий подряд, каждое со своим подтверждением. */
+  | { Chain: { goal: string; steps: ChainStep[]; why: string } }
   | { Learn: { goal: string; why: string } }
   | { Hand: { goal: string; code: string; why: string } }
   | { Ask: { question: string; why: string } }

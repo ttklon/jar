@@ -1016,6 +1016,13 @@ export function Voice({ onOpen }: VoiceScreenProps) {
             <>
               <Text className={styles.spoken}>{describeThought(thought)}</Text>
               <Text className={styles.note}>{voice.thinkNotExecuted}</Text>
+              {"Chain" in thought.proposal
+                ? thought.proposal.Chain.steps.map((step, index) => (
+                    <Text key={`${step.registry}-${index}`} className={styles.note}>
+                      {voice.thinkChainStep(index + 1, step.registry, step.why)}
+                    </Text>
+                  ))
+                : null}
             </>
           ) : null}
           {thought && !thought.proposal ? (
