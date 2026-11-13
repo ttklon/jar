@@ -57,19 +57,35 @@ pub fn fact_key(key: &str) -> String {
     format!("trial:{key}")
 }
 
+/// Ключ факта для запуска своей руки: проба и запуск — разные события, и мешать их в
+/// одном факте значит потерять доказательство, на котором руку принимали.
+pub fn run_key(key: &str) -> String {
+    format!("run:{key}")
+}
+
 /// Запомнить отчёт: следующий разговор начнётся с того, что уже проверено.
 pub fn save(memory: &Memory, report: &Report) -> Result<(), String> {
-    let json =
-        serde_json::to_string(report).map_err(|error| format!("отчёт не пишется: {error}"))?;
-    memory
-        .remember(&fact_key(&report.key), &json)
-        .map_err(|error| format!("отчёт не сохранился: {error}"))
+    save_as(memory, "trial:", report)
 }
 
 /// Последний отчёт по ключу. Битый — «не пробовали».
 pub fn get(memory: &Memory, key: &str) -> Option<Report> {
+    get_as(memory, "trial:", key)
+}
+
+/// Сохранить отчёт под своим началом ключа.
+pub fn save_as(memory: &Memory, prefix: &str, report: &Report) -> Result<(), String> {
+    let json =
+        serde_json::to_string(report).map_err(|error| format!("отчёт не пишется: {error}"))?;
     memory
-        .fact(&fact_key(key))
+        .remember(&format!("{prefix}{}", report.key), &json)
+        .map_err(|error| format!("отчёт не сохранился: {error}"))
+}
+
+/// Прочитать отчёт под своим началом ключа.
+pub fn get_as(memory: &Memory, prefix: &str, key: &str) -> Option<Report> {
+    memory
+        .fact(&format!("{prefix}{key}"))
         .and_then(|json| serde_json::from_str(&json).ok())
 }
 
