@@ -41,6 +41,16 @@ import { speak } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
 import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
 import { describeThought } from "../lib/thought";
+import {
+  add,
+  next,
+  setState,
+  stopRemaining,
+  summary,
+  unattended,
+  type QueueItem,
+  type QueueState,
+} from "../lib/queue";
 import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
 import { ActionList } from "../components/ActionList";
@@ -171,6 +181,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [trialBusy, setTrialBusy] = useState(false);
   /** Принятые руки: отдельно от встроенных и не исполняются. */
   const [adopted, setAdopted] = useState<CustomHand | null>(null);
+  /** Очередь дел: несколько задач подряд, пока человек не скажет «стоп». */
+  const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [queueOn, setQueueOn] = useState(false);
+  /** Почему очередь стоит — словами, а не пустым местом. */
+  const [queueIdle, setQueueIdle] = useState<string | null>(null);
+  const queueRef = useRef<QueueItem[]>([]);
+  const queueStopRef = useRef(false);
+  const queueRunningRef = useRef(false);
   /** Что с машиной: загрузка, память, присутствие человека. Ничего не запускает. */
   const [machine, setMachine] = useState<MachineState | null>(null);
   const [machineError, setMachineError] = useState<string | null>(null);
@@ -208,6 +226,97 @@ export function Voice({ onOpen }: VoiceScreenProps) {
    * Ошибка чтения — не ошибка задачи: без экрана помощник просто менее зрячий, и об этом
    * говорится вслух. Молча подставлять «наверное, браузер» было бы хуже пустоты.
    */
+  /**
+   * Одно дело из очереди: собрать план, проверить, можно ли без человека, и исполнить.
+   *
+   * Ничего нового здесь не решается: политика та же, что и в ручном режиме. Разница одна —
+   * если плану нужно подтверждение или ответ, дело помечается «ваше слово» и очередь идёт
+   * дальше. Исполнить такое молча было бы подлогом.
+   */
+  const runQueuedGoal = useCallback(
+    async (goal: string): Promise<{ state: QueueState; note: string }> => {
+      const check = await draftPlan(goal).catch(() => null);
+      const verdict = unattended(check);
+
+      if (!verdict.can || !check?.plan) {
+        return { state: "held", note: verdict.why };
+      }
+
+      const report = await runPlan(JSON.stringify(check.plan), []).catch(() => null);
+      if (!report) {
+        return { state: "failed", note: "запуск не состоялся: ядро не ответило" };
+      }
+      if (report.stopped) {
+        return { state: "failed", note: report.stopped };
+      }
+
+      return { state: "done", note: `шагов: ${report.steps.length}, всё выполнено` };
+    },
+    [],
+  );
+
+  /**
+   * Идти по очереди, пока не скажут «стоп».
+   *
+   * Перед каждым делом спрашиваем машину заново: за время работы человек мог вернуться,
+   * а память — кончиться. Один раз спросить и решить на весь вечер было бы самонадеянно.
+   */
+  const startQueue = useCallback(async () => {
+    if (queueRunningRef.current) return;
+
+    queueRunningRef.current = true;
+    queueStopRef.current = false;
+    setQueueOn(true);
+    setQueueIdle(null);
+
+    let items = queueRef.current;
+
+    try {
+      for (;;) {
+        if (queueStopRef.current) {
+          setQueueIdle("остановлено вами: начатое доведено, остальное не начиналось");
+          break;
+        }
+
+        const machine = await Promise.resolve(machineState()).catch(() => null);
+        const decision = next(items, {
+          parallel: machine?.budget.parallel ?? 1,
+          mayStart: machine?.budget.may_start ?? true,
+          // Без измерения «ушёл» не подтверждено: сам идти не начинаю.
+          away: machine?.budget.mode === "away",
+        });
+
+        if (decision.index < 0) {
+          setQueueIdle(decision.reason);
+          break;
+        }
+
+        const item = items[decision.index];
+        if (!item) break;
+
+        items = setState(items, item.id, "running", "");
+        queueRef.current = items;
+        setQueue(items);
+
+        const outcome = await runQueuedGoal(item.goal);
+
+        items = setState(items, item.id, outcome.state, outcome.note);
+        queueRef.current = items;
+        setQueue(items);
+      }
+    } finally {
+      queueRunningRef.current = false;
+      setQueueOn(false);
+    }
+  }, [runQueuedGoal]);
+
+  const stopQueue = useCallback(() => {
+    queueStopRef.current = true;
+    const stopped = stopRemaining(queueRef.current);
+    queueRef.current = stopped;
+    setQueue(stopped);
+  }, []);
+
   /**
    * Померить машину. Это совет самому себе, а не приказ человеку: рядом с числом всегда
    * стоит причина, иначе «умное» распределение нельзя ни объяснить, ни проверить.
@@ -783,6 +892,36 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           >
             {machineBusy ? voice.machineMeasuring : voice.machineMeasure}
           </Button>
+          <Button
+            size="small"
+            appearance="subtle"
+            onClick={() => {
+              const id = `q${Date.now()}${Math.random().toString(16).slice(2, 6)}`;
+              const updated = add(queueRef.current, text, id);
+              queueRef.current = updated;
+              setQueue(updated);
+            }}
+          >
+            {voice.queueAdd}
+          </Button>
+          <Button
+            size="small"
+            appearance="subtle"
+            disabled={queueOn || summary(queue).waiting === 0}
+            onClick={() => {
+              void startQueue();
+            }}
+          >
+            {voice.queueRun}
+          </Button>
+          <Button
+            size="small"
+            appearance="subtle"
+            disabled={!queueOn && summary(queue).waiting === 0}
+            onClick={stopQueue}
+          >
+            {voice.queueStop}
+          </Button>
           {thinkError ? (
             <Text className={styles.error}>{voice.thinkError(thinkError)}</Text>
           ) : null}
@@ -798,6 +937,18 @@ export function Voice({ onOpen }: VoiceScreenProps) {
               <pre className={styles.prompt}>{thought.answer}</pre>
             </>
           ) : null}
+        </div>
+      ) : null}
+
+      {queue.length > 0 || queueIdle ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>{voice.queueTitle(summary(queue).waiting, summary(queue).done)}</Text>
+          {queueIdle ? <Text className={styles.note}>{voice.queueIdle(queueIdle)}</Text> : null}
+          {queue.map((item) => (
+            <Text key={item.id} className={item.state === "held" ? styles.error : styles.note}>
+              {voice.queueLine(item.goal, item.state, item.note)}
+            </Text>
+          ))}
         </div>
       ) : null}
 

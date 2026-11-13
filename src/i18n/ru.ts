@@ -513,6 +513,27 @@ export const voice = {
   thinkShow: "Спросить модель",
   screenShow: "Что на экране",
   machineMeasure: "Что с машиной",
+  queueAdd: "В очередь",
+  queueRun: "Работать без меня",
+  queueStop: "Стоп",
+  queueTitle: (waiting: number, done: number) =>
+    `Очередь: ждут ${waiting}, сделано ${done}`,
+  queueIdle: (reason: string) => `очередь стоит: ${reason}`,
+  queueLine: (goal: string, state: string, note: string) => {
+    const mark =
+      state === "waiting"
+        ? "ждёт"
+        : state === "running"
+          ? "делаю"
+          : state === "done"
+            ? "готово"
+            : state === "failed"
+              ? "не вышло"
+              : state === "held"
+                ? "нужно ваше слово"
+                : "остановлено";
+    return `${mark} · ${goal}${note ? ` — ${note}` : ""}`;
+  },
   machineMeasuring: "Мерю машину…",
   machineTitle: "Машина",
   machineSummary: (mode: "near" | "away" | "crowded", parallel: number, reason: string) =>
