@@ -37,6 +37,7 @@ use crate::step::StepResult;
 use crate::stt;
 use crate::tools::{self, ParamSpec, ToolSpec};
 use crate::trial;
+use crate::uia;
 use crate::window;
 
 /// Всё, что нужно командам. Один `Arc`, чтобы клонировать в фоновый поток.

@@ -293,6 +293,10 @@ pub fn dump(max_nodes: usize) -> Result<Snapshot, String> {
 }
 
 #[cfg(windows)]
+// Привязки к Windows помечают часть вызовов UIA небезопасными, часть — безопасными, и это
+// меняется от версии к версии. Лишний `unsafe` вокруг честного вызова — не то, на чём стоит
+// ронять сборку; отсутствие нужного ловит компилятор.
+#[allow(unused_unsafe)]
 mod imp {
     //! Настоящее чтение через UI Automation.
     //!
@@ -378,8 +382,10 @@ mod imp {
                 Err(_) => return Vec::new(),
             };
 
+            // Соседи кончаются «пустым» результатом, а не ошибкой: у UIA конец ветки —
+            // это `Ok(None)`, и путать его с отказом нельзя.
             let mut next = unsafe { walker.GetFirstChildElement(&parent) };
-            while let Ok(child) = next {
+            while let Ok(Some(child)) = next {
                 self.nodes.push(child.clone());
                 result.push(self.nodes.len() - 1);
                 next = unsafe { walker.GetNextSiblingElement(&child) };
@@ -404,20 +410,20 @@ mod imp {
                 };
             };
 
-            let name = element
-                .CurrentName()
+            // Свойства UIA читаются через COM, поэтому небезопасны: чужое окно может
+            // закрыться между вызовами, и отказ здесь — обычное дело, а не сбой.
+            let name = unsafe { element.CurrentName() }
                 .map(|value| tidy(&value.to_string()))
                 .unwrap_or_default();
-            let id = element
-                .CurrentAutomationId()
+            let id = unsafe { element.CurrentAutomationId() }
                 .map(|value| tidy(&value.to_string()))
                 .unwrap_or_default();
-            let kind = element
-                .CurrentControlType()
-                .map(|value| kind_name(value.0 as u32))
+            let kind = unsafe { element.CurrentControlType() }
+                // Тип `UIA_CONTROLTYPE_ID` в привязках то `i32`, то `u32` — приводим
+                // через `try_from`, чтобы не зависеть от версии.
+                .map(|value| kind_name(u32::try_from(value.0).unwrap_or(0)))
                 .unwrap_or_else(|_| "элемент".to_string());
-            let enabled = element
-                .CurrentIsEnabled()
+            let enabled = unsafe { element.CurrentIsEnabled() }
                 .map(|value| value.as_bool())
                 .unwrap_or(false);
 
@@ -447,7 +453,8 @@ mod imp {
 
             let root: IUIAutomationElement = automation
                 .ElementFromHandle(window)
-                .map_err(|error| format!("окно не отдало элементы: {error}"))?;
+                .map_err(|error| format!("окно не отдало элементы: {error}"))?
+                .ok_or_else(|| "окно не отдало элементы: пустой ответ UIA".to_string())?;
 
             let mut screen = Screen {
                 walker: automation,
@@ -539,7 +546,8 @@ mod tests {
         children.sort_unstable();
         let mut nodes: Vec<(&str, Vec<usize>)> = vec![("окно", vec![1]), ("панель", children)];
         for number in 0..100 {
-            nodes.push((Box::leak(format!("кнопка {number}").into_boxed_str()), vec![]));
+            let name: &'static str = Box::leak(format!("кнопка {number}").into_boxed_str());
+            nodes.push((name, vec![]));
         }
 
         let mut tree = Fake::new(nodes);
@@ -559,7 +567,8 @@ mod tests {
                 } else {
                     vec![]
                 };
-                (Box::leak(format!("уровень {number}").into_boxed_str()), children)
+                let name: &'static str = Box::leak(format!("уровень {number}").into_boxed_str());
+                (name, children)
             })
             .collect();
 
