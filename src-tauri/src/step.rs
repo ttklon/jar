@@ -10,12 +10,25 @@ use serde::Serialize;
 #[derive(Debug, Clone, Serialize, PartialEq)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum Evidence {
-    ExitCode { code: i32 },
-    PathExists { path: String, exists: bool },
-    StdoutMarker { marker: String, found: bool },
+    ExitCode {
+        code: i32,
+    },
+    PathExists {
+        path: String,
+        exists: bool,
+    },
+    StdoutMarker {
+        marker: String,
+        found: bool,
+    },
     /// Действие над чужим окном: проверка — сравнение состояния экрана или чтение значения.
-    UiChanged { what: String, changed: bool },
-    Failed { reason: String },
+    UiChanged {
+        what: String,
+        changed: bool,
+    },
+    Failed {
+        reason: String,
+    },
 }
 
 impl Evidence {

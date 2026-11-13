@@ -674,7 +674,10 @@ mod tests {
 
         let result = run("apps-windows|нажать|кнопку", &params, &cancel);
         if !result.ok {
-            assert!(!result.reason.trim().is_empty(), "отказ обязан быть словами");
+            assert!(
+                !result.reason.trim().is_empty(),
+                "отказ обязан быть словами"
+            );
             assert_eq!(result.evidence.kind(), "failed");
         } else {
             // Нажатие удалось: значит, есть доказательство, а не «вроде нажали».
