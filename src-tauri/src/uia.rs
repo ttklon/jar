@@ -308,8 +308,8 @@ mod imp {
     };
     use windows::Win32::UI::Accessibility::{
         CUIAutomation, IUIAutomation, IUIAutomationElement, UIA_ExpandCollapsePatternId,
-        UIA_InvokePatternId, UIA_PATTERN_ID, UIA_SelectionItemPatternId, UIA_TextPatternId,
-        UIA_TogglePatternId, UIA_ValuePatternId,
+        UIA_InvokePatternId, UIA_SelectionItemPatternId, UIA_TextPatternId, UIA_TogglePatternId,
+        UIA_ValuePatternId, UIA_PATTERN_ID,
     };
     use windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow;
 
@@ -442,7 +442,9 @@ mod imp {
         unsafe {
             let window = GetForegroundWindow();
             if window.0.is_null() {
-                return Err("переднего окна нет: рабочий стол или заблокированный экран".to_string());
+                return Err(
+                    "переднего окна нет: рабочий стол или заблокированный экран".to_string()
+                );
             }
 
             let automation: IUIAutomation =
@@ -503,14 +505,21 @@ mod tests {
         }
 
         fn children(&mut self, node: usize) -> Vec<usize> {
-            self.nodes.get(node).map(|(_, kids)| kids.clone()).unwrap_or_default()
+            self.nodes
+                .get(node)
+                .map(|(_, kids)| kids.clone())
+                .unwrap_or_default()
         }
 
         fn describe(&self, node: usize) -> Element {
             Element {
                 depth: 0,
                 kind: "кнопка".to_string(),
-                name: self.nodes.get(node).map(|(name, _)| name.clone()).unwrap_or_default(),
+                name: self
+                    .nodes
+                    .get(node)
+                    .map(|(name, _)| name.clone())
+                    .unwrap_or_default(),
                 id: String::new(),
                 enabled: true,
                 actions: vec!["invoke".to_string()],
@@ -529,7 +538,10 @@ mod tests {
         ]);
 
         let (elements, truncated) = collect(&mut tree, MAX_NODES, MAX_DEPTH);
-        let names: Vec<&str> = elements.iter().map(|element| element.name.as_str()).collect();
+        let names: Vec<&str> = elements
+            .iter()
+            .map(|element| element.name.as_str())
+            .collect();
 
         assert_eq!(names, vec!["окно", "панель", "Войти", "Пароль"]);
         assert_eq!(elements[2].depth, 2);
@@ -551,7 +563,10 @@ mod tests {
         let (elements, truncated) = collect(&mut tree, 5, MAX_DEPTH);
 
         assert_eq!(elements.len(), 5);
-        assert!(truncated, "обрезанное дерево должно быть названо обрезанным");
+        assert!(
+            truncated,
+            "обрезанное дерево должно быть названо обрезанным"
+        );
     }
 
     #[test]
