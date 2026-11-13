@@ -646,13 +646,7 @@ pub async fn think(
                     // значит можно».
                     let pairs = steps
                         .iter()
-                        .map(|step| {
-                            (
-                                step.registry.clone(),
-                                step.params.clone(),
-                                step.why.clone(),
-                            )
-                        })
+                        .map(|step| (step.registry.clone(), step.params.clone(), step.why.clone()))
                         .collect::<Vec<_>>();
 
                     plan::chain(goal, &pairs, &inner.registry, why).map(|plan| PlanCheck {

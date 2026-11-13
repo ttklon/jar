@@ -593,7 +593,10 @@ mod tests {
                 assert_eq!(goal, "наведи порядок");
                 assert_eq!(why, "по шагам");
                 assert_eq!(steps.len(), 2);
-                assert_eq!(steps[0].params.get("path").map(String::as_str), Some("D:\\Отчёты"));
+                assert_eq!(
+                    steps[0].params.get("path").map(String::as_str),
+                    Some("D:\\Отчёты")
+                );
                 assert_eq!(steps[0].why, "нужна папка");
             }
             other => panic!("ожидалась цепочка, получено {other:?}"),
