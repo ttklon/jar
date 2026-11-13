@@ -508,6 +508,8 @@ pub async fn run_custom_hand(
     let dir = inner.base_dir.join("trial");
     std::fs::create_dir_all(&dir).map_err(|error| format!("папка запуска: {error}"))?;
 
+    // Ключ отчёта считаем до запуска: в поток уходит своя копия, а не ссылка на живое имя.
+    let prefix = trial::run_key(&key);
     let started = now_ms() as u64;
     let code = hand.code.clone();
     let report = tauri::async_runtime::spawn_blocking(move || {
@@ -516,7 +518,6 @@ pub async fn run_custom_hand(
     .await
     .map_err(|error| format!("запуск не выполнился: {error}"))??;
 
-    let prefix = trial::run_key(&key);
     trial::save_as(&inner.memory, &prefix, &report)?;
     Ok(report)
 }
