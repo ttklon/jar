@@ -14,6 +14,7 @@ import {
   transcribeLocal,
   uiDump,
   machineState,
+  uiPress,
 } from "../ipc";
 import { startRecording } from "../lib/recorder";
 import { Voice } from "./Voice";
@@ -31,6 +32,7 @@ vi.mock("../ipc", () => ({
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn().mockResolvedValue(null),
   uiDump: vi.fn().mockRejectedValue(new Error("в браузере нет UI Automation")),
+  uiPress: vi.fn().mockRejectedValue(new Error("в браузере окон нет")),
   machineState: vi.fn().mockResolvedValue({
     sample: null,
     budget: { parallel: 1, mode: "near", reason: "в браузере машину не измерить", may_start: true },
@@ -80,6 +82,7 @@ afterEach(() => {
   vi.mocked(draftPlan).mockReset().mockResolvedValue(null);
   vi.mocked(think).mockReset().mockResolvedValue(null as never);
   vi.mocked(uiDump).mockReset().mockRejectedValue(new Error("в браузере нет UI Automation"));
+  vi.mocked(uiPress).mockReset().mockRejectedValue(new Error("в браузере окон нет"));
   vi.mocked(machineState).mockReset().mockResolvedValue({
     sample: null,
     budget: { parallel: 1, mode: "near", reason: "в браузере машину не измерить", may_start: true },
@@ -313,6 +316,78 @@ describe("локальное распознавание на экране", () =
 
     await waitFor(() => expect(screen.getByText(/новое не начинаю: памяти на исходе/)).toBeTruthy());
     expect(screen.getByText(/новое не начинаю\. /)).toBeTruthy();
+  });
+
+  it("нажатие спрашивают до нажатия, а не после", async () => {
+    vi.mocked(uiDump).mockResolvedValue({
+      title: "Вход",
+      process: "chrome.exe",
+      elements: [
+        { depth: 1, kind: "кнопка", name: "Войти", id: "submit", enabled: true, actions: ["invoke"] },
+        { depth: 1, kind: "текст", name: "Забыли пароль?", id: "", enabled: true, actions: [] },
+      ],
+      truncated: false,
+      note: "чтение экрана: UI Automation, только чтение",
+      text: "Вход (chrome.exe)\n  - кнопка «Войти» #submit [invoke]",
+    });
+    vi.mocked(uiPress).mockResolvedValue({
+      target: { name: "Войти", kind: "кнопка", id: "submit", actions: ["invoke"] },
+      sent: true,
+      changed: true,
+      note: "нажато, и экран изменился — это проверено сравнением элементов окна",
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "нажми войти" } });
+    fireEvent.click(screen.getByText("Что на экране"));
+
+    await waitFor(() => expect(screen.getByText("Нажать «Войти»")).toBeTruthy());
+    fireEvent.click(screen.getByText("Нажать «Войти»"));
+
+    // Пока не сказано «да» — никакого нажатия: кнопка только спрашивает.
+    expect(vi.mocked(uiPress)).not.toHaveBeenCalled();
+    expect(screen.getByText(/Нажатие настоящее — как будто вы нажали сами/)).toBeTruthy();
+
+    fireEvent.click(screen.getByText("Да, нажать"));
+
+    await waitFor(() =>
+      expect(vi.mocked(uiPress)).toHaveBeenCalledWith("Войти", true),
+    );
+    // Итог показывается честно: нажато и экран изменился — со ссылкой на проверку.
+    await waitFor(() => expect(screen.getByText(/экран изменился/)).toBeTruthy());
+  });
+
+  it("нажали, а экран не изменился — так и говорим, а не «готово»", async () => {
+    vi.mocked(uiDump).mockResolvedValue({
+      title: "Вход",
+      process: "chrome.exe",
+      elements: [
+        { depth: 1, kind: "кнопка", name: "Готово", id: "", enabled: true, actions: ["invoke"] },
+      ],
+      truncated: false,
+      note: "чтение экрана: UI Automation, только чтение",
+      text: "Вход (chrome.exe)\n  - кнопка «Готово» [invoke]",
+    });
+    vi.mocked(uiPress).mockResolvedValue({
+      target: { name: "Готово", kind: "кнопка", id: "", actions: ["invoke"] },
+      sent: true,
+      changed: false,
+      note: "нажато, но экран не изменился: возможно, программа думает медленнее, чем мы смотрим",
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "нажми готово" } });
+    fireEvent.click(screen.getByText("Что на экране"));
+
+    await waitFor(() => expect(screen.getByText("Нажать «Готово»")).toBeTruthy());
+    fireEvent.click(screen.getByText("Нажать «Готово»"));
+    fireEvent.click(screen.getByText("Да, нажать"));
+
+    await waitFor(() => expect(screen.getByText(/экран не изменился/)).toBeTruthy());
   });
 
   it("окно не читается — об этом сказано, и поиск по словам всё равно работает", async () => {

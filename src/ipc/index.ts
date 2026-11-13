@@ -55,10 +55,11 @@ export type {
   MachineState,
   UiDump,
   UiElement,
+  UiPress,
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
+import type { AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, UiPress, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -582,6 +583,16 @@ export async function foregroundWindow(): Promise<ForegroundWindow> {
     return fromCore();
   }
   const { foregroundWindow: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Нажать элемент активного окна по имени — только после подтверждения человека. */
+export async function uiPress(name: string, confirmed: boolean): Promise<UiPress> {
+  if (isTauri()) {
+    const { uiPress: fromCore } = await import("./tauri");
+    return fromCore(name, confirmed);
+  }
+  const { uiPress: fromData } = await import("./dev");
   return fromData();
 }
 

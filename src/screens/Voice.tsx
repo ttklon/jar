@@ -20,6 +20,7 @@ import {
   machineState,
   transcribeLocal,
   uiDump,
+  uiPress,
 } from "../ipc";
 import type {
   CustomHand,
@@ -36,6 +37,7 @@ import type {
   MachineState,
   SpeechStatus,
   UiDump,
+  UiPress,
 } from "../ipc";
 import { speak } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
@@ -193,6 +195,11 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [machine, setMachine] = useState<MachineState | null>(null);
   const [machineError, setMachineError] = useState<string | null>(null);
   const [machineBusy, setMachineBusy] = useState(false);
+  /** Элемент, который человек решил нажать: сначала показываем, потом нажимаем. */
+  const [pressing, setPressing] = useState<string | null>(null);
+  /** Итог нажатия: нажато и изменилось, нажато и нет, или отказ. */
+  const [pressResult, setPressResult] = useState<UiPress | null>(null);
+  const [pressError, setPressError] = useState<string | null>(null);
   /** Что видно в активном окне: элементы, прочитанные UI Automation. Только чтение. */
   const [screen, setScreen] = useState<UiDump | null>(null);
   const [screenError, setScreenError] = useState<string | null>(null);
@@ -349,6 +356,26 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       setScreenBusy(false);
     }
   }, []);
+
+  /**
+   * Нажать элемент. Делается в два шага: сначала «нажать „Войти“?» с видом элемента,
+   * потом само нажатие. Один шаг был бы быстрее и ровно тем, чего не должно быть:
+   * помощник, который нажимает по своему выбору.
+   */
+  const press = useCallback(async (name: string) => {
+    setPressError(null);
+    setPressResult(null);
+    try {
+      const result = await uiPress(name, true);
+      setPressResult(result);
+      // Экран после нажатия читаем заново: человеку нужно увидеть новое состояние.
+      void readScreen();
+    } catch (reason: unknown) {
+      setPressError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setPressing(null);
+    }
+  }, [readScreen]);
 
   const search = useCallback((phrase: string) => {
     const query = phrase.trim();
@@ -989,6 +1016,48 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           <Text className={styles.title}>{voice.screenTitle}</Text>
           {screen ? <Text className={styles.note}>{screen.note}</Text> : null}
           {screen ? <pre className={styles.prompt}>{screen.text}</pre> : null}
+          {screen
+            ? screen.elements
+                .filter((element) => element.actions.includes("invoke") && element.name.length > 0)
+                .slice(0, 12)
+                .map((element) => (
+                  <div key={`${element.name}-${element.id}`} className={styles.bar}>
+                    {pressing === element.name ? (
+                      <>
+                        <Text className={styles.note}>
+                          {voice.pressConfirm(element.name, element.kind)}
+                        </Text>
+                        <Button size="small" onClick={() => void press(element.name)}>
+                          {voice.pressYes}
+                        </Button>
+                        <Button size="small" appearance="subtle" onClick={() => setPressing(null)}>
+                          {voice.pressNo}
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        size="small"
+                        appearance="subtle"
+                        onClick={() => {
+                          setPressing(element.name);
+                          setPressResult(null);
+                          setPressError(null);
+                        }}
+                      >
+                        {voice.pressShow(element.name)}
+                      </Button>
+                    )}
+                  </div>
+                ))
+            : null}
+          {pressResult ? (
+            <Text className={pressResult.changed ? styles.note : styles.error}>
+              {voice.pressResult(pressResult.target.name, pressResult.changed, pressResult.note)}
+            </Text>
+          ) : null}
+          {pressError ? (
+            <Text className={styles.error}>{voice.pressError(pressError)}</Text>
+          ) : null}
           {screenError ? (
             <Text className={styles.error}>{voice.screenError(screenError)}</Text>
           ) : null}

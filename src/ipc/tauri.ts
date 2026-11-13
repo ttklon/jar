@@ -6,6 +6,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type {
   MachineState,
+  UiPress,
 AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RegistrySnapshot, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
 
 export interface AppStatus {
@@ -168,6 +169,14 @@ export function forgetFact(key: string): Promise<void> {
 /** Что сейчас перед человеком: заголовок и программа. Только чтение. */
 export function foregroundWindow(): Promise<ForegroundWindow> {
   return invoke<ForegroundWindow>("foreground_window");
+}
+
+/**
+ * Нажать элемент активного окна по имени. Без `confirmed` не нажимает ничего:
+ * подтверждение приходит из интерфейса, где человек видит, что именно нажмётся.
+ */
+export function uiPress(name: string, confirmed: boolean): Promise<UiPress> {
+  return invoke<UiPress>("ui_press", { name, confirmed });
 }
 
 /** Сколько сейчас можно и почему именно столько. Ничего не запускает. */

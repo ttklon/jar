@@ -272,6 +272,132 @@ pub fn note() -> String {
     }
 }
 
+/// Что нашли по имени: ровно тот элемент, о котором говорил человек.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct Target {
+    pub name: String,
+    pub kind: String,
+    pub id: String,
+    pub actions: Vec<String>,
+}
+
+impl Target {
+    pub fn of(element: &Element) -> Self {
+        Target {
+            name: element.name.clone(),
+            kind: element.kind.clone(),
+            id: element.id.clone(),
+            actions: element.actions.clone(),
+        }
+    }
+}
+
+/// Отчёт о нажатии. Нажатие — действие, поэтому отчёт, а не «готово».
+#[derive(Debug, Clone, Serialize)]
+pub struct Press {
+    /// Что именно нажали: имя и вид, чтобы человек узнал свою кнопку.
+    pub target: Target,
+    /// Нажатие действительно отправлено системе.
+    pub sent: bool,
+    /// Экран после нажатия изменился — проверено сравнением, а не верой.
+    pub changed: bool,
+    /// Что сказать человеку: правду, включая «ничего не изменилось».
+    pub note: String,
+}
+
+/// Найти элемент по имени.
+///
+/// Правила нарочно строгие: сначала точное совпадение (без учёта регистра), потом
+/// единственное вхождение подстроки. Если под имя подходит несколько элементов, это
+/// отказ с перечислением, а не «нажмём первый попавшийся»: первый попавшийся — это как
+/// раз то, из-за чего помощники ломают людям окна.
+pub fn locate(elements: &[Element], wanted: &str) -> Result<usize, String> {
+    let wanted = wanted.trim().to_lowercase();
+    if wanted.is_empty() {
+        return Err("не названо, что нажимать".to_string());
+    }
+
+    let exact: Vec<usize> = elements
+        .iter()
+        .enumerate()
+        .filter(|(_, element)| element.name.to_lowercase() == wanted)
+        .map(|(index, _)| index)
+        .collect();
+
+    match exact.len() {
+        1 => return Ok(exact[0]),
+        0 => {}
+        _ => {
+            return Err(format!(
+                "элементов с именем «{wanted}» несколько — уточните, какой именно"
+            ))
+        }
+    }
+
+    let partial: Vec<usize> = elements
+        .iter()
+        .enumerate()
+        .filter(|(_, element)| {
+            let name = element.name.to_lowercase();
+            !name.is_empty() && name.contains(&wanted)
+        })
+        .map(|(index, _)| index)
+        .collect();
+
+    match partial.len() {
+        0 => Err(format!("в этом окне нет элемента «{wanted}»")),
+        1 => Ok(partial[0]),
+        _ => {
+            let names: Vec<String> = partial
+                .iter()
+                .take(3)
+                .map(|index| format!("«{}»", elements[*index].name))
+                .collect();
+            Err(format!(
+                "под «{wanted}» подходит несколько элементов: {} — назовите точнее",
+                names.join(", ")
+            ))
+        }
+    }
+}
+
+/// Можно ли нажимать этот элемент — по тому, что окно само про него сказало.
+pub fn may_press(element: &Element) -> Result<(), String> {
+    if element.actions.iter().any(|action| action == "invoke") {
+        return Ok(());
+    }
+    Err(format!(
+        "«{}» — это {}, у него нет нажатия: {}",
+        element.name,
+        element.kind,
+        if element.actions.is_empty() {
+            "окно не объявило для него никаких действий".to_string()
+        } else {
+            format!("доступно только: {}", element.actions.join(", "))
+        }
+    ))
+}
+
+/// Изменился ли экран: сравниваем то, что человек увидел бы, — имена и виды элементов.
+///
+/// Проверка слабая, и это сказано вслух: если окно перерисовало те же кнопки в другом
+/// порядке, изменений мы не заметим, а если поменялась только надпись — заметим.
+pub fn changed(before: &[Element], after: &[Element]) -> bool {
+    let shape = |elements: &[Element]| -> String {
+        elements
+            .iter()
+            .map(|element| format!("{}/{}", element.kind, element.name))
+            .collect::<Vec<String>>()
+            .join("|")
+    };
+    shape(before) != shape(after)
+}
+
+/// Нажать элемент активного окна по имени.
+pub fn press(max_nodes: usize, wanted: &str) -> Result<Press, String> {
+    imp::press(max_nodes, wanted)
+}
+
 /// Разобрать активное окно.
 pub fn dump(max_nodes: usize) -> Result<Snapshot, String> {
     let front = crate::window::foreground()?;
@@ -307,7 +433,8 @@ mod imp {
         COINIT_MULTITHREADED,
     };
     use windows::Win32::UI::Accessibility::{
-        CUIAutomation, IUIAutomation, IUIAutomationElement, UIA_ExpandCollapsePatternId,
+        CUIAutomation, IUIAutomation, IUIAutomationElement, IUIAutomationInvokePattern,
+        UIA_ExpandCollapsePatternId,
         UIA_InvokePatternId, UIA_SelectionItemPatternId, UIA_TextPatternId, UIA_TogglePatternId,
         UIA_ValuePatternId, UIA_PATTERN_ID,
     };
@@ -339,6 +466,9 @@ mod imp {
     struct Screen {
         walker: IUIAutomation,
         nodes: Vec<IUIAutomationElement>,
+        /// Номера узлов в том порядке, в каком их увидел обход. Нужен, чтобы по
+        /// найденному элементу добраться до его COM-указателя и нажать именно его.
+        order: std::cell::RefCell<Vec<usize>>,
     }
 
     /// Действия, которые окно само объявило доступными. Не обещание помощнику, а факт
@@ -397,6 +527,10 @@ mod imp {
         }
 
         fn describe(&self, node: usize) -> Element {
+            // Обход спрашивает описание по одному разу на узел и по порядку экрана:
+            // этим и пользуемся, чтобы запомнить соответствие.
+            self.order.borrow_mut().push(node);
+
             let Some(element) = self.nodes.get(node) else {
                 return Element {
                     depth: 0,
@@ -436,15 +570,25 @@ mod imp {
         }
     }
 
-    pub fn read(max_nodes: usize) -> Result<(Vec<Element>, bool), String> {
+    /// Пройти окно и вернуть элементы вместе с их COM-указателями в том же порядке.
+    #[allow(clippy::type_complexity)]
+    fn walk(
+        max_nodes: usize,
+    ) -> Result<
+        (
+            Vec<Element>,
+            bool,
+            std::cell::RefCell<Vec<usize>>,
+            Vec<IUIAutomationElement>,
+        ),
+        String,
+    > {
         let _apartment = Apartment::new()?;
 
         unsafe {
             let window = GetForegroundWindow();
             if window.0.is_null() {
-                return Err(
-                    "переднего окна нет: рабочий стол или заблокированный экран".to_string()
-                );
+                return Err("переднего окна нет: рабочий стол или заблокированный экран".to_string());
             }
 
             let automation: IUIAutomation =
@@ -458,10 +602,75 @@ mod imp {
             let mut screen = Screen {
                 walker: automation,
                 nodes: vec![root],
+                order: std::cell::RefCell::new(Vec::new()),
             };
 
-            Ok(collect(&mut screen, max_nodes, MAX_DEPTH))
+            let (elements, truncated) = collect(&mut screen, max_nodes, MAX_DEPTH);
+            let Screen { nodes, order, .. } = screen;
+            Ok((elements, truncated, order, nodes))
         }
+    }
+
+    /// Нажать элемент по имени. Нажатие отправляется только после того, как элемент
+    /// найден однозначно: сомнительное совпадение — отказ, а не «нажмём первое».
+    pub fn press(max_nodes: usize, wanted: &str) -> Result<super::Press, String> {
+        use super::{changed, locate, may_press, Target};
+
+        let (before, _truncated, order, nodes) = walk(max_nodes)?;
+        if before.is_empty() {
+            return Err("в окне не видно элементов: нажимать нечего".to_string());
+        }
+
+        let index = locate(&before, wanted)?;
+        may_press(&before[index])?;
+
+        let node_index = order.borrow().get(index).copied().ok_or_else(|| {
+            "элемент нашёлся, но потерялся при обходе — нажимать вслепую не буду".to_string()
+        })?;
+        let node = nodes
+            .get(node_index)
+            .ok_or_else(|| "элемент исчез между обходом и нажатием".to_string())?;
+
+        let pattern: IUIAutomationInvokePattern = unsafe {
+            node.GetCurrentPatternAs(UIA_InvokePatternId)
+        }
+        .map_err(|error| format!("окно не дало нажать «{}»: {error}", before[index].name))?;
+
+        // Нажатие отправлено — с этого момента врём только в одну сторону: сказать «не
+        // нажали», когда нажали, безопаснее, чем наоборот.
+        unsafe { pattern.Invoke() }
+            .map_err(|error| format!("нажатие не отправилось: {error}"))?;
+
+        // UIA нажимает асинхронно: программа ещё думает. Полсекунды — не «наверное, успело»,
+        // а пауза перед тем, как посмотреть на результат.
+        std::thread::sleep(std::time::Duration::from_millis(500));
+
+        let (after, _, _, _) = walk(max_nodes).unwrap_or_else(|_| {
+            (
+                Vec::new(),
+                false,
+                std::cell::RefCell::new(Vec::new()),
+                Vec::new(),
+            )
+        });
+        let did = changed(&before, &after);
+
+        Ok(super::Press {
+            target: Target::of(&before[index]),
+            sent: true,
+            changed: did,
+            note: if did {
+                "нажато, и экран изменился — это проверено сравнением элементов окна".to_string()
+            } else {
+                "нажато, но экран не изменился: возможно, программа думает медленнее, чем мы смотрим"
+                    .to_string()
+            },
+        })
+    }
+
+    pub fn read(max_nodes: usize) -> Result<(Vec<Element>, bool), String> {
+        let (elements, truncated, _order, _nodes) = walk(max_nodes)?;
+        Ok((elements, truncated))
     }
 }
 
@@ -471,6 +680,10 @@ mod imp {
 
     pub fn read(_max_nodes: usize) -> Result<(Vec<Element>, bool), String> {
         Err("чтение экрана есть только на Windows".to_string())
+    }
+
+    pub fn press(_max_nodes: usize, _wanted: &str) -> Result<super::Press, String> {
+        Err("нажимать элементы можно только на Windows".to_string())
     }
 }
 
@@ -682,6 +895,77 @@ mod tests {
         assert!(text.contains("«строка 0»"));
         assert!(!text.contains("«строка 2»"));
         assert!(text.contains("ещё 3 — не показано"));
+    }
+
+    fn element(name: &str, kind: &str, actions: &[&str]) -> Element {
+        Element {
+            depth: 1,
+            kind: kind.to_string(),
+            name: name.to_string(),
+            id: String::new(),
+            enabled: true,
+            actions: actions.iter().map(|action| action.to_string()).collect(),
+        }
+    }
+
+    #[test]
+    fn a_name_is_found_exactly_and_only_exactly() {
+        let screen = vec![
+            element("Войти", "кнопка", &["invoke"]),
+            element("Войти как гость", "кнопка", &["invoke"]),
+            element("Пароль", "поле ввода", &["value"]),
+        ];
+
+        // Точное совпадение важнее вхождения: «Войти» — это первая кнопка, а не вторая.
+        assert_eq!(locate(&screen, "войти").unwrap(), 0);
+        assert_eq!(locate(&screen, "  Войти как гость ").unwrap(), 1);
+
+        // Единственное вхождение — тоже годится.
+        assert_eq!(locate(&screen, "гость").unwrap(), 1);
+    }
+
+    #[test]
+    fn a_name_that_fits_several_elements_is_a_refusal_not_a_lottery() {
+        let screen = vec![
+            element("Удалить", "кнопка", &["invoke"]),
+            element("Удалить навсегда", "кнопка", &["invoke"]),
+            element("Сохранить", "кнопка", &["invoke"]),
+        ];
+
+        let refusal = locate(&screen, "удал").expect_err("должен быть отказ");
+        assert!(refusal.contains("несколько"));
+        assert!(refusal.contains("Удалить"));
+
+        assert!(locate(&screen, "отправить").is_err());
+        assert!(locate(&screen, "   ").is_err());
+    }
+
+    #[test]
+    fn text_and_switches_are_not_buttons() {
+        assert!(may_press(&element("Войти", "кнопка", &["invoke"])).is_ok());
+
+        let text = may_press(&element("Привет", "текст", &[])).expect_err("текст не нажимается");
+        assert!(text.contains("нет нажатия"));
+
+        let field = may_press(&element("Пароль", "поле ввода", &["value"])).expect_err("поле не кнопка");
+        assert!(field.contains("value"), "должно быть сказано, что доступно");
+    }
+
+    #[test]
+    fn the_screen_is_compared_by_what_a_person_would_see() {
+        let before = vec![element("Войти", "кнопка", &["invoke"])];
+
+        // Ничего не поменялось — значит, «не поменялось», а не «наверное, сработало».
+        assert!(!changed(&before, &before.clone()));
+
+        // Появился новый элемент — экран изменился.
+        let mut after = before.clone();
+        after.push(element("Добро пожаловать", "текст", &[]));
+        assert!(changed(&before, &after));
+
+        // Поменялось имя — тоже изменение.
+        let renamed = vec![element("Войти как гость", "кнопка", &["invoke"])];
+        assert!(changed(&before, &renamed));
     }
 
     #[test]

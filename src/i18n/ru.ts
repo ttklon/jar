@@ -513,6 +513,14 @@ export const voice = {
   thinkShow: "Спросить модель",
   screenShow: "Что на экране",
   machineMeasure: "Что с машиной",
+  pressShow: (name: string) => `Нажать «${name}»`,
+  pressConfirm: (name: string, kind: string) =>
+    `нажать «${name}» (${kind})? Нажатие настоящее — как будто вы нажали сами`,
+  pressYes: "Да, нажать",
+  pressNo: "Нет",
+  pressResult: (name: string, changed: boolean, note: string) =>
+    changed ? `«${name}»: ${note}` : `«${name}»: ${note}`,
+  pressError: (reason: string) => `нажатие не отправилось: ${reason}`,
   queueAdd: "В очередь",
   queueRun: "Работать без меня",
   queueStop: "Стоп",

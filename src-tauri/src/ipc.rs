@@ -1271,6 +1271,59 @@ pub fn foreground_window() -> Result<window::Foreground, String> {
     window::foreground().map_err(|reason| format!("{reason}. {}", window::note()))
 }
 
+/// Нажать элемент активного окна по имени.
+///
+/// Почему отдельная команда, а не «рука» из реестра: нажатие по имени — это вид действия
+/// над чужим окном, и у него другая проверка. Здесь нет токенов и подтверждений политики
+/// по той простой причине, что подтверждение тут одно и прямое: `confirmed` приходит из
+/// интерфейса, где человек видит имя и вид элемента. Без него не нажимается ничего.
+#[tauri::command]
+pub async fn ui_press(
+    state: State<'_, AppState>,
+    name: String,
+    confirmed: bool,
+) -> Result<uia::Press, String> {
+    let target = name.trim().to_string();
+    if target.is_empty() {
+        return Err("не названо, что нажимать: имя элемента пустое".to_string());
+    }
+    if !confirmed {
+        return Err("нажатие не отправлено: без вашего слова ничего не нажимаю".to_string());
+    }
+
+    let inner = Arc::clone(&state.inner);
+    let started = now_ms();
+    let wanted = target.clone();
+
+    let outcome = tauri::async_runtime::spawn_blocking(move || {
+        uia::press(uia::MAX_NODES / 3, &wanted)
+    })
+    .await
+    .map_err(|error| format!("нажатие прервано: {error}"))?;
+
+    let duration = now_ms().saturating_sub(started);
+    let (outcome, note) = match &outcome {
+        Ok(press) => ("ok", press.note.clone()),
+        Err(reason) => ("failed", reason.clone()),
+    };
+
+    audit(
+        &inner,
+        Entry {
+            kind: AuditKind::Finished,
+            subject: &target,
+            risk: "ui",
+            decision: "confirmed",
+            fingerprint: "ui_press",
+            // В журнал идёт и «нажато, но ничего не изменилось»: это не успех и не сбой.
+            outcome: &format!("{outcome}: {note}"),
+            duration_ms: duration,
+        },
+    );
+
+    outcome
+}
+
 /// Сколько сейчас можно делать и почему именно столько.
 ///
 /// Ответ — совет самой себе, а не приказ человеку: загрузку и присутствие видно по
