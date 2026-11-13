@@ -210,12 +210,45 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         setDraft(proposal);
         setLearning(null);
 
+        // Слова не совпали — не тупик: спрашиваем модель. Она нужна ровно здесь, где
+        // поиск по буквам бессилен («сделай потише» → «убавить громкость»). Молча
+        // превращать такую фразу в «не умею» было бы обиднее всего.
+        let answered: Thought | null = null;
+        if (!proposal) {
+          answered = await Promise.resolve(
+            think(
+              query,
+              frontRef.current
+                ? { title: frontRef.current.title, process: frontRef.current.process }
+                : null,
+            ),
+          ).catch(() => null);
+          setThought(answered);
+
+          // План от модели — обычный план: политика, вопросы и подтверждение те же.
+          if (answered?.plan) {
+            setDraft(answered.plan);
+            setApproved(false);
+            setReport(null);
+            const phrase = `${voice.thinkPlanReady(answered.plan.plan?.steps.length ?? 0)}. ${voice.thinkNotExecuted}`;
+            setSpoken(speak(phrase) ? voice.said(phrase) : voice.silent);
+            return;
+          }
+        }
+
         // Не умеем — не тупик: записываем задачу на обучение и говорим, что для неё
         // нужно. Учиться приложение должно уметь само, но молча — нельзя.
-        const promise = proposal ? null : await requestLearning(query).catch(() => null);
+        const promise =
+          proposal || answered?.plan
+            ? null
+            : answered?.learning ?? (await requestLearning(query).catch(() => null));
         if (promise) {
           setLearning(promise);
-          speak(voice.learnSpoken(promise.example));
+          speak(
+            answered?.learning
+              ? voice.thinkLearnRecorded(query, promise.example)
+              : voice.learnSpoken(promise.example),
+          );
           return;
         }
 

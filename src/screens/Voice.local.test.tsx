@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import {
   draftHand,
   draftPlan,
+  requestLearning,
   facts,
   modelPrompt,
   planFor,
@@ -26,7 +27,7 @@ vi.mock("../ipc", () => ({
   draftPlan: vi.fn().mockResolvedValue(null),
   requestLearning: vi.fn().mockResolvedValue(null),
   facts: vi.fn().mockResolvedValue([]),
-  think: vi.fn(),
+  think: vi.fn().mockResolvedValue(null),
   draftHand: vi.fn(),
   trialHand: vi.fn(),
   speak: vi.fn(),
@@ -64,6 +65,12 @@ vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
 afterEach(() => {
   cleanup();
+  // Моки сбрасываем целиком: «очередные» ответы не должны перетекать в следующий тест —
+  // иначе проверяется не поведение экрана, а порядок тестов.
+  vi.mocked(planFor).mockReset().mockResolvedValue([]);
+  vi.mocked(draftPlan).mockReset().mockResolvedValue(null);
+  vi.mocked(think).mockReset().mockResolvedValue(null as never);
+  vi.mocked(requestLearning).mockReset().mockResolvedValue(null);
   vi.mocked(planFor).mockClear();
   vi.mocked(transcribeLocal).mockReset();
   vi.mocked(startRecording).mockReset();
@@ -162,6 +169,72 @@ describe("локальное распознавание на экране", () =
 
     // Незабытый вопрос остался пустым: память не выдумывает маску.
     expect((screen.getByLabelText("Маска") as HTMLInputElement).value).toBe("");
+  });
+
+  it("поиск не нашёл — спрашивает модель сама, без кнопки", async () => {
+    vi.mocked(planFor).mockResolvedValueOnce([]);
+    vi.mocked(draftPlan).mockResolvedValueOnce(null);
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Call: { registry: "звук|убавить|громкость", params: {}, why: "просил тише" },
+      },
+      plan: {
+        plan: {
+          goal: "потише",
+          source: "model",
+          steps: [{ registry: "звук|убавить|громкость", params: {}, why: "просил тише" }],
+        },
+        problems: [],
+        gates: [],
+        questions: [],
+      },
+      learning: null,
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сделай потише" } });
+    fireEvent.click(screen.getByText("Найти"));
+
+    // Модель спросили сама, с окном перед человеком: без него «это» не имеет адресата.
+    await waitFor(() => expect(vi.mocked(think)).toHaveBeenCalled());
+    expect(vi.mocked(think).mock.calls[0]?.[0]).toBe("сделай потише");
+    expect(vi.mocked(think).mock.calls[0]?.[1]).toEqual({
+      title: "Видео — браузер",
+      process: "chrome.exe",
+    });
+
+    await waitFor(() =>
+      expect(screen.getAllByText(/звук\|убавить\|громкость/).length).toBeGreaterThan(0),
+    );
+  });
+
+  it("модель не ответила — фраза всё равно не пропадает: записываем в обучение", async () => {
+    vi.mocked(planFor).mockResolvedValueOnce([]);
+    vi.mocked(draftPlan).mockResolvedValueOnce(null);
+    vi.mocked(think).mockRejectedValueOnce(new Error("движок не запущен"));
+    vi.mocked(requestLearning).mockResolvedValueOnce({
+      registry: "видео|включить|субтитры",
+      example: "включить субтитры в видео",
+      query: "включи субтитры",
+      implementation: ["UI Automation"],
+      risk: "read",
+      notes: "",
+      asked_ms: 1,
+      times: 1,
+      steps: [],
+    });
+
+    render(<Voice onOpen={() => {}} />);
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "включи субтитры" } });
+    fireEvent.click(screen.getByText("Найти"));
+
+    await waitFor(() => expect(screen.getByText("Чему нужно научиться")).toBeTruthy());
   });
 
   it("показывает по просьбе, что именно уйдёт модели", async () => {
