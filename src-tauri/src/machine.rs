@@ -223,9 +223,12 @@ mod imp {
     use super::Sample;
     use std::mem::size_of;
     use windows_sys::Win32::Foundation::FILETIME;
+    // В этих привязках `GetSystemTimes` живёт рядом с потоками, а не с общей информацией
+    // о системе: так разложен заголовок, и спорить с ним бесполезно.
     use windows_sys::Win32::System::SystemInformation::{
-        GlobalMemoryStatusEx, GetSystemTimes, GetTickCount, MEMORYSTATUSEX,
+        GlobalMemoryStatusEx, GetTickCount, MEMORYSTATUSEX,
     };
+    use windows_sys::Win32::System::Threading::GetSystemTimes;
     use windows_sys::Win32::UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO};
 
     fn ticks(value: &FILETIME) -> u64 {

@@ -1277,9 +1277,11 @@ pub fn foreground_window() -> Result<window::Foreground, String> {
 /// измерению, но решает он. Поэтому рядом с числом всегда стоит причина.
 #[tauri::command]
 pub async fn machine_state() -> Result<machine::State, String> {
-    tauri::async_runtime::spawn_blocking(machine::state)
+    // Замер занимает двести миллисекунд и трогает систему: на потоке интерфейса ему не место.
+    let state = tauri::async_runtime::spawn_blocking(machine::state)
         .await
-        .map_err(|error| format!("машина не измерилась: {error}"))?
+        .map_err(|error| format!("машина не измерилась: {error}"))?;
+    Ok(state)
 }
 
 /// Что видно в активном окне — по элементам, а не по пикселям.
