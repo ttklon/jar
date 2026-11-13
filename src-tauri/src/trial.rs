@@ -307,7 +307,8 @@ mod tests {
     fn a_hand_never_runs_without_the_cell() {
         // В этой сессии клетки нет (или профиль не создаётся) — значит запуска не будет.
         // Так проверка остаётся честной и на обычной машине, и в CI.
-        let dir = std::env::temp_dir().join(format!("zshelper-trial-nocell-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-trial-nocell-{}", std::process::id()));
         let _ = std::fs::create_dir_all(&dir);
 
         let error = run_required("k", "Get-PSDrive", &dir, 1000)
