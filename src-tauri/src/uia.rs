@@ -434,9 +434,8 @@ mod imp {
     };
     use windows::Win32::UI::Accessibility::{
         CUIAutomation, IUIAutomation, IUIAutomationElement, IUIAutomationInvokePattern,
-        UIA_ExpandCollapsePatternId,
-        UIA_InvokePatternId, UIA_SelectionItemPatternId, UIA_TextPatternId, UIA_TogglePatternId,
-        UIA_ValuePatternId, UIA_PATTERN_ID,
+        UIA_ExpandCollapsePatternId, UIA_InvokePatternId, UIA_SelectionItemPatternId,
+        UIA_TextPatternId, UIA_TogglePatternId, UIA_ValuePatternId, UIA_PATTERN_ID,
     };
     use windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow;
 
@@ -588,7 +587,9 @@ mod imp {
         unsafe {
             let window = GetForegroundWindow();
             if window.0.is_null() {
-                return Err("переднего окна нет: рабочий стол или заблокированный экран".to_string());
+                return Err(
+                    "переднего окна нет: рабочий стол или заблокированный экран".to_string()
+                );
             }
 
             let automation: IUIAutomation =
@@ -638,8 +639,7 @@ mod imp {
 
         // Нажатие отправлено — с этого момента врём только в одну сторону: сказать «не
         // нажали», когда нажали, безопаснее, чем наоборот.
-        unsafe { pattern.Invoke() }
-            .map_err(|error| format!("нажатие не отправилось: {error}"))?;
+        unsafe { pattern.Invoke() }.map_err(|error| format!("нажатие не отправилось: {error}"))?;
 
         // UIA нажимает асинхронно: программа ещё думает. Полсекунды — не «наверное, успело»,
         // а пауза перед тем, как посмотреть на результат.
@@ -947,7 +947,8 @@ mod tests {
         let text = may_press(&element("Привет", "текст", &[])).expect_err("текст не нажимается");
         assert!(text.contains("нет нажатия"));
 
-        let field = may_press(&element("Пароль", "поле ввода", &["value"])).expect_err("поле не кнопка");
+        let field =
+            may_press(&element("Пароль", "поле ввода", &["value"])).expect_err("поле не кнопка");
         assert!(field.contains("value"), "должно быть сказано, что доступно");
     }
 

@@ -1295,11 +1295,10 @@ pub async fn ui_press(
     let started = now_ms();
     let wanted = target.clone();
 
-    let outcome = tauri::async_runtime::spawn_blocking(move || {
-        uia::press(uia::MAX_NODES / 3, &wanted)
-    })
-    .await
-    .map_err(|error| format!("нажатие прервано: {error}"))?;
+    let outcome =
+        tauri::async_runtime::spawn_blocking(move || uia::press(uia::MAX_NODES / 3, &wanted))
+            .await
+            .map_err(|error| format!("нажатие прервано: {error}"))?;
 
     // Журнал считает время в u128, поле длительности — в u64: миллисекунд хватает обоим.
     let duration = now_ms().saturating_sub(started) as u64;
