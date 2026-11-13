@@ -1823,7 +1823,9 @@ pub async fn run_plan(
         )
     });
     let before = if touches_screen {
-        uia::dump(uia::MAX_NODES / 3).ok().map(|snapshot| snapshot.elements)
+        uia::dump(uia::MAX_NODES / 3)
+            .ok()
+            .map(|snapshot| snapshot.elements)
     } else {
         None
     };
