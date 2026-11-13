@@ -87,18 +87,16 @@ impl Snapshot {
         }
         out.push('\n');
 
-        let mut shown = 0usize;
-        for element in &self.elements {
-            if shown >= max_lines {
-                out.push_str(&format!(
-                    "… ещё {} — не показано\n",
-                    self.elements.len() - shown
-                ));
-                break;
-            }
+        for element in self.elements.iter().take(max_lines) {
             out.push_str(&element.line());
             out.push('\n');
-            shown += 1;
+        }
+        // Скрытое считается, а не забывается: человек должен знать, что видел не всё.
+        if self.elements.len() > max_lines {
+            out.push_str(&format!(
+                "… ещё {} — не показано\n",
+                self.elements.len() - max_lines
+            ));
         }
 
         if self.elements.is_empty() {
