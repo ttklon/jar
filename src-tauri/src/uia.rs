@@ -382,10 +382,10 @@ mod imp {
                 Err(_) => return Vec::new(),
             };
 
-            // Соседи кончаются «пустым» результатом, а не ошибкой: у UIA конец ветки —
-            // это `Ok(None)`, и путать его с отказом нельзя.
+            // Конец ветки у UIA — это отказ `GetFirstChildElement`, а не пустой элемент:
+            // поэтому обход останавливается по ошибке и не путает её с «детей нет».
             let mut next = unsafe { walker.GetFirstChildElement(&parent) };
-            while let Ok(Some(child)) = next {
+            while let Ok(child) = next {
                 self.nodes.push(child.clone());
                 result.push(self.nodes.len() - 1);
                 next = unsafe { walker.GetNextSiblingElement(&child) };
@@ -443,7 +443,7 @@ mod imp {
 
         unsafe {
             let window = GetForegroundWindow();
-            if window.0 == 0 {
+            if window.0.is_null() {
                 return Err("переднего окна нет: рабочий стол или заблокированный экран".to_string());
             }
 
@@ -453,8 +453,7 @@ mod imp {
 
             let root: IUIAutomationElement = automation
                 .ElementFromHandle(window)
-                .map_err(|error| format!("окно не отдало элементы: {error}"))?
-                .ok_or_else(|| "окно не отдало элементы: пустой ответ UIA".to_string())?;
+                .map_err(|error| format!("окно не отдало элементы: {error}"))?;
 
             let mut screen = Screen {
                 walker: automation,
