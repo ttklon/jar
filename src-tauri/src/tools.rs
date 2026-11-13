@@ -21,7 +21,7 @@ use std::time::{Duration, Instant};
 use serde::{Deserialize, Serialize};
 
 use crate::executor::{self, ExecOutput, ExecRequest};
-use crate::step::{tail, StepResult};
+use crate::step::{tail, Evidence, StepResult};
 use crate::verifier::{self, Expectation};
 
 const TOOLS_JSON: &str = include_str!("../../data/tools.json");
