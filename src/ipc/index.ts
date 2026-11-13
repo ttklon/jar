@@ -484,6 +484,26 @@ export async function removeCustomHand(key: string): Promise<void> {
   return fromData();
 }
 
+/** Ручной запуск своей руки: только в клетке, только с отчётом. */
+export async function runCustomHand(key: string): Promise<TrialReport> {
+  if (isTauri()) {
+    const { runCustomHand: fromCore } = await import("./tauri");
+    return fromCore(key);
+  }
+  const { runCustomHand: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Последний запуск своей руки. `null` — не запускали. */
+export async function customRunReport(key: string): Promise<TrialReport | null> {
+  if (isTauri()) {
+    const { customRunReport: fromCore } = await import("./tauri");
+    return fromCore(key);
+  }
+  const { customRunReport: fromData } = await import("./dev");
+  return fromData();
+}
+
 /** Проба черновика в клетке. Отчёт, а не умение. */
 export async function trialHand(key: string): Promise<TrialReport> {
   if (isTauri()) {

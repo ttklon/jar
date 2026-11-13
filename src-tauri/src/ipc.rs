@@ -482,6 +482,50 @@ pub fn remove_custom_hand(state: State<'_, AppState>, key: String) -> Result<(),
     custom::forget(&state.inner.memory, key.trim())
 }
 
+/// Ручной запуск своей руки. Только в клетке, только с отчётом.
+///
+/// Это единственный путь, которым привнесённая рука что-то делает, и он устроен так, что
+/// обойти клетку нельзя: не открылась — отказ, а не «запуск без забора». План сюда не
+/// попадает: никакой автоматики, только слово человека.
+#[tauri::command]
+pub async fn run_custom_hand(
+    state: State<'_, AppState>,
+    key: String,
+) -> Result<trial::Report, String> {
+    let inner = state.inner.clone();
+    let hand = custom::get(&inner.memory, &key)
+        .ok_or_else(|| format!("такой привнесённой руки нет: {key}"))?;
+
+    // Фильтр проверяет ещё раз: код руки мог быть изменён в памяти руками.
+    let found = hand::scan(&hand.code);
+    if !found.is_empty() {
+        return Err(format!(
+            "в скрипте руки есть то, чего нельзя: {}",
+            found.join("; ")
+        ));
+    }
+
+    let dir = inner.base_dir.join("trial");
+    std::fs::create_dir_all(&dir).map_err(|error| format!("папка запуска: {error}"))?;
+
+    let started = now_ms() as u64;
+    let code = hand.code.clone();
+    let report = tauri::async_runtime::spawn_blocking(move || {
+        trial::run_required(&key, &code, &dir, started)
+    })
+    .await
+    .map_err(|error| format!("запуск не выполнился: {error}"))??;
+
+    trial::save_as(&inner.memory, trial::run_key(&key), &report)?;
+    Ok(report)
+}
+
+/// Последний запуск своей руки. `None` — не запускали.
+#[tauri::command]
+pub fn custom_run_report(state: State<'_, AppState>, key: String) -> Option<trial::Report> {
+    trial::get_as(&state.inner.memory, trial::run_key(&key), &key)
+}
+
 /// Последний отчёт о пробе для этой строки. Есть — значит, уже пробовали.
 #[tauri::command]
 pub fn trial_report(state: State<'_, AppState>, key: String) -> Option<trial::Report> {

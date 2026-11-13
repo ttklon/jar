@@ -552,6 +552,14 @@ export async function removeCustomHand(): Promise<void> {
   // Нечего убирать: руки тут не создаются.
 }
 
+export async function runCustomHand(): Promise<never> {
+  throw new Error("своя рука запускается только в клетке Windows: в браузере запуска нет");
+}
+
+export async function customRunReport(): Promise<TrialReport | null> {
+  return null;
+}
+
 export async function trialHand(): Promise<never> {
   // Клетка — это Windows и настоящее рабочее место. В браузере пробы нет, и выдумывать
   // «код 0» нельзя: человек поверил бы, что черновик проверен.

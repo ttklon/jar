@@ -131,6 +131,16 @@ export function removeCustomHand(key: string): Promise<void> {
   return invoke<void>("remove_custom_hand", { key });
 }
 
+/** Ручной запуск своей руки: только в клетке, только с отчётом. */
+export function runCustomHand(key: string): Promise<TrialReport> {
+  return invoke<TrialReport>("run_custom_hand", { key });
+}
+
+/** Последний запуск своей руки. `null` — не запускали. */
+export function customRunReport(key: string): Promise<TrialReport | null> {
+  return invoke<TrialReport | null>("custom_run_report", { key });
+}
+
 /** Проба черновика в клетке. Отчёт, а не умение. */
 export function trialHand(key: string): Promise<TrialReport> {
   return invoke<TrialReport>("trial_hand", { key });

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
-import { customHands, isTauri, listTools, removeCustomHand } from "../ipc";
+import { customHands, isTauri, listTools, removeCustomHand, runCustomHand } from "../ipc";
 import type { CustomHand, ToolView } from "../ipc";
 import { hands, voice } from "../i18n/ru";
 import { ToolCard } from "../components/ToolCard";
@@ -28,6 +28,10 @@ export function Hands() {
   const [error, setError] = useState<string | null>(null);
   /** Привнесённые руки: отдельный список, потому что они не часть сборки. */
   const [own, setOwn] = useState<CustomHand[]>([]);
+  /** Отчёт последнего запуска своей руки: по строке на каждую руку. */
+  const [reports, setReports] = useState<Record<string, string>>({});
+  const [refusals, setRefusals] = useState<Record<string, string>>({});
+  const [running, setRunning] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -104,6 +108,40 @@ export function Hands() {
                   {hand.title} · {hands.riskLabel(hand.risk)}
                 </Text>
                 <pre className={styles.note}>{hand.code}</pre>
+                <button
+                  type="button"
+                  disabled={running === hand.key}
+                  onClick={() => {
+                    setRunning(hand.key);
+                    setRefusals((current) => {
+                      const next = { ...current };
+                      delete next[hand.key];
+                      return next;
+                    });
+                    runCustomHand(hand.key)
+                      .then((report) =>
+                        setReports((current) => ({
+                          ...current,
+                          [hand.key]: voice.customRunReport(report.note, report.cell),
+                        })),
+                      )
+                      .catch((reason: unknown) =>
+                        setRefusals((current) => ({
+                          ...current,
+                          [hand.key]: voice.customRunRefused(
+                            reason instanceof Error ? reason.message : String(reason),
+                          ),
+                        })),
+                      )
+                      .finally(() => setRunning(null));
+                  }}
+                >
+                  {running === hand.key ? voice.customRunning : voice.customRun}
+                </button>
+                {reports[hand.key] ? <Text className={styles.note}>{reports[hand.key]}</Text> : null}
+                {refusals[hand.key] ? (
+                  <Text className={styles.error}>{refusals[hand.key]}</Text>
+                ) : null}
                 <button
                   type="button"
                   onClick={() =>

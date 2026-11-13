@@ -533,6 +533,10 @@ export const voice = {
     "Добавлены вами на этой машине, отдельно от встроенных. Пока не исполняются: у привнесённых рук нет пути запуска",
   customRemove: (title: string) => `убрать «${title}»`,
   customNone: "привнесённых рук нет",
+  customRun: "Запустить в клетке",
+  customRunning: "запускаю в клетке…",
+  customRunRefused: (reason: string) => `запуск не состоялся: ${reason}`,
+  customRunReport: (note: string, cell: string) => `${note} · ${cell}`,
   handFilter: (reason: string) => `черновик не принят: ${reason}`,
   thinkPlanReady: (steps: number) =>
     `план от модели готов: шагов — ${steps}. Дальше — обычная проверка и ваше слово`,

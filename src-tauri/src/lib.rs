@@ -164,6 +164,8 @@ pub fn run() {
             ipc::adopt_hand,
             ipc::custom_hands,
             ipc::remove_custom_hand,
+            ipc::run_custom_hand,
+            ipc::custom_run_report,
             ipc::forget_hand,
             ipc::facts,
             ipc::remember_fact,

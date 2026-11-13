@@ -167,6 +167,28 @@ pub fn run(key: &str, code: &str, dir: &Path, now_ms: u64) -> Report {
     }
 }
 
+/// Запуск **своей руки**: только в клетке и без исключений.
+///
+/// Здесь, в отличие от пробы, «клетка не открылась» — это отказ, а не отчёт: пробу можно
+/// пропустить (она ничего не решает), а запуск — нет. Своя рука без забора не запускается
+/// и не притворяется запущенной.
+pub fn run_required(key: &str, code: &str, dir: &Path, now_ms: u64) -> Result<Report, String> {
+    let sandbox = container::open(dir).map_err(|reason| no_cell(&reason))?;
+
+    let request = ExecRequest::new("powershell.exe", executor::powershell(code))
+        .with_timeout(TIMEOUT)
+        .with_limits(Limits::trial());
+
+    let cancel = AtomicBool::new(false);
+    sandbox
+        .run(&request, Some(Limits::trial()), &cancel)
+        .map(|output| {
+            let cell = container::note();
+            report(key, &output, &cell, now_ms)
+        })
+        .map_err(|reason| no_cell(&reason))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -263,6 +285,37 @@ mod tests {
         assert_eq!(report.stdout, "строка");
         assert_eq!(report.cell, "клетка: AppContainer, без сети");
         assert_eq!(report.duration_ms, 12);
+    }
+
+    #[test]
+    fn a_hand_never_runs_without_the_cell() {
+        // В этой сессии клетки нет (или профиль не создаётся) — значит запуска не будет.
+        // Так проверка остаётся честной и на обычной машине, и в CI.
+        let dir = std::env::temp_dir().join(format!("zshelper-trial-nocell-{}", std::process::id()));
+        let _ = std::fs::create_dir_all(&dir);
+
+        let error = run_required("k", "Get-PSDrive", &dir, 1000)
+            .expect_err("без клетки своей руке запускаться нельзя");
+        assert!(error.contains("клетка не открылась"), "{error}");
+        assert!(error.contains("не выполнялась"), "{error}");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_probe_and_a_run_do_not_overwrite_each_other() {
+        let (memory, dir) = memory("keys");
+        let probe = report("k", &output(Some(0), false), "клетка", 1000);
+        let run = report("k", &output(Some(3), false), "клетка", 2000);
+
+        save(&memory, &probe).expect("проба сохранена");
+        save_as(&memory, run_key("k"), &run).expect("запуск сохранён");
+
+        // Приём руки опирается на пробу: запуск не должен её затирать.
+        assert_eq!(get(&memory, "k"), Some(probe));
+        assert_eq!(get_as(&memory, run_key("k"), "k"), Some(run));
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
