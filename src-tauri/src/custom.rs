@@ -268,7 +268,13 @@ mod tests {
     fn a_step_without_a_hand_leaves_the_built_in_path_alone() {
         let (memory, dir) = memory("nostep");
 
-        assert!(step(&memory, "custom-test|проверить|нечто", &BTreeMap::new(), &dir).is_none());
+        assert!(step(
+            &memory,
+            "custom-test|проверить|нечто",
+            &BTreeMap::new(),
+            &dir
+        )
+        .is_none());
 
         let _ = std::fs::remove_dir_all(&dir);
     }

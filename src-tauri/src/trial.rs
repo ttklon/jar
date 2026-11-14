@@ -190,7 +190,14 @@ pub fn run(key: &str, code: &str, dir: &Path, now_ms: u64) -> Report {
 /// пропустить (она ничего не решает), а запуск — нет. Своя рука без забора не запускается
 /// и не притворяется запущенной.
 pub fn run_required(key: &str, code: &str, dir: &Path, now_ms: u64) -> Result<Report, String> {
-    run_with(key, code, dir, &BTreeMap::new(), &AtomicBool::new(false), now_ms)
+    run_with(
+        key,
+        code,
+        dir,
+        &BTreeMap::new(),
+        &AtomicBool::new(false),
+        now_ms,
+    )
 }
 
 /// Запуск своей руки с параметрами шага: они уходят переменными `ZS_*`, ровно как у
