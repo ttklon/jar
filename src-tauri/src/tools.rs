@@ -306,12 +306,12 @@ fn read_text(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
 
     let content = match std::fs::read_to_string(target) {
         Ok(content) => content,
-        Err(_) => {
-            return StepResult::failed(
-                registry,
-                format!("файл не читается как текст: {path} — возможно, он двоичный или в другой кодировке"),
-            )
-        }
+        Err(_) => return StepResult::failed(
+            registry,
+            format!(
+                "файл не читается как текст: {path} — возможно, он двоичный или в другой кодировке"
+            ),
+        ),
     };
 
     let duration_ms = started.elapsed().as_millis() as u64;
@@ -994,7 +994,6 @@ mod tests {
         let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
     }
 
-
     #[test]
     fn a_text_file_is_read_and_says_how_many_bytes_came() {
         let path = temp_target("read");
@@ -1012,7 +1011,11 @@ mod tests {
 
         assert!(read.ok, "{}", read.reason);
         assert_eq!(read.evidence.kind(), "file_read");
-        assert!(read.stdout_tail.contains("первая строка"), "{}", read.stdout_tail);
+        assert!(
+            read.stdout_tail.contains("первая строка"),
+            "{}",
+            read.stdout_tail
+        );
         assert!(read.stdout_tail.contains("вторая строка"));
 
         let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
