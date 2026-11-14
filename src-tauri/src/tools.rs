@@ -125,6 +125,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         }
         "files|записать|текст в файл" => write_text(registry, params),
         "files|прочитать|текст файла" => read_text(registry, params),
+        "files|заменить|текст в файле" => replace_text(registry, params),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -264,6 +265,126 @@ fn create_folder(registry: &str, params: &BTreeMap<String, String>) -> StepResul
         }
         Err(error) => StepResult::failed(registry, format!("папка не создана: {error}")),
     }
+}
+
+/// Заменить текст в файле и доказать, что получилось ровно то, что должно было.
+///
+/// Правила здесь такие же строгие, как у нажатия кнопки:
+///
+///  * **старое не нашлось — ничего не делаем.** «Заменил ноль раз» — это не успех, а
+///    пустая работа, о которой надо сказать;
+///  * **нашлось несколько раз — спрашиваем слово «все».** Менять первое из пяти — это
+///    угадывание, а угадывание на диске стоит дорого;
+///  * **искомое равно замене — это не замена.** Молча «сделать» тут нечего;
+///  * **доказательство — сравнение с ожидаемым текстом.** После записи файл читается
+///    обратно и сравнивается с тем, что должно было получиться, а не просто «запись прошла».
+fn replace_text(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+    let find = param(params, "find");
+    let replace = param(params, "replace");
+    let all = matches!(param(params, "all").trim(), "true" | "да" | "yes");
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Путь»");
+    }
+    // Пробелы внутри искомого — законная часть текста, поэтому проверяем только пустоту.
+    if find.trim().is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Что найти»");
+    }
+    if replace.trim().is_empty() {
+        return StepResult::failed(registry, "не задан параметр «На что заменить»");
+    }
+    if find == replace {
+        return StepResult::failed(
+            registry,
+            "искомое и замена совпадают — менять нечего, и делать вид, что заменили, я не буду",
+        );
+    }
+
+    let target = std::path::Path::new(&path);
+    let metadata = match std::fs::metadata(target) {
+        Ok(metadata) => metadata,
+        Err(_) => return StepResult::failed(registry, format!("файла нет: {path}")),
+    };
+    if !metadata.is_file() {
+        return StepResult::failed(registry, format!("это не файл, а папка: {path}"));
+    }
+    if metadata.len() > MAX_READ_BYTES {
+        return StepResult::failed(
+            registry,
+            format!(
+                "файл {} КБ, а правлю не больше {} КБ за шаг: такой файл правят программой",
+                metadata.len() / 1024,
+                MAX_READ_BYTES / 1024
+            ),
+        );
+    }
+
+    let unreadable = format!(
+        "файл не читается как текст: {path} — возможно, он двоичный или в другой кодировке"
+    );
+    let content = match std::fs::read_to_string(target) {
+        Ok(content) => content,
+        Err(_) => return StepResult::failed(registry, unreadable),
+    };
+
+    let count = content.matches(find).count();
+    if count == 0 {
+        return StepResult::failed(
+            registry,
+            format!("в файле нет «{}» — заменять нечего", head(find, 60)),
+        );
+    }
+    if count > 1 && !all {
+        return StepResult::failed(
+            registry,
+            format!(
+                "«{}» встречается {count} раз — непонятно, какое менять: скажите «заменить все»",
+                head(find, 60)
+            ),
+        );
+    }
+
+    let expected = if all {
+        content.replace(find, replace)
+    } else {
+        content.replacen(find, replace, 1)
+    };
+
+    if let Err(error) = std::fs::write(target, expected.as_bytes()) {
+        return StepResult::failed(registry, format!("файл не записался: {error}"));
+    }
+
+    let duration_ms = started.elapsed().as_millis() as u64;
+    let replaced = if all { count } else { 1 };
+
+    let back = match std::fs::read_to_string(target) {
+        Ok(back) => back,
+        Err(error) => {
+            return StepResult::failed(
+                registry,
+                format!("файл записан, но не читается обратно: {error}"),
+            )
+        }
+    };
+
+    // Доказательство — совпадение с ожидаемым текстом, а не «запись прошла без ошибки».
+    let same = back == expected;
+    let reason = if same {
+        format!("файл обновлён, заменено вхождений: {replaced} — {path}")
+    } else {
+        format!("после замены в файле не то, что должно было быть: {path}")
+    };
+    let mut result = StepResult::ok_with(
+        registry,
+        Evidence::FileText { path, matches: same },
+        reason,
+        duration_ms,
+    );
+    // Не совпало — значит, не выполнено, что бы ни говорил отчёт.
+    result.ok = same;
+    result
 }
 
 /// Сколько читаем в один шаг. Мегабайт — уже не «файл заметок», а данные, которым место
@@ -1078,6 +1199,104 @@ mod tests {
         assert!(refused.reason.contains("не больше"));
 
         let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
+    }
+
+    #[test]
+    fn one_replacement_is_made_and_checked_against_the_expected_text() {
+        let path = temp_target("replace-one");
+        std::fs::create_dir_all(path.parent().expect("у файла есть папка")).expect("папка");
+        std::fs::write(&path, "цена: 100 рублей\nсрок: завтра").expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), path.to_string_lossy().to_string());
+        params.insert("find".to_string(), "100".to_string());
+        params.insert("replace".to_string(), "150".to_string());
+
+        let replaced = run(
+            "files|заменить|текст в файле",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        assert!(replaced.ok, "{}", replaced.reason);
+        assert_eq!(replaced.evidence.kind(), "file_text");
+        assert_eq!(
+            std::fs::read_to_string(&path).expect("файл на месте"),
+            "цена: 150 рублей\nсрок: завтра"
+        );
+
+        // Старого текста нет — менять нечего, и файл не трогается.
+        let mut missing = params.clone();
+        missing.insert("find".to_string(), "200".to_string());
+        let refused = run(
+            "files|заменить|текст в файле",
+            &missing,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("заменять нечего"));
+        assert_eq!(
+            std::fs::read_to_string(&path).expect("файл на месте"),
+            "цена: 150 рублей\nсрок: завтра"
+        );
+
+        let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
+    }
+
+    #[test]
+    fn several_matches_need_the_word_all() {
+        let path = temp_target("replace-many");
+        std::fs::create_dir_all(path.parent().expect("у файла есть папка")).expect("папка");
+        std::fs::write(&path, "старое и старое").expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), path.to_string_lossy().to_string());
+        params.insert("find".to_string(), "старое".to_string());
+        params.insert("replace".to_string(), "новое".to_string());
+
+        // Два вхождения без слова «все» — не угадываем, какое менять.
+        let refused = run(
+            "files|заменить|текст в файле",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("встречается 2 раз"));
+        assert_eq!(
+            std::fs::read_to_string(&path).expect("файл на месте"),
+            "старое и старое"
+        );
+
+        // Со словом «все» — меняем оба и говорим, сколько.
+        let mut all = params.clone();
+        all.insert("all".to_string(), "true".to_string());
+        let replaced = run("files|заменить|текст в файле", &all, &AtomicBool::new(false));
+
+        assert!(replaced.ok, "{}", replaced.reason);
+        assert!(replaced.reason.contains("заменено вхождений: 2"));
+        assert_eq!(
+            std::fs::read_to_string(&path).expect("файл на месте"),
+            "новое и новое"
+        );
+
+        let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
+    }
+
+    #[test]
+    fn replacing_text_with_itself_is_refused() {
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), "C:\\tmp\\что-угодно.txt".to_string());
+        params.insert("find".to_string(), "слово".to_string());
+        params.insert("replace".to_string(), "слово".to_string());
+
+        let refused = run(
+            "files|заменить|текст в файле",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("менять нечего"));
     }
 
     #[test]

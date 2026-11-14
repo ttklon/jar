@@ -13351,5 +13351,24 @@
   "human_code": "c",
   "status": "v1",
   "notes": "двоичные и слишком большие файлы не читаю"
+ },
+ {
+  "id": "files-832",
+  "domain": "files",
+  "verb": "заменить",
+  "object": "текст в файле",
+  "example": "замени в файле старое название на новое",
+  "implementation": [
+   "fs.read",
+   "замена",
+   "fs.write",
+   "сверка"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "несколько вхождений — только со словом «все»"
  }
 ]

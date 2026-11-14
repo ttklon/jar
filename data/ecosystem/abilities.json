@@ -4920,6 +4920,26 @@
   "needs_check": false
  },
  {
+  "id": "ability:files:заменить",
+  "name": "Файлы: заменить",
+  "category": "abilities",
+  "subkind": "изменение",
+  "origin": "registry",
+  "url": "docs/ACTIONS.md",
+  "license": "own",
+  "domain": "files",
+  "verb": "заменить",
+  "actions": 1,
+  "gives": "1 действий: текст в файле",
+  "examples": [
+   "текст в файле"
+  ],
+  "tier": "T0",
+  "risk": "write-local",
+  "status": "selected",
+  "needs_check": false
+ },
+ {
   "id": "ability:files:записать",
   "name": "Файлы: записать",
   "category": "abilities",
