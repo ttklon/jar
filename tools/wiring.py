@@ -18,7 +18,9 @@
    `data/tools.json`: иначе приложение умеет больше, чем обещает, и это тоже неправда;
 3. **доказательство названо.** У каждого варианта `Evidence` есть `kind()` и строка;
 4. **слово есть.** Каждый `kind` есть в типах интерфейса (`src/ipc/types.ts`) и
-   переведён в человеческую фразу (`src/lib/evidence.ts`).
+   переведён в человеческую фразу (`src/lib/evidence.ts`);
+5. **параметры сходятся.** Каждый объявленный параметр читается своей функцией и
+   наоборот: опечатка в имени даёт шаг, который молча работает с пустым значением.
 
 Чего проверка не умеет и не притворяется, что умеет: она не знает, **какое**
 доказательство возвращает конкретная рука, — это видно только в тестах Rust. Здесь
@@ -43,6 +45,7 @@ TYPES_TS = ROOT / "src" / "ipc" / "types.ts"
 EVIDENCE_TS = ROOT / "src" / "lib" / "evidence.ts"
 
 ARM = re.compile(r'^\s*"([a-z0-9-]+\|[^"]+)"\s*=>', re.MULTILINE)
+PARAM_READ = re.compile(r'param\(params,\s*"([a-z0-9_]+)"\)')
 CALL = re.compile(r"([a-z_][a-z_0-9]*)\s*\(")
 FUNCTION = re.compile(r"^fn ([a-z_0-9]+)\s*\(", re.MULTILINE)
 KIND_ARM = re.compile(r'Evidence::([A-Za-z]+)\s*\{[^}]*\}\s*=>\s*"([a-z_]+)"')
@@ -118,11 +121,21 @@ def evidence_variants(source: str) -> list[str]:
     return names
 
 
-def declared_hands() -> list[str]:
+def declared_hands() -> list[dict]:
     data = json.loads(read(TOOLS))
     if not isinstance(data, list):
         raise SystemExit("data/tools.json: ожидался массив")
-    return [tool.get("registry", "") for tool in data if isinstance(tool, dict)]
+    return [tool for tool in data if isinstance(tool, dict)]
+
+
+def function_body(source: str, name: str) -> str:
+    """Тело функции `name` — от её заголовка до следующей функции верхнего уровня."""
+    start = source.find(f"\nfn {name}(")
+    if start < 0:
+        return ""
+    tail = source[start + 4 :]
+    end = tail.find("\nfn ")
+    return tail if end < 0 else tail[:end]
 
 
 def main() -> int:
@@ -130,12 +143,13 @@ def main() -> int:
     step_source = read(STEP_RS)
 
     hands = declared_hands()
+    registries = [hand.get("registry", "") for hand in hands]
     branches = run_branches(tools_source)
     functions = defined_functions(tools_source)
 
     errors: list[str] = []
 
-    for registry in hands:
+    for registry in registries:
         if registry not in branches:
             errors.append(f"'{registry}' объявлена как рука, но ветки в run() нет")
             continue
@@ -146,8 +160,26 @@ def main() -> int:
             errors.append(f"'{registry}' ведёт на функцию {fn}(), а её в tools.rs нет")
 
     for registry in branches:
-        if registry not in hands:
+        if registry not in registries:
             errors.append(f"'{registry}' исполняется, но в data/tools.json её нет")
+
+    # Имена параметров — единственное, что связывает данные с кодом: опечатка в одном
+    # месте даёт шаг, который молча работает с пустым значением.
+    for hand in hands:
+        registry = hand.get("registry", "")
+        declared = {param.get("name", "") for param in hand.get("params", [])}
+        fn = branches.get(registry, "")
+        if not fn or fn in HELPERS:
+            continue
+        used = set(PARAM_READ.findall(function_body(tools_source, fn)))
+        for name in sorted(declared - used):
+            errors.append(
+                f"'{registry}': параметр '{name}' объявлен, но функция {fn}() его не читает"
+            )
+        for name in sorted(used - declared):
+            errors.append(
+                f"'{registry}': функция {fn}() читает параметр '{name}', а он не объявлен"
+            )
 
     variants = evidence_variants(step_source)
     arms = dict(KIND_ARM.findall(step_source))
@@ -173,7 +205,7 @@ def main() -> int:
         return 1
 
     print(
-        f"wiring: {len(hands)} рук — у каждой ветка исполнения; "
+        f"wiring: {len(hands)} рук — у каждой ветка исполнения и её параметры; "
         f"доказательств {len(variants)} — у каждого название и перевод"
     )
     return 0
