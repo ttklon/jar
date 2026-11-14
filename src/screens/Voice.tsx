@@ -69,6 +69,14 @@ import {
   type HourLog,
   type QueueItem,
 } from "../lib/queue";
+import {
+  fixQuery,
+  look,
+  roundLine,
+  step as loopStep,
+  type Look,
+  type RoundOutcome,
+} from "../lib/loop";
 import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
 import { ActionList } from "../components/ActionList";
@@ -219,6 +227,17 @@ export function Voice({ onOpen }: VoiceScreenProps) {
    */
   const stoppedGoalsRef = useRef<Set<string>>(new Set());
   const [stoppedGoals, setStoppedGoals] = useState<string[]>([]);
+  /**
+   * Петля улучшения по целям: что показал каждый круг. Ссылка — очередь читает счёт между
+   * рендерами, состояние — чтобы счёт был виден человеку, а не помнился «где-то».
+   */
+  const loopRef = useRef<Map<string, { rounds: Look[]; fixes: number }>>(new Map());
+  const [loopLines, setLoopLines] = useState<Record<string, string>>({});
+  /**
+   * Последний ответ машины про «можно начинать». Петля спрашивает его же, а не своё
+   * мнение о том, сколько ещё выдержит компьютер.
+   */
+  const mayStartRef = useRef(true);
   /** Что с машиной: загрузка, память, присутствие человека. Ничего не запускает. */
   const [machine, setMachine] = useState<MachineState | null>(null);
   const [machineError, setMachineError] = useState<string | null>(null);
@@ -287,6 +306,9 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     queueStopRef.current = false;
     setQueueOn(true);
     setQueueIdle(null);
+    // Счёт кругов — про этот запуск. Старые круги к новому «работать без меня» не относятся.
+    loopRef.current = new Map();
+    setLoopLines({});
 
     let items = queueRef.current;
     const plans = new Map<string, PlanCheck | null>();
@@ -304,8 +326,22 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       setHour(hourRef.current);
     };
 
+    /**
+     * Записать круг петли: что показал «посмотреть». Считается по отчёту ядра, а не по
+     * бодрости очереди: «запуск прошёл» без единого шага — не сделано.
+     */
+    const recordRound = (origin: string, outcome: RoundOutcome) => {
+      const current = loopRef.current.get(origin) ?? { rounds: [] as Look[], fixes: 0 };
+      const rounds = [...current.rounds, look(outcome)];
+      loopRef.current.set(origin, { rounds, fixes: current.fixes });
+      setLoopLines((lines) => ({ ...lines, [origin]: roundLine(origin, rounds) }));
+    };
+
     /** Одно дело: план, проверка «можно ли без человека», запуск и итог. */
     const launch = (item: QueueItem) => {
+      /** Чем кончился последний прогон дела — из этого собирается круг петли. */
+      let outcome: RoundOutcome | null = null;
+
       const task = (async () => {
         const check = plans.get(item.id) ?? null;
         const verdict = unattended(check);
@@ -333,11 +369,17 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           const report = await runPlan(JSON.stringify(check.plan), []).catch(() => null);
           if (!report) {
             sync(setState(items, item.id, "failed", "запуск не состоялся: ядро не ответило"));
+            outcome = { completed: 0, steps: 0, stopped: "ядро не ответило" };
             return;
           }
 
           if (!report.stopped) {
             sync(setState(items, item.id, "done", `шагов: ${report.steps.length}, всё выполнено`));
+            outcome = {
+              completed: report.steps.length,
+              steps: report.steps.length,
+              stopped: null,
+            };
             return;
           }
 
@@ -357,6 +399,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                 `${verdict.why} — остановилось на: ${report.stopped}`,
               ),
             );
+            outcome = { completed, steps: report.steps.length, stopped: report.stopped };
             return;
           }
 
@@ -365,6 +408,8 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           await new Promise((resolve) => setTimeout(resolve, 300));
         }
       })().finally(() => {
+        // Круг считается по делу: у одиночного дела цели нет, и петли у него тоже нет.
+        if (outcome && item.origin) recordRound(item.origin, outcome);
         inFlight.delete(item.id);
       });
 
@@ -405,14 +450,39 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           continue;
         }
 
+        // Что дальше: новое улучшение, поправка сбоя или стоп. Решает петля по отчётам,
+        // а не аппетит очереди — иначе «пока не скажу стоп» превратилось бы в «сколько выдержит».
+        const loop = loopRef.current.get(origin) ?? { rounds: [] as Look[], fixes: 0 };
+        const decision = loopStep({
+          rounds: loop.rounds,
+          fixes: loop.fixes,
+          stopped: queueStopRef.current,
+          left: hourLeft(hourRef.current, Date.now()),
+          mayStart: mayStartRef.current,
+        });
+
+        if (decision.action === "stop") {
+          why = `по цели «${origin}»: ${decision.why}`;
+          continue;
+        }
+
         const room = replenish(items, origin, hourRef.current, Date.now());
-        if (!room.ask) {
+        // Поправка — не новое дело поверх провала, а ответ на него: правило «сначала
+        // разберитесь» её не отменяет, а всё остальное остаётся за replenish.
+        if (!room.ask && decision.action !== "fix") {
           // Причина видна человеку: «почему не продолжаю» — такой же ответ, как «почему стою».
           why = room.why;
           continue;
         }
 
-        const answer = await think(continuationQuery(origin, items), null).catch(() => null);
+        // Поправка считается сразу: если и она не поможет, второй не будет.
+        if (decision.action === "fix") {
+          loopRef.current.set(origin, { rounds: loop.rounds, fixes: loop.fixes + 1 });
+        }
+
+        const query =
+          decision.action === "fix" ? fixQuery(origin, items) : continuationQuery(origin, items);
+        const answer = await think(query, null).catch(() => null);
         // Пока модель думала, человек мог сказать «стоп» — тогда новые дела не берём.
         if (queueStopRef.current) break;
 
@@ -488,6 +558,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         }
 
         const machine = await Promise.resolve(machineState()).catch(() => null);
+        mayStartRef.current = machine?.budget.may_start ?? true;
         const decision = pick(items, {
           parallel: machine?.budget.parallel ?? 1,
           mayStart: machine?.budget.may_start ?? true,
@@ -1343,6 +1414,9 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                 <Text className={styles.note}>
                   {voice.queueGoalLine(done.goal, done.done, done.left, done.stuck)}
                 </Text>
+                {loopLines[goal] ? (
+                  <Text className={styles.note}>{loopLines[goal]}</Text>
+                ) : null}
                 {stopped ? (
                   <Text className={styles.note}>{voice.queueGoalStopped}</Text>
                 ) : (

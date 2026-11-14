@@ -351,7 +351,7 @@ describe("очередь дел на экране", () => {
     );
   });
 
-  it("дело по цели не сделалось — очередь не заметает это новыми делами", async () => {
+  it("дело по цели не сделалось — очередь просит одну поправку, а не придумывает новые", async () => {
     vi.mocked(draftPlan).mockResolvedValue(safePlan as never);
     vi.mocked(runPlan).mockResolvedValue({
       goal: "найди дубликаты в загрузках",
@@ -388,13 +388,90 @@ describe("очередь дел на экране", () => {
     fireEvent.click(screen.getByText("Поставить все в очередь"));
     fireEvent.click(screen.getByText("Работать без меня"));
 
-    // Оба дела не сделались — очередь говорит об этом и новых дел не выдумывает.
-    // Каждое дело получило по одной повторной попытке (пустая неудача), и это предел:
-    // два дела × две попытки.
-    await waitFor(() => expect(screen.getByText(/не сделалось/)).toBeTruthy());
-    expect(vi.mocked(think)).toHaveBeenCalledTimes(1);
+    // Оба дела не сделались. Каждое получило по одной повторной попытке (пустая
+    // неудача), и это предел: два дела × две попытки.
     await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(4));
-    expect(screen.getAllByText(/попыток уже 2/).length).toBe(2);
+    await waitFor(() => expect(screen.getAllByText(/попыток уже 2/).length).toBe(2));
+
+    // Второй вопрос к модели — про поправку, а не про «что улучшить дальше»: в нём видно,
+    // что именно не сделалось.
+    await waitFor(() => expect(vi.mocked(think)).toHaveBeenCalledTimes(2));
+    expect(vi.mocked(think).mock.calls[1]?.[0]).toContain("не удался");
+    expect(vi.mocked(think).mock.calls[1]?.[0]).toContain("найди дубликаты в загрузках");
+
+    // Модель ответила не поправкой — так и сказано, и новых дел не появилось.
+    await waitFor(() => expect(screen.getByText(/модель ответила не продолжением/)).toBeTruthy());
+    expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(4);
+  });
+
+  it("поправка тоже не помогла — петля останавливается и говорит об этом", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(safePlan as never);
+    vi.mocked(runPlan).mockResolvedValue({
+      goal: "найди дубликаты в загрузках",
+      steps: [],
+      stopped: "шаг 1: нет доступа",
+      run_id: 1,
+    } as never);
+
+    const split = {
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Split: {
+          goal: "наведи порядок в загрузках",
+          deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+          why: "две разные работы",
+        },
+      },
+      plan: null,
+      learning: null,
+      deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+      problem: null,
+    };
+
+    // Первый вопрос — разложение на дела, второй — поправка сбоя. Третьего быть не должно:
+    // поправка уже потрачена, и повторять её — долбёжка, а не усердие.
+    const fix = {
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Next: {
+          goal: "наведи порядок в загрузках",
+          deeds: ["проверь доступ к папке загрузок"],
+          done: false,
+          why: "мешает доступ",
+        },
+      },
+      plan: null,
+      learning: null,
+      deeds: ["проверь доступ к папке загрузок"],
+      problem: null,
+    };
+
+    vi.mocked(think)
+      .mockResolvedValueOnce(split as never)
+      .mockResolvedValue(fix as never);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), {
+      target: { value: "наведи порядок в загрузках" },
+    });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText(/разложил/)).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Поставить все в очередь"));
+    fireEvent.click(screen.getByText("Работать без меня"));
+
+    // Два дела по две попытки и одно дело-поправка по две попытки.
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(6));
+    await waitFor(() =>
+      expect(screen.getByText(/поправка тоже — топчемся на месте/)).toBeTruthy(),
+    );
+
+    // Третий вопрос к модели не задан: петля остановилась сама и сказала почему.
+    expect(vi.mocked(think)).toHaveBeenCalledTimes(2);
   });
 
   it("с первого раза ничего не сделалось — очередь пробует ещё раз, и это видно", async () => {
