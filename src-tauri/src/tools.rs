@@ -430,7 +430,10 @@ fn download_file(
 
     let target = std::path::Path::new(&path);
     if target.is_dir() {
-        return StepResult::failed(registry, format!("по этому пути папка, а нужен файл: {path}"));
+        return StepResult::failed(
+            registry,
+            format!("по этому пути папка, а нужен файл: {path}"),
+        );
     }
     if target.exists() && !overwrite {
         return StepResult::failed(
@@ -478,7 +481,9 @@ fn download_file(
         return StepResult::failed(registry, reason);
     }
 
-    let size = std::fs::metadata(part_path).map(|meta| meta.len()).unwrap_or(0);
+    let size = std::fs::metadata(part_path)
+        .map(|meta| meta.len())
+        .unwrap_or(0);
     if size == 0 {
         let _ = std::fs::remove_file(part_path);
         return StepResult::failed(
@@ -1444,7 +1449,10 @@ mod tests {
         // Схемы закрыты: ссылка не должна уводить curl на file://.
         assert!(args.contains(&"--proto".to_string()));
         assert!(args.contains(&"=https,http".to_string()));
-        assert_eq!(args.last().map(String::as_str), Some("https://example.com/a"));
+        assert_eq!(
+            args.last().map(String::as_str),
+            Some("https://example.com/a")
+        );
     }
 
     #[test]
