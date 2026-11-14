@@ -14,6 +14,7 @@
 //! Третье: вывод обрезается. Полотно в интерфейсе не читают, а по обрезанному видно, что
 //! человек не получил весь текст.
 
+use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::atomic::AtomicBool;
 use std::time::Duration;
@@ -122,7 +123,7 @@ pub fn verdict(exit_code: Option<i32>, timed_out: bool) -> (bool, String) {
 pub fn no_cell(reason: &str) -> String {
     format!(
         "клетка не открылась: {reason}; чужой текст без забора не запускается — \
-         проба не выполнялась"
+         ничего не выполнялось"
     )
 }
 
@@ -189,15 +190,36 @@ pub fn run(key: &str, code: &str, dir: &Path, now_ms: u64) -> Report {
 /// пропустить (она ничего не решает), а запуск — нет. Своя рука без забора не запускается
 /// и не притворяется запущенной.
 pub fn run_required(key: &str, code: &str, dir: &Path, now_ms: u64) -> Result<Report, String> {
+    run_with(key, code, dir, &BTreeMap::new(), &AtomicBool::new(false), now_ms)
+}
+
+/// Запуск своей руки с параметрами шага: они уходят переменными `ZS_*`, ровно как у
+/// встроенных рук. Склейки в текст скрипта нет — иначе кавычка в значении стала бы чужой
+/// командой.
+///
+/// Правила те же, что у `run_required`, и это не удобство, а обещание: клетка, потолки,
+/// срок, отмена. Параметры ничего не разрешают — они только называют то, что человек и
+/// так подтвердил в плане.
+pub fn run_with(
+    key: &str,
+    code: &str,
+    dir: &Path,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+    now_ms: u64,
+) -> Result<Report, String> {
     let sandbox = container::open(dir).map_err(|reason| no_cell(&reason))?;
 
-    let request = ExecRequest::new("powershell.exe", executor::powershell(code))
+    let mut request = ExecRequest::new("powershell.exe", executor::powershell(code))
         .with_timeout(TIMEOUT)
         .with_limits(Limits::trial());
 
-    let cancel = AtomicBool::new(false);
+    for (name, value) in params {
+        request = request.with_env(format!("ZS_{}", env_name(name)), value.clone());
+    }
+
     sandbox
-        .run(&request, Some(Limits::trial()), &cancel)
+        .run(&request, Some(Limits::trial()), cancel)
         .map(|output| {
             let cell = container::note();
             report(key, &output, &cell, now_ms)
@@ -205,10 +227,33 @@ pub fn run_required(key: &str, code: &str, dir: &Path, now_ms: u64) -> Result<Re
         .map_err(|reason| no_cell(&reason))
 }
 
+/// Имя параметра как суффикс переменной окружения: заглавные буквы, цифры и подчёркивания.
+/// Так же поступают встроенные руки, поэтому скрипт не может «не найти» параметр.
+fn env_name(name: &str) -> String {
+    name.chars()
+        .map(|symbol| {
+            if symbol.is_ascii_alphanumeric() {
+                symbol.to_ascii_uppercase()
+            } else {
+                '_'
+            }
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::path::PathBuf;
+
+    #[test]
+    fn step_params_become_prefixed_environment_names() {
+        // Префикс добавляет вызывающий: без него параметр «path» затёр бы системный PATH.
+        assert_eq!(env_name("path"), "PATH");
+        assert_eq!(env_name("all"), "ALL");
+        assert_eq!(env_name("query-2"), "QUERY_2");
+        assert_eq!(env_name("что"), "__");
+    }
 
     fn memory(name: &str) -> (Memory, PathBuf) {
         let dir = std::env::temp_dir().join(format!(

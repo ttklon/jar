@@ -5,22 +5,34 @@
 //! поэтому она **всегда помечена** и **всегда** отделена от встроенных: смешать их значит
 //! однажды не понять, откуда взялась команда, которая что-то испортила.
 //!
-//! Что здесь есть: приём черновика в руки, список, чтение, удаление.
+//! Что здесь есть: приём черновика в руки, список, чтение, удаление и **исполнение**.
 //!
-//! Чего здесь **нет** и почему: исполнения. Привнесённая рука не попадает ни в реестр
-//! действий, ни в план, ни в `tools::spec` — у неё просто нет такого пути. Исполнение
-//! привнесённых рук — отдельный шаг с отдельными правилами (только в клетке, всегда с
-//! отчётом), и делать его молча, «заодно», нельзя: это ровно то место, где ошибка стоит
-//! дороже всего.
+//! Как исполняются. Двумя путями, и оба устроены одинаково: только в клетке, только с
+//! отчётом, никогда «заодно». Первый — кнопка человека («запустить в клетке»). Второй —
+//! шаг плана, который человек уже подтвердил. Второй путь открыт **только там, где
+//! встроенной руки нет**: своя рука не подменяет встроенную и не смешивается с ней, иначе
+//! однажды не понять, чей это код выполнился.
+//!
+//! Чего по-прежнему нет: прав. Своя рука проходит ту же политику, что и всё остальное, —
+//! риск строки реестра, подтверждение, токен, журнал. Исполнение не даёт ни одного нового
+//! права, оно лишь доводит до конца то, что человек и так разрешил.
 //!
 //! Приём возможен только после пробы: черновик, который не запускался или упал, рукой не
 //! становится. «Проверили и не вышло» — это не рука, это следующий черновик.
 
+use std::collections::BTreeMap;
+use std::path::Path;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::time::{SystemTime, UNIX_EPOCH};
+
 use serde::{Deserialize, Serialize};
 
+use crate::executor::ExecOutput;
 use crate::hand;
 use crate::memory::Memory;
+use crate::step::StepResult;
 use crate::trial;
+use crate::verifier::{self, Expectation};
 
 /// Привнесённая рука. Хранится как данные, а не как вшитый код.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -72,6 +84,68 @@ pub fn forget(memory: &Memory, key: &str) -> Result<(), String> {
     memory
         .forget(&fact_key(key))
         .map_err(|error| format!("рука не удалилась: {error}"))
+}
+
+/// Исполнение своей руки как шага плана. `None` — руки для этой строки нет, и решать
+/// нечего; вызывающий идёт обычным путём встроенных рук.
+///
+/// Правила, и ни одного нового:
+///
+///  * **только в клетке.** Клетка не открылась — отказ, а не «запуск без забора»;
+///  * **фильтр проверяется заново.** Код руки лежит в памяти и мог быть изменён руками:
+///    доверять тому, что записали при приёме, нельзя;
+///  * **доказательство — отчёт, а не обещание.** Код возврата, начало вывода и пометка,
+///    где именно это было, попадают в шаг так же, как у встроенных рук;
+///  * **параметры шага — переменными окружения**, а не склейкой в текст скрипта.
+pub fn step(
+    memory: &Memory,
+    key: &str,
+    params: &BTreeMap<String, String>,
+    base_dir: &Path,
+) -> Option<StepResult> {
+    let hand = get(memory, key)?;
+
+    let found = hand::scan(&hand.code);
+    if !found.is_empty() {
+        return Some(StepResult::failed(
+            key,
+            format!("в скрипте руки есть то, чего нельзя: {}", found.join("; ")),
+        ));
+    }
+
+    let dir = base_dir.join("trial");
+    if let Err(error) = std::fs::create_dir_all(&dir) {
+        return Some(StepResult::failed(key, format!("папка запуска: {error}")));
+    }
+
+    let cancel = AtomicBool::new(false);
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|value| value.as_millis() as u64)
+        .unwrap_or(0);
+
+    let report = match trial::run_with(key, &hand.code, &dir, params, &cancel, now) {
+        Ok(report) => report,
+        Err(reason) => return Some(StepResult::failed(key, reason)),
+    };
+
+    // Отчёт сохраняется отдельно от пробы: приём и запуск — разные доказательства.
+    let _ = trial::save_as(memory, &trial::run_key(key), &report);
+
+    let output = ExecOutput {
+        exit_code: report.exit_code,
+        stdout: report.stdout.clone(),
+        stderr: report.stderr.clone(),
+        timed_out: report.timed_out,
+        cancelled: cancel.load(Ordering::Relaxed),
+        duration_ms: report.duration_ms,
+        limits_note: report.cell.clone(),
+    };
+
+    let mut result = verifier::check(key, &Expectation::ExitZero, &output);
+    let verdict = std::mem::take(&mut result.reason);
+    result.reason = format!("своя рука «{}»: {verdict}, {}", hand.title, report.cell);
+    Some(result)
 }
 
 /// Принять черновик в руки. Требования названы и проверяются, а не подразумеваются:
@@ -139,6 +213,7 @@ pub fn adopt(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::BTreeMap;
     use std::path::PathBuf;
 
     fn memory(name: &str) -> (Memory, PathBuf) {
@@ -187,6 +262,63 @@ mod tests {
             trial::skipped(key, "ERROR_BAD_ENVIRONMENT", 2000)
         };
         trial::save(memory, &report).expect("отчёт сохранён");
+    }
+
+    #[test]
+    fn a_step_without_a_hand_leaves_the_built_in_path_alone() {
+        let (memory, dir) = memory("nostep");
+
+        assert!(step(&memory, "custom-test|проверить|нечто", &BTreeMap::new(), &dir).is_none());
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_hand_with_forbidden_code_does_not_run_even_from_a_plan() {
+        let (memory, dir) = memory("badcode");
+        let key = "custom-test|проверить|нечто";
+
+        // Такую руку приём не пропустил бы, но код в памяти может измениться и после:
+        // поэтому фильтр проверяется заново, перед каждым запуском.
+        let hand = CustomHand {
+            key: key.to_string(),
+            title: "сходить в сеть".to_string(),
+            code: "Invoke-WebRequest https://example.com".to_string(),
+            risk: "read".to_string(),
+            source: "проверен в клетке".to_string(),
+            created_ms: 1000,
+        };
+        let json = serde_json::to_string(&hand).expect("рука пишется");
+        memory
+            .remember(&fact_key(key), &json)
+            .expect("рука сохранена");
+
+        let refused = step(&memory, key, &BTreeMap::new(), &dir).expect("рука есть");
+        assert!(!refused.ok, "{}", refused.reason);
+        assert!(refused.reason.contains("чего нельзя"), "{}", refused.reason);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_hand_in_a_plan_runs_only_inside_a_cell() {
+        let (memory, dir) = memory("stepcell");
+        let key = "custom-test|проверить|нечто";
+        draft_with_code(&memory, key, "Get-PSDrive");
+        trial_report(&memory, key, true, true);
+        adopt(&memory, key, "свободное место", "read", 3000).expect("рука принята");
+
+        let result = step(&memory, key, &BTreeMap::new(), &dir).expect("рука есть");
+
+        // Клетка в CI не открывается — тогда это отказ с причиной, а не «тихо не вышло».
+        if result.ok {
+            assert_eq!(result.evidence.kind(), "exit_code");
+            assert!(result.reason.contains("своя рука"), "{}", result.reason);
+        } else {
+            assert!(result.reason.contains("клетка"), "{}", result.reason);
+        }
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]

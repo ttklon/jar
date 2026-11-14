@@ -28,7 +28,7 @@ vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 afterEach(() => cleanup());
 
 describe("привнесённые руки", () => {
-  it("показывает свою руку отдельно и говорит, что она не исполняется", async () => {
+  it("показывает свою руку отдельно и говорит, как она исполняется", async () => {
     const { customHands } = await import("../ipc");
     vi.mocked(customHands).mockResolvedValueOnce([
       {
@@ -46,7 +46,7 @@ describe("привнесённые руки", () => {
     await waitFor(() =>
       expect(screen.getAllByText(/показать свободное место/).length).toBeGreaterThan(0),
     );
-    expect(screen.getByText(/Пока не исполняются/)).toBeTruthy();
+    expect(screen.getByText(/только в клетке и только там, где встроенной руки нет/)).toBeTruthy();
     expect(screen.getByText(/Get-PSDrive/)).toBeTruthy();
   });
 
@@ -117,7 +117,7 @@ describe("привнесённые руки", () => {
       },
     ]);
     vi.mocked(runCustomHand).mockRejectedValueOnce(
-      new Error("клетка не открылась: ERROR_BAD_ENVIRONMENT; чужой текст без забора не запускается — проба не выполнялась"),
+      new Error("клетка не открылась: ERROR_BAD_ENVIRONMENT; чужой текст без забора не запускается — ничего не выполнялось"),
     );
 
     render(<Hands />);

@@ -205,7 +205,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   /** Отчёт о пробе в клетке. Отчёт, а не «научились». */
   const [trial, setTrial] = useState<TrialReport | null>(null);
   const [trialBusy, setTrialBusy] = useState(false);
-  /** Принятые руки: отдельно от встроенных и не исполняются. */
+  /** Принятые руки: отдельно от встроенных, запускаются только в клетке и по слову. */
   const [adopted, setAdopted] = useState<CustomHand | null>(null);
   /** Очередь дел: несколько задач подряд, пока человек не скажет «стоп». */
   const [queue, setQueue] = useState<QueueItem[]>([]);
