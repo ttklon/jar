@@ -252,7 +252,7 @@ mod tests {
         assert_eq!(env_name("path"), "PATH");
         assert_eq!(env_name("all"), "ALL");
         assert_eq!(env_name("query-2"), "QUERY_2");
-        assert_eq!(env_name("что"), "__");
+        assert_eq!(env_name("что"), "___");
     }
 
     fn memory(name: &str) -> (Memory, PathBuf) {
@@ -359,7 +359,9 @@ mod tests {
         let error = run_required("k", "Get-PSDrive", &dir, 1000)
             .expect_err("без клетки своей руке запускаться нельзя");
         assert!(error.contains("клетка не открылась"), "{error}");
-        assert!(error.contains("не выполнялась"), "{error}");
+        // Запуск — не проба: отказ говорит «ничего не выполнялось», а не «пробу пропустили».
+        assert!(error.contains("не запускается"), "{error}");
+        assert!(error.contains("ничего не выполнялось"), "{error}");
 
         let _ = std::fs::remove_dir_all(&dir);
     }
