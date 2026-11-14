@@ -471,4 +471,131 @@ describe("очередь дел на экране", () => {
     await waitFor(() => expect(screen.getByText(/1 шаг уже сделано — второй прогон/)).toBeTruthy());
     expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1);
   });
+
+  it("«стоп по цели» останавливает одну работу, а другую — нет", async () => {
+    vi.mocked(think).mockResolvedValue({
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Split: {
+          goal: "наведи порядок в загрузках",
+          deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+          why: "две разные работы",
+        },
+      },
+      plan: null,
+      learning: null,
+      deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+      problem: null,
+    } as never);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), {
+      target: { value: "наведи порядок в загрузках" },
+    });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText(/разложил/)).toBeTruthy());
+
+    // Вторая работа человека — не часть этой цели, и «стоп по цели» её не касается.
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "убавить громкость" } });
+    fireEvent.click(screen.getByText("В очередь"));
+    fireEvent.click(screen.getByText("Поставить все в очередь"));
+
+    await waitFor(() => expect(screen.getAllByText(/^ждёт · /).length).toBe(3));
+
+    fireEvent.click(screen.getByText("Стоп по цели"));
+
+    await waitFor(() => expect(screen.getAllByText(/^остановлено · /).length).toBe(2));
+    expect(screen.getByText(/^ждёт · убавить громкость/)).toBeTruthy();
+    expect(screen.getByText(/цель «наведи порядок в загрузках» остановлена вами/)).toBeTruthy();
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
+  });
+
+  it("модель говорит «цель закрыта» — рядом виден экран, а не только слова", async () => {
+    const splitThought = {
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Split: {
+          goal: "наведи порядок в загрузках",
+          deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+          why: "две разные работы",
+        },
+      },
+      plan: null,
+      learning: null,
+      deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+      problem: null,
+    };
+
+    vi.mocked(draftPlan).mockResolvedValue(safePlan as never);
+    vi.mocked(runPlan).mockResolvedValue({
+      goal: "найди дубликаты в загрузках",
+      steps: [
+        {
+          position: 1,
+          registry: "звук|убавить|громкость",
+          status: "ok",
+          reason: "сделано",
+          evidence: "system",
+          duration_ms: 5,
+        },
+      ],
+      stopped: null,
+      run_id: 1,
+    } as never);
+
+    vi.mocked(think)
+      .mockResolvedValue(null as never)
+      .mockResolvedValueOnce(splitThought as never)
+      .mockResolvedValueOnce({
+        prompt: "…",
+        answer: "…",
+        proposal: {
+          Next: {
+            goal: "наведи порядок в загрузках",
+            done: true,
+            deeds: [],
+            why: "дубликатов не осталось",
+          },
+        },
+        plan: null,
+        learning: null,
+        deeds: null,
+        problem: null,
+      } as never);
+
+    // Экран читается честно: вот он. Это не проверка, а взгляд — решает человек.
+    vi.mocked(uiDump).mockResolvedValue({
+      title: "Загрузки — проводник",
+      process: "explorer.exe",
+      elements: [],
+      truncated: false,
+      note: "прочитано UI Automation",
+      text: "Папка Загрузки\nФайлов: 12",
+    } as never);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), {
+      target: { value: "наведи порядок в загрузках" },
+    });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText(/разложил/)).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Поставить все в очередь"));
+    fireEvent.click(screen.getByText("Работать без меня"));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/модель считает, что цель «наведи порядок в загрузках» закрыта/),
+      ).toBeTruthy(),
+    );
+    // И рядом — то, что видно: слова модели отдельно, экран отдельно.
+    await waitFor(() => expect(screen.getByText(/Файлов: 12/)).toBeTruthy());
+    expect(screen.getByText(/проверить можете только вы/)).toBeTruthy();
+  });
 });

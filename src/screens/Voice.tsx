@@ -60,6 +60,7 @@ import {
   retry,
   setState,
   startHour,
+  stopGoal,
   stopRemaining,
   summary,
   takeDeed,
@@ -212,6 +213,12 @@ export function Voice({ onOpen }: VoiceScreenProps) {
    */
   const hourRef = useRef<HourLog>(startHour(Date.now()));
   const [hour, setHour] = useState<HourLog>(hourRef.current);
+  /**
+   * Цели, которые человек остановил сам. Ссылка — потому что очередь читает её между
+   * рендерами, состояние — чтобы это было видно на экране, а не помнилось «где-то».
+   */
+  const stoppedGoalsRef = useRef<Set<string>>(new Set());
+  const [stoppedGoals, setStoppedGoals] = useState<string[]>([]);
   /** Что с машиной: загрузка, память, присутствие человека. Ничего не запускает. */
   const [machine, setMachine] = useState<MachineState | null>(null);
   const [machineError, setMachineError] = useState<string | null>(null);
@@ -391,6 +398,13 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       for (const origin of origins) {
         if (queueStopRef.current) break;
 
+        // Человек остановил эту цель — новых дел по ней не придумываем, даже если все
+        // прежние уже сделаны: «стоп» относится и к тому, чего ещё нет.
+        if (stoppedGoalsRef.current.has(origin)) {
+          why = `цель «${origin}» остановлена вами — новых дел по ней не беру`;
+          continue;
+        }
+
         const room = replenish(items, origin, hourRef.current, Date.now());
         if (!room.ask) {
           // Причина видна человеку: «почему не продолжаю» — такой же ответ, как «почему стою».
@@ -416,11 +430,22 @@ export function Voice({ onOpen }: VoiceScreenProps) {
 
         const next = answer.proposal.Next;
         if (next.done) {
-          // Это слова модели, а не доказательство: новых дел не берём, но и не врём,
-          // будто цель закрыта, — проверить может только человек.
+          // Это слова модели, а не доказательство: новые дела не берём, но и не врём,
+          // будто цель закрыта. Рядом показываем экран — не как проверку, а как взгляд:
+          // сравнивать и решать всё равно человеку.
+          void uiDump(SCREEN_NODES)
+            .then((dump) => {
+              setScreen(dump);
+              setScreenError(null);
+            })
+            .catch((reason: unknown) => {
+              setScreen(null);
+              setScreenError(reason instanceof Error ? reason.message : String(reason));
+            });
+
           why =
             `модель считает, что цель «${origin}» закрыта${next.why ? ` (${next.why})` : ""}: ` +
-            "новых дел по ней не беру, проверьте сами";
+            "новых дел по ней не беру. Ниже — что видно на экране сейчас; проверить можете только вы";
           continue;
         }
 
@@ -514,6 +539,24 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     const stopped = stopRemaining(queueRef.current);
     queueRef.current = stopped;
     setQueue(stopped);
+  }, []);
+
+  /**
+   * Остановить одну цель, не трогая остальные.
+   *
+   * Общее «стоп» остаётся для всего сразу; это — для одной работы. Начатое доводится до
+   * шага, где можно бросить: останавливается только то, что ещё не начиналось. Метка цели
+   * живёт и после того, как дела кончились: иначе очередь спросит модель про следующие,
+   * и «стоп» окажется советом, а не остановкой.
+   */
+  const stopOneGoal = useCallback((origin: string) => {
+    stoppedGoalsRef.current.add(origin);
+    setStoppedGoals([...stoppedGoalsRef.current]);
+
+    const next = stopGoal(queueRef.current, origin);
+    queueRef.current = next;
+    setQueue(next);
+    setQueueIdle(`цель «${origin}» остановлена вами — новых дел по ней не беру`);
   }, []);
 
   /**
@@ -1294,10 +1337,20 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           <Text className={styles.title}>{voice.queueTitle(summary(queue).waiting, summary(queue).done)}</Text>
           {goals.map((goal) => {
             const done = progress(queue, goal);
+            const stopped = stoppedGoals.includes(goal);
             return (
-              <Text key={`goal-${goal}`} className={styles.note}>
-                {voice.queueGoalLine(done.goal, done.done, done.left, done.stuck)}
-              </Text>
+              <div key={`goal-${goal}`} className={styles.bar}>
+                <Text className={styles.note}>
+                  {voice.queueGoalLine(done.goal, done.done, done.left, done.stuck)}
+                </Text>
+                {stopped ? (
+                  <Text className={styles.note}>{voice.queueGoalStopped}</Text>
+                ) : (
+                  <Button size="small" appearance="subtle" onClick={() => stopOneGoal(goal)}>
+                    {voice.queueStopGoal}
+                  </Button>
+                )}
+              </div>
             );
           })}
           <Text className={styles.note}>{voice.queueHour(hour.deeds, DEEDS_PER_HOUR)}</Text>

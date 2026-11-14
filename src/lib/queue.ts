@@ -262,6 +262,24 @@ export function stopRemaining(items: readonly QueueItem[]): QueueItem[] {
   );
 }
 
+/**
+ * Остановить одну цель, не трогая остальные.
+ *
+ * Зачем отдельно от общего «стоп». Цели — разные работы: «наведи порядок в загрузках» и
+ * «проверь обновления» не связаны ничем, кроме того, что человек попросил обе. Бросить
+ * всё из-за одной надоевшей цели — то же самое, что выдернуть шнур из-за одной лампы.
+ *
+ * Начатое не трогаем: его доводят до шага, где можно бросить. Останавливается только то,
+ * что ещё не начиналось, — и об этом сказано в самом деле.
+ */
+export function stopGoal(items: readonly QueueItem[], origin: string): QueueItem[] {
+  return items.map((item) =>
+    item.origin === origin && item.state === "waiting"
+      ? { ...item, state: "stopped", note: "остановлено вами: не начиналось" }
+      : item,
+  );
+}
+
 /** Сколько чего в очереди — одной строкой для экрана. */
 export function summary(items: readonly QueueItem[]): {
   waiting: number;

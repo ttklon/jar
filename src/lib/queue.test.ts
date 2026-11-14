@@ -15,6 +15,7 @@ import {
   rollHour,
   setState,
   startHour,
+  stopGoal,
   stopRemaining,
   summary,
   takeDeed,
@@ -376,5 +377,39 @@ describe("повтор, когда ничего не сделалось", () => 
 
     expect(verdict.again).toBe(false);
     expect(verdict.why).toContain("больше не пробую");
+  });
+});
+
+describe("стоп по одной цели", () => {
+  const goal = "наведи порядок в загрузках";
+  const deed = (id: string, text: string, state: QueueItem["state"], origin?: string): QueueItem => ({
+    id,
+    goal: text,
+    state,
+    note: "",
+    ...(origin ? { origin } : {}),
+  });
+
+  it("останавливает только ждущие дела этой цели, остальные работы не трогает", () => {
+    const items = [
+      deed("1", "найди дубликаты", "waiting", goal),
+      deed("2", "удали установщики", "running", goal),
+      deed("3", "убавить громкость", "waiting"),
+    ];
+
+    const stopped = stopGoal(items, goal);
+
+    expect(stopped[0]?.state).toBe("stopped");
+    expect(stopped[0]?.note).toContain("остановлено вами");
+    // Начатое не трогаем: его доводят до шага, где можно бросить.
+    expect(stopped[1]?.state).toBe("running");
+    // Чужая работа продолжается: бросить всё из-за одной цели — не остановка, а паника.
+    expect(stopped[2]?.state).toBe("waiting");
+  });
+
+  it("сделанное не переписывается в «остановлено»", () => {
+    const items = [deed("1", "найди дубликаты", "done", goal)];
+
+    expect(stopGoal(items, goal)[0]?.state).toBe("done");
   });
 });
