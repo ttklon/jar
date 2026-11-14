@@ -96,8 +96,8 @@
 | `deps_report.py` | стек и лицензии → docs/DEPENDENCIES.md |
 | `ecosystem.py` | валидатор экосистемы → docs/ECOSYSTEM.md |
 | `evals.py` | план проверок → docs/EVALS.md, data/evals.json |
-| `flows.py` | — |
-| `hands.py` | — |
+| `flows.py` | валидатор сценариев: шаги из реальных рук, риск не занижен |
+| `hands.py` | валидатор рук: реальные строки реестра, допустимый риск |
 | `links.py` | проверка относительных ссылок в документах |
 | `mine_awesome.py` | разбор awesome-листов |
 | `profiles.py` | валидатор профилей → docs/PROFILES.md |
@@ -106,6 +106,7 @@
 | `status.py` | блок состояния в AGENTS.md |
 | `tools_actions_titles.py` | русские названия доменов для генераторов |
 | `uia_probe.py` | снятие и черновик профиля из UIA-дампа (Windows) |
+| `wiring.py` | каждая рука подключена к исполнению, каждый вид доказательства назван |
 
 ## Первоисточники `research/`
 
