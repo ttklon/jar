@@ -452,10 +452,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
 
         // Что дальше: новое улучшение, поправка сбоя или стоп. Решает петля по отчётам,
         // а не аппетит очереди — иначе «пока не скажу стоп» превратилось бы в «сколько выдержит».
-        const loop = loopRef.current.get(origin) ?? { rounds: [] as Look[], fixes: 0 };
+        const loopState = loopRef.current.get(origin) ?? { rounds: [] as Look[], fixes: 0 };
         const decision = loopStep({
-          rounds: loop.rounds,
-          fixes: loop.fixes,
+          rounds: loopState.rounds,
+          fixes: loopState.fixes,
           stopped: queueStopRef.current,
           left: hourLeft(hourRef.current, Date.now()),
           mayStart: mayStartRef.current,
@@ -477,7 +477,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
 
         // Поправка считается сразу: если и она не поможет, второй не будет.
         if (decision.action === "fix") {
-          loopRef.current.set(origin, { rounds: loop.rounds, fixes: loop.fixes + 1 });
+          loopRef.current.set(origin, {
+            rounds: loopState.rounds,
+            fixes: loopState.fixes + 1,
+          });
         }
 
         const query =
