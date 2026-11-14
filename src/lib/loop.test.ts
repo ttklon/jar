@@ -56,6 +56,17 @@ describe("петля улучшения", () => {
     expect(afterFix.why).toContain("топчемся");
   });
 
+  it("удачный круг прощает старую поправку: у нового сбоя своя", () => {
+    // Была потрачена поправка, потом круг сделался — и новый сбой снова получает одну.
+    const decision = step(state({ rounds: ["nothing", "done", "nothing"], fixes: 0 }));
+    expect(decision.action).toBe("fix");
+
+    // А без удачного круга поправка уже потрачена — дальше человек.
+    expect(step(state({ rounds: ["nothing", "nothing"], fixes: MAX_FIX_TRIES })).action).toBe(
+      "stop",
+    );
+  });
+
   it("«стоп» человека сильнее любой возможности машины", () => {
     const decision = step(state({ stopped: true, rounds: ["nothing"], left: 12 }));
     expect(decision.action).toBe("stop");

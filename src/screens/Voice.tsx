@@ -332,8 +332,11 @@ export function Voice({ onOpen }: VoiceScreenProps) {
      */
     const recordRound = (origin: string, outcome: RoundOutcome) => {
       const current = loopRef.current.get(origin) ?? { rounds: [] as Look[], fixes: 0 };
-      const rounds = [...current.rounds, look(outcome)];
-      loopRef.current.set(origin, { rounds, fixes: current.fixes });
+      const verdict = look(outcome);
+      // Удачный круг обнуляет счёт поправок: у нового сбоя своя поправка, а не «уже была».
+      const fixes = verdict === "done" ? 0 : current.fixes;
+      const rounds = [...current.rounds, verdict];
+      loopRef.current.set(origin, { rounds, fixes });
       setLoopLines((lines) => ({ ...lines, [origin]: roundLine(origin, rounds) }));
     };
 
