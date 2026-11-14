@@ -849,13 +849,10 @@ mod tests {
         assert_eq!(refused.evidence.kind(), "stdout_marker");
     }
 
-
     /// Временный путь, уникальный для теста: чужие тесты и запуски не должны мешать.
     fn temp_target(name: &str) -> std::path::PathBuf {
-        let dir = std::env::temp_dir().join(format!(
-            "zshelper-write-{}-{name}",
-            std::process::id()
-        ));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-write-{}-{name}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         dir.join("заметка.txt")
     }
@@ -866,7 +863,10 @@ mod tests {
         let path = temp_target("notes");
         let mut params = BTreeMap::new();
         params.insert("path".to_string(), path.to_string_lossy().to_string());
-        params.insert("text".to_string(), "список покупок:\n- хлеб\n- молоко".to_string());
+        params.insert(
+            "text".to_string(),
+            "список покупок:\n- хлеб\n- молоко".to_string(),
+        );
 
         let written = run("files|записать|текст в файл", &params, &cancel);
         assert!(written.ok, "{}", written.reason);
