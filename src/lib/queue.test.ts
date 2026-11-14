@@ -7,7 +7,6 @@ import {
   hourLeft,
   MAX_TRIES,
   markScreen,
-  next,
   pick,
   progress,
   replenish,
@@ -54,37 +53,6 @@ describe("очередь дел", () => {
     items = add(items, "  убавить громкость  ", "1");
     expect(items[0]?.goal).toBe("убавить громкость");
     expect(items[0]?.state).toBe("waiting");
-  });
-
-  it("человек отошёл — очередь идёт сама, по одному в пределах бюджета", () => {
-    const items = add(add([], "первое", "1"), "второе", "2");
-
-    expect(next(items, budget()).index).toBe(0);
-
-    // Первое уже идёт — при ширине один второе ждёт, и причина названа.
-    const running = setState(items, "1", "running", "");
-    const decision = next(running, budget({ parallel: 1 }));
-    expect(decision.index).toBe(-1);
-    expect(decision.reason).toContain("уже идёт 1 из 1");
-
-    // Ширина три — второе можно брать.
-    expect(next(running, budget({ parallel: 3 })).index).toBe(1);
-  });
-
-  it("человек вернулся — новые дела не начинаются, даже если бюджет велик", () => {
-    const items = add([], "первое", "1");
-    const decision = next(items, budget({ away: false }));
-
-    expect(decision.index).toBe(-1);
-    expect(decision.reason).toContain("чтобы не мешать");
-  });
-
-  it("память на исходе — очередь стоит, а не толкается", () => {
-    const items = add([], "первое", "1");
-    const decision = next(items, budget({ mayStart: false }));
-
-    expect(decision.index).toBe(-1);
-    expect(decision.reason).toContain("памяти на исходе");
   });
 
   it("«стоп» останавливает то, что не началось, и не врёт про начатое", () => {

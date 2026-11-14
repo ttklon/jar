@@ -70,16 +70,6 @@ export interface QueueBudget {
   away: boolean;
 }
 
-/** Что делать дальше. */
-export interface Decision {
-  /**
-   * Индекс следующего дела или `-1`, если начинать нечего. Причина есть всегда —
-   * иначе «почему стоит» неотличимо от «почему сломалось».
-   */
-  index: number;
-  reason: string;
-}
-
 /**
  * Добавить дело в конец. Пустое — не дело, и в очередь не попадает.
  *
@@ -109,42 +99,6 @@ export function setState(
   note: string,
 ): QueueItem[] {
   return items.map((item) => (item.id === id ? { ...item, state, note } : item));
-}
-
-/** Что делать дальше — по бюджету машины и по тому, что уже идёт. */
-export function next(items: readonly QueueItem[], budget: QueueBudget): Decision {
-  const waiting = items.findIndex((item) => item.state === "waiting");
-  if (waiting < 0) {
-    return { index: -1, reason: "начинать нечего: в очереди пусто" };
-  }
-
-  if (!budget.mayStart) {
-    return {
-      index: -1,
-      reason: "машина просит не начинать: памяти на исходе — жду, а не толкаюсь",
-    };
-  }
-
-  const running = items.filter((item) => item.state === "running").length;
-  const parallel = Math.max(0, budget.parallel);
-  if (running >= parallel) {
-    return {
-      index: -1,
-      reason:
-        parallel === 0
-          ? "сейчас нельзя ничего: так решила машина"
-          : `уже идёт ${running} из ${parallel} — больше бюджет машины не разрешает`,
-    };
-  }
-
-  if (!budget.away) {
-    return {
-      index: -1,
-      reason: "человек за машиной — новые дела не начинаю, чтобы не мешать",
-    };
-  }
-
-  return { index: waiting, reason: "можно начинать следующее" };
 }
 
 /**
