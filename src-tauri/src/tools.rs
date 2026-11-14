@@ -126,6 +126,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|записать|текст в файл" => write_text(registry, params),
         "files|прочитать|текст файла" => read_text(registry, params),
         "files|заменить|текст в файле" => replace_text(registry, params),
+        "web|скачать|файл по ссылке" => download_file(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -388,6 +389,151 @@ fn replace_text(registry: &str, params: &BTreeMap<String, String>) -> StepResult
     // Не совпало — значит, не выполнено, что бы ни говорил отчёт.
     result.ok = same;
     result
+}
+
+/// Скачать файл по ссылке и доказать, что скачался файл, а не страница ошибки.
+///
+/// Порядок здесь такой же жёсткий, как при скачивании моделей (`download.rs`), и по той же
+/// причине — «получилось» должно означать «файл на месте и он не пустой»:
+///
+///  * **качаем в `<файл>.part`**, а не в настоящее имя: недокачанное не должно выглядеть
+///    скачанным, особенно если человек уйдёт и вернётся через час;
+///  * **`--fail` обязателен**: без него ответ 404 записывается как успешный файл, внутри
+///    которого текст ошибки;
+///  * **чужие схемы закрыты**: `--proto`/`--proto-redir` не дают ссылке увести curl на
+///    `file://` и прочитать локальный файл;
+///  * **.part удаляется при любой неудаче**: мусор рядом с файлом — это ложь на экране.
+fn download_file(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let url = param(params, "url").trim();
+    let path = clean_path(param(params, "path"));
+    let overwrite = matches!(param(params, "overwrite").trim(), "true" | "да" | "yes");
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Путь»");
+    }
+    if url.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Ссылка»");
+    }
+
+    let lowered = url.to_ascii_lowercase();
+    if !(lowered.starts_with("http://") || lowered.starts_with("https://")) {
+        return StepResult::failed(
+            registry,
+            "ссылка должна начинаться с http:// или https://: файловые и прочие схемы не качаю",
+        );
+    }
+
+    let target = std::path::Path::new(&path);
+    if target.is_dir() {
+        return StepResult::failed(registry, format!("по этому пути папка, а нужен файл: {path}"));
+    }
+    if target.exists() && !overwrite {
+        return StepResult::failed(
+            registry,
+            format!("файл уже есть: {path} — скажите «перезаписать», и я заменю"),
+        );
+    }
+    if let Some(parent) = target.parent() {
+        if !parent.as_os_str().is_empty() {
+            if let Err(error) = std::fs::create_dir_all(parent) {
+                return StepResult::failed(registry, format!("папка не создалась: {error}"));
+            }
+        }
+    }
+
+    let part = format!("{path}.part");
+    let part_path = std::path::Path::new(&part);
+    let _ = std::fs::remove_file(part_path);
+
+    let request =
+        ExecRequest::new("curl", curl_argv(url, &part)).with_timeout(Duration::from_secs(600));
+
+    let output = match executor::run(&request, cancel) {
+        Ok(output) => output,
+        Err(error) => {
+            let _ = std::fs::remove_file(part_path);
+            return StepResult::failed(registry, format!("curl не запустился: {error}"));
+        }
+    };
+
+    if output.cancelled || output.timed_out || output.exit_code != Some(0) {
+        let _ = std::fs::remove_file(part_path);
+        let reason = if output.cancelled {
+            "отменено вами: недокачанное удалено".to_string()
+        } else if output.timed_out {
+            "скачивание не уложилось в десять минут: недокачанное удалено".to_string()
+        } else {
+            format!(
+                "curl вышел с кодом {}: {} — файла нет, {} удалён",
+                output.exit_code.unwrap_or(-1),
+                tail(output.stderr.trim(), 300),
+                part
+            )
+        };
+        return StepResult::failed(registry, reason);
+    }
+
+    let size = std::fs::metadata(part_path).map(|meta| meta.len()).unwrap_or(0);
+    if size == 0 {
+        let _ = std::fs::remove_file(part_path);
+        return StepResult::failed(
+            registry,
+            "скачался пустой файл — это не результат: недокачанное удалено",
+        );
+    }
+
+    if target.exists() {
+        if let Err(error) = std::fs::remove_file(target) {
+            let _ = std::fs::remove_file(part_path);
+            return StepResult::failed(
+                registry,
+                format!("старый файл не удалось заменить: {error}"),
+            );
+        }
+    }
+    if let Err(error) = std::fs::rename(part_path, target) {
+        let _ = std::fs::remove_file(part_path);
+        return StepResult::failed(registry, format!("файл не переименовался: {error}"));
+    }
+
+    let mut result = verifier::check(registry, &Expectation::PathExists(path.clone()), &output);
+    if !result.ok {
+        // Файл переименовали, а его нет — это не успех, что бы ни говорил curl.
+        return StepResult::failed(registry, format!("после скачивания файла нет: {path}"));
+    }
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = format!("скачано {size} байт: {path}");
+    result
+}
+
+/// Аргументы curl для скачивания в файл.
+///
+/// `--max-filesize` — не жадность, а защита от «скачай вот эту ссылку», за которой гигабайты:
+/// два гигабайта — предел одного шага, и о нём сказано в подсказке параметра.
+fn curl_argv(url: &str, part: &str) -> Vec<String> {
+    [
+        "--fail",
+        "--location",
+        "--silent",
+        "--show-error",
+        "--proto",
+        "=https,http",
+        "--proto-redir",
+        "=https,http",
+        "--max-filesize",
+        "2147483648",
+        "--output",
+        part,
+        url,
+    ]
+    .iter()
+    .map(|value| value.to_string())
+    .collect()
 }
 
 /// Сколько читаем в один шаг. Мегабайт — уже не «файл заметок», а данные, которым место
@@ -1287,6 +1433,71 @@ mod tests {
         );
 
         let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
+    }
+
+    #[test]
+    fn download_arguments_guard_against_error_pages_and_file_urls() {
+        let args = curl_argv("https://example.com/a", "C:\\tmp\\a.part");
+
+        // Без --fail ответ 404 станет «успешным» файлом с текстом ошибки внутри.
+        assert!(args.contains(&"--fail".to_string()));
+        // Схемы закрыты: ссылка не должна уводить curl на file://.
+        assert!(args.contains(&"--proto".to_string()));
+        assert!(args.contains(&"=https,http".to_string()));
+        assert_eq!(args.last().map(String::as_str), Some("https://example.com/a"));
+    }
+
+    #[test]
+    fn a_download_refuses_other_schemes_and_occupied_paths() {
+        let path = temp_target("download-refuse");
+        std::fs::create_dir_all(path.parent().expect("у файла есть папка")).expect("папка");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), path.to_string_lossy().to_string());
+        params.insert("url".to_string(), "file:///C:/Windows/win.ini".to_string());
+
+        let refused = run(
+            "web|скачать|файл по ссылке",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("http"), "{}", refused.reason);
+
+        // Файл уже есть — без слова «перезаписать» не трогаем и в сеть не идём.
+        std::fs::write(&path, "старое").expect("файл");
+        params.insert(
+            "url".to_string(),
+            "https://example.com/файл.bin".to_string(),
+        );
+
+        let occupied = run(
+            "web|скачать|файл по ссылке",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!occupied.ok);
+        assert!(occupied.reason.contains("уже есть"), "{}", occupied.reason);
+        assert_eq!(
+            std::fs::read_to_string(&path).expect("файл на месте"),
+            "старое"
+        );
+
+        let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
+    }
+
+    #[test]
+    fn a_download_without_a_link_is_refused_before_any_network() {
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), "C:\\tmp\\файл.bin".to_string());
+
+        let refused = run(
+            "web|скачать|файл по ссылке",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("Ссылка"), "{}", refused.reason);
     }
 
     #[test]
