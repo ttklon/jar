@@ -306,12 +306,14 @@ fn read_text(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
 
     let content = match std::fs::read_to_string(target) {
         Ok(content) => content,
-        Err(_) => return StepResult::failed(
-            registry,
-            format!(
+        Err(_) => {
+            return StepResult::failed(
+                registry,
+                format!(
                 "файл не читается как текст: {path} — возможно, он двоичный или в другой кодировке"
             ),
-        ),
+            )
+        }
     };
 
     let duration_ms = started.elapsed().as_millis() as u64;
