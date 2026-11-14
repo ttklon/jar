@@ -421,10 +421,7 @@ fn expand_archive(
     match std::fs::metadata(archive) {
         Ok(meta) if meta.is_file() => {}
         Ok(_) => {
-            return StepResult::failed(
-                registry,
-                format!("это папка, а нужен файл архива: {path}"),
-            )
+            return StepResult::failed(registry, format!("это папка, а нужен файл архива: {path}"))
         }
         Err(_) => return StepResult::failed(registry, format!("архива нет: {path}")),
     }
@@ -432,7 +429,10 @@ fn expand_archive(
     let target = std::path::Path::new(&to);
     if target.exists() {
         if !target.is_dir() {
-            return StepResult::failed(registry, format!("по этому пути файл, а нужна папка: {to}"));
+            return StepResult::failed(
+                registry,
+                format!("по этому пути файл, а нужна папка: {to}"),
+            );
         }
         let busy = std::fs::read_dir(target)
             .map(|mut entries| entries.next().is_some())
@@ -1547,7 +1547,10 @@ mod tests {
 
     #[test]
     fn unpacking_refuses_an_occupied_folder_and_a_missing_archive() {
-        let root = temp_target("expand").parent().expect("папка").join("unpack");
+        let root = temp_target("expand")
+            .parent()
+            .expect("папка")
+            .join("unpack");
         std::fs::create_dir_all(&root).expect("папка");
 
         let mut params = BTreeMap::new();
