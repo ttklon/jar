@@ -127,6 +127,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|прочитать|текст файла" => read_text(registry, params),
         "files|заменить|текст в файле" => replace_text(registry, params),
         "web|скачать|файл по ссылке" => download_file(registry, params, cancel),
+        "files|распаковать|архив" => expand_archive(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -389,6 +390,104 @@ fn replace_text(registry: &str, params: &BTreeMap<String, String>) -> StepResult
     // Не совпало — значит, не выполнено, что бы ни говорил отчёт.
     result.ok = same;
     result
+}
+
+/// Распаковать архив в папку и доказать, что внутри появились файлы.
+///
+/// Правила здесь про чужое: распаковка — это запись рядом с чужими файлами.
+///
+///  * **архив должен быть файлом** — папка вместо архива это не «почти то же»;
+///  * **папка назначения должна быть пустой или несуществующей.** `Expand-Archive` без
+///    `-Force` падает на существующих файлах, а с `-Force` — молча затирает их; ни то, ни
+///    другое не годится, поэтому решаем до запуска и говорим причину;
+///  * **доказательство — файлы на месте.** «Команда не выдала ошибку» ещё не значит, что
+///    архив распаковался: пустая папка после успешного кода — это провал, а не успех.
+fn expand_archive(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let path = clean_path(param(params, "path"));
+    let to = clean_path(param(params, "to"));
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Архив»");
+    }
+    if to.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Куда распаковать»");
+    }
+
+    let archive = std::path::Path::new(&path);
+    match std::fs::metadata(archive) {
+        Ok(meta) if meta.is_file() => {}
+        Ok(_) => {
+            return StepResult::failed(
+                registry,
+                format!("это папка, а нужен файл архива: {path}"),
+            )
+        }
+        Err(_) => return StepResult::failed(registry, format!("архива нет: {path}")),
+    }
+
+    let target = std::path::Path::new(&to);
+    if target.exists() {
+        if !target.is_dir() {
+            return StepResult::failed(registry, format!("по этому пути файл, а нужна папка: {to}"));
+        }
+        let busy = std::fs::read_dir(target)
+            .map(|mut entries| entries.next().is_some())
+            .unwrap_or(false);
+        if busy {
+            return StepResult::failed(
+                registry,
+                format!("папка не пуста: {to} — распаковка поверх молча затёрла бы файлы"),
+            );
+        }
+    } else if let Err(error) = std::fs::create_dir_all(target) {
+        return StepResult::failed(registry, format!("папка не создалась: {error}"));
+    }
+
+    let result = run_script(
+        registry,
+        EXPAND_ARCHIVE,
+        &[("PATH", path.as_str()), ("TO", to.as_str())],
+        Expectation::PathExists(to.clone()),
+        Duration::from_secs(300),
+        cancel,
+    );
+    if !result.ok {
+        return result;
+    }
+
+    let files = count_files(target);
+    if files == 0 {
+        return StepResult::failed(
+            registry,
+            format!("код 0, но в папке нет ни одного файла: {to} — это не распаковка"),
+        );
+    }
+
+    let mut result = result;
+    result.reason = format!("распаковано файлов: {files} — {to}");
+    result
+}
+
+/// Сколько файлов внутри папки, считая вложенные. Ошибка чтения — ноль: тогда шаг
+/// честно скажет, что файлов не видно, а не соврёт про «распаковано».
+fn count_files(dir: &std::path::Path) -> usize {
+    let mut total = 0;
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return 0;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            total += count_files(&path);
+        } else {
+            total += 1;
+        }
+    }
+    total
 }
 
 /// Скачать файл по ссылке и доказать, что скачался файл, а не страница ошибки.
@@ -845,6 +944,11 @@ $rows | ForEach-Object {
   Write-Output ('{0} (pid {1}): {2} МБ' -f $_.ProcessName, $_.Id, [int]($_.WorkingSet64 / 1MB))
 }"#;
 
+const EXPAND_ARCHIVE: &str = r#"$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+[System.IO.Compression.ZipFile]::ExtractToDirectory($env:ZS_PATH, $env:ZS_TO)
+Write-Output 'ZSHELPER-OK'"#;
+
 const FREE_SPACE: &str = r#"$drives = @(Get-PSDrive -PSProvider FileSystem | Where-Object { $null -ne $_.Used })
 Write-Output ('ZSHELPER-OK drives={0}' -f $drives.Count)
 $drives | ForEach-Object {
@@ -976,6 +1080,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("files|удалить|в корзину", RECYCLE),
         ("files|проверить|размеры и место", FOLDER_SIZES),
         ("files|найти|по имени", FIND_BY_NAME),
+        ("files|распаковать|архив", EXPAND_ARCHIVE),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -1438,6 +1543,56 @@ mod tests {
         );
 
         let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
+    }
+
+    #[test]
+    fn unpacking_refuses_an_occupied_folder_and_a_missing_archive() {
+        let root = temp_target("expand").parent().expect("папка").join("unpack");
+        std::fs::create_dir_all(&root).expect("папка");
+
+        let mut params = BTreeMap::new();
+        params.insert(
+            "path".to_string(),
+            root.join("нет-такого.zip").to_string_lossy().to_string(),
+        );
+        params.insert(
+            "to".to_string(),
+            root.join("куда").to_string_lossy().to_string(),
+        );
+
+        let missing = run("files|распаковать|архив", &params, &AtomicBool::new(false));
+        assert!(!missing.ok);
+        assert!(missing.reason.contains("архива нет"), "{}", missing.reason);
+
+        // Архив есть, но папка назначения не пуста — распаковка поверх затёрла бы файлы.
+        let archive = root.join("есть.zip");
+        std::fs::write(&archive, "не настоящий архив").expect("файл");
+        let busy = root.join("куда");
+        std::fs::create_dir_all(&busy).expect("папка");
+        std::fs::write(busy.join("чужое.txt"), "не трогать").expect("файл");
+
+        params.insert("path".to_string(), archive.to_string_lossy().to_string());
+        let refused = run("files|распаковать|архив", &params, &AtomicBool::new(false));
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("не пуста"), "{}", refused.reason);
+        assert_eq!(
+            std::fs::read_to_string(busy.join("чужое.txt")).expect("файл на месте"),
+            "не трогать"
+        );
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn unpacking_script_asks_the_zip_library_and_says_when_it_finished() {
+        // Скрипт берёт путь из переменных окружения, а не из склейки: кавычка в имени
+        // папки не должна стать командой.
+        assert!(EXPAND_ARCHIVE.contains("$env:ZS_PATH"));
+        assert!(EXPAND_ARCHIVE.contains("$env:ZS_TO"));
+        assert!(EXPAND_ARCHIVE.contains("ZSHELPER-OK"));
+        assert!(scripts()
+            .iter()
+            .any(|(registry, _)| *registry == "files|распаковать|архив"));
     }
 
     #[test]
