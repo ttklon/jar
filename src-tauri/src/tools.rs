@@ -378,7 +378,10 @@ fn replace_text(registry: &str, params: &BTreeMap<String, String>) -> StepResult
     };
     let mut result = StepResult::ok_with(
         registry,
-        Evidence::FileText { path, matches: same },
+        Evidence::FileText {
+            path,
+            matches: same,
+        },
         reason,
         duration_ms,
     );
@@ -1270,7 +1273,11 @@ mod tests {
         // Со словом «все» — меняем оба и говорим, сколько.
         let mut all = params.clone();
         all.insert("all".to_string(), "true".to_string());
-        let replaced = run("files|заменить|текст в файле", &all, &AtomicBool::new(false));
+        let replaced = run(
+            "files|заменить|текст в файле",
+            &all,
+            &AtomicBool::new(false),
+        );
 
         assert!(replaced.ok, "{}", replaced.reason);
         assert!(replaced.reason.contains("заменено вхождений: 2"));
