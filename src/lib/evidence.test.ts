@@ -25,6 +25,12 @@ describe("доказательство словами", () => {
     );
   });
 
+  it("чтение файла подтверждается числом прочитанных байт", () => {
+    expect(evidenceText({ kind: "file_read", path: "C:\\tmp\\заметка.txt", bytes: 42 })).toBe(
+      "прочитано 42 байт из файла: C:\\tmp\\заметка.txt",
+    );
+  });
+
   it("остальные виды доказательств не потерялись", () => {
     expect(evidenceText({ kind: "exit_code", code: 0 })).toBe("код возврата 0");
     expect(evidenceText({ kind: "path_exists", path: "C:\\tmp", exists: true })).toContain(

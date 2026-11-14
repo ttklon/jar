@@ -26,6 +26,12 @@ pub enum Evidence {
         path: String,
         matches: bool,
     },
+    /// Файл прочитан: сколько байт текста пришло из файла. Ноль байт — пустой файл, и это
+    /// тоже честный ответ, а не «не получилось».
+    FileRead {
+        path: String,
+        bytes: usize,
+    },
     /// Действие над чужим окном: проверка — сравнение состояния экрана или чтение значения.
     UiChanged {
         what: String,
@@ -43,6 +49,7 @@ impl Evidence {
             Evidence::PathExists { .. } => "path_exists",
             Evidence::StdoutMarker { .. } => "stdout_marker",
             Evidence::FileText { .. } => "file_text",
+            Evidence::FileRead { .. } => "file_read",
             Evidence::UiChanged { .. } => "ui_changed",
             Evidence::Failed { .. } => "failed",
         }
@@ -72,6 +79,9 @@ impl Evidence {
                 } else {
                     format!("в файле оказалось не то, что записали: {path}")
                 }
+            }
+            Evidence::FileRead { path, bytes } => {
+                format!("прочитано {bytes} байт из файла: {path}")
             }
             Evidence::UiChanged { what, changed } => {
                 if *changed {

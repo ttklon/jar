@@ -24,6 +24,8 @@ export function evidenceText(evidence: Evidence): string {
       return evidence.matches
         ? `в файле ровно то, что записали: ${evidence.path}`
         : `в файле оказалось не то, что записали: ${evidence.path}`;
+    case "file_read":
+      return `прочитано ${evidence.bytes} байт из файла: ${evidence.path}`;
     case "ui_changed":
       return evidence.changed
         ? `изменение подтверждено: ${evidence.what}`

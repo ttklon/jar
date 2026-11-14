@@ -539,6 +539,7 @@ export type Evidence =
   | { kind: "path_exists"; path: string; exists: boolean }
   | { kind: "stdout_marker"; marker: string; found: boolean }
   | { kind: "file_text"; path: string; matches: boolean }
+  | { kind: "file_read"; path: string; bytes: number }
   | { kind: "ui_changed"; what: string; changed: boolean }
   | { kind: "failed"; reason: string };
 

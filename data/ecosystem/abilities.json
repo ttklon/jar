@@ -5105,6 +5105,26 @@
   "needs_check": false
  },
  {
+  "id": "ability:files:прочитать",
+  "name": "Файлы: прочитать",
+  "category": "abilities",
+  "subkind": "осмотр",
+  "origin": "registry",
+  "url": "docs/ACTIONS.md",
+  "license": "own",
+  "domain": "files",
+  "verb": "прочитать",
+  "actions": 1,
+  "gives": "1 действий: текст файла",
+  "examples": [
+   "текст файла"
+  ],
+  "tier": "T0",
+  "risk": "read",
+  "status": "selected",
+  "needs_check": false
+ },
+ {
   "id": "ability:files:распаковать",
   "name": "Файлы: распаковать",
   "category": "abilities",

@@ -124,6 +124,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
             simple(registry, OPEN_PORTS, 60, cancel)
         }
         "files|записать|текст в файл" => write_text(registry, params),
+        "files|прочитать|текст файла" => read_text(registry, params),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -263,6 +264,83 @@ fn create_folder(registry: &str, params: &BTreeMap<String, String>) -> StepResul
         }
         Err(error) => StepResult::failed(registry, format!("папка не создана: {error}")),
     }
+}
+
+/// Сколько читаем в один шаг. Мегабайт — уже не «файл заметок», а данные, которым место
+/// в программе: показать их человеку в отчёте всё равно нельзя.
+const MAX_READ_BYTES: u64 = 1024 * 1024;
+
+/// Прочитать текстовый файл.
+///
+/// Доказательство — сколько байт текста действительно пришло из файла. Пустой файл — это
+/// ноль байт и честный ответ; двоичный или слишком большой файл не читается вовсе, и
+/// причина называется, а не прячется за «не удалось».
+fn read_text(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Путь»");
+    }
+
+    let target = std::path::Path::new(&path);
+    let metadata = match std::fs::metadata(target) {
+        Ok(metadata) => metadata,
+        Err(_) => return StepResult::failed(registry, format!("файла нет: {path}")),
+    };
+
+    if !metadata.is_file() {
+        return StepResult::failed(registry, format!("это не файл, а папка: {path}"));
+    }
+    if metadata.len() > MAX_READ_BYTES {
+        return StepResult::failed(
+            registry,
+            format!(
+                "файл {} КБ, а читаю не больше {} КБ за шаг: такой файл открывают программой, \
+                 а не помощником",
+                metadata.len() / 1024,
+                MAX_READ_BYTES / 1024
+            ),
+        );
+    }
+
+    let content = match std::fs::read_to_string(target) {
+        Ok(content) => content,
+        Err(_) => {
+            return StepResult::failed(
+                registry,
+                format!("файл не читается как текст: {path} — возможно, он двоичный или в другой кодировке"),
+            )
+        }
+    };
+
+    let duration_ms = started.elapsed().as_millis() as u64;
+    let bytes = content.len();
+    let mut result = StepResult::ok_with(
+        registry,
+        Evidence::FileRead {
+            path: path.clone(),
+            bytes,
+        },
+        format!("прочитано {bytes} байт: {path}"),
+        duration_ms,
+    );
+    // В отчёт кладём начало файла и говорим, если показали не всё.
+    result.stdout_tail = if content.chars().count() > DETAIL_TAIL {
+        format!(
+            "{}\n… (показаны первые {DETAIL_TAIL} символов из {})",
+            head(&content, DETAIL_TAIL),
+            content.chars().count()
+        )
+    } else {
+        content
+    };
+    result
+}
+
+/// Начало строки в пределах `limit` символов — по границе символа, не байта.
+fn head(text: &str, limit: usize) -> String {
+    text.chars().take(limit).collect()
 }
 
 /// Потолок текста, который можно записать одним шагом.
@@ -912,6 +990,89 @@ mod tests {
         assert!(!refused.ok);
         assert!(refused.reason.contains("потолок"));
         assert!(!path.exists(), "ничего не должно появиться на диске");
+
+        let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
+    }
+
+
+    #[test]
+    fn a_text_file_is_read_and_says_how_many_bytes_came() {
+        let path = temp_target("read");
+        std::fs::create_dir_all(path.parent().expect("у файла есть папка")).expect("папка");
+        std::fs::write(&path, "первая строка\nвторая строка").expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), path.to_string_lossy().to_string());
+
+        let read = run(
+            "files|прочитать|текст файла",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        assert!(read.ok, "{}", read.reason);
+        assert_eq!(read.evidence.kind(), "file_read");
+        assert!(read.stdout_tail.contains("первая строка"), "{}", read.stdout_tail);
+        assert!(read.stdout_tail.contains("вторая строка"));
+
+        let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
+    }
+
+    #[test]
+    fn reading_a_missing_file_or_a_binary_one_is_refused() {
+        let mut params = BTreeMap::new();
+        params.insert(
+            "path".to_string(),
+            std::env::temp_dir()
+                .join("zshelper-нет-такого-файла.txt")
+                .to_string_lossy()
+                .to_string(),
+        );
+
+        let missing = run(
+            "files|прочитать|текст файла",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!missing.ok);
+        assert!(missing.reason.contains("файла нет"));
+
+        // Двоичный файл не выдаётся за текст: байты — не строки.
+        let path = temp_target("binary");
+        std::fs::create_dir_all(path.parent().expect("у файла есть папка")).expect("папка");
+        std::fs::write(&path, [0xff, 0xfe, 0x00, 0x01]).expect("файл");
+
+        let mut binary = BTreeMap::new();
+        binary.insert("path".to_string(), path.to_string_lossy().to_string());
+        let refused = run(
+            "files|прочитать|текст файла",
+            &binary,
+            &AtomicBool::new(false),
+        );
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("не читается как текст"));
+
+        let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
+    }
+
+    #[test]
+    fn a_file_over_the_read_limit_is_not_read_at_all() {
+        let path = temp_target("big");
+        std::fs::create_dir_all(path.parent().expect("у файла есть папка")).expect("папка");
+        std::fs::write(&path, vec![b'a'; (MAX_READ_BYTES + 1) as usize]).expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), path.to_string_lossy().to_string());
+
+        let refused = run(
+            "files|прочитать|текст файла",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("не больше"));
 
         let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
     }

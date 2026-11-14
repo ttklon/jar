@@ -2,7 +2,7 @@
 
 Полный, систематический перечень того, что приложение должно уметь делать. Источник — [`data/actions.psv`](../data/actions.psv); файл генерируется `python3 tools/actions.py`, руками не править.
 
-**Всего действий: 830** · доменов: **49** · уникальных глаголов: **205**
+**Всего действий: 831** · доменов: **49** · уникальных глаголов: **205**
 
 Обозначения: `risk` — R(чтение) / W(запись локально) / D(разрушительное) / E(внешний эффект) / M(деньги) / I(идентичность); `tier` — минимальное железо (T0…T3); `человек` — может / сложно / **не может** (то, ради чего продукт и нужен).
 
@@ -10,8 +10,8 @@
 
 | Риск | Действий | | Tier | Действий | | Статус | Действий |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `write-local` | 394 | `T1` | 403 | `v1` | 621 |
-| `read` | 308 | `T0` | 298 | `v2` | 198 |
+| `write-local` | 394 | `T1` | 403 | `v1` | 622 |
+| `read` | 309 | `T0` | 299 | `v2` | 198 |
 | `destructive` | 66 | `T2` | 111 | `never` | 11 |
 | `external` | 51 | `T3` | 18 |  |  |
 | `identity` | 7 |  |  |  |  |
@@ -23,7 +23,7 @@
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Видео | 30 | 8 | 20 | 1 | 1 | 0 | 0 | 9 | 21 | 0 |
 | Разработка и код | 29 | 7 | 19 | 1 | 2 | 0 | 0 | 4 | 25 | 0 |
-| Файлы | 26 | 10 | 13 | 3 | 0 | 0 | 0 | 18 | 8 | 0 |
+| Файлы | 27 | 11 | 13 | 3 | 0 | 0 | 0 | 19 | 8 | 0 |
 | music-production | 24 | 6 | 17 | 0 | 1 | 0 | 0 | 5 | 19 | 0 |
 | Веб и браузер | 23 | 14 | 4 | 1 | 3 | 0 | 1 | 12 | 11 | 1 |
 | Безопасность и доступ | 22 | 10 | 4 | 6 | 0 | 0 | 2 | 2 | 20 | 1 |
@@ -142,7 +142,7 @@
 | 810 | **создать** документацию из кода | _сделай README по коду_ | AST/парсер + LLM | write-local | T1 | может | v2 |
 | 811 | **найти** мёртвый и дублирующийся код | _что тут не используется_ | vulture/knip + AST | read | T1 | может | v2 |
 
-### Файлы (26)
+### Файлы (27)
 
 | # | Действие | Пример команды | Реализация | Риск | Tier | Человек | Статус |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -172,6 +172,7 @@
 | 800 | **проверить** дубликаты по хэшу | _найди одинаковые файлы_ | SHA-256 группировка | read | T0 | может | v1 |
 | 814 | **найти** текст внутри PDF-архива | _поищи фразу во всех pdf_ | pdftotext + ripgrep | read | T0 | может | v1 |
 | 830 | **записать** текст в файл | _запиши в файл заметку про встречу_ | fs.write, чтение обратно | write-local | T0 | может | v1 — перезапись существующего — только по слову «перезаписать» |
+| 831 | **прочитать** текст файла | _прочитай файл с заметками_ | fs.read_to_string, проверка кодировки | read | T0 | может | v1 — двоичные и слишком большие файлы не читаю |
 
 ### music-production (24)
 
@@ -1172,10 +1173,10 @@
 | составить | 11 | health-daily, home-daily, languages, learning-research, legal-docs, monitoring-triage… |
 | распознать | 10 | ai-ml, audio, home-daily, images, music, slides-pdf-print… |
 | подготовить | 10 | ai-ml, business-finance, career, creative-3d, distribution, engineering-3d… |
+| прочитать | 9 | apps-windows, chat-social, email, files, images, languages… |
 | запустить | 9 | ai-ml, apps-windows, automation, dev-code, games, licensing… |
 | открыть | 8 | business-finance, creative-3d, files, music-production, network, smart-home… |
 | экспортировать | 8 | ai-ml, business-finance, creative-3d, databases, music-production, personal-finance… |
-| прочитать | 8 | apps-windows, chat-social, email, images, languages, legal-docs… |
 | извлечь | 7 | devices, images, text-docs, video, web |
 | заполнить | 7 | career, legal-docs, sheets-data, text-docs, travel, web |
 | посчитать | 7 | business-finance, calendar-tasks, engineering-3d, home-daily, personal-finance, sheets-data… |
