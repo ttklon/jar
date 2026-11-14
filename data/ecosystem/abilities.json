@@ -4920,6 +4920,26 @@
   "needs_check": false
  },
  {
+  "id": "ability:files:записать",
+  "name": "Файлы: записать",
+  "category": "abilities",
+  "subkind": "создание",
+  "origin": "registry",
+  "url": "docs/ACTIONS.md",
+  "license": "own",
+  "domain": "files",
+  "verb": "записать",
+  "actions": 1,
+  "gives": "1 действий: текст в файл",
+  "examples": [
+   "текст в файл"
+  ],
+  "tier": "T0",
+  "risk": "write-local",
+  "status": "selected",
+  "needs_check": false
+ },
+ {
   "id": "ability:files:зашифровать",
   "name": "Файлы: зашифровать",
   "category": "abilities",

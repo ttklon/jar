@@ -123,6 +123,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "network|проверить|открытые порты" => {
             simple(registry, OPEN_PORTS, 60, cancel)
         }
+        "files|записать|текст в файл" => write_text(registry, params),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -261,6 +262,99 @@ fn create_folder(registry: &str, params: &BTreeMap<String, String>) -> StepResul
             native_result(registry, Expectation::PathExists(path), started, &message)
         }
         Err(error) => StepResult::failed(registry, format!("папка не создана: {error}")),
+    }
+}
+
+/// Потолок текста, который можно записать одним шагом.
+///
+/// 64 КБ — это уже не заметка, а файл, который человек не прочитает в подтверждении.
+/// Большое пишут программами, а не через поле параметра.
+const MAX_WRITE_BYTES: usize = 64 * 1024;
+
+/// Записать текст в файл.
+///
+/// Доказательство здесь не «запись прошла без ошибки», а «файл читается обратно и в нём
+/// ровно тот текст»: диск мог не принять, кодировка могла подменить символы, чужой процесс
+/// мог успеть переписать файл. Поэтому после записи файл читается заново и сравнивается.
+///
+/// Существующий файл не трогаем без явного слова «перезаписать»: молча затереть чужую
+/// работу — худшее из того, что можно сделать, помогая.
+fn write_text(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+    // Текст пишется ровно как пришёл: никаких «улучшений» по дороге — иначе обещание
+    // «в файле будет то, что вы сказали» перестало бы быть правдой.
+    let text = param(params, "text");
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Путь»");
+    }
+    if text.trim().is_empty() {
+        return StepResult::failed(
+            registry,
+            "не задан параметр «Текст»: пустой файл — это не результат",
+        );
+    }
+    if text.len() > MAX_WRITE_BYTES {
+        return StepResult::failed(
+            registry,
+            format!(
+                "текст {} байт, а потолок {MAX_WRITE_BYTES}: столько в подтверждении не прочитать",
+                text.len()
+            ),
+        );
+    }
+
+    let target = std::path::Path::new(&path);
+    let overwrite = matches!(param(params, "overwrite").trim(), "true" | "да" | "yes");
+    if target.exists() && !overwrite {
+        return StepResult::failed(
+            registry,
+            format!("файл уже есть: {path} — не перезаписываю без слова «перезаписать»"),
+        );
+    }
+
+    // Папки по дороге создаём: «сохрани в новой папке» — обычная просьба, а не ошибка.
+    if let Some(parent) = target.parent() {
+        if !parent.as_os_str().is_empty() {
+            if let Err(error) = std::fs::create_dir_all(parent) {
+                return StepResult::failed(
+                    registry,
+                    format!("папка для файла не создалась: {error}"),
+                );
+            }
+        }
+    }
+
+    if let Err(error) = std::fs::write(target, text.as_bytes()) {
+        return StepResult::failed(registry, format!("файл не записался: {error}"));
+    }
+
+    let duration_ms = started.elapsed().as_millis() as u64;
+    match std::fs::read_to_string(target) {
+        Ok(back) => {
+            let matches = back == text;
+            let mut result = StepResult::ok_with(
+                registry,
+                Evidence::FileText {
+                    path: path.clone(),
+                    matches,
+                },
+                if matches {
+                    format!("записано и прочитано обратно: {path}")
+                } else {
+                    format!("в файле оказалось не то, что записали: {path}")
+                },
+                duration_ms,
+            );
+            // Прочиталось другое — значит, не выполнено. Доказательство важнее отчёта.
+            result.ok = matches;
+            result
+        }
+        Err(error) => StepResult::failed(
+            registry,
+            format!("файл записан, но не читается обратно: {error}"),
+        ),
     }
 }
 
@@ -753,6 +847,73 @@ mod tests {
         let refused = run("apps-windows|запустить|программу", &params, &cancel);
         assert!(!refused.ok, "запускать нечего — это провал");
         assert_eq!(refused.evidence.kind(), "stdout_marker");
+    }
+
+
+    /// Временный путь, уникальный для теста: чужие тесты и запуски не должны мешать.
+    fn temp_target(name: &str) -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!(
+            "zshelper-write-{}-{name}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        dir.join("заметка.txt")
+    }
+
+    #[test]
+    fn text_is_written_and_read_back_and_an_existing_file_is_not_clobbered() {
+        let cancel = AtomicBool::new(false);
+        let path = temp_target("notes");
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), path.to_string_lossy().to_string());
+        params.insert("text".to_string(), "список покупок:\n- хлеб\n- молоко".to_string());
+
+        let written = run("files|записать|текст в файл", &params, &cancel);
+        assert!(written.ok, "{}", written.reason);
+        assert_eq!(written.evidence.kind(), "file_text");
+        assert_eq!(
+            std::fs::read_to_string(&path).expect("файл на месте"),
+            "список покупок:\n- хлеб\n- молоко"
+        );
+
+        // Существующий файл без слова «перезаписать» не трогаем — и говорим об этом.
+        let mut again = params.clone();
+        again.insert("text".to_string(), "другое".to_string());
+        let refused = run("files|записать|текст в файл", &again, &cancel);
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("не перезаписываю"));
+        assert_eq!(
+            std::fs::read_to_string(&path).expect("файл на месте"),
+            "список покупок:\n- хлеб\n- молоко"
+        );
+
+        // Со словом человека — переписывает.
+        again.insert("overwrite".to_string(), "true".to_string());
+        let overwritten = run("files|записать|текст в файл", &again, &cancel);
+        assert!(overwritten.ok, "{}", overwritten.reason);
+        assert_eq!(
+            std::fs::read_to_string(&path).expect("файл на месте"),
+            "другое"
+        );
+
+        let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
+    }
+
+    #[test]
+    fn a_huge_text_is_refused_before_it_touches_the_disk() {
+        let cancel = AtomicBool::new(false);
+        let path = temp_target("huge");
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), path.to_string_lossy().to_string());
+        params.insert("text".to_string(), "я".repeat(MAX_WRITE_BYTES + 1));
+
+        let refused = run("files|записать|текст в файл", &params, &cancel);
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("потолок"));
+        assert!(!path.exists(), "ничего не должно появиться на диске");
+
+        let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
     }
 
     #[test]

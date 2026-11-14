@@ -21,6 +21,11 @@ pub enum Evidence {
         marker: String,
         found: bool,
     },
+    /// Файл записан: проверка — прочитать обратно и сравнить, а не поверить записи.
+    FileText {
+        path: String,
+        matches: bool,
+    },
     /// Действие над чужим окном: проверка — сравнение состояния экрана или чтение значения.
     UiChanged {
         what: String,
@@ -37,6 +42,7 @@ impl Evidence {
             Evidence::ExitCode { .. } => "exit_code",
             Evidence::PathExists { .. } => "path_exists",
             Evidence::StdoutMarker { .. } => "stdout_marker",
+            Evidence::FileText { .. } => "file_text",
             Evidence::UiChanged { .. } => "ui_changed",
             Evidence::Failed { .. } => "failed",
         }
@@ -58,6 +64,13 @@ impl Evidence {
                     format!("в выводе найден признак «{marker}»")
                 } else {
                     format!("признак «{marker}» в выводе не найден")
+                }
+            }
+            Evidence::FileText { path, matches } => {
+                if *matches {
+                    format!("в файле ровно то, что записали: {path}")
+                } else {
+                    format!("в файле оказалось не то, что записали: {path}")
                 }
             }
             Evidence::UiChanged { what, changed } => {

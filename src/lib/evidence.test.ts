@@ -16,6 +16,15 @@ describe("доказательство словами", () => {
     ).toBe("изменения не видно: поле «Логин»");
   });
 
+  it("запись в файл подтверждается чтением обратно, а не «сохранено»", () => {
+    expect(evidenceText({ kind: "file_text", path: "C:\\tmp\\заметка.txt", matches: true })).toBe(
+      "в файле ровно то, что записали: C:\\tmp\\заметка.txt",
+    );
+    expect(evidenceText({ kind: "file_text", path: "C:\\tmp\\заметка.txt", matches: false })).toBe(
+      "в файле оказалось не то, что записали: C:\\tmp\\заметка.txt",
+    );
+  });
+
   it("остальные виды доказательств не потерялись", () => {
     expect(evidenceText({ kind: "exit_code", code: 0 })).toBe("код возврата 0");
     expect(evidenceText({ kind: "path_exists", path: "C:\\tmp", exists: true })).toContain(

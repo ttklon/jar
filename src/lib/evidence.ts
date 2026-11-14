@@ -20,6 +20,10 @@ export function evidenceText(evidence: Evidence): string {
       return evidence.found
         ? `в выводе найден признак «${evidence.marker}»`
         : `признак «${evidence.marker}» не найден`;
+    case "file_text":
+      return evidence.matches
+        ? `в файле ровно то, что записали: ${evidence.path}`
+        : `в файле оказалось не то, что записали: ${evidence.path}`;
     case "ui_changed":
       return evidence.changed
         ? `изменение подтверждено: ${evidence.what}`

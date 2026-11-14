@@ -13317,5 +13317,22 @@
   "human_code": "c",
   "status": "v1",
   "notes": ""
+ },
+ {
+  "id": "files-830",
+  "domain": "files",
+  "verb": "записать",
+  "object": "текст в файл",
+  "example": "запиши в файл заметку про встречу",
+  "implementation": [
+   "fs.write",
+   "чтение обратно"
+  ],
+  "risk": "write-local",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "перезапись существующего — только по слову «перезаписать»"
  }
 ]

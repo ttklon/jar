@@ -2,6 +2,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import { App } from "./app";
+import actionsJson from "../data/actions.json";
+
+/**
+ * Цифры берём из данных, а не из головы: реестр растёт, и дымовой тест должен проверять,
+ * что экран показывает настоящее число, а не совпадать с однажды записанным.
+ */
+const TOTAL = actionsJson.length;
+const DOMAINS = new Set(actionsJson.map((row) => row.domain)).size;
 
 /**
  * Дымовой тест интерфейса: приложение обязано отрисоваться на реальных данных
@@ -59,9 +67,9 @@ describe("App", () => {
     nav().getByRole("button", { name: "Обзор" }).click();
     await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
 
-    const domainsBlock = await screen.findAllByText("49");
+    const domainsBlock = await screen.findAllByText(String(DOMAINS));
     expect(domainsBlock.length).toBeGreaterThan(0);
-    expect(screen.getAllByText("829").length).toBeGreaterThan(0);
+    expect(screen.getAllByText(String(TOTAL)).length).toBeGreaterThan(0);
   });
 
   it("экран «Руки» показывает инструменты и их политику", async () => {
@@ -122,7 +130,7 @@ describe("App", () => {
     nav().getByRole("button", { name: "Что умею" }).click();
     await waitFor(() => expect(screen.getByText("Каталог действий")).toBeTruthy());
 
-    const found = await screen.findByText(/Найдено: 829 из 829/);
+    const found = await screen.findByText(new RegExp(`Найдено: ${TOTAL} из ${TOTAL}`));
     expect(found).toBeTruthy();
   });
 });
