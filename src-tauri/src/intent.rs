@@ -819,7 +819,8 @@ mod tests {
     #[test]
     fn a_closed_goal_is_said_out_loud_and_takes_no_deeds() {
         // У закрытой цели дел нет — и отсутствие ключа `deeds` не ошибка.
-        let answer = r#"{"kind":"next","goal":"наведи порядок","done":true,"why":"дубликатов не осталось"}"#;
+        let answer =
+            r#"{"kind":"next","goal":"наведи порядок","done":true,"why":"дубликатов не осталось"}"#;
 
         match parse(answer, &known()).expect("разбирается") {
             Proposal::Next { done, deeds, .. } => {
