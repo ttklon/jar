@@ -555,7 +555,10 @@ mod tests {
 
         assert_eq!(away.mode, Mode::Away);
         assert_eq!(away.parallel, 1);
-        assert!(away.may_start, "слово человека всё же значит одно осторожное дело");
+        assert!(
+            away.may_start,
+            "слово человека всё же значит одно осторожное дело"
+        );
         assert!(away.reason.contains("вы сказали"));
 
         assert_eq!(unmeasured(None, "нет прав").mode, Mode::Near);
