@@ -389,8 +389,86 @@ describe("очередь дел на экране", () => {
     fireEvent.click(screen.getByText("Работать без меня"));
 
     // Оба дела не сделались — очередь говорит об этом и новых дел не выдумывает.
+    // Каждое дело получило по одной повторной попытке (пустая неудача), и это предел:
+    // два дела × две попытки.
     await waitFor(() => expect(screen.getByText(/не сделалось/)).toBeTruthy());
     expect(vi.mocked(think)).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(4));
+    expect(screen.getAllByText(/попыток уже 2/).length).toBe(2);
+  });
+
+  it("с первого раза ничего не сделалось — очередь пробует ещё раз, и это видно", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(safePlan as never);
+
+    const okReport = {
+      goal: "убавить громкость",
+      steps: [
+        {
+          position: 1,
+          registry: "звук|убавить|громкость",
+          status: "ok",
+          reason: "сделано",
+          evidence: "system",
+          duration_ms: 5,
+        },
+      ],
+      stopped: null,
+      run_id: 1,
+    };
+
+    vi.mocked(runPlan)
+      // Первый раз — пустая неудача: ни один шаг не сделался, значит повторять нечего бояться.
+      .mockResolvedValueOnce({
+        goal: "убавить громкость",
+        steps: [],
+        stopped: "шаг 1: окно не открылось",
+        run_id: 1,
+      } as never)
+      .mockResolvedValueOnce(okReport as never);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    addToQueue("убавить громкость");
+    fireEvent.click(screen.getByText("Работать без меня"));
+
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.getByText(/готово · убавить громкость/)).toBeTruthy());
+  });
+
+  it("хоть что-то сделалось — второй раз не пробуем, чтобы не сделать дважды", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(safePlan as never);
+    vi.mocked(runPlan).mockResolvedValue({
+      goal: "убавить громкость",
+      steps: [
+        {
+          position: 1,
+          registry: "звук|убавить|громкость",
+          status: "ok",
+          reason: "сделано",
+          evidence: "system",
+          duration_ms: 5,
+        },
+        {
+          position: 2,
+          registry: "звук|убавить|громкость",
+          status: "failed",
+          reason: "нет доступа",
+          evidence: "system",
+          duration_ms: 5,
+        },
+      ],
+      stopped: "шаг 2: нет доступа",
+      run_id: 1,
+    } as never);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    addToQueue("убавить громкость");
+    fireEvent.click(screen.getByText("Работать без меня"));
+
+    await waitFor(() => expect(screen.getByText(/1 шаг уже сделано — второй прогон/)).toBeTruthy());
+    expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1);
   });
 });

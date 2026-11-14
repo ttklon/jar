@@ -52,10 +52,12 @@ import {
   continuationQuery,
   DEEDS_PER_HOUR,
   hourLeft,
+  MAX_TRIES,
   markScreen,
   pick,
   progress,
   replenish,
+  retry,
   setState,
   startHour,
   stopRemaining,
@@ -306,20 +308,55 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           return;
         }
 
+        // Потолок в час считает дела, а не попытки: повтор одного дела — не второе дело.
         takeHour();
-        sync(setState(items, item.id, "running", ""));
 
-        const report = await runPlan(JSON.stringify(check.plan), []).catch(() => null);
-        if (!report) {
-          sync(setState(items, item.id, "failed", "запуск не состоялся: ядро не ответило"));
-          return;
-        }
-        if (report.stopped) {
-          sync(setState(items, item.id, "failed", report.stopped));
-          return;
-        }
+        let tries = 0;
+        for (;;) {
+          tries += 1;
+          sync(
+            setState(
+              items,
+              item.id,
+              "running",
+              tries > 1 ? `попытка ${tries} из ${MAX_TRIES}` : "",
+            ),
+          );
 
-        sync(setState(items, item.id, "done", `шагов: ${report.steps.length}, всё выполнено`));
+          const report = await runPlan(JSON.stringify(check.plan), []).catch(() => null);
+          if (!report) {
+            sync(setState(items, item.id, "failed", "запуск не состоялся: ядро не ответило"));
+            return;
+          }
+
+          if (!report.stopped) {
+            sync(setState(items, item.id, "done", `шагов: ${report.steps.length}, всё выполнено`));
+            return;
+          }
+
+          const completed = report.steps.filter((step) => step.status === "ok").length;
+
+          // Сказал «стоп» — второй раз не пробуем: это уже не помощь, а спорт.
+          const verdict = queueStopRef.current
+            ? { again: false, why: "остановлено вами: второй раз не пробую" }
+            : retry({ completed, stopped: report.stopped }, tries);
+
+          if (!verdict.again) {
+            sync(
+              setState(
+                items,
+                item.id,
+                "failed",
+                `${verdict.why} — остановилось на: ${report.stopped}`,
+              ),
+            );
+            return;
+          }
+
+          // Короткая пауза: помеха могла быть случайной, но ждать её «когда-нибудь» нельзя.
+          sync(setState(items, item.id, "running", verdict.why));
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        }
       })().finally(() => {
         inFlight.delete(item.id);
       });

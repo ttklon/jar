@@ -5,11 +5,13 @@ import {
   DEEDS_PER_HOUR,
   HOUR_MS,
   hourLeft,
+  MAX_TRIES,
   markScreen,
   next,
   pick,
   progress,
   replenish,
+  retry,
   rollHour,
   setState,
   startHour,
@@ -342,5 +344,37 @@ describe("самопополнение очереди", () => {
     ];
 
     expect(progress(items, goal)).toEqual({ goal, done: 1, left: 1, stuck: 1 });
+  });
+});
+
+describe("повтор, когда ничего не сделалось", () => {
+  it("сделано — повторять нечего", () => {
+    const verdict = retry({ completed: 2, stopped: null }, 1);
+
+    expect(verdict.again).toBe(false);
+    expect(verdict.why).toContain("сделано");
+  });
+
+  it("хоть что-то сделано — второй раз нельзя: сделает дважды", () => {
+    const verdict = retry({ completed: 1, stopped: "шаг 2: нет доступа" }, 1);
+
+    expect(verdict.again).toBe(false);
+    expect(verdict.why).toContain("1 шаг уже сделано");
+    expect(verdict.why).toContain("дважды");
+  });
+
+  it("ничего не сделалось — одна повторная попытка, и она названа", () => {
+    const verdict = retry({ completed: 0, stopped: "шаг 1: окно не открылось" }, 1);
+
+    expect(verdict.again).toBe(true);
+    expect(verdict.why).toContain("шаг 1: окно не открылось");
+    expect(verdict.why).toContain(`попытка 2 из ${MAX_TRIES}`);
+  });
+
+  it("две пустые попытки — хватит: это уже долбёжка", () => {
+    const verdict = retry({ completed: 0, stopped: "шаг 1: нет доступа" }, MAX_TRIES);
+
+    expect(verdict.again).toBe(false);
+    expect(verdict.why).toContain("больше не пробую");
   });
 });
