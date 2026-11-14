@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
+  declarePresence,
   draftHand,
   draftPlan,
   requestLearning,
@@ -36,11 +37,13 @@ vi.mock("../ipc", () => ({
   uiDump: vi.fn().mockRejectedValue(new Error("в браузере нет UI Automation")),
   uiPress: vi.fn().mockRejectedValue(new Error("в браузере окон нет")),
   uiType: vi.fn().mockRejectedValue(new Error("в браузере окон нет")),
+  declarePresence: vi.fn(),
   machineState: vi.fn().mockResolvedValue({
     sample: null,
     budget: { parallel: 1, mode: "near", reason: "в браузере машину не измерить", may_start: true },
     available: false,
     note: "машина измеряется в приложении",
+    declared: null,
   }),
   draftHand: vi.fn(),
   trialHand: vi.fn(),
@@ -94,8 +97,10 @@ afterEach(() => {
     budget: { parallel: 1, mode: "near", reason: "в браузере машину не измерить", may_start: true },
     available: false,
     note: "машина измеряется в приложении",
+    declared: null,
   });
   vi.mocked(requestLearning).mockReset().mockResolvedValue(null);
+  vi.mocked(declarePresence).mockReset();
   vi.mocked(planFor).mockClear();
   vi.mocked(transcribeLocal).mockReset();
   vi.mocked(startRecording).mockReset();
@@ -285,6 +290,7 @@ describe("локальное распознавание на экране", () =
       },
       available: true,
       note: "машина измеряется честно: простой ввода, загрузка процессора, свободная память",
+      declared: null,
     });
 
     render(<Voice onOpen={() => {}} />);
@@ -312,6 +318,7 @@ describe("локальное распознавание на экране", () =
       },
       available: true,
       note: "машина измеряется честно",
+      declared: null,
     });
 
     render(<Voice onOpen={() => {}} />);
@@ -323,6 +330,56 @@ describe("локальное распознавание на экране", () =
 
     await waitFor(() => expect(screen.getByText(/новое не начинаю: памяти на исходе/)).toBeTruthy());
     expect(screen.getByText(/новое не начинаю\. /)).toBeTruthy();
+  });
+
+  it("человек говорит прямо «я ухожу» — и слово сильнее таймера", async () => {
+    vi.mocked(declarePresence).mockResolvedValue({
+      sample: { cpu_percent: 12, ram_free_mb: 9_000, ram_total_mb: 16_384, idle_seconds: 4 },
+      budget: {
+        parallel: 3,
+        mode: "away",
+        reason:
+          "вы сказали, что уходите, — верю слову, а не таймеру (ввод молчит 4 с): можно три дела сразу",
+        may_start: true,
+      },
+      available: true,
+      note: "машина измеряется честно",
+      declared: "away",
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.click(screen.getByText("Я ухожу"));
+
+    await waitFor(() => expect(vi.mocked(declarePresence)).toHaveBeenCalledWith("away"));
+    // Сказано человеком — и подписано его словами, а не «система решила».
+    expect(screen.getByText(/считаю так, пока не скажете обратное/)).toBeTruthy();
+    expect(screen.getByText(/3 дела сразу/)).toBeTruthy();
+    // Щелчок ничего не запускает: очередь начинается своей кнопкой.
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
+  });
+
+  it("«я работаю» тоже сильнее длинной тишины", async () => {
+    vi.mocked(declarePresence).mockResolvedValue({
+      sample: { cpu_percent: 8, ram_free_mb: 9_000, ram_total_mb: 16_384, idle_seconds: 9_000 },
+      budget: {
+        parallel: 1,
+        mode: "near",
+        reason:
+          "вы сказали, что работаете, — одно дело в фоне, чужие окна не трогаю (хотя ввод молчит уже 9000 с)",
+        may_start: true,
+      },
+      available: true,
+      note: "машина измеряется честно",
+      declared: "near",
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.click(screen.getByText("Я работаю"));
+
+    await waitFor(() => expect(vi.mocked(declarePresence)).toHaveBeenCalledWith("near"));
+    expect(screen.getByText(/вы сказали, что работаете: одно дело в фоне/)).toBeTruthy();
+    // И решение машины рядом: одно дело, а не три — слово не добавляет железа.
+    expect(screen.getByText(/человек за машиной — одно дело/)).toBeTruthy();
   });
 
   it("нажатие спрашивают до нажатия, а не после", async () => {

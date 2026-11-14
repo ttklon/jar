@@ -6,6 +6,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type {
   MachineState,
+  Presence,
   UiPress,
   UiTyped,
 AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RegistrySnapshot, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
@@ -188,6 +189,14 @@ export function uiType(name: string, text: string, confirmed: boolean): Promise<
 /** Сколько сейчас можно и почему именно столько. Ничего не запускает. */
 export function machineState(): Promise<MachineState> {
   return invoke<MachineState>("machine_state");
+}
+
+/**
+ * Сказать, уходит человек или работает. Это слово, а не приказ что-то запустить:
+ * оно меняет только ответ машины про то, сколько можно.
+ */
+export function declarePresence(said: Presence | null): Promise<MachineState> {
+  return invoke<MachineState>("declare_presence", { said });
 }
 
 /** Что видно в активном окне: элементы, а не пиксели. Только чтение. */

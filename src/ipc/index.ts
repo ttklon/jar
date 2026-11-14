@@ -54,6 +54,7 @@ export type {
   Tier,
   ToolView,
   MachineState,
+  Presence,
   UiDump,
   UiElement,
   UiPress,
@@ -61,7 +62,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
+import type { AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -620,6 +621,21 @@ export async function machineState(): Promise<MachineState> {
   }
   const { machineState: fromData } = await import("./dev");
   return fromData();
+}
+
+/**
+ * Сказать машине, уходит человек или работает.
+ *
+ * Это слово, а не запуск: оно меняет только ответ «сколько сейчас можно». Очередь всё
+ * равно начинается отдельной кнопкой — молча она не идёт.
+ */
+export async function declarePresence(said: Presence | null): Promise<MachineState> {
+  if (isTauri()) {
+    const { declarePresence: fromCore } = await import("./tauri");
+    return fromCore(said);
+  }
+  const { declarePresence: fromData } = await import("./dev");
+  return fromData(said);
 }
 
 /** Что видно в активном окне — по элементам. В браузере этого нет и быть не может. */

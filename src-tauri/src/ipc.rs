@@ -55,6 +55,8 @@ pub struct Inner {
     pub engine: std::sync::Mutex<Option<Server>>,
     pub policy: PolicyState,
     pub cancel: AtomicBool,
+    /// Слово человека о себе: «я ухожу» или «я работаю». `None` — не говорил, решает таймер.
+    pub presence: std::sync::Mutex<Option<machine::Presence>>,
 }
 
 pub struct AppState {
@@ -1421,9 +1423,53 @@ pub async fn ui_type(
 /// Ответ — совет самой себе, а не приказ человеку: загрузку и присутствие видно по
 /// измерению, но решает он. Поэтому рядом с числом всегда стоит причина.
 #[tauri::command]
-pub async fn machine_state() -> Result<machine::State, String> {
+pub async fn machine_state(state: State<'_, AppState>) -> Result<machine::State, String> {
+    let said = match state.inner.presence.lock() {
+        Ok(guard) => *guard,
+        Err(_) => None,
+    };
+
     // Замер занимает двести миллисекунд и трогает систему: на потоке интерфейса ему не место.
-    let state = tauri::async_runtime::spawn_blocking(machine::state)
+    let state = tauri::async_runtime::spawn_blocking(move || machine::state_with(said))
+        .await
+        .map_err(|error| format!("машина не измерилась: {error}"))?;
+    Ok(state)
+}
+
+/// Сказать машине, уходит человек или работает. Это слово человека, а не догадка.
+///
+/// Зачем команда, если есть простой ввода. Таймер ошибается в обе стороны: читающего с
+/// экрана он считает ушедшим, а ушедшего с ноутбуком — сидящим рядом. Слово сильнее
+/// таймера, но не сильнее железа: память и процессор всё равно решают своё.
+///
+/// `None` — вернуться к измерению («как есть»).
+#[tauri::command]
+pub async fn declare_presence(
+    state: State<'_, AppState>,
+    said: Option<String>,
+) -> Result<machine::State, String> {
+    let declared = match said.as_deref().map(str::trim) {
+        None | Some("") => None,
+        Some("away") => Some(machine::Presence::Away),
+        Some("near") => Some(machine::Presence::Near),
+        Some(other) => {
+            return Err(format!(
+                "непонятное слово про присутствие `{other}`: ожидалось away, near или пусто"
+            ))
+        }
+    };
+
+    match state.inner.presence.lock() {
+        Ok(mut guard) => *guard = declared,
+        Err(_) => {
+            return Err(
+                "слово про присутствие не сохранилось: приложение не в порядке, перезапустите"
+                    .to_string(),
+            )
+        }
+    }
+
+    let state = tauri::async_runtime::spawn_blocking(move || machine::state_with(declared))
         .await
         .map_err(|error| format!("машина не измерилась: {error}"))?;
     Ok(state)

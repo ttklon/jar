@@ -3,7 +3,7 @@
  * чтобы позже можно было добавить en.json без переписывания экранов.
  */
 
-import type { Risk, Tier } from "../ipc";
+import type { Presence, Risk, Tier } from "../ipc";
 
 export const RISK_LABEL: Record<Risk, string> = {
   read: "чтение",
@@ -576,6 +576,16 @@ export const voice = {
                 : "остановлено";
     return `${mark} · ${goal}${note ? ` — ${note}` : ""}`;
   },
+  presenceAway: "Я ухожу",
+  presenceNear: "Я работаю",
+  presenceClear: "Как есть",
+  presenceHint:
+    "таймер ошибается в обе стороны — читающего считает ушедшим, а ушедшего рядом. Скажите прямо, и я буду считать так, пока не скажете обратное",
+  presenceSaid: (said: Presence) =>
+    said === "away"
+      ? "вы сказали, что уходите: считаю так, пока не скажете обратное. Железо это не отменяет — память и процессор решают своё"
+      : "вы сказали, что работаете: одно дело в фоне, чужие окна не трогаю",
+  presenceError: (reason: string) => `слово про присутствие не сохранилось: ${reason}`,
   machineMeasuring: "Мерю машину…",
   machineTitle: "Машина",
   machineSummary: (mode: "near" | "away" | "crowded", parallel: number, reason: string) =>

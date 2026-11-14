@@ -55,6 +55,29 @@ impl Mode {
     }
 }
 
+/// Что человек сказал о себе: уходит он или работает.
+///
+/// Зачем слово, если есть таймер. Таймер ошибается в обе стороны: он считает «отошёл»
+/// того, кто читает с экрана, и «рядом» того, кто ушёл с ноутбуком. Слово человека
+/// сильнее измерения — но не сильнее железа: объявление не добавляет памяти и ядер.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Presence {
+    /// «Я ухожу»: можно взять больше, пока не сказано обратное.
+    Away,
+    /// «Я работаю»: одно дело в фоне, чужие окна не трогаем.
+    Near,
+}
+
+impl Presence {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Presence::Away => "я ухожу",
+            Presence::Near => "я работаю",
+        }
+    }
+}
+
 /// Сколько можно взять прямо сейчас. Это совет, и он объяснён.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Budget {
@@ -80,18 +103,34 @@ const RAM_TIGHT_MB: u32 = 1500;
 /// Загрузка выше этой — машина занята кем-то ещё.
 const CPU_BUSY: u8 = 70;
 
-/// Решение по измерению. Правила в порядке важности: память, затем чужая загрузка, затем
-/// присутствие человека. Порядок не случаен: голодная машина вредит всем, включая человека.
+/// Решение по измерению, без слова человека. Оставлено отдельно: так видно, что именно
+/// меняет слово, а что говорит железо.
 pub fn decide(sample: &Sample) -> Budget {
+    decide_with(sample, None)
+}
+
+/// Решение по измерению и по слову человека.
+///
+/// Порядок правил не случаен: сначала голодная машина, потом чужая загрузка, и только
+/// потом присутствие. Слово «я ухожу» не отменяет первые два правила — иначе объявление
+/// стало бы способом выжать из машины то, чего в ней нет.
+pub fn decide_with(sample: &Sample, said: Option<Presence>) -> Budget {
     if sample.ram_free_mb < RAM_FLOOR_MB {
         return Budget {
             parallel: 0,
             mode: Mode::Crowded,
-            reason: format!(
-                "свободной памяти {} МБ из {} — меньше порога {} МБ: новое не начинаю, \
-                 чтобы не подвесить машину",
-                sample.ram_free_mb, sample.ram_total_mb, RAM_FLOOR_MB
-            ),
+            reason: match said {
+                Some(Presence::Away) => format!(
+                    "вы сказали, что уходите, но свободной памяти {} МБ из {} — меньше порога \
+                     {} МБ: новое не начинаю, иначе машина повиснет вместе с вашими делами",
+                    sample.ram_free_mb, sample.ram_total_mb, RAM_FLOOR_MB
+                ),
+                _ => format!(
+                    "свободной памяти {} МБ из {} — меньше порога {} МБ: новое не начинаю, \
+                     чтобы не подвесить машину",
+                    sample.ram_free_mb, sample.ram_total_mb, RAM_FLOOR_MB
+                ),
+            },
             may_start: false,
         };
     }
@@ -101,19 +140,71 @@ pub fn decide(sample: &Sample) -> Budget {
             parallel: 1,
             mode: Mode::Crowded,
             reason: format!(
-                "процессор занят на {}%: дело будет одно, и то в фоне",
-                sample.cpu_percent
+                "процессор занят на {}%: дело будет одно, и то в фоне{}",
+                sample.cpu_percent,
+                match said {
+                    Some(Presence::Away) => ", хоть вы и ушли — чужую работу я не вытесняю",
+                    _ => "",
+                }
             ),
             may_start: true,
         };
     }
 
+    // Слово человека сильнее таймера — в обе стороны.
+    match said {
+        Some(Presence::Away) => {
+            if sample.ram_free_mb < RAM_TIGHT_MB {
+                return Budget {
+                    parallel: 1,
+                    mode: Mode::Away,
+                    reason: format!(
+                        "вы сказали, что уходите, но свободной памяти только {} МБ — беру одно дело",
+                        sample.ram_free_mb
+                    ),
+                    may_start: true,
+                };
+            }
+
+            return Budget {
+                parallel: 3,
+                mode: Mode::Away,
+                reason: format!(
+                    "вы сказали, что уходите, — верю слову, а не таймеру (ввод молчит {} с): \
+                     можно три дела сразу",
+                    sample.idle_seconds
+                ),
+                may_start: true,
+            };
+        }
+        Some(Presence::Near) => {
+            // Таймер мог решить «отошёл» — но человек сказал иначе, и это видно в причине.
+            let silence = if sample.idle_seconds >= AWAY_SECONDS {
+                format!(" (хотя ввод молчит уже {} с)", sample.idle_seconds)
+            } else {
+                String::new()
+            };
+
+            return Budget {
+                parallel: 1,
+                mode: Mode::Near,
+                reason: format!(
+                    "вы сказали, что работаете, — одно дело в фоне, чужие окна не трогаю{silence}"
+                ),
+                may_start: true,
+            };
+        }
+        None => {}
+    }
+
+    // Слова нет — решает таймер, и об этом говорится прямо: он может ошибаться.
     if sample.idle_seconds < AWAY_SECONDS {
         return Budget {
             parallel: 1,
             mode: Mode::Near,
             reason: format!(
-                "человек трогал ввод {} с назад — работаю в фоне, по одному делу",
+                "человек трогал ввод {} с назад — работаю в фоне, по одному делу. Если уходите, \
+                 скажите это: тогда возьму больше",
                 sample.idle_seconds
             ),
             may_start: true,
@@ -126,7 +217,7 @@ pub fn decide(sample: &Sample) -> Budget {
             parallel: 1,
             mode: Mode::Away,
             reason: format!(
-                "человек отошёл ({} с тишины), но свободной памяти только {} MБ — беру одно дело",
+                "по тишине ({} с) человек отошёл, но свободной памяти только {} MБ — беру одно дело",
                 sample.idle_seconds, sample.ram_free_mb
             ),
             may_start: true,
@@ -137,10 +228,31 @@ pub fn decide(sample: &Sample) -> Budget {
         parallel: 3,
         mode: Mode::Away,
         reason: format!(
-            "человек отошёл ({} с тишины), процессор свободен, памяти {} МБ — можно три дела сразу",
+            "по тишине ({} с) человек отошёл, процессор свободен, памяти {} МБ — можно три дела сразу",
             sample.idle_seconds, sample.ram_free_mb
         ),
         may_start: true,
+    }
+}
+
+/// Ответ без измерения. Слово «я ухожу» здесь всё равно значит больше, чем ничего: если
+/// человек сказал, что его нет, одно осторожное дело — честнее, чем «не могу, не вижу».
+fn unmeasured(said: Option<Presence>, reason: &str) -> Budget {
+    match said {
+        Some(Presence::Away) => Budget {
+            parallel: 1,
+            mode: Mode::Away,
+            reason: format!(
+                "машина не измерилась ({reason}), но вы сказали, что уходите — беру одно дело"
+            ),
+            may_start: true,
+        },
+        _ => Budget {
+            parallel: 1,
+            mode: Mode::Near,
+            reason: format!("машина не измерилась ({reason}) — беру одно дело и осторожно"),
+            may_start: true,
+        },
     }
 }
 
@@ -191,29 +303,33 @@ pub struct State {
     pub available: bool,
     /// Что это за способ измерения.
     pub note: String,
+    /// Что человек сказал про себя. `None` — не говорил, и тогда решает таймер.
+    pub declared: Option<Presence>,
 }
 
 /// Измерить машину и решить, сколько можно. Отказ измерения — не отказ приложения:
 /// без цифр помощник берётся за одно дело, а не за все сразу.
 pub fn state() -> State {
+    state_with(None)
+}
+
+/// То же, но со словом человека: «я ухожу» или «я работаю».
+pub fn state_with(said: Option<Presence>) -> State {
     let note = note();
     match sample() {
         Ok(sample) => State {
-            budget: decide(&sample),
+            budget: decide_with(&sample, said),
             sample: Some(sample),
             available: available(),
             note,
+            declared: said,
         },
         Err(reason) => State {
-            budget: Budget {
-                parallel: 1,
-                mode: Mode::Near,
-                reason: format!("машина не измерилась ({reason}) — беру одно дело и осторожно"),
-                may_start: true,
-            },
+            budget: unmeasured(said, &reason),
             sample: None,
             available: available(),
             note,
+            declared: said,
         },
     }
 }
@@ -387,6 +503,62 @@ mod tests {
             assert!(state.budget.reason.contains("не измерилась"));
         }
         assert!(!state.note.is_empty());
+    }
+
+    #[test]
+    fn a_persons_word_beats_the_idle_timer() {
+        // Сказал «ухожу», хотя ввод трогали пять секунд назад, — верим слову.
+        let away = decide_with(&sample(10, 9_000, 5), Some(Presence::Away));
+        assert_eq!(away.mode, Mode::Away);
+        assert_eq!(away.parallel, 3);
+        assert!(away.reason.contains("вы сказали"));
+
+        // Сказал «работаю», хотя таймер молчит два часа, — тоже верим.
+        let near = decide_with(&sample(10, 9_000, 9_000), Some(Presence::Near));
+        assert_eq!(near.mode, Mode::Near);
+        assert_eq!(near.parallel, 1);
+        assert!(near.reason.contains("вы сказали"));
+        assert!(near.reason.contains("ввод молчит уже 9000 с"));
+    }
+
+    #[test]
+    fn a_word_about_leaving_does_not_add_memory_or_cores() {
+        // Мало памяти — «я ухожу» этого не отменяет: объявление не добавляет железа.
+        let low = decide_with(&sample(10, 400, 5), Some(Presence::Away));
+        assert_eq!(low.parallel, 0);
+        assert!(!low.may_start);
+        assert_eq!(low.mode, Mode::Crowded);
+        assert!(low.reason.contains("вы сказали"));
+
+        // Полтора гигабайта — одно дело, даже если человек ушёл.
+        let tight = decide_with(&sample(10, 1_200, 5), Some(Presence::Away));
+        assert_eq!(tight.parallel, 1);
+        assert!(tight.reason.contains("памяти только"));
+
+        // Чужую загрузку не вытесняем даже по слову.
+        let busy = decide_with(&sample(95, 9_000, 5), Some(Presence::Away));
+        assert_eq!(busy.parallel, 1);
+        assert_eq!(busy.mode, Mode::Crowded);
+        assert!(busy.reason.contains("не вытесняю"));
+    }
+
+    #[test]
+    fn without_a_word_the_timer_says_so_honestly() {
+        let near = decide(&sample(10, 9_000, 5));
+
+        assert!(near.reason.contains("Если уходите, скажите"));
+    }
+
+    #[test]
+    fn a_declaration_is_not_lost_when_the_machine_cannot_be_measured() {
+        let away = unmeasured(Some(Presence::Away), "нет прав");
+
+        assert_eq!(away.mode, Mode::Away);
+        assert_eq!(away.parallel, 1);
+        assert!(away.may_start, "слово человека всё же значит одно осторожное дело");
+        assert!(away.reason.contains("вы сказали"));
+
+        assert_eq!(unmeasured(None, "нет прав").mode, Mode::Near);
     }
 
     #[test]

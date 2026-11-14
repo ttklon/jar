@@ -115,6 +115,7 @@ pub fn run() {
             engine: std::sync::Mutex::new(None),
             policy: PolicyState::new(),
             cancel: AtomicBool::new(false),
+            presence: std::sync::Mutex::new(None),
         }),
         log_file: log_file.display().to_string(),
     };
@@ -161,6 +162,7 @@ pub fn run() {
             ipc::ui_press,
             ipc::ui_type,
             ipc::machine_state,
+            ipc::declare_presence,
             ipc::model_prompt,
             ipc::think,
             ipc::draft_hand,

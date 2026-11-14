@@ -3,6 +3,7 @@ import { Button, Input, makeStyles, Switch, Text, tokens } from "@fluentui/react
 import { MicRegular } from "@fluentui/react-icons";
 import {
   adoptHand,
+  declarePresence,
   draftHand,
   draftPlan,
   fillPlan,
@@ -36,6 +37,7 @@ import type {
   PlanItem,
   PlanReport,
   MachineState,
+  Presence,
   SpeechStatus,
   UiDump,
   UiPress,
@@ -211,6 +213,8 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   /** Что с машиной: загрузка, память, присутствие человека. Ничего не запускает. */
   const [machine, setMachine] = useState<MachineState | null>(null);
   const [machineError, setMachineError] = useState<string | null>(null);
+  /** Слово про присутствие не сохранилось — это отдельная ошибка, а не «машина не измерилась». */
+  const [presenceError, setPresenceError] = useState<string | null>(null);
   const [machineBusy, setMachineBusy] = useState(false);
   /** Элемент, который человек решил нажать: сначала показываем, потом нажимаем. */
   const [pressing, setPressing] = useState<string | null>(null);
@@ -479,6 +483,25 @@ export function Voice({ onOpen }: VoiceScreenProps) {
    * Померить машину. Это совет самому себе, а не приказ человеку: рядом с числом всегда
    * стоит причина, иначе «умное» распределение нельзя ни объяснить, ни проверить.
    */
+  /**
+   * Сказать, ухожу я или работаю.
+   *
+   * Это слово, а не запуск: очередь всё равно начинается своей кнопкой, и ни одно действие
+   * от этого щелчка не выполняется. Зато таймер больше не решает за человека — он ошибается
+   * в обе стороны, а слово — нет.
+   */
+  const sayPresence = useCallback(async (said: Presence | null) => {
+    setMachineBusy(true);
+    try {
+      setMachine(await declarePresence(said));
+      setPresenceError(null);
+    } catch (reason: unknown) {
+      setPresenceError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setMachineBusy(false);
+    }
+  }, []);
+
   const measureMachine = useCallback(async () => {
     setMachineBusy(true);
     try {
@@ -983,6 +1006,49 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       ) : null}
 
       {voiceError ? <Text className={styles.error}>{voiceError}</Text> : null}
+
+      {/*
+        Слово человека о себе. Стоит выше поля задачи и не спрятано за измерениями:
+        чтобы сказать «я ухожу», не нужно сначала что-то напечатать.
+      */}
+      <div className={styles.bar}>
+        <Button
+          size="small"
+          appearance="subtle"
+          disabled={machineBusy}
+          onClick={() => {
+            void sayPresence("away");
+          }}
+        >
+          {voice.presenceAway}
+        </Button>
+        <Button
+          size="small"
+          appearance="subtle"
+          disabled={machineBusy}
+          onClick={() => {
+            void sayPresence("near");
+          }}
+        >
+          {voice.presenceNear}
+        </Button>
+        <Button
+          size="small"
+          appearance="subtle"
+          disabled={machineBusy || !machine?.declared}
+          onClick={() => {
+            void sayPresence(null);
+          }}
+        >
+          {voice.presenceClear}
+        </Button>
+        <Text className={styles.note}>
+          {machine?.declared ? voice.presenceSaid(machine.declared) : voice.presenceHint}
+        </Text>
+      </div>
+      {presenceError ? (
+        <Text className={styles.error}>{voice.presenceError(presenceError)}</Text>
+      ) : null}
 
       <form
         className={styles.bar}

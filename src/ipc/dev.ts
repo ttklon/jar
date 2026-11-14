@@ -14,6 +14,7 @@ import actionsJson from "../../data/actions.json";
 import type {
   Action,
   MachineState,
+  Presence,
   RegistrySnapshot,
   RegistryStats,
   UiDump,
@@ -683,6 +684,32 @@ export async function machineState(): Promise<MachineState> {
     },
     available: false,
     note: "машина измеряется в приложении: здесь её загрузку не видно",
+    declared: null,
+  };
+}
+
+/**
+ * Слово человека про себя — и в браузере остаётся словом.
+ *
+ * Измерить машину здесь нечем, поэтому дел всё равно одно: обещать «три сразу» без цифр
+ * было бы выдумкой. Но «я ухожу» всё же значит больше, чем молчание: одно осторожное дело.
+ */
+export async function declarePresence(said: Presence | null): Promise<MachineState> {
+  const base = await machineState();
+  if (said === null) return base;
+
+  const away = said === "away";
+  return {
+    ...base,
+    declared: said,
+    budget: {
+      parallel: 1,
+      mode: away ? "away" : "near",
+      reason: away
+        ? "вы сказали, что уходите; в браузере машину не измерить — беру одно дело"
+        : "вы сказали, что работаете — одно дело в фоне",
+      may_start: true,
+    },
   };
 }
 

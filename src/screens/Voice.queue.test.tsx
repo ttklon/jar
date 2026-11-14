@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
+  declarePresence,
   draftPlan,
   machineState,
   planFor,
@@ -28,11 +29,13 @@ vi.mock("../ipc", () => ({
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn().mockResolvedValue(null),
   uiDump: vi.fn().mockRejectedValue(new Error("нет UI Automation")),
+  declarePresence: vi.fn(),
   machineState: vi.fn().mockResolvedValue({
     sample: { cpu_percent: 10, ram_free_mb: 9_000, ram_total_mb: 16_384, idle_seconds: 900 },
     budget: { parallel: 3, mode: "away" as const, reason: "человек отошёл", may_start: true },
     available: true,
     note: "машина измеряется честно",
+    declared: null,
   }),
   draftHand: vi.fn(),
   trialHand: vi.fn(),
@@ -69,6 +72,7 @@ const away = {
   budget: { parallel: 3, mode: "away" as const, reason: "человек отошёл", may_start: true },
   available: true,
   note: "машина измеряется честно",
+  declared: null,
 };
 
 const safePlan = {
@@ -98,6 +102,7 @@ afterEach(() => {
   vi.mocked(machineState).mockReset().mockResolvedValue(away as never);
   vi.mocked(planFor).mockReset().mockResolvedValue([]);
   vi.mocked(think).mockReset().mockResolvedValue(null as never);
+  vi.mocked(declarePresence).mockReset();
   vi.mocked(requestLearning).mockReset().mockResolvedValue(null);
   vi.mocked(uiDump).mockReset().mockRejectedValue(new Error("нет UI Automation"));
   vi.mocked(machineState).mockReset().mockResolvedValue(away as never);

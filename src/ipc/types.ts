@@ -280,8 +280,14 @@ export interface MachineSample {
   idle_seconds: number;
 }
 
-/** Кто сейчас за машиной — по измерению, а не по догадке. */
+/** Кто сейчас за машиной — по измерению или по слову человека. */
 export type MachineMode = "near" | "away" | "crowded";
+
+/**
+ * Что человек сказал о себе. Слово сильнее таймера, но не сильнее железа: объявление не
+ * добавляет ни памяти, ни ядер.
+ */
+export type Presence = "away" | "near";
 
 /** Сколько можно взять прямо сейчас и почему именно столько. */
 export interface MachineBudget {
@@ -299,6 +305,8 @@ export interface MachineState {
   budget: MachineBudget;
   available: boolean;
   note: string;
+  /** Слово человека: «я ухожу» или «я работаю». `null` — не говорил, решает таймер. */
+  declared: Presence | null;
 }
 
 /**
