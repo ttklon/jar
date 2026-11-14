@@ -512,6 +512,10 @@ export const voice = {
   cancelled: "отменил — запись выброшена и никуда не ушла",
   thinkShow: "Спросить модель",
   sightTitle: "Что видно после работы",
+  thinkSplit: (goal: string, deeds: number) =>
+    `разложил «${goal}» на ${deeds} дела — в очередь их ставите вы, и каждое спросит своё`,
+  splitQueue: "Поставить все в очередь",
+  splitDeed: (position: number, deed: string) => `${position}. ${deed}`,
   sightNote: (note: string) => `экран: ${note}`,
   thinkChain: (goal: string, steps: number) =>
     `модель собрала цепочку из ${steps} шагов: ${goal} — каждый шаг спросит вашего слова, ничего не выполнено`,

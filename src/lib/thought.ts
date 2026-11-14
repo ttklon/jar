@@ -25,6 +25,10 @@ export function describeThought(thought: Thought): string {
     }
     return voice.thinkCall(proposal.Call.registry, proposal.Call.why);
   }
+  if ("Split" in proposal) {
+    // Разложение — это список поручений, а не выполненная работа. Так и говорим.
+    return voice.thinkSplit(proposal.Split.goal, proposal.Split.deeds.length);
+  }
   if ("Chain" in proposal) {
     // Цепочка может не собраться: у одного из шагов нет руки. Тогда говорим это, а не
     // «сейчас всё сделаю»: половина цепочки хуже отказа.

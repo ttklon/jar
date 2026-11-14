@@ -198,6 +198,8 @@ export type Proposal =
   | { Call: { registry: string; params: Record<string, string>; why: string } }
   /** Цепочка: несколько действий подряд, каждое со своим подтверждением. */
   | { Chain: { goal: string; steps: ChainStep[]; why: string } }
+  /** Разложение большой задачи на несколько дел: предложение, а не разрешение. */
+  | { Split: { goal: string; deeds: string[]; why: string } }
   | { Learn: { goal: string; why: string } }
   | { Hand: { goal: string; code: string; why: string } }
   | { Ask: { question: string; why: string } }
@@ -212,6 +214,8 @@ export interface Thought {
   plan: PlanCheck | null;
   /** Задача на обучение из предложения `learn`: записана в память и переживёт перезапуск. */
   learning: Learning | null;
+  /** Дела из разложения: каждое пойдёт своим путём, в очередь их ставит человек. */
+  deeds: string[] | null;
   problem: string | null;
 }
 

@@ -8,7 +8,7 @@ function thought(
   plan: Thought["plan"] = null,
   learning: Thought["learning"] = null,
 ): Thought {
-  return { prompt: "…", answer: "…", proposal, plan, learning, problem };
+  return { prompt: "…", answer: "…", proposal, plan, learning, deeds: null, problem };
 }
 
 const learning = {

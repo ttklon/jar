@@ -1016,6 +1016,32 @@ export function Voice({ onOpen }: VoiceScreenProps) {
             <>
               <Text className={styles.spoken}>{describeThought(thought)}</Text>
               <Text className={styles.note}>{voice.thinkNotExecuted}</Text>
+              {"Split" in thought.proposal
+                ? thought.proposal.Split.deeds.map((deed, index) => (
+                    <Text key={`deed-${index}`} className={styles.note}>
+                      {voice.splitDeed(index + 1, deed)}
+                    </Text>
+                  ))
+                : null}
+              {"Split" in thought.proposal ? (
+                <Button
+                  size="small"
+                  // Дела ставятся в очередь, а не выполняются: очередь спросит своё.
+                  onClick={() => {
+                    let next = queueRef.current;
+                    const stamp = Date.now();
+                    thought.proposal &&
+                      "Split" in thought.proposal &&
+                      thought.proposal.Split.deeds.forEach((deed, index) => {
+                        next = add(next, deed, `d${stamp}${index}`);
+                      });
+                    queueRef.current = next;
+                    setQueue(next);
+                  }}
+                >
+                  {voice.splitQueue}
+                </Button>
+              ) : null}
               {"Chain" in thought.proposal
                 ? thought.proposal.Chain.steps.map((step, index) => (
                     <Text key={`${step.registry}-${index}`} className={styles.note}>

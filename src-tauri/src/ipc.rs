@@ -576,6 +576,9 @@ pub struct Thought {
     /// Задача на обучение из предложения `learn`: записана в память и переживёт перезапуск.
     /// `None` — учиться не по чему (цель уже умеем или её нет в реестре).
     pub learning: Option<Learning>,
+    /// Дела из разложения большой задачи: каждое пойдёт своим путём. Это предложение, а не
+    /// разрешение — в очередь их ставит человек, и подтверждения остаются на местах.
+    pub deeds: Option<Vec<String>>,
     pub problem: Option<String>,
 }
 
@@ -672,12 +675,18 @@ pub async fn think(
                 _ => None,
             };
 
+            let deeds = match &proposal {
+                intent::Proposal::Split { deeds, .. } => Some(deeds.clone()),
+                _ => None,
+            };
+
             Thought {
                 prompt,
                 answer: answered,
                 proposal: Some(proposal),
                 plan,
                 learning,
+                deeds,
                 problem: None,
             }
         }
@@ -689,6 +698,7 @@ pub async fn think(
             proposal: None,
             plan: None,
             learning: None,
+            deeds: None,
             problem: Some(error.to_string()),
         },
     })

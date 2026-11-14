@@ -72,6 +72,16 @@ pub enum Proposal {
         steps: Vec<ChainStep>,
         why: String,
     },
+    /// Разложение большой задачи на несколько дел для очереди.
+    ///
+    /// Это **предложение**, а не разрешение: каждое дело потом пойдёт своим путём через
+    /// поиск, план и политику. Разложение экономит слова человека, но не даёт ни одного
+    /// нового права — иначе оно стало бы способом обойти подтверждения.
+    Split {
+        goal: String,
+        deeds: Vec<String>,
+        why: String,
+    },
     /// Не хватает одного ответа человека.
     Ask { question: String, why: String },
     /// Политика запрещает — единственный случай, когда отказ допустим.
@@ -91,6 +101,12 @@ pub struct ChainStep {
 /// Пять — не про возможности модели, а про человека: длинную цепочку нельзя ни прочитать,
 /// ни остановить вовремя, а «сделаю двадцать шагов» — обещание без свидетелей.
 pub const MAX_CHAIN_STEPS: usize = 5;
+
+/// Сколько дел в разложении разрешаем.
+///
+/// Шесть — потому что больше человек уже не прочитает перед тем, как сказать «да», а
+/// согласие на непрочитанное — не согласие.
+pub const MAX_DEEDS: usize = 6;
 
 /// Кандидат для вопроса модели: ключ реестра и то, как это называется по-человечески.
 #[derive(Debug, Clone, Serialize)]
@@ -139,6 +155,16 @@ pub fn prompt(
          2. В params только те значения, которые человек назвал или что есть в памяти. Не придумывай пути.\n\
          3. Если нужен один ответ — ask, и в question ровно один вопрос.\n\
          4. refuse только если действие необратимо, стоит денег или выдаёт себя за человека.\n\n",
+    );
+
+    // Разложение — тоже отдельно: это не действие, а список поручений.
+    out.push_str(
+        r#"И ещё один вид — разложение большой задачи на несколько отдельных дел:
+{"kind":"split","goal":"<что человек хочет в итоге>","deeds":["<дело словами>","<дело словами>"],"why":"<почему>»}
+От двух до шести дел. Каждое дело — обычная просьба словами, его потом разберёт поиск.
+Разложение ничего не разрешает само: все подтверждения остаются на местах.
+
+"#,
     );
 
     // Цепочка объявлена отдельно от общего контракта: там она заняла бы строку, которую
@@ -272,6 +298,42 @@ pub fn parse(answer: &str, known: &[String]) -> Result<Proposal, IntentError> {
             Ok(Proposal::Call {
                 registry,
                 params: params(map.get("params"))?,
+                why: field(map, "why"),
+            })
+        }
+        "split" => {
+            let goal = required(map, "goal")?;
+            let deeds = map
+                .get("deeds")
+                .and_then(|value| value.as_array())
+                .ok_or(IntentError::Missing("deeds"))?;
+
+            if deeds.len() < 2 {
+                return Err(IntentError::Broken(
+                    "разложение из одного дела — это не разложение".to_string(),
+                ));
+            }
+            if deeds.len() > MAX_DEEDS {
+                return Err(IntentError::Broken(format!(
+                    "дел {}, а больше {} за раз не беру: столько человек не прочитает перед «да»",
+                    deeds.len(),
+                    MAX_DEEDS
+                )));
+            }
+
+            let mut list = Vec::with_capacity(deeds.len());
+            for deed in deeds {
+                let text = deed
+                    .as_str()
+                    .map(str::trim)
+                    .filter(|text| !text.is_empty())
+                    .ok_or_else(|| IntentError::Broken("дело без слов".to_string()))?;
+                list.push(text.to_string());
+            }
+
+            Ok(Proposal::Split {
+                goal,
+                deeds: list,
                 why: field(map, "why"),
             })
         }
@@ -574,6 +636,45 @@ mod tests {
             }
             other => panic!("ожидался вызов, получено {other:?}"),
         }
+    }
+
+    #[test]
+    fn a_big_task_can_be_split_into_several_deeds() {
+        let answer = r#"{"kind":"split","goal":"наведи порядок в загрузках","deeds":[
+            "найди дубликаты в загрузках","удали старые установщики"
+        ],"why":"две разные работы"}"#;
+
+        match parse(answer, &known()).expect("разбирается") {
+            Proposal::Split { goal, deeds, why } => {
+                assert_eq!(goal, "наведи порядок в загрузках");
+                assert_eq!(deeds.len(), 2);
+                assert_eq!(deeds[0], "найди дубликаты в загрузках");
+                assert_eq!(why, "две разные работы");
+            }
+            other => panic!("ожидалось разложение, получено {other:?}"),
+        }
+    }
+
+    #[test]
+    fn a_split_that_is_not_a_split_is_refused() {
+        let known = known();
+
+        // Одно дело — это не разложение, а обычная просьба.
+        let single = r#"{"kind":"split","goal":"x","deeds":["одно дело"]}"#;
+        assert!(parse(single, &known).is_err());
+
+        // Семь дел — столько человек не прочитает перед «да».
+        let many = r#"{"kind":"split","goal":"x","deeds":["1","2","3","4","5","6","7"]}"#;
+        assert!(parse(many, &known).is_err());
+
+        // Пустые слова — не дела.
+        let blank = r#"{"kind":"split","goal":"x","deeds":["  ","удали"]}"#;
+        assert!(parse(blank, &known).is_err());
+
+        // И это предложение, а не разрешение: в промпте так и написано.
+        let text = prompt("наведи порядок", None, &[], &[]);
+        assert!(text.contains("\"kind\":\"split\""));
+        assert!(text.contains("подтверждения остаются на местах"));
     }
 
     #[test]

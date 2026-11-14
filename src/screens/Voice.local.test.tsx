@@ -216,6 +216,7 @@ describe("локальное распознавание на экране", () =
         questions: [],
       },
       learning: null,
+      deeds: null,
       problem: null,
     });
 
@@ -540,6 +541,7 @@ describe("локальное распознавание на экране", () =
       proposal: { Learn: { goal: "поставить будильник", why: "такого умения нет" } },
       plan: null,
       learning: null,
+      deeds: null,
       problem: null,
     });
 
@@ -551,6 +553,44 @@ describe("локальное распознавание на экране", () =
       expect(screen.getByText(/надо научиться — поставить будильник/)).toBeTruthy();
     });
     expect(screen.getByText(/предложение модели ничего не выполняет/)).toBeTruthy();
+  });
+
+  it("большая задача ложится в очередь делами, и ничего не запускается само", async () => {
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Split: {
+          goal: "наведи порядок в загрузках",
+          deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+          why: "две разные работы",
+        },
+      },
+      plan: null,
+      learning: null,
+      deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), {
+      target: { value: "наведи порядок в загрузках" },
+    });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    await waitFor(() => expect(screen.getByText(/разложил «наведи порядок в загрузках» на 2 дела/)).toBeTruthy());
+    expect(screen.getByText(/1\. найди дубликаты в загрузках/)).toBeTruthy();
+
+    // Пока человек не нажал — ни одного запуска.
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByText("Поставить все в очередь"));
+
+    // Дела в очереди, ждут и ничего не делают без «Работать без меня».
+    await waitFor(() => expect(screen.getAllByText(/^ждёт · /).length).toBe(2));
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
   });
 
   it("после работы показывается, что видно на экране, — а не «готово и точка»", async () => {
@@ -630,6 +670,7 @@ describe("локальное распознавание на экране", () =
         questions: [],
       },
       learning: null,
+      deeds: null,
       problem: null,
     });
 
@@ -678,6 +719,7 @@ describe("локальное распознавание на экране", () =
         questions: [],
       },
       learning: null,
+      deeds: null,
       problem: null,
     });
 
@@ -712,6 +754,7 @@ describe("локальное распознавание на экране", () =
         times: 1,
         steps: [{ title: "написать руку", done: false }],
       },
+      deeds: null,
       problem: null,
     });
 
@@ -741,6 +784,7 @@ describe("локальное распознавание на экране", () =
         times: 1,
         steps: [],
       },
+      deeds: null,
       problem: null,
     });
     vi.mocked(draftHand).mockResolvedValueOnce({
@@ -779,6 +823,7 @@ describe("локальное распознавание на экране", () =
         times: 1,
         steps: [],
       },
+      deeds: null,
       problem: null,
     });
     vi.mocked(draftHand).mockResolvedValueOnce({
@@ -834,6 +879,7 @@ describe("локальное распознавание на экране", () =
         times: 1,
         steps: [],
       },
+      deeds: null,
       problem: null,
     });
     vi.mocked(draftHand).mockResolvedValueOnce({
@@ -888,6 +934,7 @@ describe("локальное распознавание на экране", () =
         times: 1,
         steps: [],
       },
+      deeds: null,
       problem: null,
     });
     vi.mocked(draftHand).mockRejectedValueOnce(
@@ -911,6 +958,7 @@ describe("локальное распознавание на экране", () =
       proposal: null,
       plan: null,
       learning: null,
+      deeds: null,
       problem: "руки `выдуманная|рука` нет в реестре: выдуманное не выполняется",
     });
 
