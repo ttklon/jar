@@ -516,6 +516,10 @@ export const voice = {
     `разложил «${goal}» на ${deeds} дела — в очередь их ставите вы, и каждое спросит своё`,
   splitQueue: "Поставить все в очередь",
   splitDeed: (position: number, deed: string) => `${position}. ${deed}`,
+  thinkNext: (goal: string, deeds: number) =>
+    `цель «${goal}» ещё не закрыта: предлагаю ещё ${deeds} ${deeds === 1 ? "дело" : "дела"} — это предложение, а не разрешение`,
+  thinkNextDone: (goal: string, why: string) =>
+    `модель говорит, что цель «${goal}» закрыта${why ? ` (${why})` : ""}. Это её слова, а не доказательство: новых дел по цели не беру, проверьте сами`,
   sightNote: (note: string) => `экран: ${note}`,
   thinkChain: (goal: string, steps: number) =>
     `модель собрала цепочку из ${steps} шагов: ${goal} — каждый шаг спросит вашего слова, ничего не выполнено`,
@@ -549,6 +553,14 @@ export const voice = {
   queueTitle: (waiting: number, done: number) =>
     `Очередь: ждут ${waiting}, сделано ${done}`,
   queueIdle: (reason: string) => `очередь стоит: ${reason}`,
+  queueGoalLine: (goal: string, done: number, left: number, stuck: number) =>
+    left > 0
+      ? `цель «${goal}»: сделано ${done}, впереди ещё ${left}`
+      : stuck > 0
+        ? `цель «${goal}»: сделано ${done}, встало ${stuck} — новых дел не придумываю`
+        : `цель «${goal}»: сделано ${done}, новых дел нет`,
+  queueHour: (deeds: number, cap: number) =>
+    `за этот час сам начал ${deeds} из ${cap} — это потолок: больше ${cap} не начну, пока час не пройдёт. Счёт обнуляется при перезапуске`,
   queueLine: (goal: string, state: string, note: string) => {
     const mark =
       state === "waiting"

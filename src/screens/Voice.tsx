@@ -47,13 +47,21 @@ import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
 import { describeThought } from "../lib/thought";
 import {
   add,
+  continuationQuery,
+  DEEDS_PER_HOUR,
+  hourLeft,
   markScreen,
   pick,
+  progress,
+  replenish,
   setState,
+  startHour,
   stopRemaining,
   summary,
+  takeDeed,
   unattended,
   usesScreen,
+  type HourLog,
   type QueueItem,
 } from "../lib/queue";
 import { subscribeGlobalTalk } from "../lib/globalTalk";
@@ -194,6 +202,12 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const queueRef = useRef<QueueItem[]>([]);
   const queueStopRef = useRef(false);
   const queueRunningRef = useRef(false);
+  /**
+   * Счёт начатых дел за час. Живёт в ссылке: очередь читает его между рендерами, а
+   * показывается он на экране — чтобы потолок был виден, а не подразумевался.
+   */
+  const hourRef = useRef<HourLog>(startHour(Date.now()));
+  const [hour, setHour] = useState<HourLog>(hourRef.current);
   /** Что с машиной: загрузка, память, присутствие человека. Ничего не запускает. */
   const [machine, setMachine] = useState<MachineState | null>(null);
   const [machineError, setMachineError] = useState<string | null>(null);
@@ -271,6 +285,12 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       setQueue(items);
     };
 
+    /** Отметить начатое дело в счёте за час — до запуска, а не после удачи. */
+    const takeHour = () => {
+      hourRef.current = takeDeed(hourRef.current, Date.now());
+      setHour(hourRef.current);
+    };
+
     /** Одно дело: план, проверка «можно ли без человека», запуск и итог. */
     const launch = (item: QueueItem) => {
       const task = (async () => {
@@ -282,6 +302,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           return;
         }
 
+        takeHour();
         sync(setState(items, item.id, "running", ""));
 
         const report = await runPlan(JSON.stringify(check.plan), []).catch(() => null);
@@ -300,6 +321,87 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       });
 
       inFlight.set(item.id, task);
+    };
+
+    /**
+     * Спросить модель, что дальше по незакрытым целям.
+     *
+     * Спрашиваем только про цели, которые человек сам разложил на дела: одиночное дело —
+     * не цель, продолжать его нечем. Сколько дел взять, решает не модель и не аппетит
+     * очереди, а потолок в час: пришло три дела, а можно одно — берём одно.
+     *
+     * Возвращается не только «сколько добавил», но и «почему не добавил»: молчаливая
+     * остановка неотличима от поломки, а человек в этот момент, скорее всего, не у экрана.
+     */
+    const continueGoals = async (): Promise<{ added: number; why: string | null }> => {
+      if (queueStopRef.current) return { added: 0, why: null };
+
+      const origins = [
+        ...new Set(
+          items
+            .map((item) => item.origin)
+            .filter((origin): origin is string => typeof origin === "string" && origin.length > 0),
+        ),
+      ];
+
+      let added = 0;
+      let why: string | null = null;
+
+      for (const origin of origins) {
+        if (queueStopRef.current) break;
+
+        const room = replenish(items, origin, hourRef.current, Date.now());
+        if (!room.ask) {
+          // Причина видна человеку: «почему не продолжаю» — такой же ответ, как «почему стою».
+          why = room.why;
+          continue;
+        }
+
+        const answer = await think(continuationQuery(origin, items), null).catch(() => null);
+        // Пока модель думала, человек мог сказать «стоп» — тогда новые дела не берём.
+        if (queueStopRef.current) break;
+
+        if (!answer?.proposal) {
+          why = `модель не сказала, что делать дальше по цели «${origin}»: новых дел не выдумываю`;
+          continue;
+        }
+
+        if (!("Next" in answer.proposal)) {
+          // Модель ответила чем-то другим (вопросом, отказом, обучением) — это не
+          // продолжение, и выдавать его за дело нельзя. Говорим её словами.
+          why = `по цели «${origin}» модель ответила не продолжением: ${describeThought(answer)}`;
+          continue;
+        }
+
+        const next = answer.proposal.Next;
+        if (next.done) {
+          // Это слова модели, а не доказательство: новых дел не берём, но и не врём,
+          // будто цель закрыта, — проверить может только человек.
+          why =
+            `модель считает, что цель «${origin}» закрыта${next.why ? ` (${next.why})` : ""}: ` +
+            "новых дел по ней не беру, проверьте сами";
+          continue;
+        }
+
+        const deeds = next.deeds.slice(
+          0,
+          Math.max(0, hourLeft(hourRef.current, Date.now())),
+        );
+        if (deeds.length === 0) {
+          why = `потолок ${DEEDS_PER_HOUR} дел в час выбран: продолжение — после него`;
+          continue;
+        }
+
+        const stamp = Date.now();
+        let updated = items;
+        deeds.forEach((deed, index) => {
+          updated = add(updated, deed, `n${stamp}${index}`, origin);
+        });
+        sync(updated);
+        added += deeds.length;
+      }
+
+      return { added, why };
     };
 
     try {
@@ -341,7 +443,20 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           continue;
         }
 
-        setQueueIdle(decision.reason);
+        // Ждущее дело, которое не начинается, — это причина машины или человека, а не
+        // повод придумывать новые: так и говорим, чья это причина.
+        const waiting = items.some((item) => item.state === "waiting");
+        if (waiting) {
+          setQueueIdle(decision.reason);
+          break;
+        }
+
+        // Дела кончились, а цели могли остаться. Спрашиваем модель про следующие дела —
+        // это и есть «не останавливаться, пока не скажут стоп», но со счётом в руках.
+        const more = await continueGoals();
+        if (more.added > 0) continue;
+
+        setQueueIdle(more.why ?? decision.reason);
         break;
       }
     } finally {
@@ -733,6 +848,15 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       .finally(() => setRunning(false));
   }, [draft, approved, answers]);
 
+  // Цели, которые человек сам разложил на дела: по ним и показывается счёт.
+  const goals = [
+    ...new Set(
+      queue
+        .map((item) => item.origin)
+        .filter((origin): origin is string => typeof origin === "string" && origin.length > 0),
+    ),
+  ];
+
   return (
     <div className={styles.root}>
       <div>
@@ -1028,13 +1152,15 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                   size="small"
                   // Дела ставятся в очередь, а не выполняются: очередь спросит своё.
                   onClick={() => {
+                    if (!thought.proposal || !("Split" in thought.proposal)) return;
+                    const split = thought.proposal.Split;
                     let next = queueRef.current;
                     const stamp = Date.now();
-                    thought.proposal &&
-                      "Split" in thought.proposal &&
-                      thought.proposal.Split.deeds.forEach((deed, index) => {
-                        next = add(next, deed, `d${stamp}${index}`);
-                      });
+                    // Цель запоминается у каждого дела: по ней очередь поймёт, что
+                    // продолжать, когда эти дела кончатся.
+                    split.deeds.forEach((deed, index) => {
+                      next = add(next, deed, `d${stamp}${index}`, split.goal);
+                    });
                     queueRef.current = next;
                     setQueue(next);
                   }}
@@ -1063,6 +1189,15 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       {queue.length > 0 || queueIdle ? (
         <div className={styles.section}>
           <Text className={styles.title}>{voice.queueTitle(summary(queue).waiting, summary(queue).done)}</Text>
+          {goals.map((goal) => {
+            const done = progress(queue, goal);
+            return (
+              <Text key={`goal-${goal}`} className={styles.note}>
+                {voice.queueGoalLine(done.goal, done.done, done.left, done.stuck)}
+              </Text>
+            );
+          })}
+          <Text className={styles.note}>{voice.queueHour(hour.deeds, DEEDS_PER_HOUR)}</Text>
           {queueIdle ? <Text className={styles.note}>{voice.queueIdle(queueIdle)}</Text> : null}
           {queue.map((item) => (
             <Text key={item.id} className={item.state === "held" ? styles.error : styles.note}>

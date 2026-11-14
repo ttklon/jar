@@ -1,12 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
   add,
+  continuationQuery,
+  DEEDS_PER_HOUR,
+  HOUR_MS,
+  hourLeft,
   markScreen,
   next,
   pick,
+  progress,
+  replenish,
+  rollHour,
   setState,
+  startHour,
   stopRemaining,
   summary,
+  takeDeed,
   unattended,
   usesScreen,
   type QueueItem,
@@ -221,5 +230,117 @@ describe("что можно без человека", () => {
 
     expect(unattended(null).can).toBe(false);
     expect(unattended({ ...plan(), plan: null }).can).toBe(false);
+  });
+});
+
+describe("самопополнение очереди", () => {
+  const goal = "наведи порядок в загрузках";
+
+  /**
+   * Дело цели. Собираем литералом, а не через индексы массива: индекс без проверки —
+   * это ещё одна догадка, а тест должен проверять правила, а не удачу.
+   */
+  const deed = (
+    id: string,
+    text: string,
+    state: QueueItem["state"],
+    note = "",
+  ): QueueItem => ({ id, goal: text, state, note, origin: goal });
+
+  /** Два дела одной цели, оба сделаны: ровно тот случай, когда пора спросить «что дальше». */
+  const doneDeeds = (): QueueItem[] => [
+    deed("1", "найди дубликаты в загрузках", "done", "шагов: 1, всё выполнено"),
+    deed("2", "удали старые установщики", "done", "шагов: 1, всё выполнено"),
+  ];
+
+  it("все дела цели сделаны — можно спросить модель, что дальше", () => {
+    const verdict = replenish(doneDeeds(), goal, startHour(0), 1_000);
+
+    expect(verdict.ask).toBe(true);
+    expect(verdict.why).toContain("не закрыта");
+  });
+
+  it("пока по цели есть ждущее дело — новых не придумываем", () => {
+    const items = [deed("1", "найди дубликаты в загрузках", "done"), deed("2", "удали старые установщики", "waiting")];
+
+    expect(replenish(items, goal, startHour(0), 1_000).ask).toBe(false);
+  });
+
+  it("дело не сделалось — это не повод придумывать новые, а повод сказать", () => {
+    const items = [
+      deed("1", "найди дубликаты в загрузках", "done"),
+      deed("2", "удали старые установщики", "failed", "шаг 1: нет доступа"),
+    ];
+
+    const verdict = replenish(items, goal, startHour(0), 1_000);
+
+    expect(verdict.ask).toBe(false);
+    expect(verdict.why).toContain("не сделалось");
+    expect(verdict.why).toContain("удали старые установщики");
+  });
+
+  it("остановили — новых дел по этой цели не будет", () => {
+    const items = [
+      deed("1", "найди дубликаты в загрузках", "done"),
+      deed("2", "удали старые установщики", "stopped", "остановлено вами"),
+    ];
+
+    const verdict = replenish(items, goal, startHour(0), 1_000);
+
+    expect(verdict.ask).toBe(false);
+    expect(verdict.why).toContain("остановили");
+  });
+
+  it("потолок в час: больше сам не начинаю, и это сказано словами", () => {
+    let log = startHour(0);
+    for (let index = 0; index < DEEDS_PER_HOUR; index += 1) log = takeDeed(log, 1_000);
+
+    expect(hourLeft(log, 1_000)).toBe(0);
+
+    const verdict = replenish(doneDeeds(), goal, log, 1_000);
+    expect(verdict.ask).toBe(false);
+    expect(verdict.why).toContain("потолок");
+    expect(verdict.why).toContain(String(DEEDS_PER_HOUR));
+
+    // Час прошёл — счёт новый. Потолок ограничивает час, а не работу вообще.
+    expect(hourLeft(log, HOUR_MS + 1)).toBe(DEEDS_PER_HOUR);
+    expect(replenish(doneDeeds(), goal, log, HOUR_MS + 1).ask).toBe(true);
+  });
+
+  it("счёт дел за час не сбрасывается раньше срока", () => {
+    let log = startHour(0);
+    log = takeDeed(log, 1);
+    log = takeDeed(log, 2);
+
+    expect(log.deeds).toBe(2);
+    expect(hourLeft(log, HOUR_MS - 1)).toBe(DEEDS_PER_HOUR - 2);
+
+    const rolled = rollHour(log, HOUR_MS);
+    expect(rolled.deeds).toBe(0);
+    expect(rolled.since).toBe(HOUR_MS);
+  });
+
+  it("вопрос модели — про ту же цель и с тем, что уже было", () => {
+    const items = [
+      deed("1", "найди дубликаты в загрузках", "done"),
+      deed("2", "удали старые установщики", "failed", "шаг 1: нет доступа"),
+    ];
+
+    const query = continuationQuery(goal, items);
+
+    expect(query).toContain(goal);
+    expect(query).toContain("найди дубликаты в загрузках: сделано");
+    expect(query).toContain("удали старые установщики: не вышло (шаг 1: нет доступа)");
+    expect(query).toContain("Одно-три следующих дела");
+  });
+
+  it("счёт по цели: сделано, впереди и встало — разные числа", () => {
+    const items = [
+      deed("1", "первое", "done"),
+      deed("2", "второе", "held"),
+      deed("3", "третье", "waiting"),
+    ];
+
+    expect(progress(items, goal)).toEqual({ goal, done: 1, left: 1, stuck: 1 });
   });
 });

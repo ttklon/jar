@@ -39,7 +39,7 @@ pub enum IntentError {
     Missing(&'static str),
     #[error("руки `{0}` нет в реестре: выдуманное не выполняется")]
     UnknownTool(String),
-    #[error("вид ответа `{0}` неизвестен: ожидалось call, learn, ask или refuse")]
+    #[error("вид ответа `{0}` неизвестен: ожидалось call, learn, ask, refuse, hand, split, chain или next")]
     UnknownKind(String),
     #[error("пустой ответ: модель промолчала")]
     Empty,
@@ -82,6 +82,18 @@ pub enum Proposal {
         deeds: Vec<String>,
         why: String,
     },
+    /// Продолжение уже начатой цели: часть дел сделана, цель — ещё нет.
+    ///
+    /// Отдельный вид, а не разложение, потому что здесь другой вопрос: не «на что это
+    /// делится», а «что осталось». И другой ответ на «цель закрыта»: `done` — это слова
+    /// модели, а не доказательство, поэтому человек видит их как слова, и очередь новых
+    /// дел по этой цели больше не берёт.
+    Next {
+        goal: String,
+        done: bool,
+        deeds: Vec<String>,
+        why: String,
+    },
     /// Не хватает одного ответа человека.
     Ask { question: String, why: String },
     /// Политика запрещает — единственный случай, когда отказ допустим.
@@ -107,6 +119,12 @@ pub const MAX_CHAIN_STEPS: usize = 5;
 /// Шесть — потому что больше человек уже не прочитает перед тем, как сказать «да», а
 /// согласие на непрочитанное — не согласие.
 pub const MAX_DEEDS: usize = 6;
+
+/// Сколько дел в продолжении разрешаем.
+///
+/// Три, а не шесть: продолжение — это следующий шаг по уже начатой цели, а не новый
+/// список работ. Кто просил «наведи порядок», не давал согласия на шесть новых дел.
+pub const MAX_NEXT_DEEDS: usize = 3;
 
 /// Кандидат для вопроса модели: ключ реестра и то, как это называется по-человечески.
 #[derive(Debug, Clone, Serialize)]
@@ -160,7 +178,7 @@ pub fn prompt(
     // Разложение — тоже отдельно: это не действие, а список поручений.
     out.push_str(
         r#"И ещё один вид — разложение большой задачи на несколько отдельных дел:
-{"kind":"split","goal":"<что человек хочет в итоге>","deeds":["<дело словами>","<дело словами>"],"why":"<почему>»}
+{"kind":"split","goal":"<что человек хочет в итоге>","deeds":["<дело словами>","<дело словами>"],"why":"<почему>"}
 От двух до шести дел. Каждое дело — обычная просьба словами, его потом разберёт поиск.
 Разложение ничего не разрешает само: все подтверждения остаются на местах.
 
@@ -174,6 +192,19 @@ pub fn prompt(
 {"kind":"chain","goal":"<что получится в итоге>","steps":[{"registry":"<ключ из списка>","params":{},"why":"<зачем шаг>"}],"why":"<почему>"}
 Не больше пяти шагов, и все ключи — только из списка. Цепочка не отменяет ни одного
 подтверждения: каждый шаг спрашивает человека так же, как одиночный вызов.
+
+"#,
+    );
+
+    // Продолжение — третья отдельная форма. У неё другой вопрос: «что осталось», а не
+    // «на что делится», — и другой честный ответ на «цель закрыта».
+    out.push_str(
+        r#"И последний вид — продолжение уже начатой цели, когда часть дел сделана, а цель ещё нет:
+{"kind":"next","goal":"<цель, которая ещё не закрыта>","done":false,"deeds":["<следующее дело словами>"],"why":"<почему цель ещё не достигнута>"}
+От одного до трёх дел: это следующий шаг по той же цели, а не новый список работ.
+Если цель достигнута, ответь {"kind":"next","goal":"<та же цель>","done":true,"deeds":[],"why":"<что говорит, что цель закрыта>"}.
+Твоё «достигнута» — слова, а не доказательство: человек увидит их как слова.
+Продолжение ничего не разрешает: каждое дело пойдёт своим путём и спросит человека там, где нужно.
 
 "#,
     );
@@ -303,36 +334,62 @@ pub fn parse(answer: &str, known: &[String]) -> Result<Proposal, IntentError> {
         }
         "split" => {
             let goal = required(map, "goal")?;
-            let deeds = map
-                .get("deeds")
-                .and_then(|value| value.as_array())
-                .ok_or(IntentError::Missing("deeds"))?;
+            let list = deed_list(map, MAX_DEEDS, "столько человек не прочитает перед «да»")?;
 
-            if deeds.len() < 2 {
+            if list.len() < 2 {
                 return Err(IntentError::Broken(
                     "разложение из одного дела — это не разложение".to_string(),
                 ));
             }
-            if deeds.len() > MAX_DEEDS {
-                return Err(IntentError::Broken(format!(
-                    "дел {}, а больше {} за раз не беру: столько человек не прочитает перед «да»",
-                    deeds.len(),
-                    MAX_DEEDS
-                )));
-            }
-
-            let mut list = Vec::with_capacity(deeds.len());
-            for deed in deeds {
-                let text = deed
-                    .as_str()
-                    .map(str::trim)
-                    .filter(|text| !text.is_empty())
-                    .ok_or_else(|| IntentError::Broken("дело без слов".to_string()))?;
-                list.push(text.to_string());
-            }
 
             Ok(Proposal::Split {
                 goal,
+                deeds: list,
+                why: field(map, "why"),
+            })
+        }
+        "next" => {
+            let goal = required(map, "goal")?;
+
+            // `done` — слова модели о том, что цель закрыта. Дела и «закрыто» вместе
+            // невозможны: одно из двух неправда, и выбирать за автора мы не будем.
+            let done = match map.get("done") {
+                None | Some(serde_json::Value::Null) => false,
+                Some(serde_json::Value::Bool(flag)) => *flag,
+                Some(_) => {
+                    return Err(IntentError::Broken(
+                        "`done` должен быть true или false".to_string(),
+                    ))
+                }
+            };
+
+            // У закрытой цели дел нет, и отсутствие ключа — не ошибка: молчание здесь
+            // честнее пустого списка.
+            let list = match map.get("deeds") {
+                None | Some(serde_json::Value::Null) if done => Vec::new(),
+                _ => deed_list(
+                    map,
+                    MAX_NEXT_DEEDS,
+                    "продолжение — это шаг по цели, а не новый список работ",
+                )?,
+            };
+
+            if done {
+                if !list.is_empty() {
+                    return Err(IntentError::Broken(
+                        "цель объявлена закрытой, а дела к ней приложены: непонятно, что делать"
+                            .to_string(),
+                    ));
+                }
+            } else if list.is_empty() {
+                return Err(IntentError::Broken(
+                    "продолжение без дел — это не продолжение".to_string(),
+                ));
+            }
+
+            Ok(Proposal::Next {
+                goal,
+                done,
                 deeds: list,
                 why: field(map, "why"),
             })
@@ -470,6 +527,41 @@ fn top_level_objects(text: &str) -> Vec<(usize, usize)> {
     }
 
     found
+}
+
+/// Список дел словами: от нуля до `max`, пустые слова не считаются делом.
+///
+/// Общий для разложения и продолжения: правила одни и те же — дело без слов это не дело,
+/// а число дел ограничено сверху. Разница только в пределе и в том, как объяснить отказ,
+/// поэтому объяснение приходит снаружи.
+fn deed_list(
+    map: &serde_json::Map<String, serde_json::Value>,
+    max: usize,
+    too_many: &str,
+) -> Result<Vec<String>, IntentError> {
+    let deeds = map
+        .get("deeds")
+        .and_then(|value| value.as_array())
+        .ok_or(IntentError::Missing("deeds"))?;
+
+    if deeds.len() > max {
+        return Err(IntentError::Broken(format!(
+            "дел {}, а больше {max} за раз не беру: {too_many}",
+            deeds.len()
+        )));
+    }
+
+    let mut list = Vec::with_capacity(deeds.len());
+    for deed in deeds {
+        let text = deed
+            .as_str()
+            .map(str::trim)
+            .filter(|text| !text.is_empty())
+            .ok_or_else(|| IntentError::Broken("дело без слов".to_string()))?;
+        list.push(text.to_string());
+    }
+
+    Ok(list)
 }
 
 /// Параметры: строка, число и `true`/`false` становятся строкой. Вложенное — ошибка.
@@ -675,6 +767,67 @@ mod tests {
         let text = prompt("наведи порядок", None, &[], &[]);
         assert!(text.contains("\"kind\":\"split\""));
         assert!(text.contains("подтверждения остаются на местах"));
+    }
+
+    #[test]
+    fn a_continuation_is_one_to_three_deeds_of_the_same_goal() {
+        let answer = r#"{"kind":"next","goal":"наведи порядок в загрузках","done":false,
+            "deeds":["проверь, что осталось в загрузках"],"why":"старые установщики ещё там"}"#;
+
+        match parse(answer, &known()).expect("разбирается") {
+            Proposal::Next {
+                goal,
+                done,
+                deeds,
+                why,
+            } => {
+                assert_eq!(goal, "наведи порядок в загрузках");
+                assert!(!done, "цель ещё не закрыта");
+                assert_eq!(deeds, vec!["проверь, что осталось в загрузках".to_string()]);
+                assert_eq!(why, "старые установщики ещё там");
+            }
+            other => panic!("ожидалось продолжение, получено {other:?}"),
+        }
+
+        // В промпте продолжение объявлено отдельно и не обещает новых прав.
+        let text = prompt("наведи порядок", None, &[], &[]);
+        assert!(text.contains("\"kind\":\"next\""));
+        assert!(text.contains("Продолжение ничего не разрешает"));
+    }
+
+    #[test]
+    fn a_continuation_that_is_not_a_continuation_is_refused() {
+        let known = known();
+
+        // Четыре дела — это уже новое разложение, а не шаг по цели.
+        let many = r#"{"kind":"next","goal":"x","deeds":["1","2","3","4"]}"#;
+        assert!(parse(many, &known).is_err());
+
+        // Пустое продолжение ничего не продолжает.
+        let empty = r#"{"kind":"next","goal":"x","deeds":[]}"#;
+        assert!(parse(empty, &known).is_err());
+
+        // Цель «закрыта» и дела к ней одновременно — противоречие, а не выбор.
+        let both = r#"{"kind":"next","goal":"x","done":true,"deeds":["ещё одно"]}"#;
+        assert!(parse(both, &known).is_err());
+
+        // `done` строкой — догадка, а не ответ.
+        let stringy = r#"{"kind":"next","goal":"x","done":"да","deeds":["a"]}"#;
+        assert!(parse(stringy, &known).is_err());
+    }
+
+    #[test]
+    fn a_closed_goal_is_said_out_loud_and_takes_no_deeds() {
+        // У закрытой цели дел нет — и отсутствие ключа `deeds` не ошибка.
+        let answer = r#"{"kind":"next","goal":"наведи порядок","done":true,"why":"дубликатов не осталось"}"#;
+
+        match parse(answer, &known()).expect("разбирается") {
+            Proposal::Next { done, deeds, .. } => {
+                assert!(done, "модель говорит, что цель закрыта");
+                assert!(deeds.is_empty());
+            }
+            other => panic!("ожидалось продолжение, получено {other:?}"),
+        }
     }
 
     #[test]

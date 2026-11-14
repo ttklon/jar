@@ -200,6 +200,11 @@ export type Proposal =
   | { Chain: { goal: string; steps: ChainStep[]; why: string } }
   /** Разложение большой задачи на несколько дел: предложение, а не разрешение. */
   | { Split: { goal: string; deeds: string[]; why: string } }
+  /**
+   * Продолжение уже начатой цели. `done` — слова модели о том, что цель закрыта;
+   * это не доказательство, поэтому очередь просто перестаёт брать дела по цели.
+   */
+  | { Next: { goal: string; done: boolean; deeds: string[]; why: string } }
   | { Learn: { goal: string; why: string } }
   | { Hand: { goal: string; code: string; why: string } }
   | { Ask: { question: string; why: string } }

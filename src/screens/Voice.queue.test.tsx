@@ -257,4 +257,135 @@ describe("очередь дел на экране", () => {
     await waitFor(() => expect(screen.getAllByText(/остановлено · /).length).toBe(2));
     expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
   });
+
+  it("цель не закрыта — очередь спрашивает модель, что дальше, и продолжает делами", async () => {
+    const splitThought = {
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Split: {
+          goal: "наведи порядок в загрузках",
+          deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+          why: "две разные работы",
+        },
+      },
+      plan: null,
+      learning: null,
+      deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+      problem: null,
+    };
+
+    const nextThought = {
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Next: {
+          goal: "наведи порядок в загрузках",
+          done: false,
+          deeds: ["проверь, что осталось в загрузках"],
+          why: "старые установщики ещё там",
+        },
+      },
+      plan: null,
+      learning: null,
+      deeds: ["проверь, что осталось в загрузках"],
+      problem: null,
+    };
+
+    vi.mocked(draftPlan).mockResolvedValue(safePlan as never);
+    vi.mocked(runPlan).mockResolvedValue({
+      goal: "найди дубликаты в загрузках",
+      steps: [
+        {
+          position: 1,
+          registry: "звук|убавить|громкость",
+          status: "ok",
+          reason: "сделано",
+          evidence: "system",
+          duration_ms: 5,
+        },
+      ],
+      stopped: null,
+      run_id: 1,
+    } as never);
+
+    // Первый ответ — разложение, второй — продолжение, дальше модель молчит:
+    // очередь не должна придумывать дела за неё.
+    vi.mocked(think)
+      .mockResolvedValue(null as never)
+      .mockResolvedValueOnce(splitThought as never)
+      .mockResolvedValueOnce(nextThought as never);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), {
+      target: { value: "наведи порядок в загрузках" },
+    });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText(/разложил/)).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Поставить все в очередь"));
+    fireEvent.click(screen.getByText("Работать без меня"));
+
+    // Два дела из разложения и одно из продолжения — очередь не остановилась на первом.
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(3));
+
+    expect(vi.mocked(think).mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(vi.mocked(think).mock.calls[1]?.[0]).toContain("Цель: «наведи порядок в загрузках»");
+
+    // Счёт по цели и потолок в час видны на экране, а не подразумеваются.
+    await waitFor(() =>
+      expect(screen.getByText(/цель «наведи порядок в загрузках»: сделано 3/)).toBeTruthy(),
+    );
+    expect(screen.getByText(/за этот час сам начал 3 из 12/)).toBeTruthy();
+
+    // Модель промолчала про продолжение — так и сказано, а не «всё сделано».
+    await waitFor(() =>
+      expect(screen.getByText(/модель не сказала, что делать дальше/)).toBeTruthy(),
+    );
+  });
+
+  it("дело по цели не сделалось — очередь не заметает это новыми делами", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(safePlan as never);
+    vi.mocked(runPlan).mockResolvedValue({
+      goal: "найди дубликаты в загрузках",
+      steps: [],
+      stopped: "шаг 1: нет доступа",
+      run_id: 1,
+    } as never);
+
+    vi.mocked(think).mockResolvedValue({
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Split: {
+          goal: "наведи порядок в загрузках",
+          deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+          why: "две разные работы",
+        },
+      },
+      plan: null,
+      learning: null,
+      deeds: ["найди дубликаты в загрузках", "удали старые установщики"],
+      problem: null,
+    } as never);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), {
+      target: { value: "наведи порядок в загрузках" },
+    });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText(/разложил/)).toBeTruthy());
+
+    fireEvent.click(screen.getByText("Поставить все в очередь"));
+    fireEvent.click(screen.getByText("Работать без меня"));
+
+    // Оба дела не сделались — очередь говорит об этом и новых дел не выдумывает.
+    await waitFor(() => expect(screen.getByText(/не сделалось/)).toBeTruthy());
+    expect(vi.mocked(think)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(2);
+  });
 });

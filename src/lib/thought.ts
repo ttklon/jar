@@ -29,6 +29,12 @@ export function describeThought(thought: Thought): string {
     // Разложение — это список поручений, а не выполненная работа. Так и говорим.
     return voice.thinkSplit(proposal.Split.goal, proposal.Split.deeds.length);
   }
+  if ("Next" in proposal) {
+    // «Цель закрыта» — слова модели, а не отчёт о работе. Так и говорим: проверять человеку.
+    return proposal.Next.done
+      ? voice.thinkNextDone(proposal.Next.goal, proposal.Next.why)
+      : voice.thinkNext(proposal.Next.goal, proposal.Next.deeds.length);
+  }
   if ("Chain" in proposal) {
     // Цепочка может не собраться: у одного из шагов нет руки. Тогда говорим это, а не
     // «сейчас всё сделаю»: половина цепочки хуже отказа.

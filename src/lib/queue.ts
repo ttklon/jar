@@ -51,6 +51,13 @@ export interface QueueItem {
    * Знание появляется после плана, а не из догадки по словам.
    */
   touchesScreen?: boolean;
+  /**
+   * Чья это цель — слова человека, которые он разложил на дела.
+   *
+   * Пусто у одиночного дела: одно дело — не цель, продолжать у него нечего. Цель
+   * появляется только там, где человек сам сказал «это несколько работ».
+   */
+  origin?: string;
 }
 
 /** Сколько сейчас можно — ответ машины, а не мнение очереди. */
@@ -73,11 +80,25 @@ export interface Decision {
   reason: string;
 }
 
-/** Добавить дело в конец. Пустое — не дело, и в очередь не попадает. */
-export function add(items: readonly QueueItem[], goal: string, id: string): QueueItem[] {
+/**
+ * Добавить дело в конец. Пустое — не дело, и в очередь не попадает.
+ *
+ * `origin` передаётся только для дел из разложения: без него у дела нет цели, а значит
+ * и продолжения — очередь не придумывает, что человек «наверное, хотел ещё».
+ */
+export function add(
+  items: readonly QueueItem[],
+  goal: string,
+  id: string,
+  origin?: string,
+): QueueItem[] {
   const text = goal.trim();
   if (text.length === 0) return [...items];
-  return [...items, { id, goal: text, state: "waiting", note: "" }];
+  const source = origin?.trim();
+  return [
+    ...items,
+    { id, goal: text, state: "waiting", note: "", ...(source ? { origin: source } : {}) },
+  ];
 }
 
 /** Поставить состояние делу по номеру. Номер не найден — очередь не меняется. */
@@ -257,6 +278,171 @@ export function summary(items: readonly QueueItem[]): {
     failed: count("failed"),
     held: count("held"),
   };
+}
+
+/**
+ * Потолок дел в час.
+ *
+ * Зачем потолок, если человек сказал «работай без меня». Потому что «пока не скажу стоп» —
+ * это не «делай что угодно бесконечно»: очередь, которая сама придумывает себе дела, без
+ * счёта превращается в машину без тормозов. Двенадцать дел в час — это дело примерно
+ * каждые пять минут: работа идёт, а остановить её всё ещё можно одним словом.
+ */
+export const DEEDS_PER_HOUR = 12;
+
+/** Окно, в котором считается потолок. */
+export const HOUR_MS = 60 * 60 * 1000;
+
+/**
+ * Счёт дел за окно. Пара чисел, а не список времён: очередь — не архив.
+ *
+ * Счёт живёт, пока работает приложение, и это сказано на экране: притворяться, что
+ * потолок переживает перезапуск, значило бы обещать больше, чем есть.
+ */
+export interface HourLog {
+  /** Когда началось текущее окно, мс. */
+  since: number;
+  /** Сколько дел начато в этом окне. */
+  deeds: number;
+}
+
+export function startHour(now: number): HourLog {
+  return { since: now, deeds: 0 };
+}
+
+/** Перейти в новое окно, если час прошёл. Раньше срока счёт не сбрасывается. */
+export function rollHour(log: HourLog, now: number): HourLog {
+  return now - log.since >= HOUR_MS ? { since: now, deeds: 0 } : log;
+}
+
+/** Отметить начатое дело. Считаются начатые, а не удачные: потолок — про нагрузку. */
+export function takeDeed(log: HourLog, now: number): HourLog {
+  const rolled = rollHour(log, now);
+  return { since: rolled.since, deeds: rolled.deeds + 1 };
+}
+
+/** Сколько ещё можно начать в этом часу. Ноль — «больше не начинаю», а не «помедленнее». */
+export function hourLeft(log: HourLog, now: number): number {
+  return Math.max(0, DEEDS_PER_HOUR - rollHour(log, now).deeds);
+}
+
+/** Что с целью: сколько сделано, сколько впереди и сколько встало. */
+export interface GoalProgress {
+  /** Слова человека, которые он разложил на дела. */
+  goal: string;
+  done: number;
+  /** Ждут или идут. */
+  left: number;
+  /** Не вышло или требует его слова — это не «впереди», это «разберитесь». */
+  stuck: number;
+}
+
+export function progress(items: readonly QueueItem[], origin: string): GoalProgress {
+  const ofGoal = items.filter((item) => item.origin === origin);
+  const count = (...states: QueueState[]) =>
+    ofGoal.filter((item) => states.includes(item.state)).length;
+
+  return {
+    goal: origin,
+    done: count("done"),
+    left: count("waiting", "running"),
+    stuck: count("failed", "held"),
+  };
+}
+
+/** Спрашивать ли модель про следующие дела по цели. */
+export interface Replenish {
+  ask: boolean;
+  /** Почему да или почему нет — словами. Молчаливое «нет» неотличимо от поломки. */
+  why: string;
+}
+
+/**
+ * Пора ли продолжать цель.
+ *
+ * Продолжение — единственное место, где очередь сама решает спросить модель, поэтому
+ * правил здесь больше, чем в остальном модуле:
+ *
+ *  * **дела ещё есть — не спрашиваем.** Новые дела поверх ждущих — это не продолжение,
+ *    а суета;
+ *  * **не сделалось или нужно слово — не спрашиваем.** Придумать новое дело поверх
+ *    провала значит замести следы; сначала человек разбирается с этим;
+ *  * **остановили — не спрашиваем.** «Стоп» относится и к тому, чего ещё нет;
+ *  * **потолок выбран — не спрашиваем.** Это тот самый счётчик, который отличает
+ *    «работает, пока не скажу» от «работает, пока не сломается».
+ */
+export function replenish(
+  items: readonly QueueItem[],
+  origin: string,
+  log: HourLog,
+  now: number,
+): Replenish {
+  const ofGoal = items.filter((item) => item.origin === origin);
+
+  if (ofGoal.length === 0) {
+    return { ask: false, why: "по этой цели ещё нет ни одного дела" };
+  }
+
+  if (ofGoal.some((item) => item.state === "waiting" || item.state === "running")) {
+    return { ask: false, why: "по цели ещё есть незаконченное дело: продолжение — после него" };
+  }
+
+  if (ofGoal.some((item) => item.state === "stopped")) {
+    return { ask: false, why: "вы остановили эту цель — новые дела не придумываю" };
+  }
+
+  const stuck = ofGoal.find((item) => item.state === "failed" || item.state === "held");
+  if (stuck) {
+    return {
+      ask: false,
+      why: `по цели есть дело, которое не сделалось («${stuck.goal}»): новые дела не придумываю, пока это не разобрано`,
+    };
+  }
+
+  const left = hourLeft(log, now);
+  if (left === 0) {
+    return {
+      ask: false,
+      why: `потолок ${DEEDS_PER_HOUR} дел в час выбран: больше сам не начинаю — иначе это не помощь, а работа без тормозов`,
+    };
+  }
+
+  return {
+    ask: true,
+    why: `цель «${origin}» не закрыта, а потолок ещё не выбран (${left} из ${DEEDS_PER_HOUR})`,
+  };
+}
+
+/**
+ * Вопрос модели про продолжение — словами человека, а не JSON.
+ *
+ * Модель видит цель и что по ней уже было; чего она не видит — так это чужих окон и
+ * памяти, и это правильно: продолжение не должно знать больше, чем знает человек.
+ */
+export function continuationQuery(origin: string, items: readonly QueueItem[]): string {
+  const lines = items
+    .filter(
+      (item) =>
+        item.origin === origin &&
+        (item.state === "done" || item.state === "failed" || item.state === "held"),
+    )
+    .map((item) => {
+      const verdict =
+        item.state === "done"
+          ? "сделано"
+          : item.state === "failed"
+            ? "не вышло"
+            : "нужно слово человека";
+      return `— ${item.goal}: ${verdict}${item.note ? ` (${item.note})` : ""}`;
+    });
+
+  return [
+    `Цель: «${origin}».`,
+    lines.length > 0 ? "Что по ней уже было:" : "По ней ещё ничего не сделано.",
+    ...lines,
+    "Цель ещё не достигнута. Что делать дальше по этой же цели? Одно-три следующих дела.",
+    "Если цель достигнута — так и скажи, без новых дел.",
+  ].join("\n");
 }
 
 /** Можно ли выполнить этот план без человека. */
