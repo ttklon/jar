@@ -304,16 +304,14 @@ fn read_text(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
         );
     }
 
+    // Сообщение готовим заранее: строку с объяснением нельзя разбить, и внутри `match`
+    // она тянет за собой форматирование всего блока.
+    let unreadable = format!(
+        "файл не читается как текст: {path} — возможно, он двоичный или в другой кодировке"
+    );
     let content = match std::fs::read_to_string(target) {
         Ok(content) => content,
-        Err(_) => {
-            return StepResult::failed(
-                registry,
-                format!(
-                "файл не читается как текст: {path} — возможно, он двоичный или в другой кодировке"
-            ),
-            )
-        }
+        Err(_) => return StepResult::failed(registry, unreadable),
     };
 
     let duration_ms = started.elapsed().as_millis() as u64;
