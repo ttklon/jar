@@ -182,7 +182,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "music-production|открыть|проект в DAW" => open_daw(registry, params, cancel),
         "chat-social|найти|файл в чате" => find_chat_file(registry, params, cancel),
         "files|найти|двойники" => find_twins(registry, params, cancel),
-        "files|убрать|двойников в карантин" => quarantine_twins(registry, params, cancel),
+        "files|убрать|двойников в карантин" => {
+            quarantine_twins(registry, params, cancel)
+        }
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -3847,10 +3849,16 @@ fn quarantine_twins(
     let raw_min = param(params, "min_kb").trim().to_string();
 
     if path.is_empty() {
-        return StepResult::failed(registry, "не задана папка — назовите путь, где искать двойников");
+        return StepResult::failed(
+            registry,
+            "не задана папка — назовите путь, где искать двойников",
+        );
     }
     if !std::path::Path::new(&path).is_dir() {
-        return StepResult::failed(registry, format!("такой папки нет: {path} — проверьте путь"));
+        return StepResult::failed(
+            registry,
+            format!("такой папки нет: {path} — проверьте путь"),
+        );
     }
     let mut min_kb = 64u64;
     if !raw_min.is_empty() {
@@ -3914,7 +3922,9 @@ fn quarantine_twins(
     let groups: Vec<TwinGroup> = parse_twin_groups(&result.stdout_tail)
         .into_iter()
         .map(|mut group| {
-            group.paths.retain(|path| !full(path).starts_with(&quarantine_prefix));
+            group
+                .paths
+                .retain(|path| !full(path).starts_with(&quarantine_prefix));
             group.count = group.paths.len() as u64;
             group.wasted = group.size * group.count.saturating_sub(1);
             group
@@ -3946,8 +3956,8 @@ fn quarantine_twins(
             let mut target = std::path::Path::new(&quarantine).join(format!("{short}-{name}"));
             let mut attempt = 2;
             while target.exists() {
-                target = std::path::Path::new(&quarantine)
-                    .join(format!("{short}-{attempt}-{name}"));
+                target =
+                    std::path::Path::new(&quarantine).join(format!("{short}-{attempt}-{name}"));
                 attempt += 1;
             }
             let target_text = target.display().to_string();
@@ -6606,10 +6616,21 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         );
 
         assert!(result.ok, "{}", result.reason);
-        assert!(result.reason.contains("в карантин убрано: 2"), "{}", result.reason);
-        assert!(result.reason.contains("ничего не удалено"), "{}", result.reason);
+        assert!(
+            result.reason.contains("в карантин убрано: 2"),
+            "{}",
+            result.reason
+        );
+        assert!(
+            result.reason.contains("ничего не удалено"),
+            "{}",
+            result.reason
+        );
         // Первый по алфавиту остался на месте, остальные уехали и целы.
-        assert!(dir.join("а-копия.bin").exists(), "первый по алфавиту должен остаться");
+        assert!(
+            dir.join("а-копия.bin").exists(),
+            "первый по алфавиту должен остаться"
+        );
         assert!(!dir.join("б-копия.bin").exists(), "копия должна уехать");
         assert!(!dir.join("в-копия.bin").exists(), "копия должна уехать");
         let quarantine = dir.join("_Карантин");
@@ -6630,7 +6651,8 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
     #[cfg(windows)]
     #[test]
     fn quarantine_is_not_scanned_again() {
-        let dir = std::env::temp_dir().join(format!("zshelper-quarantine-twice-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-quarantine-twice-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
         let body = vec![3u8; 128 * 1024];
@@ -6640,11 +6662,23 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
 
         let mut params = BTreeMap::new();
         params.insert("path".to_string(), dir.display().to_string());
-        let first = run("files|убрать|двойников в карантин", &params, &AtomicBool::new(false));
+        let first = run(
+            "files|убрать|двойников в карантин",
+            &params,
+            &AtomicBool::new(false),
+        );
         assert!(first.ok, "{}", first.reason);
-        assert!(first.reason.contains("в карантин убрано: 1"), "{}", first.reason);
+        assert!(
+            first.reason.contains("в карантин убрано: 1"),
+            "{}",
+            first.reason
+        );
 
-        let second = run("files|убрать|двойников в карантин", &params, &AtomicBool::new(false));
+        let second = run(
+            "files|убрать|двойников в карантин",
+            &params,
+            &AtomicBool::new(false),
+        );
         assert!(second.ok, "{}", second.reason);
         assert!(
             second.reason.contains("двойников нет"),
@@ -6661,7 +6695,8 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert_ne!(volume_of("C:\\Фото\\a.jpg"), volume_of("D:\\Фото\\a.jpg"));
 
         // Папка настоящая (на том же томе, где идёт тест), а карантин назван на другом диске.
-        let dir = std::env::temp_dir().join(format!("zshelper-quarantine-drive-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-quarantine-drive-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
         let mut params = BTreeMap::new();
