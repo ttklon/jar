@@ -9281,6 +9281,26 @@
   "needs_check": false
  },
  {
+  "id": "ability:processes-services:замерить",
+  "name": "Процессы, службы, автозапуск: замерить",
+  "category": "abilities",
+  "subkind": "проверка",
+  "origin": "registry",
+  "url": "docs/ACTIONS.md",
+  "license": "own",
+  "domain": "processes-services",
+  "verb": "замерить",
+  "actions": 1,
+  "gives": "1 действий: изменение нагрузки",
+  "examples": [
+   "изменение нагрузки"
+  ],
+  "tier": "T1",
+  "risk": "read",
+  "status": "selected",
+  "needs_check": false
+ },
+ {
   "id": "ability:processes-services:найти",
   "name": "Процессы, службы, автозапуск: найти",
   "category": "abilities",

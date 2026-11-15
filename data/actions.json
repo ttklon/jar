@@ -3716,6 +3716,22 @@
  {
   "id": "processes-services-230",
   "domain": "processes-services",
+  "verb": "замерить",
+  "object": "изменение нагрузки",
+  "example": "замерь, что изменилось после уборки",
+  "implementation": [
+   "два снимка системы + разница числами"
+  ],
+  "risk": "read",
+  "tier": "T1",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "базис хранится рядом с журналом; ничего не меняется"
+ },
+ {
+  "id": "processes-services-231",
+  "domain": "processes-services",
   "verb": "объяснить",
   "object": "службу/процесс",
   "example": "что это за процесс svchost",
@@ -3730,7 +3746,7 @@
   "notes": ""
  },
  {
-  "id": "processes-services-231",
+  "id": "processes-services-232",
   "domain": "processes-services",
   "verb": "найти",
   "object": "подозрительный процесс",
@@ -3746,7 +3762,7 @@
   "notes": "не гарантия"
  },
  {
-  "id": "processes-services-232",
+  "id": "processes-services-233",
   "domain": "processes-services",
   "verb": "завершить",
   "object": "процесс",
@@ -3762,7 +3778,7 @@
   "notes": "риск потери данных"
  },
  {
-  "id": "processes-services-233",
+  "id": "processes-services-234",
   "domain": "processes-services",
   "verb": "отключить",
   "object": "службу",
@@ -3778,7 +3794,7 @@
   "notes": "Defender/Update/RPC — запрет"
  },
  {
-  "id": "processes-services-234",
+  "id": "processes-services-235",
   "domain": "processes-services",
   "verb": "включить",
   "object": "службу",
@@ -3794,7 +3810,7 @@
   "notes": "откат"
  },
  {
-  "id": "processes-services-235",
+  "id": "processes-services-236",
   "domain": "processes-services",
   "verb": "настроить",
   "object": "приоритет процесса",
@@ -3810,7 +3826,7 @@
   "notes": ""
  },
  {
-  "id": "processes-services-236",
+  "id": "processes-services-237",
   "domain": "processes-services",
   "verb": "настроить",
   "object": "сродство (affinity)",
@@ -3826,7 +3842,7 @@
   "notes": ""
  },
  {
-  "id": "processes-services-237",
+  "id": "processes-services-238",
   "domain": "processes-services",
   "verb": "проанализировать",
   "object": "автозапуск",
@@ -3842,7 +3858,7 @@
   "notes": ""
  },
  {
-  "id": "processes-services-238",
+  "id": "processes-services-239",
   "domain": "processes-services",
   "verb": "отключить",
   "object": "автозапуск",
@@ -3858,7 +3874,7 @@
   "notes": "откат 1 клик"
  },
  {
-  "id": "processes-services-239",
+  "id": "processes-services-240",
   "domain": "processes-services",
   "verb": "создать",
   "object": "задачу в планировщике",
@@ -3874,7 +3890,7 @@
   "notes": ""
  },
  {
-  "id": "processes-services-240",
+  "id": "processes-services-241",
   "domain": "processes-services",
   "verb": "прочитать",
   "object": "журнал событий",
@@ -3890,7 +3906,7 @@
   "notes": "объём ограничиваем"
  },
  {
-  "id": "processes-services-241",
+  "id": "processes-services-242",
   "domain": "processes-services",
   "verb": "диагностировать",
   "object": "синий экран",
@@ -3906,7 +3922,7 @@
   "notes": "нужен WinDbg"
  },
  {
-  "id": "processes-services-242",
+  "id": "processes-services-243",
   "domain": "processes-services",
   "verb": "настроить",
   "object": "виртуальную память",
@@ -3922,7 +3938,7 @@
   "notes": "осторожно"
  },
  {
-  "id": "processes-services-243",
+  "id": "processes-services-244",
   "domain": "processes-services",
   "verb": "освободить",
   "object": "память",
@@ -3938,7 +3954,7 @@
   "notes": "без «RAM booster»"
  },
  {
-  "id": "network-244",
+  "id": "network-245",
   "domain": "network",
   "verb": "проверить",
   "object": "подключение",
@@ -3954,7 +3970,7 @@
   "notes": ""
  },
  {
-  "id": "network-245",
+  "id": "network-246",
   "domain": "network",
   "verb": "показать",
   "object": "скорость",
@@ -3970,7 +3986,7 @@
   "notes": ""
  },
  {
-  "id": "network-246",
+  "id": "network-247",
   "domain": "network",
   "verb": "настроить",
   "object": "DNS",
@@ -3986,7 +4002,7 @@
   "notes": "откат"
  },
  {
-  "id": "network-247",
+  "id": "network-248",
   "domain": "network",
   "verb": "подключиться",
   "object": "к Wi-Fi",
@@ -4002,7 +4018,7 @@
   "notes": "пароль спрашиваем"
  },
  {
-  "id": "network-248",
+  "id": "network-249",
   "domain": "network",
   "verb": "показать",
   "object": "кто в сети",
@@ -4018,7 +4034,7 @@
   "notes": "только своя сеть"
  },
  {
-  "id": "network-249",
+  "id": "network-250",
   "domain": "network",
   "verb": "ограничить",
   "object": "трафик приложения",
@@ -4034,7 +4050,7 @@
   "notes": ""
  },
  {
-  "id": "network-250",
+  "id": "network-251",
   "domain": "network",
   "verb": "открыть",
   "object": "порт",
@@ -4050,7 +4066,7 @@
   "notes": "предупреждаем о риске"
  },
  {
-  "id": "network-251",
+  "id": "network-252",
   "domain": "network",
   "verb": "запустить",
   "object": "туннель",
@@ -4066,7 +4082,7 @@
   "notes": "конфиг — секрет"
  },
  {
-  "id": "network-252",
+  "id": "network-253",
   "domain": "network",
   "verb": "проверить",
   "object": "открытые порты",
@@ -4082,7 +4098,7 @@
   "notes": ""
  },
  {
-  "id": "network-253",
+  "id": "network-254",
   "domain": "network",
   "verb": "проанализировать",
   "object": "трафик",
@@ -4098,7 +4114,7 @@
   "notes": "приватность"
  },
  {
-  "id": "network-254",
+  "id": "network-255",
   "domain": "network",
   "verb": "настроить",
   "object": "прокси",
@@ -4114,7 +4130,7 @@
   "notes": ""
  },
  {
-  "id": "network-255",
+  "id": "network-256",
   "domain": "network",
   "verb": "проверить",
   "object": "сертификат/SSL",
@@ -4130,7 +4146,7 @@
   "notes": ""
  },
  {
-  "id": "network-256",
+  "id": "network-257",
   "domain": "network",
   "verb": "оптимизировать",
   "object": "задержку",
@@ -4146,7 +4162,7 @@
   "notes": "мало что реально помогает"
  },
  {
-  "id": "network-257",
+  "id": "network-258",
   "domain": "network",
   "verb": "сделать",
   "object": "спидтест-мониторинг",
@@ -4162,7 +4178,7 @@
   "notes": ""
  },
  {
-  "id": "devices-258",
+  "id": "devices-259",
   "domain": "devices",
   "verb": "подключить",
   "object": "телефон",
@@ -4178,7 +4194,7 @@
   "notes": ""
  },
  {
-  "id": "devices-259",
+  "id": "devices-260",
   "domain": "devices",
   "verb": "перекинуть",
   "object": "файлы с телефона",
@@ -4195,7 +4211,7 @@
   "notes": ""
  },
  {
-  "id": "devices-260",
+  "id": "devices-261",
   "domain": "devices",
   "verb": "управлять",
   "object": "телефоном",
@@ -4211,7 +4227,7 @@
   "notes": "Android"
  },
  {
-  "id": "devices-261",
+  "id": "devices-262",
   "domain": "devices",
   "verb": "подключить",
   "object": "принтер",
@@ -4227,7 +4243,7 @@
   "notes": ""
  },
  {
-  "id": "devices-262",
+  "id": "devices-263",
   "domain": "devices",
   "verb": "подключить",
   "object": "Bluetooth-устройство",
@@ -4243,7 +4259,7 @@
   "notes": ""
  },
  {
-  "id": "devices-263",
+  "id": "devices-264",
   "domain": "devices",
   "verb": "проверить",
   "object": "USB-устройства",
@@ -4259,7 +4275,7 @@
   "notes": ""
  },
  {
-  "id": "devices-264",
+  "id": "devices-265",
   "domain": "devices",
   "verb": "извлечь",
   "object": "флешку безопасно",
@@ -4275,7 +4291,7 @@
   "notes": ""
  },
  {
-  "id": "devices-265",
+  "id": "devices-266",
   "domain": "devices",
   "verb": "отформатировать",
   "object": "флешку",
@@ -4291,7 +4307,7 @@
   "notes": "двойное подтверждение"
  },
  {
-  "id": "devices-266",
+  "id": "devices-267",
   "domain": "devices",
   "verb": "записать",
   "object": "загрузочную флешку",
@@ -4307,7 +4323,7 @@
   "notes": "очень рискованно"
  },
  {
-  "id": "devices-267",
+  "id": "devices-268",
   "domain": "devices",
   "verb": "работать",
   "object": "с камерой",
@@ -4323,7 +4339,7 @@
   "notes": ""
  },
  {
-  "id": "devices-268",
+  "id": "devices-269",
   "domain": "devices",
   "verb": "работать",
   "object": "со сканером",
@@ -4339,7 +4355,7 @@
   "notes": ""
  },
  {
-  "id": "devices-269",
+  "id": "devices-270",
   "domain": "devices",
   "verb": "управлять",
   "object": "IoT/умным домом",
@@ -4355,7 +4371,7 @@
   "notes": "локальный хаб"
  },
  {
-  "id": "display-sound-270",
+  "id": "display-sound-271",
   "domain": "display-sound",
   "verb": "изменить",
   "object": "громкость",
@@ -4371,7 +4387,7 @@
   "notes": ""
  },
  {
-  "id": "display-sound-271",
+  "id": "display-sound-272",
   "domain": "display-sound",
   "verb": "выбрать",
   "object": "устройство вывода",
@@ -4387,7 +4403,7 @@
   "notes": ""
  },
  {
-  "id": "display-sound-272",
+  "id": "display-sound-273",
   "domain": "display-sound",
   "verb": "изменить",
   "object": "разрешение",
@@ -4403,7 +4419,7 @@
   "notes": ""
  },
  {
-  "id": "display-sound-273",
+  "id": "display-sound-274",
   "domain": "display-sound",
   "verb": "переключить",
   "object": "монитор",
@@ -4419,7 +4435,7 @@
   "notes": ""
  },
  {
-  "id": "display-sound-274",
+  "id": "display-sound-275",
   "domain": "display-sound",
   "verb": "изменить",
   "object": "масштаб",
@@ -4435,7 +4451,7 @@
   "notes": "требует relogin"
  },
  {
-  "id": "display-sound-275",
+  "id": "display-sound-276",
   "domain": "display-sound",
   "verb": "настроить",
   "object": "ночной режим",
@@ -4451,7 +4467,7 @@
   "notes": ""
  },
  {
-  "id": "display-sound-276",
+  "id": "display-sound-277",
   "domain": "display-sound",
   "verb": "сделать",
   "object": "скрин всех мониторов",
@@ -4467,7 +4483,7 @@
   "notes": ""
  },
  {
-  "id": "display-sound-277",
+  "id": "display-sound-278",
   "domain": "display-sound",
   "verb": "записать",
   "object": "звук системы",
@@ -4483,7 +4499,7 @@
   "notes": ""
  },
  {
-  "id": "display-sound-278",
+  "id": "display-sound-279",
   "domain": "display-sound",
   "verb": "настроить",
   "object": "микрофон",
@@ -4499,7 +4515,7 @@
   "notes": ""
  },
  {
-  "id": "display-sound-279",
+  "id": "display-sound-280",
   "domain": "display-sound",
   "verb": "проверить",
   "object": "качество связи",
@@ -4515,7 +4531,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-280",
+  "id": "security-access-281",
   "domain": "security-access",
   "verb": "проверить",
   "object": "обновления безопасности",
@@ -4531,7 +4547,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-281",
+  "id": "security-access-282",
   "domain": "security-access",
   "verb": "проверить",
   "object": "угрозы",
@@ -4547,7 +4563,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-282",
+  "id": "security-access-283",
   "domain": "security-access",
   "verb": "настроить",
   "object": "исключения антивируса",
@@ -4563,7 +4579,7 @@
   "notes": "предупреждаем"
  },
  {
-  "id": "security-access-283",
+  "id": "security-access-284",
   "domain": "security-access",
   "verb": "проверить",
   "object": "пароли в файлах",
@@ -4579,7 +4595,7 @@
   "notes": "локально"
  },
  {
-  "id": "security-access-284",
+  "id": "security-access-285",
   "domain": "security-access",
   "verb": "проверить",
   "object": "права приложений",
@@ -4595,7 +4611,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-285",
+  "id": "security-access-286",
   "domain": "security-access",
   "verb": "настроить",
   "object": "брандмауэр",
@@ -4611,7 +4627,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-286",
+  "id": "security-access-287",
   "domain": "security-access",
   "verb": "проверить",
   "object": "фишинговую ссылку",
@@ -4627,7 +4643,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-287",
+  "id": "security-access-288",
   "domain": "security-access",
   "verb": "зашифровать",
   "object": "диск/папку",
@@ -4643,7 +4659,7 @@
   "notes": "риск потери данных"
  },
  {
-  "id": "security-access-288",
+  "id": "security-access-289",
   "domain": "security-access",
   "verb": "удалить",
   "object": "историю браузера",
@@ -4659,7 +4675,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-289",
+  "id": "security-access-290",
   "domain": "security-access",
   "verb": "проверить",
   "object": "утечки аккаунта",
@@ -4675,7 +4691,7 @@
   "notes": "только хеш-префикс"
  },
  {
-  "id": "security-access-290",
+  "id": "security-access-291",
   "domain": "security-access",
   "verb": "создать",
   "object": "резервный код 2FA",
@@ -4691,7 +4707,7 @@
   "notes": "очень осторожно"
  },
  {
-  "id": "security-access-291",
+  "id": "security-access-292",
   "domain": "security-access",
   "verb": "проверить",
   "object": "целостность системы",
@@ -4708,7 +4724,7 @@
   "notes": "долго"
  },
  {
-  "id": "accounts-updates-292",
+  "id": "accounts-updates-293",
   "domain": "accounts-updates",
   "verb": "проверить",
   "object": "обновления Windows",
@@ -4724,7 +4740,7 @@
   "notes": ""
  },
  {
-  "id": "accounts-updates-293",
+  "id": "accounts-updates-294",
   "domain": "accounts-updates",
   "verb": "установить",
   "object": "обновления",
@@ -4740,7 +4756,7 @@
   "notes": "перезагрузка — по согласию"
  },
  {
-  "id": "accounts-updates-294",
+  "id": "accounts-updates-295",
   "domain": "accounts-updates",
   "verb": "отложить",
   "object": "обновление",
@@ -4756,7 +4772,7 @@
   "notes": ""
  },
  {
-  "id": "accounts-updates-295",
+  "id": "accounts-updates-296",
   "domain": "accounts-updates",
   "verb": "обновить",
   "object": "драйвер",
@@ -4772,7 +4788,7 @@
   "notes": "риск"
  },
  {
-  "id": "accounts-updates-296",
+  "id": "accounts-updates-297",
   "domain": "accounts-updates",
   "verb": "проверить",
   "object": "версию Windows",
@@ -4788,7 +4804,7 @@
   "notes": ""
  },
  {
-  "id": "accounts-updates-297",
+  "id": "accounts-updates-298",
   "domain": "accounts-updates",
   "verb": "создать",
   "object": "пользователя",
@@ -4804,7 +4820,7 @@
   "notes": "админ"
  },
  {
-  "id": "accounts-updates-298",
+  "id": "accounts-updates-299",
   "domain": "accounts-updates",
   "verb": "изменить",
   "object": "пароль",
@@ -4820,7 +4836,7 @@
   "notes": "только сам пользователь"
  },
  {
-  "id": "accounts-updates-299",
+  "id": "accounts-updates-300",
   "domain": "accounts-updates",
   "verb": "проверить",
   "object": "лицензию",
@@ -4836,7 +4852,7 @@
   "notes": ""
  },
  {
-  "id": "accounts-updates-300",
+  "id": "accounts-updates-301",
   "domain": "accounts-updates",
   "verb": "настроить",
   "object": "автозапуск приложения",
@@ -4852,7 +4868,7 @@
   "notes": ""
  },
  {
-  "id": "accounts-updates-301",
+  "id": "accounts-updates-302",
   "domain": "accounts-updates",
   "verb": "обновить",
   "object": "приложение",
@@ -4868,7 +4884,7 @@
   "notes": "см. notes/22"
  },
  {
-  "id": "accounts-updates-302",
+  "id": "accounts-updates-303",
   "domain": "accounts-updates",
   "verb": "проверить",
   "object": "целостность установки",
@@ -4884,7 +4900,7 @@
   "notes": ""
  },
  {
-  "id": "accounts-updates-303",
+  "id": "accounts-updates-304",
   "domain": "accounts-updates",
   "verb": "посмотреть",
   "object": "что нового",
@@ -4900,7 +4916,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-304",
+  "id": "dev-code-305",
   "domain": "dev-code",
   "verb": "создать",
   "object": "проект",
@@ -4916,7 +4932,7 @@
   "notes": "см. notes/09"
  },
  {
-  "id": "dev-code-305",
+  "id": "dev-code-306",
   "domain": "dev-code",
   "verb": "написать",
   "object": "код по описанию",
@@ -4932,7 +4948,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-306",
+  "id": "dev-code-307",
   "domain": "dev-code",
   "verb": "объяснить",
   "object": "ошибку",
@@ -4948,7 +4964,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-307",
+  "id": "dev-code-308",
   "domain": "dev-code",
   "verb": "исправить",
   "object": "баг",
@@ -4964,7 +4980,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-308",
+  "id": "dev-code-309",
   "domain": "dev-code",
   "verb": "отрефакторить",
   "object": "код",
@@ -4980,7 +4996,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-309",
+  "id": "dev-code-310",
   "domain": "dev-code",
   "verb": "покрыть",
   "object": "тестами",
@@ -4996,7 +5012,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-310",
+  "id": "dev-code-311",
   "domain": "dev-code",
   "verb": "запустить",
   "object": "тесты",
@@ -5012,7 +5028,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-311",
+  "id": "dev-code-312",
   "domain": "dev-code",
   "verb": "собрать",
   "object": "релиз",
@@ -5028,7 +5044,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-312",
+  "id": "dev-code-313",
   "domain": "dev-code",
   "verb": "работать",
   "object": "с git",
@@ -5044,7 +5060,7 @@
   "notes": "push — внешнее"
  },
  {
-  "id": "dev-code-313",
+  "id": "dev-code-314",
   "domain": "dev-code",
   "verb": "создать",
   "object": "PR",
@@ -5060,7 +5076,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-314",
+  "id": "dev-code-315",
   "domain": "dev-code",
   "verb": "ревью",
   "object": "свой дифф",
@@ -5076,7 +5092,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-315",
+  "id": "dev-code-316",
   "domain": "dev-code",
   "verb": "настроить",
   "object": "CI",
@@ -5092,7 +5108,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-316",
+  "id": "dev-code-317",
   "domain": "dev-code",
   "verb": "найти",
   "object": "в коде",
@@ -5110,7 +5126,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-317",
+  "id": "dev-code-318",
   "domain": "dev-code",
   "verb": "обновить",
   "object": "зависимости",
@@ -5126,7 +5142,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-318",
+  "id": "dev-code-319",
   "domain": "dev-code",
   "verb": "развернуть",
   "object": "локально",
@@ -5142,7 +5158,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-319",
+  "id": "dev-code-320",
   "domain": "dev-code",
   "verb": "документировать",
   "object": "API",
@@ -5158,7 +5174,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-320",
+  "id": "dev-code-321",
   "domain": "dev-code",
   "verb": "перевести",
   "object": "код на другой язык",
@@ -5174,7 +5190,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-321",
+  "id": "dev-code-322",
   "domain": "dev-code",
   "verb": "работать",
   "object": "с БД-миграциями",
@@ -5190,7 +5206,7 @@
   "notes": "бэкап обязателен"
  },
  {
-  "id": "dev-code-322",
+  "id": "dev-code-323",
   "domain": "dev-code",
   "verb": "профилировать",
   "object": "производительность",
@@ -5206,7 +5222,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-323",
+  "id": "dev-code-324",
   "domain": "dev-code",
   "verb": "настроить",
   "object": "окружение",
@@ -5222,7 +5238,7 @@
   "notes": ""
  },
  {
-  "id": "databases-324",
+  "id": "databases-325",
   "domain": "databases",
   "verb": "подключиться",
   "object": "к БД",
@@ -5238,7 +5254,7 @@
   "notes": "креды — из секретов"
  },
  {
-  "id": "databases-325",
+  "id": "databases-326",
   "domain": "databases",
   "verb": "выполнить",
   "object": "SELECT",
@@ -5254,7 +5270,7 @@
   "notes": ""
  },
  {
-  "id": "databases-326",
+  "id": "databases-327",
   "domain": "databases",
   "verb": "изменить",
   "object": "данные",
@@ -5270,7 +5286,7 @@
   "notes": "только с подтверждением"
  },
  {
-  "id": "databases-327",
+  "id": "databases-328",
   "domain": "databases",
   "verb": "создать",
   "object": "таблицу",
@@ -5286,7 +5302,7 @@
   "notes": ""
  },
  {
-  "id": "databases-328",
+  "id": "databases-329",
   "domain": "databases",
   "verb": "сделать",
   "object": "бэкап БД",
@@ -5302,7 +5318,7 @@
   "notes": ""
  },
  {
-  "id": "databases-329",
+  "id": "databases-330",
   "domain": "databases",
   "verb": "восстановить",
   "object": "БД",
@@ -5318,7 +5334,7 @@
   "notes": "перезапись — подтверждение"
  },
  {
-  "id": "databases-330",
+  "id": "databases-331",
   "domain": "databases",
   "verb": "починить",
   "object": "SQLite",
@@ -5334,7 +5350,7 @@
   "notes": ""
  },
  {
-  "id": "databases-331",
+  "id": "databases-332",
   "domain": "databases",
   "verb": "экспортировать",
   "object": "результат",
@@ -5350,7 +5366,7 @@
   "notes": ""
  },
  {
-  "id": "databases-332",
+  "id": "databases-333",
   "domain": "databases",
   "verb": "оптимизировать",
   "object": "запрос",
@@ -5366,7 +5382,7 @@
   "notes": ""
  },
  {
-  "id": "databases-333",
+  "id": "databases-334",
   "domain": "databases",
   "verb": "мониторить",
   "object": "БД",
@@ -5382,7 +5398,7 @@
   "notes": ""
  },
  {
-  "id": "ai-ml-334",
+  "id": "ai-ml-335",
   "domain": "ai-ml",
   "verb": "обучить",
   "object": "модель",
@@ -5398,7 +5414,7 @@
   "notes": "нужен GPU"
  },
  {
-  "id": "ai-ml-335",
+  "id": "ai-ml-336",
   "domain": "ai-ml",
   "verb": "запустить",
   "object": "инференс",
@@ -5414,7 +5430,7 @@
   "notes": ""
  },
  {
-  "id": "ai-ml-336",
+  "id": "ai-ml-337",
   "domain": "ai-ml",
   "verb": "сравнить",
   "object": "модели",
@@ -5430,7 +5446,7 @@
   "notes": "см. notes/15"
  },
  {
-  "id": "ai-ml-337",
+  "id": "ai-ml-338",
   "domain": "ai-ml",
   "verb": "подготовить",
   "object": "датасет",
@@ -5446,7 +5462,7 @@
   "notes": ""
  },
  {
-  "id": "ai-ml-338",
+  "id": "ai-ml-339",
   "domain": "ai-ml",
   "verb": "сделать",
   "object": "эмбеддинги",
@@ -5462,7 +5478,7 @@
   "notes": ""
  },
  {
-  "id": "ai-ml-339",
+  "id": "ai-ml-340",
   "domain": "ai-ml",
   "verb": "распознать",
   "object": "речь/текст/фото",
@@ -5478,7 +5494,7 @@
   "notes": ""
  },
  {
-  "id": "ai-ml-340",
+  "id": "ai-ml-341",
   "domain": "ai-ml",
   "verb": "сгенерировать",
   "object": "текст по данным",
@@ -5494,7 +5510,7 @@
   "notes": "факты из данных"
  },
  {
-  "id": "ai-ml-341",
+  "id": "ai-ml-342",
   "domain": "ai-ml",
   "verb": "квантовать",
   "object": "модель",
@@ -5510,7 +5526,7 @@
   "notes": ""
  },
  {
-  "id": "ai-ml-342",
+  "id": "ai-ml-343",
   "domain": "ai-ml",
   "verb": "оценить",
   "object": "качество ответа",
@@ -5526,7 +5542,7 @@
   "notes": ""
  },
  {
-  "id": "ai-ml-343",
+  "id": "ai-ml-344",
   "domain": "ai-ml",
   "verb": "экспортировать",
   "object": "модель в ONNX",
@@ -5542,7 +5558,7 @@
   "notes": ""
  },
  {
-  "id": "automation-344",
+  "id": "automation-345",
   "domain": "automation",
   "verb": "создать",
   "object": "скрипт",
@@ -5558,7 +5574,7 @@
   "notes": ""
  },
  {
-  "id": "automation-345",
+  "id": "automation-346",
   "domain": "automation",
   "verb": "запустить",
   "object": "скрипт по триггеру",
@@ -5574,7 +5590,7 @@
   "notes": ""
  },
  {
-  "id": "automation-346",
+  "id": "automation-347",
   "domain": "automation",
   "verb": "создать",
   "object": "хоткей",
@@ -5590,7 +5606,7 @@
   "notes": ""
  },
  {
-  "id": "automation-347",
+  "id": "automation-348",
   "domain": "automation",
   "verb": "создать",
   "object": "макрос приложения",
@@ -5606,7 +5622,7 @@
   "notes": ""
  },
  {
-  "id": "automation-348",
+  "id": "automation-349",
   "domain": "automation",
   "verb": "создать",
   "object": "скилл",
@@ -5622,7 +5638,7 @@
   "notes": "см. notes/20"
  },
  {
-  "id": "automation-349",
+  "id": "automation-350",
   "domain": "automation",
   "verb": "настроить",
   "object": "расписание",
@@ -5638,7 +5654,7 @@
   "notes": ""
  },
  {
-  "id": "automation-350",
+  "id": "automation-351",
   "domain": "automation",
   "verb": "связать",
   "object": "сервисы",
@@ -5654,7 +5670,7 @@
   "notes": "n8n-подобное"
  },
  {
-  "id": "automation-351",
+  "id": "automation-352",
   "domain": "automation",
   "verb": "создать",
   "object": "вебхук-приёмник",
@@ -5670,7 +5686,7 @@
   "notes": "только localhost"
  },
  {
-  "id": "automation-352",
+  "id": "automation-353",
   "domain": "automation",
   "verb": "проверить",
   "object": "скрипт перед запуском",
@@ -5686,7 +5702,7 @@
   "notes": "обязательно для скачанного"
  },
  {
-  "id": "automation-353",
+  "id": "automation-354",
   "domain": "automation",
   "verb": "откатить",
   "object": "изменения",
@@ -5702,7 +5718,7 @@
   "notes": ""
  },
  {
-  "id": "automation-354",
+  "id": "automation-355",
   "domain": "automation",
   "verb": "запланировать",
   "object": "пакет задач",
@@ -5718,7 +5734,7 @@
   "notes": ""
  },
  {
-  "id": "automation-355",
+  "id": "automation-356",
   "domain": "automation",
   "verb": "остановить",
   "object": "всё",
@@ -5734,7 +5750,7 @@
   "notes": "голосом и хоткеем"
  },
  {
-  "id": "monitoring-triage-356",
+  "id": "monitoring-triage-357",
   "domain": "monitoring-triage",
   "verb": "наблюдать",
   "object": "за системой",
@@ -5750,7 +5766,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-357",
+  "id": "monitoring-triage-358",
   "domain": "monitoring-triage",
   "verb": "наблюдать",
   "object": "за папкой",
@@ -5766,7 +5782,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-358",
+  "id": "monitoring-triage-359",
   "domain": "monitoring-triage",
   "verb": "наблюдать",
   "object": "за сайтом",
@@ -5782,7 +5798,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-359",
+  "id": "monitoring-triage-360",
   "domain": "monitoring-triage",
   "verb": "наблюдать",
   "object": "за ценой",
@@ -5798,7 +5814,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-360",
+  "id": "monitoring-triage-361",
   "domain": "monitoring-triage",
   "verb": "собрать",
   "object": "метрики",
@@ -5814,7 +5830,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-361",
+  "id": "monitoring-triage-362",
   "domain": "monitoring-triage",
   "verb": "найти",
   "object": "причину тормозов",
@@ -5830,7 +5846,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-362",
+  "id": "monitoring-triage-363",
   "domain": "monitoring-triage",
   "verb": "составить",
   "object": "отчёт о здоровье ПК",
@@ -5846,7 +5862,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-363",
+  "id": "monitoring-triage-364",
   "domain": "monitoring-triage",
   "verb": "предупредить",
   "object": "о перегреве",
@@ -5862,7 +5878,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-364",
+  "id": "monitoring-triage-365",
   "domain": "monitoring-triage",
   "verb": "наблюдать",
   "object": "за процессами",
@@ -5878,7 +5894,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-365",
+  "id": "monitoring-triage-366",
   "domain": "monitoring-triage",
   "verb": "наблюдать",
   "object": "за сетью",
@@ -5894,7 +5910,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-366",
+  "id": "virtualization-remote-367",
   "domain": "virtualization-remote",
   "verb": "запустить",
   "object": "виртуалку",
@@ -5910,7 +5926,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-367",
+  "id": "virtualization-remote-368",
   "domain": "virtualization-remote",
   "verb": "подключиться",
   "object": "по RDP",
@@ -5926,7 +5942,7 @@
   "notes": "креды — секреты"
  },
  {
-  "id": "virtualization-remote-368",
+  "id": "virtualization-remote-369",
   "domain": "virtualization-remote",
   "verb": "подключиться",
   "object": "по SSH",
@@ -5942,7 +5958,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-369",
+  "id": "virtualization-remote-370",
   "domain": "virtualization-remote",
   "verb": "передать",
   "object": "файл на сервер",
@@ -5958,7 +5974,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-370",
+  "id": "virtualization-remote-371",
   "domain": "virtualization-remote",
   "verb": "запустить",
   "object": "контейнер",
@@ -5974,7 +5990,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-371",
+  "id": "virtualization-remote-372",
   "domain": "virtualization-remote",
   "verb": "работать",
   "object": "в WSL",
@@ -5990,7 +6006,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-372",
+  "id": "virtualization-remote-373",
   "domain": "virtualization-remote",
   "verb": "помочь",
   "object": "удалённо человеку",
@@ -6006,7 +6022,7 @@
   "notes": "только с согласием, и не нами"
  },
  {
-  "id": "virtualization-remote-373",
+  "id": "virtualization-remote-374",
   "domain": "virtualization-remote",
   "verb": "создать",
   "object": "песочницу",
@@ -6022,7 +6038,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-374",
+  "id": "virtualization-remote-375",
   "domain": "virtualization-remote",
   "verb": "снять",
   "object": "снапшот ВМ",
@@ -6038,7 +6054,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-375",
+  "id": "virtualization-remote-376",
   "domain": "virtualization-remote",
   "verb": "проверить",
   "object": "доступность сервера",
@@ -6054,7 +6070,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-376",
+  "id": "virtualization-remote-377",
   "domain": "virtualization-remote",
   "verb": "развернуть",
   "object": "сервис",
@@ -6070,7 +6086,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-377",
+  "id": "virtualization-remote-378",
   "domain": "virtualization-remote",
   "verb": "синхронизировать",
   "object": "с сервером",
@@ -6086,7 +6102,7 @@
   "notes": ""
  },
  {
-  "id": "accessibility-378",
+  "id": "accessibility-379",
   "domain": "accessibility",
   "verb": "диктовать",
   "object": "текст в любое поле",
@@ -6102,7 +6118,7 @@
   "notes": ""
  },
  {
-  "id": "accessibility-379",
+  "id": "accessibility-380",
   "domain": "accessibility",
   "verb": "озвучить",
   "object": "интерфейс",
@@ -6118,7 +6134,7 @@
   "notes": ""
  },
  {
-  "id": "accessibility-380",
+  "id": "accessibility-381",
   "domain": "accessibility",
   "verb": "увеличить",
   "object": "текст/масштаб",
@@ -6134,7 +6150,7 @@
   "notes": ""
  },
  {
-  "id": "accessibility-381",
+  "id": "accessibility-382",
   "domain": "accessibility",
   "verb": "управлять",
   "object": "без мыши",
@@ -6150,7 +6166,7 @@
   "notes": ""
  },
  {
-  "id": "accessibility-382",
+  "id": "accessibility-383",
   "domain": "accessibility",
   "verb": "включить",
   "object": "экранный диктор",
@@ -6166,7 +6182,7 @@
   "notes": ""
  },
  {
-  "id": "accessibility-383",
+  "id": "accessibility-384",
   "domain": "accessibility",
   "verb": "субтитрировать",
   "object": "для любого звука",
@@ -6182,7 +6198,7 @@
   "notes": ""
  },
  {
-  "id": "accessibility-384",
+  "id": "accessibility-385",
   "domain": "accessibility",
   "verb": "упростить",
   "object": "интерфейс",
@@ -6198,7 +6214,7 @@
   "notes": ""
  },
  {
-  "id": "accessibility-385",
+  "id": "accessibility-386",
   "domain": "accessibility",
   "verb": "описать",
   "object": "изображение",
@@ -6214,7 +6230,7 @@
   "notes": "см. images"
  },
  {
-  "id": "business-finance-386",
+  "id": "business-finance-387",
   "domain": "business-finance",
   "verb": "создать",
   "object": "счёт/акт",
@@ -6230,7 +6246,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-387",
+  "id": "business-finance-388",
   "domain": "business-finance",
   "verb": "свести",
   "object": "расходы",
@@ -6246,7 +6262,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-388",
+  "id": "business-finance-389",
   "domain": "business-finance",
   "verb": "сделать",
   "object": "отчёт для налоговой",
@@ -6262,7 +6278,7 @@
   "notes": "налоговая отчётность — только человек"
  },
  {
-  "id": "business-finance-389",
+  "id": "business-finance-390",
   "domain": "business-finance",
   "verb": "проверить",
   "object": "контрагента",
@@ -6278,7 +6294,7 @@
   "notes": "не гарантия"
  },
  {
-  "id": "business-finance-390",
+  "id": "business-finance-391",
   "domain": "business-finance",
   "verb": "выставить",
   "object": "напоминание об оплате",
@@ -6294,7 +6310,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-391",
+  "id": "business-finance-392",
   "domain": "business-finance",
   "verb": "свести",
   "object": "акты сверки",
@@ -6310,7 +6326,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-392",
+  "id": "business-finance-393",
   "domain": "business-finance",
   "verb": "посчитать",
   "object": "зарплату/налоги",
@@ -6326,7 +6342,7 @@
   "notes": "проверять вручную"
  },
  {
-  "id": "business-finance-393",
+  "id": "business-finance-394",
   "domain": "business-finance",
   "verb": "создать",
   "object": "КП/презентацию",
@@ -6342,7 +6358,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-394",
+  "id": "business-finance-395",
   "domain": "business-finance",
   "verb": "вести",
   "object": "CRM-заметки",
@@ -6358,7 +6374,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-395",
+  "id": "business-finance-396",
   "domain": "business-finance",
   "verb": "спрогнозировать",
   "object": "денежный поток",
@@ -6374,7 +6390,7 @@
   "notes": "не финансовый совет"
  },
  {
-  "id": "learning-research-396",
+  "id": "learning-research-397",
   "domain": "learning-research",
   "verb": "исследовать",
   "object": "тему",
@@ -6390,7 +6406,7 @@
   "notes": ""
  },
  {
-  "id": "learning-research-397",
+  "id": "learning-research-398",
   "domain": "learning-research",
   "verb": "сделать",
   "object": "конспект",
@@ -6406,7 +6422,7 @@
   "notes": ""
  },
  {
-  "id": "learning-research-398",
+  "id": "learning-research-399",
   "domain": "learning-research",
   "verb": "составить",
   "object": "план обучения",
@@ -6422,7 +6438,7 @@
   "notes": ""
  },
  {
-  "id": "learning-research-399",
+  "id": "learning-research-400",
   "domain": "learning-research",
   "verb": "проверить",
   "object": "знания",
@@ -6438,7 +6454,7 @@
   "notes": ""
  },
  {
-  "id": "learning-research-400",
+  "id": "learning-research-401",
   "domain": "learning-research",
   "verb": "объяснить",
   "object": "простыми словами",
@@ -6454,7 +6470,7 @@
   "notes": ""
  },
  {
-  "id": "learning-research-401",
+  "id": "learning-research-402",
   "domain": "learning-research",
   "verb": "перевести",
   "object": "статью и объяснить",
@@ -6470,7 +6486,7 @@
   "notes": ""
  },
  {
-  "id": "learning-research-402",
+  "id": "learning-research-403",
   "domain": "learning-research",
   "verb": "найти",
   "object": "цитаты",
@@ -6486,7 +6502,7 @@
   "notes": ""
  },
  {
-  "id": "learning-research-403",
+  "id": "learning-research-404",
   "domain": "learning-research",
   "verb": "собрать",
   "object": "библиографию",
@@ -6502,7 +6518,7 @@
   "notes": ""
  },
  {
-  "id": "learning-research-404",
+  "id": "learning-research-405",
   "domain": "learning-research",
   "verb": "проверить",
   "object": "факт",
@@ -6518,7 +6534,7 @@
   "notes": "не 100%"
  },
  {
-  "id": "learning-research-405",
+  "id": "learning-research-406",
   "domain": "learning-research",
   "verb": "сохранить",
   "object": "закладку в базу знаний",
@@ -6534,7 +6550,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-406",
+  "id": "creative-3d-407",
   "domain": "creative-3d",
   "verb": "создать",
   "object": "макет/дизайн",
@@ -6550,7 +6566,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-407",
+  "id": "creative-3d-408",
   "domain": "creative-3d",
   "verb": "обработать",
   "object": "фото художественно",
@@ -6566,7 +6582,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-408",
+  "id": "creative-3d-409",
   "domain": "creative-3d",
   "verb": "создать",
   "object": "3D-модель",
@@ -6582,7 +6598,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-409",
+  "id": "creative-3d-410",
   "domain": "creative-3d",
   "verb": "подготовить",
   "object": "файл к печати",
@@ -6598,7 +6614,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-410",
+  "id": "creative-3d-411",
   "domain": "creative-3d",
   "verb": "сделать",
   "object": "анимацию",
@@ -6614,7 +6630,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-411",
+  "id": "creative-3d-412",
   "domain": "creative-3d",
   "verb": "создать",
   "object": "диаграмму",
@@ -6630,7 +6646,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-412",
+  "id": "creative-3d-413",
   "domain": "creative-3d",
   "verb": "подобрать",
   "object": "палитру",
@@ -6646,7 +6662,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-413",
+  "id": "creative-3d-414",
   "domain": "creative-3d",
   "verb": "создать",
   "object": "шрифтовую композицию",
@@ -6662,7 +6678,7 @@
   "notes": ""
  },
  {
-  "id": "games-414",
+  "id": "games-415",
   "domain": "games",
   "verb": "запустить",
   "object": "игру",
@@ -6678,7 +6694,7 @@
   "notes": ""
  },
  {
-  "id": "games-415",
+  "id": "games-416",
   "domain": "games",
   "verb": "записать",
   "object": "геймплей",
@@ -6694,7 +6710,7 @@
   "notes": ""
  },
  {
-  "id": "games-416",
+  "id": "games-417",
   "domain": "games",
   "verb": "сделать",
   "object": "скриншот",
@@ -6710,7 +6726,7 @@
   "notes": ""
  },
  {
-  "id": "games-417",
+  "id": "games-418",
   "domain": "games",
   "verb": "играть",
   "object": "за меня",
@@ -6726,7 +6742,7 @@
   "notes": "анти-чит, этика, бан аккаунта"
  },
  {
-  "id": "superhuman-418",
+  "id": "superhuman-419",
   "domain": "superhuman",
   "verb": "работать",
   "object": "круглосуточно",
@@ -6742,7 +6758,7 @@
   "notes": "человек не может не спать; лимиты и стоп-слово обязательны"
  },
  {
-  "id": "superhuman-419",
+  "id": "superhuman-420",
   "domain": "superhuman",
   "verb": "выполнить",
   "object": "параллельно в N потоков",
@@ -6758,7 +6774,7 @@
   "notes": "с ограничением конкурентности"
  },
  {
-  "id": "superhuman-420",
+  "id": "superhuman-421",
   "domain": "superhuman",
   "verb": "повторять",
   "object": "без ошибок и устали",
@@ -6774,7 +6790,7 @@
   "notes": "детерминизм и лог"
  },
  {
-  "id": "superhuman-421",
+  "id": "superhuman-422",
   "domain": "superhuman",
   "verb": "помнить",
   "object": "всё и всегда",
@@ -6790,7 +6806,7 @@
   "notes": "с TTL и правом забыть"
  },
  {
-  "id": "superhuman-422",
+  "id": "superhuman-423",
   "domain": "superhuman",
   "verb": "найти",
   "object": "по тысячам источников",
@@ -6806,7 +6822,7 @@
   "notes": "время и токены"
  },
  {
-  "id": "superhuman-423",
+  "id": "superhuman-424",
   "domain": "superhuman",
   "verb": "сравнить",
   "object": "сотни вариантов",
@@ -6822,7 +6838,7 @@
   "notes": ""
  },
  {
-  "id": "superhuman-424",
+  "id": "superhuman-425",
   "domain": "superhuman",
   "verb": "проверить",
   "object": "каждый шаг",
@@ -6838,7 +6854,7 @@
   "notes": "наша фишка"
  },
  {
-  "id": "superhuman-425",
+  "id": "superhuman-426",
   "domain": "superhuman",
   "verb": "мониторить",
   "object": "тысячи сигналов",
@@ -6854,7 +6870,7 @@
   "notes": ""
  },
  {
-  "id": "superhuman-426",
+  "id": "superhuman-427",
   "domain": "superhuman",
   "verb": "работать",
   "object": "быстрее человека в GUI",
@@ -6870,7 +6886,7 @@
   "notes": "с проверками, не «слепой» ввод"
  },
  {
-  "id": "superhuman-427",
+  "id": "superhuman-428",
   "domain": "superhuman",
   "verb": "замечать",
   "object": "мелкие расхождения",
@@ -6886,7 +6902,7 @@
   "notes": ""
  },
  {
-  "id": "superhuman-428",
+  "id": "superhuman-429",
   "domain": "superhuman",
   "verb": "перевести",
   "object": "мгновенно и в объёме",
@@ -6902,7 +6918,7 @@
   "notes": ""
  },
  {
-  "id": "superhuman-429",
+  "id": "superhuman-430",
   "domain": "superhuman",
   "verb": "транскрибировать",
   "object": "в реальном времени",
@@ -6918,7 +6934,7 @@
   "notes": ""
  },
  {
-  "id": "superhuman-430",
+  "id": "superhuman-431",
   "domain": "superhuman",
   "verb": "подвести",
   "object": "итоги по всей истории",
@@ -6934,7 +6950,7 @@
   "notes": ""
  },
  {
-  "id": "superhuman-431",
+  "id": "superhuman-432",
   "domain": "superhuman",
   "verb": "восстановить",
   "object": "контекст после сбоя",
@@ -6950,7 +6966,7 @@
   "notes": ""
  },
  {
-  "id": "superhuman-432",
+  "id": "superhuman-433",
   "domain": "superhuman",
   "verb": "обучаться",
   "object": "на своих ошибках",
@@ -6966,7 +6982,7 @@
   "notes": "осторожно, без самообмана"
  },
  {
-  "id": "superhuman-433",
+  "id": "superhuman-434",
   "domain": "superhuman",
   "verb": "расширить",
   "object": "себя",
@@ -6982,7 +6998,7 @@
   "notes": "см. notes/20, с подтверждением"
  },
  {
-  "id": "superhuman-434",
+  "id": "superhuman-435",
   "domain": "superhuman",
   "verb": "работать",
   "object": "в десятках приложений сразу",
@@ -6998,7 +7014,7 @@
   "notes": ""
  },
  {
-  "id": "superhuman-435",
+  "id": "superhuman-436",
   "domain": "superhuman",
   "verb": "быть",
   "object": "независимым от усталости и настроения",
@@ -7014,7 +7030,7 @@
   "notes": "это и есть продукт"
  },
  {
-  "id": "superhuman-436",
+  "id": "superhuman-437",
   "domain": "superhuman",
   "verb": "предсказывать",
   "object": "последствия",
@@ -7030,7 +7046,7 @@
   "notes": "приблизительно, честно"
  },
  {
-  "id": "superhuman-437",
+  "id": "superhuman-438",
   "domain": "superhuman",
   "verb": "сделать",
   "object": "полный цикл без человека",
@@ -7046,7 +7062,7 @@
   "notes": "с чекпойнтами и отчётами"
  },
  {
-  "id": "health-daily-438",
+  "id": "health-daily-439",
   "domain": "health-daily",
   "verb": "напомнить",
   "object": "принять лекарство",
@@ -7062,7 +7078,7 @@
   "notes": "повтор, пропуск → эскалация"
  },
  {
-  "id": "health-daily-439",
+  "id": "health-daily-440",
   "domain": "health-daily",
   "verb": "вести",
   "object": "журнал самочувствия",
@@ -7078,7 +7094,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-440",
+  "id": "health-daily-441",
   "domain": "health-daily",
   "verb": "построить",
   "object": "график показателей",
@@ -7094,7 +7110,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-441",
+  "id": "health-daily-442",
   "domain": "health-daily",
   "verb": "найти",
   "object": "врача рядом",
@@ -7110,7 +7126,7 @@
   "notes": "сбор данных, не медсовет"
  },
  {
-  "id": "health-daily-442",
+  "id": "health-daily-443",
   "domain": "health-daily",
   "verb": "собрать",
   "object": "выписки в одну папку",
@@ -7126,7 +7142,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-443",
+  "id": "health-daily-444",
   "domain": "health-daily",
   "verb": "объяснить",
   "object": "анализы простым языком",
@@ -7142,7 +7158,7 @@
   "notes": "обязательная оговорка «не заключение»"
  },
  {
-  "id": "health-daily-444",
+  "id": "health-daily-445",
   "domain": "health-daily",
   "verb": "записать",
   "object": "на приём",
@@ -7158,7 +7174,7 @@
   "notes": "если нужна оплата — стоп"
  },
  {
-  "id": "health-daily-445",
+  "id": "health-daily-446",
   "domain": "health-daily",
   "verb": "напомнить",
   "object": "встать и размяться",
@@ -7174,7 +7190,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-446",
+  "id": "health-daily-447",
   "domain": "health-daily",
   "verb": "составить",
   "object": "план тренировок",
@@ -7190,7 +7206,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-447",
+  "id": "health-daily-448",
   "domain": "health-daily",
   "verb": "записать",
   "object": "тренировку",
@@ -7206,7 +7222,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-448",
+  "id": "health-daily-449",
   "domain": "health-daily",
   "verb": "оценить",
   "object": "калории по фото",
@@ -7222,7 +7238,7 @@
   "notes": "оценка, не точность"
  },
  {
-  "id": "health-daily-449",
+  "id": "health-daily-450",
   "domain": "health-daily",
   "verb": "составить",
   "object": "список покупок",
@@ -7238,7 +7254,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-450",
+  "id": "health-daily-451",
   "domain": "health-daily",
   "verb": "заказать",
   "object": "продукты",
@@ -7254,7 +7270,7 @@
   "notes": "деньги — только навигатор"
  },
  {
-  "id": "health-daily-451",
+  "id": "health-daily-452",
   "domain": "health-daily",
   "verb": "найти",
   "object": "рецепт из того что есть",
@@ -7270,7 +7286,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-452",
+  "id": "health-daily-453",
   "domain": "health-daily",
   "verb": "вести",
   "object": "дневник сна",
@@ -7286,7 +7302,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-453",
+  "id": "health-daily-454",
   "domain": "health-daily",
   "verb": "напомнить",
   "object": "про день рождения",
@@ -7302,7 +7318,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-454",
+  "id": "health-daily-455",
   "domain": "health-daily",
   "verb": "контролировать",
   "object": "приём лекарств 24-7",
@@ -7318,7 +7334,7 @@
   "notes": "человек не следит непрерывно"
  },
  {
-  "id": "health-daily-455",
+  "id": "health-daily-456",
   "domain": "health-daily",
   "verb": "сравнить",
   "object": "показатели с нормой",
@@ -7334,7 +7350,7 @@
   "notes": "всегда «обратитесь к врачу»"
  },
  {
-  "id": "health-daily-456",
+  "id": "health-daily-457",
   "domain": "health-daily",
   "verb": "собрать",
   "object": "пакет документов для врача",
@@ -7350,7 +7366,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-457",
+  "id": "health-daily-458",
   "domain": "health-daily",
   "verb": "найти",
   "object": "аптеку с лекарством",
@@ -7366,7 +7382,7 @@
   "notes": ""
  },
  {
-  "id": "travel-458",
+  "id": "travel-459",
   "domain": "travel",
   "verb": "найти",
   "object": "билеты",
@@ -7382,7 +7398,7 @@
   "notes": "без покупки"
  },
  {
-  "id": "travel-459",
+  "id": "travel-460",
   "domain": "travel",
   "verb": "сравнить",
   "object": "цены и время",
@@ -7398,7 +7414,7 @@
   "notes": ""
  },
  {
-  "id": "travel-460",
+  "id": "travel-461",
   "domain": "travel",
   "verb": "составить",
   "object": "маршрут",
@@ -7414,7 +7430,7 @@
   "notes": ""
  },
  {
-  "id": "travel-461",
+  "id": "travel-462",
   "domain": "travel",
   "verb": "собрать",
   "object": "пакет документов",
@@ -7430,7 +7446,7 @@
   "notes": ""
  },
  {
-  "id": "travel-462",
+  "id": "travel-463",
   "domain": "travel",
   "verb": "заполнить",
   "object": "анкету на визу",
@@ -7446,7 +7462,7 @@
   "notes": "персональные данные"
  },
  {
-  "id": "travel-463",
+  "id": "travel-464",
   "domain": "travel",
   "verb": "купить",
   "object": "билет",
@@ -7462,7 +7478,7 @@
   "notes": "только навигатор"
  },
  {
-  "id": "travel-464",
+  "id": "travel-465",
   "domain": "travel",
   "verb": "забронировать",
   "object": "отель",
@@ -7478,7 +7494,7 @@
   "notes": "только навигатор"
  },
  {
-  "id": "travel-465",
+  "id": "travel-466",
   "domain": "travel",
   "verb": "напомнить",
   "object": "о регистрации на рейс",
@@ -7494,7 +7510,7 @@
   "notes": ""
  },
  {
-  "id": "travel-466",
+  "id": "travel-467",
   "domain": "travel",
   "verb": "собрать",
   "object": "чеклист вещей",
@@ -7510,7 +7526,7 @@
   "notes": ""
  },
  {
-  "id": "travel-467",
+  "id": "travel-468",
   "domain": "travel",
   "verb": "проверить",
   "object": "погоду на даты",
@@ -7526,7 +7542,7 @@
   "notes": ""
  },
  {
-  "id": "travel-468",
+  "id": "travel-469",
   "domain": "travel",
   "verb": "перевести",
   "object": "фразы для поездки",
@@ -7542,7 +7558,7 @@
   "notes": ""
  },
  {
-  "id": "travel-469",
+  "id": "travel-470",
   "domain": "travel",
   "verb": "сохранить",
   "object": "билеты и брони",
@@ -7558,7 +7574,7 @@
   "notes": ""
  },
  {
-  "id": "travel-470",
+  "id": "travel-471",
   "domain": "travel",
   "verb": "проверить",
   "object": "срок документов",
@@ -7574,7 +7590,7 @@
   "notes": ""
  },
  {
-  "id": "travel-471",
+  "id": "travel-472",
   "domain": "travel",
   "verb": "посчитать",
   "object": "бюджет поездки",
@@ -7590,7 +7606,7 @@
   "notes": ""
  },
  {
-  "id": "travel-472",
+  "id": "travel-473",
   "domain": "travel",
   "verb": "следить",
   "object": "за изменением цены",
@@ -7606,7 +7622,7 @@
   "notes": "человек не проверяет каждый час"
  },
  {
-  "id": "travel-473",
+  "id": "travel-474",
   "domain": "travel",
   "verb": "собрать",
   "object": "отчёт о поездке",
@@ -7622,7 +7638,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-474",
+  "id": "hardware-diag-475",
   "domain": "hardware-diag",
   "verb": "показать",
   "object": "характеристики железа",
@@ -7638,7 +7654,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-475",
+  "id": "hardware-diag-476",
   "domain": "hardware-diag",
   "verb": "проверить",
   "object": "температуры",
@@ -7654,7 +7670,7 @@
   "notes": "нужны права"
  },
  {
-  "id": "hardware-diag-476",
+  "id": "hardware-diag-477",
   "domain": "hardware-diag",
   "verb": "замерить",
   "object": "скорость диска",
@@ -7670,7 +7686,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-477",
+  "id": "hardware-diag-478",
   "domain": "hardware-diag",
   "verb": "проверить",
   "object": "здоровье диска",
@@ -7686,7 +7702,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-478",
+  "id": "hardware-diag-479",
   "domain": "hardware-diag",
   "verb": "проверить",
   "object": "память на ошибки",
@@ -7702,7 +7718,7 @@
   "notes": "нужна перезагрузка"
  },
  {
-  "id": "hardware-diag-479",
+  "id": "hardware-diag-480",
   "domain": "hardware-diag",
   "verb": "замерить",
   "object": "FPS в игре",
@@ -7718,7 +7734,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-480",
+  "id": "hardware-diag-481",
   "domain": "hardware-diag",
   "verb": "сравнить",
   "object": "железо с требованиями",
@@ -7734,7 +7750,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-481",
+  "id": "hardware-diag-482",
   "domain": "hardware-diag",
   "verb": "предложить",
   "object": "апгрейд",
@@ -7750,7 +7766,7 @@
   "notes": "цены — из браузера"
  },
  {
-  "id": "hardware-diag-482",
+  "id": "hardware-diag-483",
   "domain": "hardware-diag",
   "verb": "проверить",
   "object": "обновления драйверов",
@@ -7766,7 +7782,7 @@
   "notes": "не ставим молча"
  },
  {
-  "id": "hardware-diag-483",
+  "id": "hardware-diag-484",
   "domain": "hardware-diag",
   "verb": "откатить",
   "object": "драйвер",
@@ -7782,7 +7798,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-484",
+  "id": "hardware-diag-485",
   "domain": "hardware-diag",
   "verb": "проверить",
   "object": "батарею",
@@ -7798,7 +7814,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-485",
+  "id": "hardware-diag-486",
   "domain": "hardware-diag",
   "verb": "оценить",
   "object": "энергопотребление",
@@ -7814,7 +7830,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-486",
+  "id": "hardware-diag-487",
   "domain": "hardware-diag",
   "verb": "проверить",
   "object": "USB-порты",
@@ -7830,7 +7846,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-487",
+  "id": "hardware-diag-488",
   "domain": "hardware-diag",
   "verb": "проверить",
   "object": "сеть на потери",
@@ -7846,7 +7862,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-488",
+  "id": "hardware-diag-489",
   "domain": "hardware-diag",
   "verb": "диагностировать",
   "object": "синий экран",
@@ -7862,7 +7878,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-489",
+  "id": "hardware-diag-490",
   "domain": "hardware-diag",
   "verb": "собрать",
   "object": "отчёт о системе",
@@ -7878,7 +7894,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-490",
+  "id": "hardware-diag-491",
   "domain": "hardware-diag",
   "verb": "проверить",
   "object": "нагрев под нагрузкой",
@@ -7894,7 +7910,7 @@
   "notes": "предупреждение"
  },
  {
-  "id": "hardware-diag-491",
+  "id": "hardware-diag-492",
   "domain": "hardware-diag",
   "verb": "настроить",
   "object": "план питания под железо",
@@ -7910,7 +7926,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-492",
+  "id": "hardware-diag-493",
   "domain": "hardware-diag",
   "verb": "следить",
   "object": "за температурой 24-7",
@@ -7926,7 +7942,7 @@
   "notes": ""
  },
  {
-  "id": "hardware-diag-493",
+  "id": "hardware-diag-494",
   "domain": "hardware-diag",
   "verb": "найти",
   "object": "комплектующие дешевле",
@@ -7942,7 +7958,7 @@
   "notes": "покупка — never"
  },
  {
-  "id": "languages-494",
+  "id": "languages-495",
   "domain": "languages",
   "verb": "перевести",
   "object": "текст/файл/страницу",
@@ -7958,7 +7974,7 @@
   "notes": ""
  },
  {
-  "id": "languages-495",
+  "id": "languages-496",
   "domain": "languages",
   "verb": "перевести",
   "object": "речь в реальном времени",
@@ -7974,7 +7990,7 @@
   "notes": "задержка"
  },
  {
-  "id": "languages-496",
+  "id": "languages-497",
   "domain": "languages",
   "verb": "разобрать",
   "object": "ошибки в моём тексте",
@@ -7990,7 +8006,7 @@
   "notes": ""
  },
  {
-  "id": "languages-497",
+  "id": "languages-498",
   "domain": "languages",
   "verb": "объяснить",
   "object": "грамматику на примере",
@@ -8006,7 +8022,7 @@
   "notes": ""
  },
  {
-  "id": "languages-498",
+  "id": "languages-499",
   "domain": "languages",
   "verb": "составить",
   "object": "урок/упражнения",
@@ -8022,7 +8038,7 @@
   "notes": ""
  },
  {
-  "id": "languages-499",
+  "id": "languages-500",
   "domain": "languages",
   "verb": "тренировать",
   "object": "произношение",
@@ -8038,7 +8054,7 @@
   "notes": ""
  },
  {
-  "id": "languages-500",
+  "id": "languages-501",
   "domain": "languages",
   "verb": "вести",
   "object": "словарь и повторения",
@@ -8054,7 +8070,7 @@
   "notes": ""
  },
  {
-  "id": "languages-501",
+  "id": "languages-502",
   "domain": "languages",
   "verb": "субтитрировать",
   "object": "двуязычно",
@@ -8070,7 +8086,7 @@
   "notes": ""
  },
  {
-  "id": "languages-502",
+  "id": "languages-503",
   "domain": "languages",
   "verb": "прочитать",
   "object": "вслух с правильной интонацией",
@@ -8086,7 +8102,7 @@
   "notes": ""
  },
  {
-  "id": "languages-503",
+  "id": "languages-504",
   "domain": "languages",
   "verb": "адаптировать",
   "object": "текст под уровень",
@@ -8102,7 +8118,7 @@
   "notes": ""
  },
  {
-  "id": "languages-504",
+  "id": "languages-505",
   "domain": "languages",
   "verb": "практиковать",
   "object": "диалог с собеседником",
@@ -8118,7 +8134,7 @@
   "notes": ""
  },
  {
-  "id": "languages-505",
+  "id": "languages-506",
   "domain": "languages",
   "verb": "проверить",
   "object": "сертификат/экзамен",
@@ -8134,7 +8150,7 @@
   "notes": ""
  },
  {
-  "id": "languages-506",
+  "id": "languages-507",
   "domain": "languages",
   "verb": "перевести",
   "object": "переписку на лету",
@@ -8150,7 +8166,7 @@
   "notes": ""
  },
  {
-  "id": "languages-507",
+  "id": "languages-508",
   "domain": "languages",
   "verb": "запомнить",
   "object": "контекст слов",
@@ -8166,7 +8182,7 @@
   "notes": "человек не помнит источники"
  },
  {
-  "id": "video-production-508",
+  "id": "video-production-509",
   "domain": "video-production",
   "verb": "написать",
   "object": "сценарий",
@@ -8182,7 +8198,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-509",
+  "id": "video-production-510",
   "domain": "video-production",
   "verb": "сделать",
   "object": "раскадровку",
@@ -8198,7 +8214,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-510",
+  "id": "video-production-511",
   "domain": "video-production",
   "verb": "собрать",
   "object": "черновик из клипов",
@@ -8214,7 +8230,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-511",
+  "id": "video-production-512",
   "domain": "video-production",
   "verb": "нарезать",
   "object": "по тишине/сценам",
@@ -8230,7 +8246,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-512",
+  "id": "video-production-513",
   "domain": "video-production",
   "verb": "субтитрировать",
   "object": "автоматически",
@@ -8246,7 +8262,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-513",
+  "id": "video-production-514",
   "domain": "video-production",
   "verb": "озвучить",
   "object": "текст",
@@ -8262,7 +8278,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-514",
+  "id": "video-production-515",
   "domain": "video-production",
   "verb": "подобрать",
   "object": "музыку и эффекты",
@@ -8278,7 +8294,7 @@
   "notes": "лицензии проверяем"
  },
  {
-  "id": "video-production-515",
+  "id": "video-production-516",
   "domain": "video-production",
   "verb": "сделать",
   "object": "обложку/превью",
@@ -8294,7 +8310,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-516",
+  "id": "video-production-517",
   "domain": "video-production",
   "verb": "написать",
   "object": "название и описание",
@@ -8310,7 +8326,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-517",
+  "id": "video-production-518",
   "domain": "video-production",
   "verb": "выгрузить",
   "object": "на YouTube",
@@ -8326,7 +8342,7 @@
   "notes": "OAuth, подтверждение"
  },
  {
-  "id": "video-production-518",
+  "id": "video-production-519",
   "domain": "video-production",
   "verb": "выгрузить",
   "object": "в TikTok/Reels/Shorts",
@@ -8342,7 +8358,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-519",
+  "id": "video-production-520",
   "domain": "video-production",
   "verb": "перевести",
   "object": "видео на другой язык",
@@ -8358,7 +8374,7 @@
   "notes": "липсинк тяжёл"
  },
  {
-  "id": "video-production-520",
+  "id": "video-production-521",
   "domain": "video-production",
   "verb": "исправить",
   "object": "цвет и звук",
@@ -8374,7 +8390,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-521",
+  "id": "video-production-522",
   "domain": "video-production",
   "verb": "удалить",
   "object": "фон без зелёного экрана",
@@ -8390,7 +8406,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-522",
+  "id": "video-production-523",
   "domain": "video-production",
   "verb": "распознать",
   "object": "что в кадре",
@@ -8406,7 +8422,7 @@
   "notes": "человек ищет перемоткой"
  },
  {
-  "id": "video-production-523",
+  "id": "video-production-524",
   "domain": "video-production",
   "verb": "сделать",
   "object": "вертикальные нарезки",
@@ -8422,7 +8438,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-524",
+  "id": "video-production-525",
   "domain": "video-production",
   "verb": "проверить",
   "object": "технические параметры",
@@ -8438,7 +8454,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-525",
+  "id": "video-production-526",
   "domain": "video-production",
   "verb": "оптимизировать",
   "object": "размер файла",
@@ -8454,7 +8470,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-526",
+  "id": "video-production-527",
   "domain": "video-production",
   "verb": "собрать",
   "object": "плейлист и порядок",
@@ -8470,7 +8486,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-527",
+  "id": "video-production-528",
   "domain": "video-production",
   "verb": "следить",
   "object": "за комментариями 24-7",
@@ -8486,7 +8502,7 @@
   "notes": "черновик, отправка с подтверждением"
  },
  {
-  "id": "engineering-3d-528",
+  "id": "engineering-3d-529",
   "domain": "engineering-3d",
   "verb": "смоделировать",
   "object": "деталь по описанию",
@@ -8502,7 +8518,7 @@
   "notes": ""
  },
  {
-  "id": "engineering-3d-529",
+  "id": "engineering-3d-530",
   "domain": "engineering-3d",
   "verb": "подготовить",
   "object": "модель к печати",
@@ -8518,7 +8534,7 @@
   "notes": ""
  },
  {
-  "id": "engineering-3d-530",
+  "id": "engineering-3d-531",
   "domain": "engineering-3d",
   "verb": "нарезать",
   "object": "модель для 3D-печати",
@@ -8534,7 +8550,7 @@
   "notes": "профили под принтер"
  },
  {
-  "id": "engineering-3d-531",
+  "id": "engineering-3d-532",
   "domain": "engineering-3d",
   "verb": "конвертировать",
   "object": "форматы",
@@ -8550,7 +8566,7 @@
   "notes": ""
  },
  {
-  "id": "engineering-3d-532",
+  "id": "engineering-3d-533",
   "domain": "engineering-3d",
   "verb": "посчитать",
   "object": "объём и вес",
@@ -8566,7 +8582,7 @@
   "notes": ""
  },
  {
-  "id": "engineering-3d-533",
+  "id": "engineering-3d-534",
   "domain": "engineering-3d",
   "verb": "сделать",
   "object": "чертёж",
@@ -8582,7 +8598,7 @@
   "notes": "ГОСТ/ISO оформление — шаблоны"
  },
  {
-  "id": "engineering-3d-534",
+  "id": "engineering-3d-535",
   "domain": "engineering-3d",
   "verb": "сделать",
   "object": "рендер",
@@ -8598,7 +8614,7 @@
   "notes": ""
  },
  {
-  "id": "engineering-3d-535",
+  "id": "engineering-3d-536",
   "domain": "engineering-3d",
   "verb": "проверить",
   "object": "модель на прочность",
@@ -8614,7 +8630,7 @@
   "notes": ""
  },
  {
-  "id": "engineering-3d-536",
+  "id": "engineering-3d-537",
   "domain": "engineering-3d",
   "verb": "восстановить",
   "object": "3D из фото",
@@ -8630,7 +8646,7 @@
   "notes": ""
  },
  {
-  "id": "engineering-3d-537",
+  "id": "engineering-3d-538",
   "domain": "engineering-3d",
   "verb": "напечатать",
   "object": "на принтере",
@@ -8646,7 +8662,7 @@
   "notes": "физический риск, только с подтверждением"
  },
  {
-  "id": "engineering-3d-538",
+  "id": "engineering-3d-539",
   "domain": "engineering-3d",
   "verb": "следить",
   "object": "за печатью",
@@ -8662,7 +8678,7 @@
   "notes": "человек не сидит сутками"
  },
  {
-  "id": "engineering-3d-539",
+  "id": "engineering-3d-540",
   "domain": "engineering-3d",
   "verb": "собрать",
   "object": "BOM",
@@ -8678,7 +8694,7 @@
   "notes": ""
  },
  {
-  "id": "engineering-3d-540",
+  "id": "engineering-3d-541",
   "domain": "engineering-3d",
   "verb": "сделать",
   "object": "инструкцию сборки",
@@ -8694,7 +8710,7 @@
   "notes": ""
  },
  {
-  "id": "engineering-3d-541",
+  "id": "engineering-3d-542",
   "domain": "engineering-3d",
   "verb": "откалибровать",
   "object": "принтер",
@@ -8710,7 +8726,7 @@
   "notes": ""
  },
  {
-  "id": "engineering-3d-542",
+  "id": "engineering-3d-543",
   "domain": "engineering-3d",
   "verb": "сравнить",
   "object": "версии модели",
@@ -8726,7 +8742,7 @@
   "notes": ""
  },
  {
-  "id": "engineering-3d-543",
+  "id": "engineering-3d-544",
   "domain": "engineering-3d",
   "verb": "оптимизировать",
   "object": "поддержки",
@@ -8742,7 +8758,7 @@
   "notes": ""
  },
  {
-  "id": "smart-home-544",
+  "id": "smart-home-545",
   "domain": "smart-home",
   "verb": "включить",
   "object": "свет/устройство",
@@ -8758,7 +8774,7 @@
   "notes": ""
  },
  {
-  "id": "smart-home-545",
+  "id": "smart-home-546",
   "domain": "smart-home",
   "verb": "сделать",
   "object": "сцену",
@@ -8774,7 +8790,7 @@
   "notes": ""
  },
  {
-  "id": "smart-home-546",
+  "id": "smart-home-547",
   "domain": "smart-home",
   "verb": "поставить",
   "object": "расписание",
@@ -8790,7 +8806,7 @@
   "notes": ""
  },
  {
-  "id": "smart-home-547",
+  "id": "smart-home-548",
   "domain": "smart-home",
   "verb": "следить",
   "object": "за датчиками 24-7",
@@ -8806,7 +8822,7 @@
   "notes": "человек не следит постоянно"
  },
  {
-  "id": "smart-home-548",
+  "id": "smart-home-549",
   "domain": "smart-home",
   "verb": "снизить",
   "object": "энергопотребление",
@@ -8822,7 +8838,7 @@
   "notes": ""
  },
  {
-  "id": "smart-home-549",
+  "id": "smart-home-550",
   "domain": "smart-home",
   "verb": "объяснить",
   "object": "счёт за электричество",
@@ -8838,7 +8854,7 @@
   "notes": ""
  },
  {
-  "id": "smart-home-550",
+  "id": "smart-home-551",
   "domain": "smart-home",
   "verb": "открыть",
   "object": "замок/ворота",
@@ -8854,7 +8870,7 @@
   "notes": "подтверждение обязательно"
  },
  {
-  "id": "smart-home-551",
+  "id": "smart-home-552",
   "domain": "smart-home",
   "verb": "проверить",
   "object": "кто дома",
@@ -8870,7 +8886,7 @@
   "notes": "приватность"
  },
  {
-  "id": "smart-home-552",
+  "id": "smart-home-553",
   "domain": "smart-home",
   "verb": "найти",
   "object": "новое устройство",
@@ -8886,7 +8902,7 @@
   "notes": ""
  },
  {
-  "id": "smart-home-553",
+  "id": "smart-home-554",
   "domain": "smart-home",
   "verb": "обновить",
   "object": "прошивки",
@@ -8902,7 +8918,7 @@
   "notes": ""
  },
  {
-  "id": "smart-home-554",
+  "id": "smart-home-555",
   "domain": "smart-home",
   "verb": "приготовить",
   "object": "кофе по расписанию",
@@ -8918,7 +8934,7 @@
   "notes": "физическое действие"
  },
  {
-  "id": "smart-home-555",
+  "id": "smart-home-556",
   "domain": "smart-home",
   "verb": "собрать",
   "object": "отчёт по дому",
@@ -8934,7 +8950,7 @@
   "notes": ""
  },
  {
-  "id": "smart-home-556",
+  "id": "smart-home-557",
   "domain": "smart-home",
   "verb": "связать",
   "object": "события",
@@ -8950,7 +8966,7 @@
   "notes": ""
  },
  {
-  "id": "smart-home-557",
+  "id": "smart-home-558",
   "domain": "smart-home",
   "verb": "записать",
   "object": "голосовой сценарий",
@@ -8966,7 +8982,7 @@
   "notes": ""
  },
  {
-  "id": "smart-home-558",
+  "id": "smart-home-559",
   "domain": "smart-home",
   "verb": "проверить",
   "object": "доступность устройств",
@@ -8982,7 +8998,7 @@
   "notes": "человек не мониторит 24-7"
  },
  {
-  "id": "smart-home-559",
+  "id": "smart-home-560",
   "domain": "smart-home",
   "verb": "ограничить",
   "object": "детям",
@@ -8998,7 +9014,7 @@
   "notes": ""
  },
  {
-  "id": "sheets-data-560",
+  "id": "sheets-data-561",
   "domain": "sheets-data",
   "verb": "фильтровать",
   "object": "строки по условию",
@@ -9014,7 +9030,7 @@
   "notes": ""
  },
  {
-  "id": "apps-windows-561",
+  "id": "apps-windows-562",
   "domain": "apps-windows",
   "verb": "настроить",
   "object": "вид и параметры окна",
@@ -9030,7 +9046,7 @@
   "notes": ""
  },
  {
-  "id": "web-562",
+  "id": "web-563",
   "domain": "web",
   "verb": "найти",
   "object": "текст на странице",
@@ -9046,7 +9062,7 @@
   "notes": ""
  },
  {
-  "id": "web-563",
+  "id": "web-564",
   "domain": "web",
   "verb": "настроить",
   "object": "профиль браузера для агента",
@@ -9062,7 +9078,7 @@
   "notes": ""
  },
  {
-  "id": "chat-social-564",
+  "id": "chat-social-565",
   "domain": "chat-social",
   "verb": "изменить",
   "object": "своё сообщение",
@@ -9078,7 +9094,7 @@
   "notes": "в пределах окна редактирования"
  },
  {
-  "id": "chat-social-565",
+  "id": "chat-social-566",
   "domain": "chat-social",
   "verb": "удалить",
   "object": "сообщение/переписку",
@@ -9094,7 +9110,7 @@
   "notes": ""
  },
  {
-  "id": "chat-social-566",
+  "id": "chat-social-567",
   "domain": "chat-social",
   "verb": "проверить",
   "object": "доставку и прочтение",
@@ -9110,7 +9126,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-567",
+  "id": "creative-3d-568",
   "domain": "creative-3d",
   "verb": "показать",
   "object": "модель и её параметры",
@@ -9126,7 +9142,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-568",
+  "id": "creative-3d-569",
   "domain": "creative-3d",
   "verb": "изменить",
   "object": "параметры модели",
@@ -9142,7 +9158,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-569",
+  "id": "creative-3d-570",
   "domain": "creative-3d",
   "verb": "автоматизировать",
   "object": "пакетный рендер",
@@ -9158,7 +9174,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-570",
+  "id": "creative-3d-571",
   "domain": "creative-3d",
   "verb": "проверить",
   "object": "модель на ошибки",
@@ -9174,7 +9190,7 @@
   "notes": ""
  },
  {
-  "id": "databases-571",
+  "id": "databases-572",
   "domain": "databases",
   "verb": "проверить",
   "object": "целостность и индексы",
@@ -9190,7 +9206,7 @@
   "notes": ""
  },
  {
-  "id": "databases-572",
+  "id": "databases-573",
   "domain": "databases",
   "verb": "удалить",
   "object": "устаревшие записи",
@@ -9206,7 +9222,7 @@
   "notes": "только с подтверждением и копией"
  },
  {
-  "id": "dev-code-573",
+  "id": "dev-code-574",
   "domain": "dev-code",
   "verb": "удалить",
   "object": "мёртвый код и ветки",
@@ -9222,7 +9238,7 @@
   "notes": "только с тестами"
  },
  {
-  "id": "devices-574",
+  "id": "devices-575",
   "domain": "devices",
   "verb": "автоматизировать",
   "object": "подключение профилей",
@@ -9238,7 +9254,7 @@
   "notes": ""
  },
  {
-  "id": "devices-575",
+  "id": "devices-576",
   "domain": "devices",
   "verb": "удалить",
   "object": "безопасно извлечь",
@@ -9254,7 +9270,7 @@
   "notes": ""
  },
  {
-  "id": "display-sound-576",
+  "id": "display-sound-577",
   "domain": "display-sound",
   "verb": "автоматизировать",
   "object": "яркость и звук по расписанию",
@@ -9270,7 +9286,7 @@
   "notes": ""
  },
  {
-  "id": "email-577",
+  "id": "email-578",
   "domain": "email",
   "verb": "проверить",
   "object": "вложения и ссылки на опасность",
@@ -9286,7 +9302,7 @@
   "notes": ""
  },
  {
-  "id": "email-578",
+  "id": "email-579",
   "domain": "email",
   "verb": "автоматизировать",
   "object": "правила сортировки",
@@ -9302,7 +9318,7 @@
   "notes": ""
  },
  {
-  "id": "files-579",
+  "id": "files-580",
   "domain": "files",
   "verb": "автоматизировать",
   "object": "автосортировку по правилам",
@@ -9318,7 +9334,7 @@
   "notes": "с журналом и откатом"
  },
  {
-  "id": "games-580",
+  "id": "games-581",
   "domain": "games",
   "verb": "показать",
   "object": "требования игры",
@@ -9334,7 +9350,7 @@
   "notes": ""
  },
  {
-  "id": "games-581",
+  "id": "games-582",
   "domain": "games",
   "verb": "изменить",
   "object": "настройки графики",
@@ -9350,7 +9366,7 @@
   "notes": ""
  },
  {
-  "id": "games-582",
+  "id": "games-583",
   "domain": "games",
   "verb": "проверить",
   "object": "целостность файлов",
@@ -9366,7 +9382,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-583",
+  "id": "health-daily-584",
   "domain": "health-daily",
   "verb": "изменить",
   "object": "напоминание",
@@ -9382,7 +9398,7 @@
   "notes": ""
  },
  {
-  "id": "health-daily-584",
+  "id": "health-daily-585",
   "domain": "health-daily",
   "verb": "проверить",
   "object": "пропущенные приёмы",
@@ -9398,7 +9414,7 @@
   "notes": ""
  },
  {
-  "id": "images-585",
+  "id": "images-586",
   "domain": "images",
   "verb": "автоматизировать",
   "object": "пакетную обработку",
@@ -9414,7 +9430,7 @@
   "notes": ""
  },
  {
-  "id": "images-586",
+  "id": "images-587",
   "domain": "images",
   "verb": "проверить",
   "object": "качество и дубли",
@@ -9430,7 +9446,7 @@
   "notes": ""
  },
  {
-  "id": "input-587",
+  "id": "input-588",
   "domain": "input",
   "verb": "показать",
   "object": "раскладку и хоткеи",
@@ -9446,7 +9462,7 @@
   "notes": ""
  },
  {
-  "id": "input-588",
+  "id": "input-589",
   "domain": "input",
   "verb": "проверить",
   "object": "что ввод дошёл",
@@ -9462,7 +9478,7 @@
   "notes": "ключевая проверка для GUI"
  },
  {
-  "id": "learning-research-589",
+  "id": "learning-research-590",
   "domain": "learning-research",
   "verb": "обучить",
   "object": "карточками и повторениями",
@@ -9478,7 +9494,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-590",
+  "id": "monitoring-triage-591",
   "domain": "monitoring-triage",
   "verb": "изменить",
   "object": "пороги алертов",
@@ -9494,7 +9510,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-591",
+  "id": "monitoring-triage-592",
   "domain": "monitoring-triage",
   "verb": "проверить",
   "object": "что алерт дошёл",
@@ -9510,7 +9526,7 @@
   "notes": ""
  },
  {
-  "id": "monitoring-triage-592",
+  "id": "monitoring-triage-593",
   "domain": "monitoring-triage",
   "verb": "автоматизировать",
   "object": "авто-реакцию на инцидент",
@@ -9526,7 +9542,7 @@
   "notes": "человек не дежурит 24-7"
  },
  {
-  "id": "monitoring-triage-593",
+  "id": "monitoring-triage-594",
   "domain": "monitoring-triage",
   "verb": "решить",
   "object": "что важнее",
@@ -9542,7 +9558,7 @@
   "notes": ""
  },
  {
-  "id": "network-594",
+  "id": "network-595",
   "domain": "network",
   "verb": "автоматизировать",
   "object": "переключение сети",
@@ -9558,7 +9574,7 @@
   "notes": ""
  },
  {
-  "id": "processes-services-595",
+  "id": "processes-services-596",
   "domain": "processes-services",
   "verb": "автоматизировать",
   "object": "правила «если — то»",
@@ -9574,7 +9590,7 @@
   "notes": ""
  },
  {
-  "id": "sheets-data-596",
+  "id": "sheets-data-597",
   "domain": "sheets-data",
   "verb": "автоматизировать",
   "object": "регулярный отчёт",
@@ -9590,7 +9606,7 @@
   "notes": ""
  },
  {
-  "id": "text-docs-597",
+  "id": "text-docs-598",
   "domain": "text-docs",
   "verb": "работать",
   "object": "работа в Word по шагам",
@@ -9606,7 +9622,7 @@
   "notes": ""
  },
  {
-  "id": "video-598",
+  "id": "video-599",
   "domain": "video",
   "verb": "проверить",
   "object": "качество и артефакты",
@@ -9622,7 +9638,7 @@
   "notes": ""
  },
  {
-  "id": "video-599",
+  "id": "video-600",
   "domain": "video",
   "verb": "удалить",
   "object": "черновики и дубли",
@@ -9638,7 +9654,7 @@
   "notes": ""
  },
  {
-  "id": "video-production-600",
+  "id": "video-production-601",
   "domain": "video-production",
   "verb": "ответить",
   "object": "на комментарии",
@@ -9654,7 +9670,7 @@
   "notes": "черновик + подтверждение"
  },
  {
-  "id": "virtualization-remote-601",
+  "id": "virtualization-remote-602",
   "domain": "virtualization-remote",
   "verb": "автоматизировать",
   "object": "бэкап ВМ по расписанию",
@@ -9670,7 +9686,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-602",
+  "id": "virtualization-remote-603",
   "domain": "virtualization-remote",
   "verb": "удалить",
   "object": "ненужную ВМ",
@@ -9686,7 +9702,7 @@
   "notes": "с подтверждением"
  },
  {
-  "id": "web-603",
+  "id": "web-604",
   "domain": "web",
   "verb": "автоматизировать",
   "object": "мониторинг по расписанию",
@@ -9702,7 +9718,7 @@
   "notes": "человек не проверяет круглосуточно"
  },
  {
-  "id": "web-604",
+  "id": "web-605",
   "domain": "web",
   "verb": "удалить",
   "object": "кэш и данные сайта",
@@ -9718,7 +9734,7 @@
   "notes": ""
  },
  {
-  "id": "games-605",
+  "id": "games-606",
   "domain": "games",
   "verb": "автоматизировать",
   "object": "запуск и настройку окружения",
@@ -9734,7 +9750,7 @@
   "notes": ""
  },
  {
-  "id": "accessibility-606",
+  "id": "accessibility-607",
   "domain": "accessibility",
   "verb": "проверить",
   "object": "что функция доступности работает",
@@ -9750,7 +9766,7 @@
   "notes": ""
  },
  {
-  "id": "accounts-updates-607",
+  "id": "accounts-updates-608",
   "domain": "accounts-updates",
   "verb": "удалить",
   "object": "старые точки восстановления",
@@ -9766,7 +9782,7 @@
   "notes": "только по явной просьбе"
  },
  {
-  "id": "ai-ml-608",
+  "id": "ai-ml-609",
   "domain": "ai-ml",
   "verb": "обучить",
   "object": "модель на своих данных",
@@ -9782,7 +9798,7 @@
   "notes": "долго на слабом ПК"
  },
  {
-  "id": "ai-ml-609",
+  "id": "ai-ml-610",
   "domain": "ai-ml",
   "verb": "проверить",
   "object": "качество модели",
@@ -9798,7 +9814,7 @@
   "notes": ""
  },
  {
-  "id": "apps-windows-610",
+  "id": "apps-windows-611",
   "domain": "apps-windows",
   "verb": "проверить",
   "object": "что действие в окне сработало",
@@ -9814,7 +9830,7 @@
   "notes": "основа всех GUI-операций"
  },
  {
-  "id": "business-finance-611",
+  "id": "business-finance-612",
   "domain": "business-finance",
   "verb": "ответить",
   "object": "на письмо клиенту по счёту",
@@ -9830,7 +9846,7 @@
   "notes": "черновик, отправка с подтверждением"
  },
  {
-  "id": "calendar-tasks-612",
+  "id": "calendar-tasks-613",
   "domain": "calendar-tasks",
   "verb": "проверить",
   "object": "что встреча создана",
@@ -9846,7 +9862,7 @@
   "notes": ""
  },
  {
-  "id": "learning-research-613",
+  "id": "learning-research-614",
   "domain": "learning-research",
   "verb": "тренировать",
   "object": "знания вопросами",
@@ -9862,7 +9878,7 @@
   "notes": ""
  },
  {
-  "id": "ai-ml-614",
+  "id": "ai-ml-615",
   "domain": "ai-ml",
   "verb": "настроить",
   "object": "параметры инференса",
@@ -9878,7 +9894,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-615",
+  "id": "dev-code-616",
   "domain": "dev-code",
   "verb": "зафиксировать",
   "object": "изменения локально (коммит)",
@@ -9894,7 +9910,7 @@
   "notes": "push — отдельная external-операция"
  },
  {
-  "id": "video-616",
+  "id": "video-617",
   "domain": "video",
   "verb": "монтировать",
   "object": "в Premiere пошагово",
@@ -9910,7 +9926,7 @@
   "notes": "профиль приложения"
  },
  {
-  "id": "video-617",
+  "id": "video-618",
   "domain": "video",
   "verb": "оптимизировать",
   "object": "монтаж на слабом ПК (прокси)",
@@ -9926,7 +9942,7 @@
   "notes": "главный приём для слабого железа"
  },
  {
-  "id": "video-618",
+  "id": "video-619",
   "domain": "video",
   "verb": "настроить",
   "object": "сцену в OBS",
@@ -9942,7 +9958,7 @@
   "notes": ""
  },
  {
-  "id": "video-619",
+  "id": "video-620",
   "domain": "video",
   "verb": "включить",
   "object": "виртуальную камеру",
@@ -9958,7 +9974,7 @@
   "notes": ""
  },
  {
-  "id": "audio-620",
+  "id": "audio-621",
   "domain": "audio",
   "verb": "нормализовать",
   "object": "громкость по LUFS",
@@ -9974,7 +9990,7 @@
   "notes": ""
  },
  {
-  "id": "audio-621",
+  "id": "audio-622",
   "domain": "audio",
   "verb": "настроить",
   "object": "микрофон и шумоподавление",
@@ -9990,7 +10006,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-622",
+  "id": "creative-3d-623",
   "domain": "creative-3d",
   "verb": "открыть",
   "object": "макет в редакторе",
@@ -10006,7 +10022,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-623",
+  "id": "creative-3d-624",
   "domain": "creative-3d",
   "verb": "экспортировать",
   "object": "ассеты (PNG/SVG)",
@@ -10022,7 +10038,7 @@
   "notes": ""
  },
  {
-  "id": "creative-3d-624",
+  "id": "creative-3d-625",
   "domain": "creative-3d",
   "verb": "аннотировать",
   "object": "макет комментариями",
@@ -10038,7 +10054,7 @@
   "notes": ""
  },
  {
-  "id": "accessibility-625",
+  "id": "accessibility-626",
   "domain": "accessibility",
   "verb": "проверить",
   "object": "контраст и читаемость",
@@ -10054,7 +10070,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-626",
+  "id": "dev-code-627",
   "domain": "dev-code",
   "verb": "сгенерировать",
   "object": "вёрстку по макету",
@@ -10070,7 +10086,7 @@
   "notes": "проверка скриншотом"
  },
  {
-  "id": "music-627",
+  "id": "music-628",
   "domain": "music",
   "verb": "создать",
   "object": "плейлист по настроению",
@@ -10086,7 +10102,7 @@
   "notes": ""
  },
  {
-  "id": "music-628",
+  "id": "music-629",
   "domain": "music",
   "verb": "распознать",
   "object": "что за трек",
@@ -10102,7 +10118,7 @@
   "notes": ""
  },
  {
-  "id": "music-629",
+  "id": "music-630",
   "domain": "music",
   "verb": "изменить",
   "object": "теги (ID3) массово",
@@ -10118,7 +10134,7 @@
   "notes": ""
  },
  {
-  "id": "music-630",
+  "id": "music-631",
   "domain": "music",
   "verb": "конвертировать",
   "object": "формат",
@@ -10134,7 +10150,7 @@
   "notes": ""
  },
  {
-  "id": "music-631",
+  "id": "music-632",
   "domain": "music",
   "verb": "нормализовать",
   "object": "громкость альбома",
@@ -10150,7 +10166,7 @@
   "notes": ""
  },
  {
-  "id": "music-632",
+  "id": "music-633",
   "domain": "music",
   "verb": "разделить",
   "object": "на стемы",
@@ -10166,7 +10182,7 @@
   "notes": "нужен GPU"
  },
  {
-  "id": "music-633",
+  "id": "music-634",
   "domain": "music",
   "verb": "удалить",
   "object": "шум и тишину",
@@ -10182,7 +10198,7 @@
   "notes": ""
  },
  {
-  "id": "music-634",
+  "id": "music-635",
   "domain": "music",
   "verb": "найти",
   "object": "дубликаты треков",
@@ -10198,7 +10214,7 @@
   "notes": ""
  },
  {
-  "id": "music-635",
+  "id": "music-636",
   "domain": "music",
   "verb": "найти",
   "object": "трек по описанию",
@@ -10214,7 +10230,7 @@
   "notes": ""
  },
  {
-  "id": "music-636",
+  "id": "music-637",
   "domain": "music",
   "verb": "составить",
   "object": "плейлист под тренировку",
@@ -10230,7 +10246,7 @@
   "notes": ""
  },
  {
-  "id": "music-637",
+  "id": "music-638",
   "domain": "music",
   "verb": "записать",
   "object": "идею голосом",
@@ -10246,7 +10262,7 @@
   "notes": ""
  },
  {
-  "id": "music-638",
+  "id": "music-639",
   "domain": "music",
   "verb": "создать",
   "object": "музыку",
@@ -10262,7 +10278,7 @@
   "notes": ""
  },
  {
-  "id": "music-639",
+  "id": "music-640",
   "domain": "music",
   "verb": "проверить",
   "object": "качество библиотеки",
@@ -10278,7 +10294,7 @@
   "notes": ""
  },
  {
-  "id": "music-640",
+  "id": "music-641",
   "domain": "music",
   "verb": "упорядочить",
   "object": "библиотеку по папкам",
@@ -10294,7 +10310,7 @@
   "notes": ""
  },
  {
-  "id": "music-641",
+  "id": "music-642",
   "domain": "music",
   "verb": "свести",
   "object": "дорожки в микс",
@@ -10310,7 +10326,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-642",
+  "id": "personal-finance-643",
   "domain": "personal-finance",
   "verb": "импортировать",
   "object": "выписку банка",
@@ -10326,7 +10342,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-643",
+  "id": "personal-finance-644",
   "domain": "personal-finance",
   "verb": "классифицировать",
   "object": "траты по категориям",
@@ -10342,7 +10358,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-644",
+  "id": "personal-finance-645",
   "domain": "personal-finance",
   "verb": "построить",
   "object": "бюджет на месяц",
@@ -10358,7 +10374,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-645",
+  "id": "personal-finance-646",
   "domain": "personal-finance",
   "verb": "найти",
   "object": "подписки и забытые платежи",
@@ -10374,7 +10390,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-646",
+  "id": "personal-finance-647",
   "domain": "personal-finance",
   "verb": "построить",
   "object": "отчёт доходы и расходы",
@@ -10390,7 +10406,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-647",
+  "id": "personal-finance-648",
   "domain": "personal-finance",
   "verb": "сравнить",
   "object": "месяцы между собой",
@@ -10406,7 +10422,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-648",
+  "id": "personal-finance-649",
   "domain": "personal-finance",
   "verb": "спрогнозировать",
   "object": "остаток до зарплаты",
@@ -10422,7 +10438,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-649",
+  "id": "personal-finance-650",
   "domain": "personal-finance",
   "verb": "напомнить",
   "object": "о платеже",
@@ -10438,7 +10454,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-650",
+  "id": "personal-finance-651",
   "domain": "personal-finance",
   "verb": "проверить",
   "object": "подозрительные списания",
@@ -10454,7 +10470,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-651",
+  "id": "personal-finance-652",
   "domain": "personal-finance",
   "verb": "подготовить",
   "object": "данные для налоговой",
@@ -10470,7 +10486,7 @@
   "notes": "только навигатор, не расчёт налогов"
  },
  {
-  "id": "personal-finance-652",
+  "id": "personal-finance-653",
   "domain": "personal-finance",
   "verb": "посчитать",
   "object": "кредитную нагрузку",
@@ -10486,7 +10502,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-653",
+  "id": "personal-finance-654",
   "domain": "personal-finance",
   "verb": "отследить",
   "object": "курсы и цены",
@@ -10502,7 +10518,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-654",
+  "id": "personal-finance-655",
   "domain": "personal-finance",
   "verb": "собрать",
   "object": "чеки в отчёт",
@@ -10518,7 +10534,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-655",
+  "id": "personal-finance-656",
   "domain": "personal-finance",
   "verb": "оплатить",
   "object": "счёт",
@@ -10534,7 +10550,7 @@
   "notes": "деньги — только навигатор"
  },
  {
-  "id": "legal-docs-656",
+  "id": "legal-docs-657",
   "domain": "legal-docs",
   "verb": "прочитать",
   "object": "договор и объяснить",
@@ -10550,7 +10566,7 @@
   "notes": ""
  },
  {
-  "id": "legal-docs-657",
+  "id": "legal-docs-658",
   "domain": "legal-docs",
   "verb": "найти",
   "object": "опасные пункты",
@@ -10566,7 +10582,7 @@
   "notes": ""
  },
  {
-  "id": "legal-docs-658",
+  "id": "legal-docs-659",
   "domain": "legal-docs",
   "verb": "сравнить",
   "object": "две редакции договора",
@@ -10582,7 +10598,7 @@
   "notes": ""
  },
  {
-  "id": "legal-docs-659",
+  "id": "legal-docs-660",
   "domain": "legal-docs",
   "verb": "составить",
   "object": "договор по шаблону",
@@ -10598,7 +10614,7 @@
   "notes": "юрист проверяет"
  },
  {
-  "id": "legal-docs-660",
+  "id": "legal-docs-661",
   "domain": "legal-docs",
   "verb": "проверить",
   "object": "сроки и даты",
@@ -10614,7 +10630,7 @@
   "notes": ""
  },
  {
-  "id": "legal-docs-661",
+  "id": "legal-docs-662",
   "domain": "legal-docs",
   "verb": "собрать",
   "object": "пакет документов",
@@ -10630,7 +10646,7 @@
   "notes": ""
  },
  {
-  "id": "legal-docs-662",
+  "id": "legal-docs-663",
   "domain": "legal-docs",
   "verb": "заполнить",
   "object": "бланк или заявление",
@@ -10646,7 +10662,7 @@
   "notes": ""
  },
  {
-  "id": "legal-docs-663",
+  "id": "legal-docs-664",
   "domain": "legal-docs",
   "verb": "проверить",
   "object": "реквизиты контрагента",
@@ -10662,7 +10678,7 @@
   "notes": ""
  },
  {
-  "id": "legal-docs-664",
+  "id": "legal-docs-665",
   "domain": "legal-docs",
   "verb": "перевести",
   "object": "договор",
@@ -10678,7 +10694,7 @@
   "notes": ""
  },
  {
-  "id": "legal-docs-665",
+  "id": "legal-docs-666",
   "domain": "legal-docs",
   "verb": "напомнить",
   "object": "о юридическом сроке",
@@ -10694,7 +10710,7 @@
   "notes": ""
  },
  {
-  "id": "legal-docs-666",
+  "id": "legal-docs-667",
   "domain": "legal-docs",
   "verb": "подписать",
   "object": "документ электронно",
@@ -10710,7 +10726,7 @@
   "notes": "юридически значимо, только человек"
  },
  {
-  "id": "legal-docs-667",
+  "id": "legal-docs-668",
   "domain": "legal-docs",
   "verb": "сохранить",
   "object": "архив с версиями и хэшами",
@@ -10726,7 +10742,7 @@
   "notes": ""
  },
  {
-  "id": "legal-docs-668",
+  "id": "legal-docs-669",
   "domain": "legal-docs",
   "verb": "найти",
   "object": "практику по похожему делу",
@@ -10742,7 +10758,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-669",
+  "id": "home-daily-670",
   "domain": "home-daily",
   "verb": "составить",
   "object": "график уборки",
@@ -10758,7 +10774,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-670",
+  "id": "home-daily-671",
   "domain": "home-daily",
   "verb": "напомнить",
   "object": "полить растения",
@@ -10774,7 +10790,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-671",
+  "id": "home-daily-672",
   "domain": "home-daily",
   "verb": "распознать",
   "object": "болезнь растения по фото",
@@ -10790,7 +10806,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-672",
+  "id": "home-daily-673",
   "domain": "home-daily",
   "verb": "напомнить",
   "object": "корм и лекарства животным",
@@ -10806,7 +10822,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-673",
+  "id": "home-daily-674",
   "domain": "home-daily",
   "verb": "найти",
   "object": "ветклинику и записать",
@@ -10822,7 +10838,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-674",
+  "id": "home-daily-675",
   "domain": "home-daily",
   "verb": "составить",
   "object": "смету ремонта",
@@ -10838,7 +10854,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-675",
+  "id": "home-daily-676",
   "domain": "home-daily",
   "verb": "сравнить",
   "object": "мастеров и цены",
@@ -10854,7 +10870,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-676",
+  "id": "home-daily-677",
   "domain": "home-daily",
   "verb": "посчитать",
   "object": "площадь по плану",
@@ -10870,7 +10886,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-677",
+  "id": "home-daily-678",
   "domain": "home-daily",
   "verb": "собрать",
   "object": "инструкцию по ремонту",
@@ -10886,7 +10902,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-678",
+  "id": "home-daily-679",
   "domain": "home-daily",
   "verb": "проверить",
   "object": "сроки продуктов по фото",
@@ -10902,7 +10918,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-679",
+  "id": "home-daily-680",
   "domain": "home-daily",
   "verb": "составить",
   "object": "меню на неделю",
@@ -10918,7 +10934,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-680",
+  "id": "home-daily-681",
   "domain": "home-daily",
   "verb": "заказать",
   "object": "мастера",
@@ -10934,7 +10950,7 @@
   "notes": "только с подтверждением"
  },
  {
-  "id": "home-daily-681",
+  "id": "home-daily-682",
   "domain": "home-daily",
   "verb": "вести",
   "object": "журнал дома",
@@ -10950,7 +10966,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-682",
+  "id": "home-daily-683",
   "domain": "home-daily",
   "verb": "напомнить",
   "object": "про обслуживание",
@@ -10966,7 +10982,7 @@
   "notes": ""
  },
  {
-  "id": "home-daily-683",
+  "id": "home-daily-684",
   "domain": "home-daily",
   "verb": "изменить",
   "object": "список дел по дому",
@@ -10982,7 +10998,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-684",
+  "id": "personal-finance-685",
   "domain": "personal-finance",
   "verb": "изменить",
   "object": "категорию операции",
@@ -10998,7 +11014,7 @@
   "notes": ""
  },
  {
-  "id": "career-685",
+  "id": "career-686",
   "domain": "career",
   "verb": "написать",
   "object": "резюме под вакансию",
@@ -11014,7 +11030,7 @@
   "notes": ""
  },
  {
-  "id": "career-686",
+  "id": "career-687",
   "domain": "career",
   "verb": "найти",
   "object": "вакансии по фильтрам",
@@ -11030,7 +11046,7 @@
   "notes": ""
  },
  {
-  "id": "career-687",
+  "id": "career-688",
   "domain": "career",
   "verb": "сравнить",
   "object": "вакансии по требованиям и деньгам",
@@ -11046,7 +11062,7 @@
   "notes": ""
  },
  {
-  "id": "career-688",
+  "id": "career-689",
   "domain": "career",
   "verb": "подготовить",
   "object": "сопроводительное письмо",
@@ -11062,7 +11078,7 @@
   "notes": ""
  },
  {
-  "id": "career-689",
+  "id": "career-690",
   "domain": "career",
   "verb": "заполнить",
   "object": "анкету и отклик",
@@ -11078,7 +11094,7 @@
   "notes": "данные профиля, подтверждение"
  },
  {
-  "id": "career-690",
+  "id": "career-691",
   "domain": "career",
   "verb": "отследить",
   "object": "статусы откликов",
@@ -11094,7 +11110,7 @@
   "notes": ""
  },
  {
-  "id": "career-691",
+  "id": "career-692",
   "domain": "career",
   "verb": "подготовить",
   "object": "ответы к интервью",
@@ -11110,7 +11126,7 @@
   "notes": ""
  },
  {
-  "id": "career-692",
+  "id": "career-693",
   "domain": "career",
   "verb": "собрать",
   "object": "портфолио",
@@ -11126,7 +11142,7 @@
   "notes": ""
  },
  {
-  "id": "career-693",
+  "id": "career-694",
   "domain": "career",
   "verb": "проверить",
   "object": "репутацию компании",
@@ -11142,7 +11158,7 @@
   "notes": ""
  },
  {
-  "id": "career-694",
+  "id": "career-695",
   "domain": "career",
   "verb": "подготовить",
   "object": "вопросы работодателю",
@@ -11158,7 +11174,7 @@
   "notes": ""
  },
  {
-  "id": "career-695",
+  "id": "career-696",
   "domain": "career",
   "verb": "сравнить",
   "object": "офферы",
@@ -11174,7 +11190,7 @@
   "notes": ""
  },
  {
-  "id": "career-696",
+  "id": "career-697",
   "domain": "career",
   "verb": "собрать",
   "object": "документы для трудоустройства",
@@ -11190,7 +11206,7 @@
   "notes": ""
  },
  {
-  "id": "career-697",
+  "id": "career-698",
   "domain": "career",
   "verb": "спланировать",
   "object": "релокацию",
@@ -11206,7 +11222,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-698",
+  "id": "security-access-699",
   "domain": "security-access",
   "verb": "настроить",
   "object": "двухфакторную аутентификацию",
@@ -11222,7 +11238,7 @@
   "notes": "секреты в secrets.enc"
  },
  {
-  "id": "security-access-699",
+  "id": "security-access-700",
   "domain": "security-access",
   "verb": "проверить",
   "object": "утечки паролей",
@@ -11238,7 +11254,7 @@
   "notes": "сами пароли не отправляются"
  },
  {
-  "id": "security-access-700",
+  "id": "security-access-701",
   "domain": "security-access",
   "verb": "создать",
   "object": "резервные коды 2FA",
@@ -11254,7 +11270,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-701",
+  "id": "security-access-702",
   "domain": "security-access",
   "verb": "проверить",
   "object": "какие приложения имеют доступ",
@@ -11270,7 +11286,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-702",
+  "id": "security-access-703",
   "domain": "security-access",
   "verb": "заблокировать",
   "object": "подозрительную сессию",
@@ -11286,7 +11302,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-703",
+  "id": "security-access-704",
   "domain": "security-access",
   "verb": "зашифровать",
   "object": "папку или диск",
@@ -11302,7 +11318,7 @@
   "notes": "потеря ключа = потеря данных"
  },
  {
-  "id": "devices-704",
+  "id": "devices-705",
   "domain": "devices",
   "verb": "подключить",
   "object": "телефон по USB",
@@ -11318,7 +11334,7 @@
   "notes": ""
  },
  {
-  "id": "devices-705",
+  "id": "devices-706",
   "domain": "devices",
   "verb": "скопировать",
   "object": "фото и файлы с телефона",
@@ -11334,7 +11350,7 @@
   "notes": ""
  },
  {
-  "id": "devices-706",
+  "id": "devices-707",
   "domain": "devices",
   "verb": "установить",
   "object": "APK на телефон",
@@ -11350,7 +11366,7 @@
   "notes": "только свои сборки"
  },
  {
-  "id": "devices-707",
+  "id": "devices-708",
   "domain": "devices",
   "verb": "сделать",
   "object": "скриншот экрана телефона",
@@ -11366,7 +11382,7 @@
   "notes": ""
  },
  {
-  "id": "devices-708",
+  "id": "devices-709",
   "domain": "devices",
   "verb": "найти",
   "object": "устройства в сети",
@@ -11382,7 +11398,7 @@
   "notes": ""
  },
  {
-  "id": "network-709",
+  "id": "network-710",
   "domain": "network",
   "verb": "настроить",
   "object": "VPN-подключение",
@@ -11398,7 +11414,7 @@
   "notes": ""
  },
  {
-  "id": "network-710",
+  "id": "network-711",
   "domain": "network",
   "verb": "проверить",
   "object": "DNS и утечки",
@@ -11414,7 +11430,7 @@
   "notes": ""
  },
  {
-  "id": "network-711",
+  "id": "network-712",
   "domain": "network",
   "verb": "настроить",
   "object": "правило firewall",
@@ -11430,7 +11446,7 @@
   "notes": "с проверкой доступности после"
  },
  {
-  "id": "network-712",
+  "id": "network-713",
   "domain": "network",
   "verb": "проверить",
   "object": "скорость соединения",
@@ -11446,7 +11462,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-713",
+  "id": "dev-code-714",
   "domain": "dev-code",
   "verb": "настроить",
   "object": "линтеры и pre-commit",
@@ -11462,7 +11478,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-714",
+  "id": "dev-code-715",
   "domain": "dev-code",
   "verb": "проверить",
   "object": "уязвимости зависимостей",
@@ -11478,7 +11494,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-715",
+  "id": "dev-code-716",
   "domain": "dev-code",
   "verb": "собрать",
   "object": "Docker-образ",
@@ -11494,7 +11510,7 @@
   "notes": ""
  },
  {
-  "id": "input-716",
+  "id": "input-717",
   "domain": "input",
   "verb": "записать",
   "object": "макрос моих действий",
@@ -11510,7 +11526,7 @@
   "notes": ""
  },
  {
-  "id": "input-717",
+  "id": "input-718",
   "domain": "input",
   "verb": "воспроизвести",
   "object": "вчерашнюю последовательность",
@@ -11526,7 +11542,7 @@
   "notes": ""
  },
  {
-  "id": "career-718",
+  "id": "career-719",
   "domain": "career",
   "verb": "ответить",
   "object": "работодателю на сообщение",
@@ -11542,7 +11558,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-719",
+  "id": "personal-finance-720",
   "domain": "personal-finance",
   "verb": "показать",
   "object": "баланс и последние операции",
@@ -11558,7 +11574,7 @@
   "notes": "только чтение"
  },
  {
-  "id": "personal-finance-720",
+  "id": "personal-finance-721",
   "domain": "personal-finance",
   "verb": "найти",
   "object": "операцию по сумме или дате",
@@ -11574,7 +11590,7 @@
   "notes": ""
  },
  {
-  "id": "personal-finance-721",
+  "id": "personal-finance-722",
   "domain": "personal-finance",
   "verb": "экспортировать",
   "object": "операции в таблицу",
@@ -11590,7 +11606,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-722",
+  "id": "business-finance-723",
   "domain": "business-finance",
   "verb": "открыть",
   "object": "отчёт в 1С",
@@ -11606,7 +11622,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-723",
+  "id": "business-finance-724",
   "domain": "business-finance",
   "verb": "экспортировать",
   "object": "отчёт в Excel",
@@ -11622,7 +11638,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-724",
+  "id": "business-finance-725",
   "domain": "business-finance",
   "verb": "найти",
   "object": "документ по номеру",
@@ -11638,7 +11654,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-725",
+  "id": "business-finance-726",
   "domain": "business-finance",
   "verb": "проверить",
   "object": "дубли документов",
@@ -11654,7 +11670,7 @@
   "notes": ""
  },
  {
-  "id": "licensing-726",
+  "id": "licensing-727",
   "domain": "licensing",
   "verb": "активировать",
   "object": "лицензию ключом",
@@ -11670,7 +11686,7 @@
   "notes": ""
  },
  {
-  "id": "licensing-727",
+  "id": "licensing-728",
   "domain": "licensing",
   "verb": "проверить",
   "object": "лицензию офлайн",
@@ -11686,7 +11702,7 @@
   "notes": ""
  },
  {
-  "id": "licensing-728",
+  "id": "licensing-729",
   "domain": "licensing",
   "verb": "обновить",
   "object": "токен лицензии",
@@ -11702,7 +11718,7 @@
   "notes": ""
  },
  {
-  "id": "licensing-729",
+  "id": "licensing-730",
   "domain": "licensing",
   "verb": "деактивировать",
   "object": "устройство",
@@ -11718,7 +11734,7 @@
   "notes": ""
  },
  {
-  "id": "licensing-730",
+  "id": "licensing-731",
   "domain": "licensing",
   "verb": "перенести",
   "object": "лицензию на новый ПК",
@@ -11734,7 +11750,7 @@
   "notes": ""
  },
  {
-  "id": "licensing-731",
+  "id": "licensing-732",
   "domain": "licensing",
   "verb": "показать",
   "object": "статус подписки",
@@ -11750,7 +11766,7 @@
   "notes": ""
  },
  {
-  "id": "licensing-732",
+  "id": "licensing-733",
   "domain": "licensing",
   "verb": "продлить",
   "object": "подписку",
@@ -11766,7 +11782,7 @@
   "notes": "оплата — у провайдера"
  },
  {
-  "id": "licensing-733",
+  "id": "licensing-734",
   "domain": "licensing",
   "verb": "запустить",
   "object": "пробный период",
@@ -11782,7 +11798,7 @@
   "notes": ""
  },
  {
-  "id": "licensing-734",
+  "id": "licensing-735",
   "domain": "licensing",
   "verb": "проверить",
   "object": "подлинность сборки",
@@ -11798,7 +11814,7 @@
   "notes": ""
  },
  {
-  "id": "licensing-735",
+  "id": "licensing-736",
   "domain": "licensing",
   "verb": "встроить",
   "object": "водяной знак в экспорт",
@@ -11814,7 +11830,7 @@
   "notes": ""
  },
  {
-  "id": "licensing-736",
+  "id": "licensing-737",
   "domain": "licensing",
   "verb": "сообщить",
   "object": "об аномалии активаций",
@@ -11830,7 +11846,7 @@
   "notes": "человек не мониторит"
  },
  {
-  "id": "licensing-737",
+  "id": "licensing-738",
   "domain": "licensing",
   "verb": "отозвать",
   "object": "ключ",
@@ -11846,7 +11862,7 @@
   "notes": "только владелец продукта"
  },
  {
-  "id": "distribution-738",
+  "id": "distribution-739",
   "domain": "distribution",
   "verb": "собрать",
   "object": "установщик",
@@ -11862,7 +11878,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-739",
+  "id": "distribution-740",
   "domain": "distribution",
   "verb": "подписать",
   "object": "код",
@@ -11878,7 +11894,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-740",
+  "id": "distribution-741",
   "domain": "distribution",
   "verb": "опубликовать",
   "object": "релиз с манифестом",
@@ -11894,7 +11910,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-741",
+  "id": "distribution-742",
   "domain": "distribution",
   "verb": "проверить",
   "object": "подпись перед публикацией",
@@ -11910,7 +11926,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-742",
+  "id": "distribution-743",
   "domain": "distribution",
   "verb": "настроить",
   "object": "канал обновлений",
@@ -11926,7 +11942,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-743",
+  "id": "distribution-744",
   "domain": "distribution",
   "verb": "откатить",
   "object": "релиз",
@@ -11942,7 +11958,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-744",
+  "id": "distribution-745",
   "domain": "distribution",
   "verb": "проверить",
   "object": "совместимость Win10 и Win11",
@@ -11958,7 +11974,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-745",
+  "id": "distribution-746",
   "domain": "distribution",
   "verb": "подготовить",
   "object": "листинг в Store",
@@ -11974,7 +11990,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-746",
+  "id": "distribution-747",
   "domain": "distribution",
   "verb": "собрать",
   "object": "SBOM и аудит зависимостей",
@@ -11990,7 +12006,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-747",
+  "id": "distribution-748",
   "domain": "distribution",
   "verb": "проверить",
   "object": "отсутствие секретов в бинарнике",
@@ -12006,7 +12022,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-748",
+  "id": "distribution-749",
   "domain": "distribution",
   "verb": "автоматизировать",
   "object": "сборку и релиз в CI",
@@ -12022,7 +12038,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-749",
+  "id": "distribution-750",
   "domain": "distribution",
   "verb": "проверить",
   "object": "наличие WebView2 Runtime",
@@ -12038,7 +12054,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-750",
+  "id": "distribution-751",
   "domain": "distribution",
   "verb": "установить",
   "object": "WebView2 Runtime молча",
@@ -12054,7 +12070,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-751",
+  "id": "distribution-752",
   "domain": "distribution",
   "verb": "проверить",
   "object": "что релиз не открывает сетевых портов",
@@ -12070,7 +12086,7 @@
   "notes": ""
  },
  {
-  "id": "distribution-752",
+  "id": "distribution-753",
   "domain": "distribution",
   "verb": "проверить",
   "object": "что DevTools недоступны в релизе",
@@ -12086,7 +12102,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-753",
+  "id": "music-production-754",
   "domain": "music-production",
   "verb": "сочинить",
   "object": "бит (драм-паттерн)",
@@ -12102,7 +12118,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-754",
+  "id": "music-production-755",
   "domain": "music-production",
   "verb": "сочинить",
   "object": "мелодию и аккорды",
@@ -12118,7 +12134,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-755",
+  "id": "music-production-756",
   "domain": "music-production",
   "verb": "написать",
   "object": "текст песни",
@@ -12134,7 +12150,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-756",
+  "id": "music-production-757",
   "domain": "music-production",
   "verb": "проанализировать",
   "object": "референсы",
@@ -12150,7 +12166,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-757",
+  "id": "music-production-758",
   "domain": "music-production",
   "verb": "подобрать",
   "object": "референсы под задачу",
@@ -12166,7 +12182,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-758",
+  "id": "music-production-759",
   "domain": "music-production",
   "verb": "открыть",
   "object": "проект в DAW",
@@ -12182,7 +12198,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-759",
+  "id": "music-production-760",
   "domain": "music-production",
   "verb": "импортировать",
   "object": "MIDI в проект",
@@ -12198,7 +12214,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-760",
+  "id": "music-production-761",
   "domain": "music-production",
   "verb": "записать",
   "object": "вокал",
@@ -12214,7 +12230,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-761",
+  "id": "music-production-762",
   "domain": "music-production",
   "verb": "клонировать",
   "object": "голос (только свой)",
@@ -12230,7 +12246,7 @@
   "notes": "согласие; чужие голоса — never"
  },
  {
-  "id": "music-production-762",
+  "id": "music-production-763",
   "domain": "music-production",
   "verb": "синтезировать",
   "object": "вокал по тексту",
@@ -12246,7 +12262,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-763",
+  "id": "music-production-764",
   "domain": "music-production",
   "verb": "поправить",
   "object": "питч и тайминг вокала",
@@ -12262,7 +12278,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-764",
+  "id": "music-production-765",
   "domain": "music-production",
   "verb": "свести",
   "object": "дорожки в микс",
@@ -12278,7 +12294,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-765",
+  "id": "music-production-766",
   "domain": "music-production",
   "verb": "мастерить",
   "object": "трек по референсу",
@@ -12294,7 +12310,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-766",
+  "id": "music-production-767",
   "domain": "music-production",
   "verb": "разделить",
   "object": "трек на стемы",
@@ -12310,7 +12326,7 @@
   "notes": "только свои файлы"
  },
  {
-  "id": "music-production-767",
+  "id": "music-production-768",
   "domain": "music-production",
   "verb": "сгенерировать",
   "object": "инструментал",
@@ -12326,7 +12342,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-768",
+  "id": "music-production-769",
   "domain": "music-production",
   "verb": "проверить",
   "object": "громкость и пики",
@@ -12342,7 +12358,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-769",
+  "id": "music-production-770",
   "domain": "music-production",
   "verb": "экспортировать",
   "object": "финальный мастер",
@@ -12358,7 +12374,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-770",
+  "id": "music-production-771",
   "domain": "music-production",
   "verb": "опубликовать",
   "object": "трек через дистрибуцию",
@@ -12374,7 +12390,7 @@
   "notes": "права и метаданные"
  },
  {
-  "id": "music-production-771",
+  "id": "music-production-772",
   "domain": "music-production",
   "verb": "оформить",
   "object": "обложку и метаданные",
@@ -12390,7 +12406,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-772",
+  "id": "music-production-773",
   "domain": "music-production",
   "verb": "спланировать",
   "object": "релиз",
@@ -12406,7 +12422,7 @@
   "notes": ""
  },
  {
-  "id": "apps-generic-773",
+  "id": "apps-generic-774",
   "domain": "apps-generic",
   "verb": "снять",
   "object": "UIA-дерево приложения",
@@ -12422,7 +12438,7 @@
   "notes": ""
  },
  {
-  "id": "apps-generic-774",
+  "id": "apps-generic-775",
   "domain": "apps-generic",
   "verb": "сгенерировать",
   "object": "профиль приложения по UIA",
@@ -12438,7 +12454,7 @@
   "notes": ""
  },
  {
-  "id": "apps-generic-775",
+  "id": "apps-generic-776",
   "domain": "apps-generic",
   "verb": "найти",
   "object": "элемент по описанию",
@@ -12454,7 +12470,7 @@
   "notes": ""
  },
  {
-  "id": "apps-generic-776",
+  "id": "apps-generic-777",
   "domain": "apps-generic",
   "verb": "кликнуть",
   "object": "по элементу с проверкой",
@@ -12470,7 +12486,7 @@
   "notes": ""
  },
  {
-  "id": "apps-generic-777",
+  "id": "apps-generic-778",
   "domain": "apps-generic",
   "verb": "записать",
   "object": "траекторию действий пользователя",
@@ -12486,7 +12502,7 @@
   "notes": ""
  },
  {
-  "id": "apps-generic-778",
+  "id": "apps-generic-779",
   "domain": "apps-generic",
   "verb": "воспроизвести",
   "object": "траекторию с проверками",
@@ -12502,7 +12518,7 @@
   "notes": ""
  },
  {
-  "id": "apps-generic-779",
+  "id": "apps-generic-780",
   "domain": "apps-generic",
   "verb": "адаптировать",
   "object": "профиль к новой версии",
@@ -12518,7 +12534,7 @@
   "notes": ""
  },
  {
-  "id": "apps-generic-780",
+  "id": "apps-generic-781",
   "domain": "apps-generic",
   "verb": "проверить",
   "object": "что приложение открылось",
@@ -12534,7 +12550,7 @@
   "notes": ""
  },
  {
-  "id": "apps-generic-781",
+  "id": "apps-generic-782",
   "domain": "apps-generic",
   "verb": "определить",
   "object": "тип интерфейса",
@@ -12550,7 +12566,7 @@
   "notes": ""
  },
  {
-  "id": "apps-generic-782",
+  "id": "apps-generic-783",
   "domain": "apps-generic",
   "verb": "деградировать",
   "object": "до визуального агента",
@@ -12566,7 +12582,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-783",
+  "id": "dev-code-784",
   "domain": "dev-code",
   "verb": "показать",
   "object": "состояние репозитория",
@@ -12582,7 +12598,7 @@
   "notes": ""
  },
  {
-  "id": "video-784",
+  "id": "video-785",
   "domain": "video",
   "verb": "воспроизвести",
   "object": "файл или плейлист",
@@ -12598,7 +12614,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-785",
+  "id": "music-production-786",
   "domain": "music-production",
   "verb": "проверить",
   "object": "текст на плагиат",
@@ -12614,7 +12630,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-786",
+  "id": "music-production-787",
   "domain": "music-production",
   "verb": "подготовить",
   "object": "сэмплы голоса для клонирования",
@@ -12630,7 +12646,7 @@
   "notes": "только свой голос, согласие"
  },
  {
-  "id": "music-production-787",
+  "id": "music-production-788",
   "domain": "music-production",
   "verb": "оценить",
   "object": "качество вокала",
@@ -12646,7 +12662,7 @@
   "notes": ""
  },
  {
-  "id": "music-production-788",
+  "id": "music-production-789",
   "domain": "music-production",
   "verb": "согласовать",
   "object": "этап с пользователем",
@@ -12662,7 +12678,7 @@
   "notes": ""
  },
  {
-  "id": "video-789",
+  "id": "video-790",
   "domain": "video",
   "verb": "импортировать",
   "object": "медиа в проект",
@@ -12678,7 +12694,7 @@
   "notes": "проверить, что все файлы на месте и без битых"
  },
  {
-  "id": "video-790",
+  "id": "video-791",
   "domain": "video",
   "verb": "экспортировать",
   "object": "готовый ролик",
@@ -12694,7 +12710,7 @@
   "notes": "проверка по ffprobe и кадрам"
  },
  {
-  "id": "video-791",
+  "id": "video-792",
   "domain": "video",
   "verb": "подписать",
   "object": "субтитры по таймкодам",
@@ -12710,7 +12726,7 @@
   "notes": ""
  },
  {
-  "id": "databases-792",
+  "id": "databases-793",
   "domain": "databases",
   "verb": "сравнить",
   "object": "схемы двух БД",
@@ -12726,7 +12742,7 @@
   "notes": ""
  },
  {
-  "id": "network-793",
+  "id": "network-794",
   "domain": "network",
   "verb": "замерить",
   "object": "задержку до узла",
@@ -12743,7 +12759,7 @@
   "notes": ""
  },
  {
-  "id": "virtualization-remote-794",
+  "id": "virtualization-remote-795",
   "domain": "virtualization-remote",
   "verb": "восстановить",
   "object": "ВМ из снапшота",
@@ -12759,7 +12775,7 @@
   "notes": "текущее состояние сохранить снапшотом"
  },
  {
-  "id": "files-795",
+  "id": "files-796",
   "domain": "files",
   "verb": "пометить",
   "object": "дубликаты для разбора",
@@ -12775,7 +12791,7 @@
   "notes": ""
  },
  {
-  "id": "games-796",
+  "id": "games-797",
   "domain": "games",
   "verb": "установить",
   "object": "игру из библиотеки",
@@ -12791,7 +12807,7 @@
   "notes": "место на диске проверить до"
  },
  {
-  "id": "games-797",
+  "id": "games-798",
   "domain": "games",
   "verb": "перенести",
   "object": "библиотеку на другой диск",
@@ -12807,7 +12823,7 @@
   "notes": "свободное место и целостность после"
  },
  {
-  "id": "sheets-data-798",
+  "id": "sheets-data-799",
   "domain": "sheets-data",
   "verb": "сравнить",
   "object": "две таблицы",
@@ -12823,7 +12839,7 @@
   "notes": ""
  },
  {
-  "id": "text-docs-799",
+  "id": "text-docs-800",
   "domain": "text-docs",
   "verb": "проверить",
   "object": "соответствие методичке",
@@ -12839,7 +12855,7 @@
   "notes": ""
  },
  {
-  "id": "files-800",
+  "id": "files-801",
   "domain": "files",
   "verb": "открыть",
   "object": "архив без распаковки",
@@ -12855,7 +12871,7 @@
   "notes": ""
  },
  {
-  "id": "files-801",
+  "id": "files-802",
   "domain": "files",
   "verb": "проверить",
   "object": "дубликаты по хэшу",
@@ -12871,7 +12887,7 @@
   "notes": ""
  },
  {
-  "id": "audio-802",
+  "id": "audio-803",
   "domain": "audio",
   "verb": "замерить",
   "object": "LUFS и true peak",
@@ -12887,7 +12903,7 @@
   "notes": ""
  },
  {
-  "id": "video-803",
+  "id": "video-804",
   "domain": "video",
   "verb": "замерить",
   "object": "качество сжатия (SSIM)",
@@ -12903,7 +12919,7 @@
   "notes": ""
  },
  {
-  "id": "databases-804",
+  "id": "databases-805",
   "domain": "databases",
   "verb": "создать",
   "object": "индекс",
@@ -12919,7 +12935,7 @@
   "notes": "на проде только CONCURRENTLY"
  },
  {
-  "id": "network-805",
+  "id": "network-806",
   "domain": "network",
   "verb": "настроить",
   "object": "файл hosts",
@@ -12935,7 +12951,7 @@
   "notes": "бэкап файла до правки"
  },
  {
-  "id": "apps-windows-806",
+  "id": "apps-windows-807",
   "domain": "apps-windows",
   "verb": "показать",
   "object": "установленные программы",
@@ -12951,7 +12967,7 @@
   "notes": "с размером занимаемого места"
  },
  {
-  "id": "images-807",
+  "id": "images-808",
   "domain": "images",
   "verb": "извлечь",
   "object": "таблицу из скриншота",
@@ -12967,7 +12983,7 @@
   "notes": ""
  },
  {
-  "id": "images-808",
+  "id": "images-809",
   "domain": "images",
   "verb": "распознать",
   "object": "рукописный текст",
@@ -12983,7 +12999,7 @@
   "notes": "оценка уверенности обязательна"
  },
  {
-  "id": "video-809",
+  "id": "video-810",
   "domain": "video",
   "verb": "получить",
   "object": "встроенные субтитры",
@@ -12999,7 +13015,7 @@
   "notes": ""
  },
  {
-  "id": "audio-810",
+  "id": "audio-811",
   "domain": "audio",
   "verb": "удалить",
   "object": "музыку из голоса (изоляция вокала)",
@@ -13015,7 +13031,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-811",
+  "id": "dev-code-812",
   "domain": "dev-code",
   "verb": "создать",
   "object": "документацию из кода",
@@ -13031,7 +13047,7 @@
   "notes": ""
  },
  {
-  "id": "dev-code-812",
+  "id": "dev-code-813",
   "domain": "dev-code",
   "verb": "найти",
   "object": "мёртвый и дублирующийся код",
@@ -13047,7 +13063,7 @@
   "notes": ""
  },
  {
-  "id": "databases-813",
+  "id": "databases-814",
   "domain": "databases",
   "verb": "импортировать",
   "object": "таблицу Excel в базу",
@@ -13063,7 +13079,7 @@
   "notes": "типы колонок вывести, а не угадать"
  },
  {
-  "id": "web-814",
+  "id": "web-815",
   "domain": "web",
   "verb": "извлечь",
   "object": "контакты и реквизиты",
@@ -13079,7 +13095,7 @@
   "notes": "персональные данные не кэшировать"
  },
  {
-  "id": "files-815",
+  "id": "files-816",
   "domain": "files",
   "verb": "найти",
   "object": "текст внутри PDF-архива",
@@ -13095,7 +13111,7 @@
   "notes": ""
  },
  {
-  "id": "apps-windows-816",
+  "id": "apps-windows-817",
   "domain": "apps-windows",
   "verb": "настроить",
   "object": "горячие клавиши приложения",
@@ -13111,7 +13127,7 @@
   "notes": ""
  },
  {
-  "id": "security-access-817",
+  "id": "security-access-818",
   "domain": "security-access",
   "verb": "найти",
   "object": "пароль в хранилище",
@@ -13127,7 +13143,7 @@
   "notes": "показывать с маской, копировать по кнопке"
  },
  {
-  "id": "security-access-818",
+  "id": "security-access-819",
   "domain": "security-access",
   "verb": "создать",
   "object": "запись в хранилище паролей",
@@ -13143,7 +13159,7 @@
   "notes": "генератор, а не придуманный пароль"
  },
  {
-  "id": "security-access-819",
+  "id": "security-access-820",
   "domain": "security-access",
   "verb": "создать",
   "object": "резервную копию хранилища",
@@ -13159,7 +13175,7 @@
   "notes": "хранилище не синхронизировать в облако"
  },
  {
-  "id": "security-access-820",
+  "id": "security-access-821",
   "domain": "security-access",
   "verb": "проверить",
   "object": "надёжность и повторное использование паролей",
@@ -13175,7 +13191,7 @@
   "notes": ""
  },
  {
-  "id": "accounts-updates-821",
+  "id": "accounts-updates-822",
   "domain": "accounts-updates",
   "verb": "проверить",
   "object": "целостность установки Windows",
@@ -13191,7 +13207,7 @@
   "notes": "долго: 10-40 мин"
  },
  {
-  "id": "databases-822",
+  "id": "databases-823",
   "domain": "databases",
   "verb": "проверить",
   "object": "права и роли",
@@ -13207,7 +13223,7 @@
   "notes": "принцип наименьших прав: сервис не ходит суперпользователем"
  },
  {
-  "id": "databases-823",
+  "id": "databases-824",
   "domain": "databases",
   "verb": "мигрировать",
   "object": "схему",
@@ -13223,7 +13239,7 @@
   "notes": "бэкап и план отката до запуска"
  },
  {
-  "id": "databases-824",
+  "id": "databases-825",
   "domain": "databases",
   "verb": "проверить",
   "object": "медленные запросы",
@@ -13239,7 +13255,7 @@
   "notes": ""
  },
  {
-  "id": "databases-825",
+  "id": "databases-826",
   "domain": "databases",
   "verb": "закрыть",
   "object": "сессии перед обслуживанием",
@@ -13255,7 +13271,7 @@
   "notes": "сначала pg_cancel_backend, terminate — последним"
  },
  {
-  "id": "databases-826",
+  "id": "databases-827",
   "domain": "databases",
   "verb": "задокументировать",
   "object": "схему БД",
@@ -13271,7 +13287,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-827",
+  "id": "business-finance-828",
   "domain": "business-finance",
   "verb": "сформировать",
   "object": "реестр счетов за период",
@@ -13287,7 +13303,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-828",
+  "id": "business-finance-829",
   "domain": "business-finance",
   "verb": "проверить",
   "object": "ИНН/ОГРН контрагента",
@@ -13303,7 +13319,7 @@
   "notes": "контрольная сумма ловит опечатку, а не недобросовестность"
  },
  {
-  "id": "business-finance-829",
+  "id": "business-finance-830",
   "domain": "business-finance",
   "verb": "сверить",
   "object": "оплату со счётом",
@@ -13319,7 +13335,7 @@
   "notes": ""
  },
  {
-  "id": "business-finance-830",
+  "id": "business-finance-831",
   "domain": "business-finance",
   "verb": "подготовить",
   "object": "пакет документов к сделке",
@@ -13335,7 +13351,7 @@
   "notes": ""
  },
  {
-  "id": "files-831",
+  "id": "files-832",
   "domain": "files",
   "verb": "записать",
   "object": "текст в файл",
@@ -13352,7 +13368,7 @@
   "notes": "перезапись существующего — только по слову «перезаписать»"
  },
  {
-  "id": "files-832",
+  "id": "files-833",
   "domain": "files",
   "verb": "прочитать",
   "object": "текст файла",
@@ -13369,7 +13385,7 @@
   "notes": "двоичные и слишком большие файлы не читаю"
  },
  {
-  "id": "files-833",
+  "id": "files-834",
   "domain": "files",
   "verb": "заменить",
   "object": "текст в файле",

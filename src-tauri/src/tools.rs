@@ -185,6 +185,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|убрать|двойников в карантин" => {
             quarantine_twins(registry, params, cancel)
         }
+        "processes-services|замерить|изменение нагрузки" => {
+            measure_change(registry, params, cancel)
+        }
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -3805,6 +3808,205 @@ foreach ($group in $ordered) {
 }
 "#;
 
+/// Где руке хранить свой маленький файл состояния (базис замера «до/после»).
+///
+/// Ставится один раз при старте приложения рядом с журналами; в тестах и утилитах остаётся
+/// временная папка — так рука работает и без запущенного окна.
+static SCRATCH: OnceLock<std::path::PathBuf> = OnceLock::new();
+
+/// Куда класть служебные файлы рук. Вызывается один раз при старте.
+pub fn set_scratch_dir(dir: std::path::PathBuf) {
+    let _ = SCRATCH.set(dir);
+}
+
+fn scratch_dir() -> std::path::PathBuf {
+    SCRATCH
+        .get()
+        .cloned()
+        .unwrap_or_else(|| std::env::temp_dir().join("zshelper"))
+}
+
+/// Файл базиса замера: первая строка — пояснение, вторая — строка снимка.
+fn baseline_path() -> std::path::PathBuf {
+    scratch_dir().join("snapshot-baseline.txt")
+}
+
+/// Замер «до/после»: сравнить нынешнюю картину машины с прошлым замером.
+///
+/// Как это работает:
+///
+///  * **первый запуск только запоминает** числа и говорит, что базис сохранён. Врать «стало
+///    легче» без предыдущего замера было бы легко и бесполезно;
+///  * **второй запуск показывает разницу по каждому числу** и обновляет базис — поэтому замер
+///    можно повторять: «до уборки», «после уборки», «через день»;
+///  * **«не прочиталось» не превращается в ноль.** Если в одном из замеров числа нет, так и
+///    сказано, а не «стало 0»;
+///  * **сам замер ничего не меняет** — это чтение, и в причине это сказано;
+///  * пояснение человека (`note`) сохраняется вместе с базисом: через день видно, что именно
+///    было между замерами.
+fn measure_change(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let note = param(params, "note").trim().to_string();
+
+    let mut result = run_script(
+        registry,
+        SNAPSHOT,
+        &[("HOURS", "24"), ("TOP", "3")],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(120),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+    let line = match result
+        .stdout_tail
+        .lines()
+        .find(|line| line.contains("ZSHELPER-OK"))
+    {
+        Some(line) => line.to_string(),
+        None => {
+            result.ok = false;
+            result.reason =
+                "замер собрался, но строки с числами нет — смотрите полный вывод".to_string();
+            return result;
+        }
+    };
+    let current = match parse_snapshot(&line) {
+        Some(snapshot) => snapshot,
+        None => {
+            result.ok = false;
+            result.reason =
+                "замер собрался, но разобрать его не вышло — смотрите полный вывод".to_string();
+            return result;
+        }
+    };
+
+    let path = baseline_path();
+    let previous = std::fs::read_to_string(&path).ok().and_then(|text| {
+        let mut lines = text.lines();
+        let saved_note = lines.next().unwrap_or_default().trim().to_string();
+        let saved_line = lines.next().unwrap_or_default().trim().to_string();
+        parse_snapshot(&saved_line).map(|snapshot| (saved_note, snapshot))
+    });
+
+    // Базис обновляется всегда: замер «после» становится новым «до».
+    let stored = format!("{note}\n{line}\n");
+    let write_failed = std::fs::create_dir_all(scratch_dir())
+        .and_then(|()| std::fs::write(&path, stored))
+        .err();
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    match previous {
+        Some((saved_note, before)) => {
+            let mut reason = change_reason(&before, &current);
+            if !saved_note.is_empty() {
+                reason.push_str(&format!("; между замерами было отмечено: «{saved_note}»"));
+            }
+            reason.push_str("; базис обновлён — следующий замер сравню с этим; сам замер ничего не менял");
+            if let Some(error) = write_failed {
+                reason.push_str(&format!(
+                    "; новый базис не сохранился ({error}) — в следующий раз сравню с прежним"
+                ));
+            }
+            result.reason = reason;
+        }
+        None => {
+            let mut reason = format!(
+                "базис сохранён: {}. Повторите замер после изменений — покажу разницу по каждому числу",
+                snapshot_reason(&current)
+            );
+            if let Some(error) = write_failed {
+                reason = format!(
+                    "базис не сохранился ({error}) — сравнить будет не с чем; замер: {}",
+                    snapshot_reason(&current)
+                );
+            }
+            result.reason = reason;
+        }
+    }
+    result
+}
+
+/// Разница двух замеров словами и числами: было → стало (и насколько).
+///
+/// Правила: каждое число названо отдельно; неизменное тоже названо («столько же»), а не
+/// пропущено; отсутствующее — «не прочиталось», а не ноль.
+fn change_reason(before: &Snapshot, after: &Snapshot) -> String {
+    let mut parts: Vec<String> = Vec::new();
+    let change = |name: &str, was: Option<i64>, now: Option<i64>| -> String {
+        match (was, now) {
+            (Some(was), Some(now)) => {
+                let delta = now - was;
+                if delta == 0 {
+                    format!("{name}: {now} — столько же")
+                } else {
+                    format!("{name}: {was} → {now} ({delta:+})")
+                }
+            }
+            (Some(was), None) => format!("{name}: было {was}, сейчас не прочиталось"),
+            (None, Some(now)) => format!("{name}: раньше не читалось, сейчас {now}"),
+            (None, None) => format!("{name}: не прочиталось ни разу"),
+        }
+    };
+    let percentage = |value: Option<&String>, total: Option<&String>| -> Option<i64> {
+        let value = value?.parse::<f64>().ok()?;
+        let total = total?.parse::<f64>().ok()?;
+        if total <= 0.0 {
+            return None;
+        }
+        Some((value / total * 100.0).round() as i64)
+    };
+    let gigabytes = |value: Option<&String>| -> Option<i64> {
+        value
+            .and_then(|value| value.parse::<f64>().ok())
+            .map(|value| value.round() as i64)
+    };
+
+    parts.push(change(
+        "нагрузка процессора, %",
+        before.cpu.map(|value| value as i64),
+        after.cpu.map(|value| value as i64),
+    ));
+    parts.push(change(
+        "занятая память, %",
+        percentage(before.ram_used.as_ref(), before.ram_total.as_ref()),
+        percentage(after.ram_used.as_ref(), after.ram_total.as_ref()),
+    ));
+    parts.push(change(
+        "процессов",
+        Some(before.procs as i64),
+        Some(after.procs as i64),
+    ));
+    parts.push(change(
+        "службы работают",
+        before.services_running.map(|value| value as i64),
+        after.services_running.map(|value| value as i64),
+    ));
+    parts.push(change(
+        "ошибок в журнале за сутки",
+        before.events.map(|value| value as i64),
+        after.events.map(|value| value as i64),
+    ));
+    parts.push(change(
+        "свободно на системном диске, ГБ",
+        gigabytes(before.disk_free.as_ref()),
+        gigabytes(after.disk_free.as_ref()),
+    ));
+    format!("замер до/после: {}", parts.join("; "))
+}
+
 /// Короткий стабильный отпечаток пути — чтобы имена в карантине не сталкивались.
 ///
 /// `DefaultHasher::new()` в Rust даёт одинаковый результат от запуска к запуску (ключи
@@ -4700,6 +4902,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("chat-social|найти|файл в чате", FIND_CHAT_FILE),
         ("files|найти|двойники", FIND_TWINS),
         ("files|убрать|двойников в карантин", FIND_TWINS),
+        ("processes-services|замерить|изменение нагрузки", SNAPSHOT),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }
@@ -6593,6 +6796,97 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert_eq!(groups[0].paths.len(), 3);
         assert_eq!(groups[1].paths, vec!["C:\\b\\x.bin", "C:\\b\\y.bin"]);
         assert_eq!(groups[1].wasted, 300);
+    }
+
+    /// Разница двух замеров называется по каждому числу: было → стало, и насколько.
+    #[test]
+    fn the_change_names_every_number() {
+        let before = parse_snapshot(
+            "ZSHELPER-OK procs=180 cpu=41 ram_used=9.2 ram_total=16.0 services=122/200 \
+events=7 disk_free=100.4 events=7 hours=24",
+        )
+        .expect("до");
+        let after = parse_snapshot(
+            "ZSHELPER-OK procs=170 cpu=23 ram_used=8.2 ram_total=16.0 services=120/200 \
+events=9 disk_free=101.4 hours=24",
+        )
+        .expect("после");
+
+        let reason = change_reason(&before, &after);
+
+        assert!(reason.contains("нагрузка процессора, %: 41 → 23 (-18)"), "{reason}");
+        assert!(reason.contains("занятая память, %: 58 → 51 (-7)"), "{reason}");
+        assert!(reason.contains("процессов: 180 → 170 (-10)"), "{reason}");
+        assert!(reason.contains("службы работают: 122 → 120 (-2)"), "{reason}");
+        assert!(reason.contains("ошибок в журнале за сутки: 7 → 9 (+2)"), "{reason}");
+        assert!(reason.contains("свободно на системном диске, ГБ: 100 → 101 (+1)"), "{reason}");
+    }
+
+    /// Неизменное число названо, а не пропущено: молчание читается как «не смотрели».
+    #[test]
+    fn an_unchanged_number_is_named_too() {
+        let line = "ZSHELPER-OK procs=170 cpu=23 services=120/200 events=0 hours=24";
+        let before = parse_snapshot(line).expect("до");
+        let after = parse_snapshot(line).expect("после");
+
+        let reason = change_reason(&before, &after);
+
+        assert!(reason.contains("нагрузка процессора, %: 23 — столько же"), "{reason}");
+        assert!(reason.contains("ошибок в журнале за сутки: 0 — столько же"), "{reason}");
+        assert!(reason.contains("память"), "память названа даже когда её не прочитали: {reason}");
+    }
+
+    /// «Не прочиталось» не превращается в ноль при сравнении.
+    #[test]
+    fn an_unreadable_number_is_not_zero_in_the_change() {
+        // В первом замере журнал не прочитался, во втором прочитался — это не «было 0».
+        let before = parse_snapshot("ZSHELPER-OK procs=170 cpu=23 events=-1 hours=24").expect("до");
+        let after = parse_snapshot("ZSHELPER-OK procs=170 cpu=23 events=5 hours=24").expect("после");
+
+        let reason = change_reason(&before, &after);
+
+        assert!(
+            reason.contains("ошибок в журнале за сутки: раньше не читалось, сейчас 5"),
+            "{reason}"
+        );
+        // И наоборот: прочиталось, потом нет — тоже словами, а не нулём.
+        let backwards = change_reason(&after, &before);
+        assert!(
+            backwards.contains("ошибок в журнале за сутки: было 5, сейчас не прочиталось"),
+            "{backwards}"
+        );
+    }
+
+    /// Первый замер только запоминает, второй показывает разницу — и обновляет базис.
+    #[cfg(windows)]
+    #[test]
+    fn the_first_measure_only_remembers() {
+        let dir = std::env::temp_dir().join(format!("zshelper-baseline-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        set_scratch_dir(dir.clone());
+        let _ = std::fs::remove_file(baseline_path());
+
+        let mut params = BTreeMap::new();
+        params.insert("note".to_string(), "ничего не делал".to_string());
+        let registry = "processes-services|замерить|изменение нагрузки";
+
+        let first = run(registry, &params, &AtomicBool::new(false));
+        assert!(first.ok, "{}", first.reason);
+        assert!(first.reason.contains("базис сохранён"), "{}", first.reason);
+        assert!(baseline_path().exists(), "базис должен лечь в файл");
+
+        let second = run(registry, &params, &AtomicBool::new(false));
+        assert!(second.ok, "{}", second.reason);
+        assert!(second.reason.contains("замер до/после"), "{}", second.reason);
+        assert!(
+            second.reason.contains("между замерами было отмечено"),
+            "пояснение сохраняется вместе с базисом: {}",
+            second.reason
+        );
+        assert!(second.reason.contains("базис обновлён"), "{}", second.reason);
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// Карантин: в группе остаётся первый по алфавиту, остальные переезжают, ничего не теряется.
