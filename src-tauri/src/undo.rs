@@ -411,12 +411,13 @@ mod tests {
 
         let steps = plan(&entries, "sess-1", |path| path == "c" || path == "y");
 
-        // Порядок: последнее дело сессии первым, затем предыдущее, затем чужое.
+        // Порядок — обратный ко всему журналу: последнее дело первым. Чужое дело попадает
+        // в список, но с причиной: человеку полезно видеть, что оно есть и почему не его.
         let order: Vec<&str> = steps.iter().map(|s| s.entry.to.as_str()).collect();
-        assert_eq!(order, vec!["c", "b", "y"]);
-        assert!(steps[0].possible(), "{:?}", steps[0]);
+        assert_eq!(order, vec!["y", "c", "b"]);
+        assert!(steps[0].refusal.is_some(), "чужая сессия не откатывается");
         assert!(steps[1].possible(), "{:?}", steps[1]);
-        assert!(steps[2].refusal.is_some(), "чужая сессия не откатывается");
+        assert!(steps[2].possible(), "{:?}", steps[2]);
     }
 
      #[test]
@@ -457,6 +458,16 @@ mod tests {
 
     #[test]
     fn applying_counts_what_came_back_and_says_why_the_rest_did_not() {
+        // Состояние живое: после обратного переноса «b» исчезает, «a» появляется. Статичная
+        // проверка здесь ничего бы не доказала — она не заметила бы самого переноса.
+        let state = std::cell::RefCell::new(vec!["b".to_string()]);
+        let exists = |path: &str| state.borrow().iter().any(|known| known == path);
+        let move_back = |from: &str, to: &str| -> Result<(), String> {
+            state.borrow_mut().retain(|known| known != from);
+            state.borrow_mut().push(to.to_string());
+            Ok(())
+        };
+
         let steps = vec![
             Step {
                 entry: entry(Kind::Move, "a", "b", "sess-1"),
@@ -468,15 +479,15 @@ mod tests {
             },
         ];
 
-        let report = apply(
-            &steps,
-            |path| path == "b" || path == "a",
-            |_from, _to| Ok(()),
-        );
+        let report = apply(&steps, exists, move_back);
 
-        assert_eq!(report.undone, 1);
-        assert_eq!(report.refused.len(), 1);
-        assert!(report.summary().contains("откачено дел: 1"), "{}", report.summary());
+        assert_eq!(report.undone, 1, "{report:?}");
+        assert_eq!(report.refused.len(), 1, "{report:?}");
+        assert!(
+            report.summary().contains("откачено дел: 1"),
+            "{}",
+            report.summary()
+        );
     }
 
     #[test]
