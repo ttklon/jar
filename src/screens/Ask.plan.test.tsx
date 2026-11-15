@@ -72,7 +72,8 @@ describe("проверка плана", () => {
       problems: [
         {
           position: 1,
-          registry: "files|найти|по содержимому",
+          // Настоящая строка реестра, у которой руки нет и в этом векторе не появится.
+          registry: "files|найти|текст внутри PDF-архива",
           problem: "у этого действия нет инструмента",
         },
       ],
@@ -85,7 +86,9 @@ describe("проверка плана", () => {
     await waitFor(() => {
       expect(screen.getByText(/проблем: 1/i)).toBeTruthy();
     });
-    expect(screen.getByText(/шаг 1: files\|найти\|по содержимому — у этого действия нет инструмента/)).toBeTruthy();
+    expect(
+      screen.getByText(/шаг 1: files\|найти\|текст внутри PDF-архива — у этого действия нет инструмента/),
+    ).toBeTruthy();
     expect(
       (screen.getByRole("button", { name: /сохранить в памяти/i }) as HTMLButtonElement).disabled,
     ).toBe(true);
