@@ -405,22 +405,24 @@ mod tests {
     fn the_plan_goes_backwards_and_refuses_foreign_sessions() {
         let entries = vec![
             entry(Kind::Move, "a", "b", "sess-1"),
-            entry(Kind::Move, "b", "c", "sess-1"),
+            entry(Kind::Move, "c", "d", "sess-1"),
             entry(Kind::Move, "x", "y", "sess-2"),
         ];
 
-        let steps = plan(&entries, "sess-1", |path| path == "c" || path == "y");
+        let steps = plan(&entries, "sess-1", |path| {
+            matches!(path, "b" | "d" | "y")
+        });
 
         // Порядок — обратный ко всему журналу: последнее дело первым. Чужое дело попадает
         // в список, но с причиной: человеку полезно видеть, что оно есть и почему не его.
         let order: Vec<&str> = steps.iter().map(|s| s.entry.to.as_str()).collect();
-        assert_eq!(order, vec!["y", "c", "b"]);
+        assert_eq!(order, vec!["y", "d", "b"]);
         assert!(steps[0].refusal.is_some(), "чужая сессия не откатывается");
         assert!(steps[1].possible(), "{:?}", steps[1]);
         assert!(steps[2].possible(), "{:?}", steps[2]);
     }
 
-     #[test]
+    #[test]
     fn a_target_that_is_no_longer_there_is_not_undone() {
         let entries = vec![
             entry(Kind::Move, "a", "b", "sess-1"),
