@@ -7830,13 +7830,22 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let one = dir.join("исходник.mp4");
         std::fs::write(&one, "не видео".as_bytes()).expect("файл");
 
+        // Оба файла обязательны: отказ на недостающий параметр формирует `run()`, и это
+        // правильное место — рука до запуска не доходит.
         let mut params = BTreeMap::new();
         params.insert("original".to_string(), one.display().to_string());
+        let missing = run("video|замерить|качество сжатия (SSIM)", &params, &AtomicBool::new(false));
+        assert!(!missing.ok);
+        assert!(missing.reason.contains("Сжатый"), "{}", missing.reason);
 
+        // Путь назван, но файла нет — отказ уже от руки, с путём в причине.
+        params.insert(
+            "compressed".to_string(),
+            dir.join("нет такого.mp4").display().to_string(),
+        );
         let refused = run("video|замерить|качество сжатия (SSIM)", &params, &AtomicBool::new(false));
-
         assert!(!refused.ok);
-        assert!(refused.reason.contains("два файла"), "{}", refused.reason);
+        assert!(refused.reason.contains("такого файла нет"), "{}", refused.reason);
         let _ = std::fs::remove_dir_all(&dir);
     }
 
