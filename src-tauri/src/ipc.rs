@@ -25,6 +25,7 @@ use crate::llm;
 use crate::machine;
 use crate::memory::{Episode, Memory, RunRecord};
 use crate::models::{self, ModelFile};
+use crate::evals;
 use crate::places;
 use crate::plan::{self, Answer, Plan, Problem, Question, StepGate};
 use crate::planner::{self, PlanItem};
@@ -362,6 +363,17 @@ pub fn app_status(state: State<'_, AppState>) -> AppStatus {
 }
 
 /// Инструменты, которые уже умеют работать (список — в `data/tools.json`).
+/// Самопроверка: обещания, которые можно проверить машиной без человека и сети.
+///
+/// Только чтение и временные папки: ничего в системе не меняется. Падение одной проверки не
+/// мешает остальным — список доводится до конца.
+#[tauri::command]
+pub async fn self_check() -> Vec<evals::Verdict> {
+    tauri::async_runtime::spawn_blocking(evals::run_all)
+        .await
+        .unwrap_or_default()
+}
+
 /// Где приложение держит свои файлы и сколько они занимают.
 ///
 /// Только чтение: пути, размеры и честная отметка «файла ещё нет». Ничего не удаляет

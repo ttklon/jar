@@ -9,6 +9,7 @@
 export type {
   Action,
   DataPlace,
+  SelfCheckVerdict,
   AuditEvent,
   AuditKind,
   ConfirmToken,
@@ -68,7 +69,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { AuditEvent, DataPlace, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport } from "./types";
+import type { AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -139,6 +140,16 @@ export async function listFlows(): Promise<FlowView[]> {
     return fromCore();
   }
   const { listFlows: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Самопроверка обещаний. В браузере — пусто: проверять там нечего. */
+export async function selfCheck(): Promise<SelfCheckVerdict[]> {
+  if (isTauri()) {
+    const { selfCheck: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { selfCheck: fromData } = await import("./dev");
   return fromData();
 }
 

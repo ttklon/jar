@@ -17,6 +17,7 @@ import type {
   Presence,
   RegistrySnapshot,
   RegistryStats,
+  SelfCheckVerdict,
   UiDump,
   UiPress,
   UiTyped,
@@ -233,6 +234,11 @@ export async function listFlows(): Promise<FlowView[]> {
  * Отката в браузере нет: файлы на этой машине никто не двигает. Честный ответ — пустой
  * список и оговорка, а не «откатили 0 дел» с видом выполненной работы.
  */
+export async function selfCheck(): Promise<SelfCheckVerdict[]> {
+  // В браузере проверять нечего: политики, файлов и остановки здесь нет.
+  return [];
+}
+
 export async function dataPlaces(): Promise<DataPlace[]> {
   // В браузере папки приложения нет: файлы появляются только у приложения на машине.
   return [];

@@ -711,3 +711,17 @@ export interface DataPlace {
   bytes: number;
   note: string;
 }
+
+/**
+ * Итог одной самопроверки.
+ *
+ * `passed: false` — не поломка интерфейса, а честный ответ: обещание не подтвердилось, и
+ * `detail` говорит, что именно увидели.
+ */
+export interface SelfCheckVerdict {
+  name: string;
+  promise: string;
+  passed: boolean;
+  detail: string;
+  ms: number;
+}

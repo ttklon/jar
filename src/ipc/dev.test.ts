@@ -26,6 +26,7 @@ import {
   undoApply,
   undoReport,
   dataPlaces,
+  selfCheck,
   assignRole,
   removeModel,
   startEngine,
@@ -164,6 +165,8 @@ describe("журнал в браузере", () => {
     expect(preview.note).toContain("в браузере файлы никто не двигает");
     // Файлов приложения в браузере нет — и список пуст, а не выдуман.
     await expect(dataPlaces()).resolves.toEqual([]);
+    // Проверять в браузере нечего — пустой список честнее придуманного «всё хорошо».
+    await expect(selfCheck()).resolves.toEqual([]);
     const report = await undoApply();
     expect(report.undone).toBe(0);
     expect(report.refused[0]).toContain("в браузере откат недоступен");

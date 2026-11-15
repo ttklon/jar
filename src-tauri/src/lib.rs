@@ -42,6 +42,7 @@ pub mod hand;
 pub mod hotkey;
 pub mod intent;
 pub mod ipc;
+pub mod evals;
 pub mod isolation;
 pub mod learn;
 pub mod llama;
@@ -180,6 +181,7 @@ pub fn run() {
             ipc::isolation_status,
             ipc::foreground_window,
             ipc::data_places,
+            ipc::self_check,
             ipc::undo_report,
             ipc::undo_apply,
             ipc::ui_dump,

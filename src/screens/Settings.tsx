@@ -2,6 +2,7 @@ import { Button, makeStyles, Switch, Text, tokens } from "@fluentui/react-compon
 import { t } from "../i18n/ru";
 import { UndoCard } from "./Undo";
 import { DataPlaces } from "./DataPlaces";
+import { SelfCheckCard } from "./SelfCheck";
 
 const useStyles = makeStyles({
   root: { display: "flex", flexDirection: "column", gap: "20px", maxWidth: "760px" },
@@ -101,6 +102,8 @@ export function Settings({
       </div>
 
       <DataPlaces />
+
+      <SelfCheckCard />
 
       {/* Откат — часть настроек, а не отдельный экран: это редкое дело на случай
           «переложил не туда», и искать его должны там же, где всё про поведение. */}

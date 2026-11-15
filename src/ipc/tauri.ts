@@ -39,6 +39,7 @@ import type {
   TrialReport,
   UiDump,
   DataPlace,
+  SelfCheckVerdict,
   UndoPreview,
   UndoReport,
 } from "./types";
@@ -303,6 +304,10 @@ export function runTool(
 
 export function cancelTool(): Promise<void> {
   return invoke<void>("cancel_tool");
+}
+
+export function selfCheck(): Promise<SelfCheckVerdict[]> {
+  return invoke<SelfCheckVerdict[]>("self_check");
 }
 
 export function dataPlaces(): Promise<DataPlace[]> {
