@@ -443,7 +443,10 @@ fn copy_item(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
     let metadata = match std::fs::metadata(source) {
         Ok(metadata) => metadata,
         Err(_) => {
-            return StepResult::failed(registry, format!("копировать нечего, источника нет: {from}"))
+            return StepResult::failed(
+                registry,
+                format!("копировать нечего, источника нет: {from}"),
+            )
         }
     };
 
@@ -494,7 +497,10 @@ fn copy_item(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
             path: to.clone(),
             exists: true,
         },
-        format!("скопировано файлов: {}, байт: {} — {to}", actual.0, actual.1),
+        format!(
+            "скопировано файлов: {}, байт: {} — {to}",
+            actual.0, actual.1
+        ),
         started.elapsed().as_millis() as u64,
     )
 }
@@ -696,7 +702,9 @@ fn create_archive(
         return result;
     }
 
-    let size = std::fs::metadata(target).map(|meta| meta.len()).unwrap_or(0);
+    let size = std::fs::metadata(target)
+        .map(|meta| meta.len())
+        .unwrap_or(0);
     if size == 0 {
         return StepResult::failed(
             registry,
@@ -1880,12 +1888,19 @@ mod tests {
             &AtomicBool::new(false),
         );
         assert!(!refused.ok);
-        assert!(refused.reason.contains("полным путём"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("полным путём"),
+            "{}",
+            refused.reason
+        );
     }
 
     #[test]
     fn a_path_that_does_not_exist_yet_is_compared_by_its_parent() {
-        let root = temp_target("inside").parent().expect("папка").join("inside");
+        let root = temp_target("inside")
+            .parent()
+            .expect("папка")
+            .join("inside");
         std::fs::create_dir_all(&root).expect("папка");
 
         let expected = root.canonicalize().expect("папка").join("ещё").join("нет");
