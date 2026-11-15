@@ -157,7 +157,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
             save_knowledge(registry, params)
         }
         "files|сравнить|две папки" => compare_folders(registry, params),
-        "network|замерить|задержку до узла" => ping_host(registry, params, cancel),
+        "network|замерить|задержку до узла" => {
+            ping_host(registry, params, cancel)
+        }
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -3324,7 +3326,11 @@ mod tests {
         let compared = run("files|сравнить|две папки", &params, &AtomicBool::new(false));
         assert!(compared.ok, "{}", compared.reason);
         assert_eq!(compared.evidence.kind(), "compared");
-        assert!(compared.reason.contains("совпало: 1"), "{}", compared.reason);
+        assert!(
+            compared.reason.contains("совпало: 1"),
+            "{}",
+            compared.reason
+        );
         assert!(
             compared.reason.contains("отличается: 1"),
             "{}",
@@ -3347,7 +3353,9 @@ mod tests {
             compared.reason
         );
         assert!(
-            compared.stdout_tail.contains("только во второй: справа.txt"),
+            compared
+                .stdout_tail
+                .contains("только во второй: справа.txt"),
             "{}",
             compared.stdout_tail
         );
