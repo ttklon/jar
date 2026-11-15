@@ -176,6 +176,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "virtualization-remote|передать|файл на сервер" => {
             send_to_server(registry, params, cancel)
         }
+        "monitoring-triage|найти|причину тормозов" => find_slowdown(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -3341,6 +3342,410 @@ fn simple(registry: &str, script: &str, timeout_secs: u64, cancel: &AtomicBool) 
     )
 }
 
+const SNAPSHOT: &str = r#"$ErrorActionPreference = 'Stop'
+$hours = 24
+$parsed = 0
+if ([int]::TryParse($env:ZS_HOURS, [ref]$parsed) -and $parsed -gt 0) {
+  if ($parsed -gt 168) { $parsed = 168 }
+  $hours = $parsed
+}
+$top = 3
+$parsedTop = 0
+if ([int]::TryParse($env:ZS_TOP, [ref]$parsedTop) -and $parsedTop -gt 0) {
+  if ($parsedTop -gt 10) { $parsedTop = 10 }
+  $top = $parsedTop
+}
+# Только чтение: ни служб, ни автозапуска, ни файлов эта рука не меняет.
+$procs = @(Get-Process -ErrorAction SilentlyContinue)
+$procs = @($procs | Where-Object { $_.Id -ne 0 })
+$byCpu = @($procs | Where-Object { $null -ne $_.CPU } | Sort-Object CPU -Descending | Select-Object -First $top)
+$byRam = @($procs | Where-Object { $null -ne $_.WorkingSet64 } | Sort-Object WorkingSet64 -Descending | Select-Object -First $top)
+$cpuTop = (@($byCpu | ForEach-Object { $_.ProcessName + ':' + [int]$_.CPU }) -join ',')
+$ramTop = (@($byRam | ForEach-Object { $_.ProcessName + ':' + [int]($_.WorkingSet64 / 1MB) }) -join ',')
+$cpu = ''
+try {
+  $load = @(Get-CimInstance Win32_Processor -ErrorAction Stop | Where-Object { $null -ne $_.LoadPercentage })
+  if ($load.Count -gt 0) {
+    $average = [int][math]::Round((($load | Measure-Object -Property LoadPercentage -Average).Average))
+    $cpu = [string]$average
+  }
+} catch { $cpu = '' }
+$ramUsed = ''
+$ramTotal = ''
+$uptime = ''
+try {
+  $os = Get-CimInstance Win32_OperatingSystem -ErrorAction Stop
+  if ($null -ne $os) {
+    $ramUsed = [string][math]::Round(($os.TotalVisibleMemorySize - $os.FreePhysicalMemory) / 1048576, 1)
+    $ramTotal = [string][math]::Round($os.TotalVisibleMemorySize / 1048576, 1)
+    $span = (Get-Date) - $os.LastBootUpTime
+    $uptime = [string][int][math]::Floor($span.TotalHours)
+  }
+} catch { }
+$running = 0
+$total = 0
+$autoStopped = 0
+try {
+  $services = @(Get-CimInstance Win32_Service -ErrorAction Stop)
+  $total = $services.Count
+  $running = @($services | Where-Object { $_.State -eq 'Running' }).Count
+  $autoStopped = @($services | Where-Object { $_.StartMode -eq 'Auto' -and $_.State -ne 'Running' }).Count
+} catch { }
+$autostart = 0
+try { $autostart = @(Get-CimInstance Win32_StartupCommand -ErrorAction Stop).Count } catch { $autostart = -1 }
+$diskFree = ''
+$diskTotal = ''
+try {
+  $letter = $env:SystemDrive
+  if (-not $letter) { $letter = 'C:' }
+  $drive = Get-PSDrive -Name $letter.TrimEnd(':') -ErrorAction Stop
+  $diskFree = [string][math]::Round($drive.Free / 1GB, 1)
+  $diskTotal = [string][math]::Round(($drive.Used + $drive.Free) / 1GB, 1)
+} catch { }
+$netUp = -1
+try { $netUp = @(Get-NetAdapter -Physical -ErrorAction Stop | Where-Object { $_.Status -eq 'Up' }).Count } catch { $netUp = -1 }
+# -1 значит «не прочиталось»: ноль ошибок и «журнал не открылся» — разные вещи.
+$events = -1
+$since = (Get-Date).AddHours(-$hours)
+try {
+  $found = @(Get-WinEvent -FilterHashtable @{LogName = 'System'; Level = 1, 2; StartTime = $since} -MaxEvents 200 -ErrorAction Stop)
+  $events = $found.Count
+} catch {
+  if ($_.Exception.Message -like '*No events were found*' -or $_.FullyQualifiedErrorId -like '*NoMatchingEventsFound*') {
+    $events = 0
+  } else {
+    $events = -1
+  }
+}
+$line = 'ZSHELPER-OK procs=' + $procs.Count + ' cpu=' + $cpu + ' ram_used=' + $ramUsed + ' ram_total=' + $ramTotal
+$line = $line + ' top_cpu=' + $cpuTop + ' top_ram=' + $ramTop
+$line = $line + ' services=' + $running + '/' + $total + ' auto_stopped=' + $autoStopped + ' autostart=' + $autostart
+$line = $line + ' disk_free=' + $diskFree + ' disk_total=' + $diskTotal + ' net_up=' + $netUp
+$line = $line + ' events=' + $events + ' hours=' + $hours + ' uptime_h=' + $uptime
+Write-Output $line
+"#;
+
+/// Снимок производительности: процессы, службы, автозапуск, диск, сеть и журнал.
+///
+/// Что здесь важно:
+///
+///  * **только чтение.** Рука ничего не останавливает и не выключает — иначе «снимок» был бы
+///    действием, а действию нужен план и откат;
+///  * **`-1` это «не прочиталось»**, а не ноль. «Ошибок в журнале нет» и «журнал не открылся» —
+///    разные утверждения, и путать их в отчёте значит врать;
+///  * **потолки названы числом**: окно журнала до 168 часов (неделя), процессов в списке до 10,
+///    событий читается не больше 200 — «не меньше 200» так и говорится.
+fn find_slowdown(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let raw_hours = param(params, "hours").trim().to_string();
+    let raw_top = param(params, "top").trim().to_string();
+    let mut hours = 24u64;
+    if !raw_hours.is_empty() {
+        match raw_hours.parse::<u64>() {
+            Ok(value) if (1..=168).contains(&value) => hours = value,
+            _ => {
+                return StepResult::failed(
+                    registry,
+                    "окно журнала — это часы от 1 до 168 (неделя); больше недели журнал не отдаю — слишком много шума",
+                )
+            }
+        }
+    }
+    let mut top = 3u64;
+    if !raw_top.is_empty() {
+        match raw_top.parse::<u64>() {
+            Ok(value) if (1..=10).contains(&value) => top = value,
+            _ => {
+                return StepResult::failed(
+                    registry,
+                    "сколько процессов показывать — это число от 1 до 10; больше десяти в снимке не читается",
+                )
+            }
+        }
+    }
+
+    let mut result = run_script(
+        registry,
+        SNAPSHOT,
+        &[("HOURS", &hours.to_string()), ("TOP", &top.to_string())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(120),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let line = match result
+        .stdout_tail
+        .lines()
+        .find(|line| line.contains("ZSHELPER-OK"))
+    {
+        Some(line) => line.to_string(),
+        None => {
+            result.ok = false;
+            result.reason =
+                "снимок собрался, но строки с числами в выводе нет — смотрите полный вывод".to_string();
+            return result;
+        }
+    };
+    match parse_snapshot(&line) {
+        Some(snapshot) => {
+            result.reason = format!(
+                "{}; {}",
+                snapshot_verdict(&snapshot),
+                snapshot_reason(&snapshot)
+            );
+            // Маркер уже проверен, но пусть в доказательстве будет сама строка с числами.
+            result.evidence = Evidence::StdoutMarker {
+                marker: "ZSHELPER-OK".to_string(),
+                found: true,
+            };
+        }
+        None => {
+            result.ok = false;
+            result.reason =
+                "снимок собрался, но разобрать его не вышло — смотрите полный вывод".to_string();
+        }
+    }
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result
+}
+
+/// Снимок, разобранный в числа. `Option` — потому что «не прочиталось» это не ноль.
+#[derive(Debug, Default, PartialEq, Eq)]
+struct Snapshot {
+    procs: u64,
+    cpu: Option<u64>,
+    ram_used: Option<String>,
+    ram_total: Option<String>,
+    top_cpu: Vec<String>,
+    top_ram: Vec<String>,
+    services_running: Option<u64>,
+    services_total: Option<u64>,
+    auto_stopped: Option<u64>,
+    autostart: Option<u64>,
+    disk_free: Option<String>,
+    disk_total: Option<String>,
+    net_up: Option<u64>,
+    events: Option<u64>,
+    hours: u64,
+    uptime_h: Option<u64>,
+}
+
+/// Разобрать строку маркера. `None` — если в строке нет самого маркера.
+fn parse_snapshot(line: &str) -> Option<Snapshot> {
+    if !line.contains("ZSHELPER-OK") {
+        return None;
+    }
+    let field = |name: &str| -> Option<&str> {
+        line.split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+    };
+    // `-1` не разбирается как `u64` и честно даёт `None` — «не прочиталось», а не «ноль».
+    let number = |name: &str| -> Option<u64> { field(name).and_then(|v| v.parse::<u64>().ok()) };
+    let text = |name: &str| -> Option<String> {
+        field(name)
+            .filter(|value| !value.is_empty())
+            .map(str::to_string)
+    };
+    let list = |name: &str| -> Vec<String> {
+        field(name)
+            .map(|value| {
+                value
+                    .split(',')
+                    .filter(|item| !item.is_empty())
+                    .map(str::to_string)
+                    .collect()
+            })
+            .unwrap_or_default()
+    };
+    let services = field("services=").and_then(|value| {
+        let (running, total) = value.split_once('/')?;
+        Some((running.parse::<u64>().ok()?, total.parse::<u64>().ok()?))
+    });
+    Some(Snapshot {
+        procs: number("procs=").unwrap_or_default(),
+        cpu: number("cpu="),
+        ram_used: text("ram_used="),
+        ram_total: text("ram_total="),
+        top_cpu: list("top_cpu="),
+        top_ram: list("top_ram="),
+        services_running: services.map(|pair| pair.0),
+        services_total: services.map(|pair| pair.1),
+        auto_stopped: number("auto_stopped="),
+        autostart: number("autostart="),
+        disk_free: text("disk_free="),
+        disk_total: text("disk_total="),
+        net_up: number("net_up="),
+        events: number("events="),
+        hours: number("hours=").unwrap_or(24),
+        uptime_h: number("uptime_h="),
+    })
+}
+
+/// Гипотеза о причине: сверка чисел между собой. Не диагноз — говорит, на что смотреть.
+///
+/// Пороги названы числом, а не «сильно загружен»: 80% процессора, 85% памяти, и `count > 0`
+/// ошибок в журнале. Иначе вердикт нельзя ни проверить, ни оспорить.
+fn snapshot_verdict(snapshot: &Snapshot) -> String {
+    let mut verdicts: Vec<String> = Vec::new();
+    if let Some(cpu) = snapshot.cpu {
+        if cpu >= 80 {
+            verdicts.push(format!("процессор занят на {cpu}% — упирается в процессор"));
+        }
+    }
+    let ram_share = match (&snapshot.ram_used, &snapshot.ram_total) {
+        (Some(used), Some(total)) => match (used.parse::<f64>(), total.parse::<f64>()) {
+            (Ok(used), Ok(total)) if total > 0.0 => Some((used, total, used / total)),
+            _ => None,
+        },
+        _ => None,
+    };
+    if let Some((used, total, share)) = ram_share {
+        if share >= 0.85 {
+            push_ram_share(used, total, share, &mut verdicts);
+        }
+    }
+    // Один и тот же процесс в обоих списках — самый заметный подозреваемый.
+    let heavy: Vec<&String> = snapshot
+        .top_ram
+        .iter()
+        .filter(|entry| {
+            let name = entry.split(':').next().unwrap_or(entry);
+            snapshot
+                .top_cpu
+                .iter()
+                .any(|other| other.split(':').next().unwrap_or(other) == name)
+        })
+        .collect();
+    if let Some(entry) = heavy.first() {
+        let name = entry.split(':').next().unwrap_or(entry);
+        let megabytes = entry.split(':').nth(1).unwrap_or("");
+        verdicts.push(format!(
+            "{name} — и по памяти, и по процессору впереди: {megabytes} МБ"
+        ));
+    }
+    if let Some(events) = snapshot.events {
+        if events > 0 {
+            verdicts.push(format!(
+                "ошибок в журнале системы за {} ч: {events} — что-то падает и перезапускается",
+                snapshot.hours
+            ));
+        }
+    }
+    if verdicts.is_empty() {
+        let cpu = match snapshot.cpu {
+            Some(cpu) => format!("процессор {cpu}%"),
+            None => "процессор не прочитался".to_string(),
+        };
+        let ram = match &ram_share {
+            Some((used, total, _)) => format!("память {used} из {total} ГБ"),
+            None => "память не прочиталась".to_string(),
+        };
+        return format!(
+            "явной перегрузки не видно: {cpu}, {ram} — тормоза не в этих числах, смотрите диск и сеть"
+        );
+    }
+    format!(
+        "{}; это гипотеза по числам, а не диагноз",
+        verdicts.join("; ")
+    )
+}
+
+fn push_ram_share(used: f64, total: f64, share: f64, into: &mut Vec<String>) {
+    into.push(format!(
+        "память занята на {}% ({used} из {total} ГБ)",
+        (share * 100.0).round() as u64
+    ));
+}
+
+/// Причина шага: числа и что из них следует. Всё, что не прочиталось, названо словами.
+fn snapshot_reason(snapshot: &Snapshot) -> String {
+    let mut parts = vec![format!("процессов: {}", snapshot.procs)];
+    match snapshot.cpu {
+        Some(cpu) => parts.push(format!("процессор занят на {cpu}%")),
+        None => parts.push("нагрузку процессора прочитать не удалось".to_string()),
+    }
+    if let (Some(used), Some(total)) = (&snapshot.ram_used, &snapshot.ram_total) {
+        let mut ram = format!("память: {used} из {total} ГБ");
+        if let Some(heavy) = snapshot.top_ram.first() {
+            let name = heavy.split(':').next().unwrap_or(heavy);
+            let megabytes = heavy.split(':').nth(1).unwrap_or("");
+            ram.push_str(&format!(", больше всех {name} — {megabytes} МБ"));
+        }
+        parts.push(ram);
+    } else {
+        parts.push("память прочитать не удалось".to_string());
+    }
+    if !snapshot.top_cpu.is_empty() {
+        let list: Vec<String> = snapshot
+            .top_cpu
+            .iter()
+            .map(|entry| {
+                let mut halves = entry.splitn(2, ':');
+                let name = halves.next().unwrap_or(entry);
+                let seconds = halves.next().unwrap_or("");
+                format!("{name} — {seconds} с")
+            })
+            .collect();
+        parts.push(format!("дольше всех работают: {}", list.join(", ")));
+    }
+    if let (Some(running), Some(total)) = (snapshot.services_running, snapshot.services_total) {
+        let mut services = format!("службы: {running} из {total} работают");
+        if let Some(stopped) = snapshot.auto_stopped {
+            services.push_str(&format!(", автоматических стоят: {stopped}"));
+        }
+        parts.push(services);
+    } else {
+        parts.push("службы прочитать не удалось".to_string());
+    }
+    match snapshot.autostart {
+        Some(count) => parts.push(format!("в автозапуске записей: {count}")),
+        None => parts.push("автозапуск прочитать не удалось".to_string()),
+    }
+    if let (Some(free), Some(total)) = (&snapshot.disk_free, &snapshot.disk_total) {
+        parts.push(format!("системный диск: свободно {free} из {total} ГБ"));
+    }
+    match snapshot.net_up {
+        Some(up) => parts.push(format!("сетевых адаптеров поднято: {up}")),
+        None => parts.push("сетевые адаптеры прочитать не удалось".to_string()),
+    }
+    match snapshot.events {
+        Some(0) => parts.push(format!(
+            "ошибок в журнале системы за {} ч: ни одной",
+            snapshot.hours
+        )),
+        Some(count) if count >= 200 => parts.push(format!(
+            "ошибок в журнале за {} ч: не меньше 200 (читаю не больше двухсот)",
+            snapshot.hours
+        )),
+        Some(count) => parts.push(format!(
+            "ошибок в журнале системы за {} ч: {count}",
+            snapshot.hours
+        )),
+        None => parts.push(format!(
+            "журнал системы за {} ч прочитать не удалось — это не «ошибок нет», а «не видно»",
+            snapshot.hours
+        )),
+    }
+    if let Some(uptime) = snapshot.uptime_h {
+        parts.push(format!("машина работает {uptime} ч"));
+    }
+    format!("снимок: {}; только чтение — ничего не менялось", parts.join("; "))
+}
+
 /// Скрипты рук: ключ реестра и текст, который выполняется.
 ///
 /// Нужны наружу для двух вещей: проба перед запуском (`sandbox::trial`) и проверка,
@@ -3388,6 +3793,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
             "apps-windows|показать|установленные программы",
             INSTALLED_APPS,
         ),
+        ("monitoring-triage|найти|причину тормозов", SNAPSHOT),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }
@@ -5263,6 +5669,147 @@ mod tests {
     }
 
     #[test]
+    /// Вердикт опирается на названные пороги, и его можно оспорить числами.
+    #[test]
+    fn the_verdict_uses_named_thresholds() {
+        let overloaded = parse_snapshot(
+            "ZSHELPER-OK procs=200 cpu=94 ram_used=15.4 ram_total=16.0 top_cpu=chrome:412 \
+top_ram=chrome:14000 events=3 hours=24",
+        )
+        .expect("строка");
+        let verdict = snapshot_verdict(&overloaded);
+        assert!(verdict.contains("94%"), "{verdict}");
+        assert!(verdict.contains("память занята на 96%"), "{verdict}");
+        assert!(verdict.contains("chrome — и по памяти, и по процессору"), "{verdict}");
+        assert!(
+            verdict.contains("ошибок в журнале системы за 24 ч: 3"),
+            "{verdict}"
+        );
+        assert!(verdict.contains("не диагноз"), "{verdict}");
+
+        let calm = parse_snapshot(
+            "ZSHELPER-OK procs=120 cpu=7 ram_used=4.0 ram_total=16.0 top_ram=code:400 events=0 hours=24",
+        )
+        .expect("строка");
+        let verdict = snapshot_verdict(&calm);
+        assert!(verdict.contains("явной перегрузки не видно"), "{verdict}");
+        assert!(verdict.contains("процессор 7%"), "{verdict}");
+    }
+
+    /// Строка снимка разбирается в числа: имена процессов, службы, диск, события.
+    #[test]
+    fn a_snapshot_line_is_parsed_into_numbers() {
+        let line = "ZSHELPER-OK procs=180 cpu=23 ram_used=8.2 ram_total=16.0 \
+top_cpu=chrome:412,code:88 top_ram=chrome:1200,code:800 services=120/200 auto_stopped=3 \
+autostart=12 disk_free=120.4 disk_total=476.1 net_up=3 events=7 hours=24 uptime_h=53";
+
+        let snapshot = parse_snapshot(line).expect("строка разбирается");
+
+        assert_eq!(snapshot.procs, 180);
+        assert_eq!(snapshot.cpu, Some(23));
+        assert_eq!(snapshot.ram_used.as_deref(), Some("8.2"));
+        assert_eq!(snapshot.top_cpu, vec!["chrome:412", "code:88"]);
+        assert_eq!(snapshot.services_running, Some(120));
+        assert_eq!(snapshot.services_total, Some(200));
+        assert_eq!(snapshot.events, Some(7));
+        assert_eq!(snapshot.hours, 24);
+        assert_eq!(snapshot.uptime_h, Some(53));
+
+        let reason = snapshot_reason(&snapshot);
+        for expected in ["процессов: 180", "23%", "chrome — 1200 МБ", "120 из 200", "за 24 ч: 7"] {
+            assert!(reason.contains(expected), "{reason}");
+        }
+        // Рука только читает — и говорит это, чтобы её не боялись.
+        assert!(reason.contains("только чтение"), "{reason}");
+    }
+
+    /// `-1` из скрипта значит «не прочиталось», и это не то же самое, что ноль событий.
+    #[test]
+    fn an_unreadable_journal_is_not_zero_errors() {
+        let line = "ZSHELPER-OK procs=100 events=-1 hours=24 net_up=-1 autostart=-1";
+
+        let snapshot = parse_snapshot(line).expect("строка разбирается");
+
+        assert_eq!(snapshot.events, None, "-1 это не ноль");
+        let reason = snapshot_reason(&snapshot);
+        assert!(reason.contains("прочитать не удалось"), "{reason}");
+        assert!(
+            !reason.contains("ошибок в журнале системы за 24 ч:"),
+            "ноль не выдаётся за пустой журнал: {reason}"
+        );
+    }
+
+    /// Чего в строке нет, то названо словами, а не нарисовано нулём.
+    #[test]
+    fn missing_pieces_are_named_instead_of_shown_as_zero() {
+        let line = "ZSHELPER-OK procs=42";
+
+        let snapshot = parse_snapshot(line).expect("строка разбирается");
+        let reason = snapshot_reason(&snapshot);
+
+        assert_eq!(snapshot.procs, 42);
+        assert!(reason.contains("процессор"), "{reason}");
+        assert!(reason.contains("службы прочитать не удалось"), "{reason}");
+        assert!(reason.contains("автозапуск прочитать не удалось"), "{reason}");
+    }
+
+    /// Строка без маркера — это не снимок: молча не гадаем.
+    #[test]
+    fn a_line_without_the_marker_is_not_a_snapshot() {
+        assert!(parse_snapshot("Get-Process: доступ запрещён").is_none());
+    }
+
+    /// Потолки названы числом, и выход за них — отказ до запуска.
+    #[test]
+    fn snapshot_ceilings_are_named_numbers() {
+        let mut params = BTreeMap::new();
+        params.insert("hours".to_string(), "1000".to_string());
+        let refused = run(
+            "monitoring-triage|найти|причину тормозов",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("168"), "{}", refused.reason);
+
+        params.insert("hours".to_string(), "24".to_string());
+        params.insert("top".to_string(), "99".to_string());
+        let refused = run(
+            "monitoring-triage|найти|причину тормозов",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("10"), "{}", refused.reason);
+    }
+
+    /// Живой снимок: числа приходят с этой машины, а не из примера в коде.
+    #[cfg(windows)]
+    #[test]
+    fn a_live_snapshot_counts_this_machine() {
+        let result = run(
+            "monitoring-triage|найти|причину тормозов",
+            &BTreeMap::new(),
+            &AtomicBool::new(false),
+        );
+
+        assert!(result.ok, "{}", result.reason);
+        assert!(result.reason.contains("процессов: "), "{}", result.reason);
+        let snapshot = parse_snapshot(
+            result
+                .stdout_tail
+                .lines()
+                .find(|line| line.contains("ZSHELPER-OK"))
+                .expect("строка с числами"),
+        )
+        .expect("строка разбирается");
+        assert!(snapshot.procs > 0, "процессов не может быть ноль");
+        assert!(
+            snapshot.services_total.unwrap_or(0) > 0,
+            "службы на Windows есть всегда"
+        );
+    }
+
     fn clean_path_strips_quotes_and_spaces() {
         assert_eq!(clean_path("  \"C:\\tmp\"  "), "C:\\tmp");
     }
