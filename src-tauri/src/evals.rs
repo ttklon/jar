@@ -161,7 +161,9 @@ fn confirm_is_one_shot() -> Result<String, String> {
             Ok("первое подтверждение сработало, второе отклонено".to_string())
         }
         Ok(()) => Err("одним подтверждением можно воспользоваться дважды".to_string()),
-        Err(other) => Err(format!("второе подтверждение отклонено не по адресу: {other}")),
+        Err(other) => Err(format!(
+            "второе подтверждение отклонено не по адресу: {other}"
+        )),
     }
 }
 
@@ -210,17 +212,10 @@ fn nothing_found_is_an_answer() -> Result<String, String> {
     let mut params = std::collections::BTreeMap::new();
     params.insert("path".to_string(), dir.display().to_string());
     params.insert("query".to_string(), "такого-нет-никогда".to_string());
-    let result = crate::tools::run(
-        "files|найти|по имени",
-        &params,
-        &AtomicBool::new(false),
-    );
+    let result = crate::tools::run("files|найти|по имени", &params, &AtomicBool::new(false));
     let _ = std::fs::remove_dir_all(&dir);
     if !result.ok {
-        return Err(format!(
-            "пустой поиск вернул сбой: {}",
-            result.reason
-        ));
+        return Err(format!("пустой поиск вернул сбой: {}", result.reason));
     }
     Ok(format!("пустой поиск — ответ: {}", result.reason))
 }
