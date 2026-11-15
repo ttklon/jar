@@ -606,13 +606,23 @@ mod tests {
 
     #[test]
     fn a_step_without_a_hand_is_refused() {
+        // Строку без руки ищем в самом реестре, а не держим ключ в тексте теста: иначе
+        // каждый новый инструмент ломал бы этот тест, а его правка ничего бы не проверяла.
+        let catalog = registry();
+        let key = catalog
+            .actions()
+            .iter()
+            .map(|action| action.key())
+            .find(|key| crate::tools::spec(key).is_none())
+            .expect("в реестре всегда есть строки без руки");
+
         let plan = Plan {
-            goal: "покажи, что внутри архива".to_string(),
+            goal: "сделай то, чего приложение пока не умеет".to_string(),
             source: "model".to_string(),
-            steps: vec![step("files|открыть|архив без распаковки")],
+            steps: vec![step(&key)],
         };
 
-        let problems = check(&plan, &registry());
+        let problems = check(&plan, &catalog);
         assert_eq!(problems.len(), 1);
         assert!(
             problems[0].problem.contains("нет инструмента"),
