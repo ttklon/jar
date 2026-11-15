@@ -3901,13 +3901,20 @@ fn quarantine_twins(
         return result;
     }
 
-    let quarantine_prefix = quarantine.to_lowercase();
+    // Путь карантина сравнивается в полном виде: Windows отдаёт короткие имена (`RUNNER~1`),
+    // и простое сравнение строк пропустило бы содержимое карантина обратно в поиск.
+    let _ = std::fs::create_dir_all(&quarantine);
+    let full = |path: &str| -> String {
+        std::fs::canonicalize(path)
+            .map(|value| value.to_string_lossy().to_string())
+            .unwrap_or_else(|_| path.to_string())
+            .to_lowercase()
+    };
+    let quarantine_prefix = full(&quarantine);
     let groups: Vec<TwinGroup> = parse_twin_groups(&result.stdout_tail)
         .into_iter()
         .map(|mut group| {
-            group
-                .paths
-                .retain(|path| !path.to_lowercase().starts_with(&quarantine_prefix));
+            group.paths.retain(|path| !full(path).starts_with(&quarantine_prefix));
             group.count = group.paths.len() as u64;
             group.wasted = group.size * group.count.saturating_sub(1);
             group
