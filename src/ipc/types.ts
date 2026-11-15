@@ -540,6 +540,13 @@ export type Evidence =
   | { kind: "stdout_marker"; marker: string; found: boolean }
   | { kind: "file_text"; path: string; matches: boolean }
   | { kind: "file_read"; path: string; bytes: number }
+  | {
+      kind: "compared";
+      same: number;
+      different: number;
+      only_left: number;
+      only_right: number;
+    }
   | { kind: "search"; files: number; hits: number }
   | { kind: "renamed"; folder: string; count: number }
   | { kind: "ui_changed"; what: string; changed: boolean }

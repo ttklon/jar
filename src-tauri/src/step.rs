@@ -32,6 +32,13 @@ pub enum Evidence {
         path: String,
         bytes: usize,
     },
+    /// Сравнение двух папок: что совпало, что отличается и что есть только с одной стороны.
+    Compared {
+        same: usize,
+        different: usize,
+        only_left: usize,
+        only_right: usize,
+    },
     /// Поиск текста по файлам: сколько строк с совпадением и в скольких файлах. Ноль —
     /// тоже доказательство, а не провал: «нигде не встречается» это честный ответ.
     Search {
@@ -61,6 +68,7 @@ impl Evidence {
             Evidence::StdoutMarker { .. } => "stdout_marker",
             Evidence::FileText { .. } => "file_text",
             Evidence::FileRead { .. } => "file_read",
+            Evidence::Compared { .. } => "compared",
             Evidence::Search { .. } => "search",
             Evidence::Renamed { .. } => "renamed",
             Evidence::UiChanged { .. } => "ui_changed",
@@ -96,6 +104,14 @@ impl Evidence {
             Evidence::FileRead { path, bytes } => {
                 format!("прочитано {bytes} байт из файла: {path}")
             }
+            Evidence::Compared {
+                same,
+                different,
+                only_left,
+                only_right,
+            } => format!(
+                "совпало: {same}, отличается: {different}, только в первой: {only_left}, только во второй: {only_right}"
+            ),
             Evidence::Search { files, hits } => {
                 format!("строк с совпадением: {hits} в файлах: {files}")
             }

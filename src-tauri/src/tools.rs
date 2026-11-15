@@ -156,6 +156,8 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "learning-research|сохранить|закладку в базу знаний" => {
             save_knowledge(registry, params)
         }
+        "files|сравнить|две папки" => compare_folders(registry, params),
+        "network|замерить|задержку до узла" => ping_host(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -729,6 +731,215 @@ fn create_archive(
     let mut result = result;
     result.duration_ms = started.elapsed().as_millis() as u64;
     result.reason = format!("архив создан: {size} байт — {to}");
+    result
+}
+
+/// Сколько файлов в каждой папке сравниваем. Потолок назван в отчёте.
+const COMPARE_MAX_FILES: usize = 20_000;
+
+/// Список файлов папки: относительное имя (через «/») и размер.
+fn folder_index(root: &std::path::Path) -> (BTreeMap<String, u64>, bool) {
+    let mut index = BTreeMap::new();
+    let mut stack = vec![root.to_path_buf()];
+
+    while let Some(current) = stack.pop() {
+        let Ok(entries) = std::fs::read_dir(&current) else {
+            continue;
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let Ok(metadata) = entry.metadata() else {
+                continue;
+            };
+            if metadata.is_dir() {
+                stack.push(path);
+                continue;
+            }
+            let Ok(relative) = path.strip_prefix(root) else {
+                continue;
+            };
+            let name = relative.to_string_lossy().replace('\\', "/");
+            index.insert(name, metadata.len());
+            if index.len() >= COMPARE_MAX_FILES {
+                return (index, true);
+            }
+        }
+    }
+
+    (index, false)
+}
+
+/// Сравнить две папки: что совпало, что отличается, что есть только с одной стороны.
+///
+/// Что здесь важно:
+///
+///  * **сравнение по имени и размеру, а не по содержимому.** Хэши по всем файлам — это
+///    чтение всего диска; для вопроса «что изменилось между бэкапами» имени и размера
+///    обычно хватает, но об этой границе сказано прямо, а не умолчано;
+///  * **папку с собой не сравниваем.** Ноль отличий у неё — не ответ, а тавтология;
+///  * **потолок назван**: при двадцати тысячах файлов сравнение честно говорит, что
+///    просмотрено не всё;
+///  * **доказательство — четыре числа**: совпало, отличается, только слева, только справа.
+///    «Есть отличия» ничего не даёт тому, кто ищет, что именно поменялось.
+fn compare_folders(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
+    let started = Instant::now();
+    let from = clean_path(param(params, "from"));
+    let to = clean_path(param(params, "to"));
+
+    if from.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Первая папка»");
+    }
+    if to.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Вторая папка»");
+    }
+    if has_parent_dir(&from) || has_parent_dir(&to) {
+        return StepResult::failed(
+            registry,
+            "в пути есть «..» — назови папки полными путями, без сокращений",
+        );
+    }
+
+    let left = std::path::Path::new(&from);
+    let right = std::path::Path::new(&to);
+    if !left.is_dir() {
+        return StepResult::failed(registry, format!("это не папка: {from}"));
+    }
+    if !right.is_dir() {
+        return StepResult::failed(registry, format!("это не папка: {to}"));
+    }
+
+    let left_text = comparable(&canonical_ish(left, false));
+    let right_text = comparable(&canonical_ish(right, false));
+    if left_text == right_text {
+        return StepResult::failed(
+            registry,
+            "это одна и та же папка — сравнивать её с собой нечего",
+        );
+    }
+
+    let (left_index, left_cut) = folder_index(left);
+    let (right_index, right_cut) = folder_index(right);
+
+    let mut same = 0usize;
+    let mut different = 0usize;
+    let mut only_left = 0usize;
+    let mut only_right = 0usize;
+    let mut report: Vec<String> = Vec::new();
+
+    for (name, size) in &left_index {
+        match right_index.get(name) {
+            Some(other) if other == size => same += 1,
+            Some(other) => {
+                different += 1;
+                if report.len() < 20 {
+                    report.push(format!("отличается: {name} — {size} Б против {other} Б"));
+                }
+            }
+            None => {
+                only_left += 1;
+                if report.len() < 20 {
+                    report.push(format!("только в первой: {name} ({size} Б)"));
+                }
+            }
+        }
+    }
+
+    for (name, size) in &right_index {
+        if left_index.contains_key(name) {
+            continue;
+        }
+        only_right += 1;
+        if report.len() < 20 {
+            report.push(format!("только во второй: {name} ({size} Б)"));
+        }
+    }
+
+    let mut result = StepResult::ok_with(
+        registry,
+        Evidence::Compared {
+            same,
+            different,
+            only_left,
+            only_right,
+        },
+        format!(
+            "совпало: {same}, отличается: {different}, только в первой: {only_left}, только во второй: {only_right} — сравнение по имени и размеру, а не по содержимому"
+        ),
+        started.elapsed().as_millis() as u64,
+    );
+
+    if left_cut || right_cut {
+        result.reason.push_str(&format!(
+            "; потолок сравнения выбран ({COMPARE_MAX_FILES} файлов на папку) — просмотрено не всё"
+        ));
+    }
+    result.stdout_tail = report.join("\n");
+    result
+}
+
+/// Замерить задержку до узла.
+///
+/// Правила:
+///
+///  * **имя узла проверяется до запуска.** Пробелы, кавычки и прочие посторонние символы
+///    не принимаются: в переменную окружения они бы ушли безопасно, но это уже не узел,
+///    а опечатка, и лучше сказать об этом сразу;
+///  * **«ни одного ответа» — это отказ с причиной**, а не успешный замер с нулями;
+///  * **проверка — маркер в выводе и числа рядом с ним**: сколько ответов, среднее,
+///    минимум и максимум. Одно число «пинг прошёл» ничего не говорит о качестве связи.
+fn ping_host(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let host = param(params, "host").trim();
+
+    if host.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Узел»");
+    }
+    let looks_like_host = host
+        .chars()
+        .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '.' | '-' | ':' | '_'));
+    if !looks_like_host {
+        return StepResult::failed(
+            registry,
+            "в имени узла есть посторонние символы — назови адрес или имя сайта",
+        );
+    }
+
+    let mut result = run_script(
+        registry,
+        PING_HOST,
+        &[("HOST", host)],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(60),
+        cancel,
+    );
+    if !result.ok {
+        // Причина скрипта («узел не ответил») полезнее общего «признак не найден».
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let field = |name: &str| -> Option<u32> {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .and_then(|value| value.parse::<u32>().ok())
+    };
+    let replies = field("replies=").unwrap_or_default();
+    let average = field("avg=").unwrap_or_default();
+    let min = field("min=").unwrap_or_default();
+    let max = field("max=").unwrap_or_default();
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = format!(
+        "задержка до {host}: в среднем {average} мс (минимум {min}, максимум {max}), ответов {replies} из 4"
+    );
     result
 }
 
@@ -1904,6 +2115,21 @@ try {
 }
 Write-Output ('ZSHELPER-OK progid={0}' -f $progId)"#;
 
+const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
+$node = $env:ZS_HOST
+$answers = @(Test-Connection -ComputerName $node -Count 4 -ErrorAction SilentlyContinue)
+if ($answers.Count -eq 0) {
+  Write-Output 'ZSHELPER-FAILED: узел не ответил ни разу'
+  exit 3
+}
+$times = @($answers | ForEach-Object {
+  if ($null -ne $_.ResponseTime) { $_.ResponseTime } else { $_.Latency }
+})
+$avg = [int]($times | Measure-Object -Average).Average
+$min = [int]($times | Measure-Object -Minimum).Minimum
+$max = [int]($times | Measure-Object -Maximum).Maximum
+Write-Output ('ZSHELPER-OK replies={0} avg={1} min={2} max={3}' -f $answers.Count, $avg, $min, $max)"#;
+
 const LIST_ARCHIVE: &str = r#"$ErrorActionPreference = 'Stop'
 $archive = $env:ZS_PATH
 if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
@@ -2095,6 +2321,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("web|открыть|сайт", OPEN_SITE),
         ("files|открыть|файл в программе", OPEN_FILE),
         ("files|открыть|архив без распаковки", LIST_ARCHIVE),
+        ("network|замерить|задержку до узла", PING_HOST),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -3067,6 +3294,117 @@ mod tests {
                 let _ = std::fs::remove_file(&path);
             }
         }
+    }
+
+    #[test]
+    fn comparing_two_folders_names_all_four_numbers() {
+        let root = temp_target("compare")
+            .parent()
+            .expect("папка")
+            .join("compare");
+        std::fs::create_dir_all(root.join("вчера/вложенная")).expect("папка");
+        std::fs::create_dir_all(root.join("сегодня/вложенная")).expect("папка");
+        std::fs::write(root.join("вчера/общий.txt"), "один").expect("файл");
+        std::fs::write(root.join("сегодня/общий.txt"), "один").expect("файл");
+        std::fs::write(root.join("вчера/изменён.txt"), "коротко").expect("файл");
+        std::fs::write(root.join("сегодня/изменён.txt"), "гораздо длиннее").expect("файл");
+        std::fs::write(root.join("вчера/вложенная/слева.txt"), "x").expect("файл");
+        std::fs::write(root.join("сегодня/справа.txt"), "y").expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert(
+            "from".to_string(),
+            root.join("вчера").to_string_lossy().to_string(),
+        );
+        params.insert(
+            "to".to_string(),
+            root.join("сегодня").to_string_lossy().to_string(),
+        );
+
+        let compared = run("files|сравнить|две папки", &params, &AtomicBool::new(false));
+        assert!(compared.ok, "{}", compared.reason);
+        assert_eq!(compared.evidence.kind(), "compared");
+        assert!(compared.reason.contains("совпало: 1"), "{}", compared.reason);
+        assert!(
+            compared.reason.contains("отличается: 1"),
+            "{}",
+            compared.reason
+        );
+        assert!(
+            compared.reason.contains("только в первой: 1"),
+            "{}",
+            compared.reason
+        );
+        assert!(
+            compared.reason.contains("только во второй: 1"),
+            "{}",
+            compared.reason
+        );
+        // Граница названа: по имени и размеру, а не по содержимому.
+        assert!(
+            compared.reason.contains("не по содержимому"),
+            "{}",
+            compared.reason
+        );
+        assert!(
+            compared.stdout_tail.contains("только во второй: справа.txt"),
+            "{}",
+            compared.stdout_tail
+        );
+
+        // Папку с собой сравнивать нечего: ноль отличий у неё — тавтология.
+        params.insert(
+            "to".to_string(),
+            root.join("вчера").to_string_lossy().to_string(),
+        );
+        let itself = run("files|сравнить|две папки", &params, &AtomicBool::new(false));
+        assert!(!itself.ok);
+        assert!(
+            itself.reason.contains("одна и та же папка"),
+            "{}",
+            itself.reason
+        );
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn pinging_refuses_names_that_are_not_hosts() {
+        let mut params = BTreeMap::new();
+        params.insert("host".to_string(), "1.1.1.1; и ещё кто-то".to_string());
+        let refused = run(
+            "network|замерить|задержку до узла",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(
+            refused.reason.contains("посторонние символы"),
+            "{}",
+            refused.reason
+        );
+
+        // Без узла рука не гадает, что пинговать.
+        let empty = run(
+            "network|замерить|задержку до узла",
+            &BTreeMap::new(),
+            &AtomicBool::new(false),
+        );
+        assert!(!empty.ok);
+    }
+
+    #[test]
+    fn the_ping_script_counts_answers_instead_of_pretending_to_know_the_quality() {
+        assert!(PING_HOST.contains("$env:ZS_HOST"));
+        assert!(PING_HOST.contains("Test-Connection"));
+        assert!(PING_HOST.contains("ZSHELPER-FAILED"));
+        assert!(scripts()
+            .iter()
+            .any(|(registry, _)| *registry == "network|замерить|задержку до узла"));
+        // Сравнение папок — своя рука: внешней программы у неё нет.
+        assert!(!scripts()
+            .iter()
+            .any(|(registry, _)| *registry == "files|сравнить|две папки"));
     }
 
     #[test]

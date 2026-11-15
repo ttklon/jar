@@ -26,6 +26,11 @@ export function evidenceText(evidence: Evidence): string {
         : `в файле оказалось не то, что записали: ${evidence.path}`;
     case "file_read":
       return `прочитано ${evidence.bytes} байт из файла: ${evidence.path}`;
+    case "compared":
+      return (
+        `совпало: ${evidence.same}, отличается: ${evidence.different}` +
+        `, только в первой: ${evidence.only_left}, только во второй: ${evidence.only_right}`
+      );
     case "search":
       return `строк с совпадением: ${evidence.hits} в файлах: ${evidence.files}`;
     case "renamed":
