@@ -142,6 +142,8 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|распаковать|архив" => expand_archive(registry, params, cancel),
         "files|скопировать|файлы/папки" => copy_item(registry, params),
         "files|сжать|в архив" => create_archive(registry, params, cancel),
+        "files|переименовать|массово по правилу" => rename_by_rule(registry, params),
+        "web|открыть|сайт" => open_site(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -718,6 +720,209 @@ fn create_archive(
     result
 }
 
+/// Переименовать файлы в папке по правилу «найти в имени — заменить».
+///
+/// Правила здесь про чужое и про половину сделанного:
+///
+///  * **сначала проверяется весь план, и только потом переименовывается первый файл.**
+///    Если хоть одно имя упрётся в существующий файл, не переименовывается ничего:
+///    половина переименованного хуже, чем ничего, — человек не знает, где остановились;
+///  * **два файла не получат одно имя.** Иначе второй `rename` молча затрёт первый;
+///  * **вложенные папки не трогаются.** Правило звучит «в этой папке», а не «на диске»:
+///    иначе одна команда переименовала бы файлы во всём дереве, включая системные;
+///  * **сравнение — как написано, с учётом регистра.** Угадывание регистра здесь было бы
+///    сюрпризом: «фото» и «Фото» — разные куски имени;
+///  * **доказательство — список папки после:** старых имён нет, новые на месте.
+fn rename_by_rule(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
+    let started = Instant::now();
+    let folder = clean_path(param(params, "path"));
+    let find = param(params, "find").trim().to_string();
+    let replace = param(params, "replace").to_string();
+
+    if folder.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Папка»");
+    }
+    if find.is_empty() {
+        return StepResult::failed(
+            registry,
+            "не задано, что заменить в имени: пустое правило переименовало бы всё подряд",
+        );
+    }
+    if find == replace {
+        return StepResult::failed(
+            registry,
+            "искомое и замена совпадают — имена не изменятся, значит и делать нечего",
+        );
+    }
+    if has_parent_dir(&folder) {
+        return StepResult::failed(
+            registry,
+            "в пути есть «..» — назови папку полным путём, без сокращений",
+        );
+    }
+
+    let directory = std::path::Path::new(&folder);
+    if !directory.is_dir() {
+        return StepResult::failed(registry, format!("это не папка: {folder}"));
+    }
+
+    let entries = match std::fs::read_dir(directory) {
+        Ok(entries) => entries,
+        Err(error) => return StepResult::failed(registry, format!("папка не читается: {error}")),
+    };
+
+    let mut planned: Vec<(std::path::PathBuf, std::path::PathBuf)> = Vec::new();
+    let mut seen: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+
+    for entry in entries {
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(error) => {
+                return StepResult::failed(registry, format!("элемент не прочитан: {error}"))
+            }
+        };
+        let path = entry.path();
+        // Папки не переименовываем: правило объявлено для файлов.
+        if !path.is_file() {
+            continue;
+        }
+        let name = entry.file_name().to_string_lossy().to_string();
+        if !name.contains(&find) {
+            continue;
+        }
+
+        let renamed = name.replace(&find, &replace);
+        let target = path.with_file_name(&renamed);
+        if target.exists() {
+            return StepResult::failed(
+                registry,
+                format!("рядом уже есть «{renamed}» — молча затирать чужое не буду: {folder}"),
+            );
+        }
+        if !seen.insert(renamed.to_lowercase()) {
+            return StepResult::failed(
+                registry,
+                format!("два файла получили бы одно имя «{renamed}» — правило надо уточнить"),
+            );
+        }
+
+        planned.push((path, target));
+    }
+
+    if planned.is_empty() {
+        return StepResult::failed(
+            registry,
+            format!("переименовывать нечего: в именах файлов нет «{find}»"),
+        );
+    }
+
+    let total = planned.len();
+    let mut renamed = 0;
+    for (from, to) in &planned {
+        if let Err(error) = std::fs::rename(from, to) {
+            let name = from.file_name().map(|name| name.to_string_lossy().to_string());
+            return StepResult::failed(
+                registry,
+                format!(
+                    "остановился на «{}»: переименовано {renamed} из {total} — {error}",
+                    name.unwrap_or_default()
+                ),
+            );
+        }
+        renamed += 1;
+    }
+
+    // Доказательство: смотрим на папку ещё раз, а не на код возврата.
+    let left_behind = planned
+        .iter()
+        .find(|(from, _)| from.exists())
+        .map(|(from, _)| from.display().to_string());
+    let missing = planned
+        .iter()
+        .find(|(_, to)| !to.exists())
+        .map(|(_, to)| to.display().to_string());
+
+    if let Some(old) = left_behind {
+        return StepResult::failed(
+            registry,
+            format!("старое имя осталось на месте: {old} — переименование не состоялось"),
+        );
+    }
+    if let Some(new) = missing {
+        return StepResult::failed(
+            registry,
+            format!("нового имени нет на месте: {new} — переименование не состоялось"),
+        );
+    }
+
+    StepResult::ok_with(
+        registry,
+        Evidence::Renamed {
+            folder: folder.clone(),
+            count: renamed,
+        },
+        format!("переименовано файлов: {renamed} — {folder}; список папки это подтверждает"),
+        started.elapsed().as_millis() as u64,
+    )
+}
+
+/// Открыть ссылку в браузере по умолчанию.
+///
+/// Что здесь можно доказать, а что нельзя — и это сказано в отчёте прямо:
+///
+///  * **ссылка проверяется до запуска.** Только `http://` и `https://`: `file://` открыл бы
+///    локальный файл, `javascript:` — чужой код, и «открой сайт» превратилось бы во что-то
+///    другое;
+///  * **доказательство — обработчик ссылок назвался.** Windows знает, какая программа
+///    откроет http, и её имя видно в выводе; это подтверждает, что ссылка ушла браузеру,
+///    а не в пустоту;
+///  * **что страница загрузилась, отсюда не проверить.** Это остаётся человеку, и в отчёте
+///    так и написано: обещать проверку, которой нет, — хуже, чем её не иметь.
+fn open_site(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let url = param(params, "url").trim();
+
+    if url.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Ссылка»");
+    }
+
+    let lowered = url.to_ascii_lowercase();
+    if !(lowered.starts_with("http://") || lowered.starts_with("https://")) {
+        return StepResult::failed(
+            registry,
+            "открываю только http:// и https://: file:// и прочие схемы — не сайт",
+        );
+    }
+
+    let mut result = run_script(
+        registry,
+        OPEN_SITE,
+        &[("URL", url)],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(60),
+        cancel,
+    );
+    if !result.ok {
+        return result;
+    }
+
+    let handler = result
+        .stdout_tail
+        .split_whitespace()
+        .find_map(|word| word.strip_prefix("progid="))
+        .unwrap_or("обработчик не назвался");
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = format!(
+        "ссылка передана браузеру ({handler}): {url} — что страница загрузилась, отсюда не проверить, это видно на экране"
+    );
+    result
+}
+
 /// Распаковать архив в папку и доказать, что внутри появились файлы.
 ///
 /// Правила здесь про чужое: распаковка — это запись рядом с чужими файлами.
@@ -1274,6 +1479,22 @@ const COMPRESS_ARCHIVE: &str = r#"$ErrorActionPreference = 'Stop'
 Compress-Archive -LiteralPath $env:ZS_PATH -DestinationPath $env:ZS_TO -CompressionLevel Optimal
 Write-Output 'ZSHELPER-OK'"#;
 
+const OPEN_SITE: &str = r#"$ErrorActionPreference = 'Stop'
+$url = $env:ZS_URL
+if ($url -notmatch '^https?://') {
+  Write-Output 'ZSHELPER-BAD: нужна ссылка http:// или https://'
+  exit 2
+}
+$progId = (Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice' -ErrorAction SilentlyContinue).ProgId
+if (-not $progId) { $progId = 'обработчик не назвался' }
+try {
+  Start-Process -FilePath $url -ErrorAction Stop
+} catch {
+  Write-Output ('ZSHELPER-FAILED: ' + $_.Exception.Message)
+  exit 3
+}
+Write-Output ('ZSHELPER-OK progid={0}' -f $progId)"#;
+
 const EXPAND_ARCHIVE: &str = r#"$ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::ExtractToDirectory($env:ZS_PATH, $env:ZS_TO)
@@ -1412,6 +1633,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("files|найти|по имени", FIND_BY_NAME),
         ("files|распаковать|архив", EXPAND_ARCHIVE),
         ("files|сжать|в архив", COMPRESS_ARCHIVE),
+        ("web|открыть|сайт", OPEN_SITE),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -2048,6 +2270,103 @@ mod tests {
         );
 
         let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn renaming_checks_the_whole_plan_before_changing_the_first_name() {
+        let root = temp_target("rename").parent().expect("папка").join("rename");
+        std::fs::create_dir_all(root.join("вложенная")).expect("папка");
+        std::fs::write(root.join("отчёт 1.txt"), "раз").expect("файл");
+        std::fs::write(root.join("отчёт 2.txt"), "два").expect("файл");
+        std::fs::write(root.join("вложенная/отчёт 3.txt"), "три").expect("файл");
+        std::fs::write(root.join("прочее.txt"), "четыре").expect("файл");
+
+        let rules = |find: &str, replace: &str| {
+            let mut params = BTreeMap::new();
+            params.insert("path".to_string(), root.to_string_lossy().to_string());
+            params.insert("find".to_string(), find.to_string());
+            params.insert("replace".to_string(), replace.to_string());
+            params
+        };
+
+        // Цель уже занята — отказ до первого переименования, и оба старых имени на месте.
+        std::fs::write(root.join("итог 1.txt"), "чужой файл").expect("файл");
+        let clash = run(
+            "files|переименовать|массово по правилу",
+            &rules("отчёт", "итог"),
+            &AtomicBool::new(false),
+        );
+        assert!(!clash.ok);
+        assert!(clash.reason.contains("уже есть"), "{}", clash.reason);
+        assert!(root.join("отчёт 1.txt").exists());
+        assert!(root.join("отчёт 2.txt").exists());
+        std::fs::remove_file(root.join("итог 1.txt")).expect("файл");
+
+        // Искомое равно замене — имена не изменятся, значит и делать нечего.
+        let same = run(
+            "files|переименовать|массово по правилу",
+            &rules("отчёт", "отчёт"),
+            &AtomicBool::new(false),
+        );
+        assert!(!same.ok);
+        assert!(same.reason.contains("совпадают"), "{}", same.reason);
+
+        let done = run(
+            "files|переименовать|массово по правилу",
+            &rules("отчёт", "итог"),
+            &AtomicBool::new(false),
+        );
+        assert!(done.ok, "{}", done.reason);
+        assert_eq!(done.evidence.kind(), "renamed");
+        assert!(root.join("итог 1.txt").exists());
+        assert!(root.join("итог 2.txt").exists());
+        assert!(!root.join("отчёт 1.txt").exists());
+        assert!(!root.join("отчёт 2.txt").exists());
+        // Вложенную папку правило не трогает: оно про эту папку, а не про дерево.
+        assert!(root.join("вложенная/отчёт 3.txt").exists());
+        // Файл без совпадения остался как был.
+        assert!(root.join("прочее.txt").exists());
+
+        // Совпадений нет — «переименовывать нечего», а не молчаливый успех.
+        let nothing = run(
+            "files|переименовать|массово по правилу",
+            &rules("нет такого", "x"),
+            &AtomicBool::new(false),
+        );
+        assert!(!nothing.ok);
+        assert!(
+            nothing.reason.contains("переименовывать нечего"),
+            "{}",
+            nothing.reason
+        );
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn opening_a_site_refuses_foreign_schemes_before_the_browser_starts() {
+        let mut params = BTreeMap::new();
+        params.insert(
+            "url".to_string(),
+            "file:///C:/Windows/System32/calc.exe".to_string(),
+        );
+        let refused = run("web|открыть|сайт", &params, &AtomicBool::new(false));
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("http"), "{}", refused.reason);
+
+        // Без ссылки рука тоже не гадает, какой сайт имелся в виду.
+        let empty = run("web|открыть|сайт", &BTreeMap::new(), &AtomicBool::new(false));
+        assert!(!empty.ok);
+    }
+
+    #[test]
+    fn the_site_script_names_the_handler_instead_of_pretending_to_know_the_page() {
+        assert!(OPEN_SITE.contains("$env:ZS_URL"));
+        assert!(OPEN_SITE.contains("Start-Process"));
+        assert!(OPEN_SITE.contains("progid="));
+        assert!(scripts()
+            .iter()
+            .any(|(registry, _)| *registry == "web|открыть|сайт"));
     }
 
     #[test]

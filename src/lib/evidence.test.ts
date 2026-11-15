@@ -31,6 +31,12 @@ describe("доказательство словами", () => {
     );
   });
 
+  it("переименование подтверждается числом имён, а не кодом возврата", () => {
+    expect(evidenceText({ kind: "renamed", folder: "C:\\tmp\\фото", count: 7 })).toBe(
+      "переименовано файлов: 7 — C:\\tmp\\фото",
+    );
+  });
+
   it("остальные виды доказательств не потерялись", () => {
     expect(evidenceText({ kind: "exit_code", code: 0 })).toBe("код возврата 0");
     expect(evidenceText({ kind: "path_exists", path: "C:\\tmp", exists: true })).toContain(

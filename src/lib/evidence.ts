@@ -26,6 +26,8 @@ export function evidenceText(evidence: Evidence): string {
         : `в файле оказалось не то, что записали: ${evidence.path}`;
     case "file_read":
       return `прочитано ${evidence.bytes} байт из файла: ${evidence.path}`;
+    case "renamed":
+      return `переименовано файлов: ${evidence.count} — ${evidence.folder}`;
     case "ui_changed":
       return evidence.changed
         ? `изменение подтверждено: ${evidence.what}`

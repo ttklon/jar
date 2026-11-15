@@ -32,6 +32,11 @@ pub enum Evidence {
         path: String,
         bytes: usize,
     },
+    /// Файлы переименованы: проверка — список папки после, а не код возврата.
+    Renamed {
+        folder: String,
+        count: usize,
+    },
     /// Действие над чужим окном: проверка — сравнение состояния экрана или чтение значения.
     UiChanged {
         what: String,
@@ -50,6 +55,7 @@ impl Evidence {
             Evidence::StdoutMarker { .. } => "stdout_marker",
             Evidence::FileText { .. } => "file_text",
             Evidence::FileRead { .. } => "file_read",
+            Evidence::Renamed { .. } => "renamed",
             Evidence::UiChanged { .. } => "ui_changed",
             Evidence::Failed { .. } => "failed",
         }
@@ -82,6 +88,9 @@ impl Evidence {
             }
             Evidence::FileRead { path, bytes } => {
                 format!("прочитано {bytes} байт из файла: {path}")
+            }
+            Evidence::Renamed { folder, count } => {
+                format!("переименовано файлов: {count} — {folder}")
             }
             Evidence::UiChanged { what, changed } => {
                 if *changed {
