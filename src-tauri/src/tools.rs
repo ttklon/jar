@@ -2546,48 +2546,60 @@ if (-not (Test-Path -LiteralPath $path -PathType Container)) {
   exit 2
 }
 $kind = ''
-$exe = ''
-$arguments = @()
+$file = ''
+$line = ''
 if (Test-Path -LiteralPath (Join-Path $path 'package.json')) {
-  $kind = 'npm'; $exe = 'npm.cmd'; $arguments = @('test', '--silent')
+  $kind = 'npm'; $file = 'cmd.exe'; $line = '/c npm test --silent'
 } elseif (Test-Path -LiteralPath (Join-Path $path 'Cargo.toml')) {
-  $kind = 'cargo'; $exe = 'cargo'; $arguments = @('test', '--quiet')
+  $kind = 'cargo'; $file = 'cargo'; $line = 'test --quiet'
 } elseif ((Test-Path -LiteralPath (Join-Path $path 'pyproject.toml')) -or (Test-Path -LiteralPath (Join-Path $path 'pytest.ini')) -or (Test-Path -LiteralPath (Join-Path $path 'setup.py'))) {
-  $kind = 'pytest'; $exe = 'python'; $arguments = @('-m', 'pytest', '-q')
+  $kind = 'pytest'; $file = 'python'; $line = '-m pytest -q'
 } elseif (Test-Path -LiteralPath (Join-Path $path 'go.mod')) {
-  $kind = 'go'; $exe = 'go'; $arguments = @('test', './...')
+  $kind = 'go'; $file = 'go'; $line = 'test ./...'
 } else {
   Write-Output 'ZSHELPER-FAILED: не вижу, чем здесь запускаются тесты — нужен package.json, Cargo.toml, pyproject.toml или go.mod'
   exit 3
 }
-$out = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString() + '.out')
-$err = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString() + '.err')
+# Запуск без временных файлов: оба потока читаются задачами, поэтому прогон,
+# который пишет много, не застрянет на заполненном буфере.
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.UseShellExecute = $false
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError = $true
+$psi.WorkingDirectory = $path
+$psi.FileName = $file
+$psi.Arguments = $line
+$proc = New-Object System.Diagnostics.Process
+$proc.StartInfo = $psi
 $code = -1
 $timedOut = 0
+$outText = ''
+$errText = ''
 try {
-  $proc = Start-Process -FilePath $exe -ArgumentList $arguments -WorkingDirectory $path -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden -PassThru
+  [void]$proc.Start()
+  $outTask = $proc.StandardOutput.ReadToEndAsync()
+  $errTask = $proc.StandardError.ReadToEndAsync()
   if ($proc.WaitForExit(330000)) {
     $code = $proc.ExitCode
   } else {
     $timedOut = 1
     try { $proc.Kill() } catch { }
   }
+  if ($outTask.Wait(10000)) { $outText = $outTask.Result }
+  if ($errTask.Wait(10000)) { $errText = $errTask.Result }
 } catch {
   Write-Output ('ZSHELPER-FAILED: не удалось запустить ' + $kind + ' — ' + $_.Exception.Message)
-  Remove-Item -LiteralPath $out, $err -ErrorAction SilentlyContinue
   exit 4
 }
 Write-Output ('ZSHELPER-OK tool={0} exit={1} timedout={2}' -f $kind, $code, $timedOut)
 $lines = @()
-if (Test-Path -LiteralPath $out) { $lines += @(Get-Content -LiteralPath $out -Tail 15 -ErrorAction SilentlyContinue) }
-if (Test-Path -LiteralPath $err) { $lines += @(Get-Content -LiteralPath $err -Tail 15 -ErrorAction SilentlyContinue) }
-$lines = @($lines | Where-Object { $_ -ne '' -and $null -ne $_ })
+$lines += @($outText -split "`r?`n" | Where-Object { $_ -ne '' })
+$lines += @($errText -split "`r?`n" | Where-Object { $_ -ne '' })
 if ($lines.Count -eq 0) {
   Write-Output 'вывод пуст — ни одной строки'
 } else {
-  $lines | ForEach-Object { Write-Output $_ }
-}
-Remove-Item -LiteralPath $out, $err -ErrorAction SilentlyContinue"#;
+  $lines | Select-Object -Last 15 | ForEach-Object { Write-Output $_ }
+}"#;
 
 
 const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
@@ -4240,7 +4252,12 @@ mod tests {
         );
 
         assert!(!refused.ok);
-        assert!(refused.reason.contains("папка проекта"), "{}", refused.reason);
+        // Отказ называет параметр, которого не хватает, — и делает это до запуска.
+        assert!(
+            refused.reason.to_lowercase().contains("папка проекта"),
+            "{}",
+            refused.reason
+        );
     }
 
     #[test]
@@ -4318,6 +4335,9 @@ mod tests {
         assert!(RUN_TESTS.contains("go.mod"));
         // Потолок по времени назван числом, а не «когда-нибудь».
         assert!(RUN_TESTS.contains("WaitForExit(330000)"));
+        // Своих временных файлов рука не оставляет и ничего не удаляет.
+        assert!(!RUN_TESTS.to_lowercase().contains("remove-item"));
+        assert!(RUN_TESTS.contains("ReadToEndAsync"));
 
         let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
         assert!(registries.contains(&"dev-code|запустить|тесты"));
