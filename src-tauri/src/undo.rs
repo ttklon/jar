@@ -236,10 +236,9 @@ fn refuse_reason(entry: &Entry, session: &str, exists: &impl Fn(&str) -> bool) -
                 entry.from
             ),
             // Продукта нет — убирать нечего, и источник при этом цел.
-            Kind::Copy | Kind::Compress => format!(
-                "{} уже нет — убирать нечего, исходник не тронут",
-                entry.to
-            ),
+            Kind::Copy | Kind::Compress => {
+                format!("{} уже нет — убирать нечего, исходник не тронут", entry.to)
+            }
         });
     }
     // У копии и сжатия источник остаётся на месте — это норма, а не занятое место.
@@ -288,16 +287,15 @@ pub fn apply(
         }
         // Копию и сжатый файл не «вернуть назад», а убрать: источник и так на месте.
         let outcome = if step.entry.kind.is_removal() {
-            recycle(&step.entry.to)
-                .and_then(|()| {
-                    if exists(&step.entry.to) {
-                        Err("в корзину не убралось: файл на месте".to_string())
-                    } else if !exists(&step.entry.from) {
-                        Err("исходник пропал — убирать продукт было не за чем".to_string())
-                    } else {
-                        Ok(())
-                    }
-                })
+            recycle(&step.entry.to).and_then(|()| {
+                if exists(&step.entry.to) {
+                    Err("в корзину не убралось: файл на месте".to_string())
+                } else if !exists(&step.entry.from) {
+                    Err("исходник пропал — убирать продукт было не за чем".to_string())
+                } else {
+                    Ok(())
+                }
+            })
         } else {
             move_back(&step.entry.to, &step.entry.from)
         };
@@ -578,7 +576,12 @@ mod tests {
     #[test]
     fn a_copy_is_undone_by_taking_the_copy_away_not_the_source() {
         let steps = vec![Step {
-            entry: entry(Kind::Copy, "C:\\a\\файл.txt", "C:\\a\\файл (копия).txt", "sess-1"),
+            entry: entry(
+                Kind::Copy,
+                "C:\\a\\файл.txt",
+                "C:\\a\\файл (копия).txt",
+                "sess-1",
+            ),
             refusal: None,
         }];
         let state = std::cell::RefCell::new(vec![
@@ -598,7 +601,10 @@ mod tests {
         assert_eq!(report.undone, 1, "{report:?}");
         // Убрали именно копию, а исходник остался.
         assert_eq!(recycled.borrow().len(), 1);
-        assert!(state.borrow().iter().any(|known| known == "C:\\a\\файл.txt"));
+        assert!(state
+            .borrow()
+            .iter()
+            .any(|known| known == "C:\\a\\файл.txt"));
     }
 
     #[test]
