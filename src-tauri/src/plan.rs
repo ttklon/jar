@@ -299,11 +299,14 @@ pub fn check(plan: &Plan, registry: &Registry) -> Vec<Problem> {
         // намерение. Лучше сказать это здесь, чем упасть на первом же окне.
         if let Some(spec) = tools::spec(key) {
             if let Err(problem) = tools::validate(spec, &step.params) {
-                problems.push(Problem::step(
-                    position,
-                    key,
-                    format!("шагу не хватает данных: {problem}"),
-                ));
+                // Незнакомый параметр — это не «не хватает данных»: лишнее в шаге так же
+                // опасно, как недостающее, потому что подтверждение покажет его человеку.
+                let text = if problem.starts_with("эта рука не понимает") {
+                    format!("в шаге есть лишнее: {problem}")
+                } else {
+                    format!("шагу не хватает данных: {problem}")
+                };
+                problems.push(Problem::step(position, key, text));
                 continue;
             }
         }

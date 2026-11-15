@@ -65,6 +65,10 @@ pub fn spec(registry: &str) -> Option<&'static ToolSpec> {
 }
 
 /// Проверка параметров до запуска: пустой путь бессмысленно отправлять в PowerShell.
+///
+/// Проверяются обе стороны. Обязательный параметр обязан быть — это понятно. А незнакомый
+/// параметр — не мелочь: план покажет человеку «пароль», рука его не прочитает, и
+/// подтверждение станет обещанием, которого никто не выполнит. Лучше отказать до запуска.
 pub fn validate(spec: &ToolSpec, params: &BTreeMap<String, String>) -> Result<(), String> {
     for param in spec.params.iter().filter(|param| param.required) {
         match params.get(&param.name) {
@@ -72,6 +76,14 @@ pub fn validate(spec: &ToolSpec, params: &BTreeMap<String, String>) -> Result<()
             _ => return Err(format!("не задан параметр «{}»", param.label)),
         }
     }
+
+    let unknown = params
+        .keys()
+        .find(|name| !spec.params.iter().any(|param| &param.name == *name));
+    if let Some(name) = unknown {
+        return Err(format!("эта рука не понимает параметр «{name}»"));
+    }
+
     Ok(())
 }
 
@@ -128,6 +140,8 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|заменить|текст в файле" => replace_text(registry, params),
         "web|скачать|файл по ссылке" => download_file(registry, params, cancel),
         "files|распаковать|архив" => expand_archive(registry, params, cancel),
+        "files|скопировать|файлы/папки" => copy_item(registry, params),
+        "files|сжать|в архив" => create_archive(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -389,6 +403,233 @@ fn replace_text(registry: &str, params: &BTreeMap<String, String>) -> StepResult
     );
     // Не совпало — значит, не выполнено, что бы ни говорил отчёт.
     result.ok = same;
+    result
+}
+
+/// Скопировать файл или папку и доказать, что копия совпадает с источником.
+///
+/// Правила — про чужое и про бесконечность:
+///
+///  * **цель не должна существовать.** `Copy-Item` поверх молча затирает чужой файл, а
+///    «скопировал» после этого — неправда: старое потеряно;
+///  * **папку внутрь себя копировать нельзя** — это бесконечное копирование, и проверять
+///    это надо до первого файла, а не когда диск кончится;
+///  * **доказательство — совпадение числа файлов и байт**, а не код возврата: «функция не
+///    выдала ошибку» ничего не говорит о том, что копия полная;
+///  * **источник остаётся на месте.** Копирование — не перемещение, и говорить иначе нельзя.
+fn copy_item(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
+    let started = Instant::now();
+    let from = clean_path(param(params, "from"));
+    let to = clean_path(param(params, "to"));
+
+    if from.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Откуда»");
+    }
+    if to.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Куда»");
+    }
+
+    let source = std::path::Path::new(&from);
+    let metadata = match std::fs::metadata(source) {
+        Ok(metadata) => metadata,
+        Err(_) => {
+            return StepResult::failed(registry, format!("копировать нечего, источника нет: {from}"))
+        }
+    };
+
+    let target = std::path::Path::new(&to);
+    if target.exists() {
+        return StepResult::failed(
+            registry,
+            format!("цель уже есть: {to} — молча заменять чужое я не буду"),
+        );
+    }
+
+    if metadata.is_dir() && is_inside(target, source) {
+        return StepResult::failed(
+            registry,
+            format!("копировать папку внутрь себя нельзя: {to} лежит внутри {from}"),
+        );
+    }
+
+    if let Some(parent) = target.parent() {
+        if !parent.as_os_str().is_empty() {
+            if let Err(error) = std::fs::create_dir_all(parent) {
+                return StepResult::failed(registry, format!("папка не создалась: {error}"));
+            }
+        }
+    }
+
+    if metadata.is_file() {
+        if let Err(error) = std::fs::copy(source, target) {
+            return StepResult::failed(registry, format!("файл не скопирован: {error}"));
+        }
+    } else if let Err(reason) = copy_tree(source, target) {
+        return StepResult::failed(registry, reason);
+    }
+
+    let expected = measure(source);
+    let actual = measure(target);
+    if expected != actual {
+        let message = format!(
+            "копия не совпала с источником: было {} файлов ({} байт), стало {} файлов ({} байт)",
+            expected.0, expected.1, actual.0, actual.1
+        );
+        return StepResult::failed(registry, message);
+    }
+
+    StepResult::ok_with(
+        registry,
+        Evidence::PathExists {
+            path: to.clone(),
+            exists: true,
+        },
+        format!("скопировано файлов: {}, байт: {} — {to}", actual.0, actual.1),
+        started.elapsed().as_millis() as u64,
+    )
+}
+
+/// Цель лежит внутри источника. Сравниваем пути, приведённые к абсолютным: иначе «..\»
+/// в одном из них сделает проверку бессмысленной.
+fn is_inside(target: &std::path::Path, source: &std::path::Path) -> bool {
+    let source_abs = source
+        .canonicalize()
+        .unwrap_or_else(|_| source.to_path_buf());
+    let target_abs = if target.is_absolute() {
+        target.to_path_buf()
+    } else {
+        std::env::current_dir()
+            .unwrap_or_default()
+            .join(target)
+    };
+    target_abs.starts_with(&source_abs)
+}
+
+/// Скопировать папку целиком, по одному файлу. Возвращает причину, а не «что-то пошло не так»:
+/// человек должен знать, на каком файле остановилось.
+fn copy_tree(from: &std::path::Path, to: &std::path::Path) -> Result<(), String> {
+    std::fs::create_dir_all(to)
+        .map_err(|error| format!("папка не создалась: {}: {error}", to.display()))?;
+
+    let entries = std::fs::read_dir(from)
+        .map_err(|error| format!("папка не читается: {}: {error}", from.display()))?;
+
+    for entry in entries {
+        let entry = entry.map_err(|error| format!("элемент не прочитан: {error}"))?;
+        let path = entry.path();
+        let destination = to.join(entry.file_name());
+        if path.is_dir() {
+            copy_tree(&path, &destination)?;
+        } else if let Err(error) = std::fs::copy(&path, &destination) {
+            let message = format!("файл не скопирован: {}: {error}", path.display());
+            return Err(message);
+        }
+    }
+
+    Ok(())
+}
+
+/// Сколько файлов и байт в пути. Для файла — один файл и его длина.
+fn measure(path: &std::path::Path) -> (usize, u64) {
+    let Ok(metadata) = std::fs::metadata(path) else {
+        return (0, 0);
+    };
+    if metadata.is_file() {
+        return (1, metadata.len());
+    }
+
+    let mut files = 0;
+    let mut bytes = 0;
+    if let Ok(entries) = std::fs::read_dir(path) {
+        for entry in entries.flatten() {
+            let (nested_files, nested_bytes) = measure(&entry.path());
+            files += nested_files;
+            bytes += nested_bytes;
+        }
+    }
+    (files, bytes)
+}
+
+/// Заархивировать файл или папку в zip и доказать, что архив не пустой.
+///
+/// Архив — это запись нового файла, поэтому правила те же, что у копирования: цель не
+/// должна существовать (иначе `Compress-Archive` тихо перезапишет её) и архивировать
+/// нечего, если источник пуст. Формат — только zip: `Compress-Archive` не умеет ни rar,
+/// ни пароль, и делать вид, что умеет, нельзя.
+fn create_archive(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+    let to = clean_path(param(params, "to"));
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Что архивировать»");
+    }
+    if to.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Куда сохранить архив»");
+    }
+
+    let lowered = to.to_ascii_lowercase();
+    if !lowered.ends_with(".zip") {
+        return StepResult::failed(
+            registry,
+            "архив делаю только zip: имя должно кончаться на .zip — rar и пароль эта рука не умеет",
+        );
+    }
+
+    let source = std::path::Path::new(&path);
+    let metadata = match std::fs::metadata(source) {
+        Ok(metadata) => metadata,
+        Err(_) => return StepResult::failed(registry, format!("архивировать нечего: {path}")),
+    };
+    if metadata.is_dir() && measure(source).0 == 0 {
+        return StepResult::failed(
+            registry,
+            format!("папка пуста: {path} — архив из ничего не архив"),
+        );
+    }
+
+    let target = std::path::Path::new(&to);
+    if target.exists() {
+        return StepResult::failed(
+            registry,
+            format!("архив уже есть: {to} — молча заменять чужой файл я не буду"),
+        );
+    }
+    if let Some(parent) = target.parent() {
+        if !parent.as_os_str().is_empty() {
+            if let Err(error) = std::fs::create_dir_all(parent) {
+                return StepResult::failed(registry, format!("папка не создалась: {error}"));
+            }
+        }
+    }
+
+    let result = run_script(
+        registry,
+        COMPRESS_ARCHIVE,
+        &[("PATH", path.as_str()), ("TO", to.as_str())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(600),
+        cancel,
+    );
+    if !result.ok {
+        return result;
+    }
+
+    let size = std::fs::metadata(target).map(|meta| meta.len()).unwrap_or(0);
+    if size == 0 {
+        return StepResult::failed(
+            registry,
+            format!("архив создан размером ноль байт: {to} — это не архив"),
+        );
+    }
+
+    let mut result = result;
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = format!("архив создан: {size} байт — {to}");
     result
 }
 
@@ -944,6 +1185,10 @@ $rows | ForEach-Object {
   Write-Output ('{0} (pid {1}): {2} МБ' -f $_.ProcessName, $_.Id, [int]($_.WorkingSet64 / 1MB))
 }"#;
 
+const COMPRESS_ARCHIVE: &str = r#"$ErrorActionPreference = 'Stop'
+Compress-Archive -LiteralPath $env:ZS_PATH -DestinationPath $env:ZS_TO -CompressionLevel Optimal
+Write-Output 'ZSHELPER-OK'"#;
+
 const EXPAND_ARCHIVE: &str = r#"$ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::ExtractToDirectory($env:ZS_PATH, $env:ZS_TO)
@@ -1081,6 +1326,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("files|проверить|размеры и место", FOLDER_SIZES),
         ("files|найти|по имени", FIND_BY_NAME),
         ("files|распаковать|архив", EXPAND_ARCHIVE),
+        ("files|сжать|в архив", COMPRESS_ARCHIVE),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -1543,6 +1789,141 @@ mod tests {
         );
 
         let _ = std::fs::remove_dir_all(path.parent().expect("у файла есть папка"));
+    }
+
+    #[test]
+    fn copying_a_folder_keeps_every_file_and_refuses_to_overwrite() {
+        let root = temp_target("copy").parent().expect("папка").join("copy");
+        std::fs::create_dir_all(root.join("откуда/вложенная")).expect("папка");
+        std::fs::write(root.join("откуда/файл.txt"), "раз").expect("файл");
+        std::fs::write(root.join("откуда/вложенная/два.txt"), "два-два").expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert(
+            "from".to_string(),
+            root.join("откуда").to_string_lossy().to_string(),
+        );
+        params.insert(
+            "to".to_string(),
+            root.join("куда").to_string_lossy().to_string(),
+        );
+
+        let copied = run(
+            "files|скопировать|файлы/папки",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(copied.ok, "{}", copied.reason);
+        assert_eq!(copied.evidence.kind(), "path_exists");
+        assert_eq!(
+            std::fs::read_to_string(root.join("куда/вложенная/два.txt")).expect("файл на месте"),
+            "два-два"
+        );
+        // Копирование — не перемещение: источник остаётся на месте.
+        assert!(root.join("откуда/файл.txt").exists());
+
+        // Цель уже есть — не затираем чужое.
+        let again = run(
+            "files|скопировать|файлы/папки",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!again.ok);
+        assert!(again.reason.contains("уже есть"), "{}", again.reason);
+
+        // Папка внутрь себя — отказ до первого файла, а не по факту конца диска.
+        let mut inside = params.clone();
+        inside.insert(
+            "to".to_string(),
+            root.join("откуда/внутри").to_string_lossy().to_string(),
+        );
+        let looped = run(
+            "files|скопировать|файлы/папки",
+            &inside,
+            &AtomicBool::new(false),
+        );
+        assert!(!looped.ok);
+        assert!(looped.reason.contains("внутрь себя"), "{}", looped.reason);
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn archiving_refuses_foreign_formats_occupied_names_and_empty_folders() {
+        let root = temp_target("archive")
+            .parent()
+            .expect("папка")
+            .join("archive");
+        std::fs::create_dir_all(root.join("пустая")).expect("папка");
+        std::fs::create_dir_all(root.join("полная")).expect("папка");
+        std::fs::write(root.join("полная/файл.txt"), "текст").expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert(
+            "path".to_string(),
+            root.join("полная").to_string_lossy().to_string(),
+        );
+        params.insert(
+            "to".to_string(),
+            root.join("архив.rar").to_string_lossy().to_string(),
+        );
+
+        let wrong_format = run("files|сжать|в архив", &params, &AtomicBool::new(false));
+        assert!(!wrong_format.ok);
+        assert!(
+            wrong_format.reason.contains("только zip"),
+            "{}",
+            wrong_format.reason
+        );
+
+        params.insert(
+            "path".to_string(),
+            root.join("пустая").to_string_lossy().to_string(),
+        );
+        params.insert(
+            "to".to_string(),
+            root.join("архив.zip").to_string_lossy().to_string(),
+        );
+        let empty = run("files|сжать|в архив", &params, &AtomicBool::new(false));
+        assert!(!empty.ok);
+        assert!(empty.reason.contains("папка пуста"), "{}", empty.reason);
+
+        // Архив с таким именем уже есть — не затираем его.
+        std::fs::write(root.join("архив.zip"), "чужой архив").expect("файл");
+        params.insert(
+            "path".to_string(),
+            root.join("полная").to_string_lossy().to_string(),
+        );
+        let occupied = run("files|сжать|в архив", &params, &AtomicBool::new(false));
+        assert!(!occupied.ok);
+        assert!(occupied.reason.contains("уже есть"), "{}", occupied.reason);
+        assert_eq!(
+            std::fs::read_to_string(root.join("архив.zip")).expect("файл на месте"),
+            "чужой архив"
+        );
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn archiving_script_takes_paths_from_the_environment() {
+        assert!(COMPRESS_ARCHIVE.contains("$env:ZS_PATH"));
+        assert!(COMPRESS_ARCHIVE.contains("$env:ZS_TO"));
+        assert!(COMPRESS_ARCHIVE.contains("ZSHELPER-OK"));
+        assert!(scripts()
+            .iter()
+            .any(|(registry, _)| *registry == "files|сжать|в архив"));
+    }
+
+    #[test]
+    fn validate_refuses_parameters_the_hand_does_not_read() {
+        let spec = spec("files|создать|папку").expect("рука есть");
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), "C:\\tmp".to_string());
+        params.insert("пароль".to_string(), "123".to_string());
+
+        let error = validate(spec, &params).expect_err("лишний параметр не должен проходить");
+        assert!(error.contains("не понимает параметр"), "{error}");
     }
 
     #[test]
