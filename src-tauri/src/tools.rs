@@ -160,7 +160,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "network|замерить|задержку до узла" => {
             ping_host(registry, params, cancel)
         }
-        "processes-services|объяснить|службу/процесс" => explain_process(registry, params, cancel),
+        "processes-services|объяснить|службу/процесс" => {
+            explain_process(registry, params, cancel)
+        }
         "hardware-diag|проверить|температуры" => temperatures(registry, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
@@ -903,8 +905,14 @@ const PROCESS_NOTES: &[(&str, &str)] = &[
         "служба безопасности Windows: проверяет вход в систему, трогать нельзя",
     ),
     ("csrss", "клиент-сервер подсистемы Windows, трогать нельзя"),
-    ("winlogon", "вход в систему и блокировка экрана Windows, трогать нельзя"),
-    ("system", "ядро Windows в пользовательском виде: обычно это драйвер"),
+    (
+        "winlogon",
+        "вход в систему и блокировка экрана Windows, трогать нельзя",
+    ),
+    (
+        "system",
+        "ядро Windows в пользовательском виде: обычно это драйвер",
+    ),
     (
         "antimalware service executable",
         "защитник Windows: проверяет файлы в фоне, отсюда нагрузка на диск",
@@ -917,7 +925,10 @@ const PROCESS_NOTES: &[(&str, &str)] = &[
         "searchindexer",
         "индексатор поиска Windows: строит индекс файлов, отсюда нагрузка на диск",
     ),
-    ("chrome", "браузер Google Chrome: вкладки и расширения — отдельные процессы"),
+    (
+        "chrome",
+        "браузер Google Chrome: вкладки и расширения — отдельные процессы",
+    ),
     ("msedge", "браузер Microsoft Edge"),
     ("firefox", "браузер Firefox"),
     ("onedrive", "синхронизация OneDrive"),
@@ -2522,7 +2533,10 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("files|открыть|файл в программе", OPEN_FILE),
         ("files|открыть|архив без распаковки", LIST_ARCHIVE),
         ("network|замерить|задержку до узла", PING_HOST),
-        ("processes-services|объяснить|службу/процесс", EXPLAIN_PROCESS),
+        (
+            "processes-services|объяснить|службу/процесс",
+            EXPLAIN_PROCESS,
+        ),
         ("hardware-diag|проверить|температуры", TEMPERATURES),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
@@ -3654,8 +3668,8 @@ mod tests {
             &AtomicBool::new(false),
         );
         assert!(outcome.ok, "{}", outcome.reason);
-        let honest = outcome.reason.contains("датчиков ответило")
-            || outcome.reason.contains("не сообщает");
+        let honest =
+            outcome.reason.contains("датчиков ответило") || outcome.reason.contains("не сообщает");
         assert!(honest, "{}", outcome.reason);
     }
 
