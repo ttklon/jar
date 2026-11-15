@@ -176,7 +176,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "virtualization-remote|передать|файл на сервер" => {
             send_to_server(registry, params, cancel)
         }
-        "monitoring-triage|найти|причину тормозов" => find_slowdown(registry, params, cancel),
+        "monitoring-triage|найти|причину тормозов" => {
+            find_slowdown(registry, params, cancel)
+        }
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -3496,7 +3498,8 @@ fn find_slowdown(
         None => {
             result.ok = false;
             result.reason =
-                "снимок собрался, но строки с числами в выводе нет — смотрите полный вывод".to_string();
+                "снимок собрался, но строки с числами в выводе нет — смотрите полный вывод"
+                    .to_string();
             return result;
         }
     };
@@ -3743,7 +3746,10 @@ fn snapshot_reason(snapshot: &Snapshot) -> String {
     if let Some(uptime) = snapshot.uptime_h {
         parts.push(format!("машина работает {uptime} ч"));
     }
-    format!("снимок: {}; только чтение — ничего не менялось", parts.join("; "))
+    format!(
+        "снимок: {}; только чтение — ничего не менялось",
+        parts.join("; ")
+    )
 }
 
 /// Скрипты рук: ключ реестра и текст, который выполняется.
@@ -5679,7 +5685,10 @@ top_ram=chrome:14000 events=3 hours=24",
         let verdict = snapshot_verdict(&overloaded);
         assert!(verdict.contains("94%"), "{verdict}");
         assert!(verdict.contains("память занята на 96%"), "{verdict}");
-        assert!(verdict.contains("chrome — и по памяти, и по процессору"), "{verdict}");
+        assert!(
+            verdict.contains("chrome — и по памяти, и по процессору"),
+            "{verdict}"
+        );
         assert!(
             verdict.contains("ошибок в журнале системы за 24 ч: 3"),
             "{verdict}"
@@ -5715,7 +5724,13 @@ autostart=12 disk_free=120.4 disk_total=476.1 net_up=3 events=7 hours=24 uptime_
         assert_eq!(snapshot.uptime_h, Some(53));
 
         let reason = snapshot_reason(&snapshot);
-        for expected in ["процессов: 180", "23%", "chrome — 1200 МБ", "120 из 200", "за 24 ч: 7"] {
+        for expected in [
+            "процессов: 180",
+            "23%",
+            "chrome — 1200 МБ",
+            "120 из 200",
+            "за 24 ч: 7",
+        ] {
             assert!(reason.contains(expected), "{reason}");
         }
         // Рука только читает — и говорит это, чтобы её не боялись.
@@ -5749,7 +5764,10 @@ autostart=12 disk_free=120.4 disk_total=476.1 net_up=3 events=7 hours=24 uptime_
         assert_eq!(snapshot.procs, 42);
         assert!(reason.contains("процессор"), "{reason}");
         assert!(reason.contains("службы прочитать не удалось"), "{reason}");
-        assert!(reason.contains("автозапуск прочитать не удалось"), "{reason}");
+        assert!(
+            reason.contains("автозапуск прочитать не удалось"),
+            "{reason}"
+        );
     }
 
     /// Строка без маркера — это не снимок: молча не гадаем.
