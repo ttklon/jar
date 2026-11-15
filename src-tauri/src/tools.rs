@@ -4177,10 +4177,8 @@ fn grab_frame(registry: &str, params: &BTreeMap<String, String>, cancel: &Atomic
     } else {
         "размеры кадра прочитать не удалось — файл есть, но это всё, что проверено".to_string()
     };
-    result.reason = format!(
-        "{shot} ({length}); {shape}; {} — файл: {out}",
-        format!("{:.0} КБ", size as f64 / 1024.0)
-    );
+    let kilobytes = format!("{:.0} КБ", size as f64 / 1024.0);
+    result.reason = format!("{shot} ({length}); {shape}; {kilobytes} — файл: {out}");
     result.reason.push_str("; что на кадре — решает человек: содержимое рука не оценивает");
     if crate::undo::record_product(&path, &out) {
         result.reason
