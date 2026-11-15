@@ -189,6 +189,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
             measure_change(registry, params, cancel)
         }
         "video|склеить|ролики" => concat_videos(registry, params, cancel),
+        "video|извлечь|кадр" => grab_frame(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -3937,6 +3938,257 @@ Write-Output ('ZSHELPER-OK parts=' + $files.Count + ' sum=' + $sumText + ' out='
 Write-Output ('ZSHELPER-FILE ' + $out)
 "#;
 
+const GRAB_FRAME: &str = r#"$ErrorActionPreference = 'Stop'
+$path = $env:ZS_PATH
+$at = $env:ZS_AT
+$out = $env:ZS_OUT
+if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+  Write-Output 'ZSHELPER-FAILED: такого видео нет — проверьте путь'
+  exit 2
+}
+if (-not $out) {
+  Write-Output 'ZSHELPER-FAILED: не назван файл, куда сохранить кадр'
+  exit 3
+}
+if (Test-Path -LiteralPath $out) {
+  Write-Output ('ZSHELPER-FAILED: «' + $out + '» уже есть — перезаписывать не буду; назовите другое имя')
+  exit 4
+}
+$seconds = 0.0
+if (-not [double]::TryParse($at, [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$seconds)) {
+  Write-Output 'ZSHELPER-FAILED: время кадра не разобралось — нужно «мм:сс» или секунды'
+  exit 5
+}
+$tool = Get-Command ffmpeg -ErrorAction SilentlyContinue
+if (-not $tool) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не установлен — кадр вынимает он; поставьте его (winget install Gyan.FFmpeg) и повторите; сам ставить не буду'
+  exit 6
+}
+$probe = Get-Command ffprobe -ErrorAction SilentlyContinue
+$duration = ''
+if ($probe) {
+  $duration = (& $probe.Source -v error -show_entries format=duration -of csv=p=0 $path 2>$null | Select-Object -First 1)
+}
+$durationSeconds = 0.0
+$durationKnown = 0
+if ($duration) {
+  if ([double]::TryParse([string]$duration, [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$durationSeconds)) { $durationKnown = 1 }
+}
+if ($durationKnown -eq 1 -and $seconds -gt $durationSeconds) {
+  Write-Output ('ZSHELPER-FAILED: кадр просили на ' + [math]::Round($seconds, 2) + ' с, а видео длится ' + [math]::Round($durationSeconds, 2) + ' с — за концом кадра нет')
+  exit 7
+}
+$arguments = @('-hide_banner', '-loglevel', 'error', '-y', '-ss', [string]$seconds, '-i', $path, '-frames:v', '1', '-q:v', '2', $out)
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.UseShellExecute = $false
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError = $true
+$psi.FileName = $tool.Source
+$psi.Arguments = ($arguments -join ' ')
+$proc = New-Object System.Diagnostics.Process
+$proc.StartInfo = $psi
+$code = -1
+$timedOut = 0
+$err = ''
+try {
+  [void]$proc.Start()
+  $outTask = $proc.StandardOutput.ReadToEndAsync()
+  $errTask = $proc.StandardError.ReadToEndAsync()
+  if ($proc.WaitForExit(300000)) { $code = $proc.ExitCode } else { $timedOut = 1; try { $proc.Kill() } catch { } }
+  if ($errTask.Wait(10000)) { $err = $errTask.Result }
+  if ($outTask.Wait(10000)) { [void]$outTask.Result }
+} catch {
+  Write-Output ('ZSHELPER-FAILED: не удалось запустить ffmpeg — ' + $_.Exception.Message)
+  exit 8
+}
+if ($timedOut -eq 1) {
+  Write-Output 'ZSHELPER-FAILED: пяти минут не хватило — прогон остановлен'
+  exit 9
+}
+if ($code -ne 0) {
+  $tail = @($err -split "`r?`n" | Where-Object { $_ -ne '' } | Select-Object -Last 3) -join ' | '
+  Write-Output ('ZSHELPER-FAILED: ffmpeg вернул код ' + $code + ' — ' + $tail)
+  exit 10
+}
+$made = Get-Item -LiteralPath $out -ErrorAction SilentlyContinue
+if (-not $made -or $made.Length -le 0) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не оставил файла — кадра нет'
+  exit 11
+}
+$width = 0
+$height = 0
+if ($probe) {
+  $shape = (& $probe.Source -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 $out 2>$null | Select-Object -First 1)
+  if ($shape) {
+    $halves = ([string]$shape) -split ','
+    if ($halves.Count -ge 2) {
+      [void][int]::TryParse($halves[0], [ref]$width)
+      [void][int]::TryParse($halves[1], [ref]$height)
+    }
+  }
+}
+$durationText = ''
+if ($durationKnown -eq 1) { $durationText = [string][math]::Round($durationSeconds, 2) }
+Write-Output ('ZSHELPER-OK at=' + [string][math]::Round($seconds, 2) + ' duration=' + $durationText + ' width=' + $width + ' height=' + $height + ' size=' + $made.Length + ' probed=' + $durationKnown)
+Write-Output ('ZSHELPER-FILE ' + $out)
+"#;
+
+/// Разобрать время кадра: «3:20», «1:02:03», «200», «3:20.5» — в секунды.
+///
+/// Почему в ядре, а не в скрипте: человек вводит время по-разному, и отказ должен быть
+/// понятным до запуска ffmpeg, а не «время не разобралось» из середины работы.
+fn parse_timecode(raw: &str) -> Option<f64> {
+    let text = raw.trim();
+    if text.is_empty() {
+        return None;
+    }
+    let parts: Vec<&str> = text.split(':').collect();
+    if parts.len() > 3 {
+        return None;
+    }
+    let mut total = 0.0;
+    for (index, part) in parts.iter().enumerate() {
+        let value: f64 = part.replace(',', ".").parse().ok()?;
+        if value < 0.0 {
+            return None;
+        }
+        // Секунды могут быть дробными, минуты и часы — только целыми.
+        if index + 1 < parts.len() && value.fract() != 0.0 {
+            return None;
+        }
+        total = total * 60.0 + value;
+    }
+    if total > 86_400.0 {
+        return None;
+    }
+    Some(total)
+}
+
+/// Время в «мм:сс» для имени файла: двоеточие в имени Windows запрещено.
+fn timecode_for_name(seconds: f64) -> String {
+    let whole = seconds.floor() as u64;
+    let hours = whole / 3600;
+    let minutes = (whole % 3600) / 60;
+    let rest = whole % 60;
+    if hours > 0 {
+        format!("{hours}-{minutes:02}-{rest:02}")
+    } else {
+        format!("{minutes}-{rest:02}")
+    }
+}
+
+/// Вынуть кадр из видео на заданном времени и проверить, что кадр действительно есть.
+///
+/// Что проверяется и что нет — честно:
+///
+///  * **время сверяется с длительностью до работы**: кадр за концом видео — отказ с обоими
+///    числами, а не пустой файл;
+///  * **после работы проверяются файл, его размер и размеры кадра** по ffprobe. Содержание кадра
+///    рука не оценивает: «там был нужный момент» — это взгляд человека, а не байты;
+///  * **перезапись запрещена**; имя по умолчанию — «<видео> — кадр 3-20.jpg»;
+///  * **кадр попадает в журнал отката**: «откатить за сессию» уберёт его в корзину.
+fn grab_frame(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+    let raw_at = param(params, "at").trim().to_string();
+    let out_param = clean_path(param(params, "output"));
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задано видео — назовите путь к файлу");
+    }
+    if !std::path::Path::new(&path).is_file() {
+        return StepResult::failed(registry, format!("такого видео нет: {path} — проверьте путь"));
+    }
+    let at = match parse_timecode(&raw_at) {
+        Some(seconds) => seconds,
+        None => {
+            return StepResult::failed(
+                registry,
+                "время кадра не разобралось — нужно «мм:сс», «чч:мм:сс» или секунды, например 3:20 или 200; больше суток не беру",
+            )
+        }
+    };
+
+    let out = if out_param.is_empty() {
+        let source = std::path::Path::new(&path);
+        let stem = source
+            .file_stem()
+            .map(|name| name.to_string_lossy().to_string())
+            .unwrap_or_else(|| "видео".to_string());
+        source
+            .parent()
+            .unwrap_or_else(|| std::path::Path::new("."))
+            .join(format!("{stem} — кадр {}.jpg", timecode_for_name(at)))
+            .display()
+            .to_string()
+    } else {
+        out_param
+    };
+    if std::path::Path::new(&out).exists() {
+        return StepResult::failed(
+            registry,
+            format!("«{out}» уже есть — перезаписывать не буду; назовите другое имя"),
+        );
+    }
+
+    let at_text = format!("{at}");
+    let mut result = run_script(
+        registry,
+        GRAB_FRAME,
+        &[("PATH", path.as_str()), ("AT", at_text.as_str()), ("OUT", out.as_str())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(360),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let field = |name: &str| -> String {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .unwrap_or("")
+            .to_string()
+    };
+    let width = field("width=").parse::<u64>().unwrap_or_default();
+    let height = field("height=").parse::<u64>().unwrap_or_default();
+    let size = field("size=").parse::<u64>().unwrap_or_default();
+    let duration = field("duration=");
+    let probed = field("probed=") == "1";
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    let shot = format!("кадр снят на {} с", field("at="));
+    let length = if probed && !duration.is_empty() {
+        format!("видео длится {duration} с")
+    } else {
+        "длительность видео сверить не смог: ffprobe нет".to_string()
+    };
+    let shape = if width > 0 && height > 0 {
+        format!("размер кадра: {width}×{height}")
+    } else {
+        "размеры кадра прочитать не удалось — файл есть, но это всё, что проверено".to_string()
+    };
+    result.reason = format!(
+        "{shot} ({length}); {shape}; {} — файл: {out}",
+        format!("{:.0} КБ", size as f64 / 1024.0)
+    );
+    result.reason.push_str("; что на кадре — решает человек: содержимое рука не оценивает");
+    if crate::undo::record_product(&path, &out) {
+        result.reason
+            .push_str("; записан в журнал отката — «откатить за сессию» уберёт его в корзину");
+    }
+    result
+}
+
 /// Склеить ролики в один файл и проверить, что длительность сошлась.
 ///
 /// Что здесь принципиально:
@@ -5175,6 +5427,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("files|убрать|двойников в карантин", FIND_TWINS),
         ("processes-services|замерить|изменение нагрузки", SNAPSHOT),
         ("video|склеить|ролики", CONCAT_VIDEOS),
+        ("video|извлечь|кадр", GRAB_FRAME),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }
@@ -7068,6 +7321,185 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert_eq!(groups[0].paths.len(), 3);
         assert_eq!(groups[1].paths, vec!["C:\\b\\x.bin", "C:\\b\\y.bin"]);
         assert_eq!(groups[1].wasted, 300);
+    }
+
+    /// Время кадра понимается так, как его пишут люди: «3:20», «1:02:03», «200».
+    #[test]
+    fn a_timecode_is_read_the_way_people_write_it() {
+        assert_eq!(parse_timecode("3:20"), Some(200.0));
+        assert_eq!(parse_timecode("1:02:03"), Some(3723.0));
+        assert_eq!(parse_timecode("200"), Some(200.0));
+        assert_eq!(parse_timecode(" 3:20.5 "), Some(200.5));
+        assert_eq!(parse_timecode("0:00"), Some(0.0));
+        // Дробные минуты и время больше суток — не время кадра.
+        assert_eq!(parse_timecode("3.5:20"), None);
+        assert_eq!(parse_timecode("25:00:00"), None);
+        assert_eq!(parse_timecode("-5"), None);
+        assert_eq!(parse_timecode("три минуты"), None);
+        assert_eq!(parse_timecode(""), None);
+    }
+
+    /// Время в имени файла без двоеточия: Windows не разрешает его в именах.
+    #[test]
+    fn a_timecode_for_a_file_name_has_no_colons() {
+        assert_eq!(timecode_for_name(200.0), "3-20");
+        assert_eq!(timecode_for_name(3723.0), "1-02-03");
+        assert_eq!(timecode_for_name(59.9), "0-59");
+        assert!(!timecode_for_name(3723.0).contains(':'));
+    }
+
+    /// Непонятное время — отказ с примером, а не «время не разобралось» из середины работы.
+    #[test]
+    fn an_unreadable_time_is_refused_with_an_example() {
+        let dir = std::env::temp_dir().join(format!("zshelper-frame-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("папка");
+        let video = dir.join("ролик.mp4");
+        std::fs::write(&video, "не видео".as_bytes()).expect("файл");
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), video.display().to_string());
+        params.insert("at".to_string(), "три минуты".to_string());
+
+        let refused = run("video|извлечь|кадр", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("3:20"), "пример нужен в причине: {}", refused.reason);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Перезапись запрещена и здесь: кадр с таким именем уже есть — отказ.
+    #[test]
+    fn a_frame_never_overwrites() {
+        let dir = std::env::temp_dir().join(format!("zshelper-frame-out-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("папка");
+        let video = dir.join("ролик.mp4");
+        std::fs::write(&video, "не видео".as_bytes()).expect("файл");
+        let out = dir.join("кадр.jpg");
+        std::fs::write(&out, "старый кадр".as_bytes()).expect("файл");
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), video.display().to_string());
+        params.insert("at".to_string(), "1:00".to_string());
+        params.insert("output".to_string(), out.display().to_string());
+
+        let refused = run("video|извлечь|кадр", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("перезаписывать не буду"), "{}", refused.reason);
+        assert_eq!(
+            std::fs::read(&out).expect("читается"),
+            "старый кадр".as_bytes().to_vec()
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Живой кадр: размеры читаются с самого файла, а не выдумываются.
+    ///
+    /// Без ffmpeg тест требует честного отказа с его именем — оба исхода названы.
+    #[cfg(windows)]
+    #[test]
+    fn a_live_frame_is_taken_and_measured() {
+        let ffmpeg = std::process::Command::new("ffmpeg")
+            .arg("-version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false);
+        let dir = std::env::temp_dir().join(format!("zshelper-frame-live-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let video = dir.join("ролик.mp4");
+        std::fs::write(&video, "не видео".as_bytes()).expect("файл");
+        let out = dir.join("кадр.jpg");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), video.display().to_string());
+        params.insert("at".to_string(), "1".to_string());
+        params.insert("output".to_string(), out.display().to_string());
+
+        if !ffmpeg {
+            let refused = run("video|извлечь|кадр", &params, &AtomicBool::new(false));
+            assert!(!refused.ok);
+            assert!(refused.reason.contains("ffmpeg"), "{}", refused.reason);
+            let _ = std::fs::remove_dir_all(&dir);
+            return;
+        }
+
+        // Двухсекундный ролик 160×120 — кадр должен быть того же размера.
+        let made = std::process::Command::new("ffmpeg")
+            .args([
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-f",
+                "lavfi",
+                "-i",
+                "testsrc=size=160x120:rate=10:duration=2",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+            ])
+            .arg(&video)
+            .status()
+            .expect("ffmpeg запускается");
+        assert!(made.success(), "ролик не создался");
+
+        let result = run("video|извлечь|кадр", &params, &AtomicBool::new(false));
+
+        assert!(result.ok, "{}", result.reason);
+        assert!(result.reason.contains("размер кадра: 160×120"), "{}", result.reason);
+        assert!(result.reason.contains("содержимое рука не оценивает"), "{}", result.reason);
+        assert!(out.exists(), "кадр на месте");
+        let size = std::fs::metadata(&out).expect("метаданные").len();
+        assert!(size > 0, "кадр не пустой");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Кадр за концом видео — отказ с обоими числами, а не пустой файл.
+    #[cfg(windows)]
+    #[test]
+    fn a_frame_past_the_end_is_refused_with_numbers() {
+        let ffmpeg = std::process::Command::new("ffmpeg")
+            .arg("-version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false);
+        if !ffmpeg {
+            return;
+        }
+        let dir = std::env::temp_dir().join(format!("zshelper-frame-end-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let video = dir.join("короткий.mp4");
+        let made = std::process::Command::new("ffmpeg")
+            .args([
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-f",
+                "lavfi",
+                "-i",
+                "testsrc=size=64x48:rate=10:duration=1",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+            ])
+            .arg(&video)
+            .status()
+            .expect("ffmpeg запускается");
+        assert!(made.success());
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), video.display().to_string());
+        params.insert("at".to_string(), "0:30".to_string());
+        params.insert("output".to_string(), dir.join("кадр.jpg").display().to_string());
+        let refused = run("video|извлечь|кадр", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok, "{}", refused.reason);
+        assert!(refused.reason.contains("30"), "просили 30 с — это в причине: {}", refused.reason);
+        assert!(refused.reason.contains("длится"), "{}", refused.reason);
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// Один ролик — не склейка: отказ до всякой работы, с числом названных.
