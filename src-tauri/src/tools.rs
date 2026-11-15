@@ -173,6 +173,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "dev-code|запустить|тесты" => run_tests(registry, params, cancel),
         "dev-code|найти|в коде" => find_in_code(registry, params, cancel),
         "video|сжать|размер" => compress_video(registry, params, cancel),
+        "virtualization-remote|передать|файл на сервер" => {
+            send_to_server(registry, params, cancel)
+        }
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -1054,6 +1057,115 @@ fn suspicious_processes(registry: &str, cancel: &AtomicBool) -> StepResult {
             "проверено процессов: {checked}, на заметку: {suspicious} — причина названа у каждого; это факты, а не приговор"
         )
     };
+    result
+}
+
+/// Отправить файл на сервер по scp — без пароля в консоли и без чужих ключей.
+///
+/// Правила:
+///
+///  * **пароль не спрашивается**: `BatchMode=yes` не даёт шагу повиснуть на приглашении,
+///    которого некому набрать. Нет ключа — честный отказ с подсказкой, а не ожидание;
+///  * **незнакомый хост — не наша забота**: ключи хоста рука сама не принимает
+///    (`StrictHostKeyChecking` не ослаблен). Принять чужой ключ молча — это подмена сервера;
+///  * **имя сервера и путь проверяются до запуска.** Пробел в «сервере» — это опечатка,
+///    а не сервер, и лучше сказать об этом сразу, чем после трёх секунд тишины;
+///  * **проверка — размер на той стороне**, а не «scp не выдал ошибку». Сверить не удалось —
+///    так и сказано: единственное подтверждение тогда — код возврата.
+fn send_to_server(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+    let host = param(params, "host").trim().to_string();
+    let remote = param(params, "remote").trim().to_string();
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задан файл — назовите путь");
+    }
+    if host.is_empty() {
+        return StepResult::failed(registry, "не задан сервер — нужен вид «пользователь@сервер»");
+    }
+    let host_ok = host
+        .chars()
+        .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '.' | '-' | ':' | '_' | '@'));
+    if !host_ok {
+        return StepResult::failed(
+            registry,
+            "в имени сервера есть посторонние символы — назовите адрес или имя хоста",
+        );
+    }
+    if remote.is_empty() {
+        return StepResult::failed(registry, "не задана папка на сервере — например /home/user");
+    }
+    let remote_ok = remote
+        .chars()
+        .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '.' | '-' | '_' | '/' | '~'));
+    if !remote_ok {
+        return StepResult::failed(
+            registry,
+            "в пути на сервере есть посторонние символы — нужны буквы, цифры и / . - _ ~",
+        );
+    }
+
+    let mut result = run_script(
+        registry,
+        SEND_TO_SERVER,
+        &[
+            ("PATH", path.as_str()),
+            ("HOST", host.as_str()),
+            ("REMOTE", remote.as_str()),
+        ],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(330),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let field = |name: &str| -> Option<u64> {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .and_then(|value| value.parse::<u64>().ok())
+    };
+    let local = field("local=").unwrap_or_default();
+    let remote_bytes = field("remote=").unwrap_or_default();
+    let verified = field("verified=").unwrap_or_default() == 1;
+    let name = result
+        .stdout_tail
+        .split_whitespace()
+        .find_map(|word| word.strip_prefix("file="))
+        .unwrap_or("файл")
+        .to_string();
+    let megabytes = local as f64 / (1024.0 * 1024.0);
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    if verified && remote_bytes == local {
+        result.reason = format!(
+            "файл отправлен: {name} ({megabytes:.1} МБ) → {host}:{remote}; размер на той стороне совпал"
+        );
+    } else if verified {
+        result.ok = false;
+        result.reason = format!(
+            "файл ушёл, но размер на той стороне другой: здесь {local} байт, там {remote_bytes} — проверьте, что записалось"
+        );
+    } else {
+        result.reason = format!(
+            "файл отправлен: {name} ({megabytes:.1} МБ) → {host}:{remote}; сверить размер на той стороне не смог — единственное подтверждение это код 0 у scp"
+        );
+    }
     result
 }
 
@@ -2889,6 +3001,98 @@ if ($saved -eq 0) {
 } else {
   Write-Output ('было ' + $before + ' байт, стало ' + $after.Length + ' — легче на ' + $saved + '%')
 }"#;
+const SEND_TO_SERVER: &str = r#"$ErrorActionPreference = 'Stop'
+$path = $env:ZS_PATH
+$hostName = $env:ZS_HOST
+$remote = $env:ZS_REMOTE
+if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+  Write-Output 'ZSHELPER-FAILED: такого файла нет — проверьте путь'
+  exit 2
+}
+$scp = Get-Command scp -ErrorAction SilentlyContinue
+if (-not $scp) {
+  Write-Output 'ZSHELPER-FAILED: scp не установлен — на Windows это «Дополнительные компоненты → Клиент OpenSSH»; сам ставить не буду'
+  exit 3
+}
+$source = Get-Item -LiteralPath $path
+$folder = $remote.TrimEnd('/')
+$target = $hostName + ':' + $folder + '/' + $source.Name
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.UseShellExecute = $false
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError = $true
+$psi.FileName = $scp.Source
+$psi.Arguments = (@('-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10', '-o', 'ServerAliveInterval=15', ('"' + $source.FullName + '"'), ('"' + $target + '"')) -join ' ')
+$proc = New-Object System.Diagnostics.Process
+$proc.StartInfo = $psi
+$timedOut = 0
+try {
+  [void]$proc.Start()
+  $outTask = $proc.StandardOutput.ReadToEndAsync()
+  $errTask = $proc.StandardError.ReadToEndAsync()
+  if (-not $proc.WaitForExit(300000)) {
+    $timedOut = 1
+    try { $proc.Kill() } catch { }
+  }
+  $outText = ''
+  $errText = ''
+  if ($outTask.Wait(10000)) { $outText = $outTask.Result }
+  if ($errTask.Wait(10000)) { $errText = $errTask.Result }
+} catch {
+  Write-Output ('ZSHELPER-FAILED: не удалось запустить scp — ' + $_.Exception.Message)
+  exit 4
+}
+if ($timedOut -eq 1) {
+  Write-Output 'ZSHELPER-FAILED: пять минут без ответа — отправка остановлена; дошёл файл или нет, отсюда не видно'
+  exit 5
+}
+if ($proc.ExitCode -ne 0) {
+  $tail = @((@($outText, $errText) -join "`n") -split "`r?`n" | Where-Object { $_ -ne '' } | Select-Object -Last 2) -join ' | '
+  Write-Output ('ZSHELPER-FAILED: scp не смог отправить (код ' + $proc.ExitCode + ') — ' + $tail)
+  exit 6
+}
+$local = $source.Length
+$remoteBytes = 0
+$verified = 0
+$ssh = Get-Command ssh -ErrorAction SilentlyContinue
+if ($ssh) {
+  $command = "wc -c < '" + $folder + '/' + $source.Name + "'"
+  $checkPsi = New-Object System.Diagnostics.ProcessStartInfo
+  $checkPsi.UseShellExecute = $false
+  $checkPsi.RedirectStandardOutput = $true
+  $checkPsi.RedirectStandardError = $true
+  $checkPsi.FileName = $ssh.Source
+  $checkPsi.Arguments = (@('-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10', $hostName, ('"' + $command + '"')) -join ' ')
+  $check = New-Object System.Diagnostics.Process
+  $check.StartInfo = $checkPsi
+  try {
+    [void]$check.Start()
+    $checkOut = $check.StandardOutput.ReadToEndAsync()
+    $checkErr = $check.StandardError.ReadToEndAsync()
+    if ($check.WaitForExit(60000)) {
+      $text = ''
+      if ($checkOut.Wait(5000)) { $text = $checkOut.Result }
+      if ($checkErr.Wait(5000)) { [void]$checkErr.Result }
+      $trimmed = $text.Trim()
+      if ($check.ExitCode -eq 0 -and $trimmed -match '^\d+$') {
+        $remoteBytes = [int64]$trimmed
+        $verified = 1
+      }
+    } else {
+      try { $check.Kill() } catch { }
+    }
+  } catch { }
+}
+Write-Output ('ZSHELPER-OK file=' + $source.Name + ' local=' + $local + ' remote=' + $remoteBytes + ' verified=' + $verified)
+if ($verified -eq 1 -and $remoteBytes -eq $local) {
+  Write-Output ('размер на той стороне совпал: ' + $local + ' байт')
+} elseif ($verified -eq 1) {
+  Write-Output ('размер на той стороне другой: здесь ' + $local + ', там ' + $remoteBytes)
+} else {
+  Write-Output 'размер на той стороне сверить не удалось — единственное подтверждение это код 0 у scp'
+}"#;
+
+
 
 const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
 $node = $env:ZS_HOST
@@ -3110,6 +3314,10 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("dev-code|запустить|тесты", RUN_TESTS),
         ("dev-code|найти|в коде", FIND_IN_CODE),
         ("video|сжать|размер", COMPRESS_VIDEO),
+        (
+            "virtualization-remote|передать|файл на сервер",
+            SEND_TO_SERVER,
+        ),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -4817,6 +5025,107 @@ mod tests {
 
         let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
         assert!(registries.contains(&"video|сжать|размер"));
+    }
+
+    fn send_params(path: &str, host: &str, remote: &str) -> BTreeMap<String, String> {
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), path.to_string());
+        params.insert("host".to_string(), host.to_string());
+        params.insert("remote".to_string(), remote.to_string());
+        params
+    }
+
+    #[test]
+    fn sending_to_a_server_without_a_file_is_refused() {
+        let refused = run(
+            "virtualization-remote|передать|файл на сервер",
+            &send_params("", "user@example.com", "/home/user"),
+            &AtomicBool::new(false),
+        );
+
+        assert!(!refused.ok);
+        assert!(
+            refused.reason.to_lowercase().contains("не задан файл"),
+            "{}",
+            refused.reason
+        );
+    }
+
+    #[test]
+    fn a_server_name_with_spaces_is_refused_before_any_network() {
+        let refused = run(
+            "virtualization-remote|передать|файл на сервер",
+            &send_params("C:\\tmp\\файл.zip", "мой сервер", "/home/user"),
+            &AtomicBool::new(false),
+        );
+
+        assert!(!refused.ok);
+        assert!(
+            refused.reason.contains("посторонние символы"),
+            "{}",
+            refused.reason
+        );
+    }
+
+    #[test]
+    fn a_remote_path_that_could_be_a_command_is_refused() {
+        let refused = run(
+            "virtualization-remote|передать|файл на сервер",
+            &send_params("C:\\tmp\\файл.zip", "user@example.com", "/home/u; rm -rf /"),
+        );
+
+        assert!(!refused.ok);
+        assert!(
+            refused.reason.contains("посторонние символы"),
+            "{}",
+            refused.reason
+        );
+    }
+
+    #[test]
+    fn the_transfer_asks_nobody_for_a_password_and_leaves_the_file_alone() {
+        let dir = std::env::temp_dir()
+            .join(format!("zshelper-send-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let file = dir.join("архив.txt");
+        std::fs::write(&file, "содержимое").expect("файл");
+
+        let failed = run(
+            "virtualization-remote|передать|файл на сервер",
+            &send_params(
+                &file.to_string_lossy(),
+                "127.0.0.1",
+                "/tmp",
+            ),
+            &AtomicBool::new(false),
+        );
+
+        // Сервера на этой машине нет — и это честный отказ, а не «отправлено».
+        assert!(!failed.ok, "{}", failed.reason);
+        // Причина называет scp: не установлен или не смог. Ждать пароля рука не станет.
+        assert!(failed.reason.contains("scp"), "{}", failed.reason);
+        assert_eq!(
+            std::fs::read_to_string(&file).expect("файл цел"),
+            "содержимое"
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_transfer_never_weakens_host_keys() {
+        assert!(SEND_TO_SERVER.contains("BatchMode=yes"));
+        assert!(SEND_TO_SERVER.contains("ConnectTimeout=10"));
+        // Чужой ключ молча не принимается: это была бы подмена сервера.
+        assert!(!SEND_TO_SERVER.contains("StrictHostKeyChecking=no"));
+        assert!(!SEND_TO_SERVER.contains("accept-new"));
+        assert!(SEND_TO_SERVER.contains("сам ставить не буду"));
+        // Проверка результата — размер на той стороне.
+        assert!(SEND_TO_SERVER.contains("verified="));
+
+        let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
+        assert!(registries.contains(&"virtualization-remote|передать|файл на сервер"));
     }
 
     #[test]
