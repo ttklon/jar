@@ -190,7 +190,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         }
         "video|склеить|ролики" => concat_videos(registry, params, cancel),
         "video|извлечь|кадр" => grab_frame(registry, params, cancel),
-        "video|конвертировать|формат/кодек" => convert_video(registry, params, cancel),
+        "video|конвертировать|формат/кодек" => {
+            convert_video(registry, params, cancel)
+        }
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -4160,7 +4162,11 @@ Write-Output ('ZSHELPER-FILE ' + $out)
 ///    молчать;
 ///  * потолки числом: 30 минут на прогон; CRF 28 для h265 и 23 для h264 — не «на глаз»;
 ///  * результат попадает в журнал отката: «откатить за сессию» уберёт файл в корзину.
-fn convert_video(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+fn convert_video(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
     let started = Instant::now();
     let path = clean_path(param(params, "path"));
     let codec = param(params, "codec").trim().to_lowercase();
@@ -4170,7 +4176,10 @@ fn convert_video(registry: &str, params: &BTreeMap<String, String>, cancel: &Ato
         return StepResult::failed(registry, "не задано видео — назовите путь к файлу");
     }
     if !std::path::Path::new(&path).is_file() {
-        return StepResult::failed(registry, format!("такого видео нет: {path} — проверьте путь"));
+        return StepResult::failed(
+            registry,
+            format!("такого видео нет: {path} — проверьте путь"),
+        );
     }
     let codec = if codec.is_empty() {
         "h265".to_string()
@@ -4213,7 +4222,11 @@ fn convert_video(registry: &str, params: &BTreeMap<String, String>, cancel: &Ato
     let mut result = run_script(
         registry,
         CONVERT_VIDEO,
-        &[("PATH", path.as_str()), ("CODEC", codec.as_str()), ("OUT", out.as_str())],
+        &[
+            ("PATH", path.as_str()),
+            ("CODEC", codec.as_str()),
+            ("OUT", out.as_str()),
+        ],
         Expectation::StdoutMarker("ZSHELPER-OK"),
         Duration::from_secs(1860),
         cancel,
@@ -4276,12 +4289,12 @@ fn convert_video(registry: &str, params: &BTreeMap<String, String>, cancel: &Ato
     } else {
         "ffprobe нет — кодек на выходе не проверен, доверять нечему"
     };
-    result.reason = format!(
-        "перекодировано в {codec} ({origin}): {weight}; {verified}; файл: {out}"
-    );
+    result.reason =
+        format!("перекодировано в {codec} ({origin}): {weight}; {verified}; файл: {out}");
     if crate::undo::record_product(&path, &out) {
-        result.reason
-            .push_str("; записан в журнал отката — «откатить за сессию» уберёт его в корзину, исходник цел");
+        result.reason.push_str(
+            "; записан в журнал отката — «откатить за сессию» уберёт его в корзину, исходник цел",
+        );
     }
     result
 }
@@ -7600,7 +7613,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         params.insert("path".to_string(), video.display().to_string());
         params.insert("codec".to_string(), "av1".to_string());
 
-        let refused = run("video|конвертировать|формат/кодек", &params, &AtomicBool::new(false));
+        let refused = run(
+            "video|конвертировать|формат/кодек",
+            &params,
+            &AtomicBool::new(false),
+        );
 
         assert!(!refused.ok);
         assert!(refused.reason.contains("h265"), "{}", refused.reason);
@@ -7620,14 +7637,25 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         if !ffmpeg {
             return;
         }
-        let dir = std::env::temp_dir().join(format!("zshelper-convert-same-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-convert-same-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
         let video = dir.join("ролик.mp4");
         let made = std::process::Command::new("ffmpeg")
             .args([
-                "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
-                "testsrc=size=96x64:rate=10:duration=1", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-f",
+                "lavfi",
+                "-i",
+                "testsrc=size=96x64:rate=10:duration=1",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
             ])
             .arg(&video)
             .status()
@@ -7642,7 +7670,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
             dir.join("итог.mp4").display().to_string(),
         );
 
-        let refused = run("video|конвертировать|формат/кодек", &params, &AtomicBool::new(false));
+        let refused = run(
+            "video|конвертировать|формат/кодек",
+            &params,
+            &AtomicBool::new(false),
+        );
 
         assert!(!refused.ok, "{}", refused.reason);
         assert!(refused.reason.contains("уже в h264"), "{}", refused.reason);
@@ -7663,7 +7695,8 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
             .output()
             .map(|output| output.status.success())
             .unwrap_or(false);
-        let dir = std::env::temp_dir().join(format!("zshelper-convert-live-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-convert-live-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
         let video = dir.join("ролик.mp4");
@@ -7676,7 +7709,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         std::fs::write(&video, "не видео".as_bytes()).expect("файл");
 
         if !ffmpeg {
-            let refused = run("video|конвертировать|формат/кодек", &params, &AtomicBool::new(false));
+            let refused = run(
+                "video|конвертировать|формат/кодек",
+                &params,
+                &AtomicBool::new(false),
+            );
             assert!(!refused.ok);
             assert!(refused.reason.contains("ffmpeg"), "{}", refused.reason);
             let _ = std::fs::remove_dir_all(&dir);
@@ -7685,22 +7722,48 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
 
         let made = std::process::Command::new("ffmpeg")
             .args([
-                "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
-                "testsrc=size=96x64:rate=10:duration=2", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-f",
+                "lavfi",
+                "-i",
+                "testsrc=size=96x64:rate=10:duration=2",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
             ])
             .arg(&video)
             .status()
             .expect("ffmpeg запускается");
         assert!(made.success());
 
-        let result = run("video|конвертировать|формат/кодек", &params, &AtomicBool::new(false));
+        let result = run(
+            "video|конвертировать|формат/кодек",
+            &params,
+            &AtomicBool::new(false),
+        );
 
         assert!(result.ok, "{}", result.reason);
-        assert!(result.reason.contains("перекодировано в h265"), "{}", result.reason);
-        assert!(result.reason.contains("кодек на выходе проверен"), "{}", result.reason);
+        assert!(
+            result.reason.contains("перекодировано в h265"),
+            "{}",
+            result.reason
+        );
+        assert!(
+            result.reason.contains("кодек на выходе проверен"),
+            "{}",
+            result.reason
+        );
         assert!(out.exists(), "результат на месте");
         assert!(video.exists(), "исходник цел");
-        if let Some(note) = result.reason.split("; ").find(|part| part.contains("легче")) {
+        if let Some(note) = result
+            .reason
+            .split("; ")
+            .find(|part| part.contains("легче"))
+        {
             // «легче» или «легче не стало» — оба исхода названы, молчания быть не может.
             assert!(note.contains("легче"), "{note}");
         }
