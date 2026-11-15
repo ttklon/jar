@@ -126,7 +126,8 @@ mod tests {
     use super::*;
 
     fn temp_dir(name: &str) -> std::path::PathBuf {
-        let dir = std::env::temp_dir().join(format!("zshelper-places-{}-{name}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-places-{}-{name}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
         dir
@@ -140,7 +141,11 @@ mod tests {
 
         assert_eq!(places.len(), 5);
         for place in &places {
-            assert!(!place.exists, "{}: файла нет — так и должно быть", place.title);
+            assert!(
+                !place.exists,
+                "{}: файла нет — так и должно быть",
+                place.title
+            );
             assert_eq!(place.bytes, 0, "размер не выдумывается");
         }
         let _ = std::fs::remove_dir_all(&base);
