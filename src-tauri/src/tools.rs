@@ -150,6 +150,12 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|открыть|файл в программе" => {
             open_file(registry, params, cancel)
         }
+        "files|открыть|архив без распаковки" => {
+            list_archive(registry, params, cancel)
+        }
+        "learning-research|сохранить|закладку в базу знаний" => {
+            save_knowledge(registry, params)
+        }
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -723,6 +729,182 @@ fn create_archive(
     let mut result = result;
     result.duration_ms = started.elapsed().as_millis() as u64;
     result.reason = format!("архив создан: {size} байт — {to}");
+    result
+}
+
+/// Посмотреть, что внутри zip-архива, ничего не распаковывая.
+///
+/// Зачем отдельная рука. «Покажи, что внутри» — вопрос, который задают до «распакуй»,
+/// и отвечать на него распаковкой значит делать работу, о которой не просили.
+///
+/// Что здесь важно:
+///
+///  * **только zip.** rar и 7z требуют чужих программ, которых у нас нет; обещать
+///    «любой архив» и падать на первом же rar — хуже, чем сказать это сразу;
+///  * **размер после распаковки считается** — «архив на 2 МБ» и «внутри 4 ГБ» это
+///    разные вещи, и вторая важнее;
+///  * **ищутся пути, которые нельзя распаковывать в общую папку.** Абсолютные и с «..»
+///    внутри архива — это способ разложить файлы куда угодно при распаковке (zip-slip).
+///    Архив при этом не «плохой»: он просто не для распаковки вслепую, и так и сказано.
+fn list_archive(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Архив»");
+    }
+    if has_parent_dir(&path) {
+        return StepResult::failed(
+            registry,
+            "в пути есть «..» — назови архив полным путём, без сокращений",
+        );
+    }
+
+    let archive = std::path::Path::new(&path);
+    if !archive.is_file() {
+        return StepResult::failed(registry, format!("это не файл: {path}"));
+    }
+
+    let extension = archive
+        .extension()
+        .map(|value| value.to_string_lossy().to_lowercase())
+        .unwrap_or_default();
+    if extension != "zip" {
+        return StepResult::failed(
+            registry,
+            format!("читаю только zip, а тут «.{extension}» — rar и 7z эта рука не умеет"),
+        );
+    }
+
+    let mut result = run_script(
+        registry,
+        LIST_ARCHIVE,
+        &[("PATH", &path)],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(60),
+        cancel,
+    );
+    if !result.ok {
+        return result;
+    }
+
+    let field = |name: &str| -> Option<usize> {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .and_then(|value| value.parse::<usize>().ok())
+    };
+    let entries = field("entries=").unwrap_or_default();
+    let dangerous = field("danger=").unwrap_or_default();
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = format!("в архиве файлов: {entries} — {path}; распаковки не было");
+    if dangerous > 0 {
+        result.reason.push_str(&format!(
+            "; внимание: путей, которые нельзя распаковывать вслепую: {dangerous} (абсолютные или с «..»)"
+        ));
+    }
+    result
+}
+
+/// Где лежит база знаний: рядом с логами и журналом, в `LOCALAPPDATA`.
+///
+/// Не в папке программы: её могут переустановить или сделать доступной только на чтение,
+/// а база знаний — это данные человека, а не установочные файлы.
+fn knowledge_file() -> std::path::PathBuf {
+    let base = std::env::var_os("LOCALAPPDATA")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(std::env::temp_dir);
+    base.join("ZShelper").join("knowledge").join("base.jsonl")
+}
+
+/// Сохранить ссылку или заметку в локальную базу знаний.
+///
+/// Правила:
+///
+///  * **одинаковое дважды не сохраняется.** База, где одна ссылка лежит пять раз,
+///    отвечает на вопрос «что я сохранял» хуже, чем база без неё, — и человек не помнит,
+///    какая из пяти копий настоящая;
+///  * **битые и чужие строки не чинятся и не мешают**: встретили — пропустили, база
+///    открыта для ручной правки;
+///  * **доказательство — чтение обратно**: последняя строка файла должна быть ровно той,
+///    что записали. «Файл записался без ошибки» — не доказательство, а надежда.
+fn save_knowledge(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
+    let started = Instant::now();
+    let text = param(params, "text").trim().to_string();
+    let tag = param(params, "tag").trim().to_string();
+
+    if text.is_empty() {
+        return StepResult::failed(registry, "не задано, что сохранить");
+    }
+
+    let path = knowledge_file();
+    if let Some(parent) = path.parent() {
+        if let Err(error) = std::fs::create_dir_all(parent) {
+            return StepResult::failed(registry, format!("папка базы не создалась: {error}"));
+        }
+    }
+
+    let existing = std::fs::read_to_string(&path).unwrap_or_default();
+    let mut line_number = 0usize;
+    for line in existing.lines().filter(|line| !line.trim().is_empty()) {
+        line_number += 1;
+        let Ok(saved) = serde_json::from_str::<serde_json::Value>(line) else {
+            continue;
+        };
+        if saved.get("text").and_then(|value| value.as_str()) == Some(text.as_str()) {
+            return StepResult::failed(
+                registry,
+                format!("это уже есть в базе ({line_number}-я строка) — второй раз не сохраняю"),
+            );
+        }
+    }
+
+    let stamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|passed| passed.as_millis() as u64)
+        .unwrap_or_default();
+    let record = serde_json::json!({ "saved_at": stamp, "text": text, "tag": tag });
+    let line = record.to_string();
+
+    let written = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&path)
+        .and_then(|mut file| {
+            use std::io::Write;
+            writeln!(file, "{line}")
+        });
+    if let Err(error) = written {
+        return StepResult::failed(registry, format!("строка не записалась: {error}"));
+    }
+
+    let read_back = std::fs::read_to_string(&path).unwrap_or_default();
+    let matches = read_back.lines().last() == Some(line.as_str());
+    let where_saved = path.display().to_string();
+    let total = read_back
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .count();
+
+    let mut result = StepResult::ok_with(
+        registry,
+        Evidence::FileText {
+            path: where_saved.clone(),
+            matches,
+        },
+        format!("сохранено в базу знаний: строка {total} — {where_saved}"),
+        started.elapsed().as_millis() as u64,
+    );
+    result.ok = matches;
+    if !matches {
+        result.reason = format!("после записи строка не совпала: {where_saved}");
+    }
     result
 }
 
@@ -1722,6 +1904,36 @@ try {
 }
 Write-Output ('ZSHELPER-OK progid={0}' -f $progId)"#;
 
+const LIST_ARCHIVE: &str = r#"$ErrorActionPreference = 'Stop'
+$archive = $env:ZS_PATH
+if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
+  Write-Output 'ZSHELPER-MISSING: архива нет'
+  exit 3
+}
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$zip = [System.IO.Compression.ZipFile]::OpenRead($archive)
+try {
+  $entries = @($zip.Entries)
+  $total = ($entries | Measure-Object -Property Length -Sum).Sum
+  if ($null -eq $total) { $total = 0 }
+  $danger = @($entries | Where-Object {
+    $_.FullName.StartsWith('/') -or $_.FullName.StartsWith('\') -or
+    $_.FullName.Contains('../') -or $_.FullName.Contains('..\') -or
+    $_.FullName.Contains(':')
+  })
+  Write-Output ('ZSHELPER-OK entries={0} bytes={1} danger={2}' -f $entries.Count, [int64]$total, $danger.Count)
+  Write-Output ('файлов: {0}, после распаковки: {1} МБ' -f $entries.Count, [math]::Round($total / 1MB, 1))
+  $entries | Sort-Object -Property Length -Descending | Select-Object -First 10 | ForEach-Object {
+    Write-Output ('{0} — {1} КБ' -f $_.FullName, [int]($_.Length / 1KB))
+  }
+  if ($danger.Count -gt 0) {
+    Write-Output 'ВНИМАНИЕ: такие пути нельзя распаковывать в общую папку:'
+    $danger | Select-Object -First 5 | ForEach-Object { Write-Output ('  ' + $_.FullName) }
+  }
+} finally {
+  $zip.Dispose()
+}"#;
+
 const OPEN_FILE: &str = r#"$ErrorActionPreference = 'Stop'
 $file = $env:ZS_PATH
 if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
@@ -1882,6 +2094,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("files|сжать|в архив", COMPRESS_ARCHIVE),
         ("web|открыть|сайт", OPEN_SITE),
         ("files|открыть|файл в программе", OPEN_FILE),
+        ("files|открыть|архив без распаковки", LIST_ARCHIVE),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -2741,6 +2954,134 @@ mod tests {
         assert!(!missing.ok);
 
         let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn listing_an_archive_shows_what_is_inside_without_unpacking() {
+        let root = temp_target("list")
+            .parent()
+            .expect("папка")
+            .join("list");
+        std::fs::create_dir_all(root.join("проект")).expect("папка");
+        std::fs::write(root.join("проект/раз.txt"), "раз").expect("файл");
+        std::fs::write(root.join("проект/два.txt"), "два-два").expect("файл");
+
+        let mut pack = BTreeMap::new();
+        pack.insert(
+            "path".to_string(),
+            root.join("проект").to_string_lossy().to_string(),
+        );
+        pack.insert(
+            "to".to_string(),
+            root.join("проект.zip").to_string_lossy().to_string(),
+        );
+        let made = run("files|сжать|в архив", &pack, &AtomicBool::new(false));
+        assert!(made.ok, "{}", made.reason);
+
+        let before = std::fs::read_dir(&root).expect("папка").count();
+        let mut params = BTreeMap::new();
+        params.insert(
+            "path".to_string(),
+            root.join("проект.zip").to_string_lossy().to_string(),
+        );
+        let listed = run(
+            "files|открыть|архив без распаковки",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(listed.ok, "{}", listed.reason);
+        assert!(listed.reason.contains("файлов: 2"), "{}", listed.reason);
+        assert!(
+            listed.reason.contains("распаковки не было"),
+            "{}",
+            listed.reason
+        );
+        // Просмотр ничего не распаковал: рядом не появилось ни одного нового элемента.
+        let after = std::fs::read_dir(&root).expect("папка").count();
+        assert_eq!(before, after, "просмотр архива не должен ничего распаковывать");
+
+        // rar эта рука не читает и говорит это до запуска, а не после падения.
+        std::fs::write(root.join("архив.rar"), "не zip").expect("файл");
+        params.insert(
+            "path".to_string(),
+            root.join("архив.rar").to_string_lossy().to_string(),
+        );
+        let rar = run(
+            "files|открыть|архив без распаковки",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!rar.ok);
+        assert!(rar.reason.contains("только zip"), "{}", rar.reason);
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn saving_a_note_goes_into_the_local_base_and_never_twice() {
+        let path = knowledge_file();
+        let before = std::fs::read_to_string(&path).ok();
+        let stamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|passed| passed.as_millis())
+            .unwrap_or_default();
+        let text = format!("заметка из теста {stamp}");
+
+        let mut params = BTreeMap::new();
+        params.insert("text".to_string(), text.clone());
+        let saved = run(
+            "learning-research|сохранить|закладку в базу знаний",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(saved.ok, "{}", saved.reason);
+        assert_eq!(saved.evidence.kind(), "file_text");
+        assert!(saved.reason.contains("сохранено"), "{}", saved.reason);
+
+        let base = std::fs::read_to_string(&path).expect("база есть");
+        assert!(base.contains(&text), "сохранённой строки нет в базе");
+
+        // Второй раз то же самое не сохраняется: база без копий полезнее базы с ними.
+        let again = run(
+            "learning-research|сохранить|закладку в базу знаний",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!again.ok);
+        assert!(again.reason.contains("уже есть"), "{}", again.reason);
+
+        // Пустое не сохраняется вовсе — и это отказ проверки параметров.
+        let mut empty = BTreeMap::new();
+        empty.insert("text".to_string(), "   ".to_string());
+        let nothing = run(
+            "learning-research|сохранить|закладку в базу знаний",
+            &empty,
+            &AtomicBool::new(false),
+        );
+        assert!(!nothing.ok);
+
+        // За собой убираем: база знаний — данные человека, а не тестовая свалка.
+        match before {
+            Some(original) => std::fs::write(&path, original).expect("вернуть базу"),
+            None => {
+                let _ = std::fs::remove_file(&path);
+            }
+        }
+    }
+
+    #[test]
+    fn the_archive_listing_script_warns_about_paths_outside_the_folder() {
+        assert!(LIST_ARCHIVE.contains("$env:ZS_PATH"));
+        assert!(LIST_ARCHIVE.contains("ZipFile"));
+        assert!(LIST_ARCHIVE.contains("danger="));
+        assert!(LIST_ARCHIVE.contains("Contains('../')"));
+        assert!(scripts()
+            .iter()
+            .any(|(registry, _)| *registry == "files|открыть|архив без распаковки"));
+        // База знаний — своя рука: внешней программы у неё нет.
+        assert!(!scripts().iter().any(|(registry, _)| {
+            *registry == "learning-research|сохранить|закладку в базу знаний"
+        }));
     }
 
     #[test]
