@@ -147,7 +147,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         }
         "web|открыть|сайт" => open_site(registry, params, cancel),
         "files|найти|по содержимому" => find_text(registry, params, cancel),
-        "files|открыть|файл в программе" => open_file(registry, params, cancel),
+        "files|открыть|файл в программе" => {
+            open_file(registry, params, cancel)
+        }
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -793,7 +795,9 @@ fn find_text(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicB
 
         for entry in entries.flatten() {
             let path = entry.path();
-            let Ok(metadata) = entry.metadata() else { continue };
+            let Ok(metadata) = entry.metadata() else {
+                continue;
+            };
             if metadata.is_dir() {
                 stack.push(path);
                 continue;
@@ -857,9 +861,8 @@ fn find_text(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicB
     );
 
     if hits == 0 {
-        result.reason = format!(
-            "нигде не встречается: «{query}» — просмотрено {visited}, пропущено {skipped}"
-        );
+        result.reason =
+            format!("нигде не встречается: «{query}» — просмотрено {visited}, пропущено {skipped}");
     }
     if cut {
         result.reason.push_str(&format!(
@@ -2646,11 +2649,19 @@ mod tests {
         assert!(found.ok, "{}", found.reason);
         assert_eq!(found.evidence.kind(), "search");
         // Считаются строки, а не вхождения внутри строки: в «счёт.txt» их две, но строка одна.
-        assert!(found.reason.contains("строк с совпадением: 2"), "{}", found.reason);
+        assert!(
+            found.reason.contains("строк с совпадением: 2"),
+            "{}",
+            found.reason
+        );
         assert!(found.reason.contains("в файлах: 2"), "{}", found.reason);
         assert!(found.reason.contains("пропущено 1"), "{}", found.reason);
         // Показываем, где именно: файл и номер строки.
-        assert!(found.stdout_tail.contains("счёт.txt:1"), "{}", found.stdout_tail);
+        assert!(
+            found.stdout_tail.contains("счёт.txt:1"),
+            "{}",
+            found.stdout_tail
+        );
 
         // Нигде не встречается — честный ответ, а не ошибка и не повод повторять.
         params.insert("query".to_string(), "такого текста нет".to_string());
@@ -2688,8 +2699,7 @@ mod tests {
     fn opening_a_file_refuses_to_launch_programs_instead_of_opening_them() {
         let root = temp_target("open").parent().expect("папка").join("open");
         std::fs::create_dir_all(&root).expect("папка");
-        std::fs::write(root.join("отчёт.exe"), "расширение решает, а не содержимое")
-            .expect("файл");
+        std::fs::write(root.join("отчёт.exe"), "расширение решает, а не содержимое").expect("файл");
 
         let mut params = BTreeMap::new();
         params.insert(
