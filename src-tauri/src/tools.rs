@@ -4757,7 +4757,7 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
         let file = dir.join("фильм.mp4");
-        std::fs::write(&file, b"не видео").expect("файл");
+        std::fs::write(&file, "не видео").expect("файл");
 
         let mut params = BTreeMap::new();
         params.insert("path".to_string(), file.to_string_lossy().to_string());
@@ -4782,7 +4782,7 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
         let file = dir.join("битый.mp4");
-        std::fs::write(&file, b"это не видео, а строка").expect("файл");
+        std::fs::write(&file, "это не видео, а строка").expect("файл");
 
         let mut params = BTreeMap::new();
         params.insert("path".to_string(), file.to_string_lossy().to_string());
@@ -4799,8 +4799,8 @@ mod tests {
         );
         // Исходник не тронут: рука пишет рядом, а не поверх.
         assert_eq!(
-            std::fs::read(&file).expect("исходник на месте"),
-            b"это не видео, а строка"
+            std::fs::read_to_string(&file).expect("исходник на месте"),
+            "это не видео, а строка"
         );
 
         let _ = std::fs::remove_dir_all(&dir);
