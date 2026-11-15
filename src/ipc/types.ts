@@ -662,3 +662,38 @@ export interface ProfileView {
   executable: number;
   operations: ProfileOpView[];
 }
+
+/**
+ * Откат за сессию.
+ *
+ * Откат отвечает не на «что сделали» (это журнал), а на «как вернуть». Поэтому здесь
+ * только обратимое: перенос и переименование. У остального старого содержимого уже нет,
+ * и `note` говорит об этом рядом со списком, а не в документации.
+ */
+export type UndoKind = "move" | "rename";
+
+export interface UndoEntry {
+  at: number;
+  session: string;
+  kind: UndoKind;
+  from: string;
+  to: string;
+}
+
+export interface UndoStep {
+  entry: UndoEntry;
+  /** `null` — шаг можно выполнить; строка — причина, по которой нельзя. */
+  refusal: string | null;
+}
+
+export interface UndoPreview {
+  session: string;
+  steps: UndoStep[];
+  note: string;
+}
+
+export interface UndoReport {
+  session: string;
+  undone: number;
+  refused: string[];
+}

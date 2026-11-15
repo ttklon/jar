@@ -126,6 +126,8 @@ export async function confirmTool(
 import flowsJson from "../../data/flows.json";
 import type {
   AuditEvent,
+  UndoPreview,
+  UndoReport,
   Decision,
   Downloaded,
   EngineStatus,
@@ -224,6 +226,26 @@ export async function listFlows(): Promise<FlowView[]> {
       steps,
     };
   });
+}
+
+/**
+ * Отката в браузере нет: файлы на этой машине никто не двигает. Честный ответ — пустой
+ * список и оговорка, а не «откатили 0 дел» с видом выполненной работы.
+ */
+export async function undoReport(): Promise<UndoPreview> {
+  return {
+    session: "",
+    steps: [],
+    note: "в браузере файлы никто не двигает — откатывать нечего",
+  };
+}
+
+export async function undoApply(): Promise<UndoReport> {
+  return {
+    session: "",
+    undone: 0,
+    refused: ["в браузере откат недоступен: файлы двигает только приложение"],
+  };
 }
 
 /**

@@ -47,6 +47,11 @@ export type {
   IsolationStatus,
   Proposal,
   TrialReport,
+  UndoEntry,
+  UndoKind,
+  UndoPreview,
+  UndoReport,
+  UndoStep,
   Thought,
   SpeechStatus,
   Sight,
@@ -62,7 +67,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
+import type { AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -133,6 +138,28 @@ export async function listFlows(): Promise<FlowView[]> {
     return fromCore();
   }
   const { listFlows: fromData } = await import("./dev");
+  return fromData();
+}
+
+// ── Откат за сессию ─────────────────────────────────────────────────────────
+
+/** Что можно вернуть из сделанного в этом запуске. Ничего не меняет. */
+export async function undoReport(): Promise<UndoPreview> {
+  if (isTauri()) {
+    const { undoReport: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { undoReport: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Вернуть сделанное в этом запуске: в обратном порядке, с проверкой до и после шага. */
+export async function undoApply(): Promise<UndoReport> {
+  if (isTauri()) {
+    const { undoApply: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { undoApply: fromData } = await import("./dev");
   return fromData();
 }
 

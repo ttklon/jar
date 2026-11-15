@@ -65,6 +65,7 @@ pub mod tools;
 pub mod tray;
 pub mod trial;
 pub mod uia;
+pub mod undo;
 pub mod verifier;
 pub mod window;
 
@@ -102,6 +103,12 @@ pub fn run() {
 
     let base = app_dir.unwrap_or_else(std::env::temp_dir);
     let audit = Audit::new(base.join("audit.jsonl"));
+
+    // Журнал отката — рядом с журналом действий, но отвечает на другой вопрос: не «что
+    // сделали», а «как вернуть». Без него приложение работает, просто не обещает откат.
+    if !undo::init(base.join("undo.jsonl")) {
+        tracing::warn!("журнал отката уже был открыт — вторая инициализация пропущена");
+    }
 
     // Память не должна мешать запуску: без неё приложение работает, просто не помнит
     // прошлые параметры. Поэтому ошибка уходит в лог, а не в панику.
@@ -167,6 +174,8 @@ pub fn run() {
             ipc::speech_status,
             ipc::isolation_status,
             ipc::foreground_window,
+            ipc::undo_report,
+            ipc::undo_apply,
             ipc::ui_dump,
             ipc::ui_press,
             ipc::ui_type,

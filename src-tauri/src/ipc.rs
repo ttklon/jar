@@ -39,6 +39,7 @@ use crate::stt;
 use crate::tools::{self, ParamSpec, ToolSpec};
 use crate::trial;
 use crate::uia;
+use crate::undo;
 use crate::window;
 
 /// Всё, что нужно командам. Один `Arc`, чтобы клонировать в фоновый поток.
@@ -360,6 +361,38 @@ pub fn app_status(state: State<'_, AppState>) -> AppStatus {
 }
 
 /// Инструменты, которые уже умеют работать (список — в `data/tools.json`).
+/// Что можно откатить за текущую сессию. Ничего не меняет: это взгляд, а не действие.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct UndoPreview {
+    pub session: String,
+    pub steps: Vec<undo::Step>,
+    /// Чего откат не умеет — прямо, рядом со списком, а не в документации.
+    pub note: String,
+}
+
+#[tauri::command]
+pub fn undo_report() -> Result<UndoPreview, String> {
+    let journal = undo::current().ok_or(
+        "журнал отката не открыт: это режим без папки приложения — откатывать нечего",
+    )?;
+    let steps = undo::plan(&journal.undoable(), journal.session(), |path| {
+        std::path::Path::new(path).exists()
+    });
+    Ok(UndoPreview {
+        session: journal.session().to_string(),
+        steps,
+        note: undo::NOTE.to_string(),
+    })
+}
+
+/// Откатить дела текущей сессии — в обратном порядке, с проверкой до и после шага.
+#[tauri::command]
+pub fn undo_apply() -> Result<undo::Report, String> {
+    let journal = undo::current()
+        .ok_or("журнал отката не открыт: это режим без папки приложения — откатывать нечего")?;
+    Ok(undo::undo_session(journal))
+}
+
 #[tauri::command]
 pub fn list_tools(state: State<'_, AppState>) -> Vec<ToolView> {
     tools::all()

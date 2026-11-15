@@ -9,7 +9,38 @@ import type {
   Presence,
   UiPress,
   UiTyped,
-AuditEvent, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RegistrySnapshot, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump } from "./types";
+  AuditEvent,
+  ConfirmToken,
+  CustomHand,
+  Downloaded,
+  EngineStatus,
+  Episode,
+  Fact,
+  FlowView,
+  ForegroundWindow,
+  HandDraft,
+  HashCheck,
+  IsolationStatus,
+  Learning,
+  ModelsView,
+  Plan,
+  PlanAnswer,
+  PlanCheck,
+  PlanItem,
+  PlanReport,
+  ProfileView,
+  RegistrySnapshot,
+  RoleView,
+  RunRecord,
+  SpeechStatus,
+  StepResult,
+  Thought,
+  ToolView,
+  TrialReport,
+  UiDump,
+  UndoPreview,
+  UndoReport,
+} from "./types";
 
 export interface AppStatus {
   version: string;
@@ -271,6 +302,14 @@ export function runTool(
 
 export function cancelTool(): Promise<void> {
   return invoke<void>("cancel_tool");
+}
+
+export function undoReport(): Promise<UndoPreview> {
+  return invoke<UndoPreview>("undo_report");
+}
+
+export function undoApply(): Promise<UndoReport> {
+  return invoke<UndoReport>("undo_apply");
 }
 
 export function auditTail(limit: number): Promise<AuditEvent[]> {

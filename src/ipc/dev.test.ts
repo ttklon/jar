@@ -23,6 +23,8 @@ import {
   listRoles,
   searchEpisodes,
   memoryRuns,
+  undoApply,
+  undoReport,
   assignRole,
   removeModel,
   startEngine,
@@ -155,6 +157,13 @@ describe("журнал в браузере", () => {
 
   it("возвращает пустой список, а не выдуманные события", async () => {
     await expect(auditTail(10)).resolves.toEqual([]);
+    // Откат в браузере — честный ноль с оговоркой, а не «откатили 0 дел».
+    const preview = await undoReport();
+    expect(preview.steps).toEqual([]);
+    expect(preview.note).toContain("в браузере файлы никто не двигает");
+    const report = await undoApply();
+    expect(report.undone).toBe(0);
+    expect(report.refused[0]).toContain("в браузере откат недоступен");
   });
 });
 

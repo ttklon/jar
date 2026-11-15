@@ -2579,14 +2579,28 @@ fn move_item(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicB
     let from = clean_path(param(params, "from"));
     let to = clean_path(param(params, "to"));
 
-    run_script(
+    let mut result = run_script(
         registry,
         MOVE_ITEM,
         &[("FROM", &from), ("TO", &to)],
         Expectation::StdoutMarker("ZSHELPER-OK"),
         Duration::from_secs(120),
         cancel,
-    )
+    );
+
+    // Запись об откате — только после проверенного успеха: обещать вернуть то, что не
+    // переехало, значит врать в отчёте. Не записалось — так и сказано в причине.
+    if result.ok {
+        if let Some(journal) = crate::undo::current() {
+            if journal.record(crate::undo::Kind::Move, &from, &to).is_err() {
+                result.reason = format!(
+                    "{}; в журнал отката не записалось — вернуть автоматически не смогу",
+                    result.reason
+                );
+            }
+        }
+    }
+    result
 }
 
 const RECYCLE: &str = r#"$target = $env:ZS_PATH
@@ -3527,6 +3541,64 @@ mod tests {
         assert!(free.exists() && !source.exists(), "файл переехал");
 
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Перенос, сделанный рукой, попадает в журнал отката и возвращается обратно.
+    ///
+    /// Журнал приложения открывается один раз на процесс, поэтому этот тест открывает его
+    /// сам. Откатывается только своя запись: чужие дела принадлежат другим тестам, которые
+    /// работают прямо сейчас, и трогать их нельзя.
+    #[cfg(windows)]
+    #[test]
+    fn a_move_is_written_into_the_undo_journal_and_comes_back() {
+        let dir = std::env::temp_dir().join(format!("zshelper-undo-{}-e2e", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(dir.join("архив")).expect("папка");
+        // Папку не убираем: журнал открыт на процесс, и другие тесты могут в него писать.
+        crate::undo::init(dir.join("undo.jsonl"));
+
+        let source = dir.join("документ.txt");
+        let target = dir.join("архив").join("документ.txt");
+        std::fs::write(&source, "важное").expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("from".to_string(), source.to_string_lossy().to_string());
+        params.insert("to".to_string(), target.to_string_lossy().to_string());
+
+        let moved = run(
+            "files|переместить|файлы/папки",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(moved.ok, "{}", moved.reason);
+        assert!(
+            !moved.reason.contains("в журнал отката не записалось"),
+            "{}",
+            moved.reason
+        );
+
+        let journal = crate::undo::current().expect("журнал открыт этим тестом");
+        let wanted = target.to_string_lossy().to_string();
+        let entry = journal
+            .undoable()
+            .into_iter()
+            .find(|entry| entry.to == wanted)
+            .expect("запись об откате появилась");
+
+        let steps = vec![crate::undo::Step {
+            entry,
+            refusal: None,
+        }];
+        let report = crate::undo::apply(
+            &steps,
+            |path| std::path::Path::new(path).exists(),
+            |from, to| std::fs::rename(from, to).map_err(|error| error.to_string()),
+        );
+
+        assert_eq!(report.undone, 1, "{report:?}");
+        assert!(source.exists(), "файл вернулся на старое место");
+        assert!(!target.exists(), "и там его больше нет");
+        assert_eq!(std::fs::read_to_string(&source).expect("текст"), "важное");
     }
 
     /// Запуск проверяется без побочных эффектов: файла нет — запуска быть не должно.
