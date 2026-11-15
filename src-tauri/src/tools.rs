@@ -5908,7 +5908,11 @@ ZSHELPER-DAW project=C:\\Users\\Имя\\Music\\трек.als";
         );
 
         assert!(!refused.ok);
-        assert!(refused.reason.contains("такого проекта нет"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("такого проекта нет"),
+            "{}",
+            refused.reason
+        );
         assert!(
             refused.reason.contains("не открывать пустоту"),
             "{}",
@@ -5930,8 +5934,16 @@ ZSHELPER-DAW project=C:\\Users\\Имя\\Music\\трек.als";
 
         if result.ok {
             // На машине разработчика студия может быть — тогда причина называет программу.
-            assert!(result.reason.contains("процесс поднялся"), "{}", result.reason);
-            assert!(result.reason.contains("известных DAW проверено: 10"), "{}", result.reason);
+            assert!(
+                result.reason.contains("процесс поднялся"),
+                "{}",
+                result.reason
+            );
+            assert!(
+                result.reason.contains("известных DAW проверено: 10"),
+                "{}",
+                result.reason
+            );
         } else {
             assert!(
                 result.reason.contains("проверил известных: 10"),
