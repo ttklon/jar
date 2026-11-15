@@ -142,7 +142,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|распаковать|архив" => expand_archive(registry, params, cancel),
         "files|скопировать|файлы/папки" => copy_item(registry, params),
         "files|сжать|в архив" => create_archive(registry, params, cancel),
-        "files|переименовать|массово по правилу" => rename_by_rule(registry, params),
+        "files|переименовать|массово по правилу" => {
+            rename_by_rule(registry, params)
+        }
         "web|открыть|сайт" => open_site(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
@@ -820,7 +822,9 @@ fn rename_by_rule(registry: &str, params: &BTreeMap<String, String>) -> StepResu
     let mut renamed = 0;
     for (from, to) in &planned {
         if let Err(error) = std::fs::rename(from, to) {
-            let name = from.file_name().map(|name| name.to_string_lossy().to_string());
+            let name = from
+                .file_name()
+                .map(|name| name.to_string_lossy().to_string());
             return StepResult::failed(
                 registry,
                 format!(
@@ -878,11 +882,7 @@ fn rename_by_rule(registry: &str, params: &BTreeMap<String, String>) -> StepResu
 ///    а не в пустоту;
 ///  * **что страница загрузилась, отсюда не проверить.** Это остаётся человеку, и в отчёте
 ///    так и написано: обещать проверку, которой нет, — хуже, чем её не иметь.
-fn open_site(
-    registry: &str,
-    params: &BTreeMap<String, String>,
-    cancel: &AtomicBool,
-) -> StepResult {
+fn open_site(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
     let started = Instant::now();
     let url = param(params, "url").trim();
 
@@ -2274,7 +2274,10 @@ mod tests {
 
     #[test]
     fn renaming_checks_the_whole_plan_before_changing_the_first_name() {
-        let root = temp_target("rename").parent().expect("папка").join("rename");
+        let root = temp_target("rename")
+            .parent()
+            .expect("папка")
+            .join("rename");
         std::fs::create_dir_all(root.join("вложенная")).expect("папка");
         std::fs::write(root.join("отчёт 1.txt"), "раз").expect("файл");
         std::fs::write(root.join("отчёт 2.txt"), "два").expect("файл");
@@ -2355,7 +2358,11 @@ mod tests {
         assert!(refused.reason.contains("http"), "{}", refused.reason);
 
         // Без ссылки рука тоже не гадает, какой сайт имелся в виду.
-        let empty = run("web|открыть|сайт", &BTreeMap::new(), &AtomicBool::new(false));
+        let empty = run(
+            "web|открыть|сайт",
+            &BTreeMap::new(),
+            &AtomicBool::new(false),
+        );
         assert!(!empty.ok);
     }
 
