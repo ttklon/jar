@@ -3914,7 +3914,9 @@ fn measure_change(
             if !saved_note.is_empty() {
                 reason.push_str(&format!("; между замерами было отмечено: «{saved_note}»"));
             }
-            reason.push_str("; базис обновлён — следующий замер сравню с этим; сам замер ничего не менял");
+            reason.push_str(
+                "; базис обновлён — следующий замер сравню с этим; сам замер ничего не менял",
+            );
             if let Some(error) = write_failed {
                 reason.push_str(&format!(
                     "; новый базис не сохранился ({error}) — в следующий раз сравню с прежним"
@@ -6814,13 +6816,28 @@ events=9 disk_free=101.4 hours=24",
 
         let reason = change_reason(&before, &after);
 
-        assert!(reason.contains("нагрузка процессора, %: 41 → 23 (-18)"), "{reason}");
+        assert!(
+            reason.contains("нагрузка процессора, %: 41 → 23 (-18)"),
+            "{reason}"
+        );
         // 9.2 из 16 — это 57% после округления: считается по числам, а не на глаз.
-        assert!(reason.contains("занятая память, %: 57 → 51 (-6)"), "{reason}");
+        assert!(
+            reason.contains("занятая память, %: 57 → 51 (-6)"),
+            "{reason}"
+        );
         assert!(reason.contains("процессов: 180 → 170 (-10)"), "{reason}");
-        assert!(reason.contains("службы работают: 122 → 120 (-2)"), "{reason}");
-        assert!(reason.contains("ошибок в журнале за сутки: 7 → 9 (+2)"), "{reason}");
-        assert!(reason.contains("свободно на системном диске, ГБ: 100 → 101 (+1)"), "{reason}");
+        assert!(
+            reason.contains("службы работают: 122 → 120 (-2)"),
+            "{reason}"
+        );
+        assert!(
+            reason.contains("ошибок в журнале за сутки: 7 → 9 (+2)"),
+            "{reason}"
+        );
+        assert!(
+            reason.contains("свободно на системном диске, ГБ: 100 → 101 (+1)"),
+            "{reason}"
+        );
     }
 
     /// Неизменное число названо, а не пропущено: молчание читается как «не смотрели».
@@ -6832,9 +6849,18 @@ events=9 disk_free=101.4 hours=24",
 
         let reason = change_reason(&before, &after);
 
-        assert!(reason.contains("нагрузка процессора, %: 23 — столько же"), "{reason}");
-        assert!(reason.contains("ошибок в журнале за сутки: 0 — столько же"), "{reason}");
-        assert!(reason.contains("память"), "память названа даже когда её не прочитали: {reason}");
+        assert!(
+            reason.contains("нагрузка процессора, %: 23 — столько же"),
+            "{reason}"
+        );
+        assert!(
+            reason.contains("ошибок в журнале за сутки: 0 — столько же"),
+            "{reason}"
+        );
+        assert!(
+            reason.contains("память"),
+            "память названа даже когда её не прочитали: {reason}"
+        );
     }
 
     /// «Не прочиталось» не превращается в ноль при сравнении.
@@ -6842,7 +6868,8 @@ events=9 disk_free=101.4 hours=24",
     fn an_unreadable_number_is_not_zero_in_the_change() {
         // В первом замере журнал не прочитался, во втором прочитался — это не «было 0».
         let before = parse_snapshot("ZSHELPER-OK procs=170 cpu=23 events=-1 hours=24").expect("до");
-        let after = parse_snapshot("ZSHELPER-OK procs=170 cpu=23 events=5 hours=24").expect("после");
+        let after =
+            parse_snapshot("ZSHELPER-OK procs=170 cpu=23 events=5 hours=24").expect("после");
 
         let reason = change_reason(&before, &after);
 
@@ -6879,13 +6906,21 @@ events=9 disk_free=101.4 hours=24",
 
         let second = run(registry, &params, &AtomicBool::new(false));
         assert!(second.ok, "{}", second.reason);
-        assert!(second.reason.contains("замер до/после"), "{}", second.reason);
+        assert!(
+            second.reason.contains("замер до/после"),
+            "{}",
+            second.reason
+        );
         assert!(
             second.reason.contains("между замерами было отмечено"),
             "пояснение сохраняется вместе с базисом: {}",
             second.reason
         );
-        assert!(second.reason.contains("базис обновлён"), "{}", second.reason);
+        assert!(
+            second.reason.contains("базис обновлён"),
+            "{}",
+            second.reason
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
