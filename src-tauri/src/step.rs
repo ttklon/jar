@@ -32,6 +32,12 @@ pub enum Evidence {
         path: String,
         bytes: usize,
     },
+    /// Поиск текста по файлам: сколько строк с совпадением и в скольких файлах. Ноль —
+    /// тоже доказательство, а не провал: «нигде не встречается» это честный ответ.
+    Search {
+        files: usize,
+        hits: usize,
+    },
     /// Файлы переименованы: проверка — список папки после, а не код возврата.
     Renamed {
         folder: String,
@@ -55,6 +61,7 @@ impl Evidence {
             Evidence::StdoutMarker { .. } => "stdout_marker",
             Evidence::FileText { .. } => "file_text",
             Evidence::FileRead { .. } => "file_read",
+            Evidence::Search { .. } => "search",
             Evidence::Renamed { .. } => "renamed",
             Evidence::UiChanged { .. } => "ui_changed",
             Evidence::Failed { .. } => "failed",
@@ -88,6 +95,9 @@ impl Evidence {
             }
             Evidence::FileRead { path, bytes } => {
                 format!("прочитано {bytes} байт из файла: {path}")
+            }
+            Evidence::Search { files, hits } => {
+                format!("строк с совпадением: {hits} в файлах: {files}")
             }
             Evidence::Renamed { folder, count } => {
                 format!("переименовано файлов: {count} — {folder}")

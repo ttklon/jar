@@ -607,9 +607,9 @@ mod tests {
     #[test]
     fn a_step_without_a_hand_is_refused() {
         let plan = Plan {
-            goal: "найди по содержимому".to_string(),
+            goal: "покажи, что внутри архива".to_string(),
             source: "model".to_string(),
-            steps: vec![step("files|найти|по содержимому")],
+            steps: vec![step("files|открыть|архив без распаковки")],
         };
 
         let problems = check(&plan, &registry());

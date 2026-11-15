@@ -146,6 +146,8 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
             rename_by_rule(registry, params)
         }
         "web|открыть|сайт" => open_site(registry, params, cancel),
+        "files|найти|по содержимому" => find_text(registry, params, cancel),
+        "files|открыть|файл в программе" => open_file(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -721,6 +723,228 @@ fn create_archive(
     result.reason = format!("архив создан: {size} байт — {to}");
     result
 }
+
+/// Сколько байт файла ещё считается текстом. Больше — это уже не «найти строку»,
+/// а чтение гигабайтов ради одной строчки.
+const SEARCH_MAX_FILE: u64 = 1024 * 1024;
+/// Сколько файлов просматриваем за один поиск. Потолок назван в отчёте.
+const SEARCH_MAX_FILES: usize = 5_000;
+/// Сколько строк с совпадением считаем. Дальше — «потолок выбран», и это сказано.
+const SEARCH_MAX_HITS: usize = 50;
+/// Сколько строк показываем человеку. Остальные есть в счёте.
+const SEARCH_MAX_SHOWN: usize = 20;
+
+/// Найти строку текста в файлах папки.
+///
+/// Правила — про честность ответа:
+///
+///  * **ищем текст, а не байты.** Двоичные и слишком большие файлы пропускаются и
+///    считаются: «поискал везде» и «поискал в том, что похоже на текст» — разные вещи, и
+///    человек должен знать, какая из них была;
+///  * **потолки названы.** Файлов и строк конечное число; когда потолок выбран,
+///    в отчёте сказано, что просмотрено не всё;
+///  * **«нигде не встречается» — тоже ответ**, а не ошибка и не повод для повтора;
+///  * **доказательство — счёт строк с совпадением и файлов.** Не «вывод без ошибки».
+fn find_text(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let folder = clean_path(param(params, "path"));
+    let query = param(params, "query").trim().to_string();
+
+    if folder.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Где искать»");
+    }
+    if query.is_empty() {
+        return StepResult::failed(
+            registry,
+            "не задано, что искать: пустая строка есть в любом файле",
+        );
+    }
+    if has_parent_dir(&folder) {
+        return StepResult::failed(
+            registry,
+            "в пути есть «..» — назови папку полным путём, без сокращений",
+        );
+    }
+
+    let root = std::path::Path::new(&folder);
+    if !root.is_dir() {
+        return StepResult::failed(registry, format!("это не папка: {folder}"));
+    }
+
+    let needle = query.to_lowercase();
+    let mut stack = vec![root.to_path_buf()];
+    let mut visited = 0usize;
+    let mut skipped = 0usize;
+    let mut files = 0usize;
+    let mut hits = 0usize;
+    let mut shown: Vec<String> = Vec::new();
+    let mut cut = false;
+
+    while let Some(current) = stack.pop() {
+        if cancel.load(std::sync::atomic::Ordering::Relaxed) {
+            return StepResult::failed(registry, "отменено до конца поиска");
+        }
+
+        let Ok(entries) = std::fs::read_dir(&current) else {
+            // Нечитаемая папка — не повод падать: она просто не просмотрена.
+            skipped += 1;
+            continue;
+        };
+
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let Ok(metadata) = entry.metadata() else { continue };
+            if metadata.is_dir() {
+                stack.push(path);
+                continue;
+            }
+            if !metadata.is_file() {
+                continue;
+            }
+
+            visited += 1;
+            if visited > SEARCH_MAX_FILES {
+                cut = true;
+                break;
+            }
+            if metadata.len() > SEARCH_MAX_FILE {
+                skipped += 1;
+                continue;
+            }
+
+            let Ok(bytes) = std::fs::read(&path) else {
+                skipped += 1;
+                continue;
+            };
+            let Ok(text) = String::from_utf8(bytes) else {
+                skipped += 1;
+                continue;
+            };
+
+            let mut matched = false;
+            for (number, line) in text.lines().enumerate() {
+                if hits >= SEARCH_MAX_HITS {
+                    cut = true;
+                    break;
+                }
+                if !line.to_lowercase().contains(&needle) {
+                    continue;
+                }
+                hits += 1;
+                matched = true;
+                if shown.len() < SEARCH_MAX_SHOWN {
+                    let excerpt: String = line.trim().chars().take(160).collect();
+                    shown.push(format!("{}:{} — {excerpt}", path.display(), number + 1));
+                }
+            }
+            if matched {
+                files += 1;
+            }
+        }
+
+        if cut {
+            break;
+        }
+    }
+
+    let mut result = StepResult::ok_with(
+        registry,
+        Evidence::Search { files, hits },
+        format!(
+            "строк с совпадением: {hits} в файлах: {files} — просмотрено {visited}, пропущено {skipped} (двоичные, большие и нечитаемые)"
+        ),
+        started.elapsed().as_millis() as u64,
+    );
+
+    if hits == 0 {
+        result.reason = format!(
+            "нигде не встречается: «{query}» — просмотрено {visited}, пропущено {skipped}"
+        );
+    }
+    if cut {
+        result.reason.push_str(&format!(
+            "; потолок поиска выбран ({SEARCH_MAX_FILES} файлов, {SEARCH_MAX_HITS} строк) — просмотрено не всё"
+        ));
+    }
+    result.stdout_tail = shown.join("\n");
+    result
+}
+
+/// Открыть файл программой по умолчанию.
+///
+/// Что здесь важно:
+///
+///  * **запускаемые файлы не открываются.** `.exe`, `.bat`, `.ps1`, `.lnk` и подобное —
+///    это запуск программы, а не «открыть файл». У запуска своя рука и своё подтверждение;
+///    иначе «открой отчёт.pdf.exe» обошло бы его целиком;
+///  * **файл обязан существовать и быть файлом** — папка открывается проводником, а это
+///    другое действие;
+///  * **доказательство — связь расширения назвалась**: Windows знает, какая программа
+///    отвечает за это расширение. Что файл правда открылся, отсюда не проверить, и это
+///    написано прямо.
+fn open_file(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задан параметр «Файл»");
+    }
+    if has_parent_dir(&path) {
+        return StepResult::failed(
+            registry,
+            "в пути есть «..» — назови файл полным путём, без сокращений",
+        );
+    }
+
+    let file = std::path::Path::new(&path);
+    if !file.is_file() {
+        return StepResult::failed(registry, format!("это не файл: {path}"));
+    }
+
+    let extension = file
+        .extension()
+        .map(|value| value.to_string_lossy().to_lowercase())
+        .unwrap_or_default();
+    if LAUNCH_EXTENSIONS.contains(&extension.as_str()) {
+        return StepResult::failed(
+            registry,
+            format!(
+                "«.{extension}» — это запуск программы, а не открытие файла: для запуска есть apps-windows|запустить|программу со своим подтверждением"
+            ),
+        );
+    }
+
+    let mut result = run_script(
+        registry,
+        OPEN_FILE,
+        &[("PATH", &path)],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(60),
+        cancel,
+    );
+    if !result.ok {
+        return result;
+    }
+
+    let handler = result
+        .stdout_tail
+        .split_whitespace()
+        .find_map(|word| word.strip_prefix("handler="))
+        .unwrap_or("связь не назвалась");
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = format!(
+        "файл передан системе ({handler}): {path} — что он открылся, отсюда не проверить, это видно на экране"
+    );
+    result
+}
+
+/// Расширения, которые не «открываются», а запускаются. Список нарочно с запасом:
+/// лучше отказать лишний раз, чем один раз запустить чужой файл без подтверждения.
+const LAUNCH_EXTENSIONS: &[&str] = &[
+    "exe", "com", "bat", "cmd", "ps1", "psm1", "vbs", "vbe", "js", "jse", "wsf", "wsh", "msi",
+    "msp", "scr", "lnk", "url", "reg", "hta", "cpl", "jar",
+];
 
 /// Переименовать файлы в папке по правилу «найти в имени — заменить».
 ///
@@ -1495,6 +1719,26 @@ try {
 }
 Write-Output ('ZSHELPER-OK progid={0}' -f $progId)"#;
 
+const OPEN_FILE: &str = r#"$ErrorActionPreference = 'Stop'
+$file = $env:ZS_PATH
+if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
+  Write-Output 'ZSHELPER-MISSING: файла нет'
+  exit 3
+}
+$extension = [System.IO.Path]::GetExtension($file)
+$handler = 'связь не назвалась'
+if ($extension) {
+  $progId = (Get-ItemProperty ('Registry::HKEY_CLASSES_ROOT\' + $extension) -ErrorAction SilentlyContinue).'(default)'
+  if ($progId) { $handler = $progId }
+}
+try {
+  Start-Process -FilePath $file -ErrorAction Stop
+} catch {
+  Write-Output ('ZSHELPER-FAILED: ' + $_.Exception.Message)
+  exit 4
+}
+Write-Output ('ZSHELPER-OK handler={0}' -f $handler)"#;
+
 const EXPAND_ARCHIVE: &str = r#"$ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::ExtractToDirectory($env:ZS_PATH, $env:ZS_TO)
@@ -1634,6 +1878,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("files|распаковать|архив", EXPAND_ARCHIVE),
         ("files|сжать|в архив", COMPRESS_ARCHIVE),
         ("web|открыть|сайт", OPEN_SITE),
+        ("files|открыть|файл в программе", OPEN_FILE),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -2374,6 +2619,132 @@ mod tests {
         assert!(scripts()
             .iter()
             .any(|(registry, _)| *registry == "web|открыть|сайт"));
+    }
+
+    #[test]
+    fn searching_text_names_what_it_found_and_what_it_skipped() {
+        let root = temp_target("search")
+            .parent()
+            .expect("папка")
+            .join("search");
+        std::fs::create_dir_all(root.join("вложенная")).expect("папка");
+        std::fs::write(root.join("счёт.txt"), "ИНН 7701 и ещё раз ИНН 7701").expect("файл");
+        std::fs::write(root.join("вложенная/договор.txt"), "тут только ИНН 7701").expect("файл");
+        std::fs::write(root.join("прочее.txt"), "ничего интересного").expect("файл");
+        // Двоичный файл пропускается и считается пропущенным, а не выдаётся за проверенный.
+        std::fs::write(root.join("картинка.bin"), [0u8, 159, 146, 150]).expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), root.to_string_lossy().to_string());
+        params.insert("query".to_string(), "инн 7701".to_string());
+
+        let found = run(
+            "files|найти|по содержимому",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(found.ok, "{}", found.reason);
+        assert_eq!(found.evidence.kind(), "search");
+        // Считаются строки, а не вхождения внутри строки: в «счёт.txt» их две, но строка одна.
+        assert!(found.reason.contains("строк с совпадением: 2"), "{}", found.reason);
+        assert!(found.reason.contains("в файлах: 2"), "{}", found.reason);
+        assert!(found.reason.contains("пропущено 1"), "{}", found.reason);
+        // Показываем, где именно: файл и номер строки.
+        assert!(found.stdout_tail.contains("счёт.txt:1"), "{}", found.stdout_tail);
+
+        // Нигде не встречается — честный ответ, а не ошибка и не повод повторять.
+        params.insert("query".to_string(), "такого текста нет".to_string());
+        let nothing = run(
+            "files|найти|по содержимому",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(nothing.ok, "{}", nothing.reason);
+        assert!(
+            nothing.reason.contains("нигде не встречается"),
+            "{}",
+            nothing.reason
+        );
+
+        // Пустой запрос есть в любом файле, поэтому он не принимается вовсе — и отказывает
+        // ещё проверка параметров, до чтения диска.
+        params.insert("query".to_string(), "   ".to_string());
+        let empty = run(
+            "files|найти|по содержимому",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!empty.ok);
+        assert!(
+            empty.reason.contains("не задан параметр"),
+            "{}",
+            empty.reason
+        );
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn opening_a_file_refuses_to_launch_programs_instead_of_opening_them() {
+        let root = temp_target("open").parent().expect("папка").join("open");
+        std::fs::create_dir_all(&root).expect("папка");
+        std::fs::write(root.join("отчёт.exe"), "расширение решает, а не содержимое")
+            .expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert(
+            "path".to_string(),
+            root.join("отчёт.exe").to_string_lossy().to_string(),
+        );
+        let refused = run(
+            "files|открыть|файл в программе",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(
+            refused.reason.contains("запуск программы"),
+            "{}",
+            refused.reason
+        );
+
+        // Папка — не файл: у папки своё действие, эта рука её не открывает.
+        params.insert("path".to_string(), root.to_string_lossy().to_string());
+        let folder = run(
+            "files|открыть|файл в программе",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!folder.ok);
+        assert!(folder.reason.contains("не файл"), "{}", folder.reason);
+
+        // Несуществующий файл — тоже отказ, а не «открыл в никуда».
+        params.insert(
+            "path".to_string(),
+            root.join("нет.pdf").to_string_lossy().to_string(),
+        );
+        let missing = run(
+            "files|открыть|файл в программе",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!missing.ok);
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn the_open_file_script_asks_the_registry_for_the_handler() {
+        assert!(OPEN_FILE.contains("$env:ZS_PATH"));
+        assert!(OPEN_FILE.contains("HKEY_CLASSES_ROOT"));
+        assert!(OPEN_FILE.contains("handler="));
+        assert!(scripts()
+            .iter()
+            .any(|(registry, _)| *registry == "files|открыть|файл в программе"));
+        // Поиск по содержимому — своя рука: внешней программы у неё нет.
+        assert!(!scripts()
+            .iter()
+            .any(|(registry, _)| *registry == "files|найти|по содержимому"));
     }
 
     #[test]
