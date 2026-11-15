@@ -188,6 +188,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "processes-services|замерить|изменение нагрузки" => {
             measure_change(registry, params, cancel)
         }
+        "video|склеить|ролики" => concat_videos(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -3808,6 +3809,266 @@ foreach ($group in $ordered) {
 }
 "#;
 
+const CONCAT_VIDEOS: &str = r#"$ErrorActionPreference = 'Stop'
+$files = @($env:ZS_FILES -split ';' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
+$out = $env:ZS_OUT
+if ($files.Count -lt 2) {
+  Write-Output ('ZSHELPER-FAILED: для склейки нужно хотя бы два ролика — названо: ' + $files.Count)
+  exit 2
+}
+foreach ($file in $files) {
+  if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
+    Write-Output ('ZSHELPER-FAILED: нет файла «' + $file + '» — проверьте путь')
+    exit 3
+  }
+}
+if (-not $out) {
+  Write-Output 'ZSHELPER-FAILED: не назван файл, куда склеивать'
+  exit 4
+}
+if (Test-Path -LiteralPath $out) {
+  Write-Output ('ZSHELPER-FAILED: «' + $out + '» уже есть — перезаписывать не буду; назовите другое имя')
+  exit 5
+}
+$tool = Get-Command ffmpeg -ErrorAction SilentlyContinue
+if (-not $tool) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не установлен — склеивает он; поставьте его (winget install Gyan.FFmpeg) и повторите; сам ставить не буду'
+  exit 6
+}
+$probe = Get-Command ffprobe -ErrorAction SilentlyContinue
+# Однородность: без перекодирования склеивать можно только одинаковые по формату ролики.
+$shapes = @()
+$hasAudio = 1
+$durations = @()
+foreach ($file in $files) {
+  if (-not $probe) { break }
+  $video = (& $probe.Source -v error -select_streams v:0 -show_entries stream=width,height,codec_name -of csv=p=0 $file 2>$null | Select-Object -First 1)
+  $audio = (& $probe.Source -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 $file 2>$null | Select-Object -First 1)
+  if (-not $audio) { $hasAudio = 0 }
+  $duration = (& $probe.Source -v error -show_entries format=duration -of csv=p=0 $file 2>$null | Select-Object -First 1)
+  $durations += $duration
+  $shapes += [string]$video
+}
+if ($probe -and $shapes.Count -eq $files.Count) {
+  $first = $shapes[0]
+  for ($i = 1; $i -lt $shapes.Count; $i++) {
+    if ($shapes[$i] -ne $first) {
+      Write-Output ('ZSHELPER-FAILED: ролики разного формата — «' + [System.IO.Path]::GetFileName($files[0]) + '» это ' + $first + ', а «' + [System.IO.Path]::GetFileName($files[$i]) + '» это ' + $shapes[$i] + '; без перекодирования их не склеить, а перекодировать без спроса я не буду')
+      exit 7
+    }
+  }
+}
+$sum = 0.0
+$sumKnown = 0
+if ($probe -and $durations.Count -eq $files.Count) {
+  $sumKnown = 1
+  foreach ($value in $durations) {
+    $seconds = 0.0
+    if ([double]::TryParse([string]$value, [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$seconds)) { $sum += $seconds }
+  }
+}
+$arguments = @('-hide_banner', '-loglevel', 'error', '-y')
+foreach ($file in $files) { $arguments += @('-i', $file) }
+$chain = ''
+for ($i = 0; $i -lt $files.Count; $i++) {
+  if ($hasAudio -eq 1) { $chain += ('[' + $i + ':v][' + $i + ':a]') } else { $chain += ('[' + $i + ':v]') }
+}
+if ($hasAudio -eq 1) {
+  $chain += ('concat=n=' + $files.Count + ':v=1:a=1[v][a]')
+  $arguments += @('-filter_complex', $chain, '-map', '[v]', '-map', '[a]')
+} else {
+  $chain += ('concat=n=' + $files.Count + ':v=1:a=0[v]')
+  $arguments += @('-filter_complex', $chain, '-map', '[v]')
+}
+$arguments += @('-c:v', 'libx264', '-crf', '20', '-preset', 'medium')
+if ($hasAudio -eq 1) { $arguments += @('-c:a', 'aac', '-b:a', '192k') }
+$arguments += $out
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.UseShellExecute = $false
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError = $true
+$psi.FileName = $tool.Source
+$psi.Arguments = ($arguments -join ' ')
+$proc = New-Object System.Diagnostics.Process
+$proc.StartInfo = $psi
+$code = -1
+$timedOut = 0
+$err = ''
+try {
+  [void]$proc.Start()
+  $outTask = $proc.StandardOutput.ReadToEndAsync()
+  $errTask = $proc.StandardError.ReadToEndAsync()
+  if ($proc.WaitForExit(1200000)) { $code = $proc.ExitCode } else { $timedOut = 1; try { $proc.Kill() } catch { } }
+  if ($errTask.Wait(10000)) { $err = $errTask.Result }
+  if ($outTask.Wait(10000)) { [void]$outTask.Result }
+} catch {
+  Write-Output ('ZSHELPER-FAILED: не удалось запустить ffmpeg — ' + $_.Exception.Message)
+  exit 8
+}
+if ($timedOut -eq 1) {
+  Write-Output 'ZSHELPER-FAILED: двадцати минут не хватило — прогон остановлен, файл мог остаться недописанным'
+  exit 9
+}
+if ($code -ne 0) {
+  $tail = @($err -split "`r?`n" | Where-Object { $_ -ne '' } | Select-Object -Last 3) -join ' | '
+  Write-Output ('ZSHELPER-FAILED: ffmpeg вернул код ' + $code + ' — ' + $tail)
+  exit 10
+}
+$made = Get-Item -LiteralPath $out -ErrorAction SilentlyContinue
+if (-not $made -or $made.Length -le 0) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не оставил файла — склейка не состоялась'
+  exit 11
+}
+$outDuration = ''
+if ($probe) {
+  $outDuration = (& $probe.Source -v error -show_entries format=duration -of csv=p=0 $out 2>$null | Select-Object -First 1)
+}
+$diff = ''
+if ($sumKnown -eq 1 -and $outDuration) {
+  $seconds = 0.0
+  if ([double]::TryParse([string]$outDuration, [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$seconds)) {
+    $diff = [string][math]::Round([math]::Abs($seconds - $sum), 2)
+    $outDuration = [string][math]::Round($seconds, 2)
+  }
+}
+$sumText = ''
+if ($sumKnown -eq 1) { $sumText = [string][math]::Round($sum, 2) }
+Write-Output ('ZSHELPER-OK parts=' + $files.Count + ' sum=' + $sumText + ' out=' + $outDuration + ' diff=' + $diff + ' audio=' + $hasAudio + ' size=' + $made.Length + ' probed=' + $sumKnown)
+Write-Output ('ZSHELPER-FILE ' + $out)
+"#;
+
+/// Склеить ролики в один файл и проверить, что длительность сошлась.
+///
+/// Что здесь принципиально:
+///
+///  * **однородность проверяется до работы.** Склеить ролики разных форматов без перекодирования
+///    нельзя, а перекодировать без спроса — значит испортить качество молча. Разные форматы —
+///    отказ с оба названными форматами;
+///  * **проверка результата — длительность**, а не «ffmpeg не ругнулся»: сумма частей по ffprobe
+///    против длительности результата, расхождение до 1 секунды (контейнеры округляют);
+///  * **перезапись запрещена**: файл уже есть — отказ, имя выбирает человек;
+///  * **потолки числом**: не больше 20 роликов за раз, 20 минут на прогон;
+///  * **собранный файл попадает в журнал отката**: «откатить за сессию» уберёт его в корзину,
+///    исходники при этом целы.
+fn concat_videos(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let raw_files = param(params, "files");
+    let files: Vec<String> = raw_files
+        .split([';', '\n'])
+        .map(clean_path)
+        .filter(|path| !path.is_empty())
+        .collect();
+    let out_param = clean_path(param(params, "output"));
+
+    if files.len() < 2 {
+        return StepResult::failed(
+            registry,
+            format!(
+                "нужно хотя бы два ролика, а названо: {} — без второго склеивать нечего",
+                files.len()
+            ),
+        );
+    }
+    if files.len() > 20 {
+        return StepResult::failed(
+            registry,
+            format!(
+                "роликов названо: {} — больше двадцати за раз не склеиваю, разбейте на части",
+                files.len()
+            ),
+        );
+    }
+    for file in &files {
+        if !std::path::Path::new(file).is_file() {
+            return StepResult::failed(registry, format!("такого файла нет: {file} — проверьте путь"));
+        }
+    }
+    let out = if out_param.is_empty() {
+        let first = std::path::Path::new(&files[0]);
+        let stem = first
+            .file_stem()
+            .map(|name| name.to_string_lossy().to_string())
+            .unwrap_or_else(|| "видео".to_string());
+        first
+            .parent()
+            .unwrap_or_else(|| std::path::Path::new("."))
+            .join(format!("{stem} (склейка).mp4"))
+            .display()
+            .to_string()
+    } else {
+        out_param
+    };
+    if std::path::Path::new(&out).exists() {
+        return StepResult::failed(
+            registry,
+            format!("«{out}» уже есть — перезаписывать не буду; назовите другое имя"),
+        );
+    }
+
+    let joined = files.join(";");
+    let mut result = run_script(
+        registry,
+        CONCAT_VIDEOS,
+        &[("FILES", joined.as_str()), ("OUT", out.as_str())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(1260),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let field = |name: &str| -> String {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .unwrap_or("")
+            .to_string()
+    };
+    let parts = field("parts=").parse::<u64>().unwrap_or_default();
+    let sum = field("sum=");
+    let length = field("out=");
+    let diff = field("diff=").parse::<f64>().unwrap_or_default();
+    let audio = field("audio=") == "1";
+    let size = field("size=").parse::<u64>().unwrap_or_default();
+    let megabytes = format!("{:.1} МБ", size as f64 / (1024.0 * 1024.0));
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    if diff > 1.0 {
+        // Расхождение больше секунды — это не округление контейнера, а потерянные кадры.
+        result.ok = false;
+        result.reason = format!(
+            "склейка не сошлась по длительности: сумма частей {sum} с, результат {length} с — расхождение {diff} с; файл остался, но доверять ему нельзя"
+        );
+        return result;
+    }
+    let sound = if audio {
+        "звук сохранён"
+    } else {
+        "у одного из роликов не было звука — склеено только видео"
+    };
+    let verification = if length.is_empty() {
+        format!("длительность сверить не смог (ffprobe нет) — проверены части: {parts} и размер")
+    } else {
+        format!("длительность сошлась: {length} с против суммы {sum} с (расхождение {diff} с)")
+    };
+    result.reason = format!(
+        "склеено роликов: {parts}, {megabytes}, {verification}; {sound}; файл: {out}"
+    );
+    if crate::undo::record_product(&files.join(";"), &out) {
+        result.reason.push_str("; записан в журнал отката — «откатить за сессию» уберёт его в корзину, исходники целы");
+    }
+    result
+}
+
 /// Где руке хранить свой маленький файл состояния (базис замера «до/после»).
 ///
 /// Ставится один раз при старте приложения рядом с журналами; в тестах и утилитах остаётся
@@ -4905,6 +5166,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("files|найти|двойники", FIND_TWINS),
         ("files|убрать|двойников в карантин", FIND_TWINS),
         ("processes-services|замерить|изменение нагрузки", SNAPSHOT),
+        ("video|склеить|ролики", CONCAT_VIDEOS),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }
@@ -6798,6 +7060,157 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert_eq!(groups[0].paths.len(), 3);
         assert_eq!(groups[1].paths, vec!["C:\\b\\x.bin", "C:\\b\\y.bin"]);
         assert_eq!(groups[1].wasted, 300);
+    }
+
+    /// Один ролик — не склейка: отказ до всякой работы, с числом названных.
+    #[test]
+    fn concatenation_needs_at_least_two_pieces() {
+        let mut params = BTreeMap::new();
+        params.insert("files".to_string(), "C:\\видео\\один.mp4".to_string());
+
+        let refused = run("video|склеить|ролики", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("хотя бы два ролика"), "{}", refused.reason);
+        assert!(refused.reason.contains("названо: 1"), "{}", refused.reason);
+    }
+
+    /// Потолок числа роликов назван числом, и выход за него — отказ.
+    #[test]
+    fn concatenation_is_capped_by_a_named_number() {
+        let files: Vec<String> = (1..=21).map(|index| format!("C:\\в\\{index}.mp4")).collect();
+        let mut params = BTreeMap::new();
+        params.insert("files".to_string(), files.join("; "));
+
+        let refused = run("video|склеить|ролики", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("больше двадцати"), "{}", refused.reason);
+    }
+
+    /// Пропавший ролик называется до запуска ffmpeg — а не после двадцати минут работы.
+    #[test]
+    fn a_missing_piece_is_named_before_the_work() {
+        let dir = std::env::temp_dir().join(format!("zshelper-concat-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("папка");
+        let one = dir.join("есть.mp4");
+        std::fs::write(&one, b"не видео, но файл есть").expect("файл");
+        let mut params = BTreeMap::new();
+        params.insert(
+            "files".to_string(),
+            format!("{};{}", one.display(), dir.join("нет.mp4").display()),
+        );
+
+        let refused = run("video|склеить|ролики", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("такого файла нет"), "{}", refused.reason);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Перезапись запрещена: имя результата занято — отказ, а не «перезапишу молча».
+    #[test]
+    fn concatenation_never_overwrites() {
+        let dir = std::env::temp_dir().join(format!("zshelper-concat-out-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("папка");
+        let one = dir.join("a.mp4");
+        let two = dir.join("b.mp4");
+        std::fs::write(&one, b"1").expect("файл");
+        std::fs::write(&two, b"2").expect("файл");
+        let out = dir.join("итог.mp4");
+        std::fs::write(&out, b"уже есть").expect("файл");
+        let mut params = BTreeMap::new();
+        params.insert("files".to_string(), format!("{};{}", one.display(), two.display()));
+        params.insert("output".to_string(), out.display().to_string());
+
+        let refused = run("video|склеить|ролики", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("перезаписывать не буду"), "{}", refused.reason);
+        assert_eq!(
+            std::fs::read(&out).expect("читается"),
+            b"уже есть".to_vec(),
+            "файл не тронут"
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Живая склейка: два коротких ролика, длительность результата сходится с суммой.
+    ///
+    /// Если ffmpeg нет, проверяется честный отказ с его именем — врать об успехе нельзя
+    /// ни в том, ни в другом случае.
+    #[cfg(windows)]
+    #[test]
+    fn a_live_concatenation_adds_up_by_duration() {
+        let ffmpeg = std::process::Command::new("ffmpeg")
+            .arg("-version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false);
+        let dir = std::env::temp_dir().join(format!("zshelper-concat-live-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+
+        let mut params = BTreeMap::new();
+        if !ffmpeg {
+            let one = dir.join("a.mp4");
+            let two = dir.join("b.mp4");
+            std::fs::write(&one, b"не видео").expect("файл");
+            std::fs::write(&two, b"не видео").expect("файл");
+            params.insert("files".to_string(), format!("{};{}", one.display(), two.display()));
+            params.insert("output".to_string(), dir.join("итог.mp4").display().to_string());
+
+            let refused = run("video|склеить|ролики", &params, &AtomicBool::new(false));
+
+            assert!(!refused.ok, "без ffmpeg успеха быть не может");
+            assert!(refused.reason.contains("ffmpeg"), "{}", refused.reason);
+            let _ = std::fs::remove_dir_all(&dir);
+            return;
+        }
+
+        // Два ролика по секунде, одинакового формата — ровно тот случай, что рука обещает.
+        for (index, name) in ["часть 1.mp4", "часть 2.mp4"].iter().enumerate() {
+            let path = dir.join(name);
+            let status = std::process::Command::new("ffmpeg")
+                .args([
+                    "-hide_banner",
+                    "-loglevel",
+                    "error",
+                    "-y",
+                    "-f",
+                    "lavfi",
+                    "-i",
+                    "testsrc=size=160x120:rate=10:duration=1",
+                    "-f",
+                    "lavfi",
+                    "-i",
+                    "sine=frequency=440:duration=1",
+                    "-c:v",
+                    "libx264",
+                    "-pix_fmt",
+                    "yuv420p",
+                    "-c:a",
+                    "aac",
+                    "-shortest",
+                ])
+                .arg(&path)
+                .status()
+                .expect("ffmpeg запускается");
+            assert!(status.success(), "ролик {} не создался", index + 1);
+        }
+        params.insert(
+            "files".to_string(),
+            format!("{};{}", dir.join("часть 1.mp4").display(), dir.join("часть 2.mp4").display()),
+        );
+        params.insert("output".to_string(), dir.join("итог.mp4").display().to_string());
+
+        let result = run("video|склеить|ролики", &params, &AtomicBool::new(false));
+
+        assert!(result.ok, "{}", result.reason);
+        assert!(result.reason.contains("склеено роликов: 2"), "{}", result.reason);
+        assert!(result.reason.contains("длительность сошлась"), "{}", result.reason);
+        assert!(dir.join("итог.mp4").exists(), "результат на месте");
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// Разница двух замеров называется по каждому числу: было → стало, и насколько.

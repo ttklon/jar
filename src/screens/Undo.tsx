@@ -24,6 +24,7 @@ const KIND_LABEL: Record<string, string> = {
   rename: "переименование",
   copy: "копия",
   compress: "сжатие",
+  product: "собранный файл",
 };
 
 const useStyles = makeStyles({

@@ -39,6 +39,8 @@ pub enum Kind {
     Copy,
     /// Появился сжатый файл: исходник цел, рядом прибавка.
     Compress,
+    /// Появился собранный файл (склейка, рендер): исходники целы, прибавка одна.
+    Product,
 }
 
 impl Kind {
@@ -49,12 +51,13 @@ impl Kind {
             Kind::Rename => "переименование",
             Kind::Copy => "копия",
             Kind::Compress => "сжатие",
+            Kind::Product => "собранный файл",
         }
     }
 
     /// Отменяется ли дело переносом обратно (да) или уборкой продукта в корзину (нет).
     pub fn is_removal(self) -> bool {
-        matches!(self, Kind::Copy | Kind::Compress)
+        matches!(self, Kind::Copy | Kind::Compress | Kind::Product)
     }
 }
 
@@ -123,9 +126,9 @@ impl Report {
 }
 
 /// Что откат **не** умеет — прямо, чтобы никто не надеялся зря.
-pub const NOTE: &str = "откатываются переносы, переименования, копии и сжатые файлы этой \
-сессии: копия и сжатое убираются в корзину, их можно достать оттуда; запись в файл, \
-скачивание и уже сделанная корзина — нет: старого содержимого не вернуть";
+pub const NOTE: &str = "откатываются переносы, переименования, копии, сжатые и собранные \
+файлы этой сессии: копия, сжатое и собранное убираются в корзину, их можно достать оттуда; \
+запись в файл, скачивание и уже сделанная корзина — нет: старого содержимого не вернуть";
 
 /// Разбор журнала: построчно, терпимо к битым строкам.
 pub fn parse(text: &str) -> Vec<Entry> {
@@ -236,7 +239,7 @@ fn refuse_reason(entry: &Entry, session: &str, exists: &impl Fn(&str) -> bool) -
                 entry.from
             ),
             // Продукта нет — убирать нечего, и источник при этом цел.
-            Kind::Copy | Kind::Compress => {
+            Kind::Copy | Kind::Compress | Kind::Product => {
                 format!("{} уже нет — убирать нечего, исходник не тронут", entry.to)
             }
         });
@@ -382,6 +385,14 @@ pub fn record_rename(from: &str, to: &str) -> bool {
 pub fn record_copy(from: &str, to: &str) -> bool {
     match current() {
         Some(journal) => journal.record(Kind::Copy, from, to).is_ok(),
+        None => false,
+    }
+}
+
+/// Записать собранный файл: откат уберёт его в корзину, исходники не тронет.
+pub fn record_product(from: &str, to: &str) -> bool {
+    match current() {
+        Some(journal) => journal.record(Kind::Product, from, to).is_ok(),
         None => false,
     }
 }
