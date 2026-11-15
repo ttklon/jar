@@ -169,8 +169,7 @@ impl Journal {
             .append(true)
             .open(&self.path)
             .map_err(|error| format!("журнал отката не открылся на запись: {error}"))?;
-        writeln!(file, "{line}")
-            .map_err(|error| format!("журнал отката не записался: {error}"))?;
+        writeln!(file, "{line}").map_err(|error| format!("журнал отката не записался: {error}"))?;
         Ok(entry)
     }
 
@@ -253,12 +252,16 @@ pub fn apply(
 
     for step in steps {
         if let Some(reason) = &step.refusal {
-            report.refused.push(format!("{}: {reason}", step.entry.title()));
+            report
+                .refused
+                .push(format!("{}: {reason}", step.entry.title()));
             continue;
         }
         // Состояние могло измениться после составления плана — проверяем ещё раз.
         if let Some(reason) = refuse_reason(&step.entry, &step.entry.session, &exists) {
-            report.refused.push(format!("{}: {reason}", step.entry.title()));
+            report
+                .refused
+                .push(format!("{}: {reason}", step.entry.title()));
             continue;
         }
         match move_back(&step.entry.to, &step.entry.from) {
@@ -409,9 +412,7 @@ mod tests {
             entry(Kind::Move, "x", "y", "sess-2"),
         ];
 
-        let steps = plan(&entries, "sess-1", |path| {
-            matches!(path, "b" | "d" | "y")
-        });
+        let steps = plan(&entries, "sess-1", |path| matches!(path, "b" | "d" | "y"));
 
         // Порядок — обратный ко всему журналу: последнее дело первым. Чужое дело попадает
         // в список, но с причиной: человеку полезно видеть, что оно есть и почему не его.
@@ -433,7 +434,11 @@ mod tests {
         let steps = plan(&entries, "sess-1", |path| path == "b");
 
         assert!(
-            steps[0].refusal.as_deref().unwrap_or("").contains("уже не там"),
+            steps[0]
+                .refusal
+                .as_deref()
+                .unwrap_or("")
+                .contains("уже не там"),
             "{:?}",
             steps[0].refusal
         );
@@ -448,11 +453,7 @@ mod tests {
         let steps = plan(&entries, "sess-1", |path| path == "a" || path == "b");
 
         assert!(
-            steps[0]
-                .refusal
-                .as_deref()
-                .unwrap_or("")
-                .contains("занято"),
+            steps[0].refusal.as_deref().unwrap_or("").contains("занято"),
             "{:?}",
             steps[0].refusal
         );
@@ -521,7 +522,11 @@ mod tests {
         std::fs::write(&source, "текст").expect("файл");
         std::fs::rename(&source, &target).expect("перенос");
         journal
-            .record(Kind::Move, &source.to_string_lossy(), &target.to_string_lossy())
+            .record(
+                Kind::Move,
+                &source.to_string_lossy(),
+                &target.to_string_lossy(),
+            )
             .expect("запись");
 
         let report = undo_session(&journal);

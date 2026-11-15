@@ -372,9 +372,8 @@ pub struct UndoPreview {
 
 #[tauri::command]
 pub fn undo_report() -> Result<UndoPreview, String> {
-    let journal = undo::current().ok_or(
-        "журнал отката не открыт: это режим без папки приложения — откатывать нечего",
-    )?;
+    let journal = undo::current()
+        .ok_or("журнал отката не открыт: это режим без папки приложения — откатывать нечего")?;
     let steps = undo::plan(&journal.undoable(), journal.session(), |path| {
         std::path::Path::new(path).exists()
     });
