@@ -1077,7 +1077,10 @@ fn find_in_code(
     let text = param(params, "text").trim().to_string();
 
     if text.is_empty() {
-        return StepResult::failed(registry, "не задано, что искать — назовите слово или строку");
+        return StepResult::failed(
+            registry,
+            "не задано, что искать — назовите слово или строку",
+        );
     }
     if path.is_empty() {
         return StepResult::failed(registry, "не задана папка проекта");
@@ -1115,9 +1118,7 @@ fn find_in_code(
 
     result.duration_ms = started.elapsed().as_millis() as u64;
     result.reason = if matches == 0 {
-        format!(
-            "«{text}» в коде не нашлось — просмотрено файлов: {scanned}; это ответ, а не сбой"
-        )
+        format!("«{text}» в коде не нашлось — просмотрено файлов: {scanned}; это ответ, а не сбой")
     } else {
         format!("«{text}»: упоминаний {matches}, файлов {files}, просмотрено {scanned}")
     };
@@ -2706,8 +2707,6 @@ if ($found.Count -eq 0) {
 } else {
   $found | Select-Object -First 20 | ForEach-Object { Write-Output $_ }
 }"#;
-
-
 
 const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
 $node = $env:ZS_HOST
@@ -4454,16 +4453,22 @@ mod tests {
 
     /// Папка проекта с кодом: слово есть в одном файле и нет в другом.
     fn project_with_code(name: &str) -> std::path::PathBuf {
-        let dir = std::env::temp_dir()
-            .join(format!("zshelper-search-{}-{name}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-search-{}-{name}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("node_modules")).expect("служебная папка");
-        std::fs::write(dir.join("main.rs"), "fn main() {\n    handle_submit();\n}\n")
-            .expect("код");
+        std::fs::write(
+            dir.join("main.rs"),
+            "fn main() {\n    handle_submit();\n}\n",
+        )
+        .expect("код");
         std::fs::write(dir.join("app.ts"), "const other = 1;\n").expect("код");
         // Чужой код в служебной папке: он не должен попасть в ответ.
-        std::fs::write(dir.join("node_modules").join("left.rs"), "handle_submit();\n")
-            .expect("чужой код");
+        std::fs::write(
+            dir.join("node_modules").join("left.rs"),
+            "handle_submit();\n",
+        )
+        .expect("чужой код");
         dir
     }
 
@@ -4479,9 +4484,17 @@ mod tests {
         assert!(found.ok, "{}", found.reason);
         assert!(found.reason.contains("упоминаний 1"), "{}", found.reason);
         // Находка названа файлом и строкой, а не «есть совпадения».
-        assert!(found.stdout_tail.contains("main.rs:2"), "{}", found.stdout_tail);
+        assert!(
+            found.stdout_tail.contains("main.rs:2"),
+            "{}",
+            found.stdout_tail
+        );
         // Служебная папка пропущена — иначе ответ утонул бы в чужом коде.
-        assert!(!found.stdout_tail.contains("left.rs"), "{}", found.stdout_tail);
+        assert!(
+            !found.stdout_tail.contains("left.rs"),
+            "{}",
+            found.stdout_tail
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
