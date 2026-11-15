@@ -221,10 +221,14 @@ jobs:
             echo "::error::файлы не отформатированы — запусти cargo fmt"
             exit 1
           fi
+          # Форматирование меняет число строк в ядре, а дашборд это число печатает.
+          # Без пересборки следующий прогон ругался бы «сгенерированные файлы устарели»
+          # из-за отступов — и это выглядело бы как отдельная поломка.
+          python3 tools/dashboard.py
           git config user.name "zshelper-ci"
           git config user.email "ci@zshelper.local"
-          git add src-tauri/src src-tauri/build.rs src-tauri/Cargo.lock
-          git commit -m "style: cargo fmt (автоматически, CI)"
+          git add src-tauri/src src-tauri/build.rs src-tauri/Cargo.lock docs/DASHBOARD.md docs/INDEX.md
+          git commit -m "style: cargo fmt + пересчёт дашборда (автоматически, CI)"
           git push
           # На push это предупреждение, а не красная сборка: код уже починен ботом, тесты
           # прошли, и человеку не нужно чинить отступы руками. Красный прогон должен

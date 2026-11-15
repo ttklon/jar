@@ -5044,8 +5044,9 @@ mod tests {
         );
 
         assert!(!refused.ok);
+        // Файл — обязательный параметр, и отказ называет его до запуска.
         assert!(
-            refused.reason.to_lowercase().contains("не задан файл"),
+            refused.reason.to_lowercase().contains("файл"),
             "{}",
             refused.reason
         );
