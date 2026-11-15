@@ -182,6 +182,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "music-production|открыть|проект в DAW" => open_daw(registry, params, cancel),
         "chat-social|найти|файл в чате" => find_chat_file(registry, params, cancel),
         "files|найти|двойники" => find_twins(registry, params, cancel),
+        "files|убрать|двойников в карантин" => quarantine_twins(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -3802,6 +3803,206 @@ foreach ($group in $ordered) {
 }
 "#;
 
+/// Короткий стабильный отпечаток пути — чтобы имена в карантине не сталкивались.
+///
+/// `DefaultHasher::new()` в Rust даёт одинаковый результат от запуска к запуску (ключи
+/// фиксированы), поэтому отпечаток можно показать человеку и он не поменяется завтра.
+fn short_path_tag(path: &str) -> String {
+    use std::hash::{Hash, Hasher};
+    let mut hasher = std::collections::hash_map::DefaultHasher::new();
+    path.hash(&mut hasher);
+    format!("{:08x}", hasher.finish() as u32)
+}
+
+/// На каком томе лежит путь: `C:` для `C:\Фото\a.jpg`. Нужно, чтобы не обещать перенос
+/// между дисками — `rename` через тома не работает, а копировать с удалением эта рука не будет.
+fn volume_of(path: &str) -> String {
+    match std::path::Path::new(path).components().next() {
+        Some(component) => format!("{component:?}").to_lowercase(),
+        None => String::new(),
+    }
+}
+
+/// Карантин двойников: оставить по одному файлу в группе, остальные — в отдельную папку.
+///
+/// Почему именно так, а не «удалить лишнее»:
+///
+///  * **ничего не удаляется.** Файлы переезжают в папку карантина, и каждый переезд пишется
+///    в журнал отката: «откатить за сессию» вернёт их на место. Это проверяется живым тестом;
+///  * **правило выбора названо вслух.** В группе остаётся **первый по алфавиту путь** — правило
+///    можно проверить глазами, а не угадывать, «почему остался именно этот файл»;
+///  * **карантин не сканируется.** Его содержимое исключается из поиска, иначе прошлый карантин
+///    попадал бы в новые группы и «лишнее место» росло бы на пустом месте;
+///  * **между дисками не переносим.** `rename` через тома не работает, а копировать с удалением
+///    исходника — это уже удаление под другим именем. Сказано числом и отказом;
+///  * **потолок назван**: 200 файлов за один проход, чтобы одна команда не перетащила пол-диска.
+fn quarantine_twins(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+    let raw_quarantine = clean_path(param(params, "quarantine"));
+    let raw_min = param(params, "min_kb").trim().to_string();
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задана папка — назовите путь, где искать двойников");
+    }
+    if !std::path::Path::new(&path).is_dir() {
+        return StepResult::failed(registry, format!("такой папки нет: {path} — проверьте путь"));
+    }
+    let mut min_kb = 64u64;
+    if !raw_min.is_empty() {
+        match raw_min.parse::<u64>() {
+            Ok(value) if value <= 1_048_576 => min_kb = value,
+            _ => {
+                return StepResult::failed(
+                    registry,
+                    "мельче скольких килобайт не смотреть — число от 0 до 1 048 576; иначе условие не проверить",
+                )
+            }
+        }
+    }
+    let quarantine = if raw_quarantine.is_empty() {
+        std::path::Path::new(&path)
+            .join("_Карантин")
+            .display()
+            .to_string()
+    } else {
+        raw_quarantine
+    };
+    if volume_of(&path) != volume_of(&quarantine) {
+        return StepResult::failed(
+            registry,
+            format!(
+                "карантин на другом диске ({quarantine}) — переносить между дисками не буду: копирование с удалением исходника это уже удаление, а не карантин"
+            ),
+        );
+    }
+
+    // Поиск — тем же скриптом, что у отчёта: одна логика двойников, две руки.
+    let mut result = run_script(
+        registry,
+        FIND_TWINS,
+        &[("PATH", path.as_str()), ("MIN_KB", &min_kb.to_string())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(420),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let quarantine_prefix = quarantine.to_lowercase();
+    let groups: Vec<TwinGroup> = parse_twin_groups(&result.stdout_tail)
+        .into_iter()
+        .map(|mut group| {
+            group
+                .paths
+                .retain(|path| !path.to_lowercase().starts_with(&quarantine_prefix));
+            group.count = group.paths.len() as u64;
+            group.wasted = group.size * group.count.saturating_sub(1);
+            group
+        })
+        .filter(|group| group.paths.len() > 1)
+        .collect();
+
+    let ceiling = 200usize;
+    let mut moved: Vec<(String, String)> = Vec::new();
+    let mut refused: Vec<String> = Vec::new();
+    let mut freed: u64 = 0;
+    let mut unrecorded = 0usize;
+
+    'groups: for group in &groups {
+        let mut paths = group.paths.clone();
+        paths.sort();
+        for victim in paths.iter().skip(1) {
+            if moved.len() >= ceiling {
+                refused.push(format!(
+                    "упёрлись в потолок {ceiling} файлов — остальное оставил на следующий раз"
+                ));
+                break 'groups;
+            }
+            let name = std::path::Path::new(victim)
+                .file_name()
+                .map(|name| name.to_string_lossy().to_string())
+                .unwrap_or_else(|| "файл".to_string());
+            let short = short_path_tag(victim);
+            let mut target = std::path::Path::new(&quarantine).join(format!("{short}-{name}"));
+            let mut attempt = 2;
+            while target.exists() {
+                target = std::path::Path::new(&quarantine)
+                    .join(format!("{short}-{attempt}-{name}"));
+                attempt += 1;
+            }
+            let target_text = target.display().to_string();
+            if let Err(reason) = std::fs::create_dir_all(&quarantine) {
+                refused.push(format!("карантин не создался: {reason}"));
+                break 'groups;
+            }
+            match std::fs::rename(victim, &target) {
+                Ok(()) if target.exists() && !std::path::Path::new(victim).exists() => {
+                    // В журнал отката — каждый переезд: «откатить за сессию» вернёт файлы.
+                    if !crate::undo::record_move(victim, &target_text) {
+                        unrecorded += 1;
+                    }
+                    freed += group.size;
+                    moved.push((victim.clone(), target_text));
+                }
+                Ok(()) => refused.push(format!(
+                    "{victim}: после переноса состояние не сходится — файл не там или ещё и там"
+                )),
+                Err(reason) => refused.push(format!("{victim}: перенести не удалось — {reason}")),
+            }
+        }
+    }
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    let megabytes = |bytes: u64| format!("{:.1} МБ", bytes as f64 / (1024.0 * 1024.0));
+    if moved.is_empty() && refused.is_empty() {
+        result.reason = format!(
+            "двойников нет — убирать нечего; просмотрено файлов: {}",
+            result
+                .stdout_tail
+                .split_whitespace()
+                .find_map(|word| word.strip_prefix("scanned="))
+                .unwrap_or("0")
+        );
+        return result;
+    }
+    let mut reason = format!(
+        "в карантин убрано: {} из {}; освобождено: {}; в каждой группе оставлен первый по алфавиту путь, карантин: {quarantine}; ничего не удалено — «откатить за сессию» вернёт файлы",
+        moved.len(),
+        moved.len() + refused.len(),
+        megabytes(freed)
+    );
+    if let Some((from, to)) = moved.first() {
+        let from_name = std::path::Path::new(from)
+            .file_name()
+            .map(|name| name.to_string_lossy().to_string())
+            .unwrap_or_else(|| from.clone());
+        reason.push_str(&format!("; например {from_name} → {to}"));
+    }
+    if unrecorded > 0 {
+        reason.push_str(&format!(
+            "; в журнал отката не записалось дел: {unrecorded} — эти файлы откатом не вернутся"
+        ));
+    }
+    if !refused.is_empty() {
+        reason.push_str(&format!("; не убрано: {}", refused.join(" | ")));
+    }
+    result.reason = reason;
+    result
+}
+
 /// Одна группа двойников: размер, сколько копий, сколько места лишнее и пути.
 #[derive(Debug, PartialEq, Eq)]
 struct TwinGroup {
@@ -4481,6 +4682,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("music-production|открыть|проект в DAW", OPEN_DAW),
         ("chat-social|найти|файл в чате", FIND_CHAT_FILE),
         ("files|найти|двойники", FIND_TWINS),
+        ("files|убрать|двойников в карантин", FIND_TWINS),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }
@@ -6374,6 +6576,103 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert_eq!(groups[0].paths.len(), 3);
         assert_eq!(groups[1].paths, vec!["C:\\b\\x.bin", "C:\\b\\y.bin"]);
         assert_eq!(groups[1].wasted, 300);
+    }
+
+    /// Карантин: в группе остаётся первый по алфавиту, остальные переезжают, ничего не теряется.
+    #[cfg(windows)]
+    #[test]
+    fn quarantine_keeps_one_copy_and_moves_the_rest() {
+        let dir = std::env::temp_dir().join(format!("zshelper-quarantine-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let body = vec![5u8; 128 * 1024];
+        for name in ["б-копия.bin", "а-копия.bin", "в-копия.bin"] {
+            std::fs::write(dir.join(name), &body).expect("файл");
+        }
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), dir.display().to_string());
+        let result = run(
+            "files|убрать|двойников в карантин",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        assert!(result.ok, "{}", result.reason);
+        assert!(result.reason.contains("в карантин убрано: 2"), "{}", result.reason);
+        assert!(result.reason.contains("ничего не удалено"), "{}", result.reason);
+        // Первый по алфавиту остался на месте, остальные уехали и целы.
+        assert!(dir.join("а-копия.bin").exists(), "первый по алфавиту должен остаться");
+        assert!(!dir.join("б-копия.bin").exists(), "копия должна уехать");
+        assert!(!dir.join("в-копия.bin").exists(), "копия должна уехать");
+        let quarantine = dir.join("_Карантин");
+        let inside: Vec<String> = std::fs::read_dir(&quarantine)
+            .expect("карантин создан")
+            .flatten()
+            .map(|entry| entry.file_name().to_string_lossy().to_string())
+            .collect();
+        assert_eq!(inside.len(), 2, "в карантине обе копии: {inside:?}");
+        for name in &inside {
+            let content = std::fs::read(quarantine.join(name)).expect("читается");
+            assert_eq!(content.len(), body.len(), "содержимое не потерялось");
+        }
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Повторный проход не трогает уже убранное: карантин исключён из поиска.
+    #[cfg(windows)]
+    #[test]
+    fn quarantine_is_not_scanned_again() {
+        let dir = std::env::temp_dir().join(format!("zshelper-quarantine-twice-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let body = vec![3u8; 128 * 1024];
+        for name in ["первый.bin", "второй.bin"] {
+            std::fs::write(dir.join(name), &body).expect("файл");
+        }
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), dir.display().to_string());
+        let first = run("files|убрать|двойников в карантин", &params, &AtomicBool::new(false));
+        assert!(first.ok, "{}", first.reason);
+        assert!(first.reason.contains("в карантин убрано: 1"), "{}", first.reason);
+
+        let second = run("files|убрать|двойников в карантин", &params, &AtomicBool::new(false));
+        assert!(second.ok, "{}", second.reason);
+        assert!(
+            second.reason.contains("двойников нет"),
+            "второй проход не должен находить работу: {}",
+            second.reason
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Карантин на другом диске — отказ до всякой работы: копировать с удалением не будем.
+    #[test]
+    fn a_quarantine_on_another_drive_is_refused() {
+        assert_eq!(volume_of("C:\\Фото\\a.jpg"), volume_of("c:\\другое\\b.jpg"));
+        assert_ne!(volume_of("C:\\Фото\\a.jpg"), volume_of("D:\\Фото\\a.jpg"));
+
+        // Папка настоящая (на том же томе, где идёт тест), а карантин назван на другом диске.
+        let dir = std::env::temp_dir().join(format!("zshelper-quarantine-drive-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), dir.display().to_string());
+        params.insert("quarantine".to_string(), "D:\\Карантин".to_string());
+        let refused = run(
+            "files|убрать|двойников в карантин",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        assert!(!refused.ok);
+        assert!(
+            refused.reason.contains("на другом диске"),
+            "отказ обязан называть причину: {}",
+            refused.reason
+        );
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// Двойники находятся на живой папке и ничего в ней не меняют.

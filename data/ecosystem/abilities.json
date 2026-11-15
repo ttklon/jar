@@ -5306,6 +5306,26 @@
   "needs_check": false
  },
  {
+  "id": "ability:files:убрать",
+  "name": "Файлы: убрать",
+  "category": "abilities",
+  "subkind": "преобразование",
+  "origin": "registry",
+  "url": "docs/ACTIONS.md",
+  "license": "own",
+  "domain": "files",
+  "verb": "убрать",
+  "actions": 1,
+  "gives": "1 действий: двойников в карантин",
+  "examples": [
+   "двойников в карантин"
+  ],
+  "tier": "T1",
+  "risk": "destructive",
+  "status": "selected",
+  "needs_check": false
+ },
+ {
   "id": "ability:files:удалить",
   "name": "Файлы: удалить",
   "category": "abilities",
