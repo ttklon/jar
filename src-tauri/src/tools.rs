@@ -2958,10 +2958,7 @@ mod tests {
 
     #[test]
     fn listing_an_archive_shows_what_is_inside_without_unpacking() {
-        let root = temp_target("list")
-            .parent()
-            .expect("папка")
-            .join("list");
+        let root = temp_target("list").parent().expect("папка").join("list");
         std::fs::create_dir_all(root.join("проект")).expect("папка");
         std::fs::write(root.join("проект/раз.txt"), "раз").expect("файл");
         std::fs::write(root.join("проект/два.txt"), "два-два").expect("файл");
@@ -2998,7 +2995,10 @@ mod tests {
         );
         // Просмотр ничего не распаковал: рядом не появилось ни одного нового элемента.
         let after = std::fs::read_dir(&root).expect("папка").count();
-        assert_eq!(before, after, "просмотр архива не должен ничего распаковывать");
+        assert_eq!(
+            before, after,
+            "просмотр архива не должен ничего распаковывать"
+        );
 
         // rar эта рука не читает и говорит это до запуска, а не после падения.
         std::fs::write(root.join("архив.rar"), "не zip").expect("файл");
