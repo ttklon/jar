@@ -164,6 +164,10 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
             explain_process(registry, params, cancel)
         }
         "hardware-diag|проверить|температуры" => temperatures(registry, cancel),
+        "processes-services|найти|подозрительный процесс" => {
+            suspicious_processes(registry, cancel)
+        }
+        "hardware-diag|проверить|здоровье диска" => disk_health(registry, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -1005,6 +1009,79 @@ fn explain_process(
 
     result.duration_ms = started.elapsed().as_millis() as u64;
     result.reason = reason;
+    result
+}
+
+/// Найти процессы, к которым есть вопросы.
+///
+/// «Подозрительный» здесь значит **«есть за что зацепиться»**, а не «вирус»:
+///
+///  * **файл процесса лежит во временной папке или в «Загрузках»** — обычные программы
+///    оттуда не запускаются, а вот распакованные «одним файлом» гадости любят это место;
+///  * **подпись файла не в порядке** (`NotSigned`, `HashMismatch`, `UnknownError`) — это
+///    проверяемый факт, в отличие от «выглядит странно»;
+///  * **ничего не найдено — не значит «всё безопасно».** Так и сказано: список нареканий
+///    пуст, а не «компьютер чист».
+fn suspicious_processes(registry: &str, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let mut result = simple(registry, SUSPICIOUS_PROCESSES, 120, cancel);
+    if !result.ok {
+        return result;
+    }
+
+    let field = |name: &str| -> Option<usize> {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .and_then(|value| value.parse::<usize>().ok())
+    };
+    let checked = field("checked=").unwrap_or_default();
+    let suspicious = field("suspicious=").unwrap_or_default();
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = if suspicious == 0 {
+        format!(
+            "проверено процессов: {checked} — ничего явно странного не видно; это не значит «всё безопасно»"
+        )
+    } else {
+        format!(
+            "проверено процессов: {checked}, на заметку: {suspicious} — причина названа у каждого; это факты, а не приговор"
+        )
+    };
+    result
+}
+
+/// Спросить у накопителей здоровье: состояние, износ, наработку.
+///
+/// Что здесь важно:
+///
+///  * **значения берутся у диска, а не выдумываются.** Диск, который не отдаёт износ,
+///    получает «не сообщает», а не ноль процентов: ноль читался бы как «новый»;
+///  * **прогноза нет.** «Умрёт ли мой SSD» — вопрос, на который по износу и наработке
+///    честно ответить нельзя, поэтому рука даёт числа и состояние, а вывод оставляет
+///    человеку;
+///  * **пустой список — тоже ответ**: «машина не отдаёт сведения о накопителях».
+fn disk_health(registry: &str, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let mut result = simple(registry, DISK_HEALTH, 90, cancel);
+    if !result.ok {
+        return result;
+    }
+
+    let disks = result
+        .stdout_tail
+        .split_whitespace()
+        .find_map(|word| word.strip_prefix("disks="))
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or_default();
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = if disks == 0 {
+        String::from("эта машина не отдаёт сведения о накопителях — проверить здоровье нечем")
+    } else {
+        format!("дисков: {disks} — состояние, износ и наработка ниже; прогноз эта рука не делает")
+    };
     result
 }
 
@@ -2325,6 +2402,64 @@ if ($rows.Count -eq 0) {
 } else {
   $rows | ForEach-Object { Write-Output $_ }
 }"#;
+const SUSPICIOUS_PROCESSES: &str = r#"$ErrorActionPreference = 'Stop'
+$signed = @{}
+$rows = @()
+$checked = 0
+foreach ($proc in @(Get-Process -ErrorAction SilentlyContinue)) {
+  if ($checked -ge 50) { break }
+  $path = ''
+  try { $path = $proc.Path } catch { }
+  if (-not $path) { continue }
+  if (-not $signed.ContainsKey($path)) {
+    $status = 'неизвестно'
+    try {
+      $signature = Get-AuthenticodeSignature -FilePath $path -ErrorAction SilentlyContinue
+      if ($signature) { $status = [string]$signature.Status }
+    } catch { }
+    $signed[$path] = $status
+  }
+  $checked += 1
+  $why = @()
+  if ($path -like '*\Temp\*' -or $path -like '*\Downloads\*') {
+    $why += 'файл лежит во временной папке или в загрузках'
+  }
+  $status = $signed[$path]
+  if ($status -eq 'NotSigned' -or $status -eq 'HashMismatch' -or $status -eq 'UnknownError') {
+    $why += ('подпись: ' + $status)
+  }
+  if ($why.Count -gt 0) {
+    $rows += ('{0} (pid {1}): {2} — {3}' -f $proc.ProcessName, $proc.Id, $path, ($why -join '; '))
+  }
+}
+Write-Output ('ZSHELPER-OK checked={0} suspicious={1}' -f $checked, $rows.Count)
+if ($rows.Count -eq 0) {
+  Write-Output 'ничего явно странного не видно: у проверенных процессов файл на месте и подпись не вызывает вопросов'
+} else {
+  $rows | Select-Object -First 10 | ForEach-Object { Write-Output $_ }
+}"#;
+
+const DISK_HEALTH: &str = r#"$ErrorActionPreference = 'Stop'
+$rows = @()
+try {
+  foreach ($disk in @(Get-PhysicalDisk -ErrorAction Stop)) {
+    $counter = $disk | Get-StorageReliabilityCounter -ErrorAction SilentlyContinue
+    $wear = 'не сообщает'
+    $hours = 'не сообщает'
+    if ($counter) {
+      if ($null -ne $counter.Wear) { $wear = ('{0}%' -f $counter.Wear) }
+      if ($null -ne $counter.PowerOnHours) { $hours = ('{0} ч' -f $counter.PowerOnHours) }
+    }
+    $rows += ('{0}: состояние {1}, износ {2}, наработка {3}, размер {4} ГБ' -f $disk.FriendlyName, $disk.HealthStatus, $wear, $hours, [math]::Round($disk.Size / 1GB))
+  }
+} catch { }
+Write-Output ('ZSHELPER-OK disks={0}' -f $rows.Count)
+if ($rows.Count -eq 0) {
+  Write-Output 'эта машина не отдаёт сведения о накопителях — проверить здоровье нечем'
+} else {
+  $rows | Select-Object -First 10 | ForEach-Object { Write-Output $_ }
+}"#;
+
 
 const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
 $node = $env:ZS_HOST
@@ -2538,6 +2673,8 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
             EXPLAIN_PROCESS,
         ),
         ("hardware-diag|проверить|температуры", TEMPERATURES),
+        ("processes-services|найти|подозрительный процесс", SUSPICIOUS_PROCESSES),
+        ("hardware-diag|проверить|здоровье диска", DISK_HEALTH),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -3887,6 +4024,65 @@ mod tests {
 
         assert!(!refused.ok);
         assert!(refused.reason.contains("менять нечего"));
+    }
+
+    #[test]
+    fn looking_for_suspicious_processes_names_the_reason_not_a_verdict() {
+        let found = run(
+            "processes-services|найти|подозрительный процесс",
+            &BTreeMap::new(),
+            &AtomicBool::new(false),
+        );
+
+        assert!(found.ok, "{}", found.reason);
+        // Отвечает фактом: сколько проверил и что нашёл.
+        assert!(
+            found.reason.contains("проверено процессов:"),
+            "{}",
+            found.reason
+        );
+        // И честно: либо «ничего не видно» (без обещания чистоты),
+        // либо список на заметку — но не приговор.
+        let honest = found.reason.contains("ничего явно странного")
+            || found.reason.contains("на заметку");
+        assert!(honest, "{}", found.reason);
+        assert!(
+            !found.reason.contains("компьютер чист"),
+            "{}",
+            found.reason
+        );
+    }
+
+    #[test]
+    fn disk_health_says_when_the_machine_does_not_report_it() {
+        let health = run(
+            "hardware-diag|проверить|здоровье диска",
+            &BTreeMap::new(),
+            &AtomicBool::new(false),
+        );
+
+        assert!(health.ok, "{}", health.reason);
+        let honest = health.reason.contains("дисков:")
+            || health.reason.contains("не отдаёт сведения");
+        assert!(honest, "{}", health.reason);
+        // Прогноза нет не случайно: рука не обещает предсказать смерть диска.
+        assert!(!health.reason.contains("скоро сломается"), "{}", health.reason);
+    }
+
+    #[test]
+    fn the_process_scan_checks_signatures_and_temporary_folders() {
+        assert!(SUSPICIOUS_PROCESSES.contains("Get-AuthenticodeSignature"));
+        assert!(SUSPICIOUS_PROCESSES.contains("Downloads"));
+        assert!(SUSPICIOUS_PROCESSES.contains("checked="));
+        assert!(DISK_HEALTH.contains("Get-StorageReliabilityCounter"));
+        assert!(DISK_HEALTH.contains("HealthStatus"));
+
+        let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
+        assert!(registries.contains(&"processes-services|найти|подозрительный процесс"));
+        assert!(registries.contains(&"hardware-diag|проверить|здоровье диска"));
+        // Счётчики в выводе есть у обоих скриптов — по ним рука и отвечает.
+        assert!(SUSPICIOUS_PROCESSES.contains("suspicious="));
+        assert!(DISK_HEALTH.contains("disks="));
     }
 
     #[test]
