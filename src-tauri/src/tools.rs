@@ -180,6 +180,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
             find_slowdown(registry, params, cancel)
         }
         "music-production|открыть|проект в DAW" => open_daw(registry, params, cancel),
+        "chat-social|найти|файл в чате" => find_chat_file(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -3627,6 +3628,220 @@ Write-Output ('ZSHELPER-DAW exe=' + $found)
 if ($project) { Write-Output ('ZSHELPER-DAW project=' + $project) }
 "#;
 
+const FIND_CHAT_FILE: &str = r#"$ErrorActionPreference = 'Stop'
+$wanted = $env:ZS_NAME
+$days = 0
+$parsedDays = 0
+if ([int]::TryParse($env:ZS_DAYS, [ref]$parsedDays) -and $parsedDays -gt 0) {
+  if ($parsedDays -gt 365) { $parsedDays = 365 }
+  $days = $parsedDays
+}
+$only = $env:ZS_CHAT
+$places = @(
+  @{ app = 'Telegram'; path = (Join-Path $env:USERPROFILE 'Downloads\Telegram Desktop') },
+  @{ app = 'Telegram'; path = (Join-Path $env:APPDATA 'Telegram Desktop\tdata') },
+  @{ app = 'Discord'; path = (Join-Path $env:APPDATA 'discord') },
+  @{ app = 'Discord'; path = (Join-Path $env:LOCALAPPDATA 'Discord') },
+  @{ app = 'Signal'; path = (Join-Path $env:APPDATA 'Signal\attachments.noindex') },
+  @{ app = 'WhatsApp'; path = (Join-Path $env:APPDATA 'WhatsApp') },
+  @{ app = 'Skype'; path = (Join-Path $env:APPDATA 'Skype') },
+  @{ app = 'Viber'; path = (Join-Path $env:APPDATA 'Viber') },
+  @{ app = 'VK Мессенджер'; path = (Join-Path $env:APPDATA 'VKMSGR') }
+)
+# Папки WhatsApp из Store лежат в Packages и называются по-разному — ищем по образцу.
+try {
+  $packages = @(Get-ChildItem -LiteralPath (Join-Path $env:LOCALAPPDATA 'Packages') -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '*WhatsAppDesktop*' })
+  foreach ($package in $packages) {
+    $places += @{ app = 'WhatsApp'; path = (Join-Path $package.FullName 'LocalState') }
+  }
+} catch { }
+$scanCap = 20000
+$resultCap = 20
+$since = $null
+if ($days -gt 0) { $since = (Get-Date).AddDays(-$days) }
+$scanned = 0
+$files = @()
+$known = 0
+$onDisk = 0
+$watch = [System.Diagnostics.Stopwatch]::StartNew()
+foreach ($place in $places) {
+  if ($only -and $place.app -notlike ('*' + $only + '*')) { continue }
+  $known++
+  if (-not (Test-Path -LiteralPath $place.path)) { continue }
+  $onDisk++
+  try {
+    $items = @(Get-ChildItem -LiteralPath $place.path -Recurse -File -ErrorAction SilentlyContinue -Force)
+  } catch { continue }
+  foreach ($item in $items) {
+    $scanned++
+    if ($scanned -ge $scanCap) { break }
+    if ($watch.Elapsed.TotalSeconds -gt 60) { break }
+    if ($wanted -and ($item.Name -notlike ('*' + $wanted + '*'))) { continue }
+    if ($since -and ($item.LastWriteTime -lt $since)) { continue }
+    $files += @{ app = $place.app; path = $item.FullName; size = $item.Length; at = $item.LastWriteTime }
+  }
+  if ($scanned -ge $scanCap -or $watch.Elapsed.TotalSeconds -gt 60) { break }
+}
+$sorted = @($files | Sort-Object { $_.at } -Descending)
+$capped = @($sorted | Select-Object -First $resultCap)
+$cappedOut = 0
+if ($sorted.Count -gt $resultCap) { $cappedOut = 1 }
+Write-Output ('ZSHELPER-OK scanned=' + $scanned + ' found=' + $sorted.Count + ' places=' + $known + ' on_disk=' + $onDisk + ' capped=' + $cappedOut + ' cap=' + $scanCap + ' days=' + $days)
+foreach ($file in $capped) {
+  Write-Output ('ZSHELPER-FILE path=' + $file.path + ' app=' + $file.app + ' size=' + $file.size)
+}
+"#;
+
+/// Разобрать строки найденного: путь, приложение, размер.
+///
+/// Путь берётся до ` app=`, а не по словам: в путях мессенджеров пробелы обычное дело
+/// («Telegram Desktop», «Мои документы»).
+fn parse_chat_files(tail: &str) -> Vec<(String, String, u64)> {
+    tail.lines()
+        .filter_map(|line| line.trim().strip_prefix("ZSHELPER-FILE "))
+        .map(|rest| {
+            let path = rest
+                .split(" app=")
+                .next()
+                .unwrap_or(rest)
+                .trim_start_matches("path=")
+                .to_string();
+            let app = rest
+                .split(" app=")
+                .nth(1)
+                .and_then(|tail| tail.split(" size=").next())
+                .unwrap_or("")
+                .to_string();
+            let size = rest
+                .split(" size=")
+                .nth(1)
+                .and_then(|tail| tail.trim().parse::<u64>().ok())
+                .unwrap_or_default();
+            (path, app, size)
+        })
+        .collect()
+}
+
+/// Найти файл, который присылали в мессенджере.
+///
+/// Это **поиск**, поэтому «ничего не нашлось» — ответ, а не сбой: причина говорит, сколько
+/// файлов просмотрено и в скольких местах. Три правила, которые тут важнее скорости:
+///
+///  * **смотрим только папки мессенджеров**, названные в скрипте; ни `C:\`, ни домашняя папка
+///    целиком не обходятся. Сколько мест проверено и сколько из них вообще есть на диске —
+///    сказано в причине, иначе «не нашлось» звучало бы как «нигде нет»;
+///  * **потолки названы числом**: 20 000 файлов и 60 секунд на проход, 20 результатов;
+///    упёрлись — отчёт говорит это, а не притворяется, что просмотрели всё;
+///  * **ничего не меняет**: только чтение имён, размеров и времени. Никаких «а вдруг удалим».
+fn find_chat_file(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let name = param(params, "name").trim().to_string();
+    let chat = param(params, "chat").trim().to_string();
+    let raw_days = param(params, "days").trim().to_string();
+
+    if name.chars().count() < 2 && raw_days.is_empty() {
+        return StepResult::failed(
+            registry,
+            "назовите хотя бы две буквы из имени файла или сколько дней назад он приходил — иначе это «покажи всё»",
+        );
+    }
+    let mut days = 0u64;
+    if !raw_days.is_empty() {
+        match raw_days.parse::<u64>() {
+            Ok(value) if (1..=365).contains(&value) => days = value,
+            _ => {
+                return StepResult::failed(
+                    registry,
+                    "сколько дней назад — это число от 1 до 365; больше года в папках мессенджеров уже не ищу",
+                )
+            }
+        }
+    }
+
+    let mut result = run_script(
+        registry,
+        FIND_CHAT_FILE,
+        &[
+            ("NAME", name.as_str()),
+            ("DAYS", &days.to_string()),
+            ("CHAT", chat.as_str()),
+        ],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(180),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let field = |name: &str| -> Option<String> {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .map(|value| value.to_string())
+    };
+    let number = |name: &str| -> u64 {
+        field(name)
+            .and_then(|value| value.parse::<u64>().ok())
+            .unwrap_or_default()
+    };
+    let scanned = number("scanned=");
+    let found = number("found=");
+    let places = number("places=");
+    let on_disk = number("on_disk=");
+    let capped = number("capped=") == 1;
+    let cap = number("cap=");
+
+    let files = parse_chat_files(&result.stdout_tail);
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    if found == 0 {
+        let mut reason = format!(
+            "не нашлось — просмотрено файлов: {scanned} в {places} местах мессенджеров, из них есть на диске: {on_disk}; это ответ, а не сбой"
+        );
+        if capped {
+            reason.push_str(&format!("; упёрлись в потолок {cap} файлов — дальше не смотрел"));
+        }
+        result.reason = reason;
+        return result;
+    }
+
+    let names: Vec<String> = files
+        .iter()
+        .take(3)
+        .map(|(path, app, _)| {
+            let file = std::path::Path::new(path)
+                .file_name()
+                .map(|name| name.to_string_lossy().to_string())
+                .unwrap_or_else(|| path.clone());
+            format!("{file} ({app})")
+        })
+        .collect();
+    let mut reason = format!(
+        "нашлось файлов: {found} из просмотренных {scanned} в {places} местах; первые: {}",
+        names.join(", ")
+    );
+    if let Some((path, _, size)) = files.first() {
+        reason.push_str(&format!("; свежий: {path} — {size} Б"));
+    }
+    if capped {
+        reason.push_str(&format!(
+            "; показаны первые {} из {found}, и проход упёрся в потолок {cap} файлов",
+            files.len()
+        ));
+    }
+    result.reason = reason;
+    result
+}
+
 /// Открыть проект в DAW: найти установленную программу и запустить её.
 ///
 /// Почему так, а не «нажать кнопку в интерфейсе»:
@@ -3984,6 +4199,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ),
         ("monitoring-triage|найти|причину тормозов", SNAPSHOT),
         ("music-production|открыть|проект в DAW", OPEN_DAW),
+        ("chat-social|найти|файл в чате", FIND_CHAT_FILE),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }
@@ -5856,6 +6072,75 @@ mod tests {
 
         let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
         assert!(registries.contains(&"virtualization-remote|передать|файл на сервер"));
+    }
+
+    /// Строки найденного разбираются так, что путь с пробелами не режется.
+    #[test]
+    fn chat_file_lines_keep_paths_with_spaces() {
+        let tail = "ZSHELPER-OK scanned=1248 found=2 places=9 on_disk=4 capped=0 cap=20000 days=0\n\
+ZSHELPER-FILE path=C:\\Users\\Имя\\Downloads\\Telegram Desktop\\договор (2).pdf app=Telegram size=20480\n\
+ZSHELPER-FILE path=C:\\Users\\Имя\\AppData\\Roaming\\discord\\Cache\\abc.png app=Discord size=512";
+
+        let files = parse_chat_files(tail);
+
+        assert_eq!(files.len(), 2);
+        assert_eq!(
+            files[0].0,
+            "C:\\Users\\Имя\\Downloads\\Telegram Desktop\\договор (2).pdf"
+        );
+        assert_eq!(files[0].1, "Telegram");
+        assert_eq!(files[0].2, 20_480);
+        assert_eq!(files[1].1, "Discord");
+    }
+
+    /// Без критерия поиск не начинается: «покажи всё» — это не вопрос.
+    #[test]
+    fn a_chat_search_without_a_criterion_is_refused() {
+        let mut params = BTreeMap::new();
+        params.insert("name".to_string(), "a".to_string());
+
+        let refused = run("chat-social|найти|файл в чате", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("две буквы"), "{}", refused.reason);
+    }
+
+    /// Потолок окна назван числом, и выход за него — отказ до запуска.
+    #[test]
+    fn a_chat_search_window_is_capped_by_a_named_number() {
+        let mut params = BTreeMap::new();
+        params.insert("name".to_string(), "договор".to_string());
+        params.insert("days".to_string(), "900".to_string());
+
+        let refused = run("chat-social|найти|файл в чате", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("365"), "{}", refused.reason);
+    }
+
+    /// Живой поиск: «ничего не нашлось» — ответ со числом просмотренных, а не сбой.
+    ///
+    /// Ищем то, чего нет ни у кого, — так тест проверяет именно честность пустого ответа.
+    #[cfg(windows)]
+    #[test]
+    fn a_chat_search_with_no_hits_is_an_answer_not_a_failure() {
+        let mut params = BTreeMap::new();
+        params.insert("name".to_string(), "zzz-такого-файла-нет-zzz".to_string());
+
+        let result = run("chat-social|найти|файл в чате", &params, &AtomicBool::new(false));
+
+        assert!(result.ok, "пустой ответ — это ok: {}", result.reason);
+        assert!(result.reason.contains("не нашлось"), "{}", result.reason);
+        assert!(
+            result.reason.contains("просмотрено файлов:"),
+            "рядом должно быть число просмотренных: {}",
+            result.reason
+        );
+        assert!(
+            result.reason.contains("это ответ, а не сбой"),
+            "{}",
+            result.reason
+        );
     }
 
     /// Причина запуска DAW называет программу, путь и время подъёма процесса.
