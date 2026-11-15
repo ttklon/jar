@@ -45,6 +45,12 @@ def main() -> int:
         default=8,
         help="сколько аннотаций максимум (GitHub принимает не больше десяти на шаг)",
     )
+    parser.add_argument(
+        "--after",
+        type=int,
+        default=0,
+        help="сколько строк после совпадения тоже показать: сообщение паники живёт там",
+    )
     args = parser.parse_args()
 
     try:
@@ -57,8 +63,20 @@ def main() -> int:
     tail = [line for line in lines if line.strip()]
     if args.grep:
         pattern = re.compile(args.grep)
-        tail = [line for line in tail if pattern.search(line)]
-    tail = tail[-args.tail :][: args.max]
+        # Строка «panicked at …» говорит где, но не почему: причина — в следующих строках.
+        # Поэтому к каждому совпадению можно добрать несколько строк следом.
+        picked: list[str] = []
+        last = -1
+        for index, line in enumerate(tail):
+            if not pattern.search(line):
+                continue
+            for extra in range(index, min(index + 1 + args.after, len(tail))):
+                if extra > last:
+                    picked.append(tail[extra])
+                    last = extra
+        tail = picked
+    # Берём самый конец: в логе тестов причина всегда ниже списка упавших тестов.
+    tail = tail[-args.tail :][-args.max :]
 
     if not tail:
         print(f"::error title={escape(args.title)}::в логе нет строк, о которых стоит сказать")

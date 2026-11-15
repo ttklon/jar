@@ -192,7 +192,8 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: |
           python scripts/ci_log_annotate.py tests.log --title "cargo test" \
-            --grep "FAILED|panicked|overflowed|stack overflow|SIGABRT|abort|---- |assertion|failures:|error\[|провал|не удал|ошибк" --max 10
+            --grep "FAILED|panicked|overflowed|stack overflow|SIGABRT|abort|---- |assertion|failures:|error\[|провал|не удал|ошибк" \
+            --after 2 --max 10
 
       - name: Tests gate
         if: steps.tests.outputs.status != '0'
