@@ -1086,7 +1086,10 @@ fn send_to_server(
         return StepResult::failed(registry, "не задан файл — назовите путь");
     }
     if host.is_empty() {
-        return StepResult::failed(registry, "не задан сервер — нужен вид «пользователь@сервер»");
+        return StepResult::failed(
+            registry,
+            "не задан сервер — нужен вид «пользователь@сервер»",
+        );
     }
     let host_ok = host
         .chars()
@@ -3092,8 +3095,6 @@ if ($verified -eq 1 -and $remoteBytes -eq $local) {
   Write-Output 'размер на той стороне сверить не удалось — единственное подтверждение это код 0 у scp'
 }"#;
 
-
-
 const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
 $node = $env:ZS_HOST
 $answers = @(Test-Connection -ComputerName $node -Count 4 -ErrorAction SilentlyContinue)
@@ -5086,8 +5087,7 @@ mod tests {
 
     #[test]
     fn the_transfer_asks_nobody_for_a_password_and_leaves_the_file_alone() {
-        let dir = std::env::temp_dir()
-            .join(format!("zshelper-send-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("zshelper-send-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
         let file = dir.join("архив.txt");
@@ -5095,11 +5095,7 @@ mod tests {
 
         let failed = run(
             "virtualization-remote|передать|файл на сервер",
-            &send_params(
-                &file.to_string_lossy(),
-                "127.0.0.1",
-                "/tmp",
-            ),
+            &send_params(&file.to_string_lossy(), "127.0.0.1", "/tmp"),
             &AtomicBool::new(false),
         );
 
