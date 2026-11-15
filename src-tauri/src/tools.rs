@@ -181,6 +181,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         }
         "music-production|открыть|проект в DAW" => open_daw(registry, params, cancel),
         "chat-social|найти|файл в чате" => find_chat_file(registry, params, cancel),
+        "files|найти|двойники" => find_twins(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -3692,6 +3693,269 @@ foreach ($file in $capped) {
 }
 "#;
 
+const FIND_TWINS: &str = r#"$ErrorActionPreference = 'Stop'
+$root = $env:ZS_PATH
+if (-not (Test-Path -LiteralPath $root -PathType Container)) {
+  Write-Output 'ZSHELPER-FAILED: такой папки нет — проверьте путь'
+  exit 2
+}
+$minKb = 64
+$parsed = 0
+if ([int]::TryParse($env:ZS_MIN_KB, [ref]$parsed) -and $parsed -ge 0) {
+  if ($parsed -gt 1048576) { $parsed = 1048576 }
+  $minKb = $parsed
+}
+$minBytes = [int64]$minKb * 1024
+$capFiles = 20000
+$capSeconds = 300
+$sha = [System.Security.Cryptography.SHA256]::Create()
+function Hash-Bytes([byte[]]$bytes) {
+  return [System.BitConverter]::ToString($sha.ComputeHash($bytes)).Replace('-', '').ToLower()
+}
+function Hash-Prefix([string]$path) {
+  $stream = $null
+  try {
+    $stream = [System.IO.File]::OpenRead($path)
+    $buffer = New-Object byte[] 65536
+    $read = $stream.Read($buffer, 0, $buffer.Length)
+    if ($read -le 0) { return '' }
+    if ($read -lt $buffer.Length) {
+      $slice = New-Object byte[] $read
+      [Array]::Copy($buffer, $slice, $read)
+      return Hash-Bytes $slice
+    }
+    return Hash-Bytes $buffer
+  } catch { return '' } finally { if ($stream) { $stream.Dispose() } }
+}
+function Hash-Full([string]$path) {
+  $stream = $null
+  try {
+    $stream = [System.IO.File]::OpenRead($path)
+    return [System.BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-', '').ToLower()
+  } catch { return '' } finally { if ($stream) { $stream.Dispose() } }
+}
+$watch = [System.Diagnostics.Stopwatch]::StartNew()
+$scanned = 0
+$capped = 0
+try { $items = @(Get-ChildItem -LiteralPath $root -Recurse -File -Force -ErrorAction SilentlyContinue) } catch { $items = @() }
+$bySize = @{}
+foreach ($item in $items) {
+  $scanned++
+  if ($scanned -ge $capFiles) { $capped = 1; break }
+  if ($watch.Elapsed.TotalSeconds -gt $capSeconds) { $capped = 1; break }
+  if ($item.Length -lt $minBytes) { continue }
+  if ($item.Length -le 0) { continue }
+  $key = [string]$item.Length
+  if (-not $bySize.ContainsKey($key)) { $bySize[$key] = @() }
+  $bySize[$key] += $item.FullName
+}
+# Три ступени, чтобы не читать гигабайты зря: размер → первые 64 КБ → полный хэш.
+$candidates = 0
+$groups = @()
+foreach ($key in @($bySize.Keys)) {
+  $paths = @($bySize[$key])
+  if ($paths.Count -lt 2) { continue }
+  $candidates += $paths.Count
+  $byPrefix = @{}
+  foreach ($one in $paths) {
+    $prefixHash = Hash-Prefix $one
+    if (-not $prefixHash) { continue }
+    if (-not $byPrefix.ContainsKey($prefixHash)) { $byPrefix[$prefixHash] = @() }
+    $byPrefix[$prefixHash] += $one
+  }
+  foreach ($prefixKey in @($byPrefix.Keys)) {
+    $same = @($byPrefix[$prefixKey])
+    if ($same.Count -lt 2) { continue }
+    $byFull = @{}
+    foreach ($one in $same) {
+      $full = Hash-Full $one
+      if (-not $full) { continue }
+      if (-not $byFull.ContainsKey($full)) { $byFull[$full] = @() }
+      $byFull[$full] += $one
+    }
+    foreach ($full in @($byFull.Keys)) {
+      $clone = @($byFull[$full])
+      if ($clone.Count -lt 2) { continue }
+      $size = [int64]$key
+      $groups += @{ hash = $full.Substring(0, 16); size = $size; count = $clone.Count; wasted = ($size * ($clone.Count - 1)); paths = $clone }
+    }
+  }
+}
+# Одна группа — это одна хэш-таблица, а не массив; приводим к массиву, иначе .Count считает ключи.
+$groups = @($groups)
+$extra = 0
+$totalWasted = [int64]0
+foreach ($group in $groups) { $extra += ($group.count - 1); $totalWasted += $group.wasted }
+Write-Output ('ZSHELPER-OK scanned=' + $scanned + ' groups=' + $groups.Count + ' extra=' + $extra + ' wasted=' + $totalWasted + ' candidates=' + $candidates + ' capped=' + $capped + ' cap=' + $capFiles + ' seconds_cap=' + $capSeconds + ' min_kb=' + $minKb)
+$ordered = @($groups | Sort-Object { $_.wasted } -Descending)
+$shown = 0
+foreach ($group in $ordered) {
+  if ($shown -ge 5) { break }
+  Write-Output ('ZSHELPER-GROUP size=' + $group.size + ' count=' + $group.count + ' wasted=' + $group.wasted)
+  $inner = 0
+  foreach ($one in @($group.paths)) {
+    if ($inner -ge 3) { break }
+    Write-Output ('ZSHELPER-FILE path=' + $one)
+    $inner++
+  }
+  $shown++
+}
+"#;
+
+/// Одна группа двойников: размер, сколько копий, сколько места лишнее и пути.
+#[derive(Debug, PartialEq, Eq)]
+struct TwinGroup {
+    size: u64,
+    count: u64,
+    wasted: u64,
+    paths: Vec<String>,
+}
+
+/// Разобрать группы по порядку строк: `GROUP` открывает группу, следующие `FILE` идут в неё.
+///
+/// Строго последовательно, а не «первые N файлов»: иначе при группе из трёх файлов пример из
+/// второй группы оказался бы чужим и отчёт врал бы путём.
+fn parse_twin_groups(tail: &str) -> Vec<TwinGroup> {
+    let mut groups: Vec<TwinGroup> = Vec::new();
+    for line in tail.lines().map(str::trim) {
+        if let Some(rest) = line.strip_prefix("ZSHELPER-GROUP ") {
+            let field = |name: &str| -> u64 {
+                rest.split_whitespace()
+                    .find_map(|word| word.strip_prefix(name))
+                    .and_then(|value| value.parse::<u64>().ok())
+                    .unwrap_or_default()
+            };
+            groups.push(TwinGroup {
+                size: field("size="),
+                count: field("count="),
+                wasted: field("wasted="),
+                paths: Vec::new(),
+            });
+        } else if let Some(path) = line.strip_prefix("ZSHELPER-FILE path=") {
+            if let Some(group) = groups.last_mut() {
+                group.paths.push(path.to_string());
+            }
+        }
+    }
+    groups
+}
+
+/// Найти двойников: одинаковые файлы по содержимому, с отчётом о потерянном месте.
+///
+/// Три ступени, чтобы не читать зря: **размер → первые 64 КБ → полный хэш**. Файлы, у которых
+/// размер уникален, дальше не читаются вовсе; пары с разными первыми килобайтами — тоже.
+///
+/// Что здесь важно сказать вслух:
+///
+///  * **ничего не удаляется и не двигается.** Это отчёт, а не уборка: убрать двойников — отдельное
+///    дело с подтверждением, и здесь его нет;
+///  * **хэш — SHA-256, а не blake3.** Он встроен в Windows, ставить ничего не надо, и на
+///    одинаковость выбор алгоритма не влияет: одинаковые файлы дают одинаковый хэш любым;
+///  * **фото сверяются как файлы, а не по картинке.** «Похожие, но не одинаковые» снимки эта рука
+///    не находит и не делает вид, что находит;
+///  * **потолки названы числом**: 20 000 файлов и 300 секунд на проход; упёрлись — сказано.
+fn find_twins(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+    let raw_min = param(params, "min_kb").trim().to_string();
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задана папка — назовите путь, где искать двойников");
+    }
+    if !std::path::Path::new(&path).is_dir() {
+        return StepResult::failed(registry, format!("такой папки нет: {path} — проверьте путь"));
+    }
+    let mut min_kb = 64u64;
+    if !raw_min.is_empty() {
+        match raw_min.parse::<u64>() {
+            Ok(value) if value <= 1_048_576 => min_kb = value,
+            _ => {
+                return StepResult::failed(
+                    registry,
+                    "мельче скольких килобайт не смотреть — число от 0 до 1 048 576 (это гигабайт); иначе условие не проверить",
+                )
+            }
+        }
+    }
+
+    let mut result = run_script(
+        registry,
+        FIND_TWINS,
+        &[("PATH", path.as_str()), ("MIN_KB", &min_kb.to_string())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(420),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let tail = result.stdout_tail.clone();
+    let number = |name: &str| -> u64 {
+        tail.split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .and_then(|value| value.parse::<u64>().ok())
+            .unwrap_or_default()
+    };
+    let scanned = number("scanned=");
+    let groups = number("groups=");
+    let extra = number("extra=");
+    let wasted = number("wasted=");
+    let candidates = number("candidates=");
+    let capped = number("capped=") == 1;
+    let cap = number("cap=");
+
+    let twin_groups = parse_twin_groups(&tail);
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    let megabytes = |bytes: u64| format!("{:.1} МБ", bytes as f64 / (1024.0 * 1024.0));
+
+    if groups == 0 {
+        let mut reason = format!(
+            "двойников не нашлось — просмотрено файлов: {scanned}, из них совпали по размеру с другим: {candidates}; это ответ, а не сбой"
+        );
+        if capped {
+            reason.push_str(&format!(
+                "; проход упёрся в потолок {cap} файлов — дальше не смотрел"
+            ));
+        }
+        result.reason = reason;
+        return result;
+    }
+
+    let mut reason = format!(
+        "двойников: {groups} групп, лишних копий: {extra}, лишнего места: {} — просмотрено файлов: {scanned}, совпали по размеру: {candidates}; ничего не удалено",
+        megabytes(wasted)
+    );
+    // Две крупнейшие группы: дальше человек откроет отчёт, если захочет.
+    for group in twin_groups.iter().take(2) {
+        let sample = group
+            .paths
+            .first()
+            .cloned()
+            .unwrap_or_else(|| "путь не назвался".to_string());
+        reason.push_str(&format!(
+            "; копий в группе: {}, по {} каждая, лишнего {} — например {sample}",
+            group.count,
+            megabytes(group.size),
+            megabytes(group.wasted)
+        ));
+    }
+    if capped {
+        reason.push_str(&format!(
+            "; проход упёрся в потолок {cap} файлов — за ним не смотрел"
+        ));
+    }
+    result.reason = reason;
+    result
+}
+
 /// Разобрать строки найденного: путь, приложение, размер.
 ///
 /// Путь берётся до ` app=`, а не по словам: в путях мессенджеров пробелы обычное дело
@@ -4206,6 +4470,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("monitoring-triage|найти|причину тормозов", SNAPSHOT),
         ("music-production|открыть|проект в DAW", OPEN_DAW),
         ("chat-social|найти|файл в чате", FIND_CHAT_FILE),
+        ("files|найти|двойники", FIND_TWINS),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }
@@ -6078,6 +6343,108 @@ mod tests {
 
         let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
         assert!(registries.contains(&"virtualization-remote|передать|файл на сервер"));
+    }
+
+    /// Группы разбираются по порядку: пример берётся из своей группы, а не из первой.
+    #[test]
+    fn twin_groups_keep_their_own_paths() {
+        let tail = "ZSHELPER-OK scanned=90 groups=2 extra=3 wasted=900 candidates=9\n\
+ZSHELPER-GROUP size=300 count=3 wasted=600\n\
+ZSHELPER-FILE path=C:\\a\\1.bin\n\
+ZSHELPER-FILE path=C:\\a\\2.bin\n\
+ZSHELPER-FILE path=C:\\a\\3.bin\n\
+ZSHELPER-GROUP size=300 count=2 wasted=300\n\
+ZSHELPER-FILE path=C:\\b\\x.bin\n\
+ZSHELPER-FILE path=C:\\b\\y.bin";
+
+        let groups = parse_twin_groups(tail);
+
+        assert_eq!(groups.len(), 2);
+        assert_eq!(groups[0].count, 3);
+        assert_eq!(groups[0].paths.len(), 3);
+        assert_eq!(groups[1].paths, vec!["C:\\b\\x.bin", "C:\\b\\y.bin"]);
+        assert_eq!(groups[1].wasted, 300);
+    }
+
+    /// Двойники находятся на живой папке и ничего в ней не меняют.
+    ///
+    /// Два одинаковых файла по 128 КБ и один «похожий» того же размера с другой начинкой:
+    /// размер совпал у всех, значит проверяются и первые 64 КБ, и полный хэш.
+    #[cfg(windows)]
+    #[test]
+    fn twins_are_found_and_nothing_is_touched() {
+        let dir = std::env::temp_dir().join(format!("zshelper-twins-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let body = vec![7u8; 128 * 1024];
+        std::fs::write(dir.join("копия 1.bin"), &body).expect("первый");
+        std::fs::write(dir.join("копия 2.bin"), &body).expect("второй");
+        let mut other = body.clone();
+        other[70000] = 9;
+        std::fs::write(dir.join("другой.bin"), &other).expect("третий");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), dir.display().to_string());
+        params.insert("min_kb".to_string(), "64".to_string());
+        let result = run("files|найти|двойники", &params, &AtomicBool::new(false));
+
+        assert!(result.ok, "{}", result.reason);
+        assert!(result.reason.contains("двойников: 1 групп"), "{}", result.reason);
+        assert!(result.reason.contains("лишних копий: 1"), "{}", result.reason);
+        assert!(result.reason.contains("ничего не удалено"), "{}", result.reason);
+        // Хэш полный: «другой» файл того же размера в группу не попал.
+        assert!(!result.reason.contains("другой.bin"), "{}", result.reason);
+        // И главное: файлы на месте — это отчёт, а не уборка.
+        for name in ["копия 1.bin", "копия 2.bin", "другой.bin"] {
+            assert!(dir.join(name).exists(), "{name} пропал — рука не должна ничего менять");
+        }
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Пустая папка — ответ, а не сбой: просмотрено ноль, двойников нет.
+    #[cfg(windows)]
+    #[test]
+    fn an_empty_folder_is_an_answer_not_a_failure() {
+        let dir = std::env::temp_dir().join(format!("zshelper-twins-empty-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), dir.display().to_string());
+        let result = run("files|найти|двойники", &params, &AtomicBool::new(false));
+
+        assert!(result.ok, "{}", result.reason);
+        assert!(result.reason.contains("двойников не нашлось"), "{}", result.reason);
+        assert!(result.reason.contains("просмотрено файлов: 0"), "{}", result.reason);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Папки нет — отказ до запуска, с путём в причине.
+    #[test]
+    fn twins_need_a_real_folder() {
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), "C:\\нет такой папки".to_string());
+
+        let refused = run("files|найти|двойники", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("такой папки нет"), "{}", refused.reason);
+    }
+
+    /// Потолок «мельче скольких не смотреть» назван числом.
+    #[test]
+    fn the_twins_threshold_is_capped_by_a_named_number() {
+        let dir = std::env::temp_dir().join(format!("zshelper-twins-cap-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("папка");
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), dir.display().to_string());
+        params.insert("min_kb".to_string(), "2000000".to_string());
+
+        let refused = run("files|найти|двойники", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("1 048 576"), "{}", refused.reason);
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// Строки найденного разбираются так, что путь с пробелами не режется.
