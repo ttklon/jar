@@ -4087,7 +4087,11 @@ fn timecode_for_name(seconds: f64) -> String {
 ///    рука не оценивает: «там был нужный момент» — это взгляд человека, а не байты;
 ///  * **перезапись запрещена**; имя по умолчанию — «<видео> — кадр 3-20.jpg»;
 ///  * **кадр попадает в журнал отката**: «откатить за сессию» уберёт его в корзину.
-fn grab_frame(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+fn grab_frame(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
     let started = Instant::now();
     let path = clean_path(param(params, "path"));
     let raw_at = param(params, "at").trim().to_string();
@@ -4097,7 +4101,10 @@ fn grab_frame(registry: &str, params: &BTreeMap<String, String>, cancel: &Atomic
         return StepResult::failed(registry, "не задано видео — назовите путь к файлу");
     }
     if !std::path::Path::new(&path).is_file() {
-        return StepResult::failed(registry, format!("такого видео нет: {path} — проверьте путь"));
+        return StepResult::failed(
+            registry,
+            format!("такого видео нет: {path} — проверьте путь"),
+        );
     }
     let at = match parse_timecode(&raw_at) {
         Some(seconds) => seconds,
@@ -4135,7 +4142,11 @@ fn grab_frame(registry: &str, params: &BTreeMap<String, String>, cancel: &Atomic
     let mut result = run_script(
         registry,
         GRAB_FRAME,
-        &[("PATH", path.as_str()), ("AT", at_text.as_str()), ("OUT", out.as_str())],
+        &[
+            ("PATH", path.as_str()),
+            ("AT", at_text.as_str()),
+            ("OUT", out.as_str()),
+        ],
         Expectation::StdoutMarker("ZSHELPER-OK"),
         Duration::from_secs(360),
         cancel,
@@ -4179,9 +4190,12 @@ fn grab_frame(registry: &str, params: &BTreeMap<String, String>, cancel: &Atomic
     };
     let kilobytes = format!("{:.0} КБ", size as f64 / 1024.0);
     result.reason = format!("{shot} ({length}); {shape}; {kilobytes} — файл: {out}");
-    result.reason.push_str("; что на кадре — решает человек: содержимое рука не оценивает");
+    result
+        .reason
+        .push_str("; что на кадре — решает человек: содержимое рука не оценивает");
     if crate::undo::record_product(&path, &out) {
-        result.reason
+        result
+            .reason
             .push_str("; записан в журнал отката — «откатить за сессию» уберёт его в корзину");
     }
     result
@@ -7360,7 +7374,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let refused = run("video|извлечь|кадр", &params, &AtomicBool::new(false));
 
         assert!(!refused.ok);
-        assert!(refused.reason.contains("3:20"), "пример нужен в причине: {}", refused.reason);
+        assert!(
+            refused.reason.contains("3:20"),
+            "пример нужен в причине: {}",
+            refused.reason
+        );
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -7381,7 +7399,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let refused = run("video|извлечь|кадр", &params, &AtomicBool::new(false));
 
         assert!(!refused.ok);
-        assert!(refused.reason.contains("перезаписывать не буду"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("перезаписывать не буду"),
+            "{}",
+            refused.reason
+        );
         assert_eq!(
             std::fs::read(&out).expect("читается"),
             "старый кадр".as_bytes().to_vec()
@@ -7444,8 +7466,16 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let result = run("video|извлечь|кадр", &params, &AtomicBool::new(false));
 
         assert!(result.ok, "{}", result.reason);
-        assert!(result.reason.contains("размер кадра: 160×120"), "{}", result.reason);
-        assert!(result.reason.contains("содержимое рука не оценивает"), "{}", result.reason);
+        assert!(
+            result.reason.contains("размер кадра: 160×120"),
+            "{}",
+            result.reason
+        );
+        assert!(
+            result.reason.contains("содержимое рука не оценивает"),
+            "{}",
+            result.reason
+        );
         assert!(out.exists(), "кадр на месте");
         let size = std::fs::metadata(&out).expect("метаданные").len();
         assert!(size > 0, "кадр не пустой");
@@ -7491,11 +7521,18 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let mut params = BTreeMap::new();
         params.insert("path".to_string(), video.display().to_string());
         params.insert("at".to_string(), "0:30".to_string());
-        params.insert("output".to_string(), dir.join("кадр.jpg").display().to_string());
+        params.insert(
+            "output".to_string(),
+            dir.join("кадр.jpg").display().to_string(),
+        );
         let refused = run("video|извлечь|кадр", &params, &AtomicBool::new(false));
 
         assert!(!refused.ok, "{}", refused.reason);
-        assert!(refused.reason.contains("30"), "просили 30 с — это в причине: {}", refused.reason);
+        assert!(
+            refused.reason.contains("30"),
+            "просили 30 с — это в причине: {}",
+            refused.reason
+        );
         assert!(refused.reason.contains("длится"), "{}", refused.reason);
         let _ = std::fs::remove_dir_all(&dir);
     }
