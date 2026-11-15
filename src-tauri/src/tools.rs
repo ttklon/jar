@@ -193,7 +193,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "video|конвертировать|формат/кодек" => {
             convert_video(registry, params, cancel)
         }
-        "video|замерить|качество сжатия (SSIM)" => measure_ssim(registry, params, cancel),
+        "video|замерить|качество сжатия (SSIM)" => {
+            measure_ssim(registry, params, cancel)
+        }
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -4258,7 +4260,11 @@ fn ssim_verdict(ssim: f64) -> &'static str {
 ///  * **рядом размеры и длительности файлов**: SSIM без «сколько сэкономили» отвечает только на
 ///    половину вопроса;
 ///  * рука только читает — ничего не перекодирует и не удаляет.
-fn measure_ssim(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+fn measure_ssim(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
     let started = Instant::now();
     let original = clean_path(param(params, "original"));
     let compressed = clean_path(param(params, "compressed"));
@@ -4271,7 +4277,10 @@ fn measure_ssim(registry: &str, params: &BTreeMap<String, String>, cancel: &Atom
     }
     for file in [&original, &compressed] {
         if !std::path::Path::new(file).is_file() {
-            return StepResult::failed(registry, format!("такого файла нет: {file} — проверьте путь"));
+            return StepResult::failed(
+                registry,
+                format!("такого файла нет: {file} — проверьте путь"),
+            );
         }
     }
 
@@ -7834,7 +7843,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         // правильное место — рука до запуска не доходит.
         let mut params = BTreeMap::new();
         params.insert("original".to_string(), one.display().to_string());
-        let missing = run("video|замерить|качество сжатия (SSIM)", &params, &AtomicBool::new(false));
+        let missing = run(
+            "video|замерить|качество сжатия (SSIM)",
+            &params,
+            &AtomicBool::new(false),
+        );
         assert!(!missing.ok);
         assert!(missing.reason.contains("Сжатый"), "{}", missing.reason);
 
@@ -7843,9 +7856,17 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
             "compressed".to_string(),
             dir.join("нет такого.mp4").display().to_string(),
         );
-        let refused = run("video|замерить|качество сжатия (SSIM)", &params, &AtomicBool::new(false));
+        let refused = run(
+            "video|замерить|качество сжатия (SSIM)",
+            &params,
+            &AtomicBool::new(false),
+        );
         assert!(!refused.ok);
-        assert!(refused.reason.contains("такого файла нет"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("такого файла нет"),
+            "{}",
+            refused.reason
+        );
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -7864,12 +7885,22 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let dir = std::env::temp_dir().join(format!("zshelper-ssim-shape-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
-        for (name, size) in [("большой.mp4", "160x120"), ("маленький.mp4", "80x60")] {
+        for (name, size) in [("большой.mp4", "160x120"), ("маленький.mp4", "80x60")]
+        {
             let status = std::process::Command::new("ffmpeg")
                 .args([
-                    "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
-                    &format!("testsrc=size={size}:rate=10:duration=1"), "-c:v", "libx264",
-                    "-pix_fmt", "yuv420p",
+                    "-hide_banner",
+                    "-loglevel",
+                    "error",
+                    "-y",
+                    "-f",
+                    "lavfi",
+                    "-i",
+                    &format!("testsrc=size={size}:rate=10:duration=1"),
+                    "-c:v",
+                    "libx264",
+                    "-pix_fmt",
+                    "yuv420p",
                 ])
                 .arg(dir.join(name))
                 .status()
@@ -7887,10 +7918,18 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
             dir.join("маленький.mp4").display().to_string(),
         );
 
-        let refused = run("video|замерить|качество сжатия (SSIM)", &params, &AtomicBool::new(false));
+        let refused = run(
+            "video|замерить|качество сжатия (SSIM)",
+            &params,
+            &AtomicBool::new(false),
+        );
 
         assert!(!refused.ok, "{}", refused.reason);
-        assert!(refused.reason.contains("разрешения разные"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("разрешения разные"),
+            "{}",
+            refused.reason
+        );
         assert!(refused.reason.contains("160×120"), "{}", refused.reason);
         assert!(refused.reason.contains("80×60"), "{}", refused.reason);
         let _ = std::fs::remove_dir_all(&dir);
@@ -7918,7 +7957,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         if !ffmpeg {
             std::fs::write(&original, "не видео".as_bytes()).expect("файл");
             std::fs::write(&squeezed, "не видео".as_bytes()).expect("файл");
-            let refused = run("video|замерить|качество сжатия (SSIM)", &params, &AtomicBool::new(false));
+            let refused = run(
+                "video|замерить|качество сжатия (SSIM)",
+                &params,
+                &AtomicBool::new(false),
+            );
             assert!(!refused.ok);
             assert!(refused.reason.contains("ffmpeg"), "{}", refused.reason);
             let _ = std::fs::remove_dir_all(&dir);
@@ -7927,9 +7970,20 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
 
         let made = std::process::Command::new("ffmpeg")
             .args([
-                "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
-                "testsrc=size=160x120:rate=10:duration=2", "-c:v", "libx264", "-crf", "10",
-                "-pix_fmt", "yuv420p",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-f",
+                "lavfi",
+                "-i",
+                "testsrc=size=160x120:rate=10:duration=2",
+                "-c:v",
+                "libx264",
+                "-crf",
+                "10",
+                "-pix_fmt",
+                "yuv420p",
             ])
             .arg(&original)
             .status()
@@ -7937,17 +7991,21 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert!(made.success());
         // Второй файл — заведомо грубое сжатие: разница должна быть видна числом.
         let squeezed_ok = std::process::Command::new("ffmpeg")
-            .args([
-                "-hide_banner", "-loglevel", "error", "-y", "-i",
-            ])
+            .args(["-hide_banner", "-loglevel", "error", "-y", "-i"])
             .arg(&original)
-            .args(["-c:v", "libx264", "-crf", "45", "-preset", "veryfast", "-pix_fmt", "yuv420p"])
+            .args([
+                "-c:v", "libx264", "-crf", "45", "-preset", "veryfast", "-pix_fmt", "yuv420p",
+            ])
             .arg(&squeezed)
             .status()
             .expect("ffmpeg запускается");
         assert!(squeezed_ok.success());
 
-        let result = run("video|замерить|качество сжатия (SSIM)", &params, &AtomicBool::new(false));
+        let result = run(
+            "video|замерить|качество сжатия (SSIM)",
+            &params,
+            &AtomicBool::new(false),
+        );
 
         assert!(result.ok, "{}", result.reason);
         assert!(result.reason.contains("SSIM: 0."), "{}", result.reason);
