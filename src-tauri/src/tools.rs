@@ -170,6 +170,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "hardware-diag|проверить|здоровье диска" => {
             disk_health(registry, cancel)
         }
+        "dev-code|запустить|тесты" => run_tests(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -1051,6 +1052,83 @@ fn suspicious_processes(registry: &str, cancel: &AtomicBool) -> StepResult {
             "проверено процессов: {checked}, на заметку: {suspicious} — причина названа у каждого; это факты, а не приговор"
         )
     };
+    result
+}
+
+/// Прогнать тесты проекта и сказать, чем всё закончилось.
+///
+/// Правила:
+///
+///  * **чем запускать — решает папка, а не человек.** `package.json` — `npm test`,
+///    `Cargo.toml` — `cargo test`, `pyproject.toml`/`pytest.ini`/`setup.py` —
+///    `python -m pytest`, `go.mod` — `go test ./...`. Нет ни одного признака — отказ
+///    с перечислением того, что искали, а не «попробую что-нибудь на удачу»;
+///  * **упавшие тесты — это результат, а не сбой руки**, но шаг помечается неудачным:
+///    иначе следующие шаги плана пошли бы по красному прогону как ни в чём не бывало;
+///  * **потолок по времени назван.** Не уложились — прогон остановлен, и это сказано
+///    прямо, а не выдано за «тесты работают».
+fn run_tests(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задана папка проекта");
+    }
+
+    let mut result = run_script(
+        registry,
+        RUN_TESTS,
+        &[("PATH", path.as_str())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(400),
+        cancel,
+    );
+    if !result.ok {
+        // Причина скрипта («не вижу, чем…») полезнее общего «признак не найден».
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let field = |name: &str| -> Option<i32> {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .and_then(|value| value.parse::<i32>().ok())
+    };
+    let code = field("exit=").unwrap_or(-1);
+    let tool = result
+        .stdout_tail
+        .split_whitespace()
+        .find_map(|word| word.strip_prefix("tool="))
+        .unwrap_or("неизвестный запускатель")
+        .to_string();
+    let timed_out = field("timedout=").unwrap_or_default() == 1;
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.exit_code = Some(code);
+
+    if timed_out {
+        result.ok = false;
+        result.timed_out = true;
+        result.reason = format!(
+            "тесты не уложились в отведённое время — прогон {tool} остановлен, вывод ниже"
+        );
+    } else if code == 0 {
+        let seconds = result.duration_ms / 1000;
+        result.reason = format!("тесты прошли: {tool}, код 0, за {seconds} с");
+    } else {
+        result.ok = false;
+        result.reason = format!(
+            "тесты провалились: {tool}, код {code} — это результат прогона, а не сбой руки; вывод ниже"
+        );
+    }
     result
 }
 
@@ -2461,6 +2539,56 @@ if ($rows.Count -eq 0) {
 } else {
   $rows | Select-Object -First 10 | ForEach-Object { Write-Output $_ }
 }"#;
+const RUN_TESTS: &str = r#"$ErrorActionPreference = 'Stop'
+$path = $env:ZS_PATH
+if (-not (Test-Path -LiteralPath $path -PathType Container)) {
+  Write-Output 'ZSHELPER-FAILED: такой папки нет — проверьте путь'
+  exit 2
+}
+$kind = ''
+$exe = ''
+$arguments = @()
+if (Test-Path -LiteralPath (Join-Path $path 'package.json')) {
+  $kind = 'npm'; $exe = 'npm.cmd'; $arguments = @('test', '--silent')
+} elseif (Test-Path -LiteralPath (Join-Path $path 'Cargo.toml')) {
+  $kind = 'cargo'; $exe = 'cargo'; $arguments = @('test', '--quiet')
+} elseif ((Test-Path -LiteralPath (Join-Path $path 'pyproject.toml')) -or (Test-Path -LiteralPath (Join-Path $path 'pytest.ini')) -or (Test-Path -LiteralPath (Join-Path $path 'setup.py'))) {
+  $kind = 'pytest'; $exe = 'python'; $arguments = @('-m', 'pytest', '-q')
+} elseif (Test-Path -LiteralPath (Join-Path $path 'go.mod')) {
+  $kind = 'go'; $exe = 'go'; $arguments = @('test', './...')
+} else {
+  Write-Output 'ZSHELPER-FAILED: не вижу, чем здесь запускаются тесты — нужен package.json, Cargo.toml, pyproject.toml или go.mod'
+  exit 3
+}
+$out = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString() + '.out')
+$err = Join-Path ([System.IO.Path]::GetTempPath()) ([guid]::NewGuid().ToString() + '.err')
+$code = -1
+$timedOut = 0
+try {
+  $proc = Start-Process -FilePath $exe -ArgumentList $arguments -WorkingDirectory $path -RedirectStandardOutput $out -RedirectStandardError $err -WindowStyle Hidden -PassThru
+  if ($proc.WaitForExit(330000)) {
+    $code = $proc.ExitCode
+  } else {
+    $timedOut = 1
+    try { $proc.Kill() } catch { }
+  }
+} catch {
+  Write-Output ('ZSHELPER-FAILED: не удалось запустить ' + $kind + ' — ' + $_.Exception.Message)
+  Remove-Item -LiteralPath $out, $err -ErrorAction SilentlyContinue
+  exit 4
+}
+Write-Output ('ZSHELPER-OK tool={0} exit={1} timedout={2}' -f $kind, $code, $timedOut)
+$lines = @()
+if (Test-Path -LiteralPath $out) { $lines += @(Get-Content -LiteralPath $out -Tail 15 -ErrorAction SilentlyContinue) }
+if (Test-Path -LiteralPath $err) { $lines += @(Get-Content -LiteralPath $err -Tail 15 -ErrorAction SilentlyContinue) }
+$lines = @($lines | Where-Object { $_ -ne '' -and $null -ne $_ })
+if ($lines.Count -eq 0) {
+  Write-Output 'вывод пуст — ни одной строки'
+} else {
+  $lines | ForEach-Object { Write-Output $_ }
+}
+Remove-Item -LiteralPath $out, $err -ErrorAction SilentlyContinue"#;
+
 
 const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
 $node = $env:ZS_HOST
@@ -2679,6 +2807,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
             SUSPICIOUS_PROCESSES,
         ),
         ("hardware-diag|проверить|здоровье диска", DISK_HEALTH),
+        ("dev-code|запустить|тесты", RUN_TESTS),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -4087,6 +4216,111 @@ mod tests {
         // Счётчики в выводе есть у обоих скриптов — по ним рука и отвечает.
         assert!(SUSPICIOUS_PROCESSES.contains("suspicious="));
         assert!(DISK_HEALTH.contains("disks="));
+    }
+
+    /// Папка проекта с манифестом: npm и скрипт `test` из одной строки.
+    fn project_with_npm_test(name: &str, command: &str) -> std::path::PathBuf {
+        let dir = std::env::temp_dir()
+            .join(format!("zshelper-tests-{}-{name}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка проекта");
+        let manifest = format!(
+            "{{\"name\":\"probe\",\"version\":\"1.0.0\",\"private\":true,\"scripts\":{{\"test\":\"{command}\"}}}}"
+        );
+        std::fs::write(dir.join("package.json"), manifest).expect("манифест");
+        dir
+    }
+
+    #[test]
+    fn running_tests_without_a_folder_is_refused() {
+        let refused = run(
+            "dev-code|запустить|тесты",
+            &BTreeMap::new(),
+            &AtomicBool::new(false),
+        );
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("папка проекта"), "{}", refused.reason);
+    }
+
+    #[test]
+    fn tests_are_not_run_where_there_is_nothing_to_run() {
+        let dir = std::env::temp_dir().join(format!("zshelper-empty-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("пустая папка");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), dir.to_string_lossy().to_string());
+
+        let refused = run(
+            "dev-code|запустить|тесты",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok, "запускать нечего — это отказ");
+        // Отказ перечисляет, что искали, а не «что-то пошло не так».
+        assert!(refused.reason.contains("не вижу, чем"), "{}", refused.reason);
+        assert!(refused.reason.contains("package.json"), "{}", refused.reason);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_passing_test_run_is_reported_with_its_own_word() {
+        let dir = project_with_npm_test(
+            "pass",
+            "node -e \"console.log('1 passed')\"",
+        );
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), dir.to_string_lossy().to_string());
+
+        let done = run(
+            "dev-code|запустить|тесты",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        assert!(done.ok, "{}", done.reason);
+        assert!(done.reason.contains("тесты прошли"), "{}", done.reason);
+        assert!(done.reason.contains("npm"), "{}", done.reason);
+        assert_eq!(done.exit_code, Some(0));
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn failing_tests_make_the_step_fail_but_say_it_was_a_run() {
+        let dir = project_with_npm_test("fail", "node -e \"process.exit(3)\"");
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), dir.to_string_lossy().to_string());
+
+        let done = run(
+            "dev-code|запустить|тесты",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        // Красный прогон — не сбой руки, но и не успех шага.
+        assert!(!done.ok, "красные тесты — не «сделано»");
+        assert!(done.reason.contains("тесты провалились"), "{}", done.reason);
+        assert!(done.reason.contains("код 3"), "{}", done.reason);
+        assert!(done.reason.contains("не сбой руки"), "{}", done.reason);
+        assert_eq!(done.exit_code, Some(3));
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_test_script_knows_four_kinds_of_projects() {
+        assert!(RUN_TESTS.contains("package.json"));
+        assert!(RUN_TESTS.contains("Cargo.toml"));
+        assert!(RUN_TESTS.contains("pyproject.toml"));
+        assert!(RUN_TESTS.contains("go.mod"));
+        // Потолок по времени назван числом, а не «когда-нибудь».
+        assert!(RUN_TESTS.contains("WaitForExit(330000)"));
+
+        let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
+        assert!(registries.contains(&"dev-code|запустить|тесты"));
     }
 
     #[test]

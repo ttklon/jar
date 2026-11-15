@@ -583,5 +583,20 @@
     "summary": "Спрашивает у накопителей состояние, износ и наработку в часах. Значения берутся у самих дисков: если диск их не отдаёт, так и написано — «не сообщает», а не ноль. Ничего не устанавливает и не меняет; прогноз «когда умрёт» эта рука не делает и не притворяется, что делает.",
     "implementation": "PowerShell Get-PhysicalDisk + Get-StorageReliabilityCounter",
     "params": []
+  },
+  {
+    "registry": "dev-code|запустить|тесты",
+    "title": "Прогнать тесты проекта",
+    "summary": "Смотрит, чем в этой папке запускаются тесты (package.json → npm test, Cargo.toml → cargo test, pyproject.toml/pytest.ini/setup.py → python -m pytest, go.mod → go test), запускает и говорит, чем закончилось: инструмент, код возврата, сколько ждали и последние строки вывода. Упавшие тесты — результат прогона, а не сбой руки, но шаг помечается неудачным: иначе следующие шаги плана пошли бы по красному прогону. Признаков проекта нет — отказ с перечислением того, что искали; больше пяти с половиной минут не ждёт и говорит об этом прямо. Ничего не устанавливает.",
+    "implementation": "PowerShell Start-Process: npm test / cargo test / python -m pytest / go test",
+    "params": [
+      {
+        "name": "path",
+        "label": "Папка проекта",
+        "placeholder": "C:\\Projects\\мой-проект",
+        "hint": "папка, где лежит package.json, Cargo.toml, pyproject.toml или go.mod",
+        "required": true
+      }
+    ]
   }
 ]
