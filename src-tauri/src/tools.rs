@@ -5668,7 +5668,6 @@ mod tests {
         assert!(registries.contains(&"virtualization-remote|передать|файл на сервер"));
     }
 
-    #[test]
     /// Вердикт опирается на названные пороги, и его можно оспорить числами.
     #[test]
     fn the_verdict_uses_named_thresholds() {
