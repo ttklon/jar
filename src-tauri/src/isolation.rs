@@ -310,8 +310,11 @@ mod tests {
     fn a_greedy_process_hits_the_memory_ceiling() {
         use std::sync::atomic::AtomicBool;
 
-        let script = "$x = New-Object System.Collections.ArrayList; \
-                      while ($true) { [void]$x.Add((New-Object byte[] 10485760)) }";
+        // Крупные куски и массив фиксированного размера: до потолка доходим за считанные шаги.
+        // Мелкие куски в ArrayList — это лишняя работа на каждой итерации, и на медленной
+        // машине сорок секунд успевали истечь раньше потолка (так и падал CI однажды).
+        let script = "$chunks = New-Object 'object[]' 4096; $i = 0; \
+                      while ($true) { $chunks[$i] = New-Object byte[] 33554432; $i = ($i + 1) % 4096 }";
         let request = crate::executor::ExecRequest::new(
             "powershell.exe",
             vec![
