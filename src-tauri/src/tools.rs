@@ -3950,7 +3950,11 @@ Write-Output ('ZSHELPER-FILE ' + $out)
 ///  * **потолки числом**: не больше 20 роликов за раз, 20 минут на прогон;
 ///  * **собранный файл попадает в журнал отката**: «откатить за сессию» уберёт его в корзину,
 ///    исходники при этом целы.
-fn concat_videos(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+fn concat_videos(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
     let started = Instant::now();
     let raw_files = param(params, "files");
     let files: Vec<String> = raw_files
@@ -3980,7 +3984,10 @@ fn concat_videos(registry: &str, params: &BTreeMap<String, String>, cancel: &Ato
     }
     for file in &files {
         if !std::path::Path::new(file).is_file() {
-            return StepResult::failed(registry, format!("такого файла нет: {file} — проверьте путь"));
+            return StepResult::failed(
+                registry,
+                format!("такого файла нет: {file} — проверьте путь"),
+            );
         }
     }
     let out = if out_param.is_empty() {
@@ -4060,11 +4067,12 @@ fn concat_videos(registry: &str, params: &BTreeMap<String, String>, cancel: &Ato
     } else {
         format!("длительность сошлась: {length} с против суммы {sum} с (расхождение {diff} с)")
     };
-    result.reason = format!(
-        "склеено роликов: {parts}, {megabytes}, {verification}; {sound}; файл: {out}"
-    );
+    result.reason =
+        format!("склеено роликов: {parts}, {megabytes}, {verification}; {sound}; файл: {out}");
     if crate::undo::record_product(&files.join(";"), &out) {
-        result.reason.push_str("; записан в журнал отката — «откатить за сессию» уберёт его в корзину, исходники целы");
+        result.reason.push_str(
+            "; записан в журнал отката — «откатить за сессию» уберёт его в корзину, исходники целы",
+        );
     }
     result
 }
@@ -7071,21 +7079,31 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let refused = run("video|склеить|ролики", &params, &AtomicBool::new(false));
 
         assert!(!refused.ok);
-        assert!(refused.reason.contains("хотя бы два ролика"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("хотя бы два ролика"),
+            "{}",
+            refused.reason
+        );
         assert!(refused.reason.contains("названо: 1"), "{}", refused.reason);
     }
 
     /// Потолок числа роликов назван числом, и выход за него — отказ.
     #[test]
     fn concatenation_is_capped_by_a_named_number() {
-        let files: Vec<String> = (1..=21).map(|index| format!("C:\\в\\{index}.mp4")).collect();
+        let files: Vec<String> = (1..=21)
+            .map(|index| format!("C:\\в\\{index}.mp4"))
+            .collect();
         let mut params = BTreeMap::new();
         params.insert("files".to_string(), files.join("; "));
 
         let refused = run("video|склеить|ролики", &params, &AtomicBool::new(false));
 
         assert!(!refused.ok);
-        assert!(refused.reason.contains("больше двадцати"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("больше двадцати"),
+            "{}",
+            refused.reason
+        );
     }
 
     /// Пропавший ролик называется до запуска ffmpeg — а не после двадцати минут работы.
@@ -7104,7 +7122,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let refused = run("video|склеить|ролики", &params, &AtomicBool::new(false));
 
         assert!(!refused.ok);
-        assert!(refused.reason.contains("такого файла нет"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("такого файла нет"),
+            "{}",
+            refused.reason
+        );
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -7120,13 +7142,20 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let out = dir.join("итог.mp4");
         std::fs::write(&out, "уже есть".as_bytes()).expect("файл");
         let mut params = BTreeMap::new();
-        params.insert("files".to_string(), format!("{};{}", one.display(), two.display()));
+        params.insert(
+            "files".to_string(),
+            format!("{};{}", one.display(), two.display()),
+        );
         params.insert("output".to_string(), out.display().to_string());
 
         let refused = run("video|склеить|ролики", &params, &AtomicBool::new(false));
 
         assert!(!refused.ok);
-        assert!(refused.reason.contains("перезаписывать не буду"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("перезаписывать не буду"),
+            "{}",
+            refused.reason
+        );
         assert_eq!(
             std::fs::read(&out).expect("читается"),
             "уже есть".as_bytes().to_vec(),
@@ -7157,8 +7186,14 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
             let two = dir.join("b.mp4");
             std::fs::write(&one, "не видео".as_bytes()).expect("файл");
             std::fs::write(&two, "не видео".as_bytes()).expect("файл");
-            params.insert("files".to_string(), format!("{};{}", one.display(), two.display()));
-            params.insert("output".to_string(), dir.join("итог.mp4").display().to_string());
+            params.insert(
+                "files".to_string(),
+                format!("{};{}", one.display(), two.display()),
+            );
+            params.insert(
+                "output".to_string(),
+                dir.join("итог.mp4").display().to_string(),
+            );
 
             let refused = run("video|склеить|ролики", &params, &AtomicBool::new(false));
 
@@ -7200,15 +7235,30 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         }
         params.insert(
             "files".to_string(),
-            format!("{};{}", dir.join("часть 1.mp4").display(), dir.join("часть 2.mp4").display()),
+            format!(
+                "{};{}",
+                dir.join("часть 1.mp4").display(),
+                dir.join("часть 2.mp4").display()
+            ),
         );
-        params.insert("output".to_string(), dir.join("итог.mp4").display().to_string());
+        params.insert(
+            "output".to_string(),
+            dir.join("итог.mp4").display().to_string(),
+        );
 
         let result = run("video|склеить|ролики", &params, &AtomicBool::new(false));
 
         assert!(result.ok, "{}", result.reason);
-        assert!(result.reason.contains("склеено роликов: 2"), "{}", result.reason);
-        assert!(result.reason.contains("длительность сошлась"), "{}", result.reason);
+        assert!(
+            result.reason.contains("склеено роликов: 2"),
+            "{}",
+            result.reason
+        );
+        assert!(
+            result.reason.contains("длительность сошлась"),
+            "{}",
+            result.reason
+        );
         assert!(dir.join("итог.mp4").exists(), "результат на месте");
         let _ = std::fs::remove_dir_all(&dir);
     }
