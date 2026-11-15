@@ -50,6 +50,7 @@ pub mod logging;
 pub mod machine;
 pub mod memory;
 pub mod models;
+pub mod places;
 pub mod plan;
 pub mod planner;
 pub mod policy;
@@ -174,6 +175,7 @@ pub fn run() {
             ipc::speech_status,
             ipc::isolation_status,
             ipc::foreground_window,
+            ipc::data_places,
             ipc::undo_report,
             ipc::undo_apply,
             ipc::ui_dump,

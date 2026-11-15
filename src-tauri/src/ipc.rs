@@ -25,6 +25,7 @@ use crate::llm;
 use crate::machine;
 use crate::memory::{Episode, Memory, RunRecord};
 use crate::models::{self, ModelFile};
+use crate::places;
 use crate::plan::{self, Answer, Plan, Problem, Question, StepGate};
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
@@ -361,6 +362,19 @@ pub fn app_status(state: State<'_, AppState>) -> AppStatus {
 }
 
 /// Инструменты, которые уже умеют работать (список — в `data/tools.json`).
+/// Где приложение держит свои файлы и сколько они занимают.
+///
+/// Только чтение: пути, размеры и честная отметка «файла ещё нет». Ничего не удаляет
+/// и не «чистит» — уборка это отдельное дело с подтверждением.
+#[tauri::command]
+pub fn data_places(state: State<'_, AppState>) -> Vec<places::Place> {
+    places::all(
+        &state.inner.base_dir,
+        std::path::Path::new(&state.log_file),
+        &state.inner.models_dir,
+    )
+}
+
 /// Что можно откатить за текущую сессию. Ничего не меняет: это взгляд, а не действие.
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct UndoPreview {

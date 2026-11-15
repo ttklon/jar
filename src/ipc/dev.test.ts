@@ -25,6 +25,7 @@ import {
   memoryRuns,
   undoApply,
   undoReport,
+  dataPlaces,
   assignRole,
   removeModel,
   startEngine,
@@ -161,6 +162,8 @@ describe("журнал в браузере", () => {
     const preview = await undoReport();
     expect(preview.steps).toEqual([]);
     expect(preview.note).toContain("в браузере файлы никто не двигает");
+    // Файлов приложения в браузере нет — и список пуст, а не выдуман.
+    await expect(dataPlaces()).resolves.toEqual([]);
     const report = await undoApply();
     expect(report.undone).toBe(0);
     expect(report.refused[0]).toContain("в браузере откат недоступен");

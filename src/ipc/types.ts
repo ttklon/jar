@@ -697,3 +697,17 @@ export interface UndoReport {
   undone: number;
   refused: string[];
 }
+
+/**
+ * Место, где приложение держит свои файлы.
+ *
+ * `exists: false` — «файла ещё нет», а не «занимает 0 КБ»: это разные утверждения, и
+ * путать их в интерфейсе значит врать про состояние.
+ */
+export interface DataPlace {
+  title: string;
+  path: string;
+  exists: boolean;
+  bytes: number;
+  note: string;
+}

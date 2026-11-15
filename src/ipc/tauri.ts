@@ -38,6 +38,7 @@ import type {
   ToolView,
   TrialReport,
   UiDump,
+  DataPlace,
   UndoPreview,
   UndoReport,
 } from "./types";
@@ -302,6 +303,10 @@ export function runTool(
 
 export function cancelTool(): Promise<void> {
   return invoke<void>("cancel_tool");
+}
+
+export function dataPlaces(): Promise<DataPlace[]> {
+  return invoke<DataPlace[]>("data_places");
 }
 
 export function undoReport(): Promise<UndoPreview> {

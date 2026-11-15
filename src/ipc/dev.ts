@@ -128,6 +128,7 @@ import type {
   AuditEvent,
   UndoPreview,
   UndoReport,
+  DataPlace,
   Decision,
   Downloaded,
   EngineStatus,
@@ -232,6 +233,11 @@ export async function listFlows(): Promise<FlowView[]> {
  * Отката в браузере нет: файлы на этой машине никто не двигает. Честный ответ — пустой
  * список и оговорка, а не «откатили 0 дел» с видом выполненной работы.
  */
+export async function dataPlaces(): Promise<DataPlace[]> {
+  // В браузере папки приложения нет: файлы появляются только у приложения на машине.
+  return [];
+}
+
 export async function undoReport(): Promise<UndoPreview> {
   return {
     session: "",
