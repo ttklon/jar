@@ -4231,15 +4231,21 @@ mod tests {
     }
 
     /// Папка проекта с манифестом: npm и скрипт `test` из одной строки.
-    fn project_with_npm_test(name: &str, command: &str) -> std::path::PathBuf {
+    ///
+    /// Манифест собирается `serde_json`, а не склейкой строк: одна лишняя кавычка
+    /// превращает его в «не разобрал JSON», и тест тогда проверял бы не руку, а свою опечатку.
+    fn project_with_npm_test(name: &str, js: &str) -> std::path::PathBuf {
         let dir = std::env::temp_dir()
             .join(format!("zshelper-tests-{}-{name}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка проекта");
-        let manifest = format!(
-            "{{\"name\":\"probe\",\"version\":\"1.0.0\",\"private\":true,\"scripts\":{{\"test\":\"{command}\"}}}}"
-        );
-        std::fs::write(dir.join("package.json"), manifest).expect("манифест");
+        let manifest = serde_json::json!({
+            "name": "probe",
+            "version": "1.0.0",
+            "private": true,
+            "scripts": { "test": format!("node -e \"{js}\"") },
+        });
+        std::fs::write(dir.join("package.json"), manifest.to_string()).expect("манифест");
         dir
     }
 
@@ -4284,10 +4290,7 @@ mod tests {
 
     #[test]
     fn a_passing_test_run_is_reported_with_its_own_word() {
-        let dir = project_with_npm_test(
-            "pass",
-            "node -e \"console.log('1 passed')\"",
-        );
+        let dir = project_with_npm_test("pass", "console.log('1 passed')");
         let mut params = BTreeMap::new();
         params.insert("path".to_string(), dir.to_string_lossy().to_string());
 
@@ -4297,17 +4300,18 @@ mod tests {
             &AtomicBool::new(false),
         );
 
-        assert!(done.ok, "{}", done.reason);
-        assert!(done.reason.contains("тесты прошли"), "{}", done.reason);
-        assert!(done.reason.contains("npm"), "{}", done.reason);
-        assert_eq!(done.exit_code, Some(0));
+        let shown = format!("{} / вывод: {}", done.reason, done.stdout_tail);
+        assert!(done.ok, "{shown}");
+        assert!(done.reason.contains("тесты прошли"), "{shown}");
+        assert!(done.reason.contains("npm"), "{shown}");
+        assert_eq!(done.exit_code, Some(0), "{shown}");
 
         let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
     fn failing_tests_make_the_step_fail_but_say_it_was_a_run() {
-        let dir = project_with_npm_test("fail", "node -e \"process.exit(3)\"");
+        let dir = project_with_npm_test("fail", "process.exit(3)");
         let mut params = BTreeMap::new();
         params.insert("path".to_string(), dir.to_string_lossy().to_string());
 
@@ -4317,12 +4321,13 @@ mod tests {
             &AtomicBool::new(false),
         );
 
+        let shown = format!("{} / вывод: {}", done.reason, done.stdout_tail);
         // Красный прогон — не сбой руки, но и не успех шага.
-        assert!(!done.ok, "красные тесты — не «сделано»");
-        assert!(done.reason.contains("тесты провалились"), "{}", done.reason);
-        assert!(done.reason.contains("код 3"), "{}", done.reason);
-        assert!(done.reason.contains("не сбой руки"), "{}", done.reason);
-        assert_eq!(done.exit_code, Some(3));
+        assert!(!done.ok, "красные тесты — не «сделано»: {shown}");
+        assert!(done.reason.contains("тесты провалились"), "{shown}");
+        assert!(done.reason.contains("код 3"), "{shown}");
+        assert!(done.reason.contains("не сбой руки"), "{shown}");
+        assert_eq!(done.exit_code, Some(3), "{shown}");
 
         let _ = std::fs::remove_dir_all(&dir);
     }
