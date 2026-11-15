@@ -5810,6 +5810,8 @@ autostart=12 disk_free=120.4 disk_total=476.1 net_up=3 events=7 hours=24 uptime_
         );
     }
 
+    /// Путь чистится от кавычек и пробелов — так его вставляют из проводника.
+    #[test]
     fn clean_path_strips_quotes_and_spaces() {
         assert_eq!(clean_path("  \"C:\\tmp\"  "), "C:\\tmp");
     }
