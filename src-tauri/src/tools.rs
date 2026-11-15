@@ -3656,6 +3656,7 @@ mod tests {
             &steps,
             |path| std::path::Path::new(path).exists(),
             |from, to| std::fs::rename(from, to).map_err(|error| error.to_string()),
+            recycle_path,
         );
 
         assert_eq!(report.undone, 1, "{report:?}");
