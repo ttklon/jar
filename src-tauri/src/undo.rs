@@ -35,6 +35,10 @@ pub enum Kind {
     Move,
     /// Имя изменилось, содержимое осталось.
     Rename,
+    /// Появилась копия: источник на месте, рядом прибавка.
+    Copy,
+    /// Появился сжатый файл: исходник цел, рядом прибавка.
+    Compress,
 }
 
 impl Kind {
@@ -43,7 +47,14 @@ impl Kind {
         match self {
             Kind::Move => "перенос",
             Kind::Rename => "переименование",
+            Kind::Copy => "копия",
+            Kind::Compress => "сжатие",
         }
+    }
+
+    /// Отменяется ли дело переносом обратно (да) или уборкой продукта в корзину (нет).
+    pub fn is_removal(self) -> bool {
+        matches!(self, Kind::Copy | Kind::Compress)
     }
 }
 
@@ -112,8 +123,9 @@ impl Report {
 }
 
 /// Что откат **не** умеет — прямо, чтобы никто не надеялся зря.
-pub const NOTE: &str = "откатываются переносы и переименования этой сессии; запись в файл, \
-копия, сжатие, скачивание и корзина — нет: старое содержимое уже не вернуть";
+pub const NOTE: &str = "откатываются переносы, переименования, копии и сжатые файлы этой \
+сессии: копия и сжатое убираются в корзину, их можно достать оттуда; запись в файл, \
+скачивание и уже сделанная корзина — нет: старого содержимого не вернуть";
 
 /// Разбор журнала: построчно, терпимо к битым строкам.
 pub fn parse(text: &str) -> Vec<Entry> {
@@ -217,12 +229,21 @@ fn refuse_reason(entry: &Entry, session: &str, exists: &impl Fn(&str) -> bool) -
         ));
     }
     if !exists(&entry.to) {
-        return Some(format!(
-            "{} уже не там, куда его положили: откатывать нечего",
-            entry.from
-        ));
+        return Some(match entry.kind {
+            // Перенос возвращать некуда: он уже не там, куда его положили.
+            Kind::Move | Kind::Rename => format!(
+                "{} уже не там, куда его положили: откатывать нечего",
+                entry.from
+            ),
+            // Продукта нет — убирать нечего, и источник при этом цел.
+            Kind::Copy | Kind::Compress => format!(
+                "{} уже нет — убирать нечего, исходник не тронут",
+                entry.to
+            ),
+        });
     }
-    if exists(&entry.from) {
+    // У копии и сжатия источник остаётся на месте — это норма, а не занятое место.
+    if !entry.kind.is_removal() && exists(&entry.from) {
         return Some(format!(
             "старое место занято: {} — перезаписывать не буду",
             entry.from
@@ -239,6 +260,7 @@ pub fn apply(
     steps: &[Step],
     exists: impl Fn(&str) -> bool,
     move_back: impl Fn(&str, &str) -> Result<(), String>,
+    recycle: impl Fn(&str) -> Result<(), String>,
 ) -> Report {
     let session = steps
         .first()
@@ -264,7 +286,23 @@ pub fn apply(
                 .push(format!("{}: {reason}", step.entry.title()));
             continue;
         }
-        match move_back(&step.entry.to, &step.entry.from) {
+        // Копию и сжатый файл не «вернуть назад», а убрать: источник и так на месте.
+        let outcome = if step.entry.kind.is_removal() {
+            recycle(&step.entry.to)
+                .and_then(|()| {
+                    if exists(&step.entry.to) {
+                        Err("в корзину не убралось: файл на месте".to_string())
+                    } else if !exists(&step.entry.from) {
+                        Err("исходник пропал — убирать продукт было не за чем".to_string())
+                    } else {
+                        Ok(())
+                    }
+                })
+        } else {
+            move_back(&step.entry.to, &step.entry.from)
+        };
+
+        match outcome {
             // Проверка после шага: вернулось и там его больше нет. Иначе это не откат.
             Ok(()) if exists(&step.entry.from) && !exists(&step.entry.to) => {
                 report.undone += 1;
@@ -285,7 +323,8 @@ pub fn apply(
 pub fn undo_session(journal: &Journal) -> Report {
     let entries = journal.undoable();
     let steps = plan(&entries, journal.session(), path_exists);
-    apply(&steps, path_exists, move_back_on_disk)
+    // Уборка идёт через ту же руку, что и «удалить в корзину»: одно место, одна проверка.
+    apply(&steps, path_exists, move_back_on_disk, recycle_on_disk)
 }
 
 fn path_exists(path: &str) -> bool {
@@ -294,6 +333,10 @@ fn path_exists(path: &str) -> bool {
 
 fn move_back_on_disk(from: &str, to: &str) -> Result<(), String> {
     std::fs::rename(from, to).map_err(|error| format!("вернуть не удалось: {error}"))
+}
+
+fn recycle_on_disk(path: &str) -> Result<(), String> {
+    crate::tools::recycle_path(path)
 }
 
 fn now() -> u64 {
@@ -333,6 +376,22 @@ pub fn record_move(from: &str, to: &str) -> bool {
 pub fn record_rename(from: &str, to: &str) -> bool {
     match current() {
         Some(journal) => journal.record(Kind::Rename, from, to).is_ok(),
+        None => false,
+    }
+}
+
+/// Записать копию: откат уберёт её в корзину, источник не тронет.
+pub fn record_copy(from: &str, to: &str) -> bool {
+    match current() {
+        Some(journal) => journal.record(Kind::Copy, from, to).is_ok(),
+        None => false,
+    }
+}
+
+/// Записать сжатый файл: откат уберёт его в корзину, исходник не тронет.
+pub fn record_compress(from: &str, to: &str) -> bool {
+    match current() {
+        Some(journal) => journal.record(Kind::Compress, from, to).is_ok(),
         None => false,
     }
 }
@@ -482,7 +541,7 @@ mod tests {
             },
         ];
 
-        let report = apply(&steps, exists, move_back);
+        let report = apply(&steps, exists, move_back, |_path| Ok(()));
 
         assert_eq!(report.undone, 1, "{report:?}");
         assert_eq!(report.refused.len(), 1, "{report:?}");
@@ -501,7 +560,12 @@ mod tests {
             refusal: None,
         }];
 
-        let report = apply(&steps, |path| path == "b", |_from, _to| Ok(()));
+        let report = apply(
+            &steps,
+            |path| path == "b",
+            |_from, _to| Ok(()),
+            |_path| Ok(()),
+        );
 
         assert_eq!(report.undone, 0);
         assert!(
@@ -509,6 +573,67 @@ mod tests {
             "{}",
             report.refused[0]
         );
+    }
+
+    #[test]
+    fn a_copy_is_undone_by_taking_the_copy_away_not_the_source() {
+        let steps = vec![Step {
+            entry: entry(Kind::Copy, "C:\\a\\файл.txt", "C:\\a\\файл (копия).txt", "sess-1"),
+            refusal: None,
+        }];
+        let state = std::cell::RefCell::new(vec![
+            "C:\\a\\файл.txt".to_string(),
+            "C:\\a\\файл (копия).txt".to_string(),
+        ]);
+        let exists = |path: &str| state.borrow().iter().any(|known| known == path);
+        let recycled = std::cell::RefCell::new(Vec::<String>::new());
+        let recycle = |path: &str| -> Result<(), String> {
+            recycled.borrow_mut().push(path.to_string());
+            state.borrow_mut().retain(|known| known != path);
+            Ok(())
+        };
+
+        let report = apply(&steps, exists, |_, _| Ok(()), recycle);
+
+        assert_eq!(report.undone, 1, "{report:?}");
+        // Убрали именно копию, а исходник остался.
+        assert_eq!(recycled.borrow().len(), 1);
+        assert!(state.borrow().iter().any(|known| known == "C:\\a\\файл.txt"));
+    }
+
+    #[test]
+    fn a_copy_that_is_already_gone_is_not_counted_as_undone() {
+        let steps = vec![Step {
+            entry: entry(Kind::Copy, "a", "b", "sess-1"),
+            refusal: None,
+        }];
+
+        // Копии уже нет: убирать нечего, и это говорится вслух.
+        let report = apply(&steps, |path| path == "a", |_, _| Ok(()), |_| Ok(()));
+
+        assert_eq!(report.undone, 0, "{report:?}");
+        assert!(
+            report.refused[0].contains("убирать нечего"),
+            "{}",
+            report.refused[0]
+        );
+    }
+
+    #[test]
+    fn a_compressed_file_is_planned_and_removed_like_a_copy() {
+        let entries = vec![entry(
+            Kind::Compress,
+            "C:\\видео\\отпуск.mp4",
+            "C:\\видео\\отпуск (сжатое).mp4",
+            "sess-1",
+        )];
+
+        let steps = plan(&entries, "sess-1", |path| {
+            path.ends_with(".mp4") || path.ends_with("отпуск.mp4")
+        });
+
+        // Источник рядом с продуктом — для сжатия это норма, а не «занятое место».
+        assert!(steps[0].possible(), "{:?}", steps[0]);
     }
 
     #[test]

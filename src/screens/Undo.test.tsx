@@ -65,6 +65,30 @@ describe("карточка отката", () => {
     expect(undoApply).not.toHaveBeenCalled();
   });
 
+  it("называет копию и сжатие словами, а не ключами из ядра", async () => {
+    vi.mocked(undoReport).mockResolvedValue(
+      preview({
+        steps: [
+          {
+            entry: { at: 3, session: "abc", kind: "copy", from: "C:\\a", to: "C:\\a (копия)" },
+            refusal: null,
+          },
+          {
+            entry: { at: 4, session: "abc", kind: "compress", from: "C:\\в.mp4", to: "C:\\в (сжатое).mp4" },
+            refusal: null,
+          },
+        ],
+      }),
+    );
+
+    render(<UndoCard />);
+
+    await waitFor(() => expect(screen.getByText(/копия: C:\\a → C:\\a \(копия\)/)).toBeTruthy());
+    expect(screen.getByText(/сжатие: C:\\в.mp4 → C:\\в \(сжатое\).mp4/)).toBeTruthy();
+    // Список идёт как пришёл: порядок отката — дело ядра, а не карточки.
+    expect(screen.getByRole("button", { name: "Откатить дел: 2" })).toBeTruthy();
+  });
+
   it("требует второго щелчка: первый только взводит кнопку", async () => {
     vi.mocked(undoReport).mockResolvedValue(preview());
     vi.mocked(undoApply).mockResolvedValue({ session: "abc", undone: 1, refused: [] });

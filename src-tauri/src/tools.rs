@@ -525,7 +525,7 @@ fn copy_item(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
         return StepResult::failed(registry, message);
     }
 
-    StepResult::ok_with(
+    let mut result = StepResult::ok_with(
         registry,
         Evidence::PathExists {
             path: to.clone(),
@@ -536,7 +536,12 @@ fn copy_item(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
             actual.0, actual.1
         ),
         started.elapsed().as_millis() as u64,
-    )
+    );
+    // Копию можно убрать обратно: источник на месте, значит откат не заденет ничего лишнего.
+    if let Some(note) = remember(crate::undo::Kind::Copy, &from, &to) {
+        result.reason = format!("{}; {note}", result.reason);
+    }
+    result
 }
 
 /// Есть ли в пути «..». Такой путь нельзя сравнивать надёжно, поэтому рука его не берёт.
@@ -1267,6 +1272,21 @@ fn compress_video(
             megabytes(before),
             megabytes(after)
         );
+    }
+    // Сжатый файл появился рядом с исходником — значит его можно убрать обратно в корзину.
+    // Записываем и когда «легче не стало»: файл-то создан, и человек вправе захотеть его убрать.
+    let produced = std::path::Path::new(&path)
+        .parent()
+        .map(|dir| dir.join(&name))
+        .unwrap_or_else(|| std::path::PathBuf::from(&name));
+    if produced.exists() {
+        if let Some(note) = remember(
+            crate::undo::Kind::Compress,
+            &path,
+            &produced.to_string_lossy(),
+        ) {
+            result.reason = format!("{}; {note}", result.reason);
+        }
     }
     result
 }
@@ -2591,16 +2611,38 @@ fn move_item(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicB
     // Запись об откате — только после проверенного успеха: обещать вернуть то, что не
     // переехало, значит врать в отчёте. Не записалось — так и сказано в причине.
     if result.ok {
-        if let Some(journal) = crate::undo::current() {
-            if journal.record(crate::undo::Kind::Move, &from, &to).is_err() {
-                result.reason = format!(
-                    "{}; в журнал отката не записалось — вернуть автоматически не смогу",
-                    result.reason
-                );
-            }
+        if let Some(note) = remember(crate::undo::Kind::Move, &from, &to) {
+            result.reason = format!("{}; {note}", result.reason);
         }
     }
     result
+}
+
+/// Убрать путь в корзину — так откат убирает то, что сам создал.
+///
+/// Идёт через ту же руку, что и «удалить в корзину»: одно место, одна проверка. Не
+/// получилось — причина возвращается наружу, а не превращается в «наверное, убралось».
+pub fn recycle_path(path: &str) -> Result<(), String> {
+    let mut params = BTreeMap::new();
+    params.insert("path".to_string(), path.to_string());
+    let result = recycle("files|удалить|в корзину", &params, &AtomicBool::new(false));
+    if result.ok {
+        Ok(())
+    } else {
+        Err(result.reason)
+    }
+}
+
+/// Записать дело в журнал отката. `Some(причина)` — не записалось.
+///
+/// Журнал может быть не открыт (тесты, утилиты) — тогда молчим: «записать некуда» в
+/// причине шага выглядело бы поломкой. А вот отказ уже открытого журнала — это факт,
+/// о котором человек должен знать: откат про это дело не узнает.
+fn remember(kind: crate::undo::Kind, from: &str, to: &str) -> Option<String> {
+    let journal = crate::undo::current()?;
+    journal.record(kind, from, to).err().map(|error| {
+        format!("в журнал отката не записалось ({error}) — вернуть автоматически не смогу")
+    })
 }
 
 const RECYCLE: &str = r#"$target = $env:ZS_PATH
@@ -3539,6 +3581,27 @@ mod tests {
         assert!(moved.ok, "перенос должен подтвердиться: {}", moved.reason);
         assert_eq!(moved.evidence.kind(), "stdout_marker");
         assert!(free.exists() && !source.exists(), "файл переехал");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Корзина на живой Windows: файл уходит с диска, а не остаётся «наверное удалённым».
+    ///
+    /// Проверяется именно механизм, которым откат убирает копии и сжатые файлы: если он
+    /// не работает, откат не должен делать вид, что убрал.
+    #[cfg(windows)]
+    #[test]
+    fn a_file_leaves_the_disk_through_the_recycle_bin() {
+        let dir = std::env::temp_dir().join(format!("zshelper-recycle-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let file = dir.join("ненужное.txt");
+        std::fs::write(&file, "мусор").expect("файл");
+
+        let outcome = recycle_path(&file.to_string_lossy());
+
+        assert!(outcome.is_ok(), "корзина должна принять файл: {outcome:?}");
+        assert!(!file.exists(), "файл ушёл с диска");
 
         let _ = std::fs::remove_dir_all(&dir);
     }

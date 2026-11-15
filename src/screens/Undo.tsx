@@ -22,6 +22,8 @@ import { undo } from "../i18n/ru";
 const KIND_LABEL: Record<string, string> = {
   move: "перенос",
   rename: "переименование",
+  copy: "копия",
+  compress: "сжатие",
 };
 
 const useStyles = makeStyles({
