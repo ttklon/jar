@@ -167,7 +167,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "processes-services|найти|подозрительный процесс" => {
             suspicious_processes(registry, cancel)
         }
-        "hardware-diag|проверить|здоровье диска" => disk_health(registry, cancel),
+        "hardware-diag|проверить|здоровье диска" => {
+            disk_health(registry, cancel)
+        }
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -2460,7 +2462,6 @@ if ($rows.Count -eq 0) {
   $rows | Select-Object -First 10 | ForEach-Object { Write-Output $_ }
 }"#;
 
-
 const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
 $node = $env:ZS_HOST
 $answers = @(Test-Connection -ComputerName $node -Count 4 -ErrorAction SilentlyContinue)
@@ -2673,7 +2674,10 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
             EXPLAIN_PROCESS,
         ),
         ("hardware-diag|проверить|температуры", TEMPERATURES),
-        ("processes-services|найти|подозрительный процесс", SUSPICIOUS_PROCESSES),
+        (
+            "processes-services|найти|подозрительный процесс",
+            SUSPICIOUS_PROCESSES,
+        ),
         ("hardware-diag|проверить|здоровье диска", DISK_HEALTH),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
@@ -4043,14 +4047,10 @@ mod tests {
         );
         // И честно: либо «ничего не видно» (без обещания чистоты),
         // либо список на заметку — но не приговор.
-        let honest = found.reason.contains("ничего явно странного")
-            || found.reason.contains("на заметку");
+        let honest =
+            found.reason.contains("ничего явно странного") || found.reason.contains("на заметку");
         assert!(honest, "{}", found.reason);
-        assert!(
-            !found.reason.contains("компьютер чист"),
-            "{}",
-            found.reason
-        );
+        assert!(!found.reason.contains("компьютер чист"), "{}", found.reason);
     }
 
     #[test]
@@ -4062,11 +4062,15 @@ mod tests {
         );
 
         assert!(health.ok, "{}", health.reason);
-        let honest = health.reason.contains("дисков:")
-            || health.reason.contains("не отдаёт сведения");
+        let honest =
+            health.reason.contains("дисков:") || health.reason.contains("не отдаёт сведения");
         assert!(honest, "{}", health.reason);
         // Прогноза нет не случайно: рука не обещает предсказать смерть диска.
-        assert!(!health.reason.contains("скоро сломается"), "{}", health.reason);
+        assert!(
+            !health.reason.contains("скоро сломается"),
+            "{}",
+            health.reason
+        );
     }
 
     #[test]
