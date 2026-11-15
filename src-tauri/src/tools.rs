@@ -190,6 +190,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         }
         "video|склеить|ролики" => concat_videos(registry, params, cancel),
         "video|извлечь|кадр" => grab_frame(registry, params, cancel),
+        "video|конвертировать|формат/кодек" => convert_video(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -4033,6 +4034,258 @@ Write-Output ('ZSHELPER-OK at=' + [string][math]::Round($seconds, 2) + ' duratio
 Write-Output ('ZSHELPER-FILE ' + $out)
 "#;
 
+const CONVERT_VIDEO: &str = r#"$ErrorActionPreference = 'Stop'
+$path = $env:ZS_PATH
+$wanted = $env:ZS_CODEC
+$out = $env:ZS_OUT
+if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+  Write-Output 'ZSHELPER-FAILED: такого видео нет — проверьте путь'
+  exit 2
+}
+if (-not $out) {
+  Write-Output 'ZSHELPER-FAILED: не назван файл, куда сохранить результат'
+  exit 3
+}
+if (Test-Path -LiteralPath $out) {
+  Write-Output ('ZSHELPER-FAILED: «' + $out + '» уже есть — перезаписывать не буду; назовите другое имя')
+  exit 4
+}
+$encoder = ''
+$crf = ''
+if ($wanted -eq 'h265') { $encoder = 'libx265'; $crf = '28' }
+elseif ($wanted -eq 'h264') { $encoder = 'libx264'; $crf = '23' }
+else {
+  Write-Output ('ZSHELPER-FAILED: кодек «' + $wanted + '» я не знаю — умею h265 (меньше вес) и h264 (совместимее)')
+  exit 5
+}
+$tool = Get-Command ffmpeg -ErrorAction SilentlyContinue
+if (-not $tool) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не установлен — перекодирует он; поставьте его (winget install Gyan.FFmpeg) и повторите; сам ставить не буду'
+  exit 6
+}
+$probe = Get-Command ffprobe -ErrorAction SilentlyContinue
+$sourceCodec = ''
+$durationSeconds = 0.0
+$durationKnown = 0
+if ($probe) {
+  $sourceCodec = (& $probe.Source -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 $path 2>$null | Select-Object -First 1)
+  $duration = (& $probe.Source -v error -show_entries format=duration -of csv=p=0 $path 2>$null | Select-Object -First 1)
+  if ($duration) {
+    if ([double]::TryParse([string]$duration, [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$durationSeconds)) { $durationKnown = 1 }
+  }
+}
+$alias = @{ 'hevc' = 'h265'; 'avc' = 'h264' }
+if ($sourceCodec -and $alias.ContainsKey([string]$sourceCodec)) { $sourceCodec = $alias[[string]$sourceCodec] }
+if ($sourceCodec -and $sourceCodec -eq $wanted) {
+  Write-Output ('ZSHELPER-FAILED: файл уже в ' + $wanted + ' — перекодирование в тот же кодек только испортит качество, пользы не будет')
+  exit 7
+}
+$before = (Get-Item -LiteralPath $path).Length
+$arguments = @('-hide_banner', '-loglevel', 'error', '-y', '-i', $path, '-c:v', $encoder, '-crf', $crf, '-preset', 'medium', '-c:a', 'aac', '-b:a', '160k', $out)
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.UseShellExecute = $false
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError = $true
+$psi.FileName = $tool.Source
+$psi.Arguments = ($arguments -join ' ')
+$proc = New-Object System.Diagnostics.Process
+$proc.StartInfo = $psi
+$code = -1
+$timedOut = 0
+$err = ''
+try {
+  [void]$proc.Start()
+  $outTask = $proc.StandardOutput.ReadToEndAsync()
+  $errTask = $proc.StandardError.ReadToEndAsync()
+  if ($proc.WaitForExit(1800000)) { $code = $proc.ExitCode } else { $timedOut = 1; try { $proc.Kill() } catch { } }
+  if ($errTask.Wait(10000)) { $err = $errTask.Result }
+  if ($outTask.Wait(10000)) { [void]$outTask.Result }
+} catch {
+  Write-Output ('ZSHELPER-FAILED: не удалось запустить ffmpeg — ' + $_.Exception.Message)
+  exit 8
+}
+if ($timedOut -eq 1) {
+  Write-Output 'ZSHELPER-FAILED: тридцати минут не хватило — прогон остановлен, файл мог остаться недописанным'
+  exit 9
+}
+if ($code -ne 0) {
+  $tail = @($err -split "`r?`n" | Where-Object { $_ -ne '' } | Select-Object -Last 3) -join ' | '
+  Write-Output ('ZSHELPER-FAILED: ffmpeg вернул код ' + $code + ' — ' + $tail)
+  exit 10
+}
+$made = Get-Item -LiteralPath $out -ErrorAction SilentlyContinue
+if (-not $made -or $made.Length -le 0) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не оставил файла — конвертация не состоялась'
+  exit 11
+}
+$outCodec = ''
+$outDuration = 0.0
+$outDurationKnown = 0
+if ($probe) {
+  $outCodec = (& $probe.Source -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 $out 2>$null | Select-Object -First 1)
+  if ($alias.ContainsKey([string]$outCodec)) { $outCodec = $alias[[string]$outCodec] }
+  $durationOut = (& $probe.Source -v error -show_entries format=duration -of csv=p=0 $out 2>$null | Select-Object -First 1)
+  if ($durationOut) {
+    if ([double]::TryParse([string]$durationOut, [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$outDuration) -and $outDuration -ge 0) { $outDurationKnown = 1 }
+  }
+}
+if ($outCodec -and $outCodec -ne $wanted) {
+  Write-Output ('ZSHELPER-FAILED: на выходе ' + $outCodec + ', а просили ' + $wanted + ' — кодек не тот, результат оставлять нельзя')
+  exit 12
+}
+$diff = ''
+if ($durationKnown -eq 1 -and $outDurationKnown -eq 1) {
+  $diff = [string][math]::Round([math]::Abs($outDuration - $durationSeconds), 2)
+}
+$saved = [int][math]::Round((1 - ($made.Length / [double]$before)) * 100)
+$sourceText = ''
+if ($sourceCodec) { $sourceText = [string]$sourceCodec }
+$durationText = ''
+if ($durationKnown -eq 1) { $durationText = [string][math]::Round($durationSeconds, 2) }
+Write-Output ('ZSHELPER-OK codec=' + $wanted + ' from=' + $sourceText + ' before=' + $before + ' after=' + $made.Length + ' saved=' + $saved + ' diff=' + $diff + ' source_duration=' + $durationText + ' codec_checked=' + $(if ($outCodec) { 1 } else { 0 }))
+Write-Output ('ZSHELPER-FILE ' + $out)
+"#;
+
+/// Перекодировать видео в другой кодек и проверить результат по ffprobe.
+///
+/// Что здесь важно:
+///
+///  * **тот же кодек — отказ.** Перекодировать h265 в h265 значит потерять качество без пользы;
+///    рука говорит это прямо, а не делает вид, что «оптимизировала»;
+///  * **кодек на выходе проверяется**, а не предполагается: просили h265, а ffprobe видит h264 —
+///    результат остаётся, но шаг считается неудачным;
+///  * **длительность сверяется** с исходником: расхождение больше секунды значит потерянные
+///    кадры;
+///  * **«легче не стало» говорится вслух**: перекодирование может и потяжелеть, и это не повод
+///    молчать;
+///  * потолки числом: 30 минут на прогон; CRF 28 для h265 и 23 для h264 — не «на глаз»;
+///  * результат попадает в журнал отката: «откатить за сессию» уберёт файл в корзину.
+fn convert_video(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+    let codec = param(params, "codec").trim().to_lowercase();
+    let out_param = clean_path(param(params, "output"));
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задано видео — назовите путь к файлу");
+    }
+    if !std::path::Path::new(&path).is_file() {
+        return StepResult::failed(registry, format!("такого видео нет: {path} — проверьте путь"));
+    }
+    let codec = if codec.is_empty() {
+        "h265".to_string()
+    } else {
+        match codec.as_str() {
+            "h264" | "h265" => codec,
+            _ => {
+                return StepResult::failed(
+                    registry,
+                    format!(
+                        "кодек «{codec}» я не знаю — умею h265 (меньше вес) и h264 (совместимее)"
+                    ),
+                )
+            }
+        }
+    };
+
+    let out = if out_param.is_empty() {
+        let source = std::path::Path::new(&path);
+        let stem = source
+            .file_stem()
+            .map(|name| name.to_string_lossy().to_string())
+            .unwrap_or_else(|| "видео".to_string());
+        source
+            .parent()
+            .unwrap_or_else(|| std::path::Path::new("."))
+            .join(format!("{stem} ({codec}).mp4"))
+            .display()
+            .to_string()
+    } else {
+        out_param
+    };
+    if std::path::Path::new(&out).exists() {
+        return StepResult::failed(
+            registry,
+            format!("«{out}» уже есть — перезаписывать не буду; назовите другое имя"),
+        );
+    }
+
+    let mut result = run_script(
+        registry,
+        CONVERT_VIDEO,
+        &[("PATH", path.as_str()), ("CODEC", codec.as_str()), ("OUT", out.as_str())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(1860),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let field = |name: &str| -> String {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .unwrap_or("")
+            .to_string()
+    };
+    let before = field("before=").parse::<u64>().unwrap_or_default();
+    let after = field("after=").parse::<u64>().unwrap_or_default();
+    let saved = field("saved=").parse::<i64>().unwrap_or_default();
+    let diff = field("diff=").parse::<f64>().unwrap_or_default();
+    let from = field("from=");
+    let checked = field("codec_checked=") == "1";
+    let megabytes = |bytes: u64| format!("{:.1}", bytes as f64 / (1024.0 * 1024.0));
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    if diff > 1.0 {
+        result.ok = false;
+        result.reason = format!(
+            "длительность не сошлась: расхождение {diff} с — кадры потерялись; файл оставлен, но доверять ему нельзя"
+        );
+        return result;
+    }
+    let weight = if saved > 0 {
+        format!(
+            "было {} МБ, стало {} МБ — легче на {saved}%",
+            megabytes(before),
+            megabytes(after)
+        )
+    } else {
+        format!(
+            "было {} МБ, стало {} МБ — легче не стало, и это честно сказано",
+            megabytes(before),
+            megabytes(after)
+        )
+    };
+    let origin = if from.is_empty() {
+        "исходный кодек прочитать не удалось".to_string()
+    } else {
+        format!("было {from}")
+    };
+    let verified = if checked {
+        "кодек на выходе проверен по ffprobe"
+    } else {
+        "ffprobe нет — кодек на выходе не проверен, доверять нечему"
+    };
+    result.reason = format!(
+        "перекодировано в {codec} ({origin}): {weight}; {verified}; файл: {out}"
+    );
+    if crate::undo::record_product(&path, &out) {
+        result.reason
+            .push_str("; записан в журнал отката — «откатить за сессию» уберёт его в корзину, исходник цел");
+    }
+    result
+}
+
 /// Разобрать время кадра: «3:20», «1:02:03», «200», «3:20.5» — в секунды.
 ///
 /// Почему в ядре, а не в скрипте: человек вводит время по-разному, и отказ должен быть
@@ -5440,6 +5693,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("processes-services|замерить|изменение нагрузки", SNAPSHOT),
         ("video|склеить|ролики", CONCAT_VIDEOS),
         ("video|извлечь|кадр", GRAB_FRAME),
+        ("video|конвертировать|формат/кодек", CONVERT_VIDEO),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }
@@ -7333,6 +7587,124 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert_eq!(groups[0].paths.len(), 3);
         assert_eq!(groups[1].paths, vec!["C:\\b\\x.bin", "C:\\b\\y.bin"]);
         assert_eq!(groups[1].wasted, 300);
+    }
+
+    /// Неизвестный кодек — отказ с тем, что рука умеет, а не «конвертация не удалась».
+    #[test]
+    fn an_unknown_codec_is_refused_with_the_known_ones() {
+        let dir = std::env::temp_dir().join(format!("zshelper-convert-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("папка");
+        let video = dir.join("ролик.mp4");
+        std::fs::write(&video, "не видео".as_bytes()).expect("файл");
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), video.display().to_string());
+        params.insert("codec".to_string(), "av1".to_string());
+
+        let refused = run("video|конвертировать|формат/кодек", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("h265"), "{}", refused.reason);
+        assert!(refused.reason.contains("h264"), "{}", refused.reason);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Уже нужный кодек — отказ: перекодирование в тот же кодек портит качество без пользы.
+    #[cfg(windows)]
+    #[test]
+    fn converting_into_the_same_codec_is_refused() {
+        let ffmpeg = std::process::Command::new("ffmpeg")
+            .arg("-version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false);
+        if !ffmpeg {
+            return;
+        }
+        let dir = std::env::temp_dir().join(format!("zshelper-convert-same-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let video = dir.join("ролик.mp4");
+        let made = std::process::Command::new("ffmpeg")
+            .args([
+                "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
+                "testsrc=size=96x64:rate=10:duration=1", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            ])
+            .arg(&video)
+            .status()
+            .expect("ffmpeg запускается");
+        assert!(made.success());
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), video.display().to_string());
+        params.insert("codec".to_string(), "h264".to_string());
+        params.insert(
+            "output".to_string(),
+            dir.join("итог.mp4").display().to_string(),
+        );
+
+        let refused = run("video|конвертировать|формат/кодек", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok, "{}", refused.reason);
+        assert!(refused.reason.contains("уже в h264"), "{}", refused.reason);
+        assert!(
+            !dir.join("итог.mp4").exists(),
+            "ничего не должно появиться: {}",
+            refused.reason
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Живая конвертация h264 → h265: кодек на выходе читается с файла, не выдумывается.
+    #[cfg(windows)]
+    #[test]
+    fn a_live_conversion_is_checked_by_codec() {
+        let ffmpeg = std::process::Command::new("ffmpeg")
+            .arg("-version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false);
+        let dir = std::env::temp_dir().join(format!("zshelper-convert-live-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let video = dir.join("ролик.mp4");
+        let out = dir.join("ролик (h265).mp4");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), video.display().to_string());
+        params.insert("codec".to_string(), "h265".to_string());
+        params.insert("output".to_string(), out.display().to_string());
+        std::fs::write(&video, "не видео".as_bytes()).expect("файл");
+
+        if !ffmpeg {
+            let refused = run("video|конвертировать|формат/кодек", &params, &AtomicBool::new(false));
+            assert!(!refused.ok);
+            assert!(refused.reason.contains("ffmpeg"), "{}", refused.reason);
+            let _ = std::fs::remove_dir_all(&dir);
+            return;
+        }
+
+        let made = std::process::Command::new("ffmpeg")
+            .args([
+                "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
+                "testsrc=size=96x64:rate=10:duration=2", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            ])
+            .arg(&video)
+            .status()
+            .expect("ffmpeg запускается");
+        assert!(made.success());
+
+        let result = run("video|конвертировать|формат/кодек", &params, &AtomicBool::new(false));
+
+        assert!(result.ok, "{}", result.reason);
+        assert!(result.reason.contains("перекодировано в h265"), "{}", result.reason);
+        assert!(result.reason.contains("кодек на выходе проверен"), "{}", result.reason);
+        assert!(out.exists(), "результат на месте");
+        assert!(video.exists(), "исходник цел");
+        if let Some(note) = result.reason.split("; ").find(|part| part.contains("легче")) {
+            // «легче» или «легче не стало» — оба исхода названы, молчания быть не может.
+            assert!(note.contains("легче"), "{note}");
+        }
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// Время кадра понимается так, как его пишут люди: «3:20», «1:02:03», «200».
