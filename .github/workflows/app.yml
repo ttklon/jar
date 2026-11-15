@@ -208,6 +208,8 @@ jobs:
       - name: Rustfmt
         if: steps.clippy.outputs.status == '0'
         shell: bash
+        env:
+          PYTHONIOENCODING: utf-8
         run: |
           cargo fmt --manifest-path src-tauri/Cargo.toml --all
           # Смотрим только исходники: cargo build переписывает Cargo.lock и раньше
@@ -224,7 +226,7 @@ jobs:
           # Форматирование меняет число строк в ядре, а дашборд это число печатает.
           # Без пересборки следующий прогон ругался бы «сгенерированные файлы устарели»
           # из-за отступов — и это выглядело бы как отдельная поломка.
-          python3 tools/dashboard.py
+          python tools/dashboard.py
           git config user.name "zshelper-ci"
           git config user.email "ci@zshelper.local"
           git add src-tauri/src src-tauri/build.rs src-tauri/Cargo.lock docs/DASHBOARD.md docs/INDEX.md
