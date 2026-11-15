@@ -1145,9 +1145,7 @@ fn compress_video(
         let goal = if target.is_empty() {
             String::from("по качеству (CRF 23), качество по кадрам не проверялось")
         } else {
-            format!(
-                "остановка по размеру на {target} МБ — это грубая цель, хвост мог срезаться"
-            )
+            format!("остановка по размеру на {target} МБ — это грубая цель, хвост мог срезаться")
         };
         result.reason = format!(
             "видео сжато: было {} МБ, стало {} МБ, легче на {saved}% — {name}; {goal}",
@@ -2891,8 +2889,6 @@ if ($saved -eq 0) {
 } else {
   Write-Output ('было ' + $before + ' байт, стало ' + $after.Length + ' — легче на ' + $saved + '%')
 }"#;
-
-
 
 const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
 $node = $env:ZS_HOST
@@ -4739,21 +4735,22 @@ mod tests {
     #[test]
     fn compressing_a_file_that_is_not_there_is_refused() {
         let mut params = BTreeMap::new();
-        params.insert(
-            "path".to_string(),
-            "C:\\нет-такого\\видео.mp4".to_string(),
-        );
+        params.insert("path".to_string(), "C:\\нет-такого\\видео.mp4".to_string());
 
         let refused = run("video|сжать|размер", &params, &AtomicBool::new(false));
 
         assert!(!refused.ok);
-        assert!(refused.reason.contains("такого файла нет"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("такого файла нет"),
+            "{}",
+            refused.reason
+        );
     }
 
     #[test]
     fn a_bad_target_size_is_refused_before_anything_runs() {
-        let dir = std::env::temp_dir()
-            .join(format!("zshelper-video-{}-target", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-video-{}-target", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
         let file = dir.join("фильм.mp4");
@@ -4777,8 +4774,7 @@ mod tests {
 
     #[test]
     fn without_ffmpeg_or_a_real_video_the_hand_says_which_it_is() {
-        let dir = std::env::temp_dir()
-            .join(format!("zshelper-video-{}-junk", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("zshelper-video-{}-junk", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
         let file = dir.join("битый.mp4");
