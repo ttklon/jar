@@ -3854,16 +3854,26 @@ fn parse_twin_groups(tail: &str) -> Vec<TwinGroup> {
 ///  * **фото сверяются как файлы, а не по картинке.** «Похожие, но не одинаковые» снимки эта рука
 ///    не находит и не делает вид, что находит;
 ///  * **потолки названы числом**: 20 000 файлов и 300 секунд на проход; упёрлись — сказано.
-fn find_twins(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+fn find_twins(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
     let started = Instant::now();
     let path = clean_path(param(params, "path"));
     let raw_min = param(params, "min_kb").trim().to_string();
 
     if path.is_empty() {
-        return StepResult::failed(registry, "не задана папка — назовите путь, где искать двойников");
+        return StepResult::failed(
+            registry,
+            "не задана папка — назовите путь, где искать двойников",
+        );
     }
     if !std::path::Path::new(&path).is_dir() {
-        return StepResult::failed(registry, format!("такой папки нет: {path} — проверьте путь"));
+        return StepResult::failed(
+            registry,
+            format!("такой папки нет: {path} — проверьте путь"),
+        );
     }
     let mut min_kb = 64u64;
     if !raw_min.is_empty() {
@@ -6389,14 +6399,29 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let result = run("files|найти|двойники", &params, &AtomicBool::new(false));
 
         assert!(result.ok, "{}", result.reason);
-        assert!(result.reason.contains("двойников: 1 групп"), "{}", result.reason);
-        assert!(result.reason.contains("лишних копий: 1"), "{}", result.reason);
-        assert!(result.reason.contains("ничего не удалено"), "{}", result.reason);
+        assert!(
+            result.reason.contains("двойников: 1 групп"),
+            "{}",
+            result.reason
+        );
+        assert!(
+            result.reason.contains("лишних копий: 1"),
+            "{}",
+            result.reason
+        );
+        assert!(
+            result.reason.contains("ничего не удалено"),
+            "{}",
+            result.reason
+        );
         // Хэш полный: «другой» файл того же размера в группу не попал.
         assert!(!result.reason.contains("другой.bin"), "{}", result.reason);
         // И главное: файлы на месте — это отчёт, а не уборка.
         for name in ["копия 1.bin", "копия 2.bin", "другой.bin"] {
-            assert!(dir.join(name).exists(), "{name} пропал — рука не должна ничего менять");
+            assert!(
+                dir.join(name).exists(),
+                "{name} пропал — рука не должна ничего менять"
+            );
         }
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -6414,8 +6439,16 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let result = run("files|найти|двойники", &params, &AtomicBool::new(false));
 
         assert!(result.ok, "{}", result.reason);
-        assert!(result.reason.contains("двойников не нашлось"), "{}", result.reason);
-        assert!(result.reason.contains("просмотрено файлов: 0"), "{}", result.reason);
+        assert!(
+            result.reason.contains("двойников не нашлось"),
+            "{}",
+            result.reason
+        );
+        assert!(
+            result.reason.contains("просмотрено файлов: 0"),
+            "{}",
+            result.reason
+        );
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -6428,7 +6461,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let refused = run("files|найти|двойники", &params, &AtomicBool::new(false));
 
         assert!(!refused.ok);
-        assert!(refused.reason.contains("такой папки нет"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("такой папки нет"),
+            "{}",
+            refused.reason
+        );
     }
 
     /// Потолок «мельче скольких не смотреть» назван числом.
