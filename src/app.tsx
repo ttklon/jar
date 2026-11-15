@@ -33,6 +33,8 @@ import { Models } from "./screens/Models";
 import { Journal } from "./screens/Journal";
 import { Apps } from "./screens/Apps";
 import { Settings } from "./screens/Settings";
+import { Welcome } from "./screens/Welcome";
+import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { apps, ask, flows, hands, journal, models, t, voice } from "./i18n/ru";
 import { APP_VERSION } from "./version";
 
@@ -133,6 +135,9 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement }[] = [
 export function App() {
   const styles = useStyles();
   const [screen, setScreen] = useState<Screen>("voice");
+  // Знакомство показывается один раз. Решение — в `firstRun`, чтобы его проверяли тесты,
+  // а не глаза: «один раз» слишком легко превращается в «каждый раз».
+  const [welcome, setWelcome] = useState(() => shouldShowWelcome());
   const [dark, setDark] = useState(true);
   const [snapshot, setSnapshot] = useState<RegistrySnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -202,6 +207,20 @@ export function App() {
               <Spinner size="small" />
               <Text>{t.loading}</Text>
             </div>
+          ) : welcome ? (
+            <Welcome
+              source={source}
+              onStart={() => {
+                markWelcomeSeen();
+                setWelcome(false);
+                setScreen("voice");
+              }}
+              onOpen={(target) => {
+                markWelcomeSeen();
+                setWelcome(false);
+                setScreen(target);
+              }}
+            />
           ) : screen === "voice" ? (
             <Voice onOpen={(next) => setScreen(next as Screen)} />
           ) : screen === "overview" ? (
@@ -224,6 +243,7 @@ export function App() {
             <Settings
               dark={dark}
               onThemeChange={setDark}
+              onShowWelcome={() => setWelcome(true)}
               source={source}
               version={APP_VERSION}
             />

@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { App } from "./app";
 import actionsJson from "../data/actions.json";
+import { WELCOME_KEY } from "./lib/firstRun";
 
 /**
  * Цифры берём из данных, а не из головы: реестр растёт, и дымовой тест должен проверять,
@@ -35,7 +36,18 @@ vi.stubGlobal("matchMedia", (query: string) => ({
   dispatchEvent: () => false,
 }));
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  globalThis.localStorage?.clear?.();
+});
+
+/**
+ * Знакомство показывается один раз — в остальных тестах оно уже «видели», иначе каждый
+ * из них начинался бы с первого экрана и проверял бы не то, что задумано.
+ */
+beforeEach(() => {
+  globalThis.localStorage?.setItem?.(WELCOME_KEY, "1");
+});
 
 describe("App", () => {
   /**
@@ -51,6 +63,21 @@ describe("App", () => {
       () => expect(screen.getByRole("button", { name: "Держать и говорить" })).toBeTruthy(),
       { timeout: 4000 },
     );
+
+  it("при первом запуске сначала знакомит, а потом открывает голос", async () => {
+    globalThis.localStorage?.clear?.();
+    render(<App />);
+
+    await waitFor(() => expect(screen.getByText("Знакомство")).toBeTruthy(), { timeout: 4000 });
+    // Знакомство закрывает работу: голосового экрана за ним ещё нет.
+    expect(screen.queryByRole("button", { name: "Держать и говорить" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Понятно, начать" }));
+
+    await loaded();
+    // Ответ запомнен: второй раз экран не появится.
+    expect(globalThis.localStorage?.getItem(WELCOME_KEY)).toBe("1");
+  });
 
   it("открывается голосовым экраном, а не списком экранов", async () => {
     render(<App />);

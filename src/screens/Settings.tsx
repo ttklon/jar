@@ -1,4 +1,4 @@
-import { makeStyles, Switch, Text, tokens } from "@fluentui/react-components";
+import { Button, makeStyles, Switch, Text, tokens } from "@fluentui/react-components";
 import { t } from "../i18n/ru";
 
 const useStyles = makeStyles({
@@ -21,11 +21,13 @@ const useStyles = makeStyles({
 export function Settings({
   dark,
   onThemeChange,
+  onShowWelcome,
   source,
   version,
 }: {
   dark: boolean;
   onThemeChange: (dark: boolean) => void;
+  onShowWelcome: () => void;
   source: string;
   version: string;
 }) {
@@ -73,11 +75,26 @@ export function Settings({
         </div>
         <div className={styles.row}>
           <Text weight="semibold">{t.settingsVersion}</Text>
-          <Text className={styles.mono}>{version}</Text>
+          {/* Как в боковом меню: версия с «v» в одном виде, а не в двух. */}
+          <Text className={styles.mono}>v{version}</Text>
         </div>
         <div className={styles.row}>
           <Text weight="semibold">{t.settingsLogs}</Text>
           <Text className={styles.muted}>{t.settingsLogsDev}</Text>
+        </div>
+      </div>
+
+      <div className={styles.card}>
+        <div className={styles.row}>
+          <div>
+            <Text weight="semibold">{t.settingsWelcome}</Text>
+            <Text className={styles.muted} block>
+              {t.settingsWelcomeHint}
+            </Text>
+          </div>
+          <Button appearance="secondary" onClick={onShowWelcome}>
+            {t.settingsWelcomeShow}
+          </Button>
         </div>
       </div>
 
