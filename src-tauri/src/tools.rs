@@ -5072,6 +5072,7 @@ mod tests {
         let refused = run(
             "virtualization-remote|передать|файл на сервер",
             &send_params("C:\\tmp\\файл.zip", "user@example.com", "/home/u; rm -rf /"),
+            &AtomicBool::new(false),
         );
 
         assert!(!refused.ok);
