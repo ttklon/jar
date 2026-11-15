@@ -193,6 +193,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "video|конвертировать|формат/кодек" => {
             convert_video(registry, params, cancel)
         }
+        "video|замерить|качество сжатия (SSIM)" => measure_ssim(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -4148,6 +4149,213 @@ Write-Output ('ZSHELPER-OK codec=' + $wanted + ' from=' + $sourceText + ' before
 Write-Output ('ZSHELPER-FILE ' + $out)
 "#;
 
+const SSIM_OF_TWO: &str = r#"$ErrorActionPreference = 'Stop'
+$original = $env:ZS_ORIGINAL
+$compressed = $env:ZS_COMPRESSED
+if (-not (Test-Path -LiteralPath $original -PathType Leaf)) {
+  Write-Output 'ZSHELPER-FAILED: нет исходного файла — проверьте путь'
+  exit 2
+}
+if (-not (Test-Path -LiteralPath $compressed -PathType Leaf)) {
+  Write-Output 'ZSHELPER-FAILED: нет сжатого файла — проверьте путь'
+  exit 3
+}
+$tool = Get-Command ffmpeg -ErrorAction SilentlyContinue
+if (-not $tool) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не установлен — SSIM считает он; поставьте его (winget install Gyan.FFmpeg) и повторите; сам ставить не буду'
+  exit 4
+}
+$probe = Get-Command ffprobe -ErrorAction SilentlyContinue
+$widthA = 0; $heightA = 0; $widthB = 0; $heightB = 0
+$durationA = 0.0; $durationB = 0.0
+$durationsKnown = 0
+if ($probe) {
+  $shapeA = (& $probe.Source -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 $original 2>$null | Select-Object -First 1)
+  $shapeB = (& $probe.Source -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 $compressed 2>$null | Select-Object -First 1)
+  if ($shapeA) { $halves = ([string]$shapeA) -split ','; if ($halves.Count -ge 2) { [void][int]::TryParse($halves[0], [ref]$widthA); [void][int]::TryParse($halves[1], [ref]$heightA) } }
+  if ($shapeB) { $halves = ([string]$shapeB) -split ','; if ($halves.Count -ge 2) { [void][int]::TryParse($halves[0], [ref]$widthB); [void][int]::TryParse($halves[1], [ref]$heightB) } }
+  $durationTextA = (& $probe.Source -v error -show_entries format=duration -of csv=p=0 $original 2>$null | Select-Object -First 1)
+  $durationTextB = (& $probe.Source -v error -show_entries format=duration -of csv=p=0 $compressed 2>$null | Select-Object -First 1)
+  $invariant = [System.Globalization.CultureInfo]::InvariantCulture
+  $flags = 0
+  if ($durationTextA) { if ([double]::TryParse([string]$durationTextA, [System.Globalization.NumberStyles]::Float, $invariant, [ref]$durationA)) { $flags += 1 } }
+  if ($durationTextB) { if ([double]::TryParse([string]$durationTextB, [System.Globalization.NumberStyles]::Float, $invariant, [ref]$durationB)) { $flags += 2 } }
+  if ($flags -eq 3) { $durationsKnown = 1 }
+}
+# Сравнивать кадры разного размера — значит получить бессмысленное число, а не качество.
+if (($widthA -gt 0) -and ($widthB -gt 0) -and (($widthA -ne $widthB) -or ($heightA -ne $heightB))) {
+  Write-Output ('ZSHELPER-FAILED: разрешения разные — ' + $widthA + '×' + $heightA + ' против ' + $widthB + '×' + $heightB + '; SSIM на разных размерах сравнивает не то, и я не буду выдавать это за качество')
+  exit 5
+}
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.UseShellExecute = $false
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError = $true
+$psi.FileName = $tool.Source
+$psi.Arguments = ('-hide_banner -loglevel info -i "' + $compressed + '" -i "' + $original + '" -lavfi ssim -f null -')
+$proc = New-Object System.Diagnostics.Process
+$proc.StartInfo = $psi
+$code = -1
+$err = ''
+try {
+  [void]$proc.Start()
+  $outTask = $proc.StandardOutput.ReadToEndAsync()
+  $errTask = $proc.StandardError.ReadToEndAsync()
+  if ($proc.WaitForExit(1800000)) { $code = $proc.ExitCode } else { try { $proc.Kill() } catch { }; $code = -2 }
+  if ($errTask.Wait(10000)) { $err = $errTask.Result }
+  if ($outTask.Wait(10000)) { [void]$outTask.Result }
+} catch {
+  Write-Output ('ZSHELPER-FAILED: не удалось запустить ffmpeg — ' + $_.Exception.Message)
+  exit 6
+}
+if ($code -eq -2) {
+  Write-Output 'ZSHELPER-FAILED: тридцати минут не хватило на подсчёт SSIM — прогон остановлен'
+  exit 7
+}
+if ($code -ne 0) {
+  $tail = @($err -split "`r?`n" | Where-Object { $_ -ne '' } | Select-Object -Last 3) -join ' | '
+  Write-Output ('ZSHELPER-FAILED: ffmpeg вернул код ' + $code + ' — ' + $tail)
+  exit 8
+}
+$match = [regex]::Match($err, 'All:([0-9]+\.[0-9]+)')
+if (-not $match.Success) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не назвал SSIM — метрики нет, и выдумывать её я не буду'
+  exit 9
+}
+$ssim = [double]::Parse($match.Groups[1].Value, [System.Globalization.CultureInfo]::InvariantCulture)
+$sizeA = (Get-Item -LiteralPath $original).Length
+$sizeB = (Get-Item -LiteralPath $compressed).Length
+$durationText = ''
+if ($durationsKnown -eq 1) { $durationText = [string][math]::Round($durationA, 2) + '/' + [string][math]::Round($durationB, 2) }
+$ssimText = [string]::Format([System.Globalization.CultureInfo]::InvariantCulture, '{0:F4}', $ssim)
+Write-Output ('ZSHELPER-OK ssim=' + $ssimText + ' width=' + $widthA + ' height=' + $heightA + ' size_a=' + $sizeA + ' size_b=' + $sizeB + ' durations=' + $durationText + ' durations_known=' + $durationsKnown)
+"#;
+
+/// Как читать SSIM: пороги названы числом, а не «выглядит нормально».
+///
+/// SSIM — объективная метрика похожести кадров, а не оценка «нравится / не нравится». Поэтому
+/// формулировки говорят, что именно означает число, и не обещают, что человек не заметит разницы.
+fn ssim_verdict(ssim: f64) -> &'static str {
+    if ssim >= 0.98 {
+        "визуально без потерь: 0.98 и выше — разницы на глаз обычно нет"
+    } else if ssim >= 0.95 {
+        "потери заметны на градиентах и шуме, но кадр в целом тот же"
+    } else if ssim >= 0.90 {
+        "заметные артефакты: кожа и мелкий текст поплывут"
+    } else {
+        "сильная деградация: это уже не «то же видео»"
+    }
+}
+
+/// Замерить качество сжатия через SSIM: сравнить исходник и сжатый файл числами.
+///
+/// Что здесь важно:
+///
+///  * **разные разрешения — отказ.** SSIM на разных размерах сравнивает не то; выдать такое
+///    число за качество было бы обманом с числом в руках;
+///  * **метрику называет ffmpeg**, а не мы: не назвал — так и сказано, а не «примерно хорошо»;
+///  * **пороги названы числом** (0.98 / 0.95 / 0.90) и объяснены словами, что они значат;
+///  * **рядом размеры и длительности файлов**: SSIM без «сколько сэкономили» отвечает только на
+///    половину вопроса;
+///  * рука только читает — ничего не перекодирует и не удаляет.
+fn measure_ssim(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let original = clean_path(param(params, "original"));
+    let compressed = clean_path(param(params, "compressed"));
+
+    if original.is_empty() || compressed.is_empty() {
+        return StepResult::failed(
+            registry,
+            "нужны два файла: исходник и сжатый — без второго сравнивать не с чем",
+        );
+    }
+    for file in [&original, &compressed] {
+        if !std::path::Path::new(file).is_file() {
+            return StepResult::failed(registry, format!("такого файла нет: {file} — проверьте путь"));
+        }
+    }
+
+    let mut result = run_script(
+        registry,
+        SSIM_OF_TWO,
+        &[
+            ("ORIGINAL", original.as_str()),
+            ("COMPRESSED", compressed.as_str()),
+        ],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(1860),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let field = |name: &str| -> String {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .unwrap_or("")
+            .to_string()
+    };
+    let ssim = field("ssim=").parse::<f64>().unwrap_or(-1.0);
+    if ssim < 0.0 {
+        result.ok = false;
+        result.reason =
+            "ffmpeg не назвал SSIM — метрики нет, и выдумывать её я не буду".to_string();
+        return result;
+    }
+    let width = field("width=");
+    let height = field("height=");
+    let size_a = field("size_a=").parse::<u64>().unwrap_or_default();
+    let size_b = field("size_b=").parse::<u64>().unwrap_or_default();
+    let durations = field("durations=");
+    let megabytes = |bytes: u64| format!("{:.1} МБ", bytes as f64 / (1024.0 * 1024.0));
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    let economy = if size_a > 0 && size_b > 0 {
+        let saved = (1.0 - size_b as f64 / size_a as f64) * 100.0;
+        if saved > 0.0 {
+            format!(
+                "размер: {} → {} (легче на {:.0}%)",
+                megabytes(size_a),
+                megabytes(size_b),
+                saved
+            )
+        } else {
+            format!(
+                "размер: {} → {} (не легче)",
+                megabytes(size_a),
+                megabytes(size_b)
+            )
+        }
+    } else {
+        "размеры файлов прочитать не удалось".to_string()
+    };
+    let shape = if width.is_empty() || width == "0" {
+        "разрешение прочитать не удалось".to_string()
+    } else {
+        format!("кадр {width}×{height}")
+    };
+    let length = if durations.is_empty() {
+        "длительности сверить не смог (ffprobe нет)".to_string()
+    } else {
+        format!("длительности: {durations} с")
+    };
+    result.reason = format!(
+        "SSIM: {ssim:.4} — {}; {economy}; {shape}, {length}; это объективная похожесть кадров, а не оценка «нравится»",
+        ssim_verdict(ssim)
+    );
+    result
+}
+
 /// Перекодировать видео в другой кодек и проверить результат по ffprobe.
 ///
 /// Что здесь важно:
@@ -5707,6 +5915,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("video|склеить|ролики", CONCAT_VIDEOS),
         ("video|извлечь|кадр", GRAB_FRAME),
         ("video|конвертировать|формат/кодек", CONVERT_VIDEO),
+        ("video|замерить|качество сжатия (SSIM)", SSIM_OF_TWO),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }
@@ -7600,6 +7809,153 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert_eq!(groups[0].paths.len(), 3);
         assert_eq!(groups[1].paths, vec!["C:\\b\\x.bin", "C:\\b\\y.bin"]);
         assert_eq!(groups[1].wasted, 300);
+    }
+
+    /// Пороги SSIM названы числом, и каждый означает своё.
+    #[test]
+    fn ssim_thresholds_say_what_they_mean() {
+        assert!(ssim_verdict(0.995).contains("без потерь"));
+        assert!(ssim_verdict(0.98).contains("без потерь"));
+        assert!(ssim_verdict(0.96).contains("градиентах"));
+        assert!(ssim_verdict(0.92).contains("артефакты"));
+        assert!(ssim_verdict(0.85).contains("сильная деградация"));
+    }
+
+    /// Замер требует оба файла: без пары сравнивать не с чем.
+    #[test]
+    fn ssim_needs_both_files() {
+        let dir = std::env::temp_dir().join(format!("zshelper-ssim-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let one = dir.join("исходник.mp4");
+        std::fs::write(&one, "не видео".as_bytes()).expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("original".to_string(), one.display().to_string());
+
+        let refused = run("video|замерить|качество сжатия (SSIM)", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("два файла"), "{}", refused.reason);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Разные разрешения — отказ: число SSIM на разных размерах ничего не значит.
+    #[cfg(windows)]
+    #[test]
+    fn ssim_refuses_different_resolutions() {
+        let ffmpeg = std::process::Command::new("ffmpeg")
+            .arg("-version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false);
+        if !ffmpeg {
+            return;
+        }
+        let dir = std::env::temp_dir().join(format!("zshelper-ssim-shape-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        for (name, size) in [("большой.mp4", "160x120"), ("маленький.mp4", "80x60")] {
+            let status = std::process::Command::new("ffmpeg")
+                .args([
+                    "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
+                    &format!("testsrc=size={size}:rate=10:duration=1"), "-c:v", "libx264",
+                    "-pix_fmt", "yuv420p",
+                ])
+                .arg(dir.join(name))
+                .status()
+                .expect("ffmpeg запускается");
+            assert!(status.success());
+        }
+
+        let mut params = BTreeMap::new();
+        params.insert(
+            "original".to_string(),
+            dir.join("большой.mp4").display().to_string(),
+        );
+        params.insert(
+            "compressed".to_string(),
+            dir.join("маленький.mp4").display().to_string(),
+        );
+
+        let refused = run("video|замерить|качество сжатия (SSIM)", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok, "{}", refused.reason);
+        assert!(refused.reason.contains("разрешения разные"), "{}", refused.reason);
+        assert!(refused.reason.contains("160×120"), "{}", refused.reason);
+        assert!(refused.reason.contains("80×60"), "{}", refused.reason);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Живой SSIM: сильное сжатие даёт число меньше 0.98, и оно честно называется.
+    #[cfg(windows)]
+    #[test]
+    fn a_live_ssim_names_the_number_and_the_economy() {
+        let ffmpeg = std::process::Command::new("ffmpeg")
+            .arg("-version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false);
+        let dir = std::env::temp_dir().join(format!("zshelper-ssim-live-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let original = dir.join("исходник.mp4");
+        let squeezed = dir.join("сжатый.mp4");
+
+        let mut params = BTreeMap::new();
+        params.insert("original".to_string(), original.display().to_string());
+        params.insert("compressed".to_string(), squeezed.display().to_string());
+
+        if !ffmpeg {
+            std::fs::write(&original, "не видео".as_bytes()).expect("файл");
+            std::fs::write(&squeezed, "не видео".as_bytes()).expect("файл");
+            let refused = run("video|замерить|качество сжатия (SSIM)", &params, &AtomicBool::new(false));
+            assert!(!refused.ok);
+            assert!(refused.reason.contains("ffmpeg"), "{}", refused.reason);
+            let _ = std::fs::remove_dir_all(&dir);
+            return;
+        }
+
+        let made = std::process::Command::new("ffmpeg")
+            .args([
+                "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
+                "testsrc=size=160x120:rate=10:duration=2", "-c:v", "libx264", "-crf", "10",
+                "-pix_fmt", "yuv420p",
+            ])
+            .arg(&original)
+            .status()
+            .expect("ffmpeg запускается");
+        assert!(made.success());
+        // Второй файл — заведомо грубое сжатие: разница должна быть видна числом.
+        let squeezed_ok = std::process::Command::new("ffmpeg")
+            .args([
+                "-hide_banner", "-loglevel", "error", "-y", "-i",
+            ])
+            .arg(&original)
+            .args(["-c:v", "libx264", "-crf", "45", "-preset", "veryfast", "-pix_fmt", "yuv420p"])
+            .arg(&squeezed)
+            .status()
+            .expect("ffmpeg запускается");
+        assert!(squeezed_ok.success());
+
+        let result = run("video|замерить|качество сжатия (SSIM)", &params, &AtomicBool::new(false));
+
+        assert!(result.ok, "{}", result.reason);
+        assert!(result.reason.contains("SSIM: 0."), "{}", result.reason);
+        assert!(result.reason.contains("кадр 160×120"), "{}", result.reason);
+        assert!(
+            result.reason.contains("размер:") || result.reason.contains("размеры файлов"),
+            "{}",
+            result.reason
+        );
+        assert!(
+            result.reason.contains("а не оценка «нравится»"),
+            "{}",
+            result.reason
+        );
+        // Оба файла целы: замер ничего не трогает.
+        assert!(original.exists() && squeezed.exists());
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// Неизвестный кодек — отказ с тем, что рука умеет, а не «конвертация не удалась».
