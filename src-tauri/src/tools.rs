@@ -172,6 +172,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         }
         "dev-code|запустить|тесты" => run_tests(registry, params, cancel),
         "dev-code|найти|в коде" => find_in_code(registry, params, cancel),
+        "video|сжать|размер" => compress_video(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -1053,6 +1054,107 @@ fn suspicious_processes(registry: &str, cancel: &AtomicBool) -> StepResult {
             "проверено процессов: {checked}, на заметку: {suspicious} — причина названа у каждого; это факты, а не приговор"
         )
     };
+    result
+}
+
+/// Сжать видео: меньше байт, исходник цел.
+///
+/// Правила:
+///
+///  * **исходник не перезаписывается никогда.** Результат ложится рядом отдельным файлом
+///    «имя (сжатое).mp4», а если такой файл уже есть — отказ: молчаливая перезапись
+///    прошлого результата стоит человеку работы;
+///  * **«сжато» — это про байты, а не про надежду.** Рука сравнивает размеры и говорит
+///    «было X МБ, стало Y МБ, легче на Z%». Не стало легче — это неудача шага, а не успех
+///    с формулировкой «готово»;
+///  * **ffmpeg сам не ставится.** Нет его — рука говорит, чем поставить, и останавливается:
+///    приложение ничего не устанавливает без слова человека;
+///  * **грубая цель названа грубой.** Остановка по размеру (`-fs`) может срезать хвост;
+///    двухпроходный расчёт по битрейту — другой, более долгий путь, и он здесь не выдан
+///    за сделанное;
+///  * **качество по кадрам не проверяется** (SSIM — отдельная рука), и это сказано в отчёте.
+fn compress_video(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+    let target = param(params, "target").trim().to_string();
+
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задан видеофайл — назовите путь");
+    }
+    if !target.is_empty() {
+        let megabytes = target.replace(',', ".").parse::<f64>().unwrap_or(0.0);
+        if megabytes.is_nan() || megabytes <= 0.0 {
+            return StepResult::failed(
+                registry,
+                "цель — это число мегабайт, например 25; пустое поле значит «сжимать по качеству»",
+            );
+        }
+    }
+
+    let mut result = run_script(
+        registry,
+        COMPRESS_VIDEO,
+        &[("PATH", path.as_str()), ("TARGET", target.as_str())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(960),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let field = |name: &str| -> Option<u64> {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .and_then(|value| value.parse::<u64>().ok())
+    };
+    let before = field("before=").unwrap_or_default();
+    let after = field("after=").unwrap_or_default();
+    let saved = field("saved=").unwrap_or_default();
+    let name = result
+        .stdout_tail
+        .split_whitespace()
+        .find_map(|word| word.strip_prefix("file="))
+        .unwrap_or("рядом с исходником")
+        .to_string();
+
+    let megabytes = |bytes: u64| format!("{:.1}", bytes as f64 / (1024.0 * 1024.0));
+    result.duration_ms = started.elapsed().as_millis() as u64;
+
+    if saved == 0 {
+        result.ok = false;
+        result.reason = format!(
+            "сжатие не уменьшило файл: было {} МБ, стало {} МБ — результат лежит рядом ({name}), решайте сами",
+            megabytes(before),
+            megabytes(after)
+        );
+    } else {
+        let goal = if target.is_empty() {
+            String::from("по качеству (CRF 23), качество по кадрам не проверялось")
+        } else {
+            format!(
+                "остановка по размеру на {target} МБ — это грубая цель, хвост мог срезаться"
+            )
+        };
+        result.reason = format!(
+            "видео сжато: было {} МБ, стало {} МБ, легче на {saved}% — {name}; {goal}",
+            megabytes(before),
+            megabytes(after)
+        );
+    }
     result
 }
 
@@ -2707,6 +2809,90 @@ if ($found.Count -eq 0) {
 } else {
   $found | Select-Object -First 20 | ForEach-Object { Write-Output $_ }
 }"#;
+const COMPRESS_VIDEO: &str = r#"$ErrorActionPreference = 'Stop'
+$path = $env:ZS_PATH
+$target = $env:ZS_TARGET
+if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+  Write-Output 'ZSHELPER-FAILED: такого файла нет — проверьте путь'
+  exit 2
+}
+$tool = Get-Command ffmpeg -ErrorAction SilentlyContinue
+if (-not $tool) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не установлен — сжимает видео он; поставьте его (winget install Gyan.FFmpeg) и повторите; сам ставить не буду'
+  exit 3
+}
+$source = Get-Item -LiteralPath $path
+$outName = [System.IO.Path]::GetFileNameWithoutExtension($source.Name) + ' (сжатое).mp4'
+$outPath = Join-Path $source.DirectoryName $outName
+if (Test-Path -LiteralPath $outPath) {
+  Write-Output ('ZSHELPER-FAILED: рядом уже есть «' + $outName + '» — уберите его или переименуйте исходник; молча перезаписывать не буду')
+  exit 4
+}
+$options = @('-hide_banner', '-loglevel', 'error', '-y', '-i', $source.FullName, '-c:v', 'libx264', '-crf', '23', '-preset', 'medium', '-c:a', 'aac', '-b:a', '128k')
+$limited = 0
+if ($target) {
+  $megabytes = 0.0
+  if (-not [double]::TryParse($target, [ref]$megabytes) -or $megabytes -le 0) {
+    Write-Output 'ZSHELPER-FAILED: цель — это число мегабайт, например 25'
+    exit 5
+  }
+  $limited = 1
+  $options += @('-fs', [string]([int64]($megabytes * 1024 * 1024)))
+}
+$options += $outPath
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.UseShellExecute = $false
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError = $true
+$psi.WorkingDirectory = $source.DirectoryName
+$psi.FileName = $tool.Source
+$psi.Arguments = ($options -join ' ')
+$proc = New-Object System.Diagnostics.Process
+$proc.StartInfo = $psi
+$code = -1
+$timedOut = 0
+$err = ''
+try {
+  [void]$proc.Start()
+  $outTask = $proc.StandardOutput.ReadToEndAsync()
+  $errTask = $proc.StandardError.ReadToEndAsync()
+  if ($proc.WaitForExit(900000)) {
+    $code = $proc.ExitCode
+  } else {
+    $timedOut = 1
+    try { $proc.Kill() } catch { }
+  }
+  if ($errTask.Wait(10000)) { $err = $errTask.Result }
+  if ($outTask.Wait(10000)) { [void]$outTask.Result }
+} catch {
+  Write-Output ('ZSHELPER-FAILED: не удалось запустить ffmpeg — ' + $_.Exception.Message)
+  exit 6
+}
+if ($timedOut -eq 1) {
+  Write-Output 'ZSHELPER-FAILED: пятнадцати минут не хватило — прогон остановлен, файл мог остаться недописанным'
+  exit 7
+}
+if ($code -ne 0) {
+  $tail = @($err -split "`r?`n" | Where-Object { $_ -ne '' } | Select-Object -Last 3) -join ' | '
+  Write-Output ('ZSHELPER-FAILED: ffmpeg вернул код ' + $code + ' — ' + $tail)
+  exit 8
+}
+$after = Get-Item -LiteralPath $outPath -ErrorAction SilentlyContinue
+if (-not $after) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не оставил файла — смотрите вывод, запись не состоялась'
+  exit 9
+}
+$before = $source.Length
+$saved = [int][math]::Round((1 - ($after.Length / [double]$before)) * 100)
+if ($saved -lt 0) { $saved = 0 }
+Write-Output ('ZSHELPER-OK file=' + $outName + ' before=' + $before + ' after=' + $after.Length + ' saved=' + $saved + ' limited=' + $limited)
+if ($saved -eq 0) {
+  Write-Output ('сжатие не уменьшило файл: было ' + $before + ' байт, стало ' + $after.Length)
+} else {
+  Write-Output ('было ' + $before + ' байт, стало ' + $after.Length + ' — легче на ' + $saved + '%')
+}"#;
+
+
 
 const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
 $node = $env:ZS_HOST
@@ -2927,6 +3113,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("hardware-diag|проверить|здоровье диска", DISK_HEALTH),
         ("dev-code|запустить|тесты", RUN_TESTS),
         ("dev-code|найти|в коде", FIND_IN_CODE),
+        ("video|сжать|размер", COMPRESS_VIDEO),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -4547,6 +4734,93 @@ mod tests {
 
         let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
         assert!(registries.contains(&"dev-code|найти|в коде"));
+    }
+
+    #[test]
+    fn compressing_a_file_that_is_not_there_is_refused() {
+        let mut params = BTreeMap::new();
+        params.insert(
+            "path".to_string(),
+            "C:\\нет-такого\\видео.mp4".to_string(),
+        );
+
+        let refused = run("video|сжать|размер", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("такого файла нет"), "{}", refused.reason);
+    }
+
+    #[test]
+    fn a_bad_target_size_is_refused_before_anything_runs() {
+        let dir = std::env::temp_dir()
+            .join(format!("zshelper-video-{}-target", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let file = dir.join("фильм.mp4");
+        std::fs::write(&file, b"не видео").expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), file.to_string_lossy().to_string());
+        params.insert("target".to_string(), "много".to_string());
+
+        let refused = run("video|сжать|размер", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(
+            refused.reason.contains("число мегабайт"),
+            "{}",
+            refused.reason
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn without_ffmpeg_or_a_real_video_the_hand_says_which_it_is() {
+        let dir = std::env::temp_dir()
+            .join(format!("zshelper-video-{}-junk", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let file = dir.join("битый.mp4");
+        std::fs::write(&file, b"это не видео, а строка").expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), file.to_string_lossy().to_string());
+
+        let failed = run("video|сжать|размер", &params, &AtomicBool::new(false));
+
+        // Два честных исхода: ffmpeg не установлен или он не смог разобрать файл.
+        // Оба обязаны назвать причину, а не «что-то пошло не так».
+        assert!(!failed.ok, "сжимать нечего: {}", failed.reason);
+        assert!(
+            failed.reason.to_lowercase().contains("ffmpeg"),
+            "{}",
+            failed.reason
+        );
+        // Исходник не тронут: рука пишет рядом, а не поверх.
+        assert_eq!(
+            std::fs::read(&file).expect("исходник на месте"),
+            b"это не видео, а строка"
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn compression_never_overwrites_the_source() {
+        // Исходник остаётся исходником: результат — отдельный файл с другим именем.
+        assert!(COMPRESS_VIDEO.contains("(сжатое).mp4"));
+        assert!(COMPRESS_VIDEO.contains("молча перезаписывать не буду"));
+        assert!(COMPRESS_VIDEO.contains("-crf"));
+        assert!(COMPRESS_VIDEO.contains("libx264"));
+        // Проверка результата — по байтам, а не по слову «готово».
+        assert!(COMPRESS_VIDEO.contains("before="));
+        assert!(COMPRESS_VIDEO.contains("saved="));
+        // ffmpeg приложение не ставит само.
+        assert!(COMPRESS_VIDEO.contains("сам ставить не буду"));
+
+        let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
+        assert!(registries.contains(&"video|сжать|размер"));
     }
 
     #[test]
