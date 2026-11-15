@@ -36,6 +36,10 @@ const budget = (over: Partial<{ parallel: number; mayStart: boolean; away: boole
   ...over,
 });
 
+/** Свежий час: тесты про ширину не должны упираться в потолок случайно. */
+const freshHour = () => startHour(0);
+const NOW = 1_000;
+
 const plan = (over: Partial<PlanCheck> = {}): PlanCheck => ({
   plan: { goal: "убавить громкость", steps: [{ registry: "звук|убавить|громкость", params: {} }] },
   problems: [],
@@ -78,12 +82,12 @@ describe("сколько дел идёт сразу", () => {
   it("бюджет машины задаёт верхнюю границу, и он назван", () => {
     const items = add(add(add([], "а", "1"), "б", "2"), "в", "3");
 
-    const picked = pick(items, budget({ parallel: 3 }));
+    const picked = pick(items, budget({ parallel: 3 }), freshHour(), NOW);
     expect(picked.indices).toEqual([0, 1, 2]);
     expect(picked.reason).toContain("3 дела");
 
-    expect(pick(items, budget({ parallel: 1 })).indices).toEqual([0]);
-    expect(pick(items, budget({ parallel: 0 })).indices).toEqual([]);
+    expect(pick(items, budget({ parallel: 1 }), freshHour(), NOW).indices).toEqual([0]);
+    expect(pick(items, budget({ parallel: 0 }), freshHour(), NOW).indices).toEqual([]);
   });
 
   it("два дела в одном окне одновременно — не скорость, а гонка: экранных не больше одного", () => {
@@ -91,24 +95,64 @@ describe("сколько дел идёт сразу", () => {
     items = markScreen(items, "2", true);
 
     // Первое окна не трогает — его можно, второе тоже: они не мешают друг другу.
-    expect(pick(items, budget({ parallel: 3 })).indices).toEqual([0, 1]);
+    expect(pick(items, budget({ parallel: 3 }), freshHour(), NOW).indices).toEqual([0, 1]);
 
     // А два экранных дела — нет: второе ждёт, и причина названа.
     let two = add(add([], "нажать сохранить", "1"), "нажать удалить", "2");
     two = markScreen(markScreen(two, "1", true), "2", true);
-    expect(pick(two, budget({ parallel: 3 })).indices).toEqual([0]);
+    expect(pick(two, budget({ parallel: 3 }), freshHour(), NOW).indices).toEqual([0]);
 
     // Теперь одно уже идёт в окне — второе ждёт экрана, и очередь говорит об этом.
     const busy = setState(two, "1", "running", "");
-    const waiting = pick(busy, budget({ parallel: 3 }));
+    const waiting = pick(busy, budget({ parallel: 3 }), freshHour(), NOW);
     expect(waiting.indices).toEqual([]);
     expect(waiting.reason).toContain("ждут экрана");
   });
 
   it("человек за машиной или память на исходе — не начинается ничего", () => {
     const items = add([], "а", "1");
-    expect(pick(items, budget({ away: false })).reason).toContain("чтобы не мешать");
-    expect(pick(items, budget({ mayStart: false })).reason).toContain("памяти на исходе");
+    expect(pick(items, budget({ away: false }), freshHour(), NOW).reason).toContain("чтобы не мешать");
+    expect(pick(items, budget({ mayStart: false }), freshHour(), NOW).reason).toContain("памяти на исходе");
+  });
+
+  it("потолок в час общий на всю очередь: широкий заход его не обходит", () => {
+    // Пять дел и бюджет на три: без потолка очередь взяла бы три сразу. Но в этом часу
+    // осталось одно дело — и очередь берёт одно, а не «три, раз бюджет позволяет».
+    let items: QueueItem[] = [];
+    for (const [goal, id] of [
+      ["первое", "1"],
+      ["второе", "2"],
+      ["третье", "3"],
+      ["четвёртое", "4"],
+      ["пятое", "5"],
+    ] as const) {
+      items = add(items, goal, id);
+    }
+
+    let log = freshHour();
+    for (let index = 0; index < DEEDS_PER_HOUR - 1; index += 1) log = takeDeed(log, NOW);
+
+    const picked = pick(items, budget({ parallel: 3 }), log, NOW);
+    expect(picked.indices).toHaveLength(1);
+    expect(picked.reason).toContain("потолок");
+    expect(picked.reason).toContain(String(DEEDS_PER_HOUR));
+
+    // Счёт не делится по целям: две цели — тот же один свободный слот, а не по одному каждой.
+    const twoGoals = add(add(items, "по другой цели", "6"), "и ещё", "7", "большая цель");
+    expect(pick(twoGoals, budget({ parallel: 3 }), log, NOW).indices).toHaveLength(1);
+  });
+
+  it("потолок выбран — не начинается ничего, и причина говорит именно об этом", () => {
+    const items = add(add([], "а", "1"), "б", "2");
+    let log = freshHour();
+    for (let index = 0; index < DEEDS_PER_HOUR; index += 1) log = takeDeed(log, NOW);
+
+    const picked = pick(items, budget({ parallel: 3 }), log, NOW);
+    expect(picked.indices).toEqual([]);
+    expect(picked.reason).toContain(`потолок ${DEEDS_PER_HOUR} дел в час`);
+
+    // Новый час — потолок снова полный: ждать придётся не вечно, и это видно по счёту.
+    expect(pick(items, budget({ parallel: 3 }), log, NOW + HOUR_MS).indices).toEqual([0, 1]);
   });
 
   it("план узнаётся по шагам, а не по словам", () => {

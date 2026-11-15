@@ -121,11 +121,23 @@ export interface Started {
 /**
  * Сколько дел начать прямо сейчас.
  *
- * Бюджет машины задаёт верхнюю границу, а правило про экран — вторую: одновременно
- * идёт не больше одного дела, которое нажимает или вводит. Остальные ждут, и очередь
- * говорит, чего именно она ждёт.
+ * Границ три, и все три надо назвать, а не молча взять минимум:
+ *
+ *  * **бюджет машины** — сколько дел она выдержит; это решает `machine.rs`, не очередь;
+ *  * **потолок в час** — общий счёт на всю очередь, а не на каждую цель свой: иначе
+ *    «работай, пока не скажу стоп» превращалось бы в «раздели просьбу на десять целей и
+ *    получишь десять потолков». Счёт один, и широкий заход его не обходит;
+ *  * **экран** — нажимать в двух окнах одновременно нельзя, поэтому экранных дел
+ *    одновременно не больше одного.
+ *
+ * Остальные ждут, и очередь говорит, чего именно она ждёт.
  */
-export function pick(items: readonly QueueItem[], budget: QueueBudget): Started {
+export function pick(
+  items: readonly QueueItem[],
+  budget: QueueBudget,
+  log: HourLog,
+  now: number,
+): Started {
   if (!budget.mayStart) {
     return {
       indices: [],
@@ -142,14 +154,28 @@ export function pick(items: readonly QueueItem[], budget: QueueBudget): Started 
 
   const running = items.filter((item) => item.state === "running");
   const parallel = Math.max(0, budget.parallel);
-  const slots = parallel - running.length;
+
+  // Потолок в час — общий на всю очередь: он не делится по целям и не растёт от того,
+  // что дел много. Считаются начатые дела, поэтому и спрашиваем до начала.
+  const left = hourLeft(log, now);
+  if (left === 0) {
+    return {
+      indices: [],
+      reason: `потолок ${DEEDS_PER_HOUR} дел в час выбран: следующее дело — в новый час, а не «ещё одно»`,
+    };
+  }
+
+  const allowed = Math.min(parallel, left);
+  const slots = allowed - running.length;
   if (slots <= 0) {
     return {
       indices: [],
       reason:
         parallel === 0
           ? "сейчас нельзя ничего: так решила машина"
-          : `уже идёт ${running.length} из ${parallel} — больше бюджет машины не разрешает`,
+          : left < parallel
+            ? `потолок ${DEEDS_PER_HOUR} дел в час: осталось ${left}, и они уже заняты — больше не начинаю`
+            : `уже идёт ${running.length} из ${parallel} — больше бюджет машины не разрешает`,
     };
   }
 
@@ -189,12 +215,16 @@ export function pick(items: readonly QueueItem[], budget: QueueBudget): Started 
     };
   }
 
+  // Причина называет ту границу, которая сработала: «одно дело» из-за потолка и «одно
+  // дело» из-за экрана — разные вещи, и человеку важно знать, какая из них.
+  const ceiling = left < parallel ? `, потолок ${DEEDS_PER_HOUR} дел в час оставляет ${left}` : "";
+
   return {
     indices,
     reason:
       indices.length > 1
-        ? `беру ${indices.length} дела сразу: бюджет машины позволяет, окна они не трогают`
-        : "беру одно дело: так разрешает бюджет или экран занят",
+        ? `беру ${indices.length} дела сразу: бюджет машины позволяет${ceiling}, окна они не трогают`
+        : `беру одно дело: так разрешает бюджет, потолок или экран${ceiling}`,
   };
 }
 

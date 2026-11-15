@@ -565,12 +565,18 @@ export function Voice({ onOpen }: VoiceScreenProps) {
 
         const machine = await Promise.resolve(machineState()).catch(() => null);
         mayStartRef.current = machine?.budget.may_start ?? true;
-        const decision = pick(items, {
-          parallel: machine?.budget.parallel ?? 1,
-          mayStart: machine?.budget.may_start ?? true,
-          // Без измерения «ушёл» не подтверждено: сам идти не начинаю.
-          away: machine?.budget.mode === "away",
-        });
+        const decision = pick(
+          items,
+          {
+            parallel: machine?.budget.parallel ?? 1,
+            mayStart: machine?.budget.may_start ?? true,
+            // Без измерения «ушёл» не подтверждено: сам идти не начинаю.
+            away: machine?.budget.mode === "away",
+          },
+          // Потолок в час — общий счёт на всю очередь, а не на каждую цель свой.
+          hourRef.current,
+          Date.now(),
+        );
 
         for (const index of decision.indices) {
           const item = items[index];
