@@ -171,6 +171,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
             disk_health(registry, cancel)
         }
         "dev-code|запустить|тесты" => run_tests(registry, params, cancel),
+        "dev-code|найти|в коде" => find_in_code(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -1051,6 +1052,74 @@ fn suspicious_processes(registry: &str, cancel: &AtomicBool) -> StepResult {
         format!(
             "проверено процессов: {checked}, на заметку: {suspicious} — причина названа у каждого; это факты, а не приговор"
         )
+    };
+    result
+}
+
+/// Найти слово в исходниках проекта.
+///
+/// Правила:
+///
+///  * **слово берётся буквально** (`-SimpleMatch`): точка, звёздочка и скобка в запросе —
+///    это символы, а не шаблон. Искать «a.b» и находить «axb» было бы враньём;
+///  * **служебные папки пропускаются**: `node_modules`, `.git`, `target`, `dist`, `build`,
+///    `bin`, `obj`, `vendor`, `.next`. Иначе ответ про свой же код утонет в чужих библиотеках;
+///  * **«не нашлось» — это ответ, а не сбой.** Ноль находок выглядит как ноль, а рядом
+///    написано, сколько файлов просмотрено: иначе нельзя отличить «слова нет» от «не смотрел»;
+///  * **потолки названы**: двадцать тысяч файлов, до 2 МБ на файл, двадцать находок в отчёте.
+fn find_in_code(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+    let text = param(params, "text").trim().to_string();
+
+    if text.is_empty() {
+        return StepResult::failed(registry, "не задано, что искать — назовите слово или строку");
+    }
+    if path.is_empty() {
+        return StepResult::failed(registry, "не задана папка проекта");
+    }
+
+    let mut result = run_script(
+        registry,
+        FIND_IN_CODE,
+        &[("PATH", path.as_str()), ("TEXT", text.as_str())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(180),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let field = |name: &str| -> Option<usize> {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .and_then(|value| value.parse::<usize>().ok())
+    };
+    let matches = field("matches=").unwrap_or_default();
+    let files = field("files=").unwrap_or_default();
+    let scanned = field("scanned=").unwrap_or_default();
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = if matches == 0 {
+        format!(
+            "«{text}» в коде не нашлось — просмотрено файлов: {scanned}; это ответ, а не сбой"
+        )
+    } else {
+        format!("«{text}»: упоминаний {matches}, файлов {files}, просмотрено {scanned}")
     };
     result
 }
@@ -2599,6 +2668,46 @@ if ($lines.Count -eq 0) {
 } else {
   $lines | Select-Object -Last 15 | ForEach-Object { Write-Output $_ }
 }"#;
+const FIND_IN_CODE: &str = r#"$ErrorActionPreference = 'Stop'
+$path = $env:ZS_PATH
+$text = $env:ZS_TEXT
+if (-not (Test-Path -LiteralPath $path -PathType Container)) {
+  Write-Output 'ZSHELPER-FAILED: такой папки нет — проверьте путь'
+  exit 2
+}
+$skip = '(\\|/)(node_modules|\.git|target|dist|build|bin|obj|vendor|\.next)(\\|/)'
+$code = @('.rs','.ts','.tsx','.js','.jsx','.py','.go','.java','.kt','.cs','.cpp','.cc','.c','.h','.hpp','.swift','.rb','.php','.sql','.sh','.ps1','.toml','.yml','.yaml')
+$files = @(Get-ChildItem -LiteralPath $path -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
+  $code -contains $_.Extension.ToLower() -and $_.Length -lt 2MB -and ($_.FullName -notmatch $skip)
+})
+$tooMany = 0
+if ($files.Count -gt 20000) {
+  $tooMany = $files.Count - 20000
+  $files = @($files | Select-Object -First 20000)
+}
+$found = @()
+$hitFiles = 0
+foreach ($file in $files) {
+  $relative = $file.FullName
+  if ($relative.StartsWith($path)) {
+    $relative = ($relative.Substring($path.Length) -replace '^[\\/]+', '')
+  }
+  $lines = @(Select-String -LiteralPath $file.FullName -Pattern $text -SimpleMatch -ErrorAction SilentlyContinue)
+  if ($lines.Count -gt 0) {
+    $hitFiles += 1
+    foreach ($line in $lines) {
+      $found += ('{0}:{1}: {2}' -f $relative, $line.LineNumber, $line.Line.Trim())
+    }
+  }
+}
+Write-Output ('ZSHELPER-OK matches={0} files={1} scanned={2} skipped={3}' -f $found.Count, $hitFiles, $files.Count, $tooMany)
+if ($found.Count -eq 0) {
+  Write-Output ('«{0}» в коде не нашлось — просмотрено файлов: {1}' -f $text, $files.Count)
+} else {
+  $found | Select-Object -First 20 | ForEach-Object { Write-Output $_ }
+}"#;
+
+
 
 const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
 $node = $env:ZS_HOST
@@ -2818,6 +2927,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ),
         ("hardware-diag|проверить|здоровье диска", DISK_HEALTH),
         ("dev-code|запустить|тесты", RUN_TESTS),
+        ("dev-code|найти|в коде", FIND_IN_CODE),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -4340,6 +4450,90 @@ mod tests {
 
         let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
         assert!(registries.contains(&"dev-code|запустить|тесты"));
+    }
+
+    /// Папка проекта с кодом: слово есть в одном файле и нет в другом.
+    fn project_with_code(name: &str) -> std::path::PathBuf {
+        let dir = std::env::temp_dir()
+            .join(format!("zshelper-search-{}-{name}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(dir.join("node_modules")).expect("служебная папка");
+        std::fs::write(dir.join("main.rs"), "fn main() {\n    handle_submit();\n}\n")
+            .expect("код");
+        std::fs::write(dir.join("app.ts"), "const other = 1;\n").expect("код");
+        // Чужой код в служебной папке: он не должен попасть в ответ.
+        std::fs::write(dir.join("node_modules").join("left.rs"), "handle_submit();\n")
+            .expect("чужой код");
+        dir
+    }
+
+    #[test]
+    fn searching_the_code_shows_the_file_and_the_line() {
+        let dir = project_with_code("hit");
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), dir.to_string_lossy().to_string());
+        params.insert("text".to_string(), "handle_submit".to_string());
+
+        let found = run("dev-code|найти|в коде", &params, &AtomicBool::new(false));
+
+        assert!(found.ok, "{}", found.reason);
+        assert!(found.reason.contains("упоминаний 1"), "{}", found.reason);
+        // Находка названа файлом и строкой, а не «есть совпадения».
+        assert!(found.stdout_tail.contains("main.rs:2"), "{}", found.stdout_tail);
+        // Служебная папка пропущена — иначе ответ утонул бы в чужом коде.
+        assert!(!found.stdout_tail.contains("left.rs"), "{}", found.stdout_tail);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_word_that_is_not_in_the_code_is_an_answer_not_a_failure() {
+        let dir = project_with_code("miss");
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), dir.to_string_lossy().to_string());
+        params.insert("text".to_string(), "такого-слова-нет".to_string());
+
+        let found = run("dev-code|найти|в коде", &params, &AtomicBool::new(false));
+
+        assert!(found.ok, "ноль находок — не сбой: {}", found.reason);
+        assert!(found.reason.contains("не нашлось"), "{}", found.reason);
+        // Рядом сказано, сколько смотрели: иначе не отличить «нет» от «не искал».
+        assert!(
+            found.reason.contains("просмотрено файлов"),
+            "{}",
+            found.reason
+        );
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_code_search_without_a_word_is_refused() {
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), "C:\\tmp\\проект".to_string());
+
+        let refused = run("dev-code|найти|в коде", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(
+            refused.reason.to_lowercase().contains("что искать"),
+            "{}",
+            refused.reason
+        );
+    }
+
+    #[test]
+    fn the_code_search_is_literal_and_skips_service_folders() {
+        for folder in ["node_modules", ".git", "target", "dist", "vendor"] {
+            assert!(FIND_IN_CODE.contains(folder), "нет «{folder}» в пропуске");
+        }
+        // Слово берётся буквально: иначе точка в запросе стала бы шаблоном.
+        assert!(FIND_IN_CODE.contains("-SimpleMatch"));
+        assert!(FIND_IN_CODE.contains("20000"));
+        assert!(FIND_IN_CODE.contains("scanned="));
+
+        let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
+        assert!(registries.contains(&"dev-code|найти|в коде"));
     }
 
     #[test]
