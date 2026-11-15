@@ -3733,7 +3733,11 @@ fn parse_chat_files(tail: &str) -> Vec<(String, String, u64)> {
 ///  * **потолки названы числом**: 20 000 файлов и 60 секунд на проход, 20 результатов;
 ///    упёрлись — отчёт говорит это, а не притворяется, что просмотрели всё;
 ///  * **ничего не меняет**: только чтение имён, размеров и времени. Никаких «а вдруг удалим».
-fn find_chat_file(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+fn find_chat_file(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
     let started = Instant::now();
     let name = param(params, "name").trim().to_string();
     let chat = param(params, "chat").trim().to_string();
@@ -3808,7 +3812,9 @@ fn find_chat_file(registry: &str, params: &BTreeMap<String, String>, cancel: &At
             "не нашлось — просмотрено файлов: {scanned} в {places} местах мессенджеров, из них есть на диске: {on_disk}; это ответ, а не сбой"
         );
         if capped {
-            reason.push_str(&format!("; упёрлись в потолок {cap} файлов — дальше не смотрел"));
+            reason.push_str(&format!(
+                "; упёрлись в потолок {cap} файлов — дальше не смотрел"
+            ));
         }
         result.reason = reason;
         return result;
@@ -6099,7 +6105,11 @@ ZSHELPER-FILE path=C:\\Users\\Имя\\AppData\\Roaming\\discord\\Cache\\abc.png 
         let mut params = BTreeMap::new();
         params.insert("name".to_string(), "a".to_string());
 
-        let refused = run("chat-social|найти|файл в чате", &params, &AtomicBool::new(false));
+        let refused = run(
+            "chat-social|найти|файл в чате",
+            &params,
+            &AtomicBool::new(false),
+        );
 
         assert!(!refused.ok);
         assert!(refused.reason.contains("две буквы"), "{}", refused.reason);
@@ -6112,7 +6122,11 @@ ZSHELPER-FILE path=C:\\Users\\Имя\\AppData\\Roaming\\discord\\Cache\\abc.png 
         params.insert("name".to_string(), "договор".to_string());
         params.insert("days".to_string(), "900".to_string());
 
-        let refused = run("chat-social|найти|файл в чате", &params, &AtomicBool::new(false));
+        let refused = run(
+            "chat-social|найти|файл в чате",
+            &params,
+            &AtomicBool::new(false),
+        );
 
         assert!(!refused.ok);
         assert!(refused.reason.contains("365"), "{}", refused.reason);
@@ -6127,7 +6141,11 @@ ZSHELPER-FILE path=C:\\Users\\Имя\\AppData\\Roaming\\discord\\Cache\\abc.png 
         let mut params = BTreeMap::new();
         params.insert("name".to_string(), "zzz-такого-файла-нет-zzz".to_string());
 
-        let result = run("chat-social|найти|файл в чате", &params, &AtomicBool::new(false));
+        let result = run(
+            "chat-social|найти|файл в чате",
+            &params,
+            &AtomicBool::new(false),
+        );
 
         assert!(result.ok, "пустой ответ — это ok: {}", result.reason);
         assert!(result.reason.contains("не нашлось"), "{}", result.reason);
