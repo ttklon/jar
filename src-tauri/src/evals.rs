@@ -244,14 +244,16 @@ fn check_stop_stops() -> Verdict {
         };
         let request = crate::executor::ExecRequest::new(program, argv);
         let cancel = AtomicBool::new(false);
-        let flag = &cancel;
-        let stop = std::thread::spawn(move || {
-            std::thread::sleep(Duration::from_millis(300));
-            flag.store(true, Ordering::Relaxed);
-        });
-        let output = crate::executor::run(&request, &cancel)
-            .map_err(|error| format!("работа не запустилась: {error}"))?;
-        let _ = stop.join();
+        // `thread::scope` вместо `spawn`: поток берёт флаг по ссылке и обязан закончиться до
+        // выхода — иначе компилятор прав, а «нажатие стоп» проверяло бы не то.
+        let output = std::thread::scope(|scope| {
+            scope.spawn(|| {
+                std::thread::sleep(Duration::from_millis(300));
+                cancel.store(true, Ordering::Relaxed);
+            });
+            crate::executor::run(&request, &cancel)
+        })
+        .map_err(|error| format!("работа не запустилась: {error}"))?;
         let took = started.elapsed();
         if !output.cancelled {
             return Err(format!(
