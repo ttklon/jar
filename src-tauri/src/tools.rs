@@ -1117,9 +1117,8 @@ fn run_tests(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicB
     if timed_out {
         result.ok = false;
         result.timed_out = true;
-        result.reason = format!(
-            "тесты не уложились в отведённое время — прогон {tool} остановлен, вывод ниже"
-        );
+        result.reason =
+            format!("тесты не уложились в отведённое время — прогон {tool} остановлен, вывод ниже");
     } else if code == 0 {
         let seconds = result.duration_ms / 1000;
         result.reason = format!("тесты прошли: {tool}, код 0, за {seconds} с");
@@ -2600,7 +2599,6 @@ if ($lines.Count -eq 0) {
 } else {
   $lines | Select-Object -Last 15 | ForEach-Object { Write-Output $_ }
 }"#;
-
 
 const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
 $node = $env:ZS_HOST
@@ -4235,8 +4233,8 @@ mod tests {
     /// Манифест собирается `serde_json`, а не склейкой строк: одна лишняя кавычка
     /// превращает его в «не разобрал JSON», и тест тогда проверял бы не руку, а свою опечатку.
     fn project_with_npm_test(name: &str, js: &str) -> std::path::PathBuf {
-        let dir = std::env::temp_dir()
-            .join(format!("zshelper-tests-{}-{name}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-tests-{}-{name}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка проекта");
         let manifest = serde_json::json!({
@@ -4275,15 +4273,19 @@ mod tests {
         let mut params = BTreeMap::new();
         params.insert("path".to_string(), dir.to_string_lossy().to_string());
 
-        let refused = run(
-            "dev-code|запустить|тесты",
-            &params,
-            &AtomicBool::new(false),
-        );
+        let refused = run("dev-code|запустить|тесты", &params, &AtomicBool::new(false));
         assert!(!refused.ok, "запускать нечего — это отказ");
         // Отказ перечисляет, что искали, а не «что-то пошло не так».
-        assert!(refused.reason.contains("не вижу, чем"), "{}", refused.reason);
-        assert!(refused.reason.contains("package.json"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("не вижу, чем"),
+            "{}",
+            refused.reason
+        );
+        assert!(
+            refused.reason.contains("package.json"),
+            "{}",
+            refused.reason
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -4294,11 +4296,7 @@ mod tests {
         let mut params = BTreeMap::new();
         params.insert("path".to_string(), dir.to_string_lossy().to_string());
 
-        let done = run(
-            "dev-code|запустить|тесты",
-            &params,
-            &AtomicBool::new(false),
-        );
+        let done = run("dev-code|запустить|тесты", &params, &AtomicBool::new(false));
 
         let shown = format!("{} / вывод: {}", done.reason, done.stdout_tail);
         assert!(done.ok, "{shown}");
@@ -4315,11 +4313,7 @@ mod tests {
         let mut params = BTreeMap::new();
         params.insert("path".to_string(), dir.to_string_lossy().to_string());
 
-        let done = run(
-            "dev-code|запустить|тесты",
-            &params,
-            &AtomicBool::new(false),
-        );
+        let done = run("dev-code|запустить|тесты", &params, &AtomicBool::new(false));
 
         let shown = format!("{} / вывод: {}", done.reason, done.stdout_tail);
         // Красный прогон — не сбой руки, но и не успех шага.
