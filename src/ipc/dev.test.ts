@@ -181,7 +181,9 @@ describe("профили приложений в браузере", () => {
           rank(action?.risk ?? "read"),
         );
         if (operation.has_tool) executable += 1;
-        if (operation.has_tool) expect(tools.has(operation.registry)).toBe(true);
+        // Ссылка профиля бывает короткой («files|проверить»), а рука живёт у разрешённой
+        // строки реестра. Проверять надо её — иначе тест прошёл бы вхолостую.
+        if (operation.has_tool) expect(tools.has(operation.resolved), profile.slug).toBe(true);
       }
 
       expect(profile.executable).toBe(executable);

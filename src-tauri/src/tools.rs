@@ -429,6 +429,16 @@ fn copy_item(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
         return StepResult::failed(registry, "не задан параметр «Куда»");
     }
 
+    // «..» разные функции разворачивают по-разному, и проверка «цель внутри источника» на
+    // этом ломается — а цена ошибки здесь бесконечное копирование. Честнее попросить
+    // полный путь, чем угадывать.
+    if has_parent_dir(&from) || has_parent_dir(&to) {
+        return StepResult::failed(
+            registry,
+            "в пути есть «..» — назови папку полным путём, без сокращений",
+        );
+    }
+
     let source = std::path::Path::new(&from);
     let metadata = match std::fs::metadata(source) {
         Ok(metadata) => metadata,
@@ -464,7 +474,7 @@ fn copy_item(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
         if let Err(error) = std::fs::copy(source, target) {
             return StepResult::failed(registry, format!("файл не скопирован: {error}"));
         }
-    } else if let Err(reason) = copy_tree(source, target) {
+    } else if let Err(reason) = copy_tree(source, target, 0) {
         return StepResult::failed(registry, reason);
     }
 
@@ -489,25 +499,92 @@ fn copy_item(registry: &str, params: &BTreeMap<String, String>) -> StepResult {
     )
 }
 
-/// Цель лежит внутри источника. Сравниваем пути, приведённые к абсолютным: иначе «..\»
-/// в одном из них сделает проверку бессмысленной.
+/// Есть ли в пути «..». Такой путь нельзя сравнивать надёжно, поэтому рука его не берёт.
+fn has_parent_dir(path: &str) -> bool {
+    std::path::Path::new(path)
+        .components()
+        .any(|component| matches!(component, std::path::Component::ParentDir))
+}
+
+/// Цель лежит внутри источника. Оба пути приводит к одному виду `canonical_ish` — иначе
+/// короткое имя папки в одном и длинное в другом сделают проверку бессмысленной.
 fn is_inside(target: &std::path::Path, source: &std::path::Path) -> bool {
-    let source_abs = source
-        .canonicalize()
-        .unwrap_or_else(|_| source.to_path_buf());
+    let source_text = comparable(&canonical_ish(source, true));
+
     let target_abs = if target.is_absolute() {
         target.to_path_buf()
     } else {
-        std::env::current_dir()
-            .unwrap_or_default()
-            .join(target)
+        std::env::current_dir().unwrap_or_default().join(target)
     };
-    target_abs.starts_with(&source_abs)
+    let target_text = comparable(&canonical_ish(&target_abs, false));
+    // Слэш на конце — чтобы «Проект» не считался родителем «Проект2».
+    target_text == source_text || target_text.starts_with(&format!("{source_text}/"))
+}
+
+/// Приводит путь к каноническому виду, даже если самого пути ещё нет: канонизирует
+/// ближайшего существующего предка и дописывает остаток как есть.
+///
+/// Зачем не просто `canonicalize()`. На Windows он раскрывает короткие имена (`RUNNER~1` →
+/// `runneradmin`) и добавляет префикс `\\?\`, поэтому канонический путь источника и
+/// собранный из слов человека путь цели перестают быть похожими — и проверка «цель внутри
+/// источника» молча отвечает «нет». На этом папка копировалась внутрь себя до отказа диска.
+fn canonical_ish(path: &std::path::Path, must_exist: bool) -> std::path::PathBuf {
+    if let Ok(found) = path.canonicalize() {
+        return found;
+    }
+    if must_exist {
+        return path.to_path_buf();
+    }
+
+    let mut rest: Vec<std::ffi::OsString> = Vec::new();
+    let mut current = path.to_path_buf();
+    loop {
+        let Some(parent) = current.parent().map(|parent| parent.to_path_buf()) else {
+            return path.to_path_buf();
+        };
+        let Some(name) = current.file_name().map(|name| name.to_os_string()) else {
+            return path.to_path_buf();
+        };
+        rest.push(name);
+
+        if let Ok(found) = parent.canonicalize() {
+            let mut result = found;
+            for part in rest.iter().rev() {
+                result.push(part);
+            }
+            return result;
+        }
+
+        current = parent;
+        if current.as_os_str().is_empty() {
+            return path.to_path_buf();
+        }
+    }
+}
+
+/// Путь в виде строки для сравнения: без вербатим-префикса Windows (`\\?\`), с прямыми
+/// слэшами и без учёта регистра.
+///
+/// Зачем так. `canonicalize()` на Windows возвращает `\\?\C:\…`, а путь из слов человека —
+/// обычный `C:\…`. Без нормализации сравнение «внутри или нет» молча перестаёт работать, и
+/// защита от бесконечного копирования папки в себя превращается в её отсутствие.
+fn comparable(path: &std::path::Path) -> String {
+    let text = path.to_string_lossy().replace('\\', "/").to_lowercase();
+    text.trim_start_matches("//?/").to_string()
 }
 
 /// Скопировать папку целиком, по одному файлу. Возвращает причину, а не «что-то пошло не так»:
 /// человек должен знать, на каком файле остановилось.
-fn copy_tree(from: &std::path::Path, to: &std::path::Path) -> Result<(), String> {
+fn copy_tree(from: &std::path::Path, to: &std::path::Path, depth: u32) -> Result<(), String> {
+    // Сеть против бесконечности на всякий случай: если проверка «цель внутри источника»
+    // когда-нибудь снова ошибётся, лучше остановиться с внятной причиной, чем упасть
+    // переполнением стека — в отчёте тогда не видно даже, какой шаг виноват.
+    if depth > 64 {
+        return Err(String::from(
+            "папка вложена глубже 64 уровней — похоже на копирование внутрь себя, остановился",
+        ));
+    }
+
     std::fs::create_dir_all(to)
         .map_err(|error| format!("папка не создалась: {}: {error}", to.display()))?;
 
@@ -519,7 +596,7 @@ fn copy_tree(from: &std::path::Path, to: &std::path::Path) -> Result<(), String>
         let path = entry.path();
         let destination = to.join(entry.file_name());
         if path.is_dir() {
-            copy_tree(&path, &destination)?;
+            copy_tree(&path, &destination, depth + 1)?;
         } else if let Err(error) = std::fs::copy(&path, &destination) {
             let message = format!("файл не скопирован: {}: {error}", path.display());
             return Err(message);
@@ -1792,6 +1869,48 @@ mod tests {
     }
 
     #[test]
+    fn copying_refuses_dotdot_instead_of_guessing_what_it_means() {
+        let mut params = BTreeMap::new();
+        params.insert("from".to_string(), "C:\\Temp\\откуда".to_string());
+        params.insert("to".to_string(), "C:\\Temp\\откуда\\..\\куда".to_string());
+
+        let refused = run(
+            "files|скопировать|файлы/папки",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("полным путём"), "{}", refused.reason);
+    }
+
+    #[test]
+    fn a_path_that_does_not_exist_yet_is_compared_by_its_parent() {
+        let root = temp_target("inside").parent().expect("папка").join("inside");
+        std::fs::create_dir_all(&root).expect("папка");
+
+        let expected = root.canonicalize().expect("папка").join("ещё").join("нет");
+        assert_eq!(canonical_ish(&root.join("ещё/нет"), false), expected);
+        // Источник обязан существовать: выдуманный путь не канонизируется.
+        assert_eq!(
+            canonical_ish(&root.join("выдумка"), true),
+            root.join("выдумка")
+        );
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn inside_check_ignores_the_windows_verbatim_prefix() {
+        // Именно на этом сравнение ломалось: canonicalize() даёт «\\?\C:\…».
+        let inside = std::path::Path::new(r"\\?\C:\Temp\Проект\внутри");
+        let source = std::path::Path::new(r"C:\Temp\Проект");
+
+        assert_eq!(comparable(inside), "c:/temp/проект/внутри");
+        assert_eq!(comparable(source), "c:/temp/проект");
+        assert!(comparable(inside).starts_with(&format!("{}/", comparable(source))));
+    }
+
+    #[test]
     fn copying_a_folder_keeps_every_file_and_refuses_to_overwrite() {
         let root = temp_target("copy").parent().expect("папка").join("copy");
         std::fs::create_dir_all(root.join("откуда/вложенная")).expect("папка");
@@ -1844,6 +1963,17 @@ mod tests {
         );
         assert!(!looped.ok);
         assert!(looped.reason.contains("внутрь себя"), "{}", looped.reason);
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn copying_stops_at_a_sane_depth_instead_of_overflowing_the_stack() {
+        let root = temp_target("depth").parent().expect("папка").join("depth");
+
+        let error = copy_tree(&root.join("нет"), &root.join("куда"), 65)
+            .expect_err("глубже 64 уровней копировать нельзя");
+        assert!(error.contains("глубже 64 уровней"), "{error}");
 
         let _ = std::fs::remove_dir_all(&root);
     }
