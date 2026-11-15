@@ -160,6 +160,8 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "network|замерить|задержку до узла" => {
             ping_host(registry, params, cancel)
         }
+        "processes-services|объяснить|службу/процесс" => explain_process(registry, params, cancel),
+        "hardware-diag|проверить|температуры" => temperatures(registry, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -876,6 +878,150 @@ fn compare_folders(registry: &str, params: &BTreeMap<String, String>) -> StepRes
         ));
     }
     result.stdout_tail = report.join("\n");
+    result
+}
+
+/// Что приложение знает о частых процессах — своими словами, без интернета.
+///
+/// Таблица нарочно короткая и честная: в ней только то, что можно сказать уверенно.
+/// Всё остальное добирается фактами с машины (путь, подпись, память), а не догадками.
+const PROCESS_NOTES: &[(&str, &str)] = &[
+    (
+        "svchost",
+        "хост системных служб Windows: один процесс держит группу служб, и сам по себе он не вирус",
+    ),
+    (
+        "explorer",
+        "проводник Windows: рабочий стол, панель задач и окна папок — это он",
+    ),
+    (
+        "dwm",
+        "композитор окон Windows: рисует окна и эффекты, работает всегда",
+    ),
+    (
+        "lsass",
+        "служба безопасности Windows: проверяет вход в систему, трогать нельзя",
+    ),
+    ("csrss", "клиент-сервер подсистемы Windows, трогать нельзя"),
+    ("winlogon", "вход в систему и блокировка экрана Windows, трогать нельзя"),
+    ("system", "ядро Windows в пользовательском виде: обычно это драйвер"),
+    (
+        "antimalware service executable",
+        "защитник Windows: проверяет файлы в фоне, отсюда нагрузка на диск",
+    ),
+    (
+        "wmiprvse",
+        "инструментарий Windows: через него программы узнают состояние системы",
+    ),
+    (
+        "searchindexer",
+        "индексатор поиска Windows: строит индекс файлов, отсюда нагрузка на диск",
+    ),
+    ("chrome", "браузер Google Chrome: вкладки и расширения — отдельные процессы"),
+    ("msedge", "браузер Microsoft Edge"),
+    ("firefox", "браузер Firefox"),
+    ("onedrive", "синхронизация OneDrive"),
+    ("teams", "Microsoft Teams"),
+    ("steam", "клиент Steam"),
+    ("code", "редактор Visual Studio Code"),
+    ("zshelper", "это само приложение"),
+];
+
+/// Пояснение к имени процесса: без учёта регистра, только по точному имени.
+fn process_note(name: &str) -> Option<&'static str> {
+    PROCESS_NOTES
+        .iter()
+        .find(|(key, _)| key.eq_ignore_ascii_case(name))
+        .map(|(_, note)| *note)
+}
+
+/// Объяснить процесс или службу: факты с машины плюс пояснение из своей таблицы.
+///
+/// Что здесь важно:
+///
+///  * **факты важнее таблицы.** Путь файла, подпись и память проверяемы, а «это вирус» —
+///    нет, поэтому таблица говорит только то, что известно про системные имена, и прямо
+///    признаётся, когда имени в ней нет;
+///  * **процесс и служба ищутся оба.** «Что это за wuauserv» — это служба, а не процесс,
+///    и отвечать «не найдено» было бы неправдой;
+///  * **не найдено — это отказ с причиной**, а не пустой список: человек спросил про
+///    конкретное имя и должен узнать, что такого нет.
+fn explain_process(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let name = param(params, "name").trim().to_string();
+
+    if name.is_empty() {
+        return StepResult::failed(registry, "не задано, о каком процессе спросить");
+    }
+
+    let mut result = run_script(
+        registry,
+        EXPLAIN_PROCESS,
+        &[("NAME", &name)],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(60),
+        cancel,
+    );
+    if !result.ok {
+        // Причина скрипта («ни процесса, ни службы») полезнее общего «признак не найден».
+        let reason = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-NOTFOUND"))
+            .map(|line| line.replace("ZSHELPER-NOTFOUND:", "").trim().to_string());
+        if let Some(reason) = reason {
+            result.reason = reason;
+        }
+        return result;
+    }
+
+    let found = result
+        .stdout_tail
+        .lines()
+        .filter(|line| line.trim_start().starts_with("процесс:") || line.starts_with("служба:"))
+        .count();
+
+    let note = process_note(&name);
+    let mut reason = match note {
+        Some(note) => format!("«{name}» — {note}"),
+        None => format!("«{name}» в моей таблице нет — вот что видно по факту"),
+    };
+    reason.push_str(&format!("; найдено записей: {found}, подробности ниже"));
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = reason;
+    result
+}
+
+/// Спросить у машины датчики температуры.
+///
+/// Честность здесь в одном: «машина не сообщает температуру» — это ответ, а не сбой.
+/// Многие системы отдают эти значения только со сторонними драйверами, и показать
+/// вместо этого ноль градусов значило бы соврать.
+fn temperatures(registry: &str, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let mut result = simple(registry, TEMPERATURES, 60, cancel);
+    if !result.ok {
+        return result;
+    }
+
+    let sensors = result
+        .stdout_tail
+        .split_whitespace()
+        .find_map(|word| word.strip_prefix("sensors="))
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or_default();
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = if sensors == 0 {
+        String::from("машина не сообщает температуру: датчиков нет или нужны права администратора")
+    } else {
+        format!("датчиков ответило: {sensors} — значения ниже")
+    };
     result
 }
 
@@ -2117,7 +2263,59 @@ try {
 }
 Write-Output ('ZSHELPER-OK progid={0}' -f $progId)"#;
 
-const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
+const EXPLAIN_PROCESS: &str = r#"$ErrorActionPreference = 'Stop'
+$name = $env:ZS_NAME
+$found = 0
+foreach ($proc in @(Get-Process -Name $name -ErrorAction SilentlyContinue | Select-Object -First 3)) {
+  $found += 1
+  $path = ''
+  try { $path = $proc.Path } catch { }
+  $signature = 'путь недоступен'
+  if ($path) {
+    $check = Get-AuthenticodeSignature -FilePath $path -ErrorAction SilentlyContinue
+    if ($check) { $signature = $check.Status }
+  }
+  $started = 'неизвестно'
+  try { $started = $proc.StartTime.ToString('yyyy-MM-dd HH:mm') } catch { }
+  Write-Output ('процесс: {0} (pid {1}), памяти {2} МБ, запущен {3}' -f $proc.ProcessName, $proc.Id, [int]($proc.WorkingSet64 / 1MB), $started)
+  Write-Output ('  файл: {0}' -f $path)
+  Write-Output ('  подпись: {0}' -f $signature)
+}
+foreach ($service in @(Get-Service -Name $name -ErrorAction SilentlyContinue)) {
+  $found += 1
+  Write-Output ('служба: {0} — {1}, состояние {2}' -f $service.Name, $service.DisplayName, $service.Status)
+}
+if ($found -eq 0) {
+  Write-Output ('ZSHELPER-NOTFOUND: ни процесса, ни службы с таким именем: ' + $name)
+  exit 4
+}
+Write-Output ('ZSHELPER-OK found={0}' -f $found)"#;
+
+const TEMPERATURES: &str = r#"$ErrorActionPreference = 'Stop'
+$rows = @()
+try {
+  $zones = @(Get-CimInstance -Namespace root/wmi -ClassName MSAcpi_ThermalZoneTemperature -ErrorAction Stop)
+  foreach ($zone in $zones) {
+    $celsius = [math]::Round(($zone.CurrentTemperature / 10 - 273.15), 1)
+    $rows += ('зона {0}: {1} °C' -f $zone.InstanceName, $celsius)
+  }
+} catch { }
+try {
+  foreach ($disk in @(Get-PhysicalDisk -ErrorAction Stop)) {
+    $counter = $disk | Get-StorageReliabilityCounter -ErrorAction SilentlyContinue
+    if ($null -ne $counter -and $null -ne $counter.Temperature -and $counter.Temperature -gt 0) {
+      $rows += ('диск {0}: {1} °C' -f $disk.FriendlyName, $counter.Temperature)
+    }
+  }
+} catch { }
+Write-Output ('ZSHELPER-OK sensors={0}' -f $rows.Count)
+if ($rows.Count -eq 0) {
+  Write-Output 'эта машина не сообщает температуру: датчиков нет или нужны права администратора'
+} else {
+  $rows | ForEach-Object { Write-Output $_ }
+}"#;
+
+const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'const PING_HOST: &str = r#"$ErrorActionPreference = 'Stop'
 $node = $env:ZS_HOST
 $answers = @(Test-Connection -ComputerName $node -Count 4 -ErrorAction SilentlyContinue)
 if ($answers.Count -eq 0) {
@@ -2324,6 +2522,8 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("files|открыть|файл в программе", OPEN_FILE),
         ("files|открыть|архив без распаковки", LIST_ARCHIVE),
         ("network|замерить|задержку до узла", PING_HOST),
+        ("processes-services|объяснить|службу/процесс", EXPLAIN_PROCESS),
+        ("hardware-diag|проверить|температуры", TEMPERATURES),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|проанализировать|автозапуск", STARTUP),
@@ -3399,6 +3599,78 @@ mod tests {
             &AtomicBool::new(false),
         );
         assert!(!empty.ok);
+    }
+
+    #[test]
+    fn explaining_a_process_uses_its_own_table_and_admits_the_gaps() {
+        // Таблица не выдумывает: известное объясняется, неизвестное признаётся.
+        assert!(process_note("SVCHOST").is_some());
+        assert!(process_note("Explorer").is_some());
+        assert!(process_note("майнкрафт").is_none());
+
+        // Живой факт: служба есть на любой машине с Windows, и она не процесс.
+        let mut params = BTreeMap::new();
+        params.insert("name".to_string(), "Dnscache".to_string());
+        let found = run(
+            "processes-services|объяснить|службу/процесс",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(found.ok, "{}", found.reason);
+        assert!(
+            found.stdout_tail.contains("служба: Dnscache"),
+            "{}",
+            found.stdout_tail
+        );
+        // Имени нет в таблице — так и сказано, без догадок «это безопасно».
+        assert!(
+            found.reason.contains("в моей таблице нет"),
+            "{}",
+            found.reason
+        );
+
+        // Несуществующее имя — отказ с причиной, а не пустой ответ.
+        params.insert("name".to_string(), "zshelper-такого-нет".to_string());
+        let missing = run(
+            "processes-services|объяснить|службу/процесс",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!missing.ok);
+        assert!(
+            missing.reason.contains("ни процесса, ни службы"),
+            "{}",
+            missing.reason
+        );
+    }
+
+    #[test]
+    fn temperatures_say_when_the_machine_does_not_report_them() {
+        // Значения зависят от машины, поведение — нет: либо числа, либо честное
+        // «не сообщает». Ноль градусов и провал вместо этого были бы враньём.
+        let outcome = run(
+            "hardware-diag|проверить|температуры",
+            &BTreeMap::new(),
+            &AtomicBool::new(false),
+        );
+        assert!(outcome.ok, "{}", outcome.reason);
+        let honest = outcome.reason.contains("датчиков ответило")
+            || outcome.reason.contains("не сообщает");
+        assert!(honest, "{}", outcome.reason);
+    }
+
+    #[test]
+    fn the_process_script_looks_at_both_a_process_and_a_service() {
+        assert!(EXPLAIN_PROCESS.contains("$env:ZS_NAME"));
+        assert!(EXPLAIN_PROCESS.contains("Get-Service"));
+        assert!(EXPLAIN_PROCESS.contains("ZSHELPER-NOTFOUND"));
+        assert!(TEMPERATURES.contains("MSAcpi_ThermalZoneTemperature"));
+        assert!(scripts()
+            .iter()
+            .any(|(registry, _)| *registry == "processes-services|объяснить|службу/процесс"));
+        assert!(scripts()
+            .iter()
+            .any(|(registry, _)| *registry == "hardware-diag|проверить|температуры"));
     }
 
     #[test]
