@@ -179,6 +179,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "monitoring-triage|найти|причину тормозов" => {
             find_slowdown(registry, params, cancel)
         }
+        "music-production|открыть|проект в DAW" => open_daw(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -3526,6 +3527,188 @@ fn find_slowdown(
     result
 }
 
+const OPEN_DAW: &str = r#"$ErrorActionPreference = 'Stop'
+$wanted = $env:ZS_PROGRAM
+$project = $env:ZS_PROJECT
+if ($project -and -not (Test-Path -LiteralPath $project -PathType Leaf)) {
+  Write-Output 'ZSHELPER-FAILED: такого проекта нет — проверьте путь до запуска, чтобы не открывать пустоту'
+  exit 2
+}
+$known = @(
+  @{ name = 'FL Studio'; pattern = 'FL*.exe'; install = '*FL Studio*' },
+  @{ name = 'REAPER'; pattern = 'reaper.exe'; install = '*REAPER*' },
+  @{ name = 'Ableton Live'; pattern = 'Ableton Live*.exe'; install = '*Ableton Live*' },
+  @{ name = 'Cubase'; pattern = 'Cubase*.exe'; install = '*Cubase*' },
+  @{ name = 'Nuendo'; pattern = 'Nuendo*.exe'; install = '*Nuendo*' },
+  @{ name = 'Studio One'; pattern = 'Studio One.exe'; install = '*Studio One*' },
+  @{ name = 'Bitwig Studio'; pattern = 'Bitwig Studio.exe'; install = '*Bitwig*' },
+  @{ name = 'Reason'; pattern = 'Reason.exe'; install = '*Reason*' },
+  @{ name = 'Renoise'; pattern = 'Renoise.exe'; install = '*Renoise*' },
+  @{ name = 'LMMS'; pattern = 'lmms.exe'; install = '*LMMS*' }
+)
+$appPaths = @(
+  'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths',
+  'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths',
+  'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths'
+)
+$uninstall = @(
+  'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall',
+  'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall',
+  'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
+)
+function Find-InAppPaths([string]$pattern) {
+  foreach ($root in $appPaths) {
+    try { $keys = @(Get-ChildItem -Path $root -ErrorAction Stop | Where-Object { $_.PSChildName -like $pattern }) } catch { continue }
+    foreach ($key in $keys) {
+      try { $props = Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop } catch { continue }
+      $path = $props.'(default)'
+      if ($path -and (Test-Path -LiteralPath $path -PathType Leaf)) { return [string]$path }
+    }
+  }
+  return $null
+}
+function Find-InInstall([string]$installPattern, [string]$exePattern) {
+  foreach ($root in $uninstall) {
+    try { $apps = @(Get-ChildItem -Path $root -ErrorAction Stop) } catch { continue }
+    foreach ($app in $apps) {
+      try { $props = Get-ItemProperty -LiteralPath $app.PSPath -ErrorAction Stop } catch { continue }
+      if (-not $props.DisplayName) { continue }
+      if ($props.DisplayName -notlike $installPattern) { continue }
+      if (-not $props.InstallLocation) { continue }
+      if (-not (Test-Path -LiteralPath $props.InstallLocation)) { continue }
+      try { $hit = @(Get-ChildItem -LiteralPath $props.InstallLocation -Filter '*.exe' -ErrorAction Stop | Where-Object { $_.Name -like $exePattern } | Select-Object -First 1) } catch { continue }
+      if ($hit.Count -gt 0) { return [string]$hit[0].FullName }
+    }
+  }
+  return $null
+}
+$found = $null
+$foundName = ''
+$chosen = @($known)
+if ($wanted) {
+  $chosen = @($known | Where-Object { $_.name -like ('*' + $wanted + '*') })
+  if ($chosen.Count -eq 0) {
+    Write-Output ('ZSHELPER-FAILED: «' + $wanted + '» нет в списке известных — я знаю: ' + (($known | ForEach-Object { $_.name }) -join ', '))
+    exit 3
+  }
+}
+foreach ($daw in $chosen) {
+  $exe = Find-InAppPaths $daw.pattern
+  if (-not $exe) { $exe = Find-InInstall $daw.install $daw.pattern }
+  if ($exe) { $found = $exe; $foundName = $daw.name; break }
+}
+if (-not $found) {
+  Write-Output ('ZSHELPER-FAILED: ни одна DAW не найдена — проверил известных: ' + $known.Count + ' (' + (($known | ForEach-Object { $_.name }) -join ', ') + '); открывать нечего, и ставить сам не буду')
+  exit 4
+}
+$arguments = @()
+if ($project) { $arguments = @('"' + $project + '"') }
+$started = Get-Date
+try {
+  [void](Start-Process -FilePath $found -ArgumentList $arguments -PassThru -ErrorAction Stop)
+} catch {
+  Write-Output ('ZSHELPER-FAILED: не удалось запустить «' + $foundName + '» — ' + $_.Exception.Message)
+  exit 5
+}
+$processName = [System.IO.Path]::GetFileNameWithoutExtension($found)
+$alive = 0
+for ($i = 0; $i -lt 20; $i++) {
+  Start-Sleep -Milliseconds 500
+  if (Get-Process -Name $processName -ErrorAction SilentlyContinue) { $alive = 1; break }
+}
+$millis = [int](((Get-Date) - $started).TotalMilliseconds)
+if ($alive -eq 0) {
+  Write-Output ('ZSHELPER-FAILED: «' + $foundName + '» запущен, но процесс ' + $processName + ' не поднялся за 10 секунд — смотрите, не ругается ли он сам')
+  exit 6
+}
+Write-Output ('ZSHELPER-OK found=1 checked=' + $known.Count + ' alive=' + $alive + ' millis=' + $millis)
+Write-Output ('ZSHELPER-DAW name=' + $foundName)
+Write-Output ('ZSHELPER-DAW exe=' + $found)
+if ($project) { Write-Output ('ZSHELPER-DAW project=' + $project) }
+"#;
+
+/// Открыть проект в DAW: найти установленную программу и запустить её.
+///
+/// Почему так, а не «нажать кнопку в интерфейсе»:
+///
+///  * **поиск честный и названный.** Рука смотрит App Paths и записи установки и говорит,
+///    сколько известных DAW проверила; не нашлась — отказ с числом, а не пустое «не вышло»;
+///  * **проверка после запуска — процесс**, а не код возврата `Start-Process`: «запуск удался»,
+///    а процесса нет — так бывает, и отчёт это не скрывает;
+///  * **проект проверяется до запуска.** Открыть пустоту вместо проекта — худший вид «успеха»;
+///  * **ничего не устанавливает и не сохраняет**: открыть — не значит перезаписать проект.
+fn open_daw(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let program = param(params, "program").trim().to_string();
+    let project = clean_path(param(params, "project"));
+
+    if !project.is_empty() && !std::path::Path::new(&project).is_file() {
+        return StepResult::failed(
+            registry,
+            format!(
+                "такого проекта нет: {project} — проверьте путь до запуска, чтобы не открывать пустоту"
+            ),
+        );
+    }
+
+    let mut result = run_script(
+        registry,
+        OPEN_DAW,
+        &[("PROGRAM", program.as_str()), ("PROJECT", project.as_str())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(120),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let numbers = |name: &str| -> Option<u64> {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .and_then(|value| value.parse::<u64>().ok())
+    };
+    // Значения с пробелами берутся целиком из строки — разбор по словам их бы разрезал.
+    let value = |prefix: &str| -> Option<String> {
+        result.stdout_tail.lines().find_map(|line| {
+            line.trim()
+                .strip_prefix(prefix)
+                .map(|rest| rest.trim().to_string())
+                .filter(|rest| !rest.is_empty())
+        })
+    };
+    let checked = numbers("checked=").unwrap_or_default();
+    let millis = numbers("millis=").unwrap_or_default();
+    let seconds = format!("{:.1}", millis as f64 / 1000.0);
+    let name = value("ZSHELPER-DAW name=").unwrap_or_else(|| "DAW".to_string());
+    let exe = value("ZSHELPER-DAW exe=").unwrap_or_default();
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = if project.is_empty() {
+        format!(
+            "открыт {name}: {exe} — процесс поднялся за {seconds} с; известных DAW проверено: {checked}, проект не передавался"
+        )
+    } else {
+        let file = std::path::Path::new(&project)
+            .file_name()
+            .map(|name| name.to_string_lossy().to_string())
+            .unwrap_or_else(|| project.clone());
+        format!(
+            "открыт {name}: {exe} — процесс поднялся за {seconds} с, проект «{file}» передан; известных DAW проверено: {checked}"
+        )
+    };
+    result
+}
+
 /// Снимок, разобранный в числа. `Option` — потому что «не прочиталось» это не ноль.
 #[derive(Debug, Default, PartialEq, Eq)]
 struct Snapshot {
@@ -3800,6 +3983,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
             INSTALLED_APPS,
         ),
         ("monitoring-triage|найти|причину тормозов", SNAPSHOT),
+        ("music-production|открыть|проект в DAW", OPEN_DAW),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }
@@ -5672,6 +5856,89 @@ mod tests {
 
         let registries: Vec<&str> = scripts().iter().map(|(registry, _)| *registry).collect();
         assert!(registries.contains(&"virtualization-remote|передать|файл на сервер"));
+    }
+
+    /// Причина запуска DAW называет программу, путь и время подъёма процесса.
+    #[test]
+    fn the_daw_reason_names_the_program_and_the_process() {
+        // Строка, которую отдаёт скрипт: имя с пробелом и путь с пробелами.
+        let output = "ZSHELPER-OK found=1 checked=10 alive=1 millis=1500\n\
+ZSHELPER-DAW name=Ableton Live\n\
+ZSHELPER-DAW exe=C:\\Program Files\\Ableton\\Live 11\\Ableton Live 11 Suite.exe\n\
+ZSHELPER-DAW project=C:\\Users\\Имя\\Music\\трек.als";
+
+        let value = |prefix: &str| -> Option<String> {
+            output.lines().find_map(|line| {
+                line.trim()
+                    .strip_prefix(prefix)
+                    .map(|rest| rest.trim().to_string())
+                    .filter(|rest| !rest.is_empty())
+            })
+        };
+        let numbers = |name: &str| -> Option<u64> {
+            output
+                .split_whitespace()
+                .find_map(|word| word.strip_prefix(name))
+                .and_then(|value| value.parse::<u64>().ok())
+        };
+
+        // Имя и путь берутся целиком: разбор по словам разрезал бы их.
+        assert_eq!(value("ZSHELPER-DAW name=").as_deref(), Some("Ableton Live"));
+        assert_eq!(
+            value("ZSHELPER-DAW exe=").as_deref(),
+            Some("C:\\Program Files\\Ableton\\Live 11\\Ableton Live 11 Suite.exe")
+        );
+        assert_eq!(numbers("checked="), Some(10));
+        assert_eq!(numbers("millis="), Some(1500));
+    }
+
+    /// Проект проверяется до запуска: открывать пустоту рука не станет.
+    #[test]
+    fn a_missing_project_is_refused_before_launch() {
+        let mut params = BTreeMap::new();
+        params.insert(
+            "project".to_string(),
+            "C:\\нет такого\\трек.flp".to_string(),
+        );
+
+        let refused = run(
+            "music-production|открыть|проект в DAW",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("такого проекта нет"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("не открывать пустоту"),
+            "{}",
+            refused.reason
+        );
+    }
+
+    /// Живой запуск без DAW: отказ с числом проверенных, а не молчание и не «не вышло».
+    ///
+    /// На сборочной машине студий нет — здесь проверяется именно честность отказа.
+    #[cfg(windows)]
+    #[test]
+    fn opening_a_daw_says_how_many_were_checked() {
+        let result = run(
+            "music-production|открыть|проект в DAW",
+            &BTreeMap::new(),
+            &AtomicBool::new(false),
+        );
+
+        if result.ok {
+            // На машине разработчика студия может быть — тогда причина называет программу.
+            assert!(result.reason.contains("процесс поднялся"), "{}", result.reason);
+            assert!(result.reason.contains("известных DAW проверено: 10"), "{}", result.reason);
+        } else {
+            assert!(
+                result.reason.contains("проверил известных: 10"),
+                "отказ обязан называть число проверенных: {}",
+                result.reason
+            );
+        }
     }
 
     /// Вердикт опирается на названные пороги, и его можно оспорить числами.
