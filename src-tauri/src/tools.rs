@@ -7094,7 +7094,7 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         let dir = std::env::temp_dir().join(format!("zshelper-concat-{}", std::process::id()));
         std::fs::create_dir_all(&dir).expect("папка");
         let one = dir.join("есть.mp4");
-        std::fs::write(&one, b"не видео, но файл есть").expect("файл");
+        std::fs::write(&one, "не видео, но файл есть".as_bytes()).expect("файл");
         let mut params = BTreeMap::new();
         params.insert(
             "files".to_string(),
@@ -7118,7 +7118,7 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         std::fs::write(&one, b"1").expect("файл");
         std::fs::write(&two, b"2").expect("файл");
         let out = dir.join("итог.mp4");
-        std::fs::write(&out, b"уже есть").expect("файл");
+        std::fs::write(&out, "уже есть".as_bytes()).expect("файл");
         let mut params = BTreeMap::new();
         params.insert("files".to_string(), format!("{};{}", one.display(), two.display()));
         params.insert("output".to_string(), out.display().to_string());
@@ -7129,7 +7129,7 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert!(refused.reason.contains("перезаписывать не буду"), "{}", refused.reason);
         assert_eq!(
             std::fs::read(&out).expect("читается"),
-            b"уже есть".to_vec(),
+            "уже есть".as_bytes().to_vec(),
             "файл не тронут"
         );
         let _ = std::fs::remove_dir_all(&dir);
@@ -7155,8 +7155,8 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         if !ffmpeg {
             let one = dir.join("a.mp4");
             let two = dir.join("b.mp4");
-            std::fs::write(&one, b"не видео").expect("файл");
-            std::fs::write(&two, b"не видео").expect("файл");
+            std::fs::write(&one, "не видео".as_bytes()).expect("файл");
+            std::fs::write(&two, "не видео".as_bytes()).expect("файл");
             params.insert("files".to_string(), format!("{};{}", one.display(), two.display()));
             params.insert("output".to_string(), dir.join("итог.mp4").display().to_string());
 
