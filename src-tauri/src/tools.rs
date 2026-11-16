@@ -1555,12 +1555,14 @@ fn service_on(
     let wanted = match wanted.as_str() {
         "" | "manual" | "вручную" => "Manual",
         "auto" | "automatic" | "авто" => "Auto",
-        other => return StepResult::failed(
-            registry,
-            format!(
+        other => {
+            return StepResult::failed(
+                registry,
+                format!(
                 "тип запуска «{other}» я не знаю — умею auto (с Windows) и manual (по требованию)"
             ),
-        ),
+            )
+        }
     };
 
     let mut result = run_script(
