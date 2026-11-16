@@ -44,6 +44,9 @@ pub enum Kind {
     /// Пометка автозапуска: запись не удалена, а помечена отключённой — как это делает
     /// Диспетчер задач. Возвращается записью прежней пометки на место.
     Autostart,
+    /// Тип запуска службы: было `Auto`/`Manual`/`Disabled`, стало `Disabled`. Возвращается
+    /// прежним типом запуска (и отложенным стартом, если он был).
+    Service,
 }
 
 impl Kind {
@@ -56,6 +59,7 @@ impl Kind {
             Kind::Compress => "сжатие",
             Kind::Product => "собранный файл",
             Kind::Autostart => "автозапуск",
+            Kind::Service => "служба",
         }
     }
 
@@ -64,12 +68,12 @@ impl Kind {
         matches!(self, Kind::Copy | Kind::Compress | Kind::Product)
     }
 
-    /// Живёт ли дело в реестре, а не в файловой системе.
+    /// Откатывается ли дело через оболочку, а не файловым переносом.
     ///
-    /// Для такого дела проверки «файл на месте / место свободно» бессмысленны: состояние
+    /// Для таких дел проверки «файл на месте / место свободно» бессмысленны: состояние
     /// читается и пишется через оболочку, и решает это она, а не наличие пути.
-    pub fn is_autostart(self) -> bool {
-        matches!(self, Kind::Autostart)
+    pub fn restores_in_shell(self) -> bool {
+        matches!(self, Kind::Autostart | Kind::Service)
     }
 }
 
@@ -140,7 +144,8 @@ impl Report {
 /// Что откат **не** умеет — прямо, чтобы никто не надеялся зря.
 pub const NOTE: &str = "откатываются переносы, переименования, копии, сжатые и собранные \
 файлы этой сессии: копия, сжатое и собранное убираются в корзину, их можно достать оттуда; \
-пометка автозапуска возвращается прежней пометкой на место (старое значение хранится в записи); \
+пометка автозапуска возвращается прежней пометкой на место, а тип запуска службы — прежним \
+типом (старое значение хранится в записи); \
 запись в файл, скачивание и уже сделанная корзина — нет: старого содержимого не вернуть";
 
 /// Разбор журнала: построчно, терпимо к битым строкам.
@@ -244,9 +249,10 @@ fn refuse_reason(entry: &Entry, session: &str, exists: &impl Fn(&str) -> bool) -
             entry.session
         ));
     }
-    // Пометка автозапуска живёт в реестре: «файла нет» про неё сказать нельзя, и делать вид,
-    // что проверка состояния состоялась, было бы хуже, чем честно её не делать.
-    if entry.kind.is_autostart() {
+    // Пометка автозапуска и тип запуска службы живут в системе, а не в файлах: «файла нет»
+    // про них сказать нельзя, и делать вид, что проверка состояния состоялась, было бы хуже,
+    // чем честно её не делать — состояние проверит оболочка, чтением обратно.
+    if entry.kind.restores_in_shell() {
         return None;
     }
     if !exists(&entry.to) {
@@ -260,9 +266,11 @@ fn refuse_reason(entry: &Entry, session: &str, exists: &impl Fn(&str) -> bool) -
             Kind::Copy | Kind::Compress | Kind::Product => {
                 format!("{} уже нет — убирать нечего, исходник не тронут", entry.to)
             }
-            // Пометки нет — и откатывать нечего: строка остаётся честной, даже если
-            // когда-нибудь сюда дойдёт дело, которое обычно проверяется оболочкой.
-            Kind::Autostart => format!("пометки автозапуска уже нет: {}", entry.to),
+            // Сюда такие дела не доходят: их проверяет оболочка. Строка остаётся честной,
+            // даже если однажды проверка изменится.
+            Kind::Autostart | Kind::Service => {
+                format!("состояние не прочитать: {}", entry.to)
+            }
         });
     }
     // У копии и сжатия источник остаётся на месте — это норма, а не занятое место.
@@ -284,7 +292,7 @@ pub fn apply(
     exists: impl Fn(&str) -> bool,
     move_back: impl Fn(&str, &str) -> Result<(), String>,
     recycle: impl Fn(&str) -> Result<(), String>,
-    restore_autostart: impl Fn(&Entry) -> Result<(), String>,
+    restore_shell: impl Fn(&Entry) -> Result<(), String>,
 ) -> Report {
     let session = steps
         .first()
@@ -312,8 +320,8 @@ pub fn apply(
         }
         // Пометку автозапуска возвращает оболочка: файловых проверок здесь нет, и «состояние
         // не сходится» проверяется ею же — чтением обратно.
-        if step.entry.kind.is_autostart() {
-            match restore_autostart(&step.entry) {
+        if step.entry.kind.restores_in_shell() {
+            match restore_shell(&step.entry) {
                 Ok(()) => report.undone += 1,
                 Err(reason) => report
                     .refused
@@ -363,7 +371,7 @@ pub fn undo_session(journal: &Journal) -> Report {
         path_exists,
         move_back_on_disk,
         recycle_on_disk,
-        restore_autostart_on_disk,
+        restore_shell_on_disk,
     )
 }
 
@@ -402,6 +410,82 @@ pub fn record_autostart(from: &str, previous: &str) -> bool {
     }
 }
 
+/// Записать тип запуска службы, если журнал открыт: `previous` — прежний тип
+/// (`Auto`, `Manual`, `Disabled`), с `+delayed`, если служба стартовала отложенно.
+pub fn record_service(name: &str, previous: &str) -> bool {
+    match current() {
+        Some(journal) => journal.record(Kind::Service, name, previous).is_ok(),
+        None => false,
+    }
+}
+
+/// Вернуть состояние, которое живёт в системе, а не в файлах: пометку автозапуска или тип
+/// запуска службы. Что именно — решает вид дела в записи.
+fn restore_shell_on_disk(entry: &Entry) -> Result<(), String> {
+    match entry.kind {
+        Kind::Autostart => restore_autostart_on_disk(entry),
+        Kind::Service => restore_service(entry),
+        _ => Err("этот вид дела через оболочку не откатывается".to_string()),
+    }
+}
+
+const RESTORE_SERVICE: &str = r#"$ErrorActionPreference = 'Stop'
+$name = $env:ZS_SERVICE
+$previous = $env:ZS_START
+if (-not $name -or -not $previous) {
+  Write-Output 'ZSHELPER-FAILED: в записи журнала нет имени службы или прежнего типа запуска'
+  exit 2
+}
+$delayed = 0
+$base = $previous
+if ($previous.EndsWith('+delayed')) {
+  $delayed = 1
+  $base = $previous.Substring(0, $previous.Length - 8)
+}
+$map = @{ 'Auto' = 'Automatic'; 'Manual' = 'Manual'; 'Disabled' = 'Disabled' }
+if (-not $map.ContainsKey($base)) {
+  Write-Output ('ZSHELPER-FAILED: тип запуска «' + $base + '» я не знаю — не буду угадывать')
+  exit 3
+}
+Set-Service -Name $name -StartupType $map[$base] -ErrorAction Stop
+if ($delayed -eq 1) {
+  & sc.exe config $name start= delayed-auto | Out-Null
+}
+$now = ''
+try { $now = [string](Get-CimInstance Win32_Service -Filter ("Name='" + $name + "'") -ErrorAction Stop).StartMode } catch { }
+if ($now -ne $base) {
+  Write-Output ('ZSHELPER-FAILED: служба осталась в состоянии «' + $now + '», а просили «' + $base + '»')
+  exit 4
+}
+Write-Output 'ZSHELPER-OK restored'"#;
+
+fn restore_service(entry: &Entry) -> Result<(), String> {
+    let request = crate::executor::ExecRequest::new(
+        "powershell.exe",
+        crate::executor::powershell(RESTORE_SERVICE),
+    )
+    .with_timeout(std::time::Duration::from_secs(120))
+    .with_env("ZS_SERVICE", &entry.from)
+    .with_env("ZS_START", &entry.to);
+    run_shell(request)
+}
+
+fn run_shell(request: crate::executor::ExecRequest) -> Result<(), String> {
+    match crate::executor::run(&request, &std::sync::atomic::AtomicBool::new(false)) {
+        Ok(output) if output.exit_code == Some(0) => Ok(()),
+        Ok(output) => {
+            let reason = output
+                .stdout
+                .lines()
+                .find(|line| line.contains("ZSHELPER-FAILED"))
+                .map(|line| line.replace("ZSHELPER-FAILED:", "").trim().to_string())
+                .unwrap_or_else(|| format!("оболочка вернула код {:?}", output.exit_code));
+            Err(reason)
+        }
+        Err(error) => Err(format!("оболочка не запустилась: {error}")),
+    }
+}
+
 /// Вернуть прежнюю пометку автозапуска и проверить чтением обратно.
 ///
 /// Проверка здесь не формальность: «Set-ItemProperty не упал» ещё не значит, что значение стало
@@ -419,19 +503,7 @@ fn restore_autostart_on_disk(entry: &Entry) -> Result<(), String> {
             .with_env("ZS_VALUE", name)
             .with_env("ZS_BYTES", &entry.to);
 
-    match crate::executor::run(&request, &std::sync::atomic::AtomicBool::new(false)) {
-        Ok(output) if output.exit_code == Some(0) => Ok(()),
-        Ok(output) => {
-            let reason = output
-                .stdout
-                .lines()
-                .find(|line| line.contains("ZSHELPER-FAILED"))
-                .map(|line| line.replace("ZSHELPER-FAILED:", "").trim().to_string())
-                .unwrap_or_else(|| format!("оболочка вернула код {:?}", output.exit_code));
-            Err(reason)
-        }
-        Err(error) => Err(format!("оболочка не запустилась: {error}")),
-    }
+    run_shell(request)
 }
 
 const RESTORE_AUTOSTART: &str = r#"$ErrorActionPreference = 'Stop'
@@ -845,7 +917,9 @@ mod tests {
         assert_eq!(asked.borrow().len(), 1);
         assert_eq!(asked.borrow()[0], "020000000000000000000000");
         assert_eq!(Kind::Autostart.title(), "автозапуск");
-        assert!(Kind::Autostart.is_autostart());
+        assert!(Kind::Autostart.restores_in_shell());
+        assert!(Kind::Service.restores_in_shell());
+        assert!(!Kind::Move.restores_in_shell());
         assert!(!Kind::Autostart.is_removal());
     }
 

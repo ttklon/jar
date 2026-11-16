@@ -670,7 +670,7 @@ export interface ProfileView {
  * только обратимое: перенос и переименование. У остального старого содержимого уже нет,
  * и `note` говорит об этом рядом со списком, а не в документации.
  */
-export type UndoKind = "move" | "rename" | "copy" | "compress" | "product" | "autostart";
+export type UndoKind = "move" | "rename" | "copy" | "compress" | "product" | "autostart" | "service";
 
 export interface UndoEntry {
   at: number;

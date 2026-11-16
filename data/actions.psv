@@ -231,8 +231,8 @@ processes-services|замерить|изменение нагрузки|заме
 processes-services|объяснить|службу/процесс|что это за процесс svchost|база знаний 300 записей|R|T0|c|v1|
 processes-services|найти|подозрительный процесс|есть ли тут что-то странное|подписи + эвристики + VirusTotal опц.|R|T1|c|v1|не гарантия
 processes-services|завершить|процесс|закрой зависший процесс|Stop-Process|D|T1|c|v1|риск потери данных
-processes-services|отключить|службу|отключи эту службу|Set-Service|D|T1|c|v1|Defender/Update/RPC — запрет
-processes-services|включить|службу|верни службу обратно|Set-Service|W|T1|c|v1|откат
+processes-services|отключить|службу|отключи эту службу|Set-Service|D|T1|c|v1|ядро системы и защита (Defender, брандмауэр) — запрет; нужны права администратора и точка восстановления: без неё рука не меняет ничего; откат в один щелчок возвращает прежний тип запуска
+processes-services|включить|службу|верни службу обратно|Set-Service|W|T1|c|v1|обратное дело: в журнал отката не пишется; тип запуска называет человек (auto/manual)
 processes-services|настроить|приоритет процесса|дай приоритет этой программе|SetPriorityClass|W|T1|c|v1|
 processes-services|настроить|сродство (affinity)|закрепи игру за ядрами 4-7|SetProcessAffinityMask|W|T2|h|v2|
 processes-services|проанализировать|автозапуск|что стартует при загрузке|Autoruns-категории|R|T0|c|v1|

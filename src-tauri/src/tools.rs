@@ -122,6 +122,8 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "processes-services|отключить|автозапуск" => {
             autostart_off(registry, params, cancel)
         }
+        "processes-services|отключить|службу" => service_off(registry, params, cancel),
+        "processes-services|включить|службу" => service_on(registry, params, cancel),
         "storage-backup|проверить|свободное место" => {
             simple(registry, FREE_SPACE, 30, cancel)
         }
@@ -1295,6 +1297,316 @@ fn autostart_off(
     };
     result.reason = format!(
         "автозапуск отключён: «{name}»{what} ({command}); пометка «отключено» записана в StartupApproved и проверена чтением обратно — так же помечает Диспетчер задач; записей в автозапуске просмотрено: {entries}; сама запись не удалена{undo_note}; что Проводник её пропустит при входе, станет видно после перезагрузки — этого я проверить не могу"
+    );
+    result
+}
+
+const SERVICE_OFF: &str = r#"$ErrorActionPreference = 'Stop'
+$name = $env:ZS_SERVICE
+if (-not $name) {
+  Write-Output 'ZSHELPER-FAILED: не названо, какую службу отключать'
+  exit 2
+}
+$service = Get-Service -Name $name -ErrorAction SilentlyContinue
+if (-not $service) {
+  Write-Output ('ZSHELPER-FAILED: службы «' + $name + '» нет — проверено по имени; ничего не менял')
+  exit 3
+}
+$cim = $null
+try { $cim = Get-CimInstance Win32_Service -Filter ("Name='" + $name + "'") -ErrorAction Stop } catch { }
+if (-not $cim) {
+  Write-Output 'ZSHELPER-FAILED: служба есть, но её тип запуска не прочитался — менять вслепую не буду'
+  exit 4
+}
+$startMode = [string]$cim.StartMode
+if ($startMode -eq 'Disabled') {
+  Write-Output ('ZSHELPER-FAILED: служба «' + $name + '» уже отключена — второй раз делать нечего; ничего не менял')
+  exit 5
+}
+$delayed = 0
+try {
+  $reg = Get-ItemProperty -LiteralPath ('HKLM:\SYSTEM\CurrentControlSet\Services\' + $name) -Name DelayedAutoStart -ErrorAction Stop
+  if ([int]$reg.DelayedAutoStart -eq 1) { $delayed = 1 }
+} catch { }
+$beforeTop = 0
+$before = @(Get-ComputerRestorePoint -ErrorAction SilentlyContinue)
+if ($before.Count -gt 0) { $beforeTop = [int](($before | Sort-Object -Property SequenceNumber | Select-Object -Last 1).SequenceNumber) }
+$made = 0
+try {
+  Checkpoint-Computer -Description 'ZShelper: перед отключением службы' -RestorePointType MODIFY_SETTINGS -ErrorAction Stop
+  $made = 1
+} catch {
+  $made = 0
+}
+$afterTop = 0
+$after = @(Get-ComputerRestorePoint -ErrorAction SilentlyContinue)
+if ($after.Count -gt 0) { $afterTop = [int](($after | Sort-Object -Property SequenceNumber | Select-Object -Last 1).SequenceNumber) }
+if ($made -eq 0 -and $afterTop -le $beforeTop) {
+  Write-Output 'ZSHELPER-FAILED: точка восстановления не создалась — так бывает, когда защита системы выключена, сработал суточный лимит Windows или не хватает прав; отключать службу без точки я не буду; включить защиту: Enable-ComputerRestore -Drive C:\'
+  exit 6
+}
+$wasRunning = 0
+if ($service.Status -eq 'Running') { $wasRunning = 1 }
+Set-Service -Name $name -StartupType Disabled -ErrorAction Stop
+if ($wasRunning -eq 1) {
+  Stop-Service -Name $name -Force -ErrorAction SilentlyContinue
+}
+$now = ''
+try { $now = [string](Get-CimInstance Win32_Service -Filter ("Name='" + $name + "'") -ErrorAction Stop).StartMode } catch { }
+if ($now -ne 'Disabled') {
+  Write-Output ('ZSHELPER-FAILED: служба осталась в состоянии «' + $now + '» — отключить не удалось; точку восстановления я уже сделал, её видно в списке')
+  exit 7
+}
+$stillRunning = 0
+$check = Get-Service -Name $name -ErrorAction SilentlyContinue
+if ($check -and $check.Status -eq 'Running') { $stillRunning = 1 }
+$previous = $startMode
+if ($delayed -eq 1) { $previous = $startMode + '+delayed' }
+Write-Output 'ZSHELPER-OK'
+Write-Output ('ZSHELPER-NAME ' + $name)
+Write-Output ('ZSHELPER-PREVIOUS ' + $previous)
+Write-Output ('ZSHELPER-RUNNING ' + $stillRunning)
+Write-Output ('ZSHELPER-POINT ' + $afterTop)
+"#;
+
+/// Отключить службу — с точкой восстановления, записью в журнал отката и проверкой обратным чтением.
+///
+/// Что здесь важно и почему именно так:
+///
+///  * **без точки восстановления не меняем ничего.** `Checkpoint-Computer` молчит, когда защита
+///    системы выключена, сработал суточный лимит Windows или не хватает прав, поэтому факт
+///    проверяется **по номеру последней точки до и после**, а не по отсутствию ошибки;
+///  * **защита машины не отключается.** Ядро системы (`lsass`, `rpcss`) и защита (`windefend`,
+///    `mpssvc`, `bfe`) получают отказ с причиной: это не «лишняя служба», а то, на чём держится
+///    и безопасность, и сама работа системы;
+///  * **состояние проверяется обратным чтением**: `StartMode` спрашивается у Windows после
+///    изменения, и «команда не упала» доказательством не считается;
+///  * **что не удалось, то названо**: если служба осталась запущенной, это сказано словами, а не
+///    спрятано за словом «отключено»;
+///  * **отложенный запуск не теряется**: если служба стартовала отложенно (`DelayedAutoStart`),
+///    это записано в журнал отката, и «откатить за сессию» вернёт именно это;
+///  * потолок прогона — пять минут: создание точки восстановления — самая долгая часть.
+fn service_off(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let name = param(params, "service").trim().to_string();
+    if name.is_empty() {
+        return StepResult::failed(registry, "не названо, какую службу отключать");
+    }
+    if let Some(note) = services::lookup(&name) {
+        if note.criticality == services::Criticality::Core {
+            return StepResult::failed(
+                registry,
+                format!(
+                    "«{name}» — {}: это часть системы, и отключать её я не буду — компьютер перестанет работать",
+                    note.what
+                ),
+            );
+        }
+    }
+    // Защиту машины выключают не «для порядка»: это не уборка, а снятие охраны.
+    let protection = ["windefend", "mpssvc", "bfe", "wscsvc"];
+    if protection
+        .iter()
+        .any(|guard| guard.eq_ignore_ascii_case(&name))
+    {
+        return StepResult::failed(
+            registry,
+            format!(
+                "«{name}» — это защита машины (антивирус или брандмауэр), а не лишняя служба; отключать её я не буду ни с подтверждением, ни без"
+            ),
+        );
+    }
+
+    let mut result = run_script(
+        registry,
+        SERVICE_OFF,
+        &[("SERVICE", name.as_str())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(300),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let line_value = |prefix: &str| -> String {
+        result
+            .stdout_tail
+            .lines()
+            .find_map(|line| line.strip_prefix(prefix))
+            .unwrap_or("")
+            .trim()
+            .to_string()
+    };
+    let stopped_name = line_value("ZSHELPER-NAME ");
+    let previous = line_value("ZSHELPER-PREVIOUS ");
+    let still_running = line_value("ZSHELPER-RUNNING ") == "1";
+    let point = line_value("ZSHELPER-POINT ");
+    if stopped_name.is_empty() || previous.is_empty() {
+        result.ok = false;
+        result.reason =
+            "оболочка не назвала прежний тип запуска — откат записывать не из чего, за результат это не выдам"
+                .to_string();
+        return result;
+    }
+
+    let recorded = crate::undo::record_service(&stopped_name, &previous);
+    result.duration_ms = started.elapsed().as_millis() as u64;
+
+    let point_note = if point == "0" || point.is_empty() {
+        "точка восстановления уже была — номер прочитать не удалось".to_string()
+    } else {
+        format!("точка восстановления создана, номер {point}")
+    };
+    let running_note = if still_running {
+        "; сама служба всё ещё работает: остановить её не удалось, и это сказано прямо — при следующем запуске она уже не поднимется"
+            .to_string()
+    } else {
+        "; служба остановлена и при следующем запуске не поднимется".to_string()
+    };
+    let undo_note = if recorded {
+        format!("; «откатить за сессию» вернёт прежний тип запуска ({previous})")
+    } else {
+        "; в журнал отката не записалось: тип запуска придётся вернуть вручную (services.msc)"
+            .to_string()
+    };
+    result.reason = format!(
+        "служба «{stopped_name}» отключена: было {previous}, стало Disabled; {point_note}{running_note}{undo_note}"
+    );
+    result
+}
+
+const SERVICE_ON: &str = r#"$ErrorActionPreference = 'Stop'
+$name = $env:ZS_SERVICE
+$wanted = $env:ZS_START
+if (-not $name) {
+  Write-Output 'ZSHELPER-FAILED: не названо, какую службу включать'
+  exit 2
+}
+if (-not $wanted) { $wanted = 'Manual' }
+$map = @{ 'Auto' = 'Automatic'; 'Automatic' = 'Automatic'; 'Manual' = 'Manual' }
+if (-not $map.ContainsKey($wanted)) {
+  Write-Output ('ZSHELPER-FAILED: тип запуска «' + $wanted + '» я не знаю — умею Auto и Manual')
+  exit 3
+}
+$service = Get-Service -Name $name -ErrorAction SilentlyContinue
+if (-not $service) {
+  Write-Output ('ZSHELPER-FAILED: службы «' + $name + '» нет — проверено по имени; ничего не менял')
+  exit 4
+}
+$cim = $null
+try { $cim = Get-CimInstance Win32_Service -Filter ("Name='" + $name + "'") -ErrorAction Stop } catch { }
+if (-not $cim) {
+  Write-Output 'ZSHELPER-FAILED: служба есть, но её тип запуска не прочитался — менять вслепую не буду'
+  exit 5
+}
+$startMode = [string]$cim.StartMode
+if ($startMode -ne 'Disabled') {
+  Write-Output ('ZSHELPER-FAILED: служба «' + $name + '» и так включена: тип запуска ' + $startMode + ' — включать нечего; ничего не менял')
+  exit 6
+}
+Set-Service -Name $name -StartupType $map[$wanted] -ErrorAction Stop
+$now = ''
+try { $now = [string](Get-CimInstance Win32_Service -Filter ("Name='" + $name + "'") -ErrorAction Stop).StartMode } catch { }
+if ($now -ne $wanted -and -not ($wanted -eq 'Automatic' -and $now -eq 'Auto')) {
+  Write-Output ('ZSHELPER-FAILED: служба осталась в состоянии «' + $now + '», а просили «' + $wanted + '»')
+  exit 7
+}
+$running = 0
+$check = Get-Service -Name $name -ErrorAction SilentlyContinue
+if ($check -and $check.Status -eq 'Running') { $running = 1 }
+Write-Output 'ZSHELPER-OK'
+Write-Output ('ZSHELPER-NAME ' + $name)
+Write-Output ('ZSHELPER-NOW ' + $now)
+Write-Output ('ZSHELPER-RUNNING ' + $running)
+"#;
+
+/// Вернуть службу в строй: прежний тип запуска вместо `Disabled`.
+///
+/// Почему отдельной рукой, а не «откатом»: откат живёт сессией и помнит прежнее состояние, а
+/// вернуть службу может понадобиться и через неделю — тогда прежнего значения уже никто не
+/// помнит, и человек называет желаемое сам. В журнал отката это дело не пишется: включать
+/// обратно — значит повторять его же, и «откат включения» был бы отключением, то есть тем,
+/// что человек только что передумал делать.
+fn service_on(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let name = param(params, "service").trim().to_string();
+    let wanted = param(params, "start").trim().to_lowercase();
+    if name.is_empty() {
+        return StepResult::failed(registry, "не названо, какую службу включать");
+    }
+    let wanted = match wanted.as_str() {
+        "" | "manual" | "вручную" => "Manual",
+        "auto" | "automatic" | "авто" => "Auto",
+        other => {
+            return StepResult::failed(
+                registry,
+                format!("тип запуска «{other}» я не знаю — умею auto (с Windows) и manual (по требованию)"),
+            )
+        }
+    };
+
+    let mut result = run_script(
+        registry,
+        SERVICE_ON,
+        &[("SERVICE", name.as_str()), ("START", wanted)],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(120),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let line_value = |prefix: &str| -> String {
+        result
+            .stdout_tail
+            .lines()
+            .find_map(|line| line.strip_prefix(prefix))
+            .unwrap_or("")
+            .trim()
+            .to_string()
+    };
+    let turned_name = line_value("ZSHELPER-NAME ");
+    let now = line_value("ZSHELPER-NOW ");
+    let running = line_value("ZSHELPER-RUNNING ") == "1";
+    if turned_name.is_empty() || now.is_empty() {
+        result.ok = false;
+        result.reason =
+            "оболочка не назвала, что стало со службой — за результат это не выдам".to_string();
+        return result;
+    }
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    let state = if running {
+        "она уже работает".to_string()
+    } else {
+        "сейчас она не запущена: поднимется, когда понадобится системе или программе".to_string()
+    };
+    result.reason = format!(
+        "служба «{turned_name}» включена: было Disabled, стало {now}; {state}; в журнал отката не пишу — включать обратно значит повторять это же дело"
     );
     result
 }
@@ -6462,6 +6774,8 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
         ("processes-services|отключить|автозапуск", AUTOSTART_OFF),
+        ("processes-services|отключить|службу", SERVICE_OFF),
+        ("processes-services|включить|службу", SERVICE_ON),
         ("processes-services|проанализировать|автозапуск", STARTUP),
         ("storage-backup|проверить|свободное место", FREE_SPACE),
         ("storage-backup|проверить|SMART диска", SMART),
@@ -8384,6 +8698,111 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert_eq!(groups[0].paths.len(), 3);
         assert_eq!(groups[1].paths, vec!["C:\\b\\x.bin", "C:\\b\\y.bin"]);
         assert_eq!(groups[1].wasted, 300);
+    }
+
+    /// Неизвестный тип запуска — отказ с тем, что рука умеет, до любых изменений.
+    #[test]
+    fn turning_a_service_on_refuses_an_unknown_start_type() {
+        let mut params = BTreeMap::new();
+        params.insert("service".to_string(), "Fax".to_string());
+        params.insert("start".to_string(), "когда-нибудь".to_string());
+        let refused = run(
+            "processes-services|включить|службу",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("тип запуска"), "{}", refused.reason);
+        assert!(refused.reason.contains("умею"), "{}", refused.reason);
+    }
+
+    /// Ядро системы не отключают ни с подтверждением, ни без.
+    #[test]
+    fn a_core_service_is_never_turned_off() {
+        for name in ["lsass", "rpcss", "csrss"] {
+            let mut params = BTreeMap::new();
+            params.insert("service".to_string(), name.to_string());
+            let refused = run(
+                "processes-services|отключить|службу",
+                &params,
+                &AtomicBool::new(false),
+            );
+            assert!(!refused.ok, "{name}");
+            assert!(
+                refused.reason.contains("часть системы"),
+                "{name}: {}",
+                refused.reason
+            );
+            assert!(
+                refused.reason.contains("перестанет работать"),
+                "{name}: {}",
+                refused.reason
+            );
+        }
+    }
+
+    /// Защиту машины рука не выключает: это снятие охраны, а не уборка.
+    #[test]
+    fn the_protection_of_the_machine_stays_on() {
+        for name in ["WinDefend", "mpssvc", "BFE"] {
+            let mut params = BTreeMap::new();
+            params.insert("service".to_string(), name.to_string());
+            let refused = run(
+                "processes-services|отключить|службу",
+                &params,
+                &AtomicBool::new(false),
+            );
+            assert!(!refused.ok, "{name}");
+            assert!(
+                refused.reason.contains("защита машины"),
+                "{name}: {}",
+                refused.reason
+            );
+            assert!(
+                refused.reason.contains("ни с подтверждением, ни без"),
+                "{name}: {}",
+                refused.reason
+            );
+        }
+    }
+
+    /// Имя службы обязательно, и пустое имя — отказ диспетчера, а не поход в систему.
+    #[test]
+    fn turning_a_service_off_needs_its_name() {
+        let refused = run(
+            "processes-services|отключить|службу",
+            &BTreeMap::new(),
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(
+            refused.reason.contains("не задан параметр"),
+            "{}",
+            refused.reason
+        );
+    }
+
+    /// Живой отказ: несуществующая служба называется по имени, и ничего не меняется.
+    ///
+    /// Отключать настоящую службу в тесте нельзя: это чужая машина. Проверяется то, что
+    /// проверяемо без риска — отказ до любых изменений.
+    #[cfg(windows)]
+    #[test]
+    fn a_missing_service_is_refused_by_name() {
+        let mut params = BTreeMap::new();
+        params.insert("service".to_string(), "zshelper-такой-службы-нет".to_string());
+        let refused = run(
+            "processes-services|отключить|службу",
+            &params,
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(
+            refused.reason.contains("нет — проверено по имени"),
+            "{}",
+            refused.reason
+        );
+        assert!(refused.reason.contains("ничего не менял"), "{}", refused.reason);
     }
 
     /// Ядро системы не убирают из автозапуска: это не программа, а часть Windows.
