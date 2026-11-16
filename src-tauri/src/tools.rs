@@ -1020,21 +1020,64 @@ if ($props) {
     $entries += [pscustomobject]@{ Name = $prop.Name; Command = [string]$prop.Value }
   }
 }
-if ($entries.Count -eq 0) {
-  Write-Output 'ZSHELPER-FAILED: в автозапуске этого пользователя нет ни одной записи — убирать нечего; общие записи (HKLM) я не трогаю: для них нужны права администратора и точка восстановления, а это отдельное дело'
+$userStartup = [Environment]::GetFolderPath('Startup')
+$shortcuts = @()
+if ($userStartup -and (Test-Path -LiteralPath $userStartup)) {
+  $shortcuts = @(Get-ChildItem -LiteralPath $userStartup -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Extension -eq '.lnk' -or $_.Extension -eq '.url' })
+}
+$commonStartup = [Environment]::GetFolderPath('CommonStartup')
+$commonShortcuts = @()
+if ($commonStartup -and (Test-Path -LiteralPath $commonStartup)) {
+  $commonShortcuts = @(Get-ChildItem -LiteralPath $commonStartup -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Extension -eq '.lnk' -or $_.Extension -eq '.url' })
+}
+$total = $entries.Count + $shortcuts.Count + $commonShortcuts.Count
+if ($total -eq 0) {
+  Write-Output 'ZSHELPER-FAILED: автозапуск пуст — нечего убирать; проверено мест: Run 0 записей, ярлыков 0'
   exit 3
 }
-$match = @($entries | Where-Object { $_.Name -eq $app -or $_.Name.ToLower() -eq $app.ToLower() })
-if ($match.Count -eq 0) {
-  $names = (($entries | ForEach-Object { $_.Name }) -join ', ')
-  Write-Output ('ZSHELPER-FAILED: записи «' + $app + '» в автозапуске нет — просмотрено записей: ' + $entries.Count + ' (' + $names + '); ничего не менял')
+$wanted = $app.ToLower()
+$runMatch = @($entries | Where-Object { $_.Name.ToLower() -eq $wanted })
+$shortcutMatch = @($shortcuts | Where-Object { $_.BaseName.ToLower() -eq $wanted -or $_.Name.ToLower() -eq $wanted })
+$commonMatch = @($commonShortcuts | Where-Object { $_.BaseName.ToLower() -eq $wanted -or $_.Name.ToLower() -eq $wanted })
+$foundCount = $runMatch.Count + $shortcutMatch.Count + $commonMatch.Count
+if ($foundCount -eq 0) {
+  $runNames = @($entries | ForEach-Object { $_.Name })
+  $linkNames = @($shortcuts | ForEach-Object { $_.BaseName })
+  $all = @($runNames + $linkNames) -join ', '
+  Write-Output ('ZSHELPER-FAILED: записи «' + $app + '» в автозапуске нет — просмотрено: Run ' + $entries.Count + ', ярлыков у вас ' + $shortcuts.Count + ', ярлыков для всех ' + $commonShortcuts.Count + ' (' + $all + '); ничего не менял')
   exit 4
 }
-if ($match.Count -gt 1) {
-  Write-Output ('ZSHELPER-FAILED: под «' + $app + '» подходит записей: ' + $match.Count + ' — назовите точнее; ничего не менял')
+if ($foundCount -gt 1) {
+  Write-Output ('ZSHELPER-FAILED: под «' + $app + '» подходит записей: ' + $foundCount + ' — назовите точнее; ничего не менял')
   exit 5
 }
-$name = [string]$match[0].Name
+if ($commonMatch.Count -eq 1 -and $runMatch.Count -eq 0 -and $shortcutMatch.Count -eq 0) {
+  Write-Output ('ZSHELPER-FAILED: «' + $commonMatch[0].Name + '» лежит в автозапуске для всех пользователей — там нужны права администратора и точка восстановления, а это отдельное дело; ничего не менял')
+  exit 6
+}
+if ($shortcutMatch.Count -eq 1) {
+  $target = Join-Path $userStartup '_Отключённый автозапуск'
+  New-Item -ItemType Directory -Path $target -Force | Out-Null
+  $to = Join-Path $target $shortcutMatch[0].Name
+  Move-Item -LiteralPath $shortcutMatch[0].FullName -Destination $to -ErrorAction Stop
+  $stillThere = Test-Path -LiteralPath $shortcutMatch[0].FullName
+  $arrived = Test-Path -LiteralPath $to
+  if ($stillThere -or -not $arrived) {
+    Write-Output 'ZSHELPER-FAILED: ярлык не переехал — автозапуск остался бы включённым; проверьте сами'
+    exit 7
+  }
+  Write-Output ('ZSHELPER-OK entries=' + $entries.Count)
+  Write-Output 'ZSHELPER-KIND shortcut'
+  Write-Output ('ZSHELPER-NAME ' + $shortcutMatch[0].BaseName)
+  Write-Output ('ZSHELPER-COMMAND ' + $shortcutMatch[0].Name)
+  Write-Output 'ZSHELPER-PREVIOUS absent'
+  Write-Output ('ZSHELPER-FROM ' + $shortcutMatch[0].FullName)
+  Write-Output ('ZSHELPER-TO ' + $to)
+  exit 0
+}
+$name = [string]$runMatch[0].Name
 $previous = ''
 try {
   $existing = (Get-ItemProperty -LiteralPath $approvedKey -Name $name -ErrorAction Stop).$name
@@ -1042,7 +1085,7 @@ try {
 } catch { }
 if ($previous -and $previous.StartsWith('03')) {
   Write-Output ('ZSHELPER-FAILED: «' + $name + '» уже помечен отключённым — второй раз отключать нечего; ничего не менял')
-  exit 6
+  exit 8
 }
 $disabled = [byte[]](3,0,0,0,0,0,0,0,0,0,0,0)
 New-Item -Path $approvedKey -Force | Out-Null
@@ -1050,13 +1093,14 @@ Set-ItemProperty -LiteralPath $approvedKey -Name $name -Value $disabled -Type Bi
 $now = (Get-ItemProperty -LiteralPath $approvedKey -Name $name -ErrorAction SilentlyContinue).$name
 if (-not ($now -is [byte[]]) -or $now[0] -ne 3) {
   Write-Output 'ZSHELPER-FAILED: пометка не записалась — автозапуск остался как был, и делать вид, что отключил, я не буду'
-  exit 7
+  exit 9
 }
 $previousText = 'absent'
 if ($previous) { $previousText = $previous }
 Write-Output ('ZSHELPER-OK entries=' + $entries.Count)
+Write-Output 'ZSHELPER-KIND run'
 Write-Output ('ZSHELPER-NAME ' + $name)
-Write-Output ('ZSHELPER-COMMAND ' + [string]$match[0].Command)
+Write-Output ('ZSHELPER-COMMAND ' + [string]$runMatch[0].Command)
 Write-Output ('ZSHELPER-PREVIOUS ' + $previousText)
 "#;
 
@@ -1193,25 +1237,49 @@ fn autostart_off(
     let entries = line_value("ZSHELPER-OK entries=")
         .parse::<usize>()
         .unwrap_or_default();
+    let kind = line_value("ZSHELPER-KIND ");
     let name = line_value("ZSHELPER-NAME ");
     let command = line_value("ZSHELPER-COMMAND ");
     let previous = line_value("ZSHELPER-PREVIOUS ");
-    if name.is_empty() {
+    if name.is_empty() || kind.is_empty() {
         result.ok = false;
         result.reason =
             "оболочка не назвала, что именно отключила — за результат это не выдам".to_string();
         return result;
     }
 
-    let key = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run";
-    let recorded =
-        crate::undo::record_autostart(&crate::undo::autostart_path(key, &name), &previous);
-
     result.duration_ms = started.elapsed().as_millis() as u64;
     let what = match services::lookup(&name) {
         Some(note) => format!(" — {}", note.what),
         None => String::new(),
     };
+
+    // Ярлык из папки «Автозагрузка» переезжает, и это обычный перенос: откат вернёт его
+    // тем же механизмом, что и любой другой файл.
+    if kind == "shortcut" {
+        let from = clean_path(line_value("ZSHELPER-FROM "));
+        let to = clean_path(line_value("ZSHELPER-TO "));
+        if from.is_empty() || to.is_empty() {
+            result.ok = false;
+            result.reason = "ярлык переехал, но оболочка не назвала оба пути — откат не запишу"
+                .to_string();
+            return result;
+        }
+        let recorded = crate::undo::record_move(&from, &to);
+        let undo_note = if recorded {
+            "; «откатить за сессию» вернёт ярлык на место — это обычный перенос"
+        } else {
+            "; в журнал отката не записалось: вернуть можно вручную, перенеся ярлык обратно"
+        };
+        result.reason = format!(
+            "автозапуск отключён: ярлык «{name}»{what} убран из папки «Автозагрузка» в подпапку «_Отключённый автозапуск» и проверен на месте — файл не удалён, а переехал; записей в Run просмотрено: {entries}{undo_note}; что Проводник его не запустит при входе, станет видно после перезагрузки"
+        );
+        return result;
+    }
+
+    let key = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run";
+    let recorded =
+        crate::undo::record_autostart(&crate::undo::autostart_path(key, &name), &previous);
     let undo_note = match (recorded, previous.as_str()) {
         (true, "absent") => {
             "; «откатить за сессию» снимет пометку: прежней не было, и вернуть надо ровно это"
@@ -8352,6 +8420,67 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
             refused.reason.contains("не задан параметр"),
             "{}",
             refused.reason
+        );
+    }
+
+    /// Живая проверка ярлыка: файл из «Автозагрузки» переезжает, а не исчезает.
+    #[cfg(windows)]
+    #[test]
+    fn a_live_startup_shortcut_is_moved_and_kept() {
+        let startup = std::process::Command::new("powershell.exe")
+            .args([
+                "-NoProfile",
+                "-NonInteractive",
+                "-Command",
+                "[Environment]::GetFolderPath('Startup')",
+            ])
+            .output()
+            .ok()
+            .map(|output| String::from_utf8_lossy(&output.stdout).trim().to_string())
+            .unwrap_or_default();
+        if startup.is_empty() {
+            return;
+        }
+        let from = std::path::Path::new(&startup).join("ZShelper Self Test.url");
+        // .url — обычный текстовый файл, поэтому его можно создать без COM и без ярлыка.
+        if std::fs::write(
+            &from,
+            "[InternetShortcut]\r\nURL=https://example.invalid/\r\n",
+        )
+        .is_err()
+        {
+            return;
+        }
+
+        let mut params = BTreeMap::new();
+        params.insert("app".to_string(), "zshelper self test".to_string());
+        let off = run(
+            "processes-services|отключить|автозапуск",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        let moved = std::path::Path::new(&startup)
+            .join("_Отключённый автозапуск")
+            .join("ZShelper Self Test.url");
+        // Убираем за собой в любом случае: тест не должен оставлять следов в автозагрузке.
+        let _ = std::fs::remove_file(&moved);
+        let _ = std::fs::remove_file(&from);
+
+        assert!(off.ok, "{}", off.reason);
+        assert!(off.reason.contains("ярлык"), "{}", off.reason);
+        assert!(
+            off.reason.contains("_Отключённый автозапуск"),
+            "{}",
+            off.reason
+        );
+        // Файл не удалён, а переехал: оба факта названы.
+        assert!(off.reason.contains("не удалён, а переехал"), "{}", off.reason);
+        assert!(
+            off.reason.contains("«откатить за сессию»")
+                || off.reason.contains("в журнал отката не записалось"),
+            "{}",
+            off.reason
         );
     }
 
