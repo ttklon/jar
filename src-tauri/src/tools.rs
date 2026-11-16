@@ -116,8 +116,12 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|проверить|дубликаты по хэшу" => {
             duplicates(registry, params, cancel)
         }
-        "processes-services|показать|топ по нагрузке" => top_processes(registry, cancel),
-        "processes-services|отключить|автозапуск" => autostart_off(registry, params, cancel),
+        "processes-services|показать|топ по нагрузке" => {
+            top_processes(registry, cancel)
+        }
+        "processes-services|отключить|автозапуск" => {
+            autostart_off(registry, params, cancel)
+        }
         "storage-backup|проверить|свободное место" => {
             simple(registry, FREE_SPACE, 30, cancel)
         }
@@ -1200,7 +1204,8 @@ fn autostart_off(
     }
 
     let key = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run";
-    let recorded = crate::undo::record_autostart(&crate::undo::autostart_path(key, &name), &previous);
+    let recorded =
+        crate::undo::record_autostart(&crate::undo::autostart_path(key, &name), &previous);
 
     result.duration_ms = started.elapsed().as_millis() as u64;
     let what = match services::lookup(&name) {
@@ -8326,7 +8331,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         );
 
         assert!(!refused.ok);
-        assert!(refused.reason.contains("часть системы"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("часть системы"),
+            "{}",
+            refused.reason
+        );
         assert!(refused.reason.contains("не трогаю"), "{}", refused.reason);
     }
 
@@ -8339,7 +8348,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
             &AtomicBool::new(false),
         );
         assert!(!refused.ok);
-        assert!(refused.reason.contains("не задан параметр"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("не задан параметр"),
+            "{}",
+            refused.reason
+        );
     }
 
     /// Живая проверка: пометка ставится, читается обратно и второй раз не ставится.
@@ -8395,11 +8408,7 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
             off.reason
         );
         // Что будет после входа в систему — не проверено, и это сказано.
-        assert!(
-            off.reason.contains("после перезагрузки"),
-            "{}",
-            off.reason
-        );
+        assert!(off.reason.contains("после перезагрузки"), "{}", off.reason);
         // В тестах журнал отката может быть не открыт: тогда честно сказано, что вернуть
         // автоматически не выйдет. В приложении эта ветка другая — и обе говорят правду.
         assert!(

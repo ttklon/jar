@@ -412,14 +412,12 @@ fn restore_autostart_on_disk(entry: &Entry) -> Result<(), String> {
         .rsplit_once('|')
         .ok_or_else(|| format!("запись журнала без имени пометки: {}", entry.from))?;
     let script = RESTORE_AUTOSTART;
-    let request = crate::executor::ExecRequest::new(
-        "powershell.exe",
-        crate::executor::powershell(script),
-    )
-    .with_timeout(std::time::Duration::from_secs(60))
-    .with_env("ZS_KEY", key)
-    .with_env("ZS_VALUE", name)
-    .with_env("ZS_BYTES", &entry.to);
+    let request =
+        crate::executor::ExecRequest::new("powershell.exe", crate::executor::powershell(script))
+            .with_timeout(std::time::Duration::from_secs(60))
+            .with_env("ZS_KEY", key)
+            .with_env("ZS_VALUE", name)
+            .with_env("ZS_BYTES", &entry.to);
 
     match crate::executor::run(&request, &std::sync::atomic::AtomicBool::new(false)) {
         Ok(output) if output.exit_code == Some(0) => Ok(()),
@@ -840,13 +838,7 @@ mod tests {
             Ok(())
         };
 
-        let report = apply(
-            &steps,
-            |_| false,
-            |_, _| Ok(()),
-            |_| Ok(()),
-            restore,
-        );
+        let report = apply(&steps, |_| false, |_, _| Ok(()), |_| Ok(()), restore);
 
         assert_eq!(report.undone, 1, "{report:?}");
         // Файловые проверки к пометке не применяются: иначе «файла нет» отменило бы откат.
@@ -879,7 +871,11 @@ mod tests {
             "{:?}",
             report.refused
         );
-        assert!(report.summary().contains("не откатилось"), "{}", report.summary());
+        assert!(
+            report.summary().contains("не откатилось"),
+            "{}",
+            report.summary()
+        );
     }
 
     /// Путь пометки собирается из ключа и имени — без догадок о разделителе.
