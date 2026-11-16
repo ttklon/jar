@@ -116,14 +116,8 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|проверить|дубликаты по хэшу" => {
             duplicates(registry, params, cancel)
         }
-<<<<<<< HEAD
-        "processes-services|показать|топ по нагрузке" => {
-            top_processes(registry, cancel)
-        }
-=======
         "processes-services|показать|топ по нагрузке" => top_processes(registry, cancel),
         "processes-services|отключить|автозапуск" => autostart_off(registry, params, cancel),
->>>>>>> 9e500ff (Автозапуск: пометка вместо удаления и откат, который правда откатывает)
         "storage-backup|проверить|свободное место" => {
             simple(registry, FREE_SPACE, 30, cancel)
         }
