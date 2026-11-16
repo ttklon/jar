@@ -116,7 +116,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|проверить|дубликаты по хэшу" => {
             duplicates(registry, params, cancel)
         }
-        "processes-services|показать|топ по нагрузке" => top_processes(registry, cancel),
+        "processes-services|показать|топ по нагрузке" => {
+            top_processes(registry, cancel)
+        }
         "storage-backup|проверить|свободное место" => {
             simple(registry, FREE_SPACE, 30, cancel)
         }
@@ -8172,7 +8174,10 @@ zshelper (pid 44): 120 МБ\n\
         assert!(text.contains("браузер Google Chrome"), "{text}");
         assert!(text.contains("опознано в базе: 1 из 2"), "{text}");
         // Память — не процессор: это сказано, чтобы «тяжёлый» не читали как «тормозит».
-        assert!(text.contains("это память, а не процессорное время"), "{text}");
+        assert!(
+            text.contains("это память, а не процессорное время"),
+            "{text}"
+        );
         assert!(!text.contains("тормоз"), "{text}");
 
         let unknown = vec![("чужое-имя".to_string(), "20 МБ".to_string())];
