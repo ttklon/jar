@@ -60,6 +60,7 @@ pub mod registry;
 pub mod restricted;
 pub mod roles;
 pub mod sandbox;
+pub mod services;
 pub mod server;
 pub mod step;
 pub mod stt;

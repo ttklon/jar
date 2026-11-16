@@ -21,6 +21,7 @@ use std::time::{Duration, Instant};
 use serde::{Deserialize, Serialize};
 
 use crate::executor::{self, ExecOutput, ExecRequest};
+use crate::services;
 use crate::step::{tail, Evidence, StepResult};
 use crate::verifier::{self, Expectation};
 
@@ -921,76 +922,15 @@ fn compare_folders(registry: &str, params: &BTreeMap<String, String>) -> StepRes
     result
 }
 
-/// Что приложение знает о частых процессах — своими словами, без интернета.
-///
-/// Таблица нарочно короткая и честная: в ней только то, что можно сказать уверенно.
-/// Всё остальное добирается фактами с машины (путь, подпись, память), а не догадками.
-const PROCESS_NOTES: &[(&str, &str)] = &[
-    (
-        "svchost",
-        "хост системных служб Windows: один процесс держит группу служб, и сам по себе он не вирус",
-    ),
-    (
-        "explorer",
-        "проводник Windows: рабочий стол, панель задач и окна папок — это он",
-    ),
-    (
-        "dwm",
-        "композитор окон Windows: рисует окна и эффекты, работает всегда",
-    ),
-    (
-        "lsass",
-        "служба безопасности Windows: проверяет вход в систему, трогать нельзя",
-    ),
-    ("csrss", "клиент-сервер подсистемы Windows, трогать нельзя"),
-    (
-        "winlogon",
-        "вход в систему и блокировка экрана Windows, трогать нельзя",
-    ),
-    (
-        "system",
-        "ядро Windows в пользовательском виде: обычно это драйвер",
-    ),
-    (
-        "antimalware service executable",
-        "защитник Windows: проверяет файлы в фоне, отсюда нагрузка на диск",
-    ),
-    (
-        "wmiprvse",
-        "инструментарий Windows: через него программы узнают состояние системы",
-    ),
-    (
-        "searchindexer",
-        "индексатор поиска Windows: строит индекс файлов, отсюда нагрузка на диск",
-    ),
-    (
-        "chrome",
-        "браузер Google Chrome: вкладки и расширения — отдельные процессы",
-    ),
-    ("msedge", "браузер Microsoft Edge"),
-    ("firefox", "браузер Firefox"),
-    ("onedrive", "синхронизация OneDrive"),
-    ("teams", "Microsoft Teams"),
-    ("steam", "клиент Steam"),
-    ("code", "редактор Visual Studio Code"),
-    ("zshelper", "это само приложение"),
-];
-
-/// Пояснение к имени процесса: без учёта регистра, только по точному имени.
-fn process_note(name: &str) -> Option<&'static str> {
-    PROCESS_NOTES
-        .iter()
-        .find(|(key, _)| key.eq_ignore_ascii_case(name))
-        .map(|(_, note)| *note)
-}
-
-/// Объяснить процесс или службу: факты с машины плюс пояснение из своей таблицы.
+/// Объяснить процесс или службу: факты с машины плюс пояснение из встроенной базы.
 ///
 /// Что здесь важно:
 ///
-///  * **факты важнее таблицы.** Путь файла, подпись и память проверяемы, а «это вирус» —
-///    нет, поэтому таблица говорит только то, что известно про системные имена, и прямо
-///    признаётся, когда имени в ней нет;
+///  * **факты важнее базы.** Путь файла, подпись и память проверяемы, а «это вирус» — нет,
+///    поэтому база (`services::NOTE`) говорит только то, что известно про системные имена, и
+///    прямо признаётся, когда имени в ней нет — вместе с числом записей в ней;
+///  * **отключаемость называется с последствием.** «Только с оговоркой — без него не печатает
+///    принтер» полезнее, чем «можно» без причины: решение принимает человек, а не слово;
 ///  * **процесс и служба ищутся оба.** «Что это за wuauserv» — это служба, а не процесс,
 ///    и отвечать «не найдено» было бы неправдой;
 ///  * **не найдено — это отказ с причиной**, а не пустой список: человек спросил про
@@ -1034,16 +974,31 @@ fn explain_process(
         .filter(|line| line.trim_start().starts_with("процесс:") || line.starts_with("служба:"))
         .count();
 
-    let note = process_note(&name);
-    let mut reason = match note {
-        Some(note) => format!("«{name}» — {note}"),
-        None => format!("«{name}» в моей таблице нет — вот что видно по факту"),
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = explain_reason(&name, found);
+    result
+}
+
+/// Причина ответа «что это за служба»: знание из базы отдельно, факты с машины отдельно.
+///
+/// Отдельной функцией — чтобы формулировку можно было проверить тестом, а не глазами на живой
+/// машине: «критичность» и «отключить» не должны слипнуться в одно слово «важная».
+fn explain_reason(name: &str, found: usize) -> String {
+    let mut reason = match services::lookup(name) {
+        Some(note) => format!(
+            "«{name}» — {}; критичность: {}; отключить: {} — {}",
+            note.what,
+            note.criticality.label(),
+            note.disable.label(),
+            note.because
+        ),
+        None => format!(
+            "«{name}» в базе нет (в ней {} записей про службы и системные процессы) — вот что видно по факту, и это проверяемо",
+            services::count()
+        ),
     };
     reason.push_str(&format!("; найдено записей: {found}, подробности ниже"));
-
-    result.duration_ms = started.elapsed().as_millis() as u64;
-    result.reason = reason;
-    result
+    reason
 }
 
 /// Найти процессы, к которым есть вопросы.
@@ -7377,9 +7332,9 @@ mod tests {
     #[test]
     fn explaining_a_process_uses_its_own_table_and_admits_the_gaps() {
         // Таблица не выдумывает: известное объясняется, неизвестное признаётся.
-        assert!(process_note("SVCHOST").is_some());
-        assert!(process_note("Explorer").is_some());
-        assert!(process_note("майнкрафт").is_none());
+        assert!(services::lookup("SVCHOST").is_some());
+        assert!(services::lookup("Explorer").is_some());
+        assert!(services::lookup("майнкрафт").is_none());
 
         // Живой факт: служба есть на любой машине с Windows, и она не процесс.
         let mut params = BTreeMap::new();
@@ -8123,6 +8078,29 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert_eq!(groups[0].paths.len(), 3);
         assert_eq!(groups[1].paths, vec!["C:\\b\\x.bin", "C:\\b\\y.bin"]);
         assert_eq!(groups[1].wasted, 300);
+    }
+
+    /// Ответ «что это за служба» называет и знание, и его границу.
+    #[test]
+    fn explain_names_what_it_knows_and_admits_what_it_does_not() {
+        let known = explain_reason("lsass", 1);
+        assert!(known.contains("критичность: ядро системы"), "{known}");
+        assert!(known.contains("отключить: нельзя"), "{known}");
+        assert!(known.contains("найдено записей: 1"), "{known}");
+
+        let careful = explain_reason("spooler", 1);
+        assert!(
+            careful.contains("отключить: только с оговоркой"),
+            "{careful}"
+        );
+        assert!(careful.contains("принтер"), "{careful}");
+
+        let unknown = explain_reason("майнкрафт", 2);
+        assert!(unknown.contains("в базе нет"), "{unknown}");
+        assert!(unknown.contains("записей про службы"), "{unknown}");
+        assert!(unknown.contains("найдено записей: 2"), "{unknown}");
+        // И «нет в базе» не выдаётся за «такого не бывает».
+        assert!(!unknown.contains("такого не существует"), "{unknown}");
     }
 
     /// Пороги SSIM названы числом, и каждый означает своё.
