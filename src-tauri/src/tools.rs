@@ -8186,7 +8186,7 @@ zshelper (pid 44): 120 МБ\n\
     fn an_empty_top_report_does_not_claim_a_clean_machine() {
         let text = top_summary(&[]);
         assert!(text.contains("прочитать не удалось"), "{text}");
-        assert!(!text.contains("ничего не грузит"));
+        assert!(text.contains("выдумывать"), "{text}");
     }
 
     /// Ответ «что это за служба» называет и знание, и его границу.
