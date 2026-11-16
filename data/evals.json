@@ -1,6 +1,6 @@
 {
   "generated_from": "data/actions.psv",
-  "count": 834,
+  "count": 835,
   "curated": [
     {
       "priority": "P0",
@@ -23269,6 +23269,34 @@
       "then": [
         "объект существует по ожидаемому пути",
         "размер/хэш совпадает с ожиданием"
+      ],
+      "must_not": [
+        "молча провалиться",
+        "повторять неудачный шаг больше 3 раз"
+      ]
+    },
+    {
+      "id": "eval-apps-windows-835",
+      "action_id": "apps-windows-835",
+      "domain": "apps-windows",
+      "phrase": "покажи установленные приложения Store",
+      "when": "пакеты Store",
+      "tier": "T0",
+      "risk": "read",
+      "status": "v1",
+      "human": "может",
+      "policy": {
+        "ask": false,
+        "refuse": false,
+        "telegram": false,
+        "audit_log": true,
+        "stoppable": true,
+        "backup_before": false,
+        "show_payload": false
+      },
+      "then": [
+        "UIA-состояние изменилось как ожидалось",
+        "OCR подтверждает результат"
       ],
       "must_not": [
         "молча провалиться",

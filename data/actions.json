@@ -13402,5 +13402,21 @@
   "human_code": "c",
   "status": "v1",
   "notes": "несколько вхождений — только со словом «все»"
+ },
+ {
+  "id": "apps-windows-835",
+  "domain": "apps-windows",
+  "verb": "показать",
+  "object": "пакеты Store",
+  "example": "покажи установленные приложения Store",
+  "implementation": [
+   "Get-AppxPackage (текущий пользователь)"
+  ],
+  "risk": "read",
+  "tier": "T0",
+  "human": "может",
+  "human_code": "c",
+  "status": "v1",
+  "notes": "только инвентаризация; не делает вывод, что приложение лишнее; ничего не удаляет"
  }
 ]
