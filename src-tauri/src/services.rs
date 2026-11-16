@@ -291,7 +291,7 @@ const NOTES: &[Note] = &[
     },
     Note {
         name: "dnscache",
-        what: "кэш имён DNS",
+        what: "кэш имён DNS: помнит адреса по именам",
         criticality: Criticality::Important,
         disable: Disable::Never,
         because: "без кэша сеть работает медленно и с ошибками имён",
@@ -515,7 +515,7 @@ const NOTES: &[Note] = &[
     },
     Note {
         name: "startmenuexperiencehost",
-        what: "меню Пуск",
+        what: "меню Пуск, его поиск и список программ",
         criticality: Criticality::Optional,
         disable: Disable::Never,
         because: "остановка просто перезапускает меню",
@@ -732,7 +732,7 @@ const NOTES: &[Note] = &[
     },
     Note {
         name: "fax",
-        what: "факс",
+        what: "служба факса: приём и отправка по телефонной линии",
         criticality: Criticality::Optional,
         disable: Disable::Yes,
         because: "нужен единицам, остальным только занимает место",
@@ -956,7 +956,7 @@ const NOTES: &[Note] = &[
     },
     Note {
         name: "winrar",
-        what: "WinRAR",
+        what: "WinRAR: архиватор и файловый менеджер",
         criticality: Criticality::Optional,
         disable: Disable::Yes,
         because: "это программа: открывается на время работы",
@@ -1040,7 +1040,7 @@ const NOTES: &[Note] = &[
     },
     Note {
         name: "powerpnt",
-        what: "Microsoft PowerPoint",
+        what: "Microsoft PowerPoint: презентации",
         criticality: Criticality::Optional,
         disable: Disable::Yes,
         because: "это программа",
@@ -1054,14 +1054,14 @@ const NOTES: &[Note] = &[
     },
     Note {
         name: "notepad",
-        what: "Блокнот",
+        what: "Блокнот: простой текстовый редактор Windows",
         criticality: Criticality::Optional,
         disable: Disable::Yes,
         because: "это программа",
     },
     Note {
         name: "mspaint",
-        what: "Paint",
+        what: "Paint: простой редактор рисунков Windows",
         criticality: Criticality::Optional,
         disable: Disable::Yes,
         because: "это программа",
@@ -1089,7 +1089,7 @@ const NOTES: &[Note] = &[
     },
     Note {
         name: "cmd",
-        what: "командная строка",
+        what: "командная строка Windows",
         criticality: Criticality::Optional,
         disable: Disable::Yes,
         because: "это программа",
@@ -1131,7 +1131,7 @@ const NOTES: &[Note] = &[
     },
     Note {
         name: "node",
-        what: "Node.js",
+        what: "Node.js: среда выполнения JavaScript",
         criticality: Criticality::Optional,
         disable: Disable::Yes,
         because: "это программа: часто это сборка или dev-сервер",

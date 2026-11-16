@@ -7350,9 +7350,19 @@ mod tests {
             "{}",
             found.stdout_tail
         );
-        // Имени нет в таблице — так и сказано, без догадок «это безопасно».
+        // Имя есть в базе — значит ответ называет критичность и отключаемость, а не только факты.
         assert!(
-            found.reason.contains("в моей таблице нет"),
+            found.reason.contains("критичность: важно для работы"),
+            "{}",
+            found.reason
+        );
+        assert!(
+            found.reason.contains("отключить: нельзя"),
+            "{}",
+            found.reason
+        );
+        assert!(
+            found.reason.contains("с ошибками имён"),
             "{}",
             found.reason
         );
