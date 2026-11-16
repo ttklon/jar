@@ -70,7 +70,7 @@ jobs:
       # Бандлер Tauri скачивает себе NSIS с внешнего хранилища, и оно регулярно
       # отвечает 504. Это не наш код, но из-за него релиз «красный» через раз —
       # поэтому три попытки, и только на 504: остальные ошибки повторять незачем.
-      - name: Build installer (NSIS)
+      - name: Build installers (NSIS + MSI)
         id: bundle
         continue-on-error: true
         shell: bash
@@ -108,7 +108,58 @@ jobs:
       - name: Installer artifacts
         if: steps.bundle.outcome == 'success'
         shell: bash
-        run: ls -la src-tauri/target/release/bundle/nsis
+        run: |
+          ls -la src-tauri/target/release/bundle/nsis
+          ls -la src-tauri/target/release/bundle/msi
+
+      # Портативная сборка — тот же exe, но без установки: положил в папку и запустил.
+      # Чего она НЕ делает, сказано в файле рядом: WebView2 нужен системный, а данные
+      # всё равно живут в %LOCALAPPDATA%, поэтому «портативная» не значит «ничего не
+      # оставляет на диске».
+      - name: Portable package (zip)
+        if: steps.bundle.outcome == 'success'
+        shell: bash
+        run: |
+          mkdir -p dist/portable
+          cp src-tauri/target/release/zshelper.exe dist/portable/
+          # Текст читай-файла лежит в репозитории: его видно в ревью и не надо
+          # экранировать в YAML.
+          cp scripts/portable-readme.txt dist/portable/ЧИТАЙ.txt
+          cd dist/portable
+          powershell -NoProfile -Command "Compress-Archive -Path 'zshelper.exe','ЧИТАЙ.txt' -DestinationPath '../zshelper-portable.zip' -Force"
+          cd ../..
+          ls -la dist
+
+      # Контрольные суммы печатаются в сводку прогона: скачанный файл можно сверить,
+      # не доверяя ни каналу, ни дате.
+      - name: Checksums
+        if: steps.bundle.outcome == 'success'
+        shell: bash
+        run: |
+          {
+            echo "### Установщики и портативная сборка"
+            echo ""
+            echo "| файл | sha256 |"
+            echo "| --- | --- |"
+            for file in src-tauri/target/release/bundle/nsis/*.exe \
+                        src-tauri/target/release/bundle/msi/*.msi \
+                        dist/zshelper-portable.zip; do
+              [ -f "$file" ] || continue
+              echo "| \`$(basename "$file")\` | \`$(sha256sum "$file" | cut -d' ' -f1)\` |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload installers and portable
+        if: steps.bundle.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: zshelper-windows
+          path: |
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/msi/*.msi
+            dist/zshelper-portable.zip
+          if-no-files-found: error
+          retention-days: 14
 
   rust:
     name: core (cargo check + tests, Windows)
