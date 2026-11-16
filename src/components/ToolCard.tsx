@@ -14,11 +14,12 @@ import {
   Text,
   tokens,
 } from "@fluentui/react-components";
-import { PlayRegular, StopRegular } from "@fluentui/react-icons";
+import { PlayRegular, Speaker2Regular, StopRegular } from "@fluentui/react-icons";
 import type { StepResult, ToolView } from "../ipc";
 import { cancelTool, confirmTool, isTauri, runTool } from "../ipc";
 import { RISK_LABEL, hands } from "../i18n/ru";
 import { evidenceText } from "../lib/evidence";
+import { speak } from "../lib/voice";
 import { RiskBadge } from "./RiskBadge";
 
 const useStyles = makeStyles({
@@ -70,6 +71,7 @@ const useStyles = makeStyles({
 
 export function ToolCard({ tool }: { tool: ToolView }) {
   const styles = useStyles();
+  const [speechStatus, setSpeechStatus] = useState<string | null>(null);
   // Прошлые удачные параметры подставляются сразу: путь к папке обычно один и тот же,
   // а вводить его заново каждый раз — работа, которую приложение уже сделало.
   const [values, setValues] = useState<Record<string, string>>(() => tool.last_params ?? {});
@@ -205,7 +207,29 @@ export function ToolCard({ tool }: { tool: ToolView }) {
             {hands.evidence}: {evidenceText(result.evidence)}
           </Text>
           {result.reason && result.reason !== "готово" ? (
-            <Text className={styles.muted}>{result.reason}</Text>
+            <div className={styles.actions}>
+              <Text className={styles.muted}>{result.reason}</Text>
+              {tool.registry === "processes-services|показать|топ по нагрузке" ? (
+                <Button
+                  appearance="subtle"
+                  icon={<Speaker2Regular />}
+                  aria-label="Прослушать пересказ отчёта"
+                  title="Озвучить браузером или службой Windows; голосовой движок может передавать текст службе системы"
+                  onClick={() =>
+                    setSpeechStatus(
+                      speak(result.reason ?? "")
+                        ? "Системный синтез речи запущен."
+                        : "В этой среде синтез речи недоступен или не установлен голос.",
+                    )
+                  }
+                >
+                  Озвучить
+                </Button>
+              ) : null}
+              {tool.registry === "processes-services|показать|топ по нагрузке" && speechStatus ? (
+                <Text role="status" className={styles.muted}>{speechStatus}</Text>
+              ) : null}
+            </div>
           ) : null}
           <pre className={styles.output}>
             {result.stdout_tail.trim() || result.stderr_tail.trim() || hands.empty_output}
