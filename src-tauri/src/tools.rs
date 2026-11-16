@@ -122,7 +122,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "processes-services|отключить|автозапуск" => {
             autostart_off(registry, params, cancel)
         }
-        "processes-services|отключить|службу" => service_off(registry, params, cancel),
+        "processes-services|отключить|службу" => {
+            service_off(registry, params, cancel)
+        }
         "processes-services|включить|службу" => service_on(registry, params, cancel),
         "storage-backup|проверить|свободное место" => {
             simple(registry, FREE_SPACE, 30, cancel)
@@ -1553,12 +1555,12 @@ fn service_on(
     let wanted = match wanted.as_str() {
         "" | "manual" | "вручную" => "Manual",
         "auto" | "automatic" | "авто" => "Auto",
-        other => {
-            return StepResult::failed(
-                registry,
-                format!("тип запуска «{other}» я не знаю — умею auto (с Windows) и manual (по требованию)"),
-            )
-        }
+        other => return StepResult::failed(
+            registry,
+            format!(
+                "тип запуска «{other}» я не знаю — умею auto (с Windows) и manual (по требованию)"
+            ),
+        ),
     };
 
     let mut result = run_script(
@@ -8790,7 +8792,10 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
     #[test]
     fn a_missing_service_is_refused_by_name() {
         let mut params = BTreeMap::new();
-        params.insert("service".to_string(), "zshelper-такой-службы-нет".to_string());
+        params.insert(
+            "service".to_string(),
+            "zshelper-такой-службы-нет".to_string(),
+        );
         let refused = run(
             "processes-services|отключить|службу",
             &params,
@@ -8802,7 +8807,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
             "{}",
             refused.reason
         );
-        assert!(refused.reason.contains("ничего не менял"), "{}", refused.reason);
+        assert!(
+            refused.reason.contains("ничего не менял"),
+            "{}",
+            refused.reason
+        );
     }
 
     /// Ядро системы не убирают из автозапуска: это не программа, а часть Windows.
