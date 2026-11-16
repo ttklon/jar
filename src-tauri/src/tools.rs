@@ -116,9 +116,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|проверить|дубликаты по хэшу" => {
             duplicates(registry, params, cancel)
         }
-        "processes-services|показать|топ по нагрузке" => {
-            simple(registry, TOP_PROCESSES, 30, cancel)
-        }
+        "processes-services|показать|топ по нагрузке" => top_processes(registry, cancel),
         "storage-backup|проверить|свободное место" => {
             simple(registry, FREE_SPACE, 30, cancel)
         }
@@ -999,6 +997,68 @@ fn explain_reason(name: &str, found: usize) -> String {
     };
     reason.push_str(&format!("; найдено записей: {found}, подробности ниже"));
     reason
+}
+
+/// Разобрать строки отчёта «топ по памяти»: имя и вес.
+///
+/// Разбор отдельной функцией — чтобы формат проверялся тестом, а не глазами: если скрипт
+/// поменяет вид строки, тест скажет об этом раньше человека.
+fn parse_top(tail: &str) -> Vec<(String, String)> {
+    tail.lines()
+        .filter_map(|line| {
+            let line = line.trim();
+            let cut = line.find(" (pid ")?;
+            let name = line[..cut].trim().to_string();
+            if name.is_empty() {
+                return None;
+            }
+            let weight = line[cut..]
+                .rsplit(": ")
+                .next()
+                .unwrap_or("")
+                .trim()
+                .to_string();
+            Some((name, weight))
+        })
+        .collect()
+}
+
+/// Пересказ отчёта «топ по памяти» словами: кто самый тяжёлый и что это вообще за программа.
+///
+/// Чего здесь нет и не будет: слова «тормозит». Отчёт меряет **память**, а не процессорное время,
+/// и «тяжёлый» здесь значит именно её — приложение, занявшее гигабайт кэша, может при этом ничего
+/// не нагружать. Сказать иначе значило бы свалить вину на невиновного.
+fn top_summary(rows: &[(String, String)]) -> String {
+    let Some((name, weight)) = rows.first() else {
+        return "процессы прочитать не удалось — список пуст, и выдумывать «ничего не грузит» я не буду"
+            .to_string();
+    };
+    let known = rows
+        .iter()
+        .filter(|(name, _)| services::lookup(name).is_some())
+        .count();
+    let what = match services::lookup(name) {
+        Some(note) => format!("это {} ({})", note.what, note.criticality.label()),
+        None => "в базе его нет — что это, по имени не скажу".to_string(),
+    };
+    format!(
+        "топ по памяти: {} процессов (потолок 5); самый тяжёлый — {name}: {weight}, {what}; опознано в базе: {known} из {}; это память, а не процессорное время",
+        rows.len(),
+        rows.len()
+    )
+}
+
+/// Топ процессов по памяти с пересказом, который называет виновника и его роль.
+fn top_processes(registry: &str, cancel: &AtomicBool) -> StepResult {
+    let started = Instant::now();
+    let mut result = simple(registry, TOP_PROCESSES, 30, cancel);
+    if !result.ok {
+        return result;
+    }
+    let rows = parse_top(&result.stdout_tail);
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    result.reason = top_summary(&rows);
+    result
 }
 
 /// Найти процессы, к которым есть вопросы.
@@ -8084,6 +8144,49 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert_eq!(groups[0].paths.len(), 3);
         assert_eq!(groups[1].paths, vec!["C:\\b\\x.bin", "C:\\b\\y.bin"]);
         assert_eq!(groups[1].wasted, 300);
+    }
+
+    /// Строки отчёта разбираются по имени и весу, а мусор пропускается.
+    #[test]
+    fn top_rows_are_parsed_by_name_and_weight() {
+        let tail = "ZSHELPER-OK processes=3\n\
+chrome (pid 1012): 812 МБ\n\
+zshelper (pid 44): 120 МБ\n\
+строка без pid\n";
+        let rows = parse_top(tail);
+        assert_eq!(rows.len(), 2);
+        assert_eq!(rows[0].0, "chrome");
+        assert_eq!(rows[0].1, "812 МБ");
+        assert_eq!(rows[1].0, "zshelper");
+    }
+
+    /// Пересказ называет виновника, его роль и то, что мерилось именно памятью.
+    #[test]
+    fn the_top_report_names_the_heaviest_and_what_it_is() {
+        let rows = vec![
+            ("chrome".to_string(), "812 МБ".to_string()),
+            ("чужое-имя".to_string(), "20 МБ".to_string()),
+        ];
+        let text = top_summary(&rows);
+        assert!(text.contains("самый тяжёлый — chrome: 812 МБ"), "{text}");
+        assert!(text.contains("браузер Google Chrome"), "{text}");
+        assert!(text.contains("опознано в базе: 1 из 2"), "{text}");
+        // Память — не процессор: это сказано, чтобы «тяжёлый» не читали как «тормозит».
+        assert!(text.contains("это память, а не процессорное время"), "{text}");
+        assert!(!text.contains("тормоз"), "{text}");
+
+        let unknown = vec![("чужое-имя".to_string(), "20 МБ".to_string())];
+        let text = top_summary(&unknown);
+        assert!(text.contains("в базе его нет"), "{text}");
+        assert!(text.contains("опознано в базе: 0 из 1"), "{text}");
+    }
+
+    /// Пустой список — это «не прочиталось», а не «ничего не грузит».
+    #[test]
+    fn an_empty_top_report_does_not_claim_a_clean_machine() {
+        let text = top_summary(&[]);
+        assert!(text.contains("прочитать не удалось"), "{text}");
+        assert!(!text.contains("ничего не грузит"));
     }
 
     /// Ответ «что это за служба» называет и знание, и его границу.
