@@ -108,6 +108,9 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "apps-windows|показать|установленные программы" => {
             simple(registry, INSTALLED_APPS, 60, cancel)
         }
+        "apps-windows|показать|пакеты Store" => {
+            simple(registry, STORE_PACKAGES, 60, cancel)
+        }
         "files|удалить|в корзину" => recycle(registry, params, cancel),
         "files|проверить|размеры и место" => {
             folder_sizes(registry, params, cancel)
@@ -3875,6 +3878,17 @@ $apps = @(Get-ItemProperty $keys -ErrorAction SilentlyContinue |
 Write-Output ('ZSHELPER-OK apps={0}' -f $apps.Count)
 $apps | ForEach-Object { Write-Output ('{0} — {1}' -f $_.DisplayName, $_.DisplayVersion) }"#;
 
+/// Инвентаризация пакетов текущего пользователя. Это не список «мусора»: без знания
+/// привычек человека пакет нельзя безопасно объявить ненужным. Ничего не удаляет.
+const STORE_PACKAGES: &str = r#"$ErrorActionPreference = 'Stop'
+$packages = @(Get-AppxPackage -ErrorAction Stop | Sort-Object Name | Select-Object -First 60)
+Write-Output ('ZSHELPER-OK packages={0} (показаны максимум 60)' -f $packages.Count)
+if ($packages.Count -eq 0) { Write-Output 'пакетов текущего пользователя не найдено' }
+$packages | ForEach-Object {
+  Write-Output ('{0} — версия {1}; framework={2}; ресурсный={3}' -f $_.Name, $_.Version, $_.IsFramework, $_.IsResourcePackage)
+}
+Write-Output 'Только текущий пользователь; системные и подготовленные для новых пользователей пакеты этим списком не покрыты. Это инвентаризация, не рекомендация удалить.'"#;
+
 const STARTUP: &str = r#"$items = @(Get-CimInstance Win32_StartupCommand -ErrorAction SilentlyContinue |
   Select-Object -First 20)
 Write-Output ('ZSHELPER-OK autostart={0}' -f $items.Count)
@@ -6791,6 +6805,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
             "apps-windows|показать|установленные программы",
             INSTALLED_APPS,
         ),
+        ("apps-windows|показать|пакеты Store", STORE_PACKAGES),
         ("monitoring-triage|найти|причину тормозов", SNAPSHOT),
         ("music-production|открыть|проект в DAW", OPEN_DAW),
         ("chat-social|найти|файл в чате", FIND_CHAT_FILE),
