@@ -196,6 +196,7 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "video|замерить|качество сжатия (SSIM)" => {
             measure_ssim(registry, params, cancel)
         }
+        "video|добавить|субтитры" => add_subtitles(registry, params, cancel),
         "apps-windows|нажать|кнопку" => press_element(registry, params),
         "apps-windows|ввести|текст" => type_into_field(registry, params, cancel),
         _ => StepResult::failed(registry, "инструмент объявлен, но не реализован"),
@@ -4233,6 +4234,103 @@ $ssimText = [string]::Format([System.Globalization.CultureInfo]::InvariantCultur
 Write-Output ('ZSHELPER-OK ssim=' + $ssimText + ' width=' + $widthA + ' height=' + $heightA + ' size_a=' + $sizeA + ' size_b=' + $sizeB + ' durations=' + $durationText + ' durations_known=' + $durationsKnown)
 "#;
 
+const SUBTITLES_INTO_VIDEO: &str = r#"$ErrorActionPreference = 'Stop'
+$path = $env:ZS_PATH
+$subs = $env:ZS_SUBS
+$out = $env:ZS_OUT
+$codec = $env:ZS_SUB_CODEC
+if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+  Write-Output 'ZSHELPER-FAILED: нет видеофайла — проверьте путь'
+  exit 2
+}
+if (-not (Test-Path -LiteralPath $subs -PathType Leaf)) {
+  Write-Output 'ZSHELPER-FAILED: нет файла субтитров — проверьте путь'
+  exit 3
+}
+if (-not $out) {
+  Write-Output 'ZSHELPER-FAILED: не назван файл, куда сохранить результат'
+  exit 4
+}
+if (Test-Path -LiteralPath $out) {
+  Write-Output ('ZSHELPER-FAILED: «' + $out + '» уже есть — перезаписывать не буду; назовите другое имя')
+  exit 5
+}
+$tool = Get-Command ffmpeg -ErrorAction SilentlyContinue
+if (-not $tool) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не установлен — кладёт дорожку он; поставьте его (winget install Gyan.FFmpeg) и повторите; сам ставить не буду'
+  exit 6
+}
+$probe = Get-Command ffprobe -ErrorAction SilentlyContinue
+if (-not $probe) {
+  Write-Output 'ZSHELPER-FAILED: ffprobe не установлен — без него я не проверю, появилась ли дорожка, а обещать вслепую не буду; поставьте его (winget install Gyan.FFmpeg)'
+  exit 7
+}
+$subsBefore = @(& $probe.Source -v error -select_streams s -show_entries stream=index -of csv=p=0 $path 2>$null | Where-Object { $_ -ne '' })
+$sourceDuration = 0.0
+$durationKnown = 0
+$durationText = (& $probe.Source -v error -show_entries format=duration -of csv=p=0 $path 2>$null | Select-Object -First 1)
+if ($durationText) {
+  if ([double]::TryParse([string]$durationText, [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$sourceDuration)) { $durationKnown = 1 }
+}
+$arguments = @('-hide_banner', '-loglevel', 'error', '-y', '-i', $path, '-i', $subs, '-map', '0:v', '-map', '0:a?', '-map', '0:s?', '-map', '1:0', '-c', 'copy', '-c:s', $codec, $out)
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.UseShellExecute = $false
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError = $true
+$psi.FileName = $tool.Source
+$psi.Arguments = ($arguments -join ' ')
+$proc = New-Object System.Diagnostics.Process
+$proc.StartInfo = $psi
+$code = -1
+$timedOut = 0
+$err = ''
+try {
+  [void]$proc.Start()
+  $outTask = $proc.StandardOutput.ReadToEndAsync()
+  $errTask = $proc.StandardError.ReadToEndAsync()
+  if ($proc.WaitForExit(600000)) { $code = $proc.ExitCode } else { $timedOut = 1; try { $proc.Kill() } catch { } }
+  if ($errTask.Wait(10000)) { $err = $errTask.Result }
+  if ($outTask.Wait(10000)) { [void]$outTask.Result }
+} catch {
+  Write-Output ('ZSHELPER-FAILED: не удалось запустить ffmpeg — ' + $_.Exception.Message)
+  exit 8
+}
+if ($timedOut -eq 1) {
+  Write-Output 'ZSHELPER-FAILED: десяти минут не хватило — прогон остановлен, файл мог остаться недописанным'
+  exit 9
+}
+if ($code -ne 0) {
+  $tail = @($err -split "`r?`n" | Where-Object { $_ -ne '' } | Select-Object -Last 3) -join ' | '
+  Write-Output ('ZSHELPER-FAILED: ffmpeg вернул код ' + $code + ' — ' + $tail)
+  exit 10
+}
+$made = Get-Item -LiteralPath $out -ErrorAction SilentlyContinue
+if (-not $made -or $made.Length -le 0) {
+  Write-Output 'ZSHELPER-FAILED: ffmpeg не оставил файла — дорожка не добавлена'
+  exit 11
+}
+$subsAfter = @(& $probe.Source -v error -select_streams s -show_entries stream=index -of csv=p=0 $out 2>$null | Where-Object { $_ -ne '' })
+if ($subsAfter.Count -le $subsBefore.Count) {
+  Write-Output ('ZSHELPER-FAILED: дорожки субтитров в результате не прибавилось — было ' + $subsBefore.Count + ', стало ' + $subsAfter.Count + '; такой файл я за результат не выдам')
+  exit 12
+}
+$outCodec = ''
+$codecLines = @(& $probe.Source -v error -select_streams s -show_entries stream=codec_name -of csv=p=0 $out 2>$null | Where-Object { $_ -ne '' })
+if ($codecLines.Count -gt 0) { $outCodec = [string]$codecLines[$codecLines.Count - 1] }
+$outDuration = 0.0
+$outDurationKnown = 0
+$durationOut = (& $probe.Source -v error -show_entries format=duration -of csv=p=0 $out 2>$null | Select-Object -First 1)
+if ($durationOut) {
+  if ([double]::TryParse([string]$durationOut, [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref]$outDuration) -and $outDuration -ge 0) { $outDurationKnown = 1 }
+}
+$diff = ''
+if ($durationKnown -eq 1 -and $outDurationKnown -eq 1) {
+  $diff = [string][math]::Round([math]::Abs($outDuration - $sourceDuration), 2)
+}
+Write-Output ('ZSHELPER-OK subs_before=' + $subsBefore.Count + ' subs_after=' + $subsAfter.Count + ' sub_codec=' + $outCodec + ' diff=' + $diff + ' duration=' + $(if ($durationKnown -eq 1) { [string][math]::Round($sourceDuration, 2) } else { '' }) + ' size_src=' + (Get-Item -LiteralPath $path).Length + ' size_out=' + $made.Length)
+Write-Output ('ZSHELPER-FILE ' + $out)
+"#;
+
 /// Как читать SSIM: пороги названы числом, а не «выглядит нормально».
 ///
 /// SSIM — объективная метрика похожести кадров, а не оценка «нравится / не нравится». Поэтому
@@ -4362,6 +4460,211 @@ fn measure_ssim(
         "SSIM: {ssim:.4} — {}; {economy}; {shape}, {length}; это объективная похожесть кадров, а не оценка «нравится»",
         ssim_verdict(ssim)
     );
+    result
+}
+
+/// Сколько реплик в файле субтитров: реплика — это строка с «-->» между временами.
+///
+/// Считаем байтами, а не строками: файл может прийти в другой кодировке, и падать на чтении
+/// текста из-за одного непечатного байта рука не должна.
+fn count_cues(bytes: &[u8]) -> usize {
+    bytes.windows(3).filter(|window| *window == b"-->").count()
+}
+
+/// Положить субтитры в видео отдельной дорожкой, не перекодируя картинку.
+///
+/// Что здесь важно:
+///
+///  * **картинка не перекодируется**: видео и звук копируются байтами (`-c copy`), так что
+///    качество то же — это не «почти без потерь», а без них;
+///  * **дорожка проверяется по ffprobe**, а не предполагается: если в результате не стало
+///    больше дорожек субтитров, файл не выдаётся за результат;
+///  * **кодировка называется вслух**: ffmpeg читает UTF-8, а UTF-16 он молча превратит в мусор.
+///    Поэтому UTF-16 — отказ с просьбой пересохранить, а не «вроде вшилось»;
+///  * **пустой файл — отказ с числом**: «реплик: 0» значит, что вшивать нечего;
+///  * **честная оговорка**: субтитры — отдельная дорожка, её надо включить в плеере; кто не умеет —
+///    увидит видео без них, и рука это говорит, а не обещает «субтитры на экране»;
+///  * потолок прогона — 10 минут; результат пишется в журнал отката.
+fn add_subtitles(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let path = clean_path(param(params, "path"));
+    let subs = clean_path(param(params, "subtitles"));
+    let out_param = clean_path(param(params, "output"));
+
+    if path.is_empty() || subs.is_empty() {
+        return StepResult::failed(
+            registry,
+            "нужны два файла: видео и субтитры — без второго класть нечего",
+        );
+    }
+    for file in [&path, &subs] {
+        if !std::path::Path::new(file).is_file() {
+            return StepResult::failed(
+                registry,
+                format!("такого файла нет: {file} — проверьте путь"),
+            );
+        }
+    }
+
+    // Кодировка: ffmpeg ждёт UTF-8, а UTF-16 он прочитает как мусор из нулей и латиницы.
+    let bytes = match std::fs::read(&subs) {
+        Ok(bytes) => bytes,
+        Err(error) => {
+            return StepResult::failed(
+                registry,
+                format!("файл субтитров не читается: {error} — проверьте права и путь"),
+            )
+        }
+    };
+    let utf16 = bytes.starts_with(&[0xFF, 0xFE])
+        || bytes.starts_with(&[0xFE, 0xFF])
+        || (bytes.len() > 4 && bytes.iter().take(512).filter(|byte| **byte == 0).count() > 8);
+    if utf16 {
+        return StepResult::failed(
+            registry,
+            "файл субтитров в UTF-16 — ffmpeg читает только UTF-8 и превратит текст в мусор; пересохраните в UTF-8 и повторите",
+        );
+    }
+    let cues = count_cues(&bytes);
+    if cues == 0 {
+        return StepResult::failed(
+            registry,
+            "реплик: 0 — в файле нет ни одной строки с «-->», вшивать нечего; проверьте, что это SRT, а не пустышка",
+        );
+    }
+
+    let out = if out_param.is_empty() {
+        let source = std::path::Path::new(&path);
+        let stem = source
+            .file_stem()
+            .map(|name| name.to_string_lossy().to_string())
+            .unwrap_or_else(|| "видео".to_string());
+        source
+            .parent()
+            .unwrap_or_else(|| std::path::Path::new("."))
+            .join(format!("{stem} (субтитры).mp4"))
+            .display()
+            .to_string()
+    } else {
+        out_param
+    };
+    let extension = std::path::Path::new(&out)
+        .extension()
+        .map(|ext| ext.to_string_lossy().to_lowercase())
+        .unwrap_or_default();
+    let codec = match extension.as_str() {
+        "mp4" | "m4v" | "mov" => "mov_text",
+        "mkv" => "srt",
+        _ => {
+            return StepResult::failed(
+                registry,
+                format!(
+                    "в «.{extension}» дорожку субтитров не положить — умею mp4/mov (дорожка mov_text) и mkv (дорожка srt); назовите другое имя"
+                ),
+            )
+        }
+    };
+    if std::path::Path::new(&out).exists() {
+        return StepResult::failed(
+            registry,
+            format!("«{out}» уже есть — перезаписывать не буду; назовите другое имя"),
+        );
+    }
+
+    let mut result = run_script(
+        registry,
+        SUBTITLES_INTO_VIDEO,
+        &[
+            ("PATH", path.as_str()),
+            ("SUBS", subs.as_str()),
+            ("OUT", out.as_str()),
+            ("SUB_CODEC", codec),
+        ],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(660),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let field = |name: &str| -> String {
+        result
+            .stdout_tail
+            .split_whitespace()
+            .find_map(|word| word.strip_prefix(name))
+            .unwrap_or("")
+            .to_string()
+    };
+    let before = field("subs_before=").parse::<usize>().unwrap_or_default();
+    let after = field("subs_after=").parse::<usize>().unwrap_or_default();
+    let out_codec = field("sub_codec=");
+    let diff = field("diff=").parse::<f64>().unwrap_or_default();
+    let size_src = field("size_src=").parse::<u64>().unwrap_or_default();
+    let size_out = field("size_out=").parse::<u64>().unwrap_or_default();
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    if after <= before {
+        result.ok = false;
+        result.reason = format!(
+            "дорожек субтитров стало {after}, а было {before} — дорожка не появилась, и за результат я это не выдам"
+        );
+        return result;
+    }
+    if diff > 1.0 {
+        result.ok = false;
+        result.reason = format!(
+            "длительность не сошлась: расхождение {diff} с — что-то потерялось; файл оставлен, но доверять ему нельзя"
+        );
+        return result;
+    }
+    let track = if out_codec.is_empty() {
+        "кодек дорожки ffprobe не назвал".to_string()
+    } else {
+        format!("кодек дорожки: {out_codec} — проверено ffprobe")
+    };
+    let length = if diff.is_empty() {
+        "длительность сверить не удалось (ffprobe не назвал)".to_string()
+    } else {
+        format!("длительность сошлась, расхождение {diff} с")
+    };
+    let weight = if size_src > 0 {
+        let growth = size_out as f64 / size_src as f64;
+        if growth > 1.0 {
+            format!(
+                "файл вырос с {:.1} до {:.1} МБ — это сама дорожка субтитров",
+                size_src as f64 / (1024.0 * 1024.0),
+                size_out as f64 / (1024.0 * 1024.0)
+            )
+        } else {
+            format!(
+                "файл {:.1} МБ, было {:.1} МБ",
+                size_out as f64 / (1024.0 * 1024.0),
+                size_src as f64 / (1024.0 * 1024.0)
+            )
+        }
+    } else {
+        "размер файла прочитать не удалось".to_string()
+    };
+    result.reason = format!(
+        "дорожка субтитров добавлена: реплик: {cues}; дорожек субтитров в файле {after} (было {before}), {track}; {length}; {weight}; видео и звук скопированы без перекодирования — картинка не потеряла ни капли; файл: {out}; субтитры надо включить в плеере: кто этого не умеет, увидит видео без них"
+    );
+    if crate::undo::record_product(&path, &out) {
+        result.reason.push_str(
+            "; записан в журнал отката — «откатить за сессию» уберёт его в корзину, исходник цел",
+        );
+    }
     result
 }
 
@@ -5925,6 +6228,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ("video|извлечь|кадр", GRAB_FRAME),
         ("video|конвертировать|формат/кодек", CONVERT_VIDEO),
         ("video|замерить|качество сжатия (SSIM)", SSIM_OF_TWO),
+        ("video|добавить|субтитры", SUBTITLES_INTO_VIDEO),
         ("apps-windows|запустить|программу", LAUNCH_APP),
     ]
 }
@@ -8022,6 +8326,176 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         );
         // Оба файла целы: замер ничего не трогает.
         assert!(original.exists() && squeezed.exists());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Реплики считаются по строкам с «-->», и это число потом называется вслух.
+    #[test]
+    fn subtitles_count_their_cues() {
+        let srt = "1\n00:00:01,000 --> 00:00:02,000\nПривет\n\n2\n00:00:03,000 --> 00:00:04,000\nПока\n";
+        assert_eq!(count_cues(srt.as_bytes()), 2);
+        assert_eq!(count_cues("не субтитры".as_bytes()), 0);
+        // Одиночная стрелка — не реплика: считаем ровно «-->».
+        assert_eq!(count_cues(b"00:00:01 -> 00:00:02"), 0);
+    }
+
+    /// Пустой файл субтитров — отказ с числом, а не «вшилось» с нулём реплик.
+    #[test]
+    fn subtitles_refuse_a_file_without_cues() {
+        let dir = std::env::temp_dir().join(format!("zshelper-subs-empty-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let video = dir.join("ролик.mp4");
+        let subs = dir.join("пусто.srt");
+        std::fs::write(&video, "не видео".as_bytes()).expect("файл");
+        std::fs::write(&subs, "просто текст без реплик".as_bytes()).expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), video.display().to_string());
+        params.insert("subtitles".to_string(), subs.display().to_string());
+
+        let refused = run("video|добавить|субтитры", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("реплик: 0"), "{}", refused.reason);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// UTF-16 — отказ с просьбой пересохранить: ffmpeg прочитал бы такое как мусор.
+    #[test]
+    fn subtitles_refuse_utf16_text() {
+        let dir = std::env::temp_dir().join(format!("zshelper-subs-utf16-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let video = dir.join("ролик.mp4");
+        let subs = dir.join("utf16.srt");
+        std::fs::write(&video, "не видео".as_bytes()).expect("файл");
+        let mut body: Vec<u8> = vec![0xFF, 0xFE];
+        for byte in "1\n00:00:01,000 --> 00:00:02,000\nПривет\n".as_bytes() {
+            body.push(*byte);
+            body.push(0);
+        }
+        std::fs::write(&subs, &body).expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), video.display().to_string());
+        params.insert("subtitles".to_string(), subs.display().to_string());
+
+        let refused = run("video|добавить|субтитры", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("UTF-16"), "{}", refused.reason);
+        assert!(refused.reason.contains("UTF-8"), "{}", refused.reason);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Контейнер без дорожки субтитров — отказ с тем, что подойдёт, а не пустой файл.
+    #[test]
+    fn subtitles_refuse_a_container_that_holds_no_track() {
+        let dir = std::env::temp_dir().join(format!("zshelper-subs-ext-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let video = dir.join("ролик.mp4");
+        let subs = dir.join("реплики.srt");
+        std::fs::write(&video, "не видео".as_bytes()).expect("файл");
+        std::fs::write(
+            &subs,
+            "1\n00:00:01,000 --> 00:00:02,000\nПривет\n".as_bytes(),
+        )
+        .expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), video.display().to_string());
+        params.insert("subtitles".to_string(), subs.display().to_string());
+        params.insert(
+            "output".to_string(),
+            dir.join("итог.avi").display().to_string(),
+        );
+
+        let refused = run("video|добавить|субтитры", &params, &AtomicBool::new(false));
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains(".avi"), "{}", refused.reason);
+        assert!(refused.reason.contains("mov_text"), "{}", refused.reason);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Живая вставка: дорожка появляется, её видит ffprobe, картинка не перекодирована.
+    #[cfg(windows)]
+    #[test]
+    fn a_live_subtitle_track_is_verified_by_ffprobe() {
+        let ffmpeg = std::process::Command::new("ffmpeg")
+            .arg("-version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false);
+        let dir = std::env::temp_dir().join(format!("zshelper-subs-live-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("папка");
+        let video = dir.join("ролик.mp4");
+        let subs = dir.join("реплики.srt");
+        std::fs::write(
+            &subs,
+            "1\n00:00:00,200 --> 00:00:00,900\nПервая реплика\n\n2\n00:00:01,100 --> 00:00:01,900\nВторая\n".as_bytes(),
+        )
+        .expect("файл");
+
+        let mut params = BTreeMap::new();
+        params.insert("path".to_string(), video.display().to_string());
+        params.insert("subtitles".to_string(), subs.display().to_string());
+
+        if !ffmpeg {
+            std::fs::write(&video, "не видео".as_bytes()).expect("файл");
+            let refused = run("video|добавить|субтитры", &params, &AtomicBool::new(false));
+            assert!(!refused.ok);
+            assert!(refused.reason.contains("ffmpeg"), "{}", refused.reason);
+            let _ = std::fs::remove_dir_all(&dir);
+            return;
+        }
+
+        let made = std::process::Command::new("ffmpeg")
+            .args([
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-f",
+                "lavfi",
+                "-i",
+                "testsrc=size=160x120:rate=10:duration=2",
+                "-c:v",
+                "libx264",
+                "-pix_fmt",
+                "yuv420p",
+            ])
+            .arg(&video)
+            .status()
+            .expect("ffmpeg запускается");
+        assert!(made.success());
+
+        let result = run("video|добавить|субтитры", &params, &AtomicBool::new(false));
+
+        assert!(result.ok, "{}", result.reason);
+        assert!(
+            result.reason.contains("дорожка субтитров добавлена"),
+            "{}",
+            result.reason
+        );
+        assert!(result.reason.contains("реплик: 2"), "{}", result.reason);
+        assert!(
+            result.reason.contains("проверено ffprobe"),
+            "{}",
+            result.reason
+        );
+        assert!(
+            result.reason.contains("без перекодирования"),
+            "{}",
+            result.reason
+        );
+        let out = dir.join("ролик (субтитры).mp4");
+        assert!(out.exists(), "результат рядом: {}", out.display());
+        // Исходник цел, субтитры тоже: рука ничего не трогает.
+        assert!(video.exists() && subs.exists());
         let _ = std::fs::remove_dir_all(&dir);
     }
 
