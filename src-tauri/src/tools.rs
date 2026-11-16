@@ -6832,6 +6832,20 @@ mod tests {
     use crate::registry::Registry;
 
     #[test]
+    fn store_package_inventory_is_bounded_read_only_and_honest_about_scope() {
+        assert!(STORE_PACKAGES.contains("Get-AppxPackage"));
+        assert!(STORE_PACKAGES.contains("Select-Object -First 60"));
+        assert!(STORE_PACKAGES.contains("текущего пользователя"));
+        assert!(STORE_PACKAGES.contains("инвентаризация, не рекомендация удалить"));
+        assert!(!STORE_PACKAGES.contains("Remove-AppxPackage"));
+        assert!(!STORE_PACKAGES.contains("Add-AppxPackage"));
+        assert!(scripts()
+            .iter()
+            .any(|(registry, script)| *registry == "apps-windows|показать|пакеты Store"
+                && *script == STORE_PACKAGES));
+    }
+
+    #[test]
     fn tools_file_parses_and_every_hand_is_described() {
         let tools = all();
         assert!(tools.len() >= 10, "«рук» не должно становиться меньше");
