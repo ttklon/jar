@@ -236,7 +236,7 @@ processes-services|включить|службу|верни службу обр�
 processes-services|настроить|приоритет процесса|дай приоритет этой программе|SetPriorityClass|W|T1|c|v1|
 processes-services|настроить|сродство (affinity)|закрепи игру за ядрами 4-7|SetProcessAffinityMask|W|T2|h|v2|
 processes-services|проанализировать|автозапуск|что стартует при загрузке|Autoruns-категории|R|T0|c|v1|
-processes-services|отключить|автозапуск|убери Steam из автозапуска|реестр + StartupApproved|W|T0|c|v1|откат 1 клик
+processes-services|отключить|автозапуск|убери Steam из автозапуска|реестр HKCU\...\Run + пометка StartupApproved|W|T0|c|v1|HKCU только: общие записи (HKLM) требуют прав администратора и точки восстановления — отказ с причиной; ничего не удаляется, запись остаётся, откат 1 клик
 processes-services|создать|задачу в планировщике|запускай бэкап в 3 ночи|schtasks|W|T1|c|v1|
 processes-services|прочитать|журнал событий|какие ошибки были за сутки|Get-WinEvent|R|T0|c|v1|объём ограничиваем
 processes-services|диагностировать|синий экран|почему был BSOD|дампа анализ|R|T2|c|v2|нужен WinDbg

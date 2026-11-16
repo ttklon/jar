@@ -116,9 +116,14 @@ pub fn run(registry: &str, params: &BTreeMap<String, String>, cancel: &AtomicBoo
         "files|проверить|дубликаты по хэшу" => {
             duplicates(registry, params, cancel)
         }
+<<<<<<< HEAD
         "processes-services|показать|топ по нагрузке" => {
             top_processes(registry, cancel)
         }
+=======
+        "processes-services|показать|топ по нагрузке" => top_processes(registry, cancel),
+        "processes-services|отключить|автозапуск" => autostart_off(registry, params, cancel),
+>>>>>>> 9e500ff (Автозапуск: пометка вместо удаления и откат, который правда откатывает)
         "storage-backup|проверить|свободное место" => {
             simple(registry, FREE_SPACE, 30, cancel)
         }
@@ -1001,6 +1006,62 @@ fn explain_reason(name: &str, found: usize) -> String {
     reason
 }
 
+const AUTOSTART_OFF: &str = r#"$ErrorActionPreference = 'Stop'
+$app = $env:ZS_APP
+if (-not $app) {
+  Write-Output 'ZSHELPER-FAILED: не названо, что убрать из автозапуска'
+  exit 2
+}
+$runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
+$approvedKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run'
+$entries = @()
+try { $props = Get-ItemProperty -LiteralPath $runKey -ErrorAction Stop } catch { $props = $null }
+if ($props) {
+  foreach ($prop in $props.PSObject.Properties) {
+    if ($prop.Name -like 'PS*') { continue }
+    $entries += [pscustomobject]@{ Name = $prop.Name; Command = [string]$prop.Value }
+  }
+}
+if ($entries.Count -eq 0) {
+  Write-Output 'ZSHELPER-FAILED: в автозапуске этого пользователя нет ни одной записи — убирать нечего; общие записи (HKLM) я не трогаю: для них нужны права администратора и точка восстановления, а это отдельное дело'
+  exit 3
+}
+$match = @($entries | Where-Object { $_.Name -eq $app -or $_.Name.ToLower() -eq $app.ToLower() })
+if ($match.Count -eq 0) {
+  $names = (($entries | ForEach-Object { $_.Name }) -join ', ')
+  Write-Output ('ZSHELPER-FAILED: записи «' + $app + '» в автозапуске нет — просмотрено записей: ' + $entries.Count + ' (' + $names + '); ничего не менял')
+  exit 4
+}
+if ($match.Count -gt 1) {
+  Write-Output ('ZSHELPER-FAILED: под «' + $app + '» подходит записей: ' + $match.Count + ' — назовите точнее; ничего не менял')
+  exit 5
+}
+$name = [string]$match[0].Name
+$previous = ''
+try {
+  $existing = (Get-ItemProperty -LiteralPath $approvedKey -Name $name -ErrorAction Stop).$name
+  if ($existing -is [byte[]]) { $previous = (($existing | ForEach-Object { $_.ToString('x2') }) -join '') }
+} catch { }
+if ($previous -and $previous.StartsWith('03')) {
+  Write-Output ('ZSHELPER-FAILED: «' + $name + '» уже помечен отключённым — второй раз отключать нечего; ничего не менял')
+  exit 6
+}
+$disabled = [byte[]](3,0,0,0,0,0,0,0,0,0,0,0)
+New-Item -Path $approvedKey -Force | Out-Null
+Set-ItemProperty -LiteralPath $approvedKey -Name $name -Value $disabled -Type Binary -Force
+$now = (Get-ItemProperty -LiteralPath $approvedKey -Name $name -ErrorAction SilentlyContinue).$name
+if (-not ($now -is [byte[]]) -or $now[0] -ne 3) {
+  Write-Output 'ZSHELPER-FAILED: пометка не записалась — автозапуск остался как был, и делать вид, что отключил, я не буду'
+  exit 7
+}
+$previousText = 'absent'
+if ($previous) { $previousText = $previous }
+Write-Output ('ZSHELPER-OK entries=' + $entries.Count)
+Write-Output ('ZSHELPER-NAME ' + $name)
+Write-Output ('ZSHELPER-COMMAND ' + [string]$match[0].Command)
+Write-Output ('ZSHELPER-PREVIOUS ' + $previousText)
+"#;
+
 /// Разобрать строки отчёта «топ по памяти»: имя и вес.
 ///
 /// Разбор отдельной функцией — чтобы формат проверялся тестом, а не глазами: если скрипт
@@ -1060,6 +1121,114 @@ fn top_processes(registry: &str, cancel: &AtomicBool) -> StepResult {
     let rows = parse_top(&result.stdout_tail);
     result.duration_ms = started.elapsed().as_millis() as u64;
     result.reason = top_summary(&rows);
+    result
+}
+
+/// Убрать программу из автозапуска: пометить отключённой так, как это делает Диспетчер задач.
+///
+/// Что здесь важно:
+///
+///  * **ничего не удаляется.** Запись `Run` остаётся на месте, а в `StartupApproved` ставится
+///    пометка «отключено» — то же самое, что делает Диспетчер задач. Поэтому вернуть можно,
+///    и вернуть умеет «откатить за сессию»: прежняя пометка хранится в записи журнала;
+///  * **состояние проверяется чтением обратно**, а не словом «записалось»: сравнили байты —
+///    только это и есть доказательство;
+///  * **ядро системы не трогается.** Если имя совпадает с записью базы, помеченной как ядро
+///    (`lsass`, `csrss`), — отказ: такие вещи не «убирают из автозапуска», их не отключают вовсе;
+///  * **общие записи (HKLM) — отказ с причиной**: там нужны права администратора и точка
+///    восстановления, и обещать это одной кнопкой было бы неправдой;
+///  * **что не проверено, то названо вслух**: пометку читает Проводник при входе, поэтому
+///    «Windows её пропустит» проверяется перезагрузкой, и рука это говорит;
+///  * потолок прогона — минута: работа с реестром не бывает долгой, а зависание оболочки
+///    не должно держать приложение.
+fn autostart_off(
+    registry: &str,
+    params: &BTreeMap<String, String>,
+    cancel: &AtomicBool,
+) -> StepResult {
+    let started = Instant::now();
+    let app = param(params, "app").trim().to_string();
+    if app.is_empty() {
+        return StepResult::failed(registry, "не названо, что убрать из автозапуска");
+    }
+    // Ядро системы не отключают — ни в автозапуске, ни где-либо ещё.
+    if let Some(note) = services::lookup(&app) {
+        if note.criticality == services::Criticality::Core {
+            return StepResult::failed(
+                registry,
+                format!(
+                    "«{app}» — {}: это не автозапуск программы, а часть системы, и её я не трогаю",
+                    note.what
+                ),
+            );
+        }
+    }
+
+    let mut result = run_script(
+        registry,
+        AUTOSTART_OFF,
+        &[("APP", app.as_str())],
+        Expectation::StdoutMarker("ZSHELPER-OK"),
+        Duration::from_secs(60),
+        cancel,
+    );
+    if !result.ok {
+        if let Some(line) = result
+            .stdout_tail
+            .lines()
+            .find(|line| line.contains("ZSHELPER-FAILED"))
+        {
+            result.reason = line.replace("ZSHELPER-FAILED:", "").trim().to_string();
+        }
+        return result;
+    }
+
+    let line_value = |prefix: &str| -> String {
+        result
+            .stdout_tail
+            .lines()
+            .find_map(|line| line.strip_prefix(prefix))
+            .unwrap_or("")
+            .trim()
+            .to_string()
+    };
+    let entries = line_value("ZSHELPER-OK entries=")
+        .parse::<usize>()
+        .unwrap_or_default();
+    let name = line_value("ZSHELPER-NAME ");
+    let command = line_value("ZSHELPER-COMMAND ");
+    let previous = line_value("ZSHELPER-PREVIOUS ");
+    if name.is_empty() {
+        result.ok = false;
+        result.reason =
+            "оболочка не назвала, что именно отключила — за результат это не выдам".to_string();
+        return result;
+    }
+
+    let key = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run";
+    let recorded = crate::undo::record_autostart(&crate::undo::autostart_path(key, &name), &previous);
+
+    result.duration_ms = started.elapsed().as_millis() as u64;
+    let what = match services::lookup(&name) {
+        Some(note) => format!(" — {}", note.what),
+        None => String::new(),
+    };
+    let undo_note = match (recorded, previous.as_str()) {
+        (true, "absent") => {
+            "; «откатить за сессию» снимет пометку: прежней не было, и вернуть надо ровно это"
+                .to_string()
+        }
+        (true, _) => format!(
+            "; «откатить за сессию» вернёт прежнюю пометку ({previous}) — это и есть откат в один щелчок"
+        ),
+        (false, _) => {
+            "; в журнал отката не записалось: автоматически вернуть не получится — снимите пометку в Диспетчере задач"
+                .to_string()
+        }
+    };
+    result.reason = format!(
+        "автозапуск отключён: «{name}»{what} ({command}); пометка «отключено» записана в StartupApproved и проверена чтением обратно — так же помечает Диспетчер задач; записей в автозапуске просмотрено: {entries}; сама запись не удалена{undo_note}; что Проводник её пропустит при входе, станет видно после перезагрузки — этого я проверить не могу"
+    );
     result
 }
 
@@ -6225,6 +6394,7 @@ pub fn scripts() -> Vec<(&'static str, &'static str)> {
         ),
         ("files|проверить|дубликаты по хэшу", DUPLICATES),
         ("processes-services|показать|топ по нагрузке", TOP_PROCESSES),
+        ("processes-services|отключить|автозапуск", AUTOSTART_OFF),
         ("processes-services|проанализировать|автозапуск", STARTUP),
         ("storage-backup|проверить|свободное место", FREE_SPACE),
         ("storage-backup|проверить|SMART диска", SMART),
@@ -6516,6 +6686,7 @@ mod tests {
             |path| std::path::Path::new(path).exists(),
             |from, to| std::fs::rename(from, to).map_err(|error| error.to_string()),
             recycle_path,
+            |_| Ok(()),
         );
 
         assert_eq!(report.undone, 1, "{report:?}");
@@ -8146,6 +8317,103 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
         assert_eq!(groups[0].paths.len(), 3);
         assert_eq!(groups[1].paths, vec!["C:\\b\\x.bin", "C:\\b\\y.bin"]);
         assert_eq!(groups[1].wasted, 300);
+    }
+
+    /// Ядро системы не убирают из автозапуска: это не программа, а часть Windows.
+    #[test]
+    fn autostart_refuses_the_core_of_the_system() {
+        let mut params = BTreeMap::new();
+        params.insert("app".to_string(), "lsass".to_string());
+
+        let refused = run(
+            "processes-services|отключить|автозапуск",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("часть системы"), "{}", refused.reason);
+        assert!(refused.reason.contains("не трогаю"), "{}", refused.reason);
+    }
+
+    /// Пустое имя — отказ диспетчера до запуска, без похода в реестр.
+    #[test]
+    fn autostart_needs_a_name() {
+        let refused = run(
+            "processes-services|отключить|автозапуск",
+            &BTreeMap::new(),
+            &AtomicBool::new(false),
+        );
+        assert!(!refused.ok);
+        assert!(refused.reason.contains("не задан параметр"), "{}", refused.reason);
+    }
+
+    /// Живая проверка: пометка ставится, читается обратно и второй раз не ставится.
+    ///
+    /// Тест заводит собственную запись `Run` с явным именем, чтобы не трогать чужой
+    /// автозапуск, и убирает за собой оба значения.
+    #[cfg(windows)]
+    #[test]
+    fn a_live_autostart_mark_is_written_and_verified() {
+        let run_key = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+        let approved_key =
+            "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run";
+        let name = "ZShelper Self Test";
+        let script = format!(
+            "New-ItemProperty -Path '{run_key}' -Name '{name}' -Value 'cmd /c exit' -PropertyType String -Force | Out-Null"
+        );
+        let prepared = std::process::Command::new("powershell.exe")
+            .args(["-NoProfile", "-NonInteractive", "-Command", &script])
+            .status()
+            .map(|status| status.success())
+            .unwrap_or(false);
+        if !prepared {
+            return;
+        }
+
+        let mut params = BTreeMap::new();
+        params.insert("app".to_string(), "zshelper self test".to_string());
+        let off = run(
+            "processes-services|отключить|автозапуск",
+            &params,
+            &AtomicBool::new(false),
+        );
+
+        // Уберём за собой в любом случае: тест не должен оставлять следов в автозапуске.
+        let cleanup = "Remove-ItemProperty -Path '{RUN}' -Name 'ZShelper Self Test' -ErrorAction SilentlyContinue; Remove-ItemProperty -Path '{APPROVED}' -Name 'ZShelper Self Test' -ErrorAction SilentlyContinue";
+        let cleanup = cleanup
+            .replace("{RUN}", run_key)
+            .replace("{APPROVED}", approved_key);
+        let _ = std::process::Command::new("powershell.exe")
+            .args(["-NoProfile", "-NonInteractive", "-Command", &cleanup])
+            .status();
+
+        assert!(off.ok, "{}", off.reason);
+        assert!(off.reason.contains("автозапуск отключён"), "{}", off.reason);
+        assert!(
+            off.reason.contains("проверена чтением обратно"),
+            "{}",
+            off.reason
+        );
+        assert!(
+            off.reason.contains("записей в автозапуске просмотрено:"),
+            "{}",
+            off.reason
+        );
+        // Что будет после входа в систему — не проверено, и это сказано.
+        assert!(
+            off.reason.contains("после перезагрузки"),
+            "{}",
+            off.reason
+        );
+        // В тестах журнал отката может быть не открыт: тогда честно сказано, что вернуть
+        // автоматически не выйдет. В приложении эта ветка другая — и обе говорят правду.
+        assert!(
+            off.reason.contains("«откатить за сессию»")
+                || off.reason.contains("в журнал отката не записалось"),
+            "{}",
+            off.reason
+        );
     }
 
     /// Строки отчёта разбираются по имени и весу, а мусор пропускается.

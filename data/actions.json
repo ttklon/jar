@@ -3864,14 +3864,14 @@
   "object": "автозапуск",
   "example": "убери Steam из автозапуска",
   "implementation": [
-   "реестр + StartupApproved"
+   "реестр HKCU\\...\\Run + пометка StartupApproved"
   ],
   "risk": "write-local",
   "tier": "T0",
   "human": "может",
   "human_code": "c",
   "status": "v1",
-  "notes": "откат 1 клик"
+  "notes": "HKCU только: общие записи (HKLM) требуют прав администратора и точки восстановления — отказ с причиной; ничего не удаляется, запись остаётся, откат 1 клик"
  },
  {
   "id": "processes-services-240",

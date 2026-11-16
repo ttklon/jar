@@ -41,6 +41,9 @@ pub enum Kind {
     Compress,
     /// Появился собранный файл (склейка, рендер): исходники целы, прибавка одна.
     Product,
+    /// Пометка автозапуска: запись не удалена, а помечена отключённой — как это делает
+    /// Диспетчер задач. Возвращается записью прежней пометки на место.
+    Autostart,
 }
 
 impl Kind {
@@ -52,12 +55,21 @@ impl Kind {
             Kind::Copy => "копия",
             Kind::Compress => "сжатие",
             Kind::Product => "собранный файл",
+            Kind::Autostart => "автозапуск",
         }
     }
 
     /// Отменяется ли дело переносом обратно (да) или уборкой продукта в корзину (нет).
     pub fn is_removal(self) -> bool {
         matches!(self, Kind::Copy | Kind::Compress | Kind::Product)
+    }
+
+    /// Живёт ли дело в реестре, а не в файловой системе.
+    ///
+    /// Для такого дела проверки «файл на месте / место свободно» бессмысленны: состояние
+    /// читается и пишется через оболочку, и решает это она, а не наличие пути.
+    pub fn is_autostart(self) -> bool {
+        matches!(self, Kind::Autostart)
     }
 }
 
@@ -128,6 +140,7 @@ impl Report {
 /// Что откат **не** умеет — прямо, чтобы никто не надеялся зря.
 pub const NOTE: &str = "откатываются переносы, переименования, копии, сжатые и собранные \
 файлы этой сессии: копия, сжатое и собранное убираются в корзину, их можно достать оттуда; \
+пометка автозапуска возвращается прежней пометкой на место (старое значение хранится в записи); \
 запись в файл, скачивание и уже сделанная корзина — нет: старого содержимого не вернуть";
 
 /// Разбор журнала: построчно, терпимо к битым строкам.
@@ -231,6 +244,11 @@ fn refuse_reason(entry: &Entry, session: &str, exists: &impl Fn(&str) -> bool) -
             entry.session
         ));
     }
+    // Пометка автозапуска живёт в реестре: «файла нет» про неё сказать нельзя, и делать вид,
+    // что проверка состояния состоялась, было бы хуже, чем честно её не делать.
+    if entry.kind.is_autostart() {
+        return None;
+    }
     if !exists(&entry.to) {
         return Some(match entry.kind {
             // Перенос возвращать некуда: он уже не там, куда его положили.
@@ -263,6 +281,7 @@ pub fn apply(
     exists: impl Fn(&str) -> bool,
     move_back: impl Fn(&str, &str) -> Result<(), String>,
     recycle: impl Fn(&str) -> Result<(), String>,
+    restore_autostart: impl Fn(&Entry) -> Result<(), String>,
 ) -> Report {
     let session = steps
         .first()
@@ -274,7 +293,7 @@ pub fn apply(
         refused: Vec::new(),
     };
 
-    for step in steps {
+    for step in steps.iter() {
         if let Some(reason) = &step.refusal {
             report
                 .refused
@@ -286,6 +305,17 @@ pub fn apply(
             report
                 .refused
                 .push(format!("{}: {reason}", step.entry.title()));
+            continue;
+        }
+        // Пометку автозапуска возвращает оболочка: файловых проверок здесь нет, и «состояние
+        // не сходится» проверяется ею же — чтением обратно.
+        if step.entry.kind.is_autostart() {
+            match restore_autostart(&step.entry) {
+                Ok(()) => report.undone += 1,
+                Err(reason) => report
+                    .refused
+                    .push(format!("{}: {reason}", step.entry.title())),
+            }
             continue;
         }
         // Копию и сжатый файл не «вернуть назад», а убрать: источник и так на месте.
@@ -325,7 +355,13 @@ pub fn undo_session(journal: &Journal) -> Report {
     let entries = journal.undoable();
     let steps = plan(&entries, journal.session(), path_exists);
     // Уборка идёт через ту же руку, что и «удалить в корзину»: одно место, одна проверка.
-    apply(&steps, path_exists, move_back_on_disk, recycle_on_disk)
+    apply(
+        &steps,
+        path_exists,
+        move_back_on_disk,
+        recycle_on_disk,
+        restore_autostart_on_disk,
+    )
 }
 
 fn path_exists(path: &str) -> bool {
@@ -339,6 +375,97 @@ fn move_back_on_disk(from: &str, to: &str) -> Result<(), String> {
 fn recycle_on_disk(path: &str) -> Result<(), String> {
     crate::tools::recycle_path(path)
 }
+
+/// Путь к пометке автозапуска в записи отката: `ключ|имя`, например
+/// `HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run|Steam`.
+///
+/// Одна строка вместо двух полей — потому что старое значение (байты) хранится во второй
+/// стороне записи, и формат журнала остаётся тем же, что у переносов.
+pub fn autostart_path(key: &str, name: &str) -> String {
+    format!("{key}|{name}")
+}
+
+/// Записать пометку автозапуска, если журнал открыт. `previous` — прежние байты в hex или
+/// `absent`, если пометки не было вовсе: тогда откат её уберёт, а не «вернёт непонятно что».
+pub fn record_autostart(from: &str, previous: &str) -> bool {
+    let previous = if previous.trim().is_empty() {
+        "absent"
+    } else {
+        previous.trim()
+    };
+    match current() {
+        Some(journal) => journal.record(Kind::Autostart, from, previous).is_ok(),
+        None => false,
+    }
+}
+
+/// Вернуть прежнюю пометку автозапуска и проверить чтением обратно.
+///
+/// Проверка здесь не формальность: «Set-ItemProperty не упал» ещё не значит, что значение стало
+/// прежним — сравнение байтов и есть доказательство.
+fn restore_autostart_on_disk(entry: &Entry) -> Result<(), String> {
+    let (key, name) = entry
+        .from
+        .rsplit_once('|')
+        .ok_or_else(|| format!("запись журнала без имени пометки: {}", entry.from))?;
+    let script = RESTORE_AUTOSTART;
+    let request = crate::executor::ExecRequest::new(
+        "powershell.exe",
+        crate::executor::powershell(script),
+    )
+    .with_timeout(std::time::Duration::from_secs(60))
+    .with_env("ZS_KEY", key)
+    .with_env("ZS_VALUE", name)
+    .with_env("ZS_BYTES", &entry.to);
+
+    match crate::executor::run(&request, &std::sync::atomic::AtomicBool::new(false)) {
+        Ok(output) if output.exit_code == Some(0) => Ok(()),
+        Ok(output) => {
+            let reason = output
+                .stdout
+                .lines()
+                .find(|line| line.contains("ZSHELPER-FAILED"))
+                .map(|line| line.replace("ZSHELPER-FAILED:", "").trim().to_string())
+                .unwrap_or_else(|| format!("оболочка вернула код {:?}", output.exit_code));
+            Err(reason)
+        }
+        Err(error) => Err(format!("оболочка не запустилась: {error}")),
+    }
+}
+
+const RESTORE_AUTOSTART: &str = r#"$ErrorActionPreference = 'Stop'
+$key = $env:ZS_KEY
+$value = $env:ZS_VALUE
+$bytes = $env:ZS_BYTES
+if (-not $key -or -not $value) {
+  Write-Output 'ZSHELPER-FAILED: в записи журнала нет ключа или имени пометки'
+  exit 2
+}
+if ($bytes -eq 'absent') {
+  Remove-ItemProperty -LiteralPath $key -Name $value -ErrorAction SilentlyContinue
+  $still = $null
+  try { $still = (Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction Stop).$value } catch { }
+  if ($still) {
+    Write-Output 'ZSHELPER-FAILED: пометка не убралась — автозапуск остался бы отключённым'
+    exit 3
+  }
+  Write-Output 'ZSHELPER-OK removed'
+  exit 0
+}
+$data = [byte[]]::new([int]($bytes.Length / 2))
+for ($i = 0; $i -lt $data.Length; $i++) {
+  $data[$i] = [Convert]::ToByte($bytes.Substring($i * 2, 2), 16)
+}
+New-Item -Path $key -Force | Out-Null
+Set-ItemProperty -LiteralPath $key -Name $value -Value $data -Type Binary -Force
+$now = (Get-ItemProperty -LiteralPath $key -Name $value -ErrorAction SilentlyContinue).$value
+$nowHex = ''
+if ($now -is [byte[]]) { $nowHex = (($now | ForEach-Object { $_.ToString('x2') }) -join '') }
+if ($nowHex -ne $bytes) {
+  Write-Output ('ZSHELPER-FAILED: пометка не вернулась: просили ' + $bytes + ', стало ' + $nowHex)
+  exit 4
+}
+Write-Output 'ZSHELPER-OK restored'"#;
 
 fn now() -> u64 {
     std::time::SystemTime::now()
@@ -550,7 +677,7 @@ mod tests {
             },
         ];
 
-        let report = apply(&steps, exists, move_back, |_path| Ok(()));
+        let report = apply(&steps, exists, move_back, |_path| Ok(()), |_| Ok(()));
 
         assert_eq!(report.undone, 1, "{report:?}");
         assert_eq!(report.refused.len(), 1, "{report:?}");
@@ -574,6 +701,7 @@ mod tests {
             |path| path == "b",
             |_from, _to| Ok(()),
             |_path| Ok(()),
+            |_| Ok(()),
         );
 
         assert_eq!(report.undone, 0);
@@ -607,7 +735,7 @@ mod tests {
             Ok(())
         };
 
-        let report = apply(&steps, exists, |_, _| Ok(()), recycle);
+        let report = apply(&steps, exists, |_, _| Ok(()), recycle, |_| Ok(()));
 
         assert_eq!(report.undone, 1, "{report:?}");
         // Убрали именно копию, а исходник остался.
@@ -626,7 +754,13 @@ mod tests {
         }];
 
         // Копии уже нет: убирать нечего, и это говорится вслух.
-        let report = apply(&steps, |path| path == "a", |_, _| Ok(()), |_| Ok(()));
+        let report = apply(
+            &steps,
+            |path| path == "a",
+            |_, _| Ok(()),
+            |_| Ok(()),
+            |_| Ok(()),
+        );
 
         assert_eq!(report.undone, 0, "{report:?}");
         assert!(
@@ -682,5 +816,76 @@ mod tests {
         let second = undo_session(&journal);
         assert_eq!(second.undone, 0, "{second:?}");
         assert!(!second.refused.is_empty());
+    }
+
+    /// Пометка автозапуска возвращается прежним значением, и её возврат считается откатом.
+    #[test]
+    fn an_autostart_mark_is_restored_by_the_shell_and_counted() {
+        let steps = vec![Step {
+            entry: Entry {
+                at: 1,
+                session: "sess-1".to_string(),
+                kind: Kind::Autostart,
+                from: "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run|Steam".to_string(),
+                to: "020000000000000000000000".to_string(),
+            },
+            refusal: None,
+        }];
+        let asked = std::cell::RefCell::new(Vec::<String>::new());
+        let restore = |entry: &Entry| -> Result<(), String> {
+            asked.borrow_mut().push(entry.to.clone());
+            Ok(())
+        };
+
+        let report = apply(
+            &steps,
+            |_| false,
+            |_, _| Ok(()),
+            |_| Ok(()),
+            restore,
+        );
+
+        assert_eq!(report.undone, 1, "{report:?}");
+        // Файловые проверки к пометке не применяются: иначе «файла нет» отменило бы откат.
+        assert_eq!(asked.borrow().len(), 1);
+        assert_eq!(asked.borrow()[0], "020000000000000000000000");
+        assert_eq!(Kind::Autostart.title(), "автозапуск");
+        assert!(Kind::Autostart.is_autostart());
+        assert!(!Kind::Autostart.is_removal());
+    }
+
+    /// Если оболочка не смогла вернуть пометку, откат говорит причину, а не «получилось».
+    #[test]
+    fn a_failed_autostart_restore_is_refused_with_its_reason() {
+        let steps = vec![Step {
+            entry: entry(Kind::Autostart, "HKCU:\\…\\Run|Steam", "absent", "sess-1"),
+            refusal: None,
+        }];
+
+        let report = apply(
+            &steps,
+            |_| false,
+            |_, _| Ok(()),
+            |_| Ok(()),
+            |_| Err("пометка не убралась".to_string()),
+        );
+
+        assert_eq!(report.undone, 0, "{report:?}");
+        assert!(
+            report.refused[0].contains("пометка не убралась"),
+            "{:?}",
+            report.refused
+        );
+        assert!(report.summary().contains("не откатилось"), "{}", report.summary());
+    }
+
+    /// Путь пометки собирается из ключа и имени — без догадок о разделителе.
+    #[test]
+    fn the_autostart_path_keeps_key_and_name_apart() {
+        let path = autostart_path("HKCU:\\Software\\Run", "Steam");
+        assert_eq!(path, "HKCU:\\Software\\Run|Steam");
+        let (key, name) = path.rsplit_once('|').expect("разделитель есть");
+        assert_eq!(key, "HKCU:\\Software\\Run");
+        assert_eq!(name, "Steam");
     }
 }
