@@ -68,7 +68,7 @@
   "url": "docs/ACTIONS.md",
   "license": "own",
   "domain": "apps-windows",
-  "gives": "21 действий: Office через COM, legacy-приложение, вид и параметры окна, горячие клавиши приложения, интерфейс, кнопку",
+  "gives": "22 действий: Office через COM, legacy-приложение, вид и параметры окна, горячие клавиши приложения, интерфейс, кнопку",
   "refuses": "деньги и подпись — только человек",
   "risk": "destructive",
   "status": "selected",
