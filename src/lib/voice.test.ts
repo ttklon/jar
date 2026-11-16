@@ -140,6 +140,18 @@ describe("голос", () => {
     expect(first.text).toBe("план выполнен");
     expect(first.lang).toBe("ru-RU");
 
+    const statuses: string[] = [];
+    speak("проверка", "ru-RU", (status) => statuses.push(status));
+    const second = spoken[1] as (typeof spoken)[number] & {
+      onstart: (() => void) | null;
+      onend: (() => void) | null;
+      onerror: (() => void) | null;
+    };
+    second.onstart?.();
+    second.onend?.();
+    second.onerror?.();
+    expect(statuses).toEqual(["started", "finished", "error"]);
+
     // Пустая строка — это не фраза, синтезатор её не трогает.
     expect(speak("   ")).toBe(false);
   });

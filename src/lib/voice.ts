@@ -52,7 +52,12 @@ interface VoiceGlobals {
     speak(utterance: unknown): void;
     cancel(): void;
   };
-  SpeechSynthesisUtterance?: new (text: string) => { lang: string };
+  SpeechSynthesisUtterance?: new (text: string) => {
+    lang: string;
+    onstart: (() => void) | null;
+    onend: (() => void) | null;
+    onerror: (() => void) | null;
+  };
 }
 
 function globals(): VoiceGlobals {
@@ -178,7 +183,11 @@ export function listen(listeners: VoiceListeners, lang = "ru-RU"): Voice {
  * Проговаривает текст вслух. Возвращает `false`, если синтеза речи в окружении нет:
  * приложение обязано сказать «проговорить не могу», а не молча сделать вид.
  */
-export function speak(text: string, lang = "ru-RU"): boolean {
+export function speak(
+  text: string,
+  lang = "ru-RU",
+  onStatus?: (status: "started" | "finished" | "error") => void,
+): boolean {
   const scope = globals();
   const synth = scope.speechSynthesis;
   const Utterance = scope.SpeechSynthesisUtterance;
@@ -188,6 +197,9 @@ export function speak(text: string, lang = "ru-RU"): boolean {
   synth.cancel();
   const utterance = new Utterance(text);
   utterance.lang = lang;
+  utterance.onstart = () => onStatus?.("started");
+  utterance.onend = () => onStatus?.("finished");
+  utterance.onerror = () => onStatus?.("error");
   synth.speak(utterance);
   return true;
 }
