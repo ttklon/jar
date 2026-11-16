@@ -1261,8 +1261,8 @@ fn autostart_off(
         let to = clean_path(&line_value("ZSHELPER-TO "));
         if from.is_empty() || to.is_empty() {
             result.ok = false;
-            result.reason = "ярлык переехал, но оболочка не назвала оба пути — откат не запишу"
-                .to_string();
+            result.reason =
+                "ярлык переехал, но оболочка не назвала оба пути — откат не запишу".to_string();
             return result;
         }
         let recorded = crate::undo::record_move(&from, &to);
@@ -8475,7 +8475,11 @@ ZSHELPER-FILE path=C:\\b\\y.bin";
             off.reason
         );
         // Файл не удалён, а переехал: оба факта названы.
-        assert!(off.reason.contains("не удалён, а переехал"), "{}", off.reason);
+        assert!(
+            off.reason.contains("не удалён, а переехал"),
+            "{}",
+            off.reason
+        );
         assert!(
             off.reason.contains("«откатить за сессию»")
                 || off.reason.contains("в журнал отката не записалось"),
