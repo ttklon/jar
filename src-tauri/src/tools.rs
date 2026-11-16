@@ -1257,8 +1257,8 @@ fn autostart_off(
     // Ярлык из папки «Автозагрузка» переезжает, и это обычный перенос: откат вернёт его
     // тем же механизмом, что и любой другой файл.
     if kind == "shortcut" {
-        let from = clean_path(line_value("ZSHELPER-FROM "));
-        let to = clean_path(line_value("ZSHELPER-TO "));
+        let from = clean_path(&line_value("ZSHELPER-FROM "));
+        let to = clean_path(&line_value("ZSHELPER-TO "));
         if from.is_empty() || to.is_empty() {
             result.ok = false;
             result.reason = "ярлык переехал, но оболочка не назвала оба пути — откат не запишу"
