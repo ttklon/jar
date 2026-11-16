@@ -7361,11 +7361,7 @@ mod tests {
             "{}",
             found.reason
         );
-        assert!(
-            found.reason.contains("с ошибками имён"),
-            "{}",
-            found.reason
-        );
+        assert!(found.reason.contains("с ошибками имён"), "{}", found.reason);
 
         // Несуществующее имя — отказ с причиной, а не пустой ответ.
         params.insert("name".to_string(), "zshelper-такого-нет".to_string());
