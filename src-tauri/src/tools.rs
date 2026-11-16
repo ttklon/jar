@@ -6839,10 +6839,9 @@ mod tests {
         assert!(STORE_PACKAGES.contains("инвентаризация, не рекомендация удалить"));
         assert!(!STORE_PACKAGES.contains("Remove-AppxPackage"));
         assert!(!STORE_PACKAGES.contains("Add-AppxPackage"));
-        assert!(scripts()
-            .iter()
-            .any(|(registry, script)| *registry == "apps-windows|показать|пакеты Store"
-                && *script == STORE_PACKAGES));
+        assert!(scripts().iter().any(|(registry, script)| *registry
+            == "apps-windows|показать|пакеты Store"
+            && *script == STORE_PACKAGES));
     }
 
     #[test]
