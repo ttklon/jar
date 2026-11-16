@@ -4610,7 +4610,8 @@ fn add_subtitles(
     let before = field("subs_before=").parse::<usize>().unwrap_or_default();
     let after = field("subs_after=").parse::<usize>().unwrap_or_default();
     let out_codec = field("sub_codec=");
-    let diff = field("diff=").parse::<f64>().unwrap_or_default();
+    let diff_text = field("diff=");
+    let diff = diff_text.parse::<f64>().unwrap_or_default();
     let size_src = field("size_src=").parse::<u64>().unwrap_or_default();
     let size_out = field("size_out=").parse::<u64>().unwrap_or_default();
 
@@ -4634,7 +4635,7 @@ fn add_subtitles(
     } else {
         format!("кодек дорожки: {out_codec} — проверено ffprobe")
     };
-    let length = if diff.is_empty() {
+    let length = if diff_text.is_empty() {
         "длительность сверить не удалось (ffprobe не назвал)".to_string()
     } else {
         format!("длительность сошлась, расхождение {diff} с")
