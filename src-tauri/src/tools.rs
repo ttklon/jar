@@ -3881,11 +3881,12 @@ $apps | ForEach-Object { Write-Output ('{0} — {1}' -f $_.DisplayName, $_.Displ
 /// Инвентаризация пакетов текущего пользователя. Это не список «мусора»: без знания
 /// привычек человека пакет нельзя безопасно объявить ненужным. Ничего не удаляет.
 const STORE_PACKAGES: &str = r#"$ErrorActionPreference = 'Stop'
-$packages = @(Get-AppxPackage -ErrorAction Stop | Sort-Object Name | Select-Object -First 60)
-Write-Output ('ZSHELPER-OK packages={0} (показаны максимум 60)' -f $packages.Count)
+$allPackages = @(Get-AppxPackage -ErrorAction Stop | Sort-Object Name)
+$packages = @($allPackages | Select-Object -First 60)
+Write-Output ('ZSHELPER-OK найдено={0}; показано={1}{2}' -f $allPackages.Count, $packages.Count, $(if ($allPackages.Count -gt $packages.Count) { '; список ограничен 60' } else { '' }))
 if ($packages.Count -eq 0) { Write-Output 'пакетов текущего пользователя не найдено' }
 $packages | ForEach-Object {
-  Write-Output ('{0} — версия {1}; framework={2}; ресурсный={3}' -f $_.Name, $_.Version, $_.IsFramework, $_.IsResourcePackage)
+  Write-Output ('{0} — {1}; версия {2}; framework={3}; ресурсный={4}' -f $_.Name, $_.PublisherDisplayName, $_.Version, $_.IsFramework, $_.IsResourcePackage)
 }
 Write-Output 'Только текущий пользователь; системные и подготовленные для новых пользователей пакеты этим списком не покрыты. Это инвентаризация, не рекомендация удалить.'"#;
 
@@ -6835,6 +6836,8 @@ mod tests {
     fn store_package_inventory_is_bounded_read_only_and_honest_about_scope() {
         assert!(STORE_PACKAGES.contains("Get-AppxPackage"));
         assert!(STORE_PACKAGES.contains("Select-Object -First 60"));
+        assert!(STORE_PACKAGES.contains("$allPackages.Count"));
+        assert!(STORE_PACKAGES.contains("PublisherDisplayName"));
         assert!(STORE_PACKAGES.contains("текущего пользователя"));
         assert!(STORE_PACKAGES.contains("инвентаризация, не рекомендация удалить"));
         assert!(!STORE_PACKAGES.contains("Remove-AppxPackage"));
