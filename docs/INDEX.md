@@ -103,6 +103,7 @@
 | `links.py` | проверка относительных ссылок в документах |
 | `mine_awesome.py` | разбор awesome-листов |
 | `profiles.py` | валидатор профилей → docs/PROFILES.md |
+| `sbom.py` | — |
 | `shortlist.py` | раскладка инвентаризации по доменам |
 | `skills.py` | валидатор скиллов → docs/SKILLS.md |
 | `status.py` | блок состояния в AGENTS.md |

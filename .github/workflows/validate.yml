@@ -59,6 +59,9 @@ jobs:
       - name: Relative links in the documentation resolve
         run: python3 tools/links.py
 
+      - name: SPDX SBOM can be built from both lockfiles
+        run: python3 tools/sbom.py --check
+
       - name: UIA draft generator works on a fixture dump
         run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
 

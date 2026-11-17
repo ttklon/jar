@@ -12,6 +12,22 @@ permissions:
   checks: write
 
 jobs:
+  sbom:
+    name: dependency inventory (SPDX 2.3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build SPDX from npm and Cargo lockfiles
+        run: python3 tools/sbom.py --output dist/zshelper.spdx.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zshelper-sbom
+          path: dist/zshelper.spdx.json
+          if-no-files-found: error
+          retention-days: 14
+
   web:
     name: ui (typecheck, tests, build)
     runs-on: ubuntu-latest
