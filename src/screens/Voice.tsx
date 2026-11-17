@@ -938,12 +938,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     listening: mic.listening,
     start: mic.start,
     stop: mic.stop,
+    cancel: mic.cancel,
   });
   globalTalkState.current = {
     always,
     listening: mic.listening,
     start: mic.start,
     stop: mic.stop,
+    cancel: mic.cancel,
   };
 
   useEffect(() => {
@@ -959,6 +961,12 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       up: () => {
         const state = globalTalkState.current;
         if (!state.always) state.stop();
+      },
+      stop: () => {
+        const state = globalTalkState.current;
+        state.cancel();
+        state.stop();
+        void setVoiceTrayStatus("ready").catch(() => undefined);
       },
     })
       .then((unsubscribe) => {

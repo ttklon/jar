@@ -20,6 +20,8 @@ export interface GlobalTalk {
   down(): void;
   /** Отпустили — заканчиваем. */
   up(): void;
+  /** Команда «Остановить микрофон» из системного трея. */
+  stop?(): void;
 }
 
 /**
@@ -32,14 +34,22 @@ export async function subscribeGlobalTalk(talk: GlobalTalk): Promise<() => void>
   }
 
   const { listen } = await import("@tauri-apps/api/event");
-  const unlisten = await listen<string>(GLOBAL_TALK_EVENT, (event) => {
+  const unlistenHold = await listen<string>(GLOBAL_TALK_EVENT, (event) => {
     // Молча игнорируем всё, чего не понимаем: событие приходит из ядра, но лишнее
     // значение не должно ронять экран.
     if (event.payload === "down") talk.down();
     if (event.payload === "up") talk.up();
   });
+  let unlistenStop: (() => void) | null = null;
+  try {
+    unlistenStop = await listen("voice://stop", () => talk.stop?.());
+  } catch (error) {
+    unlistenHold();
+    throw error;
+  }
 
   return () => {
-    void unlisten();
+    unlistenHold();
+    unlistenStop?.();
   };
 }

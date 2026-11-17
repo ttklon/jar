@@ -6,15 +6,15 @@
 
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 
 pub fn install(app: &AppHandle) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, "show", "Открыть ZShelper", true, None::<&str>)?;
-    let pause = MenuItem::with_id(app, "pause", "Пауза (скоро)", false, None::<&str>)?;
+    let stop_voice = MenuItem::with_id(app, "stop-voice", "Остановить микрофон", true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
     let quit = MenuItem::with_id(app, "quit", "Выход", true, None::<&str>)?;
 
-    let menu = Menu::with_items(app, &[&show, &pause, &separator, &quit])?;
+    let menu = Menu::with_items(app, &[&show, &stop_voice, &separator, &quit])?;
 
     let mut builder = TrayIconBuilder::with_id("main")
         .tooltip("ZShelper — готово")
@@ -26,6 +26,13 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
                 app.exit(0);
             }
             "show" => show_main_window(app),
+            "stop-voice" => {
+                if let Err(error) = app.emit("voice://stop", ()) {
+                    tracing::warn!(%error, "команда остановки голоса не отправлена");
+                } else if let Err(error) = set_voice_status(app, "ready") {
+                    tracing::warn!(%error, "статус трея не сброшен после остановки голоса");
+                }
+            }
             _ => {}
         })
         .on_tray_icon_event(|tray, event| {

@@ -10,12 +10,14 @@ describe("удержание из любой программы", () => {
   it("в браузере подписка пустая, но отписка работает", async () => {
     const down = vi.fn();
     const up = vi.fn();
+    const stop = vi.fn();
 
-    const off = await subscribeGlobalTalk({ down, up });
+    const off = await subscribeGlobalTalk({ down, up, stop });
     expect(typeof off).toBe("function");
     expect(() => off()).not.toThrow();
     expect(down).not.toHaveBeenCalled();
     expect(up).not.toHaveBeenCalled();
+    expect(stop).not.toHaveBeenCalled();
   });
 
   it("имя события одно и то же в ядре и в интерфейсе", () => {
