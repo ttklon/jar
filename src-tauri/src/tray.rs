@@ -92,10 +92,19 @@ mod tests {
 
     #[test]
     fn tray_has_explicit_voice_states_and_rejects_unknown_values() {
-        assert_eq!(voice_tooltip("key-down").unwrap(), "ZShelper — голосовая клавиша зажата");
+        assert_eq!(
+            voice_tooltip("key-down").unwrap(),
+            "ZShelper — голосовая клавиша зажата"
+        );
         assert_eq!(voice_tooltip("listening").unwrap(), "ZShelper — слушаю");
-        assert_eq!(voice_tooltip("working").unwrap(), "ZShelper — обрабатываю запрос");
-        assert_eq!(voice_tooltip("error").unwrap(), "ZShelper — ошибка; откройте окно");
+        assert_eq!(
+            voice_tooltip("working").unwrap(),
+            "ZShelper — обрабатываю запрос"
+        );
+        assert_eq!(
+            voice_tooltip("error").unwrap(),
+            "ZShelper — ошибка; откройте окно"
+        );
         assert!(voice_tooltip("untrusted arbitrary tooltip").is_err());
     }
 }
