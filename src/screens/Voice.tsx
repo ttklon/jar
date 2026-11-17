@@ -916,19 +916,35 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       );
   }, []);
 
-  // Удержание из любой программы: человек говорит в браузере или поверх видео, а окно
-  // помощника даже не в фокусе. Где глобальных клавиш нет (браузер) — подписка пустая.
+  // Стабильная подписка: если переподписываться на `mic.listening`, короткое нажатие
+  // может попасть в окно между down и up, и отпускание потеряется. События читают
+  // актуальное состояние из ref, сама системная подписка живёт до размонтирования Voice.
+  const globalTalkState = useRef({
+    always,
+    listening: mic.listening,
+    start: mic.start,
+    stop: mic.stop,
+  });
+  globalTalkState.current = {
+    always,
+    listening: mic.listening,
+    start: mic.start,
+    stop: mic.stop,
+  };
+
   useEffect(() => {
     let off: (() => void) | null = null;
     let alive = true;
 
     subscribeGlobalTalk({
       down: () => {
-        if (always && mic.listening) mic.stop();
-        else mic.start();
+        const state = globalTalkState.current;
+        if (state.always && state.listening) state.stop();
+        else state.start();
       },
       up: () => {
-        if (!always) mic.stop();
+        const state = globalTalkState.current;
+        if (!state.always) state.stop();
       },
     })
       .then((unsubscribe) => {
@@ -943,7 +959,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       alive = false;
       off?.();
     };
-  }, [always, mic.listening, mic.start, mic.stop]);
+  }, []);
 
   // Чем распознаём — видно сразу: пока своего движка нет, звук уходит наружу, и
   // человек должен знать это до того, как заговорит, а не после.

@@ -10,8 +10,8 @@
 //!
 //! Вторая клавиша — `Ctrl+Space`: удержание для разговора из **любой** программы.
 //! Человек смотрит видео или пишет в чужом окне; переключаться на помощника он не хочет.
-//! Поэтому удержание приходит из системы двумя событиями — нажал и отпустил, — а окно
-//! показывается без перехвата фокуса: отбирать клавиатуру у того, кто печатает, нельзя.
+//! Поэтому удержание приходит из системы двумя событиями — нажал и отпустил, — окно
+//! остаётся свёрнутым, а состояние голосовой клавиши показывается в подсказке трея.
 //! Сама клавиша ничего не подтверждает и ничего не выполняет.
 
 use tauri::{AppHandle, Emitter, Manager};
@@ -54,15 +54,6 @@ pub fn reveal_main(app: &AppHandle) {
     if let Err(error) = window.set_focus() {
         tracing::warn!(%error, "окно не получает фокус");
     }
-}
-
-/// Показать окно, не забирая фокус.
-fn peek(app: &AppHandle) {
-    let Some(window) = app.get_webview_window("main") else {
-        return;
-    };
-    let _ = window.show();
-    let _ = window.unminimize();
 }
 
 /// Отправить интерфейсу «нажал» / «отпустил».
@@ -111,12 +102,13 @@ pub fn install(app: &mut tauri::App) {
             if pressed == &talk_shortcut() {
                 match event.state() {
                     ShortcutState::Pressed => {
-                        // Окно показываем, но фокус не забираем: человек продолжает
-                        // смотреть видео или печатать, а видит, что его слушают.
-                        peek(&handle);
+                        crate::tray::set_voice_hold(&handle, true);
                         emit_talk(&handle, "down");
                     }
-                    ShortcutState::Released => emit_talk(&handle, "up"),
+                    ShortcutState::Released => {
+                        crate::tray::set_voice_hold(&handle, false);
+                        emit_talk(&handle, "up");
+                    }
                 }
             }
         })

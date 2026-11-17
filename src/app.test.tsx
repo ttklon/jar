@@ -87,6 +87,17 @@ describe("App", () => {
     expect(screen.getByText(/Пока ничего не сказано/)).toBeTruthy();
   });
 
+  it("голосовой сервис остаётся смонтированным за скрытым экраном для Ctrl+Space", async () => {
+    render(<App />);
+    await loaded();
+
+    nav().getByRole("button", { name: "Руки" }).click();
+    await waitFor(() => expect(screen.getByText(/\d+ инструментов/)).toBeTruthy());
+
+    const voicePrompt = screen.getByText(/Скажите задачу/);
+    expect(voicePrompt.closest('[aria-hidden="true"]')).toBeTruthy();
+  });
+
   it("обзор реестра показывает цифры из данных репозитория", async () => {
     render(<App />);
     await loaded();

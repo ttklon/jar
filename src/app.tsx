@@ -195,6 +195,14 @@ export function App() {
         </aside>
 
         <main className={styles.main}>
+          {!error && snapshot && !welcome ? (
+            <div
+              style={{ display: screen === "voice" ? "contents" : "none" }}
+              aria-hidden={screen !== "voice"}
+            >
+              <Voice onOpen={(next) => setScreen(next as Screen)} />
+            </div>
+          ) : null}
           {error ? (
             <div className={styles.error}>
               <Text as="h2" size={600}>
@@ -221,9 +229,7 @@ export function App() {
                 setScreen(target);
               }}
             />
-          ) : screen === "voice" ? (
-            <Voice onOpen={(next) => setScreen(next as Screen)} />
-          ) : screen === "overview" ? (
+          ) : screen === "voice" ? null : screen === "overview" ? (
             <Overview snapshot={snapshot} />
           ) : screen === "catalog" ? (
             <Catalog snapshot={snapshot} />

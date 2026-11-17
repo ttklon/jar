@@ -17,7 +17,7 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
     let menu = Menu::with_items(app, &[&show, &pause, &separator, &quit])?;
 
     let mut builder = TrayIconBuilder::with_id("main")
-        .tooltip("ZShelper")
+        .tooltip("ZShelper — готово")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
@@ -46,6 +46,37 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
     builder.build(app)?;
     tracing::info!("трей установлен");
     Ok(())
+}
+
+/// Индикатор удержания для фонового разговора. Окно остаётся скрытым;
+/// системный tooltip — единственная видимая подсказка без вмешательства в чужое окно.
+fn voice_tooltip(active: bool) -> &'static str {
+    if active {
+        "ZShelper — голосовая клавиша зажата"
+    } else {
+        "ZShelper — готово"
+    }
+}
+
+pub fn set_voice_hold(app: &AppHandle, active: bool) {
+    let Some(tray) = app.tray_by_id("main") else {
+        tracing::warn!("иконка трея не найдена для voice status");
+        return;
+    };
+    if let Err(error) = tray.set_tooltip(Some(voice_tooltip(active))) {
+        tracing::warn!(%error, "статус голоса не обновлён в трее");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::voice_tooltip;
+
+    #[test]
+    fn tray_distinguishes_held_voice_key_from_ready() {
+        assert_eq!(voice_tooltip(true), "ZShelper — голосовая клавиша зажата");
+        assert_eq!(voice_tooltip(false), "ZShelper — готово");
+    }
 }
 
 fn show_main_window(app: &AppHandle) {
