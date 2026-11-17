@@ -25,6 +25,16 @@ jobs:
       - name: Build SPDX from npm and Cargo lockfiles
         run: python3 tools/sbom.py --output dist/zshelper.spdx.json
 
+      - name: Record SBOM checksum
+        run: |
+          digest=$(sha256sum dist/zshelper.spdx.json | cut -d' ' -f1)
+          {
+            echo "### Dependency SBOM"
+            echo ""
+            echo "Artifact: \`zshelper-sbom/zshelper.spdx.json\`"
+            echo "SHA-256: \`$digest\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Attest SBOM provenance
         if: github.event_name == 'push'
         uses: actions/attest-build-provenance@v2
