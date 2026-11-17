@@ -10,7 +10,8 @@ use tauri::{AppHandle, Emitter, Manager};
 
 pub fn install(app: &AppHandle) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, "show", "Открыть ZShelper", true, None::<&str>)?;
-    let stop_voice = MenuItem::with_id(app, "stop-voice", "Остановить микрофон", true, None::<&str>)?;
+    let stop_voice =
+        MenuItem::with_id(app, "stop-voice", "Остановить микрофон", true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
     let quit = MenuItem::with_id(app, "quit", "Выход", true, None::<&str>)?;
 
