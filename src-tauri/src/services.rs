@@ -1150,6 +1150,125 @@ const NOTES: &[Note] = &[
         disable: Disable::Never,
         because: "остановка перезапускает поиск",
     },
+    Note {
+        name: "AppXSvc",
+        what: "развёртывание и обслуживание приложений Microsoft Store",
+        criticality: Criticality::Important,
+        disable: Disable::WithCare,
+        because: "без неё приложения Store могут не устанавливаться и не обновляться",
+    },
+    Note {
+        name: "ClipSVC",
+        what: "лицензии приложений Microsoft Store",
+        criticality: Criticality::Important,
+        disable: Disable::WithCare,
+        because: "без неё часть приложений Store не подтвердит лицензию и не запустится",
+    },
+    Note {
+        name: "InstallService",
+        what: "установка приложений Microsoft Store и обновления Store",
+        criticality: Criticality::Important,
+        disable: Disable::WithCare,
+        because: "без неё установка и обновление приложений из Store могут не работать",
+    },
+    Note {
+        name: "StateRepository",
+        what: "хранилище состояния приложений Windows и их регистрации",
+        criticality: Criticality::Important,
+        disable: Disable::WithCare,
+        because: "без него меню «Пуск» и приложения могут потерять регистрацию или настройки",
+    },
+    Note {
+        name: "WaaSMedicSvc",
+        what: "восстановление компонентов Центра обновления Windows",
+        criticality: Criticality::Important,
+        disable: Disable::WithCare,
+        because: "без неё Windows может не восстановить повреждённые компоненты обновления",
+    },
+    Note {
+        name: "UsoSvc",
+        what: "координация поиска и установки обновлений Windows",
+        criticality: Criticality::Important,
+        disable: Disable::WithCare,
+        because: "без неё автоматический поиск и установка обновлений могут остановиться",
+    },
+    Note {
+        name: "NgcSvc",
+        what: "контейнер Windows Hello для PIN и ключей входа",
+        criticality: Criticality::Important,
+        disable: Disable::WithCare,
+        because: "без неё вход по PIN и часть сценариев Windows Hello могут перестать работать",
+    },
+    Note {
+        name: "TokenBroker",
+        what: "управление токенами учётных записей для приложений Windows",
+        criticality: Criticality::Important,
+        disable: Disable::WithCare,
+        because: "без неё приложения могут потерять вход через учётную запись Microsoft",
+    },
+    Note {
+        name: "VaultSvc",
+        what: "хранилище учётных данных Windows",
+        criticality: Criticality::Important,
+        disable: Disable::WithCare,
+        because: "без неё приложения и службы не смогут получить сохранённые учётные данные",
+    },
+    Note {
+        name: "WinHttpAutoProxySvc",
+        what: "обнаружение настроек прокси для приложений WinHTTP",
+        criticality: Criticality::Optional,
+        disable: Disable::WithCare,
+        because: "без неё автоматическая настройка прокси в некоторых приложениях не сработает",
+    },
+    Note {
+        name: "Wecsvc",
+        what: "сбор перенаправленных журналов событий с других компьютеров",
+        criticality: Criticality::Optional,
+        disable: Disable::Yes,
+        because: "нужна только как принимающая сторона Windows Event Forwarding",
+    },
+    Note {
+        name: "WerSvc",
+        what: "отчёты об ошибках Windows и сбор диагностических дампов",
+        criticality: Criticality::Optional,
+        disable: Disable::WithCare,
+        because: "без неё не будут собираться и отправляться отчёты о сбоях",
+    },
+    Note {
+        name: "FontCache",
+        what: "кэш шрифтов для ускорения отображения текста",
+        criticality: Criticality::Optional,
+        disable: Disable::WithCare,
+        because: "без неё приложения будут медленнее открывать шрифты и часть текста может отображаться иначе",
+    },
+    Note {
+        name: "TabletInputService",
+        what: "экранная клавиатура, рукописный ввод и сенсорная панель ввода",
+        criticality: Criticality::Optional,
+        disable: Disable::WithCare,
+        because: "без неё могут перестать работать экранная клавиатура и рукописный ввод",
+    },
+    Note {
+        name: "NaturalAuthentication",
+        what: "биометрические и другие сигналы для Windows Hello",
+        criticality: Criticality::Optional,
+        disable: Disable::WithCare,
+        because: "без неё связанные с Windows Hello сценарии могут стать недоступны",
+    },
+    Note {
+        name: "WalletService",
+        what: "управление платёжными и цифровыми кошельками Windows",
+        criticality: Criticality::Optional,
+        disable: Disable::Yes,
+        because: "нужна только приложениям, использующим кошелёк Windows",
+    },
+    Note {
+        name: "PushToInstall",
+        what: "удалённая установка приложений Microsoft Store",
+        criticality: Criticality::Optional,
+        disable: Disable::WithCare,
+        because: "без неё установка приложений Store с другого устройства не сработает",
+    },
 ];
 
 /// Найти запись по имени: без учёта регистра и без учёта краевых пробелов.
@@ -1234,7 +1353,20 @@ mod tests {
     /// База должна быть достаточно большой, чтобы на неё можно было опереться.
     #[test]
     fn the_base_is_big_enough_to_be_useful() {
-        assert!(count() >= 100, "записей в базе: {}", count());
+        assert!(count() >= 170, "записей в базе: {}", count());
+    }
+
+    #[test]
+    fn service_names_are_unique_for_exact_lookup() {
+        for (index, note) in NOTES.iter().enumerate() {
+            assert!(
+                NOTES[..index]
+                    .iter()
+                    .all(|earlier| !earlier.name.eq_ignore_ascii_case(note.name)),
+                "повтор имени службы: {}",
+                note.name
+            );
+        }
     }
 
     /// Формулировки не обещают больше, чем значат: «нельзя» говорит «нельзя».
