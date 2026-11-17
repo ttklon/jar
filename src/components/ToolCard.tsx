@@ -218,17 +218,22 @@ export function ToolCard({ tool }: { tool: ToolView }) {
                   onClick={() =>
                     {
                       setSpeechStatus("Ожидание системного голоса…");
-                      if (
-                        !speak(result.reason ?? "", "ru-RU", (status) => {
-                          setSpeechStatus(
-                            status === "started"
-                              ? "Идёт озвучивание."
-                              : status === "finished"
-                                ? "Озвучивание завершено."
-                                : "Системный синтез речи сообщил об ошибке.",
-                          );
-                        })
-                      ) {
+                      let noRussianVoice = false;
+                      const started = speak(result.reason ?? "", "ru-RU", (status) => {
+                        if (status === "no-voice") {
+                          noRussianVoice = true;
+                          setSpeechStatus("Системные голоса есть, но русского голоса не найдено. Установите русский голос Windows и повторите.");
+                          return;
+                        }
+                        setSpeechStatus(
+                          status === "started"
+                            ? "Идёт озвучивание."
+                            : status === "finished"
+                              ? "Озвучивание завершено."
+                              : "Системный синтез речи сообщил об ошибке.",
+                        );
+                      });
+                      if (!started && !noRussianVoice) {
                         setSpeechStatus("В этой среде синтез речи недоступен или не установлен голос.");
                       }
                     }

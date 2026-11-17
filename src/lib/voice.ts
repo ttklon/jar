@@ -51,9 +51,11 @@ interface VoiceGlobals {
   speechSynthesis?: {
     speak(utterance: unknown): void;
     cancel(): void;
+    getVoices?(): Array<{ lang: string; name: string }>;
   };
   SpeechSynthesisUtterance?: new (text: string) => {
     lang: string;
+    voice?: { lang: string; name: string };
     onstart: (() => void) | null;
     onend: (() => void) | null;
     onerror: (() => void) | null;
@@ -186,7 +188,7 @@ export function listen(listeners: VoiceListeners, lang = "ru-RU"): Voice {
 export function speak(
   text: string,
   lang = "ru-RU",
-  onStatus?: (status: "started" | "finished" | "error") => void,
+  onStatus?: (status: "started" | "finished" | "error" | "no-voice") => void,
 ): boolean {
   const scope = globals();
   const synth = scope.speechSynthesis;
@@ -195,8 +197,18 @@ export function speak(
 
   // Новая фраза отменяет предыдущую: две одновременно — это шум.
   synth.cancel();
+  const voices = synth.getVoices?.() ?? [];
+  const requestedLanguage = lang.toLowerCase().split("-")[0];
+  const voice = voices.find((candidate) => candidate.lang.toLowerCase() === lang.toLowerCase())
+    ?? voices.find((candidate) => candidate.lang.toLowerCase().split("-")[0] === requestedLanguage);
+  if (voices.length > 0 && !voice) {
+    onStatus?.("no-voice");
+    return false;
+  }
+
   const utterance = new Utterance(text);
   utterance.lang = lang;
+  if (voice) utterance.voice = voice;
   utterance.onstart = () => onStatus?.("started");
   utterance.onend = () => onStatus?.("finished");
   utterance.onerror = () => onStatus?.("error");

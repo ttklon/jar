@@ -120,6 +120,7 @@ describe("голос", () => {
     const cancel = vi.fn();
     vi.stubGlobal("speechSynthesis", {
       speak: (utterance: { text: string; lang: string }) => spoken.push(utterance),
+      getVoices: () => [{ lang: "ru-RU", name: "Russian" }],
       cancel,
     });
     vi.stubGlobal(
@@ -139,6 +140,7 @@ describe("голос", () => {
     if (!first) throw new Error("фраза не прозвучала");
     expect(first.text).toBe("план выполнен");
     expect(first.lang).toBe("ru-RU");
+    expect((first as typeof first & { voice?: { name: string } }).voice?.name).toBe("Russian");
 
     const statuses: string[] = [];
     speak("проверка", "ru-RU", (status) => statuses.push(status));
@@ -154,5 +156,29 @@ describe("голос", () => {
 
     // Пустая строка — это не фраза, синтезатор её не трогает.
     expect(speak("   ")).toBe(false);
+  });
+
+  it("не запускает речь на заведомо неподходящем языке, если русский голос отсутствует", () => {
+    const speakEngine = vi.fn();
+    const statuses: string[] = [];
+    vi.stubGlobal("speechSynthesis", {
+      speak: speakEngine,
+      cancel: vi.fn(),
+      getVoices: () => [{ lang: "en-US", name: "English" }],
+    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        lang = "";
+        onstart: (() => void) | null = null;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(_text: string) {}
+      },
+    );
+
+    expect(speak("проверка", "ru-RU", (status) => statuses.push(status))).toBe(false);
+    expect(speakEngine).not.toHaveBeenCalled();
+    expect(statuses).toEqual(["no-voice"]);
   });
 });
