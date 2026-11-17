@@ -36,7 +36,8 @@ npm run tauri dev       # desktop-приложение (Windows SDK/Rust/WebView
 
 Сводка разработки: [`docs/DASHBOARD.md`](docs/DASHBOARD.md). План: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 Инструкции разработчика: [`docs/BUILD-GUIDE.md`](docs/BUILD-GUIDE.md); пользовательская инструкция:
-[`docs/GUIDE.md`](docs/GUIDE.md).
+[`docs/GUIDE.md`](docs/GUIDE.md). Целевая модель «второго друга», режим работы из трея и безопасное обучение:
+[`docs/PRODUCT-VISION.md`](docs/PRODUCT-VISION.md).
 
 ## С чего начать
 
