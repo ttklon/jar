@@ -28,10 +28,10 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
             }
             "show" => show_main_window(app),
             "stop-voice" => {
+                // Не ставим ready здесь: emit лишь отправляет запрос, а не доказывает,
+                // что UI получил его и действительно закрыл микрофон.
                 if let Err(error) = app.emit("voice://stop", ()) {
                     tracing::warn!(%error, "команда остановки голоса не отправлена");
-                } else if let Err(error) = set_voice_status(app, "ready") {
-                    tracing::warn!(%error, "статус трея не сброшен после остановки голоса");
                 }
             }
             _ => {}
