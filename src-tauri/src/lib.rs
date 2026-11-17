@@ -221,6 +221,19 @@ pub fn run() {
             }
             Ok(())
         })
+        .on_window_event(|window, event| {
+            if window.label() != "main" {
+                return;
+            }
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                // X означает «убрать окно»: выход — только явным пунктом трея,
+                // иначе скрытый PTT исчез бы вместе с окном.
+                api.prevent_close();
+                if let Err(error) = window.hide() {
+                    tracing::warn!(%error, "окно не удалось скрыть при закрытии");
+                }
+            }
+        })
         .build(tauri::generate_context!())
         .expect("приложение не собралось")
         .run(|app, event| {
