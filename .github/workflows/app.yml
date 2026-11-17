@@ -15,11 +15,21 @@ jobs:
   sbom:
     name: dependency inventory (SPDX 2.3)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
 
       - name: Build SPDX from npm and Cargo lockfiles
         run: python3 tools/sbom.py --output dist/zshelper.spdx.json
+
+      - name: Attest SBOM provenance
+        if: github.event_name == 'push'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/zshelper.spdx.json
 
       - uses: actions/upload-artifact@v4
         with:
