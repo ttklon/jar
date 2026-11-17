@@ -68,6 +68,14 @@ pub fn set_voice_hold(app: &AppHandle, active: bool) {
     }
 }
 
+fn show_main_window(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::voice_tooltip;
@@ -76,13 +84,5 @@ mod tests {
     fn tray_distinguishes_held_voice_key_from_ready() {
         assert_eq!(voice_tooltip(true), "ZShelper — голосовая клавиша зажата");
         assert_eq!(voice_tooltip(false), "ZShelper — готово");
-    }
-}
-
-fn show_main_window(app: &AppHandle) {
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.show();
-        let _ = window.unminimize();
-        let _ = window.set_focus();
     }
 }
