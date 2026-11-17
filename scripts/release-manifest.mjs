@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
-import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
@@ -13,7 +13,48 @@ async function sha256(file) {
   return hash.digest("hex");
 }
 
+export async function verifyManifest(manifestPath, artifactDirectory = path.dirname(manifestPath)) {
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  if (
+    manifest.schema_version !== 1
+    || typeof manifest.product !== "string"
+    || typeof manifest.version !== "string"
+    || !/^[a-f0-9]{40}$/i.test(manifest.commit ?? "")
+    || !Array.isArray(manifest.artifacts)
+    || manifest.artifacts.length === 0
+  ) {
+    throw new Error("unsupported or incomplete release manifest");
+  }
+  const names = new Set();
+  for (const artifact of manifest.artifacts) {
+    const name = artifact.filename;
+    if (typeof name !== "string" || !name || name === "." || name === ".." || /[\\/]/.test(name)) {
+      throw new Error("manifest contains an unsafe artifact filename");
+    }
+    if (names.has(name)) throw new Error(`duplicate artifact filename: ${name}`);
+    names.add(name);
+    if (!Number.isSafeInteger(artifact.bytes) || artifact.bytes < 1 || !/^[a-f0-9]{64}$/.test(artifact.sha256)) {
+      throw new Error(`invalid size or SHA-256 for ${name}`);
+    }
+    const file = path.join(artifactDirectory, name);
+    const linkInfo = await lstat(file);
+    const info = await stat(file);
+    if (linkInfo.isSymbolicLink() || !info.isFile() || info.size !== artifact.bytes || await sha256(file) !== artifact.sha256) {
+      throw new Error(`size or SHA-256 mismatch: ${name}`);
+    }
+  }
+  return manifest.artifacts.length;
+}
+
 async function main() {
+  if (process.argv[2] === "--verify") {
+    const manifestPath = path.resolve(process.argv[3] ?? "");
+    const artifactDirectory = path.resolve(process.argv[4] ?? path.dirname(manifestPath));
+    const count = await verifyManifest(manifestPath, artifactDirectory);
+    console.log(`Verified ${count} release artifacts against ${manifestPath}`);
+    return;
+  }
+
   const bundle = path.join(root, "src-tauri/target/release/bundle");
   const files = [];
   for (const format of ["nsis", "msi"]) {
@@ -56,7 +97,9 @@ async function main() {
   console.log(`Release manifest: ${artifacts.length} artifacts, ${output}`);
 }
 
-main().catch((error) => {
-  console.error(`release manifest failed: ${error.message}`);
-  process.exitCode = 1;
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(`release manifest failed: ${error.message}`);
+    process.exitCode = 1;
+  });
+}
