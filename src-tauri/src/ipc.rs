@@ -1581,14 +1581,13 @@ pub fn isolation_status(state: State<'_, AppState>) -> IsolationStatus {
     }
 }
 
-/// Есть ли чем распознавать локально. Ничего не запускает.
-#[tauri::command]
 /// Обновить ограниченный статус фонового голоса в трее.
 #[tauri::command]
 pub fn set_voice_tray_status(app: AppHandle, status: String) -> Result<(), String> {
     crate::tray::set_voice_status(&app, &status)
 }
 
+/// Есть ли чем распознавать локально. Ничего не запускает.
 #[tauri::command]
 pub fn speech_status(state: State<'_, AppState>) -> SpeechStatus {
     read_speech_status(&state)
