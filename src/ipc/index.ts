@@ -54,6 +54,7 @@ export type {
   UndoPreview,
   UndoReport,
   UndoStep,
+  VoiceTrayStatus,
   Thought,
   SpeechStatus,
   Sight,
@@ -69,7 +70,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport } from "./types";
+import type { AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -708,6 +709,15 @@ export async function isolationStatus(): Promise<IsolationStatus> {
 }
 
 /** Есть ли чем распознавать локально: движок и модель. Ничего не запускает. */
+export async function setVoiceTrayStatus(status: VoiceTrayStatus): Promise<void> {
+  if (isTauri()) {
+    const { setVoiceTrayStatus: fromCore } = await import("./tauri");
+    return fromCore(status);
+  }
+  const { setVoiceTrayStatus: fromData } = await import("./dev");
+  return fromData(status);
+}
+
 export async function speechStatus(): Promise<SpeechStatus> {
   if (isTauri()) {
     const { speechStatus: fromCore } = await import("./tauri");

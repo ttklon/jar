@@ -50,21 +50,31 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
 
 /// Индикатор удержания для фонового разговора. Окно остаётся скрытым;
 /// системный tooltip — единственная видимая подсказка без вмешательства в чужое окно.
-fn voice_tooltip(active: bool) -> &'static str {
-    if active {
-        "ZShelper — голосовая клавиша зажата"
-    } else {
-        "ZShelper — готово"
+fn voice_tooltip(status: &str) -> Result<&'static str, String> {
+    match status {
+        "ready" => Ok("ZShelper — готово"),
+        "key-down" => Ok("ZShelper — голосовая клавиша зажата"),
+        "key-up" => Ok("ZShelper — клавиша отпущена"),
+        "listening" => Ok("ZShelper — слушаю"),
+        "working" => Ok("ZShelper — обрабатываю запрос"),
+        "error" => Ok("ZShelper — ошибка; откройте окно"),
+        _ => Err("неизвестное состояние голоса".to_string()),
     }
 }
 
+pub fn set_voice_status(app: &AppHandle, status: &str) -> Result<(), String> {
+    let tooltip = voice_tooltip(status)?;
+    let tray = app
+        .tray_by_id("main")
+        .ok_or_else(|| "иконка трея не найдена".to_string())?;
+    tray.set_tooltip(Some(tooltip))
+        .map_err(|error| format!("статус голоса не обновлён в трее: {error}"))
+}
+
 pub fn set_voice_hold(app: &AppHandle, active: bool) {
-    let Some(tray) = app.tray_by_id("main") else {
-        tracing::warn!("иконка трея не найдена для voice status");
-        return;
-    };
-    if let Err(error) = tray.set_tooltip(Some(voice_tooltip(active))) {
-        tracing::warn!(%error, "статус голоса не обновлён в трее");
+    let status = if active { "key-down" } else { "key-up" };
+    if let Err(error) = set_voice_status(app, status) {
+        tracing::warn!(%error, "voice status не обновлён");
     }
 }
 
@@ -81,8 +91,11 @@ mod tests {
     use super::voice_tooltip;
 
     #[test]
-    fn tray_distinguishes_held_voice_key_from_ready() {
-        assert_eq!(voice_tooltip(true), "ZShelper — голосовая клавиша зажата");
-        assert_eq!(voice_tooltip(false), "ZShelper — готово");
+    fn tray_has_explicit_voice_states_and_rejects_unknown_values() {
+        assert_eq!(voice_tooltip("key-down").unwrap(), "ZShelper — голосовая клавиша зажата");
+        assert_eq!(voice_tooltip("listening").unwrap(), "ZShelper — слушаю");
+        assert_eq!(voice_tooltip("working").unwrap(), "ZShelper — обрабатываю запрос");
+        assert_eq!(voice_tooltip("error").unwrap(), "ZShelper — ошибка; откройте окно");
+        assert!(voice_tooltip("untrusted arbitrary tooltip").is_err());
     }
 }

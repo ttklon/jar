@@ -42,6 +42,7 @@ import type {
   SelfCheckVerdict,
   UndoPreview,
   UndoReport,
+  VoiceTrayStatus,
 } from "./types";
 
 export interface AppStatus {
@@ -62,6 +63,10 @@ export function registrySnapshot(): Promise<RegistrySnapshot> {
 
 export function appStatus(): Promise<AppStatus> {
   return invoke<AppStatus>("app_status");
+}
+
+export function setVoiceTrayStatus(status: VoiceTrayStatus): Promise<void> {
+  return invoke<void>("set_voice_tray_status", { status });
 }
 
 export function planFor(query: string, limit = 8): Promise<PlanItem[]> {

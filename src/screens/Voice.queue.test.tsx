@@ -43,6 +43,7 @@ vi.mock("../ipc", () => ({
   modelPrompt: vi.fn().mockResolvedValue(""),
   rememberFact: vi.fn().mockResolvedValue(undefined),
   runPlan: vi.fn(),
+  setVoiceTrayStatus: vi.fn().mockResolvedValue(undefined),
   speechStatus: vi.fn().mockResolvedValue({
     found: false,
     program: null,

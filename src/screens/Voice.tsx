@@ -18,6 +18,7 @@ import {
   runPlan,
   isolationStatus,
   speechStatus,
+  setVoiceTrayStatus,
   machineState,
   transcribeLocal,
   uiDump,
@@ -872,6 +873,19 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     },
     onError: (message) => setVoiceError(message),
   });
+
+  const trayVoiceState = voiceError
+    ? "error"
+    : mic.listening
+      ? "listening"
+      : busy || running || thinking
+        ? "working"
+        : "ready";
+  useEffect(() => {
+    void setVoiceTrayStatus(trayVoiceState).catch(() => {
+      // В браузере и при отсутствующей иконке трея UI продолжает работать.
+    });
+  }, [trayVoiceState]);
 
   useEffect(() => {
     frontRef.current = front;

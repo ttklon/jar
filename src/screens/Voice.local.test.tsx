@@ -54,6 +54,7 @@ vi.mock("../ipc", () => ({
   rememberFact: vi.fn().mockResolvedValue(undefined),
   runPlan: vi.fn(),
   speechStatus: vi.fn(),
+  setVoiceTrayStatus: vi.fn().mockResolvedValue(undefined),
   foregroundWindow: vi.fn().mockResolvedValue({
     title: "Видео — браузер",
     process: "chrome.exe",

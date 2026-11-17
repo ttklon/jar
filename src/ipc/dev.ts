@@ -21,6 +21,7 @@ import type {
   UiDump,
   UiPress,
   UiTyped,
+  VoiceTrayStatus,
 } from "./types";
 import { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
@@ -766,6 +767,10 @@ export async function isolationStatus(): Promise<IsolationStatus> {
     summary: "в браузере процессов нет",
     note: "потолки живут в ядре приложения: здесь запускать нечего",
   };
+}
+
+export async function setVoiceTrayStatus(_status: VoiceTrayStatus): Promise<void> {
+  // Browser preview has no system tray; the desktop adapter updates the native tooltip.
 }
 
 export async function speechStatus(): Promise<SpeechStatus> {

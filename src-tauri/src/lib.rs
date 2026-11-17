@@ -179,6 +179,7 @@ pub fn run() {
             ipc::search_episodes,
             ipc::run_plan,
             ipc::speech_status,
+            ipc::set_voice_tray_status,
             ipc::isolation_status,
             ipc::foreground_window,
             ipc::data_places,

@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use serde::Serialize;
-use tauri::State;
+use tauri::{AppHandle, State};
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::container;
@@ -1582,6 +1582,13 @@ pub fn isolation_status(state: State<'_, AppState>) -> IsolationStatus {
 }
 
 /// Есть ли чем распознавать локально. Ничего не запускает.
+#[tauri::command]
+/// Обновить ограниченный статус фонового голоса в трее.
+#[tauri::command]
+pub fn set_voice_tray_status(app: AppHandle, status: String) -> Result<(), String> {
+    crate::tray::set_voice_status(&app, &status)
+}
+
 #[tauri::command]
 pub fn speech_status(state: State<'_, AppState>) -> SpeechStatus {
     read_speech_status(&state)

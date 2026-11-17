@@ -353,6 +353,8 @@ export interface Screening {
 }
 
 /** Что известно о локальном распознавании речи. */
+export type VoiceTrayStatus = "ready" | "key-down" | "key-up" | "listening" | "working" | "error";
+
 export interface SpeechStatus {
   /** Найден ли `whisper-server.exe` рядом с приложением или в `PATH`. */
   found: boolean;
