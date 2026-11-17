@@ -259,11 +259,17 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     // «Слушаю всегда» выключается целиком; удержание — нет, там заканчивается только фраза.
     if (forever) {
       alwaysStop.current = () => {
+        // Stop immediately, not at the next VAD silence boundary. Discard any partial
+        // utterance so turning the mode off (or using tray Stop) never submits it.
+        discardRef.current = true;
         activeRef.current = false;
         setListening(false);
         setSpeaking(false);
         alwaysStop.current = null;
+        const flush = flushRef.current;
         flushRef.current = null;
+        flush?.();
+        if (!flush) finish();
       };
     }
 

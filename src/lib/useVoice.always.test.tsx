@@ -149,6 +149,7 @@ describe("слушаю всегда", () => {
 
     act(() => result.current.stop());
     await waitFor(() => expect(result.current.listening).toBe(false));
+    await waitFor(() => expect(stopped).toBe(1));
     expect(result.current.speaking).toBe(false);
     expect(transcribe).not.toHaveBeenCalled();
   });
