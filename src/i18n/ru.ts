@@ -591,6 +591,7 @@ export const voice = {
   openJournal: "История",
   loadError: "Не удалось найти",
   draftTitle: "Что могу сделать",
+  draftPreview: "Предлагаемый план",
   draftNeed: "нужно ваше разрешение",
   draftMissing: "данных пока нет",
   draftRun: "Выполнить",

@@ -170,6 +170,18 @@ export interface VoiceScreenProps {
   onOpen?: (screen: string) => void;
 }
 
+function describePlanParams(params?: Record<string, string>): string {
+  if (!params || Object.keys(params).length === 0) return "параметров нет";
+  return Object.entries(params)
+    .map(([name, value]) => {
+      const safeValue = /password|passphrase|secret|token|(?:api|access|private|client)[_-]?key|credential|authorization|bearer/i.test(name)
+        ? "[скрыто]"
+        : value;
+      return `${name}: ${safeValue}`;
+    })
+    .join("; ");
+}
+
 export function Voice({ onOpen }: VoiceScreenProps) {
   const styles = useStyles();
   const [text, setText] = useState("");
@@ -1648,6 +1660,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       {draft?.plan ? (
         <section className={styles.draft}>
           <Text weight="semibold">{voice.draftTitle}</Text>
+          <Text className={styles.note}>{`${voice.draftPreview}: ${draft.plan.goal}`}</Text>
+          <ol className={styles.problems}>
+            {draft.plan.steps.map((step, index) => (
+              <li key={`${step.registry}-${index}`}>
+                {`${index + 1}. ${step.registry} · ${describePlanParams(step.params)}${step.why ? ` · ${step.why}` : ""}`}
+              </li>
+            ))}
+          </ol>
           <ul className={styles.problems}>
             {draft.gates.map((gate) => (
               <li key={gate.position}>

@@ -759,7 +759,7 @@ describe("локальное распознавание на экране", () =
           steps: [
             {
               registry: "storage-backup|проверить|свободное место",
-              params: {},
+              params: { path: "C:\\Users\\test\\backup.zip", apiKey: "must-not-render" },
               why: "просил про диск",
             },
             {
@@ -803,6 +803,13 @@ describe("локальное распознавание на экране", () =
     );
     // И подтверждение на месте: план модели без «да» человека не выполняется.
     expect(screen.getByText("Что могу сделать")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "1. storage-backup|проверить|свободное место · path: C:\\Users\\test\\backup.zip; apiKey: [скрыто] · просил про диск",
+      ),
+    ).toBeTruthy();
+    expect(screen.getByText(/apiKey: \[скрыто\]/)).toBeTruthy();
+    expect(screen.queryByText(/must-not-render/)).toBeNull();
     expect(screen.getAllByText(/нужно ваше разрешение/)).toHaveLength(2);
     const approveFirst = screen.getByLabelText("разрешить шаг 1") as HTMLInputElement;
     const approveSecond = screen.getByLabelText("разрешить шаг 2") as HTMLInputElement;
