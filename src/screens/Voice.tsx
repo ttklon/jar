@@ -194,7 +194,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   /** Что именно учтено в этом поиске — иначе «учли контекст» превращается в обещание. */
   const [usedAround, setUsedAround] = useState<string | null>(null);
   const [draft, setDraft] = useState<PlanCheck | null>(null);
-  const [approved, setApproved] = useState(false);
+  const [approved, setApproved] = useState<number[]>([]);
   const [report, setReport] = useState<PlanReport | null>(null);
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
@@ -756,7 +756,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         setUsedAround(ranked.moved > 0 && frontRef.current ? aroundPhrase(frontRef.current) : null);
         setItems(found);
         setReport(null);
-        setApproved(false);
+        setApproved([]);
 
         // Черновик плана: что именно приложение собирается сделать. Спрашиваем его
         // сразу — человек сказал задачу, и ответ «могу сделать вот это» полезнее списка.
@@ -785,7 +785,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           // План от модели — обычный план: политика, вопросы и подтверждение те же.
           if (answered?.plan) {
             setDraft(answered.plan);
-            setApproved(false);
+            setApproved([]);
             setReport(null);
             const phrase = `${voice.thinkPlanReady(answered.plan.plan?.steps.length ?? 0)}. ${voice.thinkNotExecuted}`;
             setSpoken(speak(phrase) ? voice.said(phrase) : voice.silent);
@@ -875,7 +875,9 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   });
 
   const waitingForConfirmation =
-    draft?.gates.some((gate) => gate.decision === "confirm") === true && !approved;
+    draft?.gates.some(
+      (gate) => gate.decision === "confirm" && !approved.includes(gate.position),
+    ) === true;
   const trayVoiceState = voiceError
     ? "error"
     : mic.listening
@@ -1060,7 +1062,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           speak(voice.askSpoken(message));
           return null;
         }
-        return runPlan(JSON.stringify(checked.plan), approved ? [1] : []);
+        return runPlan(JSON.stringify(checked.plan), approved);
       })
       .then((result) => {
         if (!result) return;
@@ -1339,7 +1341,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                     setDraft(answer.plan);
                     setAnswers({});
                     setRemembered([]);
-                    setApproved(false);
+                    setApproved([]);
                     setReport(null);
                   }
 
@@ -1654,8 +1656,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                     <input
                       type="checkbox"
                       aria-label={voice.draftApprove(gate.position)}
-                      checked={approved}
-                      onChange={(event) => setApproved(event.target.checked)}
+                      checked={approved.includes(gate.position)}
+                      onChange={(event) =>
+                        setApproved((current) =>
+                          event.target.checked
+                            ? [...new Set([...current, gate.position])]
+                            : current.filter((position) => position !== gate.position),
+                        )
+                      }
                     />
                   ) : null}{" "}
                   {gate.registry} · {voice.planRisk[gate.risk] ?? gate.risk}
@@ -1725,7 +1733,9 @@ export function Voice({ onOpen }: VoiceScreenProps) {
               appearance="primary"
               disabled={
                 running ||
-                draft.gates.some((gate) => gate.decision === "confirm" && !approved) ||
+                draft.gates.some(
+                  (gate) => gate.decision === "confirm" && !approved.includes(gate.position),
+                ) ||
                 draft.questions.some(
                   (question) =>
                     (answers[`${question.position}:${question.name}`] ?? "").trim().length === 0,

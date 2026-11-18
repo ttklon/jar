@@ -762,6 +762,11 @@ describe("локальное распознавание на экране", () =
               params: {},
               why: "просил про диск",
             },
+            {
+              registry: "storage-backup|проверить|резервную копию",
+              params: {},
+              why: "второй подтверждаемый шаг",
+            },
           ],
         },
         problems: [],
@@ -770,6 +775,13 @@ describe("локальное распознавание на экране", () =
             position: 1,
             registry: "storage-backup|проверить|свободное место",
             risk: "read",
+            decision: "confirm",
+            wants_approval: true,
+          },
+          {
+            position: 2,
+            registry: "storage-backup|проверить|резервную копию",
+            risk: "destructive",
             decision: "confirm",
             wants_approval: true,
           },
@@ -791,8 +803,22 @@ describe("локальное распознавание на экране", () =
     );
     // И подтверждение на месте: план модели без «да» человека не выполняется.
     expect(screen.getByText("Что могу сделать")).toBeTruthy();
-    expect(screen.getByText(/нужно ваше разрешение/)).toBeTruthy();
-    expect(screen.getByLabelText("разрешить шаг 1")).toBeTruthy();
+    expect(screen.getAllByText(/нужно ваше разрешение/)).toHaveLength(2);
+    const approveFirst = screen.getByLabelText("разрешить шаг 1") as HTMLInputElement;
+    const approveSecond = screen.getByLabelText("разрешить шаг 2") as HTMLInputElement;
+    const runButton = screen.getByRole("button", { name: "Выполнить" }) as HTMLButtonElement;
+    expect(runButton.disabled).toBe(true);
+
+    fireEvent.click(approveFirst);
+    expect(approveFirst.checked).toBe(true);
+    expect(approveSecond.checked).toBe(false);
+    expect(runButton.disabled).toBe(true);
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
+
+    fireEvent.click(approveSecond);
+    expect(approveSecond.checked).toBe(true);
+    expect(runButton.disabled).toBe(false);
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
   });
 
   it("просьба модели об обучении остаётся карточкой, а не фразой в воздух", async () => {
