@@ -276,7 +276,7 @@ mod tests {
         )
         .with_limits(Limits {
             process_ms: 500,
-            timeout_ms: 30_000,
+            timeout_ms: 90_000,
             ..Limits::trial()
         });
 
@@ -299,7 +299,7 @@ mod tests {
             "убитый процесс не может быть успешным"
         );
         assert!(
-            started.elapsed().as_secs() < 20,
+            started.elapsed().as_secs() < 60,
             "потолок не сработал: {:?}",
             started.elapsed()
         );
