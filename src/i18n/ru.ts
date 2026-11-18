@@ -453,7 +453,8 @@ export const ask = {
   planNoPlan: "в браузере проверка планов недоступна — правила реестра и политики живут в ядре",
   planError: "Проверка не удалась",
   planSaved: "план сохранён в памяти",
-  planStepsTitle: "Шаги плана",
+  planGoal: "Цель",
+  planStepsTitle: "Шаги плана; параметры с именами секретов скрыты",
   planNeedsApproval: "нужно ваше разрешение",
   planApprove: (position: number) => `разрешить шаг ${position}`,
   planStep: (position: number, registry: string, risk: string) =>

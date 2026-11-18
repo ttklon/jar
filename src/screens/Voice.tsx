@@ -80,6 +80,7 @@ import {
 } from "../lib/loop";
 import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
+import { describePlanParams } from "../lib/planPreview";
 import { ActionList } from "../components/ActionList";
 import { voice } from "../i18n/ru";
 
@@ -168,18 +169,6 @@ const useStyles = makeStyles({
 export interface VoiceScreenProps {
   /** Переход к доказательству: реестр, руки, сценарии, история. */
   onOpen?: (screen: string) => void;
-}
-
-function describePlanParams(params?: Record<string, string>): string {
-  if (!params || Object.keys(params).length === 0) return "параметров нет";
-  return Object.entries(params)
-    .map(([name, value]) => {
-      const safeValue = /password|passphrase|secret|token|(?:api|access|private|client)[_-]?key|credential|authorization|bearer/i.test(name)
-        ? "[скрыто]"
-        : value;
-      return `${name}: ${safeValue}`;
-    })
-    .join("; ");
 }
 
 export function Voice({ onOpen }: VoiceScreenProps) {

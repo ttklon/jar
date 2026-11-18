@@ -14,6 +14,7 @@ import type { PlanCheck, PlanItem, PlanReport } from "../ipc";
 import { ask } from "../i18n/ru";
 import { speak } from "../lib/voice";
 import { useVoice } from "../lib/useVoice";
+import { describePlanParams } from "../lib/planPreview";
 import { ActionList } from "../components/ActionList";
 
 const LIMIT = 8;
@@ -237,7 +238,19 @@ export function Ask() {
         {check !== null && check.problems.length === 0 ? (
           <>
             <Text className={styles.okPlan}>{ask.planOk(check.plan?.steps.length ?? 0)}</Text>
+            {check.plan ? (
+              <Text className={styles.note}>{`${ask.planGoal}: ${check.plan.goal}`}</Text>
+            ) : null}
             <Text className={styles.note}>{ask.planStepsTitle}</Text>
+            {check.plan ? (
+              <ol className={styles.problems}>
+                {check.plan.steps.map((step, index) => (
+                  <li key={`${step.registry}-${index}`}>
+                    {`${index + 1}. ${step.registry} · ${describePlanParams(step.params)}${step.why ? ` · ${step.why}` : ""}`}
+                  </li>
+                ))}
+              </ol>
+            ) : null}
             <ul className={styles.problems}>
               {check.gates.map((gate) => {
                 const risky = gate.decision === "confirm";

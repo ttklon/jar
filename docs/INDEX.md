@@ -18,6 +18,7 @@
 | Файл | Заголовок | Назначение | Кто пишет |
 | --- | --- | --- | --- |
 | [ACTIONS.md](ACTIONS.md) | Реестр действий ZShelper | реестр действий: что система умеет | tools/actions.py |
+| [ALPHA-IMPROVEMENT-PLAN.md](ALPHA-IMPROVEMENT-PLAN.md) | План доработки альфы: от работающего прототипа к проверяемому продукту | Цель: закрывать реальные риски и пользовательские разрывы последовательно, не наращивать число записей каталога ради видимости готовности. План не объ | руками |
 | [APP-COVERAGE.md](APP-COVERAGE.md) | Каталог приложений: что ZShelper должен уметь автоматизировать | каталог приложений Windows и их tier | tools/app_targets.py |
 | [COVERAGE.md](COVERAGE.md) | Покрытие: где «умеет всё» пока не всё | аудит покрытия: дырки и глубина | tools/audit_actions.py |
 | [DECISION-STACK.md](DECISION-STACK.md) | Решение по стеку: Tauri 2 + Rust-ядро + React/Fluent UI | почему Tauri 2 + Rust + React, а не Electron | руками |

@@ -62,6 +62,7 @@ describe("проверка плана", () => {
     await waitFor(() => {
       expect(screen.getByText(/план исполним: 1 шагов/i)).toBeTruthy();
     });
+    expect(screen.getByText("Цель: посмотреть диск")).toBeTruthy();
   });
 
   it("проблемы перечислены по шагам и с причиной", async () => {
@@ -137,7 +138,11 @@ const RISKY = {
   source: "model",
   steps: [
     { registry: "files|проверить|дубликаты по хэшу", why: "сначала найти" },
-    { registry: "files|удалить|в корзину", why: "потом убрать" },
+    {
+      registry: "files|удалить|в корзину",
+      params: { path: "C:\\Users\\test\\duplicate.txt", apiKey: "hidden-test-value" },
+      why: "потом убрать",
+    },
   ],
 };
 
@@ -199,6 +204,12 @@ describe("запуск плана", () => {
     });
 
     const run = screen.getByRole("button", { name: /выполнить план/i }) as HTMLButtonElement;
+    expect(
+      screen.getByText(
+        "2. files|удалить|в корзину · path: C:\\Users\\test\\duplicate.txt; apiKey: [скрыто] · потом убрать",
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText(/hidden-test-value/)).toBeNull();
     expect(run.disabled).toBe(true);
 
     fireEvent.click(screen.getByLabelText("разрешить шаг 2"));
