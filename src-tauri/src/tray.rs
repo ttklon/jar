@@ -65,6 +65,8 @@ fn voice_tooltip(status: &str) -> Result<&'static str, String> {
         "key-up" => Ok("ZShelper — клавиша отпущена"),
         "listening" => Ok("ZShelper — слушаю"),
         "working" => Ok("ZShelper — обрабатываю запрос"),
+        "awaiting-confirmation" => Ok("ZShelper — жду подтверждения"),
+        "executing" => Ok("ZShelper — выполняю действие"),
         "error" => Ok("ZShelper — ошибка; откройте окно"),
         _ => Err("неизвестное состояние голоса".to_string()),
     }
@@ -108,6 +110,14 @@ mod tests {
         assert_eq!(
             voice_tooltip("working").unwrap(),
             "ZShelper — обрабатываю запрос"
+        );
+        assert_eq!(
+            voice_tooltip("awaiting-confirmation").unwrap(),
+            "ZShelper — жду подтверждения"
+        );
+        assert_eq!(
+            voice_tooltip("executing").unwrap(),
+            "ZShelper — выполняю действие"
         );
         assert_eq!(
             voice_tooltip("error").unwrap(),

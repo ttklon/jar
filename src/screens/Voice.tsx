@@ -874,13 +874,19 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     onError: (message) => setVoiceError(message),
   });
 
+  const waitingForConfirmation =
+    draft?.gates.some((gate) => gate.decision === "confirm") === true && !approved;
   const trayVoiceState = voiceError
     ? "error"
     : mic.listening
       ? "listening"
-      : busy || running || thinking
-        ? "working"
-        : "ready";
+      : running
+        ? "executing"
+        : waitingForConfirmation
+          ? "awaiting-confirmation"
+          : busy || thinking
+            ? "working"
+            : "ready";
   useEffect(() => {
     void setVoiceTrayStatus(trayVoiceState).catch(() => {
       // В браузере и при отсутствующей иконке трея UI продолжает работать.
