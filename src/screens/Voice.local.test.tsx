@@ -819,6 +819,10 @@ describe("локальное распознавание на экране", () =
     expect(approveSecond.checked).toBe(true);
     expect(runButton.disabled).toBe(false);
     expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
+
+    fireEvent.click(runButton);
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(runPlan).mock.calls[0]?.[1]).toEqual([1, 2]);
   });
 
   it("просьба модели об обучении остаётся карточкой, а не фразой в воздух", async () => {
