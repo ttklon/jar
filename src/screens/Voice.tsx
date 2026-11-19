@@ -857,6 +857,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         const value = heard.trim();
         setAnswerTarget(null);
         setAnswers((current) => ({ ...current, [`${target.position}:${target.name}`]: value }));
+        setApproved((current) => current.filter((position) => position !== target.position));
         speak(voice.answerHeard(value));
 
         // Следующий пустой вопрос задаём вслух: человек, который говорит, не смотрит в экран.
@@ -909,7 +910,11 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     const seeded = seedAnswers(draft.questions, knownFacts, answers);
     if (seeded.remembered.length === 0) return;
 
-    setAnswers((current) => ({ ...current, ...seeded.answers }));
+        setAnswers((current) => ({ ...current, ...seeded.answers }));
+        const seededPositions = new Set(
+          seeded.remembered.map((field) => Number(field.split(":", 1)[0])),
+        );
+        setApproved((current) => current.filter((position) => !seededPositions.has(position)));
     setRemembered((current) => [...new Set([...current, ...seeded.remembered])]);
     // `answers` не в зависимостях намеренно: подстановка не должна запускать саму себя.
   }, [draft, knownFacts]);
@@ -1061,6 +1066,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           const message = checked.problems[0]?.problem ?? voice.loadError;
           setError(message);
           speak(voice.askSpoken(message));
+          return null;
+        }
+        if (asked.length > 0 && checked.gates.some((gate) => gate.decision === "confirm")) {
+          // Ответ мог изменить параметры шага: покажем уже заполненный план и попросим
+          // согласие заново, а не применим подтверждение к старой версии.
+          setApproved([]);
+          setSpoken(voice.draftChangedReview);
+          speak(voice.draftChangedReview);
           return null;
         }
         return runPlan(JSON.stringify(checked.plan), approved);
@@ -1697,6 +1710,9 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                       placeholder={question.hint || question.label}
                       onChange={(_, data) => {
                         setAnswers((current) => ({ ...current, [key]: data.value }));
+                        setApproved((current) =>
+                          current.filter((position) => position !== question.position),
+                        );
                         // Человек поправил — это уже не память, а его слово.
                         setRemembered((current) => current.filter((field) => field !== key));
                       }}

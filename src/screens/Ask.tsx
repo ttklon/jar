@@ -142,6 +142,7 @@ export function Ask() {
     setPlanError(null);
     setSaved(false);
     setReport(null);
+    setCheck(null);
     setApproved([]);
     checkPlan(planJson)
       .then(setCheck)
@@ -210,8 +211,16 @@ export function Ask() {
               placeholder={ask.planPlaceholder}
               aria-label={ask.planTitle}
               resize="vertical"
+              disabled={planBusy}
               textarea={{ spellCheck: false }}
-              onChange={(_, data) => setPlanJson(data.value)}
+              onChange={(_, data) => {
+                setPlanJson(data.value);
+                setCheck(null);
+                setApproved([]);
+                setReport(null);
+                setSaved(false);
+                setPlanError(null);
+              }}
             />
             <div className={styles.bar}>
               <Button disabled={planBusy} onClick={verifyPlan}>

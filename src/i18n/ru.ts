@@ -593,6 +593,7 @@ export const voice = {
   loadError: "Не удалось найти",
   draftTitle: "Что могу сделать",
   draftPreview: "Предлагаемый план",
+  draftChangedReview: "Параметры обновились. Проверьте заполненный план и подтвердите нужные шаги заново.",
   draftNeed: "нужно ваше разрешение",
   draftMissing: "данных пока нет",
   draftRun: "Выполнить",

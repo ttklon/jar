@@ -115,6 +115,27 @@ describe("проверка плана", () => {
     });
   });
 
+  it("любая правка JSON отзывает старую проверку и подтверждения", async () => {
+    vi.mocked(checkPlan).mockResolvedValue({
+      plan: RISKY,
+      problems: [],
+      gates: RISKY_GATES,
+      questions: [],
+    });
+
+    render(<Ask />);
+    const editor = screen.getByLabelText(/проверить план/i);
+    fireEvent.change(editor, { target: { value: JSON.stringify(RISKY) } });
+    fireEvent.click(screen.getByRole("button", { name: /^проверить$/i }));
+    await waitFor(() => expect(screen.getByRole("button", { name: /выполнить план/i })).toBeTruthy());
+    fireEvent.click(screen.getByLabelText("разрешить шаг 2"));
+
+    fireEvent.change(editor, { target: { value: JSON.stringify({ ...RISKY, goal: "другая цель" }) } });
+    expect(screen.queryByRole("button", { name: /выполнить план/i })).toBeNull();
+    expect(screen.queryByLabelText("разрешить шаг 2")).toBeNull();
+    expect(screen.queryByText(/план исполним/)).toBeNull();
+  });
+
   it("сохранение говорит, что план запомнен", async () => {
     vi.mocked(checkPlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES, questions: [] });
     vi.mocked(savePlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES, questions: [] });

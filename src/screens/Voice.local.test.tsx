@@ -5,6 +5,7 @@ import {
   declarePresence,
   draftHand,
   draftPlan,
+  fillPlan,
   requestLearning,
   facts,
   modelPrompt,
@@ -31,6 +32,7 @@ vi.mock("../ipc", () => ({
   isTauri: () => true,
   planFor: vi.fn().mockResolvedValue([]),
   draftPlan: vi.fn().mockResolvedValue(null),
+  fillPlan: vi.fn(),
   requestLearning: vi.fn().mockResolvedValue(null),
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn().mockResolvedValue(null),
@@ -53,7 +55,7 @@ vi.mock("../ipc", () => ({
   ),
   rememberFact: vi.fn().mockResolvedValue(undefined),
   runPlan: vi.fn(),
-  speechStatus: vi.fn(),
+  speechStatus: vi.fn().mockResolvedValue(null),
   setVoiceTrayStatus: vi.fn().mockResolvedValue(undefined),
   foregroundWindow: vi.fn().mockResolvedValue({
     title: "Видео — браузер",
@@ -87,6 +89,7 @@ afterEach(() => {
   // иначе проверяется не поведение экрана, а порядок тестов.
   vi.mocked(planFor).mockReset().mockResolvedValue([]);
   vi.mocked(draftPlan).mockReset().mockResolvedValue(null);
+  vi.mocked(fillPlan).mockReset();
   vi.mocked(think).mockReset().mockResolvedValue(null as never);
   vi.mocked(uiDump).mockReset().mockRejectedValue(new Error("в браузере нет UI Automation"));
   // Запуск плана тоже: иначе «не выполнялось» в одном тесте зависит от другого.
@@ -830,6 +833,62 @@ describe("локальное распознавание на экране", () =
     fireEvent.click(runButton);
     await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1));
     expect(vi.mocked(runPlan).mock.calls[0]?.[1]).toEqual([1, 2]);
+  });
+
+  it("ответ, меняющий параметры подтверждаемого шага, требует нового согласия", async () => {
+    const initialPlan = {
+      plan: {
+        goal: "удали выбранный файл",
+        source: "model",
+        steps: [{ registry: "files|удалить|в корзину", params: {}, why: "по просьбе" }],
+      },
+      problems: [],
+      gates: [
+        {
+          position: 1,
+          registry: "files|удалить|в корзину",
+          risk: "destructive",
+          decision: "confirm" as const,
+          wants_approval: true,
+        },
+      ],
+      questions: [{ position: 1, name: "path", label: "Путь", hint: "Путь к файлу" }],
+    };
+    const filledPlan = {
+      ...initialPlan,
+      plan: {
+        ...initialPlan.plan,
+        steps: [
+          { registry: "files|удалить|в корзину", params: { path: "C:\\tmp\\target.txt" }, why: "по просьбе" },
+        ],
+      },
+      questions: [],
+    };
+    vi.mocked(draftPlan).mockResolvedValueOnce(initialPlan);
+    vi.mocked(fillPlan).mockResolvedValueOnce(filledPlan);
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "удали выбранный файл" } });
+    fireEvent.click(screen.getByText("Найти"));
+
+    const path = await screen.findByLabelText("Путь");
+    fireEvent.change(path, { target: { value: "C:\\tmp\\target.txt" } });
+    fireEvent.click(screen.getByLabelText("разрешить шаг 1"));
+    fireEvent.click(screen.getByRole("button", { name: "Ответить и выполнить" }));
+
+    await waitFor(() => expect(vi.mocked(fillPlan)).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(fillPlan).mock.calls[0]?.[1]).toHaveLength(1);
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
+    expect(screen.getByText(/Параметры обновились/)).toBeTruthy();
+    expect(
+      screen.getByText("1. files|удалить|в корзину · path: C:\\tmp\\target.txt · по просьбе"),
+    ).toBeTruthy();
+    expect((screen.getByLabelText("разрешить шаг 1") as HTMLInputElement).checked).toBe(false);
+
+    fireEvent.click(screen.getByLabelText("разрешить шаг 1"));
+    fireEvent.click(screen.getByRole("button", { name: "Выполнить" }));
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(runPlan).mock.calls[0]?.[1]).toEqual([1]);
   });
 
   it("просьба модели об обучении остаётся карточкой, а не фразой в воздух", async () => {
