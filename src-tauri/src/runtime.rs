@@ -508,4 +508,51 @@ mod tests {
         assert!(verify(&base).is_err());
         std::fs::remove_dir_all(base).unwrap();
     }
+    /// Network and upstream binary execution are opt-in, never part of normal tests.
+    #[cfg(all(windows, target_arch = "x86_64"))]
+    #[test]
+    #[ignore = "downloads pinned runtime + model and executes runtime; explicit consent required"]
+    fn pinned_runtime_conversation_smoke() {
+        use std::time::{Duration, SystemTime, UNIX_EPOCH};
+        assert!(std::env::var("ZSHELPER_RUNTIME_SMOKE").is_ok_and(|v| v == "1"),
+            "explicit ZSHELPER_RUNTIME_SMOKE=1 consent required");
+        struct Work(std::path::PathBuf);
+        impl Drop for Work {
+            fn drop(&mut self) { let _ = std::fs::remove_dir_all(&self.0); }
+        }
+        struct Engine(crate::server::Server);
+        impl Drop for Engine {
+            fn drop(&mut self) { let _ = self.0.stop(); }
+        }
+        let work = Work(std::env::temp_dir().join(format!("zshelper-live-smoke-{}-{}",
+            std::process::id(), SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos())));
+        std::fs::create_dir(&work.0).unwrap();
+        let memory = crate::memory::Memory::open(work.0.join("memory.db")).unwrap();
+        let model = &readiness::catalog().model;
+        let models_dir = work.0.join("models");
+        let downloaded = download::download_sized(&models_dir, &model.file, &model.url,
+            Some(&model.sha256), Some(model.bytes), download::MAX_MODEL_BYTES, &memory)
+            .expect("pinned model download and hash verification");
+        assert!(downloaded.verified);
+        println!("RUNTIME_SMOKE model bytes and SHA256 verified");
+        let installed = install(&work.0).expect("pinned runtime download and atomic installation");
+        verify(&work.0).expect("installed payload SHA256 inventory");
+        println!("RUNTIME_SMOKE runtime installed and verified");
+        let port = crate::server::free_port().unwrap();
+        let spec = crate::llama::spec(Path::new(&installed.program), &models_dir.join(&model.file), port);
+        let mut engine = Engine(crate::server::Server::start(&spec, &work.0.join("engine.log"), Duration::from_secs(120))
+            .expect("runtime startup and /health"));
+        println!("RUNTIME_SMOKE process started; loopback health OK");
+        let body = crate::llm::chat_body("Ответь одним словом: готово", "local");
+        let answer = crate::llm::ask(port, &body, Duration::from_secs(120)).expect("safe test question");
+        assert!(!answer.trim().is_empty(), "empty answer is not a conversation");
+        println!("RUNTIME_SMOKE nonempty text response received");
+        engine.0.stop().expect("stop runtime");
+        assert!(!engine.0.is_alive());
+        remove(&work.0).expect("remove managed runtime after stopping");
+        assert!(find(&work.0).is_none());
+        assert!(models_dir.join(&model.file).is_file(), "runtime removal must preserve model");
+        println!("RUNTIME_SMOKE process stopped; managed runtime removed; model preserved");
+    }
+
 }

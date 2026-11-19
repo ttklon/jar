@@ -11,6 +11,11 @@ on:
         type: boolean
         required: true
         default: false
+      runtime_smoke:
+        description: Download ~1 GB pinned model/runtime and execute conversation smoke on Windows runner
+        type: boolean
+        required: false
+        default: false
       release_tag:
         description: Release tag (must match the app version, for example v0.1.0)
         type: string
@@ -375,6 +380,31 @@ jobs:
         run: |
           echo "::error::cargo test упал — подробности в аннотациях выше"
           exit 1
+
+      - name: Pinned runtime conversation smoke (explicit network/execution consent)
+        if: github.event_name == 'workflow_dispatch' && inputs.runtime_smoke && steps.tests.outputs.status == '0'
+        id: runtime_smoke
+        shell: bash
+        env:
+          ZSHELPER_RUNTIME_SMOKE: "1"
+        run: |
+          set +e
+          cargo test --manifest-path src-tauri/Cargo.toml pinned_runtime_conversation_smoke -- --ignored --nocapture > runtime-smoke.log 2>&1
+          code=$?
+          echo "status=$code" >> "$GITHUB_OUTPUT"
+          grep "RUNTIME_SMOKE" runtime-smoke.log >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Runtime smoke failure report
+        if: always() && steps.runtime_smoke.outputs.status != '' && steps.runtime_smoke.outputs.status != '0'
+        shell: bash
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/ci_log_annotate.py runtime-smoke.log --title "pinned runtime smoke" --grep "FAILED|panicked|RUNTIME_SMOKE|error|Error" --after 4 --max 20
+
+      - name: Runtime smoke gate
+        if: steps.runtime_smoke.outputs.status != '' && steps.runtime_smoke.outputs.status != '0'
+        shell: bash
+        run: exit 1
 
       # У разработчика может не быть Rust-тулчейна (песочница, новая машина), а
       # форматирование детерминировано. Поэтому ветку чинит сам CI отдельным
