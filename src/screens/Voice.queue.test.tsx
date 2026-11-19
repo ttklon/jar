@@ -252,6 +252,40 @@ describe("очередь дел на экране", () => {
     expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
   });
 
+  it("стоп во время ожидания проверки очереди не запускает поздно проверенное дело", async () => {
+    let resolveDraft!: (value: typeof safePlan) => void;
+    vi.mocked(draftPlan).mockReturnValueOnce(new Promise((resolve) => { resolveDraft = resolve as (value: typeof safePlan) => void; }));
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+    addToQueue("убавить громкость");
+    fireEvent.click(screen.getByText("Работать без меня"));
+    await waitFor(() => expect(draftPlan).toHaveBeenCalledWith("убавить громкость"));
+
+    fireEvent.click(screen.getByText("Стоп"));
+    resolveDraft(safePlan);
+
+    await waitFor(() => expect(screen.getByText(/остановлено вами/)).toBeTruthy());
+    expect(runPlan).not.toHaveBeenCalled();
+  });
+
+  it("стоп во время опроса ресурсов не запускает дело после ответа системы", async () => {
+    let resolveMachine!: (value: typeof away) => void;
+    vi.mocked(machineState).mockReturnValueOnce(new Promise((resolve) => { resolveMachine = resolve as (value: typeof away) => void; }));
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+    addToQueue("убавить громкость");
+    fireEvent.click(screen.getByText("Работать без меня"));
+    await waitFor(() => expect(machineState).toHaveBeenCalled());
+
+    fireEvent.click(screen.getByText("Стоп"));
+    resolveMachine(away);
+
+    await waitFor(() => expect(screen.getByText(/остановлено вами/)).toBeTruthy());
+    expect(runPlan).not.toHaveBeenCalled();
+  });
+
   it("«стоп» останавливает то, что ещё не начиналось", async () => {
     render(<Voice onOpen={() => {}} />);
     await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());

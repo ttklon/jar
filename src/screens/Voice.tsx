@@ -176,6 +176,10 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [text, setText] = useState("");
   const [items, setItems] = useState<PlanItem[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const searchRequestRef = useRef(0);
+  const executeRequestRef = useRef(0);
+  const thoughtRequestRef = useRef(0);
+  const promptRequestRef = useRef(0);
   const [error, setError] = useState<string | null>(null);
   const [voiceError, setVoiceError] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
@@ -183,6 +187,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   /** Отменил ли человек запись — чтобы «ничего не ушло» было видно, а не молчало. */
   const [cancelled, setCancelled] = useState(false);
   const [speech, setSpeech] = useState<SpeechStatus | null>(null);
+  const [systemSpeechConsent, setSystemSpeechConsent] = useState(false);
   const [isolation, setIsolation] = useState<IsolationStatus | null>(null);
   /** Что перед человеком: спрашиваем в момент, когда он заговорил, а не один раз. */
   const [front, setFront] = useState<ForegroundWindow | null>(null);
@@ -561,11 +566,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         );
         for (const item of unknown.slice(0, 3)) {
           const check = await draftPlan(item.goal).catch(() => null);
+          if (queueStopRef.current) break;
           plans.set(item.id, check);
           sync(markScreen(items, item.id, usesScreen(check)));
         }
+        if (queueStopRef.current) continue;
 
         const machine = await Promise.resolve(machineState()).catch(() => null);
+        if (queueStopRef.current) continue;
         mayStartRef.current = machine?.budget.may_start ?? true;
         const decision = pick(
           items,
@@ -741,9 +749,21 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   }, [readScreen]);
 
   const search = useCallback((phrase: string) => {
+    executeRequestRef.current += 1;
+    thoughtRequestRef.current += 1;
+    promptRequestRef.current += 1;
+    setDraft(null);
+    setAnswers({});
+    setRemembered([]);
+    setApproved([]);
+    setReport(null);
+    setThought(null);
+    setThinking(false);
     const query = phrase.trim();
+    const request = ++searchRequestRef.current;
     if (query.length === 0) {
       setItems(null);
+      setBusy(false);
       return;
     }
 
@@ -751,6 +771,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     setError(null);
     planFor(query, LIMIT)
       .then(async (raw) => {
+        if (request !== searchRequestRef.current) return;
         // Сначала то, что про программу перед человеком. Решения и опасность не меняются.
         const ranked = rankForWindow(raw, frontRef.current);
         const found = ranked.items;
@@ -762,6 +783,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         // Черновик плана: что именно приложение собирается сделать. Спрашиваем его
         // сразу — человек сказал задачу, и ответ «могу сделать вот это» полезнее списка.
         const proposal = await draftPlan(query).catch(() => null);
+        if (request !== searchRequestRef.current) return;
         setDraft(proposal);
         setLearning(null);
 
@@ -773,6 +795,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           const window = frontRef.current;
           // Экран читаем до вопроса: без него у «нажми эту кнопку» нет адресата.
           const screenText = window ? await readScreen() : null;
+          if (request !== searchRequestRef.current) return;
           answered = await Promise.resolve(
             think(
               query,
@@ -781,6 +804,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                 : null,
             ),
           ).catch(() => null);
+          if (request !== searchRequestRef.current) return;
           setThought(answered);
 
           // План от модели — обычный план: политика, вопросы и подтверждение те же.
@@ -800,6 +824,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           proposal || answered?.plan
             ? null
             : answered?.learning ?? (await requestLearning(query).catch(() => null));
+        if (request !== searchRequestRef.current) return;
         if (promise) {
           setLearning(promise);
           speak(
@@ -828,10 +853,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
             : voice.draftSpoken(proposal.plan?.steps.length ?? 0);
         setSpoken(speak(phraseOut) ? voice.said(phraseOut) : voice.silent);
       })
-      .catch((reason: unknown) =>
-        setError(reason instanceof Error ? reason.message : String(reason)),
-      )
-      .finally(() => setBusy(false));
+      .catch((reason: unknown) => {
+        if (request === searchRequestRef.current) {
+          setError(reason instanceof Error ? reason.message : String(reason));
+        }
+      })
+      .finally(() => {
+        if (request === searchRequestRef.current) setBusy(false);
+      });
   }, [knownFacts]);
 
   // Свой движок есть — пишем звук и отдаём ему: это единственный путь, где звук не
@@ -849,6 +878,8 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const mic = useVoice({
     local: localEngine,
     always,
+    enabled: localEngine !== null || systemSpeechConsent,
+    disabledReason: voice.systemSpeechRequired,
     onText: (heard) => {
       setVoiceError(null);
       const target = answerTargetRef.current;
@@ -856,6 +887,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
       if (target) {
         const value = heard.trim();
         setAnswerTarget(null);
+        executeRequestRef.current += 1;
         setAnswers((current) => ({ ...current, [`${target.position}:${target.name}`]: value }));
         setApproved((current) => current.filter((position) => position !== target.position));
         speak(voice.answerHeard(value));
@@ -910,7 +942,15 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     const seeded = seedAnswers(draft.questions, knownFacts, answers);
     if (seeded.remembered.length === 0) return;
 
-        setAnswers((current) => ({ ...current, ...seeded.answers }));
+        executeRequestRef.current += 1;
+        setAnswers((current) => {
+          const safeSeeded = Object.fromEntries(
+            Object.entries(seeded.answers).filter(([field]) =>
+              seeded.remembered.includes(field) && (current[field] ?? "").trim().length === 0,
+            ),
+          );
+          return { ...current, ...safeSeeded };
+        });
         const seededPositions = new Set(
           seeded.remembered.map((field) => Number(field.split(":", 1)[0])),
         );
@@ -1027,6 +1067,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   }, [mic.listening]);
 
   const execute = useCallback(() => {
+    const request = ++executeRequestRef.current;
     const plan = draft?.plan;
     if (!plan) return;
 
@@ -1052,15 +1093,17 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     const prepared =
       asked.length > 0
         ? fillPlan(JSON.stringify(plan), asked).catch((reason: unknown) => {
-            const message = reason instanceof Error ? reason.message : String(reason);
-            setError(message);
+            if (request === executeRequestRef.current) {
+              const message = reason instanceof Error ? reason.message : String(reason);
+              setError(message);
+            }
             return null;
           })
         : Promise.resolve(draft);
 
     prepared
       .then((checked) => {
-        if (!checked) return null;
+        if (!checked || request !== executeRequestRef.current) return null;
         setDraft(checked);
         if (checked.problems.length > 0) {
           const message = checked.problems[0]?.problem ?? voice.loadError;
@@ -1210,6 +1253,19 @@ export function Voice({ onOpen }: VoiceScreenProps) {
 
       <Text className={styles.note}>{voice.hotkey}</Text>
       <Text className={styles.note}>{voice.privacy}</Text>
+      {!localEngine ? (
+        <>
+          <label>
+            <input
+              type="checkbox"
+              checked={systemSpeechConsent}
+              onChange={(event) => setSystemSpeechConsent(event.target.checked)}
+            />{" "}
+            {voice.systemSpeechConsent}
+          </label>
+          <Text className={styles.note}>{voice.systemSpeechConsentHint}</Text>
+        </>
+      ) : null}
       {speech ? (
         <Text className={speech.found && speech.model ? styles.localReady : styles.note}>
           {speech.found && speech.model
@@ -1285,7 +1341,20 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           value={text}
           aria-label={voice.heard}
           placeholder={voice.heardPlaceholder}
-          onChange={(_, data) => setText(data.value)}
+          onChange={(_, data) => {
+            thoughtRequestRef.current += 1;
+            promptRequestRef.current += 1;
+            setThinking(false);
+            executeRequestRef.current += 1;
+            setText(data.value);
+            setDraft(null);
+            setAnswers({});
+            setRemembered([]);
+            setApproved([]);
+            setReport(null);
+            setPromptText(null);
+            setPromptError(null);
+          }}
         />
         <Button type="submit" disabled={busy}>
           {voice.find}
@@ -1298,16 +1367,20 @@ export function Voice({ onOpen }: VoiceScreenProps) {
             size="small"
             appearance="subtle"
             onClick={() => {
+              const request = ++promptRequestRef.current;
               if (promptText !== null) {
                 setPromptText(null);
                 return;
               }
-              modelPrompt(text.trim(), front ? { title: front.title, process: front.process } : null)
+              const requestedText = text.trim();
+              modelPrompt(requestedText, front ? { title: front.title, process: front.process } : null)
                 .then((value) => {
+                  if (request !== promptRequestRef.current) return;
                   setPromptText(value);
                   setPromptError(null);
                 })
                 .catch((reason: unknown) => {
+                  if (request !== promptRequestRef.current) return;
                   setPromptText(null);
                   setPromptError(reason instanceof Error ? reason.message : String(reason));
                 });
@@ -1330,19 +1403,23 @@ export function Voice({ onOpen }: VoiceScreenProps) {
             appearance="subtle"
             disabled={thinking}
             onClick={() => {
+              const request = ++thoughtRequestRef.current;
+              const requestedText = text.trim();
               setThinking(true);
               setThinkError(null);
               setThought(null);
               readScreen()
-                .then((screenText) =>
-                  think(
-                    text.trim(),
+                .then((screenText) => {
+                  if (request !== thoughtRequestRef.current) return null;
+                  return think(
+                    requestedText,
                     front
                       ? { title: front.title, process: front.process, screen: screenText }
                       : null,
-                  ),
-                )
+                  );
+                })
                 .then((answer) => {
+                  if (!answer || request !== thoughtRequestRef.current) return;
                   setThought(answer);
 
                   // План модели — это обычный план: политика, вопросы и подтверждение те же.
@@ -1364,10 +1441,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                     : describeThought(answer);
                   speak(phrase);
                 })
-                .catch((reason: unknown) =>
-                  setThinkError(reason instanceof Error ? reason.message : String(reason)),
-                )
-                .finally(() => setThinking(false));
+                .catch((reason: unknown) => {
+                  if (request === thoughtRequestRef.current) {
+                    setThinkError(reason instanceof Error ? reason.message : String(reason));
+                  }
+                })
+                .finally(() => {
+                  if (request === thoughtRequestRef.current) setThinking(false);
+                });
             }}
           >
             {thinking ? voice.thinkThinking : voice.thinkShow}
@@ -1679,13 +1760,14 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                       type="checkbox"
                       aria-label={voice.draftApprove(gate.position)}
                       checked={approved.includes(gate.position)}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        executeRequestRef.current += 1;
                         setApproved((current) =>
                           event.target.checked
                             ? [...new Set([...current, gate.position])]
                             : current.filter((position) => position !== gate.position),
-                        )
-                      }
+                        );
+                      }}
                     />
                   ) : null}{" "}
                   {gate.registry} · {voice.planRisk[gate.risk] ?? gate.risk}
@@ -1709,6 +1791,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
                       aria-label={question.label}
                       placeholder={question.hint || question.label}
                       onChange={(_, data) => {
+                        executeRequestRef.current += 1;
                         setAnswers((current) => ({ ...current, [key]: data.value }));
                         setApproved((current) =>
                           current.filter((position) => position !== question.position),

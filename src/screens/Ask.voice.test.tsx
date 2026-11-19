@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { checkPlan, planFor, runPlan } from "../ipc";
+import type { PlanItem } from "../ipc";
 import { listen, speak } from "../lib/voice";
 import type { VoiceListeners } from "../lib/voice";
 import { Ask } from "./Ask";
@@ -44,6 +45,10 @@ afterEach(() => {
   vi.mocked(speak).mockReset();
 });
 
+function grantSystemSpeechConsent() {
+  fireEvent.click(screen.getByRole("checkbox", { name: /Разрешаю системное распознавание речи/ }));
+}
+
 function capture(): VoiceListeners {
   const call = vi.mocked(listen).mock.calls[0];
   if (!call) throw new Error("микрофон не включали");
@@ -53,12 +58,41 @@ function capture(): VoiceListeners {
 }
 
 describe("голосовой вход", () => {
+  it("поздний ответ старого поиска не затирает новый", async () => {
+    let resolveOld!: (value: PlanItem[]) => void;
+    let resolveNew!: (value: PlanItem[]) => void;
+    vi.mocked(planFor)
+      .mockReturnValueOnce(new Promise<PlanItem[]>((resolve) => { resolveOld = resolve; }))
+      .mockReturnValueOnce(new Promise<PlanItem[]>((resolve) => { resolveNew = resolve; }));
+
+    render(<Ask />);
+    const textbox = screen.getByLabelText(/почистить диск от временных файлов/i);
+    fireEvent.change(textbox, { target: { value: "старый запрос" } });
+    fireEvent.submit(textbox.closest("form")!);
+    fireEvent.change(textbox, { target: { value: "новый запрос" } });
+    fireEvent.submit(textbox.closest("form")!);
+
+    resolveNew([]);
+    await waitFor(() => expect(screen.getByRole("button", { name: /найти/i }).hasAttribute("disabled")).toBe(false));
+    resolveOld([]);
+    await waitFor(() => expect(planFor).toHaveBeenCalledTimes(2));
+    expect((textbox as HTMLInputElement).value).toBe("новый запрос");
+  });
+
+  it("не включает системный микрофон без согласия", () => {
+    render(<Ask />);
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
+    expect(listen).not.toHaveBeenCalled();
+    expect(screen.getByText(/Сначала отметьте согласие/)).toBeTruthy();
+  });
+
   it("держим кнопку — слушаем, услышанное сразу идёт в поиск", async () => {
     const stop = vi.fn();
     vi.mocked(listen).mockReturnValue({ stop });
     vi.mocked(planFor).mockResolvedValue([]);
 
     render(<Ask />);
+    grantSystemSpeechConsent();
 
     const mic = screen.getByRole("button", { name: "Держать и говорить" });
     fireEvent.pointerDown(mic);
@@ -90,6 +124,7 @@ describe("голосовой вход", () => {
     vi.mocked(listen).mockReturnValue({ stop });
 
     render(<Ask />);
+    grantSystemSpeechConsent();
 
     const mic = screen.getByRole("button", { name: "Держать и говорить" });
     fireEvent.pointerDown(mic);
@@ -102,6 +137,7 @@ describe("голосовой вход", () => {
     vi.mocked(listen).mockReturnValue({ stop: vi.fn() });
 
     render(<Ask />);
+    grantSystemSpeechConsent();
 
     fireEvent.keyDown(window, { code: "Space", ctrlKey: true });
     expect(listen).toHaveBeenCalledTimes(1);
@@ -116,6 +152,7 @@ describe("голосовой вход", () => {
     });
 
     render(<Ask />);
+    grantSystemSpeechConsent();
 
     fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
 
@@ -162,6 +199,7 @@ describe("голосовой вход", () => {
     });
 
     render(<Ask />);
+    grantSystemSpeechConsent();
 
     fireEvent.click(screen.getByRole("button", { name: /^проверить$/i }));
     await waitFor(() => {
@@ -199,6 +237,7 @@ describe("голосовой вход", () => {
     });
 
     render(<Ask />);
+    grantSystemSpeechConsent();
 
     fireEvent.click(screen.getByRole("button", { name: /^проверить$/i }));
     await waitFor(() => {

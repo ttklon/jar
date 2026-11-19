@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   Input,
@@ -93,14 +93,19 @@ export function Ask() {
   const [approved, setApproved] = useState<number[]>([]);
   const [report, setReport] = useState<PlanReport | null>(null);
   const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [systemSpeechConsent, setSystemSpeechConsent] = useState(false);
   const [spokenNote, setSpokenNote] = useState<string | null>(null);
   const [voiceSeconds, setVoiceSeconds] = useState(0);
+  const searchRequest = useRef(0);
+  const planRequest = useRef(0);
 
   const search = useCallback((text: string) => {
     const trimmed = text.trim();
+    const request = ++searchRequest.current;
     if (trimmed.length === 0) {
       // Пустой запрос — не ошибка: возвращаем экран в исходное состояние.
       setItems(null);
+      setBusy(false);
       setError(null);
       return;
     }
@@ -108,16 +113,24 @@ export function Ask() {
     setBusy(true);
     setError(null);
     planFor(trimmed, LIMIT)
-      .then(setItems)
-      .catch((reason: unknown) =>
-        setError(reason instanceof Error ? reason.message : String(reason)),
-      )
-      .finally(() => setBusy(false));
+      .then((result) => {
+        if (request === searchRequest.current) setItems(result);
+      })
+      .catch((reason: unknown) => {
+        if (request === searchRequest.current) {
+          setError(reason instanceof Error ? reason.message : String(reason));
+        }
+      })
+      .finally(() => {
+        if (request === searchRequest.current) setBusy(false);
+      });
   }, []);
 
   // Сказать задачу: услышанное идёт в тот же поиск, что и напечатанное. Голос — это
   // только вход, дальше обычный путь: реестр, руки, политика.
   const voice = useVoice({
+    enabled: systemSpeechConsent,
+    disabledReason: ask.voiceConsentRequired,
     onText: (text) => {
       setVoiceError(null);
       setQuery(text);
@@ -138,32 +151,47 @@ export function Ask() {
   }, [voice.listening]);
 
   const verifyPlan = useCallback(() => {
+    const request = ++planRequest.current;
+    const source = planJson;
     setPlanBusy(true);
     setPlanError(null);
     setSaved(false);
     setReport(null);
     setCheck(null);
     setApproved([]);
-    checkPlan(planJson)
-      .then(setCheck)
-      .catch((reason: unknown) =>
-        setPlanError(reason instanceof Error ? reason.message : String(reason)),
-      )
-      .finally(() => setPlanBusy(false));
+    checkPlan(source)
+      .then((result) => {
+        if (request === planRequest.current) setCheck(result);
+      })
+      .catch((reason: unknown) => {
+        if (request === planRequest.current) {
+          setPlanError(reason instanceof Error ? reason.message : String(reason));
+        }
+      })
+      .finally(() => {
+        if (request === planRequest.current) setPlanBusy(false);
+      });
   }, [planJson]);
 
   const storePlan = useCallback(() => {
+    const request = ++planRequest.current;
+    const source = planJson;
     setPlanBusy(true);
     setPlanError(null);
-    savePlan(planJson)
+    savePlan(source)
       .then((result) => {
+        if (request !== planRequest.current) return;
         setCheck(result);
         setSaved(result.problems.length === 0);
       })
-      .catch((reason: unknown) =>
-        setPlanError(reason instanceof Error ? reason.message : String(reason)),
-      )
-      .finally(() => setPlanBusy(false));
+      .catch((reason: unknown) => {
+        if (request === planRequest.current) {
+          setPlanError(reason instanceof Error ? reason.message : String(reason));
+        }
+      })
+      .finally(() => {
+        if (request === planRequest.current) setPlanBusy(false);
+      });
   }, [planJson]);
 
   const executePlan = useCallback(() => {
@@ -214,6 +242,8 @@ export function Ask() {
               disabled={planBusy}
               textarea={{ spellCheck: false }}
               onChange={(_, data) => {
+                planRequest.current += 1;
+                setPlanBusy(false);
                 setPlanJson(data.value);
                 setCheck(null);
                 setApproved([]);
@@ -351,6 +381,17 @@ export function Ask() {
           </>
         ) : null}
       </section>
+
+      <label>
+        <input
+          type="checkbox"
+          aria-label={ask.voiceConsent}
+          checked={systemSpeechConsent}
+          onChange={(event) => setSystemSpeechConsent(event.target.checked)}
+        />{" "}
+        {ask.voiceConsent}
+      </label>
+      <Text className={styles.note}>{ask.voiceConsentHint}</Text>
 
       <form
         className={styles.bar}

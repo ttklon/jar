@@ -29,6 +29,10 @@ export interface VoiceOptions {
   onError(message: string): void;
   /** Включить удержание Ctrl+Space. По умолчанию да. */
   hotkey?: boolean;
+  /** Разрешено ли запускать микрофон на текущем экране/маршруте. */
+  enabled?: boolean;
+  /** Пояснение, когда запуск заблокирован отсутствием согласия. */
+  disabledReason?: string;
   /** Пауза ожидания разбора после отпускания, мс. */
   grace?: number;
   /** Что сказать, если после отпускания ничего не разобралось. */
@@ -97,6 +101,8 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     local = null,
     always = false,
     pauseSend = true,
+    enabled = true,
+    disabledReason = "сначала подтвердите использование системной речи",
   } = options;
   const [listening, setListening] = useState(false);
   const [speaking, setSpeaking] = useState(false);
@@ -125,6 +131,8 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   // Колбэки живут в ссылке: иначе каждое изменение пропсов пересоздавало бы слушание.
   const callbacks = useRef({ onText, onError, nothingHeard, local });
   callbacks.current = { onText, onError, nothingHeard, local };
+  const permission = useRef({ enabled, disabledReason });
+  permission.current = { enabled, disabledReason };
 
   const clearGrace = useCallback(() => {
     if (graceRef.current !== null) {
@@ -150,7 +158,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
    */
   const listenSegments = useCallback((forever: boolean) => {
     const engine = callbacks.current.local;
-    if (!engine) return;
+    if (!engine || !permission.current.enabled) return;
 
     const run = () => {
       if (!activeRef.current) return;
@@ -277,6 +285,10 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   }, [finish]);
 
   const start = useCallback(() => {
+    if (!permission.current.enabled) {
+      callbacks.current.onError(permission.current.disabledReason);
+      return;
+    }
     if (activeRef.current) return;
 
     discardRef.current = false;
@@ -490,6 +502,13 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   );
 
   // Режим выключили, а микрофон ещё открыт — закрываем, не дожидаясь следующей фразы.
+  useEffect(() => {
+    if (!enabled && activeRef.current) {
+      if (alwaysStop.current) alwaysStop.current();
+      else cancel();
+    }
+  }, [cancel, enabled]);
+
   useEffect(() => {
     if (!always) {
       alwaysStop.current?.();

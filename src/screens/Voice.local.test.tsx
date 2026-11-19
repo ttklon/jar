@@ -107,6 +107,7 @@ afterEach(() => {
   vi.mocked(declarePresence).mockReset();
   vi.mocked(planFor).mockClear();
   vi.mocked(transcribeLocal).mockReset();
+  vi.mocked(modelPrompt).mockReset().mockResolvedValue("Ты выбираешь одно действие для помощника на Windows.\nЗадача человека:\nубавить громкость");
   vi.mocked(startRecording).mockReset();
 });
 
@@ -119,6 +120,31 @@ const FOUND = {
 };
 
 describe("локальное распознавание на экране", () => {
+  it("поздний результат старого поиска не запускает старый черновик плана", async () => {
+    let resolveOld!: (value: never[]) => void;
+    let resolveNew!: (value: never[]) => void;
+    vi.mocked(planFor)
+      .mockReturnValueOnce(new Promise<never[]>((resolve) => { resolveOld = resolve; }))
+      .mockReturnValueOnce(new Promise<never[]>((resolve) => { resolveNew = resolve; }));
+    vi.mocked(draftPlan).mockResolvedValue(null);
+
+    render(<Voice />);
+    const field = screen.getByLabelText("Услышал");
+    const form = field.closest("form");
+    if (!form) throw new Error("форма голосового поиска не найдена");
+
+    fireEvent.change(field, { target: { value: "старый запрос" } });
+    fireEvent.submit(form);
+    fireEvent.change(field, { target: { value: "новый запрос" } });
+    fireEvent.submit(form);
+
+    resolveNew([]);
+    await waitFor(() => expect(draftPlan).toHaveBeenCalledWith("новый запрос"));
+    resolveOld([]);
+    await waitFor(() => expect(planFor).toHaveBeenCalledTimes(2));
+    expect(draftPlan).toHaveBeenCalledTimes(1);
+  });
+
   it("говорит заранее, что звук остаётся на компьютере", async () => {
     vi.mocked(speechStatus).mockResolvedValue(FOUND);
 
@@ -748,6 +774,43 @@ describe("локальное распознавание на экране", () =
     expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
   });
 
+  it("не показывает устаревший текст запроса модели после смены задачи", async () => {
+    let resolvePrompt!: (value: string) => void;
+    vi.mocked(modelPrompt).mockReturnValueOnce(new Promise((resolve) => { resolvePrompt = resolve; }));
+    render(<Voice onOpen={() => {}} />);
+    const field = screen.getByLabelText("Услышал");
+    fireEvent.change(field, { target: { value: "первая задача" } });
+    fireEvent.click(screen.getByText("Что спросим у модели"));
+    await waitFor(() => expect(modelPrompt).toHaveBeenCalledTimes(1));
+
+    fireEvent.change(field, { target: { value: "другая задача" } });
+    resolvePrompt("устаревшее содержимое запроса");
+    await waitFor(() => expect(screen.queryByText("устаревшее содержимое запроса")).toBeNull());
+    expect(screen.queryByText(/Модели уйдёт ровно это/)).toBeNull();
+  });
+
+  it("смена задачи очищает старый план и его подтверждение", async () => {
+    vi.mocked(draftPlan).mockResolvedValueOnce({
+      plan: { goal: "опасное старое дело", source: "model", steps: [{ registry: "files|удалить|папку", params: {} }] },
+      problems: [],
+      questions: [],
+      gates: [{ position: 1, registry: "files|удалить|папку", risk: "destructive", decision: "confirm", wants_approval: true }],
+    } as never);
+
+    render(<Voice onOpen={() => {}} />);
+    const field = screen.getByLabelText("Услышал");
+    fireEvent.change(field, { target: { value: "опасное старое дело" } });
+    fireEvent.click(screen.getByText("Найти"));
+    await screen.findByLabelText("разрешить шаг 1");
+    fireEvent.click(screen.getByLabelText("разрешить шаг 1"));
+
+    fireEvent.change(field, { target: { value: "новая задача" } });
+
+    expect(screen.queryByLabelText("разрешить шаг 1")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Выполнить" })).toBeNull();
+    expect(runPlan).not.toHaveBeenCalled();
+  });
+
   it("план модели становится обычным планом: с подтверждением, а не сразу делом", async () => {
     vi.mocked(think).mockResolvedValueOnce({
       prompt: "…",
@@ -833,6 +896,37 @@ describe("локальное распознавание на экране", () =
     fireEvent.click(runButton);
     await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1));
     expect(vi.mocked(runPlan).mock.calls[0]?.[1]).toEqual([1, 2]);
+  });
+
+  it("изменение ответа во время перепроверки отменяет запуск устаревшего плана", async () => {
+    const initialPlan = {
+      plan: {
+        goal: "создай папку",
+        source: "model",
+        steps: [{ registry: "files|создать|папку", params: {}, why: "по просьбе" }],
+      },
+      problems: [],
+      gates: [],
+      questions: [{ position: 1, name: "path", label: "Путь", hint: "Путь к папке" }],
+    };
+    const filledPlan = { ...initialPlan, questions: [], problems: [] };
+    let resolveFill!: (value: typeof filledPlan) => void;
+    vi.mocked(draftPlan).mockResolvedValueOnce(initialPlan as never);
+    vi.mocked(fillPlan).mockReturnValueOnce(new Promise((resolve) => { resolveFill = resolve as (value: typeof filledPlan) => void; }));
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "создай папку" } });
+    fireEvent.click(screen.getByText("Найти"));
+
+    const path = await screen.findByLabelText("Путь");
+    fireEvent.change(path, { target: { value: "C:\\first" } });
+    fireEvent.click(screen.getByRole("button", { name: "Ответить и выполнить" }));
+    await waitFor(() => expect(fillPlan).toHaveBeenCalledTimes(1));
+
+    fireEvent.change(path, { target: { value: "C:\\second" } });
+    resolveFill(filledPlan);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Ответить и выполнить" })).toBeTruthy());
+    expect(runPlan).not.toHaveBeenCalled();
   });
 
   it("ответ, меняющий параметры подтверждаемого шага, требует нового согласия", async () => {

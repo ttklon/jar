@@ -51,6 +51,23 @@ afterEach(() => {
 });
 
 describe("удержание микрофона", () => {
+  it("не запускает системный микрофон без согласия; согласие включает путь", () => {
+    const onError = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ enabled }: { enabled: boolean }) =>
+        useVoice({ onText: vi.fn(), onError, enabled, disabledReason: "нужно согласие" }),
+      { initialProps: { enabled: false } },
+    );
+
+    act(() => result.current.start());
+    expect(onError).toHaveBeenCalledWith("нужно согласие");
+    expect(listen).not.toHaveBeenCalled();
+
+    rerender({ enabled: true });
+    act(() => result.current.start());
+    expect(listen).toHaveBeenCalledTimes(1);
+  });
+
   it("пока держим — слушаем, услышали — отпускаем сами", () => {
     const onText = vi.fn();
     const { result } = renderHook(() =>
