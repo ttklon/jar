@@ -192,28 +192,45 @@ pub fn start(
 /// A request owns its child before readiness polling starts, so cancel/shutdown
 /// can kill it during model loading as well as during inference.
 pub fn start_owned(
-    program: &Path, model: &Path, port: u16, log: &Path,
-    timeout: Duration, ticket: &crate::stt_session::Ticket,
+    program: &Path,
+    model: &Path,
+    port: u16,
+    log: &Path,
+    timeout: Duration,
+    ticket: &crate::stt_session::Ticket,
 ) -> Result<(), String> {
     use std::process::{Command, Stdio};
     ticket.check()?;
     let out = std::fs::File::create(log).map_err(|e| format!("лог ASR не создаётся: {e}"))?;
     let errors = out.try_clone().map_err(|e| e.to_string())?;
     let mut command = Command::new(program);
-    command.args(args(model, port)).stdin(Stdio::null())
-        .stdout(Stdio::from(out)).stderr(Stdio::from(errors));
+    command
+        .args(args(model, port))
+        .stdin(Stdio::null())
+        .stdout(Stdio::from(out))
+        .stderr(Stdio::from(errors));
     #[cfg(windows)]
     {
         use std::os::windows::process::CommandExt;
         command.creation_flags(0x08000000); // CREATE_NO_WINDOW
     }
-    ticket.attach(command.spawn().map_err(|e| format!("ASR не запустился: {e}"))?)?;
+    ticket.attach(
+        command
+            .spawn()
+            .map_err(|e| format!("ASR не запустился: {e}"))?,
+    )?;
     let deadline = std::time::Instant::now() + timeout;
     loop {
         ticket.check()?;
-        if ticket.exited()? { return Err("ASR завершился до готовности".into()); }
-        if wait_port(port, Duration::from_millis(100)) { return ticket.check(); }
-        if std::time::Instant::now() >= deadline { return Err("ASR не открыл порт вовремя".into()); }
+        if ticket.exited()? {
+            return Err("ASR завершился до готовности".into());
+        }
+        if wait_port(port, Duration::from_millis(100)) {
+            return ticket.check();
+        }
+        if std::time::Instant::now() >= deadline {
+            return Err("ASR не открыл порт вовремя".into());
+        }
     }
 }
 
@@ -235,20 +252,34 @@ pub fn post(port: u16, wav: &[u8], timeout: Duration) -> Result<String, String> 
 }
 
 pub fn post_cancellable(
-    port: u16, wav: &[u8], timeout: Duration, ticket: &crate::stt_session::Ticket,
+    port: u16,
+    wav: &[u8],
+    timeout: Duration,
+    ticket: &crate::stt_session::Ticket,
 ) -> Result<String, String> {
     post_checked(port, wav, timeout, Some(ticket))
 }
 
 fn post_checked(
-    port: u16, wav: &[u8], timeout: Duration, ticket: Option<&crate::stt_session::Ticket>,
+    port: u16,
+    wav: &[u8],
+    timeout: Duration,
+    ticket: Option<&crate::stt_session::Ticket>,
 ) -> Result<String, String> {
-    if wav.is_empty() { return Err("нечего распознавать: пустая запись".into()); }
-    if wav.len() > 16 * 1024 * 1024 { return Err("запись ASR превышает 16 МиБ".into()); }
+    if wav.is_empty() {
+        return Err("нечего распознавать: пустая запись".into());
+    }
+    if wav.len() > 16 * 1024 * 1024 {
+        return Err("запись ASR превышает 16 МиБ".into());
+    }
     let deadline = std::time::Instant::now() + timeout;
     let checkpoint = || -> Result<(), String> {
-        if let Some(ticket) = ticket { ticket.check()?; }
-        if std::time::Instant::now() >= deadline { return Err("время ожидания ASR истекло".into()); }
+        if let Some(ticket) = ticket {
+            ticket.check()?;
+        }
+        if std::time::Instant::now() >= deadline {
+            return Err("время ожидания ASR истекло".into());
+        }
         Ok(())
     };
     checkpoint()?;
@@ -256,9 +287,20 @@ fn post_checked(
     let poll = Duration::from_millis(100).min(timeout);
     let mut stream = TcpStream::connect_timeout(&address, poll)
         .map_err(|_| format!("движок не отвечает на 127.0.0.1:{port}"))?;
-    stream.set_read_timeout(Some(poll)).map_err(|e| e.to_string())?;
-    stream.set_write_timeout(Some(poll)).map_err(|e| e.to_string())?;
-    let retry = |e: &std::io::Error| matches!(e.kind(), std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut | std::io::ErrorKind::Interrupted);
+    stream
+        .set_read_timeout(Some(poll))
+        .map_err(|e| e.to_string())?;
+    stream
+        .set_write_timeout(Some(poll))
+        .map_err(|e| e.to_string())?;
+    let retry = |e: &std::io::Error| {
+        matches!(
+            e.kind(),
+            std::io::ErrorKind::WouldBlock
+                | std::io::ErrorKind::TimedOut
+                | std::io::ErrorKind::Interrupted
+        )
+    };
     let bytes = request(wav);
     let mut at = 0;
     while at < bytes.len() {
@@ -277,7 +319,9 @@ fn post_checked(
         match stream.read(&mut buffer) {
             Ok(0) => break,
             Ok(n) => {
-                if response.len() + n > 1024 * 1024 { return Err("ответ ASR превышает 1 МиБ".into()); }
+                if response.len() + n > 1024 * 1024 {
+                    return Err("ответ ASR превышает 1 МиБ".into());
+                }
                 response.extend_from_slice(&buffer[..n]);
             }
             Err(e) if retry(&e) => continue,
@@ -285,7 +329,9 @@ fn post_checked(
         }
     }
     checkpoint()?;
-    if response.is_empty() { return Err("движок закрыл соединение, ничего не ответив".into()); }
+    if response.is_empty() {
+        return Err("движок закрыл соединение, ничего не ответив".into());
+    }
     text_from_json(&String::from_utf8_lossy(body_of(&response)))
 }
 
@@ -403,7 +449,14 @@ mod tests {
         });
         let ticket = Arc::new(crate::stt_session::Ticket::default());
         let worker_ticket = ticket.clone();
-        let worker = thread::spawn(move || post_cancellable(port, &wav_fixture(), Duration::from_secs(10), &worker_ticket));
+        let worker = thread::spawn(move || {
+            post_cancellable(
+                port,
+                &wav_fixture(),
+                Duration::from_secs(10),
+                &worker_ticket,
+            )
+        });
         received.recv_timeout(Duration::from_secs(5)).unwrap();
         let now = std::time::Instant::now();
         ticket.stop().unwrap();
@@ -427,7 +480,9 @@ mod tests {
         let server = thread::spawn(move || {
             let (mut socket, _) = listener.accept().unwrap();
             for _ in 0..100 {
-                if socket.write_all(b" ").is_err() { break; }
+                if socket.write_all(b" ").is_err() {
+                    break;
+                }
                 thread::sleep(Duration::from_millis(10));
             }
         });

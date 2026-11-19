@@ -1819,10 +1819,14 @@ pub fn begin_transcription(state: State<'_, AppState>) -> Result<String, String>
 }
 
 #[tauri::command]
-pub async fn cancel_transcription(state: State<'_, AppState>, request_id: String) -> Result<(), String> {
+pub async fn cancel_transcription(
+    state: State<'_, AppState>,
+    request_id: String,
+) -> Result<(), String> {
     let requests = state.inner.asr.clone();
     tauri::async_runtime::spawn_blocking(move || requests.cancel(&request_id))
-        .await.map_err(|e| e.to_string())?
+        .await
+        .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]
@@ -1864,7 +1868,12 @@ pub async fn transcribe_local(
         let port = server::free_port()?;
         let log = inner.base_dir.join(format!("whisper-server-{port}.log"));
         stt::start_owned(
-            &program, &model, port, &log, std::time::Duration::from_secs(60), &lease.ticket,
+            &program,
+            &model,
+            port,
+            &log,
+            std::time::Duration::from_secs(60),
+            &lease.ticket,
         )?;
         let text = stt::post_cancellable(port, &audio, stt::TIMEOUT, &lease.ticket);
         // Check cancellation before delivering a result. Lease Drop kills/reaps on
