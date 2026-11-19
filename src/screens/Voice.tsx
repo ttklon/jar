@@ -44,6 +44,7 @@ import type {
   UiPress,
   UiTyped,
 } from "../ipc";
+import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { speak } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
@@ -83,7 +84,7 @@ import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
 import { describePlanParams } from "../lib/planPreview";
 import { ActionList } from "../components/ActionList";
-import { voice } from "../i18n/ru";
+import { voice, microphoneCheck as micTestText } from "../i18n/ru";
 
 /**
  * Главный экран. Человек ничего здесь не выбирает: он держит кнопку, говорит задачу,
@@ -188,6 +189,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const [spoken, setSpoken] = useState<string | null>(null);
   /** Отменил ли человек запись — чтобы «ничего не ушло» было видно, а не молчало. */
   const [cancelled, setCancelled] = useState(false);
+  const [micCheckBusy, setMicCheckBusy] = useState(false);
   const [speech, setSpeech] = useState<SpeechStatus | null>(null);
   const [systemSpeechConsent, setSystemSpeechConsent] = useState(false);
   const [isolation, setIsolation] = useState<IsolationStatus | null>(null);
@@ -880,8 +882,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const mic = useVoice({
     local: localEngine,
     always,
-    enabled: localEngine !== null || systemSpeechConsent,
-    disabledReason: voice.systemSpeechRequired,
+    enabled: !micCheckBusy && (localEngine !== null || systemSpeechConsent),
+    disabledReason: micCheckBusy ? micTestText.busyReason : voice.systemSpeechRequired,
     onText: (heard) => {
       setVoiceError(null);
       const target = answerTargetRef.current;
@@ -1287,6 +1289,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
             : voice.ceilingsNone(isolation.note)}
         </Text>
       ) : null}
+
+      <MicrophoneCheck active={active} disabled={mic.listening} onBusyChange={setMicCheckBusy} />
 
       {voiceError ? <Text className={styles.error}>{voiceError}</Text> : null}
 

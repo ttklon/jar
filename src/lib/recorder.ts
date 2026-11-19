@@ -14,10 +14,11 @@
  * успевать за речью.
  */
 
+import { audioCapture as text } from "../i18n/ru";
 import { prepare, TARGET_RATE } from "./wav";
 
 /** Нет микрофона — так и говорим, без «не удалось». */
-export const NO_MIC = "микрофон в этом окружении недоступен";
+export const NO_MIC = text.unavailable;
 
 export interface Recording {
   wav: Uint8Array;
@@ -34,8 +35,8 @@ export interface Recorder {
  * Что делать с каждым куском звука по мере записи.
  *
  * Нужен режиму «слушаю всегда»: пока пишем, кто-то должен решать, началась ли фраза.
- * Возвращённое `false` означает «запись больше не нужна» — рекордер аккуратно
- * останавливается сам, чтобы не держать микрофон открытым.
+ * Возвращённое `false` прекращает сбор кадров. Владелец обязан вызвать stop()
+ * вне аудиоколбэка, чтобы закрыть граф и микрофон.
  */
 export type FrameSink = (frame: Float32Array, sampleRate: number) => boolean | void;
 
@@ -63,6 +64,7 @@ interface ContextLike {
   createScriptProcessor(size: number, input: number, output: number): ProcessorLike;
   createGain(): GainLike;
   close(): Promise<void>;
+  resume?(): Promise<void>;
 }
 
 interface StreamLike {
@@ -83,85 +85,144 @@ export function microphoneAvailable(): boolean {
  * Начинает запись. Ошибки называют причину: «нет доступа» и «нет микрофона» — это
  * разные вещи, и человеку нужно знать, какую из них чинить.
  */
+export interface CaptureOptions {
+  signal?: AbortSignal;
+  /** Diagnostic mode: inspect frames but never retain audio chunks or a waveform. */
+  retainAudio?: boolean;
+}
+
+function aborted(): Error {
+  return Object.assign(new Error(text.cancelled), { name: "AbortError" });
+}
+
+function abortable(pending: Promise<void>, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) return Promise.reject(aborted());
+  return new Promise((resolve, reject) => {
+    const cancel = () => reject(aborted());
+    signal?.addEventListener("abort", cancel, { once: true });
+    pending.then(() => {
+      signal?.removeEventListener("abort", cancel);
+      resolve();
+    }, (error: unknown) => {
+      signal?.removeEventListener("abort", cancel);
+      reject(error);
+    });
+  });
+}
+
+/** getUserMedia cannot be aborted by the browser API: release late grants ourselves. */
+async function openStream(devices: MediaDevicesLike, signal?: AbortSignal): Promise<StreamLike> {
+  if (signal?.aborted) throw aborted();
+  return new Promise((resolve, reject) => {
+    const cancel = () => reject(aborted());
+    signal?.addEventListener("abort", cancel, { once: true });
+    let pending: Promise<StreamLike>;
+    try {
+      pending = devices.getUserMedia({
+        audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
+      });
+    } catch (error) {
+      signal?.removeEventListener("abort", cancel);
+      reject(error);
+      return;
+    }
+    pending.then((stream) => {
+      signal?.removeEventListener("abort", cancel);
+      if (signal?.aborted) { stopTracks(stream); reject(aborted()); }
+      else resolve(stream);
+    }, (error: unknown) => {
+      signal?.removeEventListener("abort", cancel);
+      reject(error);
+    });
+  });
+}
+
+function stopTracks(stream: StreamLike): void {
+  for (const track of stream.getTracks()) {
+    try { track.stop(); } catch { /* Continue releasing the remaining tracks. */ }
+  }
+}
+
 export async function startRecording(
   rate = TARGET_RATE,
   onFrame?: FrameSink,
+  options: CaptureOptions = {},
 ): Promise<Recorder> {
   const devices = (navigator as unknown as { mediaDevices?: MediaDevicesLike }).mediaDevices;
-  if (!devices || typeof devices.getUserMedia !== "function") {
-    throw new Error(NO_MIC);
-  }
-
+  if (!devices || typeof devices.getUserMedia !== "function") throw new Error(NO_MIC);
   let stream: StreamLike;
-  try {
-    stream = await devices.getUserMedia({
-      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true },
-    });
-  } catch (error) {
+  try { stream = await openStream(devices, options.signal); }
+  catch (error) {
     const name = error instanceof Error ? error.name : String(error);
-    throw new Error(
-      name === "NotAllowedError"
-        ? "микрофон закрыт: разрешите доступ к нему"
-        : `микрофон не открылся: ${name}`,
-    );
+    if (name === "AbortError") throw error;
+    throw new Error(name === "NotAllowedError" ? text.denied
+      : name === "NotFoundError" ? text.missing
+      : name === "NotReadableError" ? text.busy : text.failed(name));
   }
 
-  const Context = (globalThis as unknown as { AudioContext: new (options?: unknown) => ContextLike })
-    .AudioContext;
-  const context = new Context({ sampleRate: rate });
-  const source = context.createMediaStreamSource(stream);
-  // Куски по 1024 отсчёта: при 16 кГц это 64 мс — достаточно часто, чтобы заметить начало
-  // фразы, и достаточно редко, чтобы не занимать поток. Длину куска в миллисекундах
-  // считает тот, кто его получает: частота известна только здесь.
-  const processor = context.createScriptProcessor(1024, 1, 1);
-
-  // Уводим звук в «тишину»: граф должен быть подключён, иначе браузер не станет
-  // вызывать обработчик, но слышать себя в колонках человек не должен.
-  const silence = context.createGain();
-  silence.gain.value = 0;
-
-  const chunks: Float32Array[] = [];
-  processor.onaudioprocess = (event) => {
-    // Копия обязательна: буфер переиспользуется, и без копии мы запомнили бы пустоту.
-    const copy = new Float32Array(event.inputBuffer.getChannelData(0));
-    chunks.push(copy);
-
-    if (onFrame && onFrame(copy, context.sampleRate) === false) {
-      // Слушать больше нечего: закрываем микрофон, а не оставляем его включённым.
-      processor.onaudioprocess = null;
-    }
-  };
-
-  source.connect(processor);
-  processor.connect(silence);
-  silence.connect(context.destination);
-
+  let context: ContextLike | undefined;
+  let source: ReturnType<ContextLike["createMediaStreamSource"]> | undefined;
+  let processor: ProcessorLike | undefined;
+  let silence: GainLike | undefined;
   let stopped = false;
+  const chunks: Float32Array[] = [];
+  const cancel = () => { chunks.length = 0; void release().catch(() => undefined); };
+  // Track release is synchronous; a slow/failed AudioContext.close must not retain it.
+  async function release(): Promise<void> {
+    if (stopped) return;
+    stopped = true;
+    options.signal?.removeEventListener("abort", cancel);
+    if (processor) processor.onaudioprocess = null;
+    for (const node of [processor, silence, source]) {
+      try { node?.disconnect(); } catch { /* Still close the device and other nodes. */ }
+    }
+    stopTracks(stream);
+    await context?.close();
+  }
 
+  try {
+    if (options.signal?.aborted) throw aborted();
+    const Context = (globalThis as unknown as { AudioContext?: new (options?: unknown) => ContextLike }).AudioContext;
+    if (!Context) throw new Error(text.graph);
+    context = new Context({ sampleRate: rate });
+    const activeContext = context;
+    source = context.createMediaStreamSource(stream);
+    processor = context.createScriptProcessor(1024, 1, 1);
+    const activeProcessor = processor;
+    silence = context.createGain();
+    silence.gain.value = 0;
+    processor.onaudioprocess = (event) => {
+      if (stopped) return;
+      const copy = new Float32Array(event.inputBuffer.getChannelData(0));
+      if (options.retainAudio !== false) chunks.push(copy);
+      // false stops frame collection; the caller still closes the recorder outside
+      // the audio callback (the VAD path schedules that close explicitly).
+      if (onFrame?.(copy, activeContext.sampleRate) === false) activeProcessor.onaudioprocess = null;
+    };
+    source.connect(processor);
+    processor.connect(silence);
+    silence.connect(context.destination);
+    options.signal?.addEventListener("abort", cancel, { once: true });
+    if (options.signal?.aborted) throw aborted();
+    await abortable(context.resume?.() ?? Promise.resolve(), options.signal);
+    if (options.signal?.aborted || stopped) throw aborted();
+  } catch (error) {
+    await release().catch(() => undefined);
+    throw error;
+  }
+
+  const sampleRate = context.sampleRate;
   return {
     stop: async () => {
-      if (stopped) {
-        return { wav: new Uint8Array(0), seconds: 0, sampleRate: context.sampleRate };
-      }
-      stopped = true;
-
-      processor.onaudioprocess = null;
-      processor.disconnect();
-      silence.disconnect();
-      source.disconnect();
-      for (const track of stream.getTracks()) track.stop();
-      await context.close();
-
+      if (stopped) return { wav: new Uint8Array(0), seconds: 0, sampleRate };
+      await release();
       const length = chunks.reduce((total, chunk) => total + chunk.length, 0);
       const samples = new Float32Array(length);
       let at = 0;
-      for (const chunk of chunks) {
-        samples.set(chunk, at);
-        at += chunk.length;
-      }
-
-      const { wav, seconds } = prepare(samples, context.sampleRate);
-      return { wav, seconds, sampleRate: context.sampleRate };
+      for (const chunk of chunks) { samples.set(chunk, at); at += chunk.length; }
+      chunks.length = 0;
+      const { wav, seconds } = prepare(samples, sampleRate);
+      return { wav, seconds, sampleRate };
     },
   };
 }
