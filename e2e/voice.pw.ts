@@ -113,3 +113,30 @@ test("Escape after release rejects delayed ASR before it becomes a task", async 
   expect(state.cancelledRequests).toContain(state.asrRequests[0]);
   expect(state.commands).not.toContain("run_plan");
 });
+
+
+test("processing remains visible after release and can be cancelled by button", async ({ page }) => {
+  await page.evaluate(() => { window.voiceSimulation.state.delayAsr = true; });
+  await hold(page);
+  await expect(page.getByText("Распознаю локально… Можно отменить, не дожидаясь результата.", { exact: true })).toBeVisible();
+  await released(page);
+  await expect(page.getByRole("button", { name: "Проверить микрофон локально", exact: true })).toBeDisabled();
+  await page.getByRole("button", { name: "Отменить распознавание", exact: true }).click();
+  await expect(page.getByText("распознавание отменено — результат не станет задачей", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Отменить распознавание", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Проверить микрофон локально", exact: true })).toBeEnabled();
+  await expect(page.getByLabel("Услышал", { exact: true })).toHaveValue("");
+  const state = await page.evaluate(() => window.voiceSimulation.state);
+  expect(state.queries).toEqual([]);
+  expect(state.cancelledRequests).toContain(state.asrRequests[0]);
+});
+
+test("successful delayed ASR clears processing and delivers its actual text", async ({ page }) => {
+  await page.evaluate(() => { window.voiceSimulation.state.delayAsr = true; });
+  await hold(page);
+  await expect(page.getByRole("button", { name: "Отменить распознавание", exact: true })).toBeVisible();
+  await page.evaluate(() => window.voiceSimulation.resolveAsr("расскажи что умеешь"));
+  await expect(page.getByLabel("Услышал", { exact: true })).toHaveValue("расскажи что умеешь");
+  await expect(page.getByRole("button", { name: "Отменить распознавание", exact: true })).toHaveCount(0);
+  await released(page);
+});

@@ -32,12 +32,18 @@ impl Ticket {
                 return Err("владелец процесса ASR недоступен".into());
             }
         };
-        if self.check().is_err() || slot.is_some() {
+        if slot.is_some() {
             let _ = child.kill();
             let _ = child.wait();
             return Err(CANCELLED.into());
         }
+        // Keep ownership even if cancel won the race and kill itself fails.
         *slot = Some(child);
+        drop(slot);
+        if self.check().is_err() {
+            self.stop()?;
+            return Err(CANCELLED.into());
+        }
         Ok(())
     }
 
@@ -298,6 +304,24 @@ mod tests {
             .spawn()
             .unwrap();
         assert!(ticket.attach(child).is_err());
-        assert!(ticket.child.lock().unwrap().is_none());
+        assert!(ticket.exited().unwrap());
     }
+    #[cfg(windows)]
+    #[test]
+    fn racing_spawn_keeps_its_handle_when_cancel_cleanup_fails() {
+        use std::process::Command;
+        let ticket = Ticket::default();
+        ticket.stop().unwrap();
+        ticket.fail_stop.store(true, Ordering::SeqCst);
+        let child = Command::new("powershell.exe")
+            .args(["-NoProfile", "-NonInteractive", "-Command", "Start-Sleep -Seconds 60"])
+            .spawn().unwrap();
+        let failed = ticket.attach(child).is_err();
+        let retained = ticket.child.lock().unwrap().is_some();
+        ticket.fail_stop.store(false, Ordering::SeqCst);
+        ticket.stop().unwrap();
+        assert!(failed && retained);
+        assert!(ticket.exited().unwrap());
+    }
+
 }

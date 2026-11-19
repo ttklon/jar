@@ -61,6 +61,8 @@ export interface VoiceOptions {
 
 export interface VoiceControl {
   listening: boolean;
+  /** Audio is closed/closing and a local ASR result is pending. */
+  processing: boolean;
   supported: boolean;
   /** Идёт ли сейчас фраза в режиме «слушаю всегда». */
   speaking: boolean;
@@ -105,6 +107,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     disabledReason = "сначала подтвердите использование системной речи",
   } = options;
   const [listening, setListening] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [speaking, setSpeaking] = useState(false);
 
   const voiceRef = useRef<Voice | null>(null);
@@ -115,18 +118,22 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   // ASR is an input trust boundary: a superseded/cancelled capture must never
   // deliver text (and therefore a task), even if the native request finishes later.
   const pending = useRef(false);
+  const setPending = useCallback((value: boolean) => {
+    pending.current = value;
+    setProcessing(value);
+  }, []);
   const generation = useRef(0);
   const utterance = useRef(0);
   const capture = useRef<AbortController | null>(null);
   const asr = useRef<AbortController | null>(null);
   const invalidate = useCallback(() => {
     generation.current += 1;
-    pending.current = false;
+    setPending(false);
     asr.current?.abort();
     asr.current = null;
     capture.current?.abort();
     capture.current = null;
-  }, []);
+  }, [setPending]);
   const transcribe = useCallback(async (
     engine: NonNullable<VoiceOptions["local"]>, wav: Uint8Array,
   ) => {
@@ -224,7 +231,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
           return;
         }
 
-        pending.current = true;
+        setPending(true);
         current
           .stop()
           .then((recording) => {
@@ -252,7 +259,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
           })
           .finally(() => {
             if (!valid()) return;
-            pending.current = false;
+            setPending(false);
             if (activeRef.current) run();
             else finish();
           });
@@ -328,7 +335,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     }
 
     run();
-  }, [finish, invalidate, transcribe]);
+  }, [finish, invalidate, setPending, transcribe]);
 
   const start = useCallback(() => {
     if (!permission.current.enabled) {
@@ -437,7 +444,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
         return;
       }
 
-      pending.current = true;
+      setPending(true);
       recorder
         .stop()
         .then((recording) => {
@@ -459,7 +466,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
         .catch((error: unknown) => {
           if (valid()) callbacks.current.onError(error instanceof Error ? error.message : String(error));
         })
-        .finally(() => { if (valid()) pending.current = false; });
+        .finally(() => { if (valid()) setPending(false); });
       return;
     }
 
@@ -474,7 +481,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
       }
       finish();
     }, grace);
-  }, [clearGrace, finish, grace, invalidate, transcribe]);
+  }, [clearGrace, finish, grace, invalidate, setPending, transcribe]);
 
   const cancel = useCallback(() => {
     if (!activeRef.current) {
@@ -591,5 +598,5 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   // а системное распознавание однократное.
   const alwaysSupported = local !== null && microphoneAvailable();
 
-  return { listening, supported, speaking, alwaysSupported, start, stop, cancel };
+  return { listening, processing, supported, speaking, alwaysSupported, start, stop, cancel };
 }

@@ -1837,6 +1837,7 @@ pub async fn transcribe_local(
 ) -> Result<String, String> {
     let inner = state.inner.clone();
     let lease = inner.asr.acquire(&request_id)?;
+    crate::stt_audio::validate(&audio)?;
     let status = read_speech_status(&state);
 
     let program = stt::find_program(&inner.base_dir).ok_or_else(|| {
@@ -1851,10 +1852,6 @@ pub async fn transcribe_local(
             status.models_dir
         )
     })?;
-
-    if audio.is_empty() || audio.len() > 16 * 1024 * 1024 {
-        return Err("запись ASR пуста или превышает 16 МиБ".to_string());
-    }
 
     let run = inner
         .memory

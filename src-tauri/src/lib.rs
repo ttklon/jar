@@ -66,6 +66,8 @@ pub mod server;
 pub mod services;
 pub mod step;
 pub mod stt;
+pub mod stt_audio;
+pub mod stt_http;
 pub mod stt_session;
 pub mod tools;
 pub mod tray;

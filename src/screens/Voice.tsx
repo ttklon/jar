@@ -189,6 +189,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const [spoken, setSpoken] = useState<string | null>(null);
   /** Отменил ли человек запись — чтобы «ничего не ушло» было видно, а не молчало. */
   const [cancelled, setCancelled] = useState(false);
+  const [cancelledAsr, setCancelledAsr] = useState(false);
   const [micCheckBusy, setMicCheckBusy] = useState(false);
   const [speech, setSpeech] = useState<SpeechStatus | null>(null);
   const [systemSpeechConsent, setSystemSpeechConsent] = useState(false);
@@ -920,15 +921,17 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     ) === true;
   const trayVoiceState = voiceError
     ? "error"
-    : mic.listening
-      ? "listening"
-      : running
-        ? "executing"
-        : waitingForConfirmation
-          ? "awaiting-confirmation"
-          : busy || thinking
-            ? "working"
-            : "ready";
+    : mic.processing
+      ? "working"
+      : mic.listening
+        ? "listening"
+        : running
+          ? "executing"
+          : waitingForConfirmation
+            ? "awaiting-confirmation"
+            : busy || thinking
+              ? "working"
+              : "ready";
   useEffect(() => {
     void setVoiceTrayStatus(trayVoiceState).catch(() => {
       // В браузере и при отсутствующей иконке трея UI продолжает работать.
@@ -1169,19 +1172,22 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         <Text className={styles.note}>{voice.pauseSend}</Text>
       ) : null}
 
-      {mic.listening && !always ? (
+      {mic.processing ? <Text role="status" className={styles.note}>{voice.asrProcessing}</Text> : null}
+
+      {(mic.listening && !always) || mic.processing ? (
         <Button
           appearance="subtle"
           onClick={() => {
+            setCancelledAsr(mic.processing);
             mic.cancel();
             setCancelled(true);
           }}
         >
-          {voice.cancelShow}
+          {mic.processing ? voice.asrCancel : voice.cancelShow}
         </Button>
       ) : null}
 
-      {cancelled ? <Text className={styles.note}>{voice.cancelled}</Text> : null}
+      {cancelled ? <Text className={styles.note}>{cancelledAsr ? voice.asrCancelled : voice.cancelled}</Text> : null}
 
       <Button
         className={mic.listening ? styles.micListening : styles.mic}
@@ -1222,7 +1228,9 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           mic.stop();
         }}
       >
-        {always
+        {mic.processing
+          ? voice.asrProcessingShort
+          : always
           ? mic.listening
             ? mic.speaking
               ? voice.alwaysSpeaking
@@ -1292,7 +1300,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         </Text>
       ) : null}
 
-      <MicrophoneCheck active={active} disabled={mic.listening} onBusyChange={setMicCheckBusy} />
+      <MicrophoneCheck active={active} disabled={mic.listening || mic.processing} onBusyChange={setMicCheckBusy} />
 
       {voiceError ? <Text className={styles.error}>{voiceError}</Text> : null}
 

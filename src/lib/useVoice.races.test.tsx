@@ -25,6 +25,36 @@ async function opened() {
 }
 
 describe("ASR session isolation", () => {
+  it("exposes processing between release and ASR completion, clears it on cancel", async () => {
+    ready(); const answer = deferred<string>();
+    const transcribe = vi.fn().mockReturnValue(answer.promise);
+    const { result } = renderHook(() => useVoice({ local: { transcribe }, onText: vi.fn(), onError: vi.fn() }));
+    expect(result.current.processing).toBe(false);
+    act(() => result.current.start()); await opened();
+    act(() => result.current.stop());
+    await waitFor(() => expect(transcribe).toHaveBeenCalledOnce());
+    expect(result.current.listening).toBe(false);
+    expect(result.current.processing).toBe(true);
+    act(() => result.current.cancel());
+    expect(result.current.processing).toBe(false);
+    await act(async () => answer.resolve("stale"));
+    expect(result.current.processing).toBe(false);
+  });
+
+  it("old finalizer cannot clear processing of the new ASR", async () => {
+    ready(); const first = deferred<string>(); const second = deferred<string>();
+    const transcribe = vi.fn().mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise);
+    const { result } = renderHook(() => useVoice({ local: { transcribe }, onText: vi.fn(), onError: vi.fn() }));
+    act(() => result.current.start()); await opened(); act(() => result.current.stop());
+    await waitFor(() => expect(transcribe).toHaveBeenCalledTimes(1));
+    act(() => result.current.start()); await opened(); act(() => result.current.stop());
+    await waitFor(() => expect(transcribe).toHaveBeenCalledTimes(2));
+    await act(async () => first.resolve("old"));
+    expect(result.current.processing).toBe(true);
+    await act(async () => second.resolve("new"));
+    await waitFor(() => expect(result.current.processing).toBe(false));
+  });
+
   it.each([false, true])("cancel after release rejects a late transcript (pauseSend=%s)", async (pauseSend) => {
     ready();
     const answer = deferred<string>();

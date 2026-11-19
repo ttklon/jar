@@ -234,15 +234,6 @@ pub fn start_owned(
     }
 }
 
-/// Отделяет тело ответа от заголовков.
-fn body_of(response: &[u8]) -> &[u8] {
-    response
-        .windows(4)
-        .position(|window| window == b"\r\n\r\n")
-        .map(|at| &response[at + 4..])
-        .unwrap_or(response)
-}
-
 /// Отправляет звук движку и возвращает распознанный текст.
 ///
 /// Ошибки различаются по смыслу: «движок не отвечает» (не запущен или умер) и
@@ -272,6 +263,7 @@ fn post_checked(
     if wav.len() > 16 * 1024 * 1024 {
         return Err("запись ASR превышает 16 МиБ".into());
     }
+    crate::stt_audio::validate(wav)?;
     let deadline = std::time::Instant::now() + timeout;
     let checkpoint = || -> Result<(), String> {
         if let Some(ticket) = ticket {
@@ -332,7 +324,7 @@ fn post_checked(
     if response.is_empty() {
         return Err("движок закрыл соединение, ничего не ответив".into());
     }
-    text_from_json(&String::from_utf8_lossy(body_of(&response)))
+    text_from_json(crate::stt_http::json_body(&response)?)
 }
 
 #[cfg(test)]
@@ -342,12 +334,20 @@ mod tests {
     use std::thread;
 
     fn wav_fixture() -> Vec<u8> {
-        // Настоящий WAV не нужен: проверяем, что байты дошли без перекодирования.
-        let mut bytes = b"RIFF".to_vec();
-        bytes.extend_from_slice(&[0x24, 0x00, 0x00, 0x00]);
-        bytes.extend_from_slice(b"WAVEfmt ");
-        bytes.extend_from_slice(&[1, 2, 3, 4, 5]);
-        bytes
+        let mut wav = vec![0; 46];
+        wav[0..4].copy_from_slice(b"RIFF");
+        wav[4..8].copy_from_slice(&38u32.to_le_bytes());
+        wav[8..16].copy_from_slice(b"WAVEfmt ");
+        wav[16..20].copy_from_slice(&16u32.to_le_bytes());
+        wav[20..22].copy_from_slice(&1u16.to_le_bytes());
+        wav[22..24].copy_from_slice(&1u16.to_le_bytes());
+        wav[24..28].copy_from_slice(&16000u32.to_le_bytes());
+        wav[28..32].copy_from_slice(&32000u32.to_le_bytes());
+        wav[32..34].copy_from_slice(&2u16.to_le_bytes());
+        wav[34..36].copy_from_slice(&16u16.to_le_bytes());
+        wav[36..40].copy_from_slice(b"data");
+        wav[40..44].copy_from_slice(&2u32.to_le_bytes());
+        wav
     }
 
     #[test]
@@ -416,6 +416,28 @@ mod tests {
 
         assert_eq!(text, "открой почту");
         assert!(request.starts_with("POST /inference"), "{request}");
+    }
+
+    #[test]
+    fn a_valid_text_in_an_http_error_never_becomes_recognition() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let worker = thread::spawn(move || {
+            let (mut socket, _) = listener.accept().unwrap();
+            let mut buffer = [0; 8192];
+            socket.read(&mut buffer).unwrap();
+            socket.write_all(b"HTTP/1.1 500 Error\r\nContent-Type: application/json\r\nContent-Length: 15\r\n\r\n{\"text\":\"fake\"}").unwrap();
+        });
+        let result = post(port, &wav_fixture(), Duration::from_secs(5));
+        worker.join().unwrap();
+        assert!(result.unwrap_err().contains("HTTP 500"));
+    }
+
+    #[test]
+    fn malformed_wav_is_rejected_before_connecting_to_any_server() {
+        let error = post(1, b"not a wave file", Duration::from_secs(1)).unwrap_err();
+        assert!(error.contains("WAV"), "{error}");
+        assert!(!error.contains("не отвечает"));
     }
 
     #[test]
