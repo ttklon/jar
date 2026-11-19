@@ -530,16 +530,14 @@ mod tests {
                 let _ = self.0.stop();
             }
         }
-        let work = Work(
-            std::env::temp_dir().join(format!(
+        let work = Work(std::env::temp_dir().join(format!(
                 "zshelper-live-smoke-{}-{}",
                 std::process::id(),
                 SystemTime::now()
                     .duration_since(UNIX_EPOCH)
                     .unwrap()
                     .as_nanos()
-            )),
-        );
+            )));
         std::fs::create_dir(&work.0).unwrap();
         let memory = crate::memory::Memory::open(work.0.join("memory.db")).unwrap();
         let model = &readiness::catalog().model;
