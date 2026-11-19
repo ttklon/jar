@@ -3,10 +3,10 @@ import { test, expect, type Page } from "@playwright/test";
 type SimState = {
   commands: string[]; queries: string[]; micRequests: number; spoken: string[]; unknown: string[];
   wavs: { bytes: number; rate: number; samples: number; peak: number }[];
-  streams: MediaStream[]; asrError: boolean; micError: boolean;
+  streams: MediaStream[]; asrError: boolean; delayAsr: boolean; micError: boolean;
 };
 declare global {
-  interface Window { voiceSimulation: { state: SimState; hold(payload: "down" | "up"): Promise<void> } }
+  interface Window { voiceSimulation: { state: SimState; resolveAsr(text: string): void; hold(payload: "down" | "up"): Promise<void> } }
 }
 async function hold(page: Page) {
   const button = page.getByRole("button", { name: "Держать и говорить", exact: true });
@@ -95,4 +95,20 @@ test("simulated native hold event uses the same real audio path", async ({ page 
   await page.evaluate(() => window.voiceSimulation.hold("up"));
   await expect.poll(() => page.evaluate(() => window.voiceSimulation.state.queries.length)).toBe(1);
   await released(page);
+});
+
+
+test("Escape after release rejects delayed ASR before it becomes a task", async ({ page }) => {
+  await page.evaluate(() => { window.voiceSimulation.state.delayAsr = true; });
+  await hold(page);
+  await expect.poll(() => page.evaluate(() => window.voiceSimulation.state.wavs.length)).toBe(1);
+  await released(page);
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => window.voiceSimulation.resolveAsr("удали файлы"));
+  // Drain promise continuations and render work after the deliberately late result.
+  await page.waitForTimeout(300);
+  await expect(page.getByLabel("Услышал", { exact: true })).toHaveValue("");
+  const state = await page.evaluate(() => window.voiceSimulation.state);
+  expect(state.queries).toEqual([]);
+  expect(state.commands).not.toContain("run_plan");
 });

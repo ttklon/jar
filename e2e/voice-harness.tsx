@@ -13,9 +13,11 @@ const state = {
   streams: [] as MediaStream[],
   micRequests: 0,
   asrError: false,
+  delayAsr: false,
   micError: false,
   unknown: [] as string[],
 };
+let resolveAsr: ((text: string) => void) | null = null;
 const nativeGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
 navigator.mediaDevices.getUserMedia = async (constraints) => {
   state.micRequests++;
@@ -65,6 +67,7 @@ mockIPC((command, payload) => {
       for (let at = 44; at < bytes.length; at += 2) peak = Math.max(peak, Math.abs(view.getInt16(at, true)));
       state.wavs.push({ bytes: bytes.length, rate: view.getUint32(24, true), samples: (bytes.length - 44) / 2, peak });
       if (state.asrError) throw new Error("SIMULATED ASR failure");
+      if (state.delayAsr) return new Promise<string>((resolve) => { resolveAsr = resolve; });
       // Deliberately NOT recognition: deterministic contract fixture after validating real captured audio.
       return state.wavs.length === 1 ? "привет помощник" : "расскажи что умеешь";
     }
@@ -82,6 +85,7 @@ mockIPC((command, payload) => {
 
 Object.assign(window, { voiceSimulation: {
   state,
+  resolveAsr: (text: string) => { resolveAsr?.(text); resolveAsr = null; },
   hold: (payload: "down" | "up") => emit("voice://hold", payload),
 } });
 ReactDOM.createRoot(document.getElementById("root")!).render(
