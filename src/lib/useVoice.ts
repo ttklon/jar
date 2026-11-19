@@ -201,7 +201,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
         closing = true;
         // Фразу отменили: закрываем микрофон и начинаем заново, без разбора.
         if (!wanted() || discardRef.current) {
-          discardRef.current = false;
+          if (valid()) discardRef.current = false;
           current
             .stop()
             .catch(() => undefined)
