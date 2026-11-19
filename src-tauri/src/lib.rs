@@ -56,9 +56,11 @@ pub mod plan;
 pub mod planner;
 pub mod policy;
 pub mod profiles;
+pub mod readiness;
 pub mod registry;
 pub mod restricted;
 pub mod roles;
+pub mod runtime;
 pub mod sandbox;
 pub mod server;
 pub mod services;
@@ -162,6 +164,12 @@ pub fn run() {
             ipc::list_models,
             ipc::verify_model,
             ipc::download_model,
+            ipc::cancel_download,
+            ipc::download_progress,
+            ipc::readiness_status,
+            ipc::download_runtime,
+            ipc::remove_runtime,
+            ipc::smoke_check,
             ipc::remove_model,
             ipc::engine_status,
             ipc::start_engine,

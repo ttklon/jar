@@ -44,6 +44,7 @@ import type {
   UiPress,
   UiTyped,
 } from "../ipc";
+import { ReadinessCard } from "../components/ReadinessCard";
 import { speak } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
 import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
@@ -167,11 +168,12 @@ const useStyles = makeStyles({
 });
 
 export interface VoiceScreenProps {
+  active?: boolean;
   /** Переход к доказательству: реестр, руки, сценарии, история. */
   onOpen?: (screen: string) => void;
 }
 
-export function Voice({ onOpen }: VoiceScreenProps) {
+export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const styles = useStyles();
   const [text, setText] = useState("");
   const [items, setItems] = useState<PlanItem[] | null>(null);
@@ -1156,6 +1158,8 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           {voice.lead}
         </Text>
       </div>
+
+      <ReadinessCard active={active} onToModels={onOpen ? () => onOpen("models") : undefined} />
 
       {mic.listening && !always ? (
         <Text className={styles.note}>{voice.pauseSend}</Text>

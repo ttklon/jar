@@ -502,6 +502,70 @@ export interface Downloaded {
   verified: boolean;
 }
 
+/** Pinned-модель для первого разговора (`data/readiness.json`). */
+export interface ModelSpec {
+  id: string;
+  title: string;
+  file: string;
+  url: string;
+  sha256: string;
+  bytes: number;
+  license: string;
+  source: string;
+  min_ram_gb: number;
+  description: string;
+}
+
+/** Pinned-движок `llama-server` из релиза llama.cpp (`data/readiness.json`). */
+export interface RuntimeSpec {
+  id: string;
+  title: string;
+  asset: string;
+  url: string;
+  sha256: string;
+  bytes: number;
+  license: string;
+  source: string;
+  program: string;
+  description: string;
+}
+
+/**
+ * Готовность к первому разговору. Только факты: что есть на машине и чего не хватает.
+ * `missing` — `engine` и/или `model`; пусто — готово. Локальное распознавание
+ * (`speech_*`) для первого разговора необязательно и в `missing` не входит.
+ */
+export interface ReadinessStatus {
+  download_name: string | null;
+  runtime_managed: boolean;
+  runtime_supported: boolean;
+  engine_found: boolean;
+  engine_running: boolean;
+  engine_program: string | null;
+  engine_search_dir: string;
+  model_present: boolean;
+  model_name: string | null;
+  model_bytes: number;
+  models_dir: string;
+  free_bytes: number | null;
+  speech_found: boolean;
+  speech_model: string | null;
+  speech_search_dir: string;
+  model_spec: ModelSpec;
+  runtime_spec: RuntimeSpec;
+  ready: boolean;
+  missing: string[];
+}
+
+/** Итог проверки разговора: движок запущен и ответил (или нет) на тестовый вопрос. */
+export interface SmokeResult {
+  ok: boolean;
+  answer: string | null;
+  model: string | null;
+  port: number | null;
+  note: string;
+}
+
 /** Результат сверки хеша. `verdict`: `first` | `same` | `changed`. */
 export interface HashCheck {
   name: string;
@@ -735,3 +799,5 @@ export interface SelfCheckVerdict {
   detail: string;
   ms: number;
 }
+
+export interface Installed { program: string }

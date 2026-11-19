@@ -152,31 +152,23 @@ pub fn total_bytes(items: &[ModelFile]) -> u64 {
 /// Свободное место на диске, где лежит папка моделей.
 ///
 /// На не-Windows — `None`: число, взятое с потолка, в интерфейсе опаснее пустоты.
-/// Папки может ещё не быть, поэтому диск определяется по корню пути, а не по файлу.
+/// Папки может ещё не быть: опрашиваем ближайший существующий каталог через WinAPI.
 #[cfg(windows)]
 pub fn free_space(dir: &Path) -> Option<u64> {
-    let path = dir.display().to_string().replace('\'', "''");
-    // Диск берётся по корню пути, а не по `DeviceID`: у корня есть обратная косая
-    // черта («C:\»), и фильтр CIM `DeviceID='C:\'` не совпадает ни с чем.
-    let script = format!(
-        "$drive = [System.IO.Path]::GetPathRoot('{path}').TrimEnd('\\').TrimEnd(':');\
-         Write-Output (Get-PSDrive -Name $drive).Free"
-    );
-
-    let output = std::process::Command::new("powershell.exe")
-        .args(crate::executor::powershell(&script))
-        .output()
-        .ok()?;
-
-    if !output.status.success() {
-        tracing::warn!(
-            stderr = %String::from_utf8_lossy(&output.stderr).trim(),
-            "свободное место на диске не удалось узнать"
-        );
-        return None;
-    }
-
-    String::from_utf8_lossy(&output.stdout).trim().parse().ok()
+    use std::os::windows::ffi::OsStrExt;
+    // Closest existing ancestor also works for not-yet-created model/sidecar folders
+    // and UNC volumes. No PowerShell process or interpolated command is needed.
+    let existing = dir.ancestors().find(|path| path.is_dir())?;
+    let wide: Vec<u16> = existing.as_os_str().encode_wide().chain(Some(0)).collect();
+    let mut available = 0u64;
+    // SAFETY: NUL-terminated live path buffer and valid output pointer; other outputs
+    // are optional according to GetDiskFreeSpaceExW's contract.
+    let ok = unsafe {
+        windows_sys::Win32::Storage::FileSystem::GetDiskFreeSpaceExW(
+            wide.as_ptr(), &mut available, std::ptr::null_mut(), std::ptr::null_mut(),
+        )
+    };
+    (ok != 0).then_some(available)
 }
 
 #[cfg(not(windows))]

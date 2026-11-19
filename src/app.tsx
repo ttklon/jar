@@ -200,7 +200,7 @@ export function App() {
               style={{ display: screen === "voice" ? "contents" : "none" }}
               aria-hidden={screen !== "voice"}
             >
-              <Voice onOpen={(next) => setScreen(next as Screen)} />
+              <Voice active={screen === "voice"} onOpen={(next) => setScreen(next as Screen)} />
             </div>
           ) : null}
           {error ? (

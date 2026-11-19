@@ -29,9 +29,11 @@ import type {
   PlanItem,
   PlanReport,
   ProfileView,
+  ReadinessStatus,
   RegistrySnapshot,
   RoleView,
   RunRecord,
+  SmokeResult,
   SpeechStatus,
   StepResult,
   Thought,
@@ -91,6 +93,33 @@ export function downloadModel(
   sha256?: string,
 ): Promise<Downloaded> {
   return invoke<Downloaded>("download_model", { url, name, sha256: sha256 ?? null });
+}
+
+/** Отменить текущее скачивание. Скачивания нет — не ошибка. */
+export function cancelDownload(): Promise<void> {
+  return invoke<void>("cancel_download");
+}
+
+/** Сколько байт уже скачано в `<имя>.part`. `null` — скачивания нет. */
+export function downloadProgress(name: string): Promise<number | null> {
+  return invoke<number | null>("download_progress", { name });
+}
+
+/** Готовность к первому разговору. Только чтение: ничего не скачивает и не запускает. */
+export function readinessStatus(): Promise<ReadinessStatus> {
+  return invoke<ReadinessStatus>("readiness_status");
+}
+
+
+
+
+
+/**
+ * Запустить движок (если ещё не запущен) и проверить разговор одним безопасным вопросом.
+ * Только по явной кнопке: нажатие кнопки и есть согласие на запуск.
+ */
+export function smokeCheck(): Promise<SmokeResult> {
+  return invoke<SmokeResult>("smoke_check");
 }
 
 export function engineStatus(): Promise<EngineStatus> {
@@ -337,4 +366,11 @@ export function listProfiles(): Promise<ProfileView[]> {
 
 export function memoryRuns(limit: number): Promise<RunRecord[]> {
   return invoke<RunRecord[]>("memory_runs", { limit });
+}
+
+export function downloadRuntime(): Promise<import("./types").Installed> {
+  return invoke("download_runtime");
+}
+export function removeRuntime(): Promise<void> {
+  return invoke("remove_runtime");
 }

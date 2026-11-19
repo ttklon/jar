@@ -35,6 +35,8 @@ import type {
   ModelsView,
   RoleView,
 } from "../ipc";
+import catalog from "../../data/readiness.json";
+import { ReadinessCard } from "../components/ReadinessCard";
 import { models as text } from "../i18n/ru";
 
 const useStyles = makeStyles({
@@ -289,6 +291,8 @@ export function Models() {
       </Text>
       <Text className={styles.lead}>{text.lead}</Text>
 
+      <ReadinessCard />
+
       <section className={styles.download}>
         <Text as="h2" size={500}>
           {text.download.title}
@@ -299,9 +303,9 @@ export function Models() {
           <Button
             size="small"
             onClick={() => {
-              setUrl("https://huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf");
+              setUrl(catalog.model.url);
               setName("Qwen2.5-1.5B-Instruct-Q4_K_M.gguf");
-              setSha("");
+              setSha(catalog.model.sha256);
               setDownloadError(null);
             }}
           >

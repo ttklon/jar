@@ -22,6 +22,7 @@ import { Voice } from "./Voice";
  */
 
 vi.mock("../ipc", () => ({
+  readinessStatus: async () => { throw new Error("статус недоступен в этом тесте"); },
   isTauri: () => true,
   planFor: vi.fn().mockResolvedValue([]),
   draftPlan: vi.fn().mockResolvedValue(null),

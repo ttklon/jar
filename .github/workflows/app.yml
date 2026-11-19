@@ -314,6 +314,10 @@ jobs:
 
       # Вывод компилятора пишем в файл и превращаем в аннотации: логи джобов
       # доступны не всегда, а аннотации читаются через API в любом случае.
+      - name: Runtime archive attack tests (no binary execution)
+        shell: powershell
+        run: ./scripts/test-runtime-installer.ps1
+
       - name: Clippy
         id: clippy
         shell: bash

@@ -29,6 +29,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # tauri транзитивно: своя зависимость не должна зависеть от чужой версии.
 windows-sys = { version = "0.61", features = [
   "Win32_Foundation",
+  "Win32_Storage_FileSystem",
   "Win32_Security",
   "Win32_Security_Authorization",
   "Win32_Security_Isolation",
