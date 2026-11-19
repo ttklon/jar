@@ -391,6 +391,12 @@ jobs:
           set +e
           cargo test --manifest-path src-tauri/Cargo.toml pinned_runtime_conversation_smoke -- --ignored --nocapture > runtime-smoke.log 2>&1
           code=$?
+          # cargo test can exit 0 when a filter matches no tests. Require the final
+          # milestone, emitted only after real inference, stop and removal assertions.
+          if [ "$code" = 0 ] && ! grep -Fq "RUNTIME_SMOKE process stopped; managed runtime removed; model preserved" runtime-smoke.log; then
+            echo "RUNTIME_SMOKE did not complete all milestones" >> runtime-smoke.log
+            code=1
+          fi
           echo "status=$code" >> "$GITHUB_OUTPUT"
           grep "RUNTIME_SMOKE" runtime-smoke.log >> "$GITHUB_STEP_SUMMARY" || true
 
