@@ -16,6 +16,8 @@ on:
         type: string
         required: false
   workflow_call:
+  release:
+    types: [published]
 
 permissions:
   contents: write
@@ -87,7 +89,7 @@ jobs:
   # каждом pull request: release-сборка с LTO идёт десятки минут.
   bundle:
     name: release (installer, Windows)
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.publish_release)
+    if: github.event_name == 'push' || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish_release)
     runs-on: windows-latest
     timeout-minutes: 90
     permissions:
@@ -256,6 +258,26 @@ jobs:
             --title "ZShelper $RELEASE_TAG — ранняя альфа" \
             --prerelease \
             --notes "Проверочная Windows-сборка из GitHub Actions. Это ранняя альфа, не стабильный релиз. Перед установкой сохраните важные данные. Автообновление в приложении пока не реализовано. Проверьте SHA-256 по zshelper-release.json; GitHub provenance не является Authenticode-подписью."
+
+      - name: Attach assets to published GitHub release
+        if: github.event_name == 'release' && github.event.action == 'published'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          expected="v${version}"
+          if [ "$RELEASE_TAG" != "$expected" ]; then
+            echo "release tag $RELEASE_TAG does not match app version $expected" >&2
+            exit 1
+          fi
+          gh release upload "$RELEASE_TAG" \
+            src-tauri/target/release/bundle/nsis/*.exe \
+            src-tauri/target/release/bundle/msi/*.msi \
+            dist/zshelper-portable.zip \
+            dist/zshelper-release.json \
+            --clobber
 
   rust:
     name: core (cargo check + tests, Windows)
