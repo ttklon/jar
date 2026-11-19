@@ -31,7 +31,7 @@ const useStyles = makeStyles({
   note: { color: tokens.colorNeutralForeground3, fontSize: tokens.fontSizeBase200 },
 });
 
-export type WelcomeTarget = "ask" | "catalog" | "journal";
+export type WelcomeTarget = "ask" | "catalog" | "journal" | "models";
 
 export function Welcome({
   source,
@@ -65,7 +65,10 @@ export function Welcome({
       </div>
 
       <div className={styles.actions}>
-        <Button appearance="primary" onClick={onStart}>
+        <Button appearance="primary" onClick={() => onOpen("models")}>
+          {welcome.setupAI}
+        </Button>
+        <Button appearance="secondary" onClick={onStart}>
           {welcome.start}
         </Button>
         <Button appearance="secondary" onClick={() => onOpen("ask")}>

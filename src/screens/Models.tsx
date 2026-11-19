@@ -294,6 +294,20 @@ export function Models() {
           {text.download.title}
         </Text>
         <Text className={styles.note}>{text.download.lead}</Text>
+        <div className={styles.rowActions}>
+          <Text className={styles.note}>{text.download.recommended}</Text>
+          <Button
+            size="small"
+            onClick={() => {
+              setUrl("https://huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/Qwen2.5-1.5B-Instruct-Q4_K_M.gguf");
+              setName("Qwen2.5-1.5B-Instruct-Q4_K_M.gguf");
+              setSha("");
+              setDownloadError(null);
+            }}
+          >
+            {text.download.useRecommended}
+          </Button>
+        </div>
         <div className={styles.form}>
           <Input
             className={styles.wide}
