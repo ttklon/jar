@@ -10,6 +10,8 @@ pub const CANCELLED: &str = "локальное распознавание от�
 pub struct Ticket {
     pub cancelled: AtomicBool,
     child: Mutex<Option<Child>>,
+    #[cfg(test)]
+    fail_stop: AtomicBool,
 }
 
 impl Ticket {
@@ -55,6 +57,10 @@ impl Ticket {
     /// Set the flag before taking the process lock: a racing spawn cannot escape.
     pub fn stop(&self) -> Result<(), String> {
         self.cancelled.store(true, Ordering::SeqCst);
+        #[cfg(test)]
+        if self.fail_stop.load(Ordering::SeqCst) {
+            return Err("injected ASR cleanup failure".into());
+        }
         let mut child = self
             .child
             .lock()
@@ -77,6 +83,7 @@ struct Pending {
     id: String,
     created: Instant,
     started: bool,
+    finished: bool,
     ticket: Arc<Ticket>,
 }
 
@@ -104,6 +111,7 @@ impl Requests {
             id: id.clone(),
             created: Instant::now(),
             started: false,
+            finished: false,
             ticket: Arc::default(),
         });
         Ok(id)
@@ -140,7 +148,12 @@ impl Requests {
             }
             ticket
         };
-        ticket.stop()
+        ticket.stop()?;
+        let mut slot = self.slot.lock().map_err(|_| "очередь ASR недоступна")?;
+        if slot.as_ref().is_some_and(|p| p.id == id && p.finished) {
+            *slot = None;
+        }
+        Ok(())
     }
 
     pub fn shutdown(&self) {
@@ -165,12 +178,19 @@ pub struct Lease {
 
 impl Drop for Lease {
     fn drop(&mut self) {
-        if let Err(error) = self.ticket.stop() {
+        let stopped = self.ticket.stop();
+        if let Err(error) = &stopped {
             tracing::warn!(%error, "ASR cleanup");
         }
         if let Ok(mut slot) = self.owner.slot.lock() {
-            if slot.as_ref().is_some_and(|p| p.id == self.id) {
-                *slot = None;
+            if let Some(pending) = slot.as_mut().filter(|p| p.id == self.id) {
+                if stopped.is_ok() {
+                    *slot = None;
+                } else {
+                    // Never lose the process handle or permit another model when
+                    // termination failed. A same-ID cancel or shutdown may retry.
+                    pending.finished = true;
+                }
             }
         }
     }
@@ -196,6 +216,22 @@ mod tests {
         assert!(lease.ticket.check().is_err());
         assert!(owner.reserve().is_err(), "worker still owns the lease");
         drop(lease);
+        assert!(owner.reserve().is_ok());
+    }
+
+    #[test]
+    fn failed_cleanup_keeps_ownership_and_blocks_new_work_until_retry() {
+        let owner = Arc::new(Requests::default());
+        let id = owner.reserve().unwrap();
+        let lease = owner.acquire(&id).unwrap();
+        let ticket = lease.ticket.clone();
+        ticket.fail_stop.store(true, Ordering::SeqCst);
+        drop(lease);
+        assert!(owner.reserve().is_err());
+        assert!(owner.cancel(&id).is_err());
+        assert!(owner.reserve().is_err());
+        ticket.fail_stop.store(false, Ordering::SeqCst);
+        owner.cancel(&id).unwrap();
         assert!(owner.reserve().is_ok());
     }
 
