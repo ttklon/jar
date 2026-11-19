@@ -177,28 +177,50 @@ mod tests {
         assert!(catalog.model.bytes > 0, "размер модели известен");
         assert!(catalog.runtime.bytes > 0, "размер движка известен");
         assert!(catalog.model.url.starts_with("https://"), "модель по https");
-        assert!(catalog.runtime.url.starts_with("https://"), "движок по https");
         assert!(
-            catalog.runtime.url.contains("github.com/ggml-org/llama.cpp/releases/download/"),
+            catalog.runtime.url.starts_with("https://"),
+            "движок по https"
+        );
+        assert!(
+            catalog
+                .runtime
+                .url
+                .contains("github.com/ggml-org/llama.cpp/releases/download/"),
             "движок только из релизов llama.cpp: {}",
             catalog.runtime.url
         );
         assert!(
-            catalog.model.url.contains("huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF"),
+            catalog
+                .model
+                .url
+                .contains("huggingface.co/bartowski/Qwen2.5-1.5B-Instruct-GGUF"),
             "модель только из проверенного репозитория: {}",
             catalog.model.url
         );
         assert_eq!(catalog.runtime.program, "llama-server.exe");
         assert!(catalog.model.file.ends_with(".gguf"), "модель — .gguf");
         assert!(!catalog.model.license.is_empty(), "лицензия модели названа");
-        assert!(!catalog.runtime.license.is_empty(), "лицензия движка названа");
+        assert!(
+            !catalog.runtime.license.is_empty(),
+            "лицензия движка названа"
+        );
     }
 
     #[test]
     fn empty_install_misses_both() {
         let status = build(
-            false, false, None, "sidecars".into(), false, None, 0, "models".into(), Some(10_000_000_000),
-            false, None, "sidecars".into(),
+            false,
+            false,
+            None,
+            "sidecars".into(),
+            false,
+            None,
+            0,
+            "models".into(),
+            Some(10_000_000_000),
+            false,
+            None,
+            "sidecars".into(),
         );
         assert!(!status.ready);
         assert_eq!(status.missing, ["engine", "model"]);
@@ -207,9 +229,18 @@ mod tests {
     #[test]
     fn configured_machine_is_ready() {
         let status = build(
-            true, false, Some("sidecars/llama-server.exe".into()), "sidecars".into(),
-            true, Some("m.gguf".into()), 986_048_768, "models".into(), Some(10_000_000_000),
-            false, None, "sidecars".into(),
+            true,
+            false,
+            Some("sidecars/llama-server.exe".into()),
+            "sidecars".into(),
+            true,
+            Some("m.gguf".into()),
+            986_048_768,
+            "models".into(),
+            Some(10_000_000_000),
+            false,
+            None,
+            "sidecars".into(),
         );
         assert!(status.ready, "движок и модель есть — разговор возможен");
         assert!(status.missing.is_empty());
@@ -218,14 +249,34 @@ mod tests {
     #[test]
     fn partial_install_names_only_what_is_missing() {
         let only_engine = build(
-            true, false, Some("x".into()), "s".into(), false, None, 0, "m".into(), None,
-            false, None, "s".into(),
+            true,
+            false,
+            Some("x".into()),
+            "s".into(),
+            false,
+            None,
+            0,
+            "m".into(),
+            None,
+            false,
+            None,
+            "s".into(),
         );
         assert_eq!(only_engine.missing, ["model"]);
 
         let only_model = build(
-            false, false, None, "s".into(), true, Some("m.gguf".into()), 1, "m".into(), None,
-            false, None, "s".into(),
+            false,
+            false,
+            None,
+            "s".into(),
+            true,
+            Some("m.gguf".into()),
+            1,
+            "m".into(),
+            None,
+            false,
+            None,
+            "s".into(),
         );
         assert_eq!(only_model.missing, ["engine"]);
     }
@@ -235,10 +286,23 @@ mod tests {
         // Локальное распознавание — не обязательное условие первого разговора:
         // голос может идти через системную службу с согласия человека.
         let status = build(
-            true, false, Some("x".into()), "s".into(), true, Some("m.gguf".into()), 1, "m".into(), None,
-            false, None, "s".into(),
+            true,
+            false,
+            Some("x".into()),
+            "s".into(),
+            true,
+            Some("m.gguf".into()),
+            1,
+            "m".into(),
+            None,
+            false,
+            None,
+            "s".into(),
         );
-        assert!(status.ready, "без локального ASR разговор всё равно возможен");
+        assert!(
+            status.ready,
+            "без локального ASR разговор всё равно возможен"
+        );
         assert!(!status.speech_found);
     }
 

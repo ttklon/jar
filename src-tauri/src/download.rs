@@ -37,19 +37,24 @@ pub fn active_name() -> Option<String> {
     ACTIVE_NAME.lock().ok().and_then(|name| name.clone())
 }
 pub(crate) fn set_name(name: &str) {
-    if let Ok(mut current) = ACTIVE_NAME.lock() { *current = Some(name.to_string()); }
+    if let Ok(mut current) = ACTIVE_NAME.lock() {
+        *current = Some(name.to_string());
+    }
 }
 #[cfg(test)]
 pub(crate) static TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 pub(crate) struct DownloadGuard;
 impl Drop for DownloadGuard {
     fn drop(&mut self) {
-        if let Ok(mut name) = ACTIVE_NAME.lock() { *name = None; }
+        if let Ok(mut name) = ACTIVE_NAME.lock() {
+            *name = None;
+        }
         ACTIVE.store(false, Ordering::SeqCst);
     }
 }
 pub(crate) fn acquire() -> Result<DownloadGuard, String> {
-    ACTIVE.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+    ACTIVE
+        .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
         .map_err(|_| "другое скачивание уже идёт".to_string())?;
     clear_cancel();
     Ok(DownloadGuard)
@@ -118,11 +123,16 @@ pub fn part_path(target: &Path) -> PathBuf {
 /// внутри. `--location` нужен, потому что HuggingFace отдаёт редирект на CDN.
 pub fn curl_args(url: &str, part: &Path) -> Vec<String> {
     vec![
-        "--proto".into(), "=http,https".into(),
-        "--proto-redir".into(), "=https".into(),
-        "--connect-timeout".into(), "30".into(),
-        "--max-time".into(), "3600".into(),
-        "--max-redirs".into(), "5".into(),
+        "--proto".into(),
+        "=http,https".into(),
+        "--proto-redir".into(),
+        "=https".into(),
+        "--connect-timeout".into(),
+        "30".into(),
+        "--max-time".into(),
+        "3600".into(),
+        "--max-redirs".into(),
+        "5".into(),
         "--fail".to_string(),
         "--location".to_string(),
         "--silent".to_string(),
@@ -156,7 +166,6 @@ fn check_url(url: &str) -> Result<(), String> {
 }
 
 pub(crate) fn fetch(url: &str, part: &Path, max_bytes: u64) -> Result<(), String> {
-
     let mut child = Command::new("curl")
         .arg("--disable")
         .args(["--max-filesize", &max_bytes.to_string()])
@@ -167,11 +176,18 @@ pub(crate) fn fetch(url: &str, part: &Path, max_bytes: u64) -> Result<(), String
         .map_err(|error| format!("curl не запустился: {error}"))?;
 
     loop {
-        let oversized = std::fs::metadata(part).map(|m| m.len() > max_bytes).unwrap_or(false);
+        let oversized = std::fs::metadata(part)
+            .map(|m| m.len() > max_bytes)
+            .unwrap_or(false);
         if oversized || cancelled() {
             let _ = child.kill();
             let _ = child.wait();
-            return Err(if oversized { "скачивание превысило лимит размера" } else { "скачивание отменено человеком" }.to_string());
+            return Err(if oversized {
+                "скачивание превысило лимит размера"
+            } else {
+                "скачивание отменено человеком"
+            }
+            .to_string());
         }
         match child.try_wait() {
             Ok(Some(status)) => {
@@ -181,7 +197,9 @@ pub(crate) fn fetch(url: &str, part: &Path, max_bytes: u64) -> Result<(), String
                     let _ = pipe.read_to_string(&mut stderr);
                 }
                 if status.success() {
-                    if cancelled() { return Err("скачивание отменено человеком".into()); }
+                    if cancelled() {
+                        return Err("скачивание отменено человеком".into());
+                    }
                     return Ok(());
                 }
                 let code = status.code().unwrap_or(-1);
@@ -276,7 +294,10 @@ pub(crate) fn remove_stale_part(part: &Path) -> Result<(), String> {
     match std::fs::remove_file(part) {
         Ok(()) => Ok(()),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
-        Err(error) => Err(format!("не удалось убрать старый временный файл {}: {error}; проверьте права перед повтором", part.display())),
+        Err(error) => Err(format!(
+            "не удалось убрать старый временный файл {}: {error}; проверьте права перед повтором",
+            part.display()
+        )),
     }
 }
 
@@ -286,14 +307,21 @@ pub(crate) fn sha256_cancellable(path: &Path) -> Result<String, String> {
     sha256_reader(file, cancelled)
 }
 
-fn sha256_reader(mut file: impl Read, mut is_cancelled: impl FnMut() -> bool) -> Result<String, String> {
+fn sha256_reader(
+    mut file: impl Read,
+    mut is_cancelled: impl FnMut() -> bool,
+) -> Result<String, String> {
     use sha2::{Digest, Sha256};
     let mut hash = Sha256::new();
     let mut buffer = [0u8; 65536];
     loop {
-        if is_cancelled() { return Err("скачивание отменено человеком".into()); }
+        if is_cancelled() {
+            return Err("скачивание отменено человеком".into());
+        }
         let count = file.read(&mut buffer).map_err(|e| e.to_string())?;
-        if count == 0 { break; }
+        if count == 0 {
+            break;
+        }
         hash.update(&buffer[..count]);
     }
     Ok(format!("{:x}", hash.finalize()))
@@ -313,9 +341,13 @@ fn commit(
         return Err("скачался пустой файл".to_string());
     }
 
-    if cancelled() { return Err("скачивание отменено человеком".into()); }
+    if cancelled() {
+        return Err("скачивание отменено человеком".into());
+    }
     let actual = sha256_cancellable(part)?;
-    if cancelled() { return Err("скачивание отменено человеком".into()); }
+    if cancelled() {
+        return Err("скачивание отменено человеком".into());
+    }
     match expected {
         Some(expected) if !expected.eq_ignore_ascii_case(&actual) => {
             return Err(format!(
@@ -327,11 +359,15 @@ fn commit(
 
     // hard_link атомарно отказывает, если цель уже появилась: чужой файл не затираем.
     std::fs::hard_link(part, target).map_err(|error| format!("файл не опубликован: {error}"))?;
-    std::fs::remove_file(part).map_err(|error| format!("модель опубликована после проверки, но временный файл не убран: {error}"))?;
+    std::fs::remove_file(part).map_err(|error| {
+        format!("модель опубликована после проверки, но временный файл не убран: {error}")
+    })?;
 
     memory
         .remember(&models::hash_key(name), &actual)
-        .map_err(|error| format!("модель опубликована после проверки, но хеш не записался: {error}"))?;
+        .map_err(|error| {
+            format!("модель опубликована после проверки, но хеш не записался: {error}")
+        })?;
 
     Ok(Downloaded {
         name: name.to_string(),
@@ -347,7 +383,6 @@ mod tests {
     use std::io::{Read, Write};
     use std::net::TcpListener;
     use std::thread;
-
 
     fn temp_dir(tag: &str) -> PathBuf {
         let dir =
@@ -489,7 +524,15 @@ mod tests {
         let dir = temp_dir("checks");
         let memory = Memory::open(dir.join("memory.db")).expect("память открывается");
 
-        for name in ["../escape.gguf", "sub/model.gguf", "model.bin", "CON.gguf", "LPT1.gguf", "m:ads.gguf", ""] {
+        for name in [
+            "../escape.gguf",
+            "sub/model.gguf",
+            "model.bin",
+            "CON.gguf",
+            "LPT1.gguf",
+            "m:ads.gguf",
+            "",
+        ] {
             let error = download(&dir, name, "https://example.com/m.gguf", None, &memory)
                 .expect_err("такое имя не годится");
             assert!(
@@ -587,15 +630,21 @@ mod tests {
     fn hashing_can_be_cancelled_between_blocks() {
         let mut data = std::io::Cursor::new(vec![7u8; 1024 * 1024]);
         let mut checks = 0;
-        let error = sha256_reader(&mut data, || { checks += 1; checks >= 3 }).unwrap_err();
+        let error = sha256_reader(&mut data, || {
+            checks += 1;
+            checks >= 3
+        })
+        .unwrap_err();
         assert!(error.contains("отменено"));
         assert_eq!(data.position(), 2 * 65536);
     }
 
     #[test]
     fn hashing_without_cancellation_matches_sha256() {
-        assert_eq!(sha256_reader(std::io::Cursor::new(b"abc"), || false).unwrap(),
-            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+        assert_eq!(
+            sha256_reader(std::io::Cursor::new(b"abc"), || false).unwrap(),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
     }
 
     #[test]
@@ -616,12 +665,18 @@ mod tests {
         let _test_guard = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
         let dir = temp_dir("malformed-hash");
         let memory = Memory::open(dir.join("memory.db")).unwrap();
-        let error = download(&dir, "m.gguf", "https://example.com/m.gguf", Some("bad hash"), &memory).unwrap_err();
+        let error = download(
+            &dir,
+            "m.gguf",
+            "https://example.com/m.gguf",
+            Some("bad hash"),
+            &memory,
+        )
+        .unwrap_err();
         assert!(error.contains("64 шестнадцатеричных"));
         assert!(!dir.join("m.gguf.part").exists());
         assert!(active_name().is_none());
         drop(memory);
         std::fs::remove_dir_all(dir).unwrap();
     }
-
 }

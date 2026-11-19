@@ -165,7 +165,10 @@ pub fn free_space(dir: &Path) -> Option<u64> {
     // are optional according to GetDiskFreeSpaceExW's contract.
     let ok = unsafe {
         windows_sys::Win32::Storage::FileSystem::GetDiskFreeSpaceExW(
-            wide.as_ptr(), &mut available, std::ptr::null_mut(), std::ptr::null_mut(),
+            wide.as_ptr(),
+            &mut available,
+            std::ptr::null_mut(),
+            std::ptr::null_mut(),
         )
     };
     (ok != 0).then_some(available)

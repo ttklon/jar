@@ -1,23 +1,34 @@
 //! Pinned runtime delivery. The archive is never executed. Publication is a directory
 //! rename on the same volume, after bounded extraction and Windows x64 PE validation.
-use std::path::{Path, PathBuf};
-use serde::{Deserialize, Serialize};
 use crate::{download, models, readiness};
+use serde::{Deserialize, Serialize};
+use std::path::{Path, PathBuf};
 
 pub const MAX_EXPANDED: u64 = 500 * 1024 * 1024;
 const OWNER: &str = ".zshelper-owner";
 const SCRIPT: &str = include_str!("runtime-install.ps1");
 
 #[derive(Debug, Serialize)]
-pub struct Installed { pub program: String }
+pub struct Installed {
+    pub program: String,
+}
 #[derive(Deserialize)]
-struct Marker { archive_sha256: String, program: String, files: Vec<InstalledFile> }
+struct Marker {
+    archive_sha256: String,
+    program: String,
+    files: Vec<InstalledFile>,
+}
 #[derive(Deserialize)]
-struct InstalledFile { path: String, sha256: String }
+struct InstalledFile {
+    path: String,
+    sha256: String,
+}
 
 fn marker(dir: &Path) -> Option<Marker> {
     let path = dir.join("installed.json");
-    if std::fs::metadata(&path).ok()?.len() > 1024 * 1024 { return None; }
+    if std::fs::metadata(&path).ok()?.len() > 1024 * 1024 {
+        return None;
+    }
     serde_json::from_slice(&std::fs::read(path).ok()?).ok()
 }
 
@@ -27,23 +38,35 @@ pub fn directory(base: &Path) -> PathBuf {
 
 /// Windows path rules, also on Linux tests. Never trust a marker as a path.
 pub fn safe_relative(name: &str) -> bool {
-    !name.is_empty() && name.len() <= 180 && name.split(['/', '\\']).all(|p| {
-        let stem = p.split('.').next().unwrap_or("").to_ascii_uppercase();
-        let numbered_device = stem.strip_prefix("COM").or_else(|| stem.strip_prefix("LPT"))
-            .is_some_and(|tail| tail.chars().count() == 1 && "0123456789¹²³".contains(tail));
-        !p.is_empty() && p != "." && p != ".." && !p.ends_with(['.', ' '])
-            && !p.chars().any(|c| c < ' ' || "<>:\"|?*".contains(c))
-            && !["CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$", "CLOCK$"].contains(&stem.as_str())
-            && !numbered_device
-    })
+    !name.is_empty()
+        && name.len() <= 180
+        && name.split(['/', '\\']).all(|p| {
+            let stem = p.split('.').next().unwrap_or("").to_ascii_uppercase();
+            let numbered_device = stem
+                .strip_prefix("COM")
+                .or_else(|| stem.strip_prefix("LPT"))
+                .is_some_and(|tail| tail.chars().count() == 1 && "0123456789¹²³".contains(tail));
+            !p.is_empty()
+                && p != "."
+                && p != ".."
+                && !p.ends_with(['.', ' '])
+                && !p.chars().any(|c| c < ' ' || "<>:\"|?*".contains(c))
+                && !["CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$", "CLOCK$"]
+                    .contains(&stem.as_str())
+                && !numbered_device
+        })
 }
 
 fn link_or_reparse(info: &std::fs::Metadata) -> bool {
-    if info.file_type().is_symlink() { return true; }
+    if info.file_type().is_symlink() {
+        return true;
+    }
     #[cfg(windows)]
     {
         use std::os::windows::fs::MetadataExt;
-        if info.file_attributes() & 0x400 != 0 { return true; }
+        if info.file_attributes() & 0x400 != 0 {
+            return true;
+        }
     }
     false
 }
@@ -52,55 +75,97 @@ fn link_or_reparse(info: &std::fs::Metadata) -> bool {
 /// be removed. An arbitrary directory with the version name is NOT app-owned.
 pub fn is_managed(base: &Path) -> bool {
     let dir = directory(base);
-    let Ok(info) = std::fs::symlink_metadata(&dir) else { return false; };
-    if !info.is_dir() || link_or_reparse(&info) { return false; }
+    let Ok(info) = std::fs::symlink_metadata(&dir) else {
+        return false;
+    };
+    if !info.is_dir() || link_or_reparse(&info) {
+        return false;
+    }
     let path = dir.join(OWNER);
-    let Ok(info) = std::fs::symlink_metadata(&path) else { return false; };
-    info.is_file() && !link_or_reparse(&info) && info.len() == 64
-        && std::fs::read(path).is_ok_and(|bytes| bytes == readiness::catalog().runtime.sha256.as_bytes())
+    let Ok(info) = std::fs::symlink_metadata(&path) else {
+        return false;
+    };
+    info.is_file()
+        && !link_or_reparse(&info)
+        && info.len() == 64
+        && std::fs::read(path)
+            .is_ok_and(|bytes| bytes == readiness::catalog().runtime.sha256.as_bytes())
 }
 
 /// Validate the record and filesystem structure without claiming a fresh hash check.
 fn payload(dir: &Path) -> Result<Marker, String> {
     let info = std::fs::symlink_metadata(dir).map_err(|e| e.to_string())?;
-    if !info.is_dir() || link_or_reparse(&info) { return Err("каталог движка является ссылкой".into()); }
-    let marker_info = std::fs::symlink_metadata(dir.join("installed.json")).map_err(|e| e.to_string())?;
-    if !marker_info.is_file() || link_or_reparse(&marker_info) { return Err("запись установки является ссылкой".into()); }
-    let meta = marker(dir).ok_or_else(|| "повреждена запись установки движка; переустановите его".to_string())?;
-    if meta.archive_sha256 != readiness::catalog().runtime.sha256 || !safe_relative(&meta.program)
-        || !meta.program.replace('\\', "/").rsplit('/').next().is_some_and(|name| name.eq_ignore_ascii_case("llama-server.exe"))
-        || meta.files.is_empty() || meta.files.len() > 2048 {
+    if !info.is_dir() || link_or_reparse(&info) {
+        return Err("каталог движка является ссылкой".into());
+    }
+    let marker_info =
+        std::fs::symlink_metadata(dir.join("installed.json")).map_err(|e| e.to_string())?;
+    if !marker_info.is_file() || link_or_reparse(&marker_info) {
+        return Err("запись установки является ссылкой".into());
+    }
+    let meta = marker(dir)
+        .ok_or_else(|| "повреждена запись установки движка; переустановите его".to_string())?;
+    if meta.archive_sha256 != readiness::catalog().runtime.sha256
+        || !safe_relative(&meta.program)
+        || !meta
+            .program
+            .replace('\\', "/")
+            .rsplit('/')
+            .next()
+            .is_some_and(|name| name.eq_ignore_ascii_case("llama-server.exe"))
+        || meta.files.is_empty()
+        || meta.files.len() > 2048
+    {
         return Err("запись установки движка не прошла проверку; переустановите его".into());
     }
     let mut found = false;
     let mut total_bytes = 0u64;
     let mut paths = std::collections::BTreeSet::new();
     for file in &meta.files {
-        if !safe_relative(&file.path) || !readiness::sha256_well_formed(&file.sha256)
-            || !paths.insert(file.path.replace('\\', "/").to_ascii_lowercase()) {
-            return Err("небезопасная или повторная запись файла движка; переустановите его".into());
+        if !safe_relative(&file.path)
+            || !readiness::sha256_well_formed(&file.sha256)
+            || !paths.insert(file.path.replace('\\', "/").to_ascii_lowercase())
+        {
+            return Err(
+                "небезопасная или повторная запись файла движка; переустановите его".into(),
+            );
         }
-        if file.path == meta.program { found = true; }
+        if file.path == meta.program {
+            found = true;
+        }
         // Reject links in every ancestor, not just at the leaf (Windows junctions too).
         let mut current = dir.to_path_buf();
         let parts: Vec<_> = file.path.split(['/', '\\']).collect();
         for (index, part) in parts.iter().enumerate() {
             current.push(part);
-            let info = std::fs::symlink_metadata(&current).map_err(|e| format!("файл установки недоступен: {} ({e}); переустановите движок", current.display()))?;
+            let info = std::fs::symlink_metadata(&current).map_err(|e| {
+                format!(
+                    "файл установки недоступен: {} ({e}); переустановите движок",
+                    current.display()
+                )
+            })?;
             let leaf = index + 1 == parts.len();
             if link_or_reparse(&info) || (!leaf && !info.is_dir()) || (leaf && !info.is_file()) {
                 return Err("небезопасная структура установки; переустановите движок".into());
             }
-            if leaf { total_bytes = total_bytes.saturating_add(info.len()); }
+            if leaf {
+                total_bytes = total_bytes.saturating_add(info.len());
+            }
         }
-        if total_bytes > MAX_EXPANDED { return Err("превышен размер установки; переустановите движок".into()); }
+        if total_bytes > MAX_EXPANDED {
+            return Err("превышен размер установки; переустановите движок".into());
+        }
     }
-    if !found { return Err("exe отсутствует в записи установки; переустановите движок".into()); }
+    if !found {
+        return Err("exe отсутствует в записи установки; переустановите движок".into());
+    }
     Ok(meta)
 }
 
 pub fn find(base: &Path) -> Option<PathBuf> {
-    if !is_managed(base) { return None; }
+    if !is_managed(base) {
+        return None;
+    }
     let dir = directory(base);
     let meta = payload(&dir).ok()?;
     Some(dir.join(meta.program))
@@ -110,9 +175,16 @@ fn verify_directory(dir: &Path, cancellable: bool) -> Result<(), String> {
     let meta = payload(dir)?;
     for file in meta.files {
         let path = dir.join(&file.path);
-        let actual = if cancellable { download::sha256_cancellable(&path)? } else { models::sha256_file(&path)? };
+        let actual = if cancellable {
+            download::sha256_cancellable(&path)?
+        } else {
+            models::sha256_file(&path)?
+        };
         if actual != file.sha256 {
-            return Err(format!("файл движка изменился: {}; переустановите движок", file.path));
+            return Err(format!(
+                "файл движка изменился: {}; переустановите движок",
+                file.path
+            ));
         }
     }
     Ok(())
@@ -120,7 +192,9 @@ fn verify_directory(dir: &Path, cancellable: bool) -> Result<(), String> {
 
 /// The manifest detects corruption; it is not a signature against same-user attackers.
 pub fn verify(base: &Path) -> Result<(), String> {
-    if !is_managed(base) { return Err("владение установкой движка не подтверждено; проверьте каталог вручную".into()); }
+    if !is_managed(base) {
+        return Err("владение установкой движка не подтверждено; проверьте каталог вручную".into());
+    }
     verify_directory(&directory(base), false)
 }
 
@@ -132,7 +206,10 @@ pub fn install(base: &Path) -> Result<Installed, String> {
     let spec = &readiness::catalog().runtime;
     download::set_name(&spec.asset);
     // Source is compiled-in, no URL or destination is accepted over IPC.
-    if !spec.url.starts_with("https://github.com/ggml-org/llama.cpp/releases/download/") {
+    if !spec
+        .url
+        .starts_with("https://github.com/ggml-org/llama.cpp/releases/download/")
+    {
         return Err("источник движка вне allowlist".into());
     }
     let target = directory(base);
@@ -141,13 +218,21 @@ pub fn install(base: &Path) -> Result<Installed, String> {
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => false,
         Err(error) => return Err(error.to_string()),
     };
-    if target_present { return Err(format!("каталог движка уже есть: {}. Удалите управляемую установку кнопкой; если метка владения повреждена, проверьте каталог вручную. Чужие файлы автоматически не удаляются", target.display())); }
+    if target_present {
+        return Err(format!("каталог движка уже есть: {}. Удалите управляемую установку кнопкой; если метка владения повреждена, проверьте каталог вручную. Чужие файлы автоматически не удаляются", target.display()));
+    }
     let sidecars = base.join("sidecars");
     std::fs::create_dir_all(&sidecars).map_err(|e| e.to_string())?;
     download::check_free_space(&sidecars, MAX_EXPANDED + spec.bytes)?;
     // Exclusive create prevents cleaning up an unrelated directory.
-    let work = sidecars.join(format!(".runtime-{}-{}", std::process::id(),
-        std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_err(|e| e.to_string())?.as_nanos()));
+    let work = sidecars.join(format!(
+        ".runtime-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|e| e.to_string())?
+            .as_nanos()
+    ));
     std::fs::create_dir(&work).map_err(|e| e.to_string())?;
     let stage = work.join("stage");
     let archive = work.join("runtime.zip");
@@ -165,19 +250,28 @@ pub fn install(base: &Path) -> Result<Installed, String> {
             std::fs::rename(&part, &archive).map_err(|e| e.to_string())
         });
         checked.map_err(|error| download::cleanup_error(&part, error))?;
-        if download::cancelled() { return Err("скачивание отменено человеком".into()); }
+        if download::cancelled() {
+            return Err("скачивание отменено человеком".into());
+        }
         std::fs::write(&script, SCRIPT).map_err(|e| e.to_string())?;
         extract(&script, &archive, &stage, &spec.sha256, spec.bytes)?;
         verify_directory(&stage, true)?;
         // Write our own ownership marker, never one supplied by the ZIP.
-        let mut owner = std::fs::OpenOptions::new().write(true).create_new(true)
-            .open(stage.join(OWNER)).map_err(|e| e.to_string())?;
+        let mut owner = std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(stage.join(OWNER))
+            .map_err(|e| e.to_string())?;
         std::io::Write::write_all(&mut owner, spec.sha256.as_bytes()).map_err(|e| e.to_string())?;
         drop(owner);
-        if download::cancelled() { return Err("установка отменена человеком".into()); }
+        if download::cancelled() {
+            return Err("установка отменена человеком".into());
+        }
         std::fs::rename(&stage, &target).map_err(|e| format!("установка не опубликована: {e}"))?;
         let program = find(base).ok_or_else(|| "не найден установленный движок".to_string())?;
-        Ok(Installed { program: program.display().to_string() })
+        Ok(Installed {
+            program: program.display().to_string(),
+        })
     })();
     match std::fs::remove_dir_all(&work) {
         Ok(()) => result,
@@ -191,20 +285,48 @@ pub fn install(base: &Path) -> Result<Installed, String> {
     }
 }
 
-fn extract(script: &Path, archive: &Path, stage: &Path, hash: &str, bytes: u64) -> Result<(), String> {
+fn extract(
+    script: &Path,
+    archive: &Path,
+    stage: &Path,
+    hash: &str,
+    bytes: u64,
+) -> Result<(), String> {
     use std::process::{Command, Stdio};
     use std::time::{Duration, Instant};
     let mut child = Command::new("powershell.exe")
-        .args(["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File"])
-        .arg(script).arg("-Archive").arg(archive).arg("-Stage").arg(stage)
-        .arg("-ExpectedHash").arg(hash).arg("-ExpectedBytes").arg(bytes.to_string())
-        .stdout(Stdio::null()).stderr(Stdio::null()).spawn().map_err(|e| e.to_string())?;
+        .args([
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+        ])
+        .arg(script)
+        .arg("-Archive")
+        .arg(archive)
+        .arg("-Stage")
+        .arg(stage)
+        .arg("-ExpectedHash")
+        .arg(hash)
+        .arg("-ExpectedBytes")
+        .arg(bytes.to_string())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .map_err(|e| e.to_string())?;
     let deadline = Instant::now() + Duration::from_secs(120);
     loop {
         if download::cancelled() || Instant::now() >= deadline {
             let requested = download::cancelled();
-            let _ = child.kill(); let _ = child.wait();
-            return Err(if requested { "распаковка отменена человеком" } else { "распаковка превысила 120 секунд; повторите установку" }.into());
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(if requested {
+                "распаковка отменена человеком"
+            } else {
+                "распаковка превысила 120 секунд; повторите установку"
+            }
+            .into());
         }
         match child.try_wait() {
             Ok(Some(status)) if status.success() => return Ok(()),
@@ -235,7 +357,22 @@ mod tests {
     use super::*;
     #[test]
     fn rejects_windows_path_attacks_on_every_host() {
-        for name in ["../x", "..\\x", "/x", "C:\\x", "x:ads", "CON.exe", "a/LPT1", "x.", "x ", "a//b", "a/./b", "COM¹.dll", "CONIN$", ""] {
+        for name in [
+            "../x",
+            "..\\x",
+            "/x",
+            "C:\\x",
+            "x:ads",
+            "CON.exe",
+            "a/LPT1",
+            "x.",
+            "x ",
+            "a//b",
+            "a/./b",
+            "COM¹.dll",
+            "CONIN$",
+            "",
+        ] {
             assert!(!safe_relative(name), "{name}");
         }
         assert!(safe_relative("bin/llama-server.exe"));
@@ -248,7 +385,8 @@ mod tests {
         }
     }
     fn fixture(tag: &str) -> PathBuf {
-        let base = std::env::temp_dir().join(format!("zshelper-managed-{tag}-{}", std::process::id()));
+        let base =
+            std::env::temp_dir().join(format!("zshelper-managed-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&base);
         let dir = directory(&base);
         std::fs::create_dir_all(&dir).unwrap();
@@ -259,8 +397,16 @@ mod tests {
             "program": "llama-server.exe",
             "files": [{"path": "llama-server.exe", "sha256": sha}]
         });
-        std::fs::write(dir.join("installed.json"), serde_json::to_vec(&meta).unwrap()).unwrap();
-        std::fs::write(dir.join(OWNER), readiness::catalog().runtime.sha256.as_bytes()).unwrap();
+        std::fs::write(
+            dir.join("installed.json"),
+            serde_json::to_vec(&meta).unwrap(),
+        )
+        .unwrap();
+        std::fs::write(
+            dir.join(OWNER),
+            readiness::catalog().runtime.sha256.as_bytes(),
+        )
+        .unwrap();
         base
     }
     #[test]
@@ -279,7 +425,11 @@ mod tests {
             "archive_sha256": readiness::catalog().runtime.sha256,
             "program": "../llama-server.exe", "files": []
         });
-        std::fs::write(directory(&base).join("installed.json"), serde_json::to_vec(&marker).unwrap()).unwrap();
+        std::fs::write(
+            directory(&base).join("installed.json"),
+            serde_json::to_vec(&marker).unwrap(),
+        )
+        .unwrap();
         assert!(find(&base).is_none());
         assert!(verify(&base).is_err());
         std::fs::remove_dir_all(base).unwrap();
@@ -289,10 +439,15 @@ mod tests {
         let base = fixture("removal");
         std::fs::write(base.join("sidecars/llama-server.exe"), b"manual").unwrap();
         std::fs::write(base.join("model.gguf"), b"weights").unwrap();
-        let _test_guard = download::TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let _test_guard = download::TEST_LOCK
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         remove(&base).unwrap();
         assert!(!directory(&base).exists());
-        assert_eq!(std::fs::read(base.join("sidecars/llama-server.exe")).unwrap(), b"manual");
+        assert_eq!(
+            std::fs::read(base.join("sidecars/llama-server.exe")).unwrap(),
+            b"manual"
+        );
         assert_eq!(std::fs::read(base.join("model.gguf")).unwrap(), b"weights");
         std::fs::remove_dir_all(base).unwrap();
     }
@@ -303,7 +458,9 @@ mod tests {
         std::fs::remove_file(directory(&base).join(OWNER)).unwrap();
         assert!(!is_managed(&base));
         assert!(find(&base).is_none());
-        let _guard = download::TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let _guard = download::TEST_LOCK
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         assert!(remove(&base).unwrap_err().contains("метки владения"));
         assert!(directory(&base).join("llama-server.exe").is_file());
         std::fs::remove_dir_all(base).unwrap();
@@ -316,7 +473,9 @@ mod tests {
         assert!(is_managed(&base));
         assert!(find(&base).is_none());
         assert!(verify(&base).is_err());
-        let _guard = download::TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let _guard = download::TEST_LOCK
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
         remove(&base).unwrap();
         assert!(!directory(&base).exists());
         std::fs::remove_dir_all(base).unwrap();
@@ -349,5 +508,4 @@ mod tests {
         assert!(verify(&base).is_err());
         std::fs::remove_dir_all(base).unwrap();
     }
-
 }

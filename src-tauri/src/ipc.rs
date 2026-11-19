@@ -28,10 +28,10 @@ use crate::memory::{Episode, Memory, RunRecord};
 use crate::models::{self, ModelFile};
 use crate::places;
 use crate::plan::{self, Answer, Plan, Problem, Question, StepGate};
-use crate::readiness;
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
+use crate::readiness;
 use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::restricted;
 use crate::roles;
@@ -927,7 +927,11 @@ pub fn readiness_status(state: State<'_, AppState>) -> Result<readiness::Readine
     let files = match std::fs::metadata(&inner.models_dir) {
         Ok(_) => models::scan(&inner.models_dir)?,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => Vec::new(),
-        Err(e) => return Err(format!("папку моделей прочитать не удалось: {e}; проверьте права и путь в «Моделях»")),
+        Err(e) => {
+            return Err(format!(
+                "папку моделей прочитать не удалось: {e}; проверьте права и путь в «Моделях»"
+            ))
+        }
     };
     let first_ok = files.iter().find(|file| file.ok);
     let model_present = first_ok.is_some();
@@ -955,25 +959,36 @@ pub fn readiness_status(state: State<'_, AppState>) -> Result<readiness::Readine
 
 /// Download only the compiled-in pinned runtime. No execution after install.
 #[tauri::command]
-pub async fn download_runtime(state: State<'_, AppState>) -> Result<crate::runtime::Installed, String> {
+pub async fn download_runtime(
+    state: State<'_, AppState>,
+) -> Result<crate::runtime::Installed, String> {
     let base = state.inner.base_dir.clone();
     tauri::async_runtime::spawn_blocking(move || crate::runtime::install(&base))
-        .await.map_err(|e| e.to_string())?
+        .await
+        .map_err(|e| e.to_string())?
 }
 
 /// Only the app-owned versioned directory may be removed. Never manual files.
 #[tauri::command]
 pub async fn remove_runtime(state: State<'_, AppState>) -> Result<(), String> {
     use std::sync::atomic::Ordering;
-    ENGINE_STARTING.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+    ENGINE_STARTING
+        .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
         .map_err(|_| "движок запускается; дождитесь завершения".to_string())?;
     let _guard = EngineStartGuard;
-    if state.inner.engine.lock().map_err(|e| e.to_string())?.is_some() {
+    if state
+        .inner
+        .engine
+        .lock()
+        .map_err(|e| e.to_string())?
+        .is_some()
+    {
         return Err("сначала остановите движок в «Моделях»".into());
     }
     let base = state.inner.base_dir.clone();
     tauri::async_runtime::spawn_blocking(move || crate::runtime::remove(&base))
-        .await.map_err(|e| e.to_string())?
+        .await
+        .map_err(|e| e.to_string())?
 }
 
 /// Итог проверки разговора: движок запущен (или уже был запущен) и ответил на
@@ -1008,7 +1023,8 @@ pub async fn smoke_check(state: State<'_, AppState>) -> Result<SmokeResult, Stri
         (port, None) // Имя уже загруженной модели здесь не известно: не угадываем.
     } else {
         let name = models::scan(&state.inner.models_dir)?
-            .into_iter().find(|file| file.ok)
+            .into_iter()
+            .find(|file| file.ok)
             .map(|file| file.name)
             .ok_or_else(|| "нет модели с читаемым заголовком: откройте «Модели»".to_string())?;
         let status = start_engine(state, name.clone()).await?;
@@ -1076,12 +1092,14 @@ fn read_engine_status(state: &AppState) -> EngineStatus {
 
     let (running, port, pid) = match state.inner.engine.lock() {
         Ok(mut guard) => {
-            if guard.as_mut().is_some_and(|server| !server.is_alive()) { *guard = None; }
+            if guard.as_mut().is_some_and(|server| !server.is_alive()) {
+                *guard = None;
+            }
             match guard.as_ref() {
                 Some(server) => (true, Some(server.port()), Some(server.pid())),
                 None => (false, None, None),
             }
-        },
+        }
         // Отравленный мьютекс: считаем, что движок не под нашим контролем.
         Err(_) => (false, None, None),
     };
@@ -1123,7 +1141,8 @@ pub async fn start_engine(
 ) -> Result<EngineStatus, String> {
     use std::sync::atomic::Ordering;
     let stop_epoch = ENGINE_STOP_EPOCH.load(Ordering::SeqCst);
-    ENGINE_STARTING.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+    ENGINE_STARTING
+        .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
         .map_err(|_| "движок уже запускается".to_string())?;
     let _start_guard = EngineStartGuard;
     let _ = read_engine_status(&state);
@@ -1138,7 +1157,10 @@ pub async fn start_engine(
     }
 
     let inner = state.inner.clone();
-    if !crate::runtime::safe_relative(&name) || name.contains(['/', '\\']) || !name.to_ascii_lowercase().ends_with(".gguf") {
+    if !crate::runtime::safe_relative(&name)
+        || name.contains(['/', '\\'])
+        || !name.to_ascii_lowercase().ends_with(".gguf")
+    {
         return Err("нужно имя файла .gguf из папки моделей, а не путь".into());
     }
     let model = inner.models_dir.join(&name);
@@ -1161,25 +1183,25 @@ pub async fn start_engine(
     let managed_base = state.inner.base_dir.clone();
     let managed = program.starts_with(crate::runtime::directory(&managed_base));
     let started = tauri::async_runtime::spawn_blocking(move || {
-        if managed { crate::runtime::verify(&managed_base)?; }
+        if managed {
+            crate::runtime::verify(&managed_base)?;
+        }
         Server::start(&spec, &log, std::time::Duration::from_secs(60))
     })
     .await
     .map_err(|error| format!("запуск не выполнился: {error}"))?;
 
     let result = match started {
-        Ok(mut server) => {
-            match state.inner.engine.lock() {
-                Ok(mut guard) if ENGINE_STOP_EPOCH.load(Ordering::SeqCst) == stop_epoch => {
-                    *guard = Some(server);
-                    Ok(())
-                }
-                _ => {
-                    let _ = server.stop();
-                    Err("запуск отменён или состояние движка недоступно".to_string())
-                }
+        Ok(mut server) => match state.inner.engine.lock() {
+            Ok(mut guard) if ENGINE_STOP_EPOCH.load(Ordering::SeqCst) == stop_epoch => {
+                *guard = Some(server);
+                Ok(())
             }
-        }
+            _ => {
+                let _ = server.stop();
+                Err("запуск отменён или состояние движка недоступно".to_string())
+            }
+        },
         Err(error) => Err(error),
     };
 
