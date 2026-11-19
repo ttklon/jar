@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run && node --test scripts/check-release-manifest.mjs",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test:voice-simulation": "tsc -p tsconfig.e2e.json --noEmit && playwright test"
   },
   "dependencies": {
     "@fluentui/react-components": "^9.54.0",
@@ -20,8 +21,10 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.61.1",
     "@tauri-apps/cli": "^2.1.0",
     "@testing-library/react": "^16.3.3",
+    "@types/node": "22.19.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",

@@ -846,7 +846,9 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         );
         if (first) speak(voice.askSpoken(first.label));
         // Отвечаем вслух: человек, который говорит, не смотрит в экран.
-        const phraseOut = !proposal
+        const phraseOut = answered?.proposal
+          ? describeThought(answered)
+          : !proposal
           ? found.length === 0
             ? voice.spokenNothing
             : found.some((item) => Boolean(item.tool))

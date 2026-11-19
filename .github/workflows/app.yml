@@ -89,6 +89,34 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+  voice-simulation:
+    name: voice simulation (Windows Chromium, virtual microphone)
+    runs-on: windows-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Install test browser (not a user runtime)
+        run: npx playwright install chromium
+      - name: Virtual microphone and dialogue contract simulation
+        run: npm run test:voice-simulation
+      - name: Upload simulation evidence (no real user audio)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice-simulation-windows
+          path: |
+            artifacts/voice-report
+            artifacts/voice-simulation
+          if-no-files-found: error
+          retention-days: 14
+
   # Спайк релиза из `RUNTIME.md` §5: приложение должно не только компилироваться в
   # dev-профиле, но и собираться в release с установщиком. Делается на push, а не на
   # каждом pull request: release-сборка с LTO идёт десятки минут.
