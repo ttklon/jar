@@ -6,7 +6,11 @@ pub fn json_body(response: &[u8]) -> Result<&str, String> {
     if end > 16 * 1024 { return Err("ASR: HTTP-заголовок превышает 16 КиБ".into()); }
     let header = std::str::from_utf8(&response[..end]).map_err(|_| "ASR: неверная кодировка HTTP-заголовка")?;
     let mut lines = header.split("\r\n");
-    let mut status = lines.next().unwrap_or_default().splitn(3, ' ');
+    let status_line = lines.next().unwrap_or_default();
+    if status_line.bytes().any(|b| b < 32 || b == 127) {
+        return Err("ASR: недопустимые символы HTTP-статуса".into());
+    }
+    let mut status = status_line.splitn(3, ' ');
     if !matches!(status.next(), Some("HTTP/1.0" | "HTTP/1.1")) {
         return Err("ASR: неизвестный HTTP-протокол".into());
     }
@@ -85,6 +89,14 @@ mod tests {
         assert!(json_body(b"HTTP/1.1 200 OK\r\n\r\n{}").is_err());
         let mut invalid = response("", "{}"); invalid.push(255);
         assert!(json_body(&invalid).is_err());
+    }
+    #[test]
+    fn rejects_invalid_protocol_status_and_control_characters() {
+        for status in ["HTTP/2 200 OK", "HTTP/1.1 20 OK", "HTTP/1.1 200X OK",
+            "HTTP/1.1 200 OK\nInjected", "HTTP/1.1 200 OK\tInjected"] {
+            let raw = format!("{status}\r\nContent-Type: application/json\r\n\r\n{{}}");
+            assert!(json_body(raw.as_bytes()).is_err(), "{status}");
+        }
     }
     #[test]
     fn rejects_oversized_headers_and_incomplete_header_prefixes() {

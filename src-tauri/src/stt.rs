@@ -425,7 +425,8 @@ mod tests {
         let worker = thread::spawn(move || {
             let (mut socket, _) = listener.accept().unwrap();
             let mut buffer = [0; 8192];
-            socket.read(&mut buffer).unwrap();
+            let read = socket.read(&mut buffer).unwrap();
+            assert!(read > 0);
             socket.write_all(b"HTTP/1.1 500 Error\r\nContent-Type: application/json\r\nContent-Length: 15\r\n\r\n{\"text\":\"fake\"}").unwrap();
         });
         let result = post(port, &wav_fixture(), Duration::from_secs(5));
