@@ -1,0 +1,17 @@
+{
+  "id": "github:electron/electron-quick-start",
+  "kind": "github",
+  "category": "electron-shell",
+  "repo": "electron/electron-quick-start",
+  "url": "https://github.com/electron/electron-quick-start",
+  "description": "Clone to try a simple Electron app",
+  "stars": 11429,
+  "forks": 4855,
+  "language": "JavaScript",
+  "license": "CC0-1.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-05T18:19:46Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "github:topoteretes/cognee",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "topoteretes/cognee",
+  "url": "https://github.com/topoteretes/cognee",
+  "description": "Cognee is the open-source AI memory platform for agents. Give your AI agents persistent long-term memory with small models for free",
+  "stars": 33131,
+  "forks": 3480,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent-memory",
+    "agent-skills",
+    "ai",
+    "ai-agents",
+    "ai-memory",
+    "cognitive-architecture",
+    "cognitive-memory",
+    "context-engineering",
+    "contributions-welcome",
+    "good-first-issue",
+    "good-first-pr",
+    "graph-database",
+    "graph-rag",
+    "help-wanted",
+    "knowledge"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T10:53:45Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

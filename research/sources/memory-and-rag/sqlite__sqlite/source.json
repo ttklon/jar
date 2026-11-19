@@ -1,0 +1,17 @@
+{
+  "id": "github:sqlite/sqlite",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "sqlite/sqlite",
+  "url": "https://github.com/sqlite/sqlite",
+  "description": "Official Git mirror of the SQLite source tree",
+  "stars": 10936,
+  "forks": 1715,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:30:21Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

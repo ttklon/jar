@@ -1,0 +1,23 @@
+{
+  "id": "github:bencevans/screenshot-desktop",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "bencevans/screenshot-desktop",
+  "url": "https://github.com/bencevans/screenshot-desktop",
+  "description": "💻 Capture a screenshot of your local machine",
+  "stars": 503,
+  "forks": 105,
+  "language": "JavaScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "hacktoberfest",
+    "linux",
+    "osx",
+    "screenshot",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T11:24:17Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

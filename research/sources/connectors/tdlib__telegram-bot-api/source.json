@@ -1,0 +1,17 @@
+{
+  "id": "github:tdlib/telegram-bot-api",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "tdlib/telegram-bot-api",
+  "url": "https://github.com/tdlib/telegram-bot-api",
+  "description": "Telegram Bot API server",
+  "stars": 4515,
+  "forks": 935,
+  "language": "C++",
+  "license": "BSL-1.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-08-26T14:59:19Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

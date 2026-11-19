@@ -1,0 +1,18 @@
+# Discovery: `docx generation python`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 13 | [frankbria/auto-author](https://github.com/frankbria/auto-author) | TypeScript | MIT | 2026-11-06 | AI-powered book authoring platform that guides writers from concept to draft through interactive interviews, voice/text input, and intelligent    content generation. Features rich text editing, automated table of content |
+| 6 | [saberfazliahmadi/rag-document-qa](https://github.com/saberfazliahmadi/rag-document-qa) | Python | MIT | 2026-10-28 | Retrieval-Augmented Generation (RAG) pipeline in Python: ingest PDF/DOCX/TXT documents into ChromaDB and ask questions with grounded, source-cited LLM answers. |
+| 5 | [huseink/docx-dynamic-generation](https://github.com/huseink/docx-dynamic-generation) | Python | - | 2024-12-23 | Example for Automating Word Document Creation with Python and FastAPI (Using python-docx-template) |
+| 5 | [mr-ravin/FileChat-RAG](https://github.com/mr-ravin/FileChat-RAG) | Python | MIT | 2025-05-25 | FileChat-RAG is a simple Retrieval-Augmented Generation (RAG) system that allows users to ask questions about the contents of various file formats. It extracts text from PDFs, JSON, text files(.txt, .docx, .odt, .md), an |
+| 4 | [smitngandhi/SRS_Generation](https://github.com/smitngandhi/SRS_Generation) | Python | - | 2026-02-11 | 🤖 AI-powered SRS document generator using multi-agent system with Groq API. Generates IEEE 830-1998 compliant documents with Mermaid diagrams in minutes. Built with FastAPI, Google ADK, and Llama models. Generated SRS fi |
+| 4 | [Yatendra-Gupta193/RAGDoc_Assistant](https://github.com/Yatendra-Gupta193/RAGDoc_Assistant) | JavaScript | - | 2026-07-28 | Developed An AI-powered Retrieval-Augmented Generation (RAG) Document Assistant that allows users to upload PDF, DOCX, and TXT files and ask questions in natural language... |
+| 3 | [LuiccianDev/word-mcp](https://github.com/LuiccianDev/word-mcp) | Python | MIT | 2026-11-08 | High-performance Model Context Protocol (MCP) server for programmatic Word (.docx) document generation and manipulation. |
+| 3 | [maoningwood/gongwen](https://github.com/maoningwood/gongwen) | Python | NOASSERTION | 2026-09-03 | 党政机关公文 docx 生成 Skill：字体检查 + python-docx 构建库 + 版式数字验收，兼容 ZCode / Claude Code / Codex 等 agent \| Chinese official-document (gongwen) docx generation skill for AI agents |
+| 3 | [dhruvsharma777/polaris-AI-Shorts-Generator](https://github.com/dhruvsharma777/polaris-AI-Shorts-Generator) | Python | - | 2025-12-27 | Pollaris AI Video Generator is a Python-based automation pipeline. It transforms simple text prompts or uploaded documents (PDF/DOCX) into fully edited videos. The system handles script generation, AI voiceovers (Edge-TT |
+| 2 | [ThalesMMS/Radiology-Templates](https://github.com/ThalesMMS/Radiology-Templates) | Python | MIT | 2026-04-18 | Radiology report template repository with Python/Rust tools for DOCX, Markdown, and TXT round trips, consistent formatting rules, index generation, backup handling, and conversion cleanup. |
+| 2 | [yavuzkrm/rag-project](https://github.com/yavuzkrm/rag-project) | Python | MIT | 2026-10-07 | A Retrieval-Augmented Generation (RAG) application that enables users to query PDF, DOCX, and TXT documents using a local LLM powered by Ollama and ChromaDB. |
+| 2 | [FelipeEnne/Personal-Portfolio](https://github.com/FelipeEnne/Personal-Portfolio) | Python | MIT | 2026-10-30 | Personal portfolio and career source of truth with automated EN/PT portfolio and resume generation, including job-specific CV tailoring. |

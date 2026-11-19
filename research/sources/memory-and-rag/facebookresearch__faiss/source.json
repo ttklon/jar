@@ -1,0 +1,17 @@
+{
+  "id": "github:facebookresearch/faiss",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "facebookresearch/faiss",
+  "url": "https://github.com/facebookresearch/faiss",
+  "description": "A library for efficient similarity search and clustering of dense vectors.",
+  "stars": 41268,
+  "forks": 4588,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T17:39:00Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

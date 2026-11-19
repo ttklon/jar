@@ -1,0 +1,25 @@
+{
+  "id": "github:AutoHotkey/AutoHotkey",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "AutoHotkey/AutoHotkey",
+  "url": "https://github.com/AutoHotkey/AutoHotkey",
+  "description": "AutoHotkey - macro-creation and automation-oriented scripting utility for Windows.",
+  "stars": 13434,
+  "forks": 1202,
+  "language": "C++",
+  "license": "GPL-2.0",
+  "topics": [
+    "autohotkey",
+    "automation",
+    "c-plus-plus",
+    "hotkeys",
+    "scripting",
+    "scripting-language",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T00:55:18Z",
+  "default_branch": "alpha",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

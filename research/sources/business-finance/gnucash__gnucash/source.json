@@ -1,0 +1,17 @@
+{
+  "id": "github:gnucash/gnucash",
+  "kind": "github",
+  "category": "business-finance",
+  "repo": "gnucash/gnucash",
+  "url": "https://github.com/gnucash/gnucash",
+  "description": "GnuCash Double-Entry Accounting Program.",
+  "stars": 4402,
+  "forks": 1005,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-08T05:45:15Z",
+  "default_branch": "stable",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

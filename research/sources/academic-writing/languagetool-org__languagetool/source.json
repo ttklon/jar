@@ -1,0 +1,24 @@
+{
+  "id": "github:languagetool-org/languagetool",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "languagetool-org/languagetool",
+  "url": "https://github.com/languagetool-org/languagetool",
+  "description": "Style and Grammar Checker for 25+ Languages",
+  "stars": 15238,
+  "forks": 1601,
+  "language": "Java",
+  "license": "LGPL-2.1",
+  "topics": [
+    "grammar",
+    "natural-language",
+    "natural-language-processing",
+    "proofreading",
+    "spellcheck",
+    "style-checker"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:46:41Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

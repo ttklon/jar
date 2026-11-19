@@ -1,0 +1,17 @@
+{
+  "id": "github:turboderp-org/exllamav2",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "turboderp-org/exllamav2",
+  "url": "https://github.com/turboderp-org/exllamav2",
+  "description": "A fast inference library for running LLMs locally on modern consumer-class GPUs",
+  "stars": 4652,
+  "forks": 347,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-03-04T13:12:20Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

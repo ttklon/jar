@@ -1,0 +1,18 @@
+---
+id: "github:KDE/kio-extras"
+kind: "github"
+category: "devices-peripherals"
+repo: "KDE/kio-extras"
+url: "https://github.com/KDE/kio-extras"
+description: "Additional components to increase the functionality of KIO"
+stars: 32
+forks: 18
+language: "C++"
+license: "NOASSERTION"
+archived: false
+pushed_at: "2026-11-08T06:11:25Z"
+default_branch: "master"
+fetched_at: "2026-11-08T12:43:21Z"
+---
+
+_README not available_

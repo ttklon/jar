@@ -1,0 +1,25 @@
+{
+  "id": "github:pmndrs/zustand",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "pmndrs/zustand",
+  "url": "https://github.com/pmndrs/zustand",
+  "description": "🐻 Bear necessities for state management in React",
+  "stars": 58904,
+  "forks": 2191,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "hacktoberfest",
+    "hooks",
+    "react",
+    "react-context",
+    "reactjs",
+    "redux",
+    "state-management"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T13:35:06Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

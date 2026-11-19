@@ -1,0 +1,22 @@
+{
+  "id": "github:helix-editor/helix",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "helix-editor/helix",
+  "url": "https://github.com/helix-editor/helix",
+  "description": "A post-modern modal text editor.",
+  "stars": 46917,
+  "forks": 4010,
+  "language": "Rust",
+  "license": "MPL-2.0",
+  "topics": [
+    "kakoune",
+    "rust",
+    "text-editor",
+    "vim"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-29T02:36:33Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

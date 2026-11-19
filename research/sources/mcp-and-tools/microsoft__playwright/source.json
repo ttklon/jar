@@ -1,0 +1,33 @@
+{
+  "id": "github:microsoft/playwright",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "microsoft/playwright",
+  "url": "https://github.com/microsoft/playwright",
+  "description": "Playwright is a framework for Web Testing and Automation. It allows testing Chromium, Firefox and WebKit with a single API.",
+  "stars": 99567,
+  "forks": 6815,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "automation",
+    "chrome",
+    "chromium",
+    "e2e-testing",
+    "electron",
+    "end-to-end-testing",
+    "firefox",
+    "javascript",
+    "playwright",
+    "test",
+    "test-automation",
+    "testing",
+    "testing-tools",
+    "web",
+    "webkit"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T08:36:03Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

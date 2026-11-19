@@ -1,0 +1,24 @@
+{
+  "id": "github:thomasnordquist/MQTT-Explorer",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "thomasnordquist/MQTT-Explorer",
+  "url": "https://github.com/thomasnordquist/MQTT-Explorer",
+  "description": "An all-round MQTT client that provides a structured topic overview",
+  "stars": 4091,
+  "forks": 418,
+  "language": "TypeScript",
+  "license": "CC-BY-4.0",
+  "topics": [
+    "homeautomation",
+    "mqtt",
+    "mqtt-client",
+    "mqtt-explorer",
+    "mqtt-smarthome",
+    "mqtt-tool"
+  ],
+  "archived": false,
+  "pushed_at": "2026-05-08T01:27:42Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:wong2/awesome-mcp-servers",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "wong2/awesome-mcp-servers",
+  "url": "https://github.com/wong2/awesome-mcp-servers",
+  "description": "A curated list of Model Context Protocol (MCP) servers",
+  "stars": 4406,
+  "forks": 2243,
+  "language": "",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-07-13T12:44:30Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

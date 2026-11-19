@@ -1,0 +1,22 @@
+{
+  "id": "github:microsoft/TypeScript",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "microsoft/TypeScript",
+  "url": "https://github.com/microsoft/TypeScript",
+  "description": "TypeScript is a superset of JavaScript that compiles to clean JavaScript output.",
+  "stars": 111862,
+  "forks": 15395,
+  "language": "Go",
+  "license": "Apache-2.0",
+  "topics": [
+    "javascript",
+    "language",
+    "typechecker",
+    "typescript"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:59:51Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

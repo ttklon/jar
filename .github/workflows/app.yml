@@ -1,0 +1,409 @@
+name: app
+
+on:
+  push:
+    branches: [main, "arena/**"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Publish a GitHub pre-release from this commit
+        type: boolean
+        required: true
+        default: false
+      release_tag:
+        description: Release tag (must match the app version, for example v0.1.0)
+        type: string
+        required: false
+  workflow_call:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+  checks: write
+
+jobs:
+  sbom:
+    name: dependency inventory (SPDX 2.3)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build SPDX from npm and Cargo lockfiles
+        run: python3 tools/sbom.py --output dist/zshelper.spdx.json
+
+      - name: Record SBOM checksum
+        run: |
+          digest=$(sha256sum dist/zshelper.spdx.json | cut -d' ' -f1)
+          {
+            echo "### Dependency SBOM"
+            echo ""
+            echo "Artifact: \`zshelper-sbom/zshelper.spdx.json\`"
+            echo "SHA-256: \`$digest\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Attest SBOM provenance
+        if: github.event_name == 'push'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/zshelper.spdx.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zshelper-sbom
+          path: dist/zshelper.spdx.json
+          if-no-files-found: error
+          retention-days: 14
+
+  web:
+    name: ui (typecheck, tests, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests (registry invariants, UI smoke)
+        run: npm test
+
+      - name: Build frontend
+        run: npm run build
+
+  # Спайк релиза из `RUNTIME.md` §5: приложение должно не только компилироваться в
+  # dev-профиле, но и собираться в release с установщиком. Делается на push, а не на
+  # каждом pull request: release-сборка с LTO идёт десятки минут.
+  bundle:
+    name: release (installer, Windows)
+    if: github.event_name == 'push' || github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish_release)
+    runs-on: windows-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+      actions: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # Кеш пишем только из основной ветки: иначе каждая рабочая ветка заводит свою
+      # копию на полгигабайта, и хранилище кончается за неделю. Читать кеш можно всегда.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Вывод сборки превращается в аннотации: логи джоб недоступны, аннотации — да.
+      # Аннотации из шага, который сам упал, до API не доходят (проверено), поэтому
+      # три шага: run → report (`continue-on-error`) → gate.
+      # Бандлер Tauri скачивает себе NSIS с внешнего хранилища, и оно регулярно
+      # отвечает 504. Это не наш код, но из-за него релиз «красный» через раз —
+      # поэтому три попытки, и только на 504: остальные ошибки повторять незачем.
+      - name: Build installers (NSIS + MSI)
+        id: bundle
+        continue-on-error: true
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            echo "попытка $attempt"
+            if npm run tauri build > bundle.log 2>&1; then
+              exit 0
+            fi
+            if ! grep -q "http status: 504" bundle.log; then
+              exit 1
+            fi
+            sleep 20
+          done
+          exit 1
+
+      # `continue-on-error` здесь не для красоты: упавший отчёт делает `success()`
+      # ложным, и гейт ниже молча пропускается — сборка «зелёная» без установщика.
+      - name: Report bundle errors
+        if: steps.bundle.outcome == 'failure'
+        shell: bash
+        continue-on-error: true
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          tail -120 bundle.log
+          python scripts/ci_log_annotate.py bundle.log --title "tauri build" \
+            --grep "error|Error|ERROR|failed|panicked" --tail 40 --max 8
+
+      - name: Installer gate
+        if: steps.bundle.outcome == 'failure'
+        shell: bash
+        run: exit 1
+
+      - name: Installer artifacts
+        if: steps.bundle.outcome == 'success'
+        shell: bash
+        run: |
+          ls -la src-tauri/target/release/bundle/nsis
+          ls -la src-tauri/target/release/bundle/msi
+
+      # Портативная сборка — тот же exe, но без установки: положил в папку и запустил.
+      # Чего она НЕ делает, сказано в файле рядом: WebView2 нужен системный, а данные
+      # всё равно живут в %LOCALAPPDATA%, поэтому «портативная» не значит «ничего не
+      # оставляет на диске».
+      - name: Portable package (zip)
+        if: steps.bundle.outcome == 'success'
+        shell: bash
+        run: |
+          mkdir -p dist/portable
+          cp src-tauri/target/release/zshelper.exe dist/portable/
+          # Текст читай-файла лежит в репозитории: его видно в ревью и не надо
+          # экранировать в YAML.
+          cp scripts/portable-readme.txt dist/portable/ЧИТАЙ.txt
+          cd dist/portable
+          powershell -NoProfile -Command "Compress-Archive -Path 'zshelper.exe','ЧИТАЙ.txt' -DestinationPath '../zshelper-portable.zip' -Force"
+          cd ../..
+          ls -la dist
+
+      - name: Create release manifest
+        if: steps.bundle.outcome == 'success'
+        shell: bash
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: node scripts/release-manifest.mjs
+
+      # Контрольные суммы печатаются в сводку прогона: скачанный файл можно сверить,
+      # не доверяя ни каналу, ни дате.
+      - name: Checksums
+        if: steps.bundle.outcome == 'success'
+        shell: bash
+        run: |
+          {
+            echo "### Установщики и портативная сборка"
+            echo ""
+            echo "| файл | sha256 |"
+            echo "| --- | --- |"
+            for file in src-tauri/target/release/bundle/nsis/*.exe \
+                        src-tauri/target/release/bundle/msi/*.msi \
+                        dist/zshelper-portable.zip; do
+              [ -f "$file" ] || continue
+              echo "| \`$(basename "$file")\` | \`$(sha256sum "$file" | cut -d' ' -f1)\` |"
+            done
+            echo ""
+            echo "Манифест: \`zshelper-release.json\` (SHA-256 \`$(sha256sum dist/zshelper-release.json | cut -d' ' -f1)\`)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Attest installer and portable package provenance
+        if: steps.bundle.outcome == 'success'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/msi/*.msi
+            dist/zshelper-portable.zip
+            dist/zshelper-release.json
+
+      - name: Upload installers and portable
+        if: steps.bundle.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: zshelper-windows
+          path: |
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/msi/*.msi
+            dist/zshelper-portable.zip
+            dist/zshelper-release.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish GitHub pre-release
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: |
+          version=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          expected="v${version}"
+          if [ -z "$RELEASE_TAG" ] || [ "$RELEASE_TAG" != "$expected" ]; then
+            echo "release_tag must equal the application version: $expected" >&2
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" \
+            src-tauri/target/release/bundle/nsis/*.exe \
+            src-tauri/target/release/bundle/msi/*.msi \
+            dist/zshelper-portable.zip \
+            dist/zshelper-release.json \
+            --target "$GITHUB_SHA" \
+            --title "ZShelper $RELEASE_TAG — ранняя альфа" \
+            --prerelease \
+            --notes "Проверочная Windows-сборка из GitHub Actions. Это ранняя альфа, не стабильный релиз. Перед установкой сохраните важные данные. Автообновление в приложении пока не реализовано. Проверьте SHA-256 по zshelper-release.json; GitHub provenance не является Authenticode-подписью."
+
+      - name: Attach assets to published GitHub release
+        if: github.event_name == 'release' && github.event.action == 'published'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          expected="v${version}"
+          if [ "$RELEASE_TAG" != "$expected" ]; then
+            echo "release tag $RELEASE_TAG does not match app version $expected" >&2
+            exit 1
+          fi
+          gh release upload "$RELEASE_TAG" \
+            src-tauri/target/release/bundle/nsis/*.exe \
+            src-tauri/target/release/bundle/msi/*.msi \
+            dist/zshelper-portable.zip \
+            dist/zshelper-release.json \
+            --clobber
+
+  rust:
+    name: core (cargo check + tests, Windows)
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # токен нужен, чтобы CI мог запушить коммит форматирования в ветку
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      # Кеш пишем только из основной ветки: иначе каждая рабочая ветка заводит свою
+      # копию на полгигабайта, и хранилище кончается за неделю. Читать кеш можно всегда.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "src-tauri -> target"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+
+      # Tauri проверяет наличие frontendDist при сборке, поэтому фронтенд
+      # собирается до вызова cargo.
+      - name: Build frontend
+        run: |
+          npm ci
+          npm run build
+
+      # Вывод компилятора пишем в файл и превращаем в аннотации: логи джобов
+      # доступны не всегда, а аннотации читаются через API в любом случае.
+      - name: Clippy
+        id: clippy
+        shell: bash
+        run: |
+          set +e
+          {
+            echo "pwd: $(pwd)"
+            echo "cargo: $(command -v cargo || echo НЕ НАЙДЕН)"
+            cargo --version
+          } > clippy.log 2>&1
+          cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings >> clippy.log 2>&1
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Clippy report
+        if: always()
+        shell: bash
+        continue-on-error: true
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/ci_annotate.py clippy.log
+
+      - name: Clippy gate
+        if: steps.clippy.outputs.status != '0'
+        shell: bash
+        run: |
+          echo "::error::clippy завершился с ошибками (см. аннотации выше)"
+          exit 1
+
+      # Как и у clippy: сначала прогон пишет лог, потом отдельный шаг превращает его
+      # в аннотации, и только третий валит сборку. Аннотации из шага, который сам
+      # завершился ошибкой, до API не доходят.
+      - name: Tests (реестр встроен в бинарник)
+        id: tests
+        if: steps.clippy.outputs.status == '0'
+        shell: bash
+        run: |
+          set +e
+          cargo test --manifest-path src-tauri/Cargo.toml > tests.log 2>&1
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Tests report
+        if: always() && steps.tests.outputs.status != '0'
+        shell: bash
+        continue-on-error: true
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          python scripts/ci_log_annotate.py tests.log --title "cargo test" \
+            --grep "FAILED|panicked|overflowed|stack overflow|SIGABRT|abort|---- |assertion|failures:|error\[|провал|не удал|ошибк" \
+            --after 2 --max 10
+
+      - name: Tests gate
+        if: steps.tests.outputs.status != '0'
+        shell: bash
+        run: |
+          echo "::error::cargo test упал — подробности в аннотациях выше"
+          exit 1
+
+      # У разработчика может не быть Rust-тулчейна (песочница, новая машина), а
+      # форматирование детерминировано. Поэтому ветку чинит сам CI отдельным
+      # коммитом, а не человек, вручную правящий отступы по диффу из аннотаций.
+      - name: Rustfmt
+        if: steps.clippy.outputs.status == '0'
+        shell: bash
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          cargo fmt --manifest-path src-tauri/Cargo.toml --all
+          # Смотрим только исходники: cargo build переписывает Cargo.lock и раньше
+          # выдавал это за «код не отформатирован».
+          if git diff --quiet -- src-tauri/src src-tauri/build.rs; then
+            echo "форматирование в порядке"
+            exit 0
+          fi
+          if [ "${{ github.event_name }}" != "push" ]; then
+            git diff -- src-tauri
+            echo "::error::файлы не отформатированы — запусти cargo fmt"
+            exit 1
+          fi
+          # Форматирование меняет число строк в ядре, а дашборд это число печатает.
+          # Без пересборки следующий прогон ругался бы «сгенерированные файлы устарели»
+          # из-за отступов — и это выглядело бы как отдельная поломка.
+          python tools/dashboard.py
+          git config user.name "zshelper-ci"
+          git config user.email "ci@zshelper.local"
+          git add src-tauri/src src-tauri/build.rs src-tauri/Cargo.lock docs/DASHBOARD.md docs/INDEX.md
+          git commit -m "style: cargo fmt + пересчёт дашборда (автоматически, CI)"
+          git push
+          # На push это предупреждение, а не красная сборка: код уже починен ботом, тесты
+          # прошли, и человеку не нужно чинить отступы руками. Красный прогон должен
+          # значить «не собирается или тесты упали» — иначе цвет перестаёт что-то значить.
+          echo "::warning::CI отформатировал код и запушил коммит — подтяни его (git pull --rebase)"
+          exit 0

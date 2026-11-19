@@ -1,0 +1,18 @@
+# Discovery: `windows ui automation agent`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 222 | [winyunq/UnrealMotionGraphicsMCP](https://github.com/winyunq/UnrealMotionGraphicsMCP) | C++ | MIT | 2026-08-02 | 🚀 UE5-UMG-MCP: A deep-focused MCP for Unreal Engine UMG layout. Designed to maximize AI efficiency within limited context windows by prioritizing precision in UI structure, animations, and blueprint integration. |
+| 193 | [LAVARONG/wechat-automation-api](https://github.com/LAVARONG/wechat-automation-api) | Python | - | 2026-09-18 | 微信 Windows 版自动化发送服务（支持 4.0+ 版本）  基于 Flask + uiautomation 的 HTTP API 服务，通过 UI 自动化控制微信客户端发送消息。 支持文本、图片、批量发送和队列管理。非 HOOK、非协议，安全可靠。已支持Agent Skill，可让openclaw安装。 |
+| 157 | [YV17labs/GhostDesk](https://github.com/YV17labs/GhostDesk) | Rust | NOASSERTION | 2026-09-23 | Give any AI agent a full desktop — it sees the screen, clicks, types, and runs apps like a human. Automate anything with a UI: browsers, legacy software, internal tools. No API needed. One Docker command. |
+| 130 | [sbroenne/mcp-windows](https://github.com/sbroenne/mcp-windows) | C# | MIT | 2026-11-08 | Let AI agents control Windows applications. Click buttons, type text, toggle settings — all by name, not coordinates.  Uses the Windows UI Automation API to find UI elements reliably, regardless of DPI, theme, resolution |
+| 52 | [sandraschi/windows-computer-use-mcp](https://github.com/sandraschi/windows-computer-use-mcp) | Python | MIT | 2026-11-01 | Windows Computer Use for AI Agents. Both a tool (22 MCP tools for click, type, screenshot, OCR, UI inspection) and an agent (autonomous mission engine, macro recorder, intent-based discovery, event watchers). Built with  |
+| 21 | [vanvuongngo/ClaraN](https://github.com/vanvuongngo/ClaraN) | Kotlin | MIT | 2025-12-02 | ClaraN — Privacy-first, fully local AI workspace with Ollama LLM chat, tool calling, agent builder, Stable Diffusion, and embedded n8n-style automation. Backend in Rust. Just your stack, your machines. |
+| 13 | [deploymenttheory/windows-mcp-server](https://github.com/deploymenttheory/windows-mcp-server) | Go | MIT | 2026-11-06 | A MCP server that bridges AI agents to the Windows desktop. UI Automation, synthetic mouse/keyboard input, screenshots, window and application control, PowerShell, the registry, processes, the filesystem, and web scrapin |
+| 8 | [VBS2004/jev-windows-agent](https://github.com/VBS2004/jev-windows-agent) | Python | MIT | 2026-09-27 | Windows UI Automation extension of arc-cua: a fast, JEV-powered decision loop for desktop computer-use agents |
+| 8 | [KremlevLev/Rynne](https://github.com/KremlevLev/Rynne) | Python | NOASSERTION | 2026-08-14 | A deterministic Windows AI agent that doesn't hallucinate actions. Features native UI Automation (no blind clicks), file rollbacks, and strict HITL security. |
+| 7 | [Erikdai/bridge-agent](https://github.com/Erikdai/bridge-agent) | Python | MIT | 2026-10-16 | Give your web agent access to Windows: deterministic routing between the page DOM and Windows UI Automation |
+| 7 | [timteh/antigravity-autopilot](https://github.com/timteh/antigravity-autopilot) | PowerShell | MIT | 2026-03-18 | 🚀 Auto-accept agent steps in Antigravity IDE — no CDP required. Uses OS-level accessibility (Windows UI Automation) to click Run/Accept/Continue buttons invisibly. Works when every other auto-accept extension fails. |
+| 5 | [amitse/uiacli](https://github.com/amitse/uiacli) | C# | MIT | 2026-05-17 | browser-use for Windows desktops — AI agents see and control any Windows app via UI Automation. The missing piece for computer-use agents. |

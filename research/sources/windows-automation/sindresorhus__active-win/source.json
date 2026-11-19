@@ -1,0 +1,23 @@
+{
+  "id": "github:sindresorhus/active-win",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "sindresorhus/active-win",
+  "url": "https://github.com/sindresorhus/active-win",
+  "description": "Get metadata about the active window and open windows (title, id, bounds, owner, etc)",
+  "stars": 924,
+  "forks": 195,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "active-window",
+    "javascript",
+    "node-module",
+    "nodejs",
+    "npm-package"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-31T09:30:34Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

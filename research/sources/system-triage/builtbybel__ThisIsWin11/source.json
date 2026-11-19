@@ -1,0 +1,20 @@
+{
+  "id": "github:builtbybel/ThisIsWin11",
+  "kind": "github",
+  "category": "system-triage",
+  "repo": "builtbybel/ThisIsWin11",
+  "url": "https://github.com/builtbybel/ThisIsWin11",
+  "description": "The real PowerToys for Windows 11",
+  "stars": 5169,
+  "forks": 326,
+  "language": "C#",
+  "license": "MIT",
+  "topics": [
+    "powertoys",
+    "windows11"
+  ],
+  "archived": true,
+  "pushed_at": "2023-06-06T05:10:10Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

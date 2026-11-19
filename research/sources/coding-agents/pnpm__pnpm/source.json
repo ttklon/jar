@@ -1,0 +1,26 @@
+{
+  "id": "github:pnpm/pnpm",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "pnpm/pnpm",
+  "url": "https://github.com/pnpm/pnpm",
+  "description": "Fast, disk space efficient package manager",
+  "stars": 37029,
+  "forks": 1982,
+  "language": "Rust",
+  "license": "MIT",
+  "topics": [
+    "dependency-manager",
+    "install",
+    "javascript",
+    "modules",
+    "node",
+    "nodejs",
+    "npm",
+    "package-manager"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:12:37Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

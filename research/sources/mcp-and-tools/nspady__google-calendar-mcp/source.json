@@ -1,0 +1,17 @@
+{
+  "id": "github:nspady/google-calendar-mcp",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "nspady/google-calendar-mcp",
+  "url": "https://github.com/nspady/google-calendar-mcp",
+  "description": "MCP integration for Google Calendar to manage events.",
+  "stars": 1212,
+  "forks": 335,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-29T20:51:00Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

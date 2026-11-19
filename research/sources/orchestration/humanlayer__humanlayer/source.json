@@ -1,0 +1,28 @@
+{
+  "id": "github:humanlayer/humanlayer",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "humanlayer/humanlayer",
+  "url": "https://github.com/humanlayer/humanlayer",
+  "description": "The best way to get AI coding agents to solve hard problems in complex codebases.",
+  "stars": 12837,
+  "forks": 1073,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "agents",
+    "ai",
+    "amp",
+    "claude-code",
+    "codex",
+    "human-in-the-loop",
+    "humanlayer",
+    "llm",
+    "llms",
+    "opencode"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T23:04:55Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

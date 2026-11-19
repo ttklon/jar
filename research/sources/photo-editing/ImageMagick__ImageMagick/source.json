@@ -1,0 +1,26 @@
+{
+  "id": "github:ImageMagick/ImageMagick",
+  "kind": "github",
+  "category": "photo-editing",
+  "repo": "ImageMagick/ImageMagick",
+  "url": "https://github.com/ImageMagick/ImageMagick",
+  "description": "ImageMagick is a free, open-source software suite for creating, editing, converting, and displaying images. It supports 200+ formats and offers powerful command-line tools and APIs for automation, scripting, and integration across platforms.",
+  "stars": 17816,
+  "forks": 1699,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [
+    "command-line-image-tool",
+    "digital-image-editing",
+    "image-conversion",
+    "image-manipulation",
+    "image-processing",
+    "imagemagick",
+    "mastering-digital-image-alchemy",
+    "open-source-software"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T12:24:45Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

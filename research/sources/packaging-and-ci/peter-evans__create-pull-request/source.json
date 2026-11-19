@@ -1,0 +1,25 @@
+{
+  "id": "github:peter-evans/create-pull-request",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "peter-evans/create-pull-request",
+  "url": "https://github.com/peter-evans/create-pull-request",
+  "description": "A GitHub action to create a pull request for changes to your repository in the actions workspace",
+  "stars": 2872,
+  "forks": 553,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "actions-workspace",
+    "automation",
+    "ci-cd",
+    "create-pull-request",
+    "github-action",
+    "pull-request",
+    "workflow"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T11:17:34Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

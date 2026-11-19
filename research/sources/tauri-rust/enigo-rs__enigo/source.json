@@ -1,0 +1,25 @@
+{
+  "id": "github:enigo-rs/enigo",
+  "kind": "github",
+  "category": "tauri-rust",
+  "repo": "enigo-rs/enigo",
+  "url": "https://github.com/enigo-rs/enigo",
+  "description": "Cross platform input simulation in Rust",
+  "stars": 1803,
+  "forks": 162,
+  "language": "Rust",
+  "license": "MIT",
+  "topics": [
+    "automation",
+    "cross-platform",
+    "input",
+    "keyboard",
+    "mouse",
+    "rust",
+    "simulation"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T00:51:05Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

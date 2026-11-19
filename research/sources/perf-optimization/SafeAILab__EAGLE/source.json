@@ -1,0 +1,21 @@
+{
+  "id": "github:SafeAILab/EAGLE",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "SafeAILab/EAGLE",
+  "url": "https://github.com/SafeAILab/EAGLE",
+  "description": "Official Implementation of EAGLE-1 (ICML'24), EAGLE-2 (EMNLP'24), and EAGLE-3 (NeurIPS'25).",
+  "stars": 2572,
+  "forks": 297,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "large-language-models",
+    "llm-inference",
+    "speculative-decoding"
+  ],
+  "archived": false,
+  "pushed_at": "2026-02-20T02:53:29Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

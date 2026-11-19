@@ -1,0 +1,23 @@
+{
+  "id": "github:continuedev/continue",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "continuedev/continue",
+  "url": "https://github.com/continuedev/continue",
+  "description": "open-source coding agent",
+  "stars": 36431,
+  "forks": 5557,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent",
+    "ai",
+    "cli",
+    "developer-tools",
+    "open-source"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T15:28:28Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

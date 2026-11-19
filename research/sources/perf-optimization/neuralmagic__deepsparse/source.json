@@ -1,0 +1,32 @@
+{
+  "id": "github:neuralmagic/deepsparse",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "neuralmagic/deepsparse",
+  "url": "https://github.com/neuralmagic/deepsparse",
+  "description": "Sparsity-aware deep learning inference runtime for CPUs",
+  "stars": 3152,
+  "forks": 192,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "computer-vision",
+    "cpus",
+    "deepsparse",
+    "inference",
+    "llm-inference",
+    "machinelearning",
+    "nlp",
+    "object-detection",
+    "onnx",
+    "performance",
+    "pretrained-models",
+    "pruning",
+    "quantization",
+    "sparsification"
+  ],
+  "archived": true,
+  "pushed_at": "2025-06-02T21:11:06Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

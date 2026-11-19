@@ -1,0 +1,60 @@
+{
+  "app": "Figma (desktop / web)",
+  "exe": ["Figma.exe", "chrome.exe"],
+  "ui_stack": "web",
+  "version_seen": "2026-11",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "search": { "by": "hotkey", "value": "Ctrl+P (quick actions)" },
+    "layers": { "by": "uia", "value": "панель слоёв слева", "fallback": "поиск слоя через Ctrl+F" },
+    "export": { "by": "hotkey", "value": "Ctrl+Shift+E", "fallback": "правая панель → Export" },
+    "comment": { "by": "hotkey", "value": "C" },
+    "canvas": { "by": "ocr", "value": "заголовок фрейма в левом верхнем углу канваса" },
+    "api": { "by": "api", "value": "Figma REST API (files, images, comments) с токеном из secrets.enc" }
+  },
+  "operations": [
+    {
+      "name": "Открыть файл и найти фрейм",
+      "registry": "creative-3d|открыть|макет",
+      "steps": ["открыть URL файла", "wait:networkidle", "anchor:search", "type:имя фрейма", "Enter"],
+      "verify": ["фрейм выделен (панель свойств показывает имя)", "canvas OCR содержит заголовок фрейма"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Собрать макет по описанию",
+      "registry": "creative-3d|создать|макет",
+      "steps": ["api:прочитать структуру", "создать фреймы/текст по правилам", "применить стили из библиотеки"],
+      "verify": ["число элементов совпадает с планом", "использованы только токены палитры", "скриншот отдан человеку"],
+      "risk": "write-local",
+      "notes": "правки в Figma через API ограничены; предпочтительно генерировать код, а не двигать пиксели"
+    },
+    {
+      "name": "Экспортировать ассеты",
+      "registry": "creative-3d|экспортировать|ассеты",
+      "steps": ["выделить фреймы/иконки", "anchor:export", "выбрать SVG/PNG @1x @2x", "скачать"],
+      "verify": ["файлы скачаны", "SVG парсится как XML", "размеры PNG = @1x/@2x кратны"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Проверить контраст и читаемость",
+      "registry": "accessibility|проверить|контраст",
+      "steps": ["api:получить цвета текста и фона", "посчитать contrast ratio"],
+      "verify": ["для основного текста ≥ 4.5:1", "для крупного ≥ 3:1", "отчёт со списком нарушений"],
+      "risk": "read"
+    },
+    {
+      "name": "Сгенерировать вёрстку по макету",
+      "registry": "dev-code|сгенерировать|вёрстку",
+      "steps": ["api:дерево слоёв → JSON", "генерация HTML/CSS", "скриншот сравнение"],
+      "verify": ["SSIM скриншота > 0.9 к макету", "адаптив на 3 ширинах", "нет горизонтального скролла"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Оставить комментарий к элементу",
+      "registry": "creative-3d|аннотировать|макет",
+      "steps": ["anchor:comment", "клик по элементу", "type:замечание", "Ctrl+Enter"],
+      "verify": ["api:comments содержит новый комментарий", "привязка к нужному узлу"],
+      "risk": "write-local"
+    }
+  ]
+}

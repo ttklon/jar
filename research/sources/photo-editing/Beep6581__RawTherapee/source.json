@@ -1,0 +1,21 @@
+{
+  "id": "github:Beep6581/RawTherapee",
+  "kind": "github",
+  "category": "photo-editing",
+  "repo": "Beep6581/RawTherapee",
+  "url": "https://github.com/Beep6581/RawTherapee",
+  "description": "A powerful cross-platform raw photo processing program",
+  "stars": 4281,
+  "forks": 427,
+  "language": "C++",
+  "license": "GPL-3.0",
+  "topics": [
+    "photography",
+    "raw",
+    "rawtherapee"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T05:29:21Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

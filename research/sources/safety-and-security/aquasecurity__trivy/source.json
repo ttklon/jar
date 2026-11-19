@@ -1,0 +1,33 @@
+{
+  "id": "github:aquasecurity/trivy",
+  "kind": "github",
+  "category": "safety-and-security",
+  "repo": "aquasecurity/trivy",
+  "url": "https://github.com/aquasecurity/trivy",
+  "description": "Find vulnerabilities, misconfigurations, secrets, SBOM in containers, Kubernetes, code repositories, clouds and more",
+  "stars": 39114,
+  "forks": 836,
+  "language": "Go",
+  "license": "Apache-2.0",
+  "topics": [
+    "containers",
+    "devsecops",
+    "docker",
+    "go",
+    "golang",
+    "hacktoberfest",
+    "iac",
+    "infrastructure-as-code",
+    "kubernetes",
+    "misconfiguration",
+    "security",
+    "security-tools",
+    "vulnerability",
+    "vulnerability-detection",
+    "vulnerability-scanners"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T11:29:59Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

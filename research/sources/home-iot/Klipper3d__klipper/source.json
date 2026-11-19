@@ -1,0 +1,17 @@
+{
+  "id": "github:Klipper3d/klipper",
+  "kind": "github",
+  "category": "home-iot",
+  "repo": "Klipper3d/klipper",
+  "url": "https://github.com/Klipper3d/klipper",
+  "description": "Klipper is a 3d-printer firmware",
+  "stars": 12031,
+  "forks": 5962,
+  "language": "C",
+  "license": "GPL-3.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-08T01:22:25Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

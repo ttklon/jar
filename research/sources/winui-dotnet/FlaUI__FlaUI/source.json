@@ -1,0 +1,32 @@
+{
+  "id": "github:FlaUI/FlaUI",
+  "kind": "github",
+  "category": "winui-dotnet",
+  "repo": "FlaUI/FlaUI",
+  "url": "https://github.com/FlaUI/FlaUI",
+  "description": "UI automation library for .Net",
+  "stars": 3197,
+  "forks": 449,
+  "language": "C#",
+  "license": "MIT",
+  "topics": [
+    "automation",
+    "automation-ui",
+    "dotnet",
+    "framework",
+    "gui",
+    "microsoft",
+    "qa",
+    "testing",
+    "testing-tools",
+    "ui-automation",
+    "uiautomation",
+    "user-interface",
+    "winforms",
+    "wpf"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-13T21:45:21Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

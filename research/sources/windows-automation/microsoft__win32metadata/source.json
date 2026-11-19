@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/win32metadata",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "microsoft/win32metadata",
+  "url": "https://github.com/microsoft/win32metadata",
+  "description": "Tooling to generate metadata for Win32 APIs in the Windows SDK.",
+  "stars": 1509,
+  "forks": 157,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T02:50:08Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

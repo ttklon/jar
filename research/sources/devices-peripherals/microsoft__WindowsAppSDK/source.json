@@ -1,0 +1,31 @@
+{
+  "id": "github:microsoft/WindowsAppSDK",
+  "kind": "github",
+  "category": "devices-peripherals",
+  "repo": "microsoft/WindowsAppSDK",
+  "url": "https://github.com/microsoft/WindowsAppSDK",
+  "description": "The Windows App SDK empowers all Windows desktop apps with modern Windows UI, APIs, and platform features, including back-compat support, shipped via NuGet.",
+  "stars": 4725,
+  "forks": 482,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "cpp",
+    "csharp",
+    "desktop",
+    "project-reunion",
+    "win32",
+    "winappsdk",
+    "windows",
+    "windows-10",
+    "windows-11",
+    "windows-app-sdk",
+    "winui",
+    "winui3",
+    "wpf"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T01:38:52Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

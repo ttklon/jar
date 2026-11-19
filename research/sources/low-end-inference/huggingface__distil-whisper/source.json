@@ -1,0 +1,21 @@
+{
+  "id": "github:huggingface/distil-whisper",
+  "kind": "github",
+  "category": "low-end-inference",
+  "repo": "huggingface/distil-whisper",
+  "url": "https://github.com/huggingface/distil-whisper",
+  "description": "Distilled variant of Whisper for speech recognition. 6x faster, 50% smaller, within 1% word error rate.",
+  "stars": 4119,
+  "forks": 358,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "audio",
+    "speech-recognition",
+    "whisper"
+  ],
+  "archived": false,
+  "pushed_at": "2025-01-08T10:09:47Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

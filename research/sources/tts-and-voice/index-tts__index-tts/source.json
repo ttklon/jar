@@ -1,0 +1,25 @@
+{
+  "id": "github:index-tts/index-tts",
+  "kind": "github",
+  "category": "tts-and-voice",
+  "repo": "index-tts/index-tts",
+  "url": "https://github.com/index-tts/index-tts",
+  "description": "An Industrial-Level Controllable and Efficient Zero-Shot Text-To-Speech System",
+  "stars": 24983,
+  "forks": 2930,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "bigvgan",
+    "cross-lingual",
+    "indextts",
+    "text-to-speech",
+    "tts",
+    "voice-clone",
+    "zero-shot-tts"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-29T16:06:53Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

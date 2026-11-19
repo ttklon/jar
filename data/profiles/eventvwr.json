@@ -1,0 +1,55 @@
+{
+  "app": "Просмотр событий",
+  "exe": ["mmc.exe", "eventvwr.exe"],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli_query": { "by": "api", "value": "Get-WinEvent -FilterHashtable @{LogName='System';Level=1,2;StartTime=(Get-Date).AddDays(-1)}" },
+    "wevtutil": { "by": "api", "value": "wevtutil qe System /q:\"*[System[(Level=1 or Level=2)]]\" /c:50 /rd:true /f:text" },
+    "log_tree": { "by": "uia", "value": "TreeItem Name='Журналы Windows' → подэлементы (локализуются)", "fallback": "wevtutil el — список журналов без UI" },
+    "bugcheck": { "by": "api", "value": "Get-WinEvent -FilterHashtable @{LogName='System';Id=1001,1018,41}" },
+    "dump_path": { "by": "api", "value": "%SystemRoot%\\Minidump\\*.dmp, %SystemRoot%\\MEMORY.DMP" }
+  },
+  "operations": [
+    {
+      "name": "Прочитать журнал и найти критичные ошибки",
+      "registry": "processes-services|прочитать|журнал событий",
+      "steps": ["cli:Get-WinEvent -FilterHashtable @{LogName='System','Application';Level=1,2;StartTime=(Get-Date).AddDays(-1)}", "сгруппировать по ProviderName + Id", "для топ-3 событий прочитать полный текст и данные"],
+      "verify": ["выведены время, провайдер, Event ID и текст", "для каждого события указано, повторяется ли оно (частота)", "нет выдуманных событий: каждое подтверждено цитатой из вывода"],
+      "risk": "read",
+      "notes": "UI Просмотра событий фильтрует медленно и по локализованным именам — Get-WinEvent и точнее, и быстрее"
+    },
+    {
+      "name": "Диагностировать синий экран",
+      "registry": "processes-services|диагностировать|синий экран",
+      "steps": ["cli:Get-WinEvent -FilterHashtable @{LogName='System';Id=1001} — код BugCheck", "найти свежий .dmp в Minidump", "определить драйвер-виновника (analyze с windbg, если установлен)", "сопоставить с историей обновлений и драйверов"],
+      "verify": ["назван код ошибки (например 0x0000007E) и время", "указан файл-подозреваемый или явно сказано, что без дампа не определить", "дана одна конкретная рекомендация, а не список из десяти"],
+      "risk": "read",
+      "on_fail": "если дампов нет (отключены) — предложить включить их, а не гадать"
+    },
+    {
+      "name": "Найти подозрительную активность процесса",
+      "registry": "processes-services|найти|подозрительный процесс",
+      "steps": ["включить аудит создания процессов (4688) — только по согласию", "cli:Get-WinEvent -FilterHashtable @{LogName='Security';Id=4688} | Select TimeCreated,Message", "искать нетипичные пути (Temp, AppData, сетевые шары) и родителей"],
+      "verify": ["для каждого кандидата указан путь, родитель и время", "легитимные записи отделены от подозрительных", "не сделано вывода только по имени файла"],
+      "risk": "read",
+      "notes": "включение аудита — изменение политики безопасности, поэтому отдельный шаг с подтверждением"
+    },
+    {
+      "name": "Наблюдать за системой по журналам",
+      "registry": "monitoring-triage|наблюдать|за системой",
+      "steps": ["каждый час: сводка Level=1,2 за период", "сравнить с прошлой сводкой: новые события только", "алерт при появлении нового критичного Event ID"],
+      "verify": ["отчёт содержит только новые события", "каждое новое событие имеет источник и ID", "нет повторов одного и того же алерта (дедупликация)"],
+      "risk": "read"
+    },
+    {
+      "name": "Проверить здоровье диска по событиям",
+      "registry": "hardware-diag|проверить|здоровье диска",
+      "steps": ["cli:Get-WinEvent -FilterHashtable @{LogName='System';ProviderName='disk','Disk','stornvme','volmgr'} -MaxEvents 100", "искать Event ID 7 (bad block), 51 (paging error), 153 (retry)", "сопоставить с SMART через CrystalDiskInfo/wmic"],
+      "verify": ["названы конкретные Event ID с датами", "показаны атрибуты SMART (Reallocated Sectors, Wear Leveling)", "сделан вывод: диск в порядке / наблюдать / менять"],
+      "risk": "destructive",
+      "notes": "чтение не меняет диск, но риск поднят до destructive намеренно: вывод «диск умирает» влечёт замену носителя"
+    }
+  ]
+}

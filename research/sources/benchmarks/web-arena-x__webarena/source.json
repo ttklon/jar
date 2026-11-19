@@ -1,0 +1,20 @@
+{
+  "id": "github:web-arena-x/webarena",
+  "kind": "github",
+  "category": "benchmarks",
+  "repo": "web-arena-x/webarena",
+  "url": "https://github.com/web-arena-x/webarena",
+  "description": "Code repo for \"WebArena: A Realistic Web Environment for Building Autonomous Agents\"",
+  "stars": 1643,
+  "forks": 248,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent",
+    "nlp"
+  ],
+  "archived": false,
+  "pushed_at": "2025-11-26T21:16:00Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

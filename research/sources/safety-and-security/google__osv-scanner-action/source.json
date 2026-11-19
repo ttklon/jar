@@ -1,0 +1,21 @@
+{
+  "id": "github:google/osv-scanner-action",
+  "kind": "github",
+  "category": "safety-and-security",
+  "repo": "google/osv-scanner-action",
+  "url": "https://github.com/google/osv-scanner-action",
+  "description": "",
+  "stars": 103,
+  "forks": 40,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "github-actions",
+    "osv",
+    "vulnerability-scanners"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-12T01:51:36Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

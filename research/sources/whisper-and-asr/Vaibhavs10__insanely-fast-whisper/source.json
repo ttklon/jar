@@ -1,0 +1,17 @@
+{
+  "id": "github:Vaibhavs10/insanely-fast-whisper",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "Vaibhavs10/insanely-fast-whisper",
+  "url": "https://github.com/Vaibhavs10/insanely-fast-whisper",
+  "description": "",
+  "stars": 13057,
+  "forks": 952,
+  "language": "Jupyter Notebook",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2025-10-25T09:50:57Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

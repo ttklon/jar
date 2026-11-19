@@ -1,0 +1,33 @@
+{
+  "id": "github:hellzerg/optimizer",
+  "kind": "github",
+  "category": "system-triage",
+  "repo": "hellzerg/optimizer",
+  "url": "https://github.com/hellzerg/optimizer",
+  "description": "The finest Windows Optimizer",
+  "stars": 18219,
+  "forks": 1229,
+  "language": "C#",
+  "license": "GPL-3.0",
+  "topics": [
+    "cleanup",
+    "hosts-file",
+    "optimize",
+    "privacy",
+    "registry-hacks",
+    "registry-tweaks",
+    "startup-items",
+    "toolbox",
+    "tweaks",
+    "windows",
+    "windows-10",
+    "windows-7",
+    "windows-8",
+    "windows-8-1",
+    "windows-tweaks"
+  ],
+  "archived": true,
+  "pushed_at": "2026-01-20T19:04:47Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

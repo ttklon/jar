@@ -1,0 +1,22 @@
+{
+  "id": "github:wireshark/wireshark",
+  "kind": "github",
+  "category": "network-admin",
+  "repo": "wireshark/wireshark",
+  "url": "https://github.com/wireshark/wireshark",
+  "description": "Read-only mirror of Wireshark's Git repository at https://gitlab.com/wireshark/wireshark. You're welcome to submit pull requests there.",
+  "stars": 10176,
+  "forks": 2256,
+  "language": "C",
+  "license": "GPL-2.0",
+  "topics": [
+    "packet-capture",
+    "stratoshark",
+    "tshark",
+    "wireshark"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T12:35:04Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

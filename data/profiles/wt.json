@@ -1,0 +1,55 @@
+{
+  "app": "Windows Terminal",
+  "exe": ["WindowsTerminal.exe", "wt.exe"],
+  "ui_stack": "uia",
+  "version_seen": "1.2x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": { "by": "api", "value": "wt.exe -w <окно> new-tab --title <t> -d <dir> -- pwsh -NoLogo -Command <cmd>" },
+    "settings": { "by": "api", "value": "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json", "fallback": "Ctrl+, в окне" },
+    "tab": { "by": "uia", "value": "TabItem Name=<заголовок вкладки>" },
+    "split": { "by": "hotkey", "value": "Alt+Shift+D (вертикальное разделение)", "fallback": "кнопка ▾ в заголовке вкладки" },
+    "pane_focus": { "by": "hotkey", "value": "Alt+Стрелка" },
+    "copy_all": { "by": "hotkey", "value": "Ctrl+Shift+A → Ctrl+C (выделить всё и скопировать)" }
+  },
+  "operations": [
+    {
+      "name": "Открыть рабочую раскладку под задачу",
+      "registry": "apps-windows|разместить|окна",
+      "steps": ["cli:wt.exe -w 0 new-tab --title api -d <проект> -- pwsh -NoLogo -Command <сервер>", "cli:wt.exe -w 0 split-pane -V --title tests -d <проект> -- pwsh -NoLogo -Command <тесты>", "cli:wt.exe -w 0 split-pane -H --title logs -d <проект> -- pwsh -NoLogo -Command <хвост лога>"],
+      "verify": ["в окне ровно 3 панели с ожидаемыми заголовками", "каждая панель в своей рабочей папке (pwd)", "процессы панелей видны в Get-Process"],
+      "risk": "write-local",
+      "notes": "раскладка воспроизводима одной командой — не нужно кликать; для сложных случаев — fragment в settings.json"
+    },
+    {
+      "name": "Настроить вид, шрифт и профиль по умолчанию",
+      "registry": "apps-windows|настроить|вид и параметры окна",
+      "steps": ["прочитать anchor:settings", "сделать бэкап settings.json", "изменить defaultProfile, font.size, opacity, colorScheme", "перезапустить окно"],
+      "verify": ["settings.json валиден как JSON (parse без ошибок)", "после перезапуска применяется шрифт/тема", "бэкап существует и откат возможен"],
+      "risk": "write-local",
+      "on_fail": "вернуть бэкап: битый settings.json делает Terminal незапускаемым"
+    },
+    {
+      "name": "Запустить тесты в отдельной панели и собрать результат",
+      "registry": "dev-code|запустить|тесты",
+      "steps": ["cli:wt.exe -w 0 new-tab --title tests -d <проект> -- pwsh -NoLogo -Command 'npm test 2>&1 | Tee-Object -FilePath .zshelper\\test.log'", "wait до завершения", "прочитать .zshelper\\test.log"],
+      "verify": ["лог содержит итоговую строку (passed/failed)", "код возврата сохранён в файле", "число упавших тестов и их имена извлечены"],
+      "risk": "write-local",
+      "on_fail": "не считать «0 ошибок» успехом, если тесты не запустились вообще — проверять наличие итоговой строки"
+    },
+    {
+      "name": "Прочитать, что показывает терминал",
+      "registry": "apps-windows|прочитать|интерфейс",
+      "steps": ["anchor:copy_all", "прочитать буфер", "разобрать: команда, код возврата, ключевые строки ошибок"],
+      "verify": ["в ответе процитированы реальные строки вывода", "код возврата указан числом"],
+      "risk": "read"
+    },
+    {
+      "name": "Переключиться на нужное окно терминала",
+      "registry": "apps-windows|переключиться|на окно",
+      "steps": ["найти окно по заголовку (UIA top-level windows)", "Alt+Tab или SetForegroundWindow", "проверить фокус по заголовку"],
+      "verify": ["GetForegroundWindow соответствует найденному окну", "курсор ввода в терминале (эхо-тест: отправить пустую строку)"],
+      "risk": "write-local"
+    }
+  ]
+}

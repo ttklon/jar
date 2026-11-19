@@ -1,0 +1,24 @@
+{
+  "id": "github:sindresorhus/got",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "sindresorhus/got",
+  "url": "https://github.com/sindresorhus/got",
+  "description": "🌐 Human-friendly and powerful HTTP request library for Node.js",
+  "stars": 14962,
+  "forks": 1003,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "http",
+    "http-client",
+    "http-request",
+    "https",
+    "nodejs",
+    "npm-package"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-30T08:46:04Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

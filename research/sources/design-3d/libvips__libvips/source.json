@@ -1,0 +1,33 @@
+{
+  "id": "github:libvips/libvips",
+  "kind": "github",
+  "category": "design-3d",
+  "repo": "libvips/libvips",
+  "url": "https://github.com/libvips/libvips",
+  "description": "A fast image processing library with low memory needs.",
+  "stars": 11792,
+  "forks": 802,
+  "language": "C",
+  "license": "LGPL-2.1",
+  "topics": [
+    "c",
+    "cpp",
+    "gif",
+    "graphicsmagick",
+    "hdr",
+    "heic",
+    "image-processing",
+    "imagemagick",
+    "jpeg",
+    "libvips",
+    "nifti",
+    "openexr",
+    "openslide",
+    "pdf",
+    "pdfium"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T18:23:03Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

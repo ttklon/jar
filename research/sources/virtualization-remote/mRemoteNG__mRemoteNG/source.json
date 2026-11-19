@@ -1,0 +1,26 @@
+{
+  "id": "github:mRemoteNG/mRemoteNG",
+  "kind": "github",
+  "category": "virtualization-remote",
+  "repo": "mRemoteNG/mRemoteNG",
+  "url": "https://github.com/mRemoteNG/mRemoteNG",
+  "description": "mRemoteNG is the next generation of mRemote, open source, tabbed, multi-protocol, remote connections manager.",
+  "stars": 11192,
+  "forks": 1640,
+  "language": "C#",
+  "license": "GPL-2.0",
+  "topics": [
+    "c-sharp",
+    "mremoteng",
+    "multi-protocol",
+    "rdp",
+    "remote-access",
+    "remote-desktop",
+    "ssh",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T22:01:00Z",
+  "default_branch": "v1.78.2-dev",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

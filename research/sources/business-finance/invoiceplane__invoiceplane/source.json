@@ -1,0 +1,26 @@
+{
+  "id": "github:invoiceplane/invoiceplane",
+  "kind": "github",
+  "category": "business-finance",
+  "repo": "invoiceplane/invoiceplane",
+  "url": "https://github.com/invoiceplane/invoiceplane",
+  "description": "A self-hosted open source application for managing your invoices, clients and payments.",
+  "stars": 3280,
+  "forks": 890,
+  "language": "PHP",
+  "license": "NOASSERTION",
+  "topics": [
+    "billing",
+    "codeigniter",
+    "crm",
+    "invoiceplane",
+    "invoices",
+    "invoicing",
+    "open-source",
+    "php"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:59:57Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

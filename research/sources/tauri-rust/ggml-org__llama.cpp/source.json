@@ -1,0 +1,19 @@
+{
+  "id": "github:ggml-org/llama.cpp",
+  "kind": "github",
+  "category": "tauri-rust",
+  "repo": "ggml-org/llama.cpp",
+  "url": "https://github.com/ggml-org/llama.cpp",
+  "description": "LLM inference in C/C++",
+  "stars": 133708,
+  "forks": 25254,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "ggml"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:56:39Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

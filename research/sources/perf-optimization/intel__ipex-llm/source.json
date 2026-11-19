@@ -1,0 +1,22 @@
+{
+  "id": "github:intel/ipex-llm",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "intel/ipex-llm",
+  "url": "https://github.com/intel/ipex-llm",
+  "description": "Accelerate local LLM inference and finetuning (LLaMA, Mistral, ChatGLM, Qwen, DeepSeek, Mixtral, Gemma, Phi, MiniCPM, Qwen-VL, MiniCPM-V, etc.) on Intel XPU (e.g., local PC with iGPU and NPU, discrete GPU such as Arc, Flex and Max); seamlessly integrate with llama.cpp, Ollama, HuggingFace, LangChain, LlamaIndex, vLLM, DeepSpeed, Axolotl, etc.",
+  "stars": 8843,
+  "forks": 1433,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "gpu",
+    "llm",
+    "pytorch",
+    "transformers"
+  ],
+  "archived": true,
+  "pushed_at": "2026-01-28T17:32:40Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "github:DeviceFarmer/adbkit",
+  "kind": "github",
+  "category": "adb-android",
+  "repo": "DeviceFarmer/adbkit",
+  "url": "https://github.com/DeviceFarmer/adbkit",
+  "description": "A pure Node.js client for the Android Debug Bridge.",
+  "stars": 308,
+  "forks": 63,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "hacktoberfest"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T15:40:32Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:07:59Z"
+}

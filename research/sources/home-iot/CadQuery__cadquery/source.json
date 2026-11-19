@@ -1,0 +1,30 @@
+{
+  "id": "github:CadQuery/cadquery",
+  "kind": "github",
+  "category": "home-iot",
+  "repo": "CadQuery/cadquery",
+  "url": "https://github.com/CadQuery/cadquery",
+  "description": "A python parametric CAD scripting framework based on OCCT",
+  "stars": 6077,
+  "forks": 570,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "3d",
+    "brep",
+    "cad",
+    "cadquery",
+    "dxf",
+    "modeling",
+    "occt",
+    "opencascade",
+    "parametric",
+    "python",
+    "step",
+    "stl"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T17:44:34Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

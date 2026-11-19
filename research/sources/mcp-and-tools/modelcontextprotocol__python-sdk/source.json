@@ -1,0 +1,22 @@
+{
+  "id": "github:modelcontextprotocol/python-sdk",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "modelcontextprotocol/python-sdk",
+  "url": "https://github.com/modelcontextprotocol/python-sdk",
+  "description": "The official Python SDK for Model Context Protocol servers and clients",
+  "stars": 24799,
+  "forks": 4109,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "mcp",
+    "mcp-client",
+    "mcp-server",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T13:38:56Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

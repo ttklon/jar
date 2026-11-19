@@ -1,0 +1,25 @@
+{
+  "id": "github:grammyjs/grammY",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "grammyjs/grammY",
+  "url": "https://github.com/grammyjs/grammY",
+  "description": "The Telegram Bot Framework.",
+  "stars": 3797,
+  "forks": 159,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "bot",
+    "deno",
+    "javascript",
+    "nodejs",
+    "telegram",
+    "telegram-bot",
+    "typescript"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-16T15:43:28Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

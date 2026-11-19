@@ -1,0 +1,17 @@
+{
+  "id": "github:huggingface/parler-tts",
+  "kind": "github",
+  "category": "tts-and-voice",
+  "repo": "huggingface/parler-tts",
+  "url": "https://github.com/huggingface/parler-tts",
+  "description": "Inference and training library for high-quality TTS models.",
+  "stars": 5599,
+  "forks": 590,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2024-12-10T08:28:12Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

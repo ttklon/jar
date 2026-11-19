@@ -1,0 +1,28 @@
+{
+  "id": "github:cyanheads/mcp-ts-template",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "cyanheads/mcp-ts-template",
+  "url": "https://github.com/cyanheads/mcp-ts-template",
+  "description": "Agent-native TypeScript framework for building MCP servers.",
+  "stars": 153,
+  "forks": 32,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent-native",
+    "ai",
+    "cloudflare-workers",
+    "cyanheads",
+    "framework",
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "opentelemetry",
+    "typescript"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T20:49:42Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

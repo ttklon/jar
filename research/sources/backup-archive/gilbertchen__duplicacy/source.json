@@ -1,0 +1,17 @@
+{
+  "id": "github:gilbertchen/duplicacy",
+  "kind": "github",
+  "category": "backup-archive",
+  "repo": "gilbertchen/duplicacy",
+  "url": "https://github.com/gilbertchen/duplicacy",
+  "description": "A new generation cloud backup tool",
+  "stars": 5699,
+  "forks": 360,
+  "language": "Go",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-27T00:54:07Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

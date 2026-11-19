@@ -1,0 +1,31 @@
+{
+  "id": "github:velopack/velopack",
+  "kind": "github",
+  "category": "updates",
+  "repo": "velopack/velopack",
+  "url": "https://github.com/velopack/velopack",
+  "description": "Installer and automatic update framework for cross-platform desktop applications",
+  "stars": 2447,
+  "forks": 169,
+  "language": "C#",
+  "license": "MIT",
+  "topics": [
+    "automatic-updates",
+    "autoupdate",
+    "clickonce",
+    "desktop",
+    "dotnet",
+    "installer",
+    "linux",
+    "macos",
+    "osx",
+    "squirrel",
+    "updater",
+    "velopack",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T23:46:11Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

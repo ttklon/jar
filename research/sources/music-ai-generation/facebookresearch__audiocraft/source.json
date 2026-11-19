@@ -1,0 +1,17 @@
+{
+  "id": "github:facebookresearch/audiocraft",
+  "kind": "github",
+  "category": "music-ai-generation",
+  "repo": "facebookresearch/audiocraft",
+  "url": "https://github.com/facebookresearch/audiocraft",
+  "description": "Audiocraft is a library for audio processing and generation with deep learning. It features the state-of-the-art EnCodec audio compressor / tokenizer, along with MusicGen, a simple and controllable music generation LM with textual and melodic conditioning.",
+  "stars": 23834,
+  "forks": 2715,
+  "language": "Jupyter Notebook",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-03-03T21:50:32Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:28:58Z"
+}

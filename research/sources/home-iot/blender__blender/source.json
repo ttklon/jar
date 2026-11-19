@@ -1,0 +1,24 @@
+{
+  "id": "github:blender/blender",
+  "kind": "github",
+  "category": "home-iot",
+  "repo": "blender/blender",
+  "url": "https://github.com/blender/blender",
+  "description": "Official mirror of Blender",
+  "stars": 21754,
+  "forks": 3536,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "3d",
+    "animation",
+    "b3d",
+    "computer-graphics",
+    "modeling",
+    "rendering"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T20:31:50Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

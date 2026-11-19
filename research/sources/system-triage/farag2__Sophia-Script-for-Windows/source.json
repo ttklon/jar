@@ -1,0 +1,33 @@
+{
+  "id": "github:farag2/Sophia-Script-for-Windows",
+  "kind": "github",
+  "category": "system-triage",
+  "repo": "farag2/Sophia-Script-for-Windows",
+  "url": "https://github.com/farag2/Sophia-Script-for-Windows",
+  "description": ":zap: The most advanced PowerShell module on GitHub for fine-tuning Windows 11 & Windows 10",
+  "stars": 9873,
+  "forks": 645,
+  "language": "PowerShell",
+  "license": "MIT",
+  "topics": [
+    "25h2",
+    "26h2",
+    "debloat",
+    "debloater",
+    "debloating",
+    "gui",
+    "ltsc",
+    "powershell",
+    "script",
+    "sophia",
+    "sophia-script",
+    "tweak",
+    "tweaker",
+    "tweaks",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T13:19:38Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

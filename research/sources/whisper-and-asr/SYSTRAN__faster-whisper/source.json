@@ -1,0 +1,26 @@
+{
+  "id": "github:SYSTRAN/faster-whisper",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "SYSTRAN/faster-whisper",
+  "url": "https://github.com/SYSTRAN/faster-whisper",
+  "description": "Faster Whisper transcription with CTranslate2",
+  "stars": 26582,
+  "forks": 2223,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "deep-learning",
+    "inference",
+    "openai",
+    "quantization",
+    "speech-recognition",
+    "speech-to-text",
+    "transformer",
+    "whisper"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T17:24:51Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

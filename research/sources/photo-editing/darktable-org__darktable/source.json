@@ -1,0 +1,17 @@
+{
+  "id": "github:darktable-org/darktable",
+  "kind": "github",
+  "category": "photo-editing",
+  "repo": "darktable-org/darktable",
+  "url": "https://github.com/darktable-org/darktable",
+  "description": "darktable is an open source photography workflow application and raw developer",
+  "stars": 13411,
+  "forks": 1513,
+  "language": "C",
+  "license": "GPL-3.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-08T07:05:59Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:MarkusPfundstein/mcp-obsidian",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "MarkusPfundstein/mcp-obsidian",
+  "url": "https://github.com/MarkusPfundstein/mcp-obsidian",
+  "description": "MCP server that interacts with Obsidian via the Obsidian rest API community plugin",
+  "stars": 4524,
+  "forks": 507,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-08-31T11:49:01Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

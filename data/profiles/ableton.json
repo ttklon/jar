@@ -1,0 +1,74 @@
+{
+  "app": "Ableton Live 12",
+  "exe": ["Ableton Live 12.exe", "Ableton Live 12 Beta.exe"],
+  "ui_stack": "win32",
+  "version_seen": "12.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "remote_script": { "by": "api", "value": "User Remote Scripts\\ZShelper → Live Object Model по OSC/UDP 127.0.0.1:11000", "fallback": "Python-скрипт в AbletonOSC: /live/track/*, /live/clip_slot/*, /live/scene/*" },
+    "browser": { "by": "hotkey", "value": "Ctrl+Alt+B", "fallback": "иконка «Browse» в правом верхнем углу" },
+    "search_field": { "by": "hotkey", "value": "Ctrl+F (внутри браузера)" },
+    "export_dialog": { "by": "hotkey", "value": "Ctrl+Shift+R", "fallback": "Файл → Export Audio/Video" },
+    "arrangement_view": { "by": "hotkey", "value": "Tab" },
+    "session_view": { "by": "hotkey", "value": "Tab (переключение)" },
+    "metronome": { "by": "hotkey", "value": "Ctrl+L" }
+  },
+  "operations": [
+    {
+      "name": "Открыть проект или шаблон и проверить, что загрузился",
+      "registry": "music-production|открыть|проект в DAW",
+      "steps": ["start:Live.exe <путь.als>", "wait:до 45s", "проверить заголовок окна и наличие треков"],
+      "verify": ["в заголовке имя проекта", "OSC: /live/song/get/num_tracks > 0", "BPM и тональность совпадают с ожидаемыми"],
+      "risk": "write-local",
+      "timeouts_ms": 60000,
+      "on_fail": "не открывать второй экземпляр поверх: Live блокирует файл; спросить, закрыть ли текущий проект"
+    },
+    {
+      "name": "Импортировать MIDI в новый трек",
+      "registry": "music-production|импортировать|MIDI в проект",
+      "steps": ["anchor:browser", "Ctrl+F → ввести имя .mid", "drag в Session View на пустой слот", "проверить, что клип создан"],
+      "verify": ["OSC: у слота есть clip с непустым набором нот (num_notes > 0)", "длина клипа совпадает с исходным MIDI", "назначенный инструмент не пуст"],
+      "risk": "write-local",
+      "notes": "перетаскивание — единственный надёжный путь: API Live не умеет создавать клипы из файла напрямую"
+    },
+    {
+      "name": "Собрать бит из сгенерированного MIDI",
+      "registry": "music-production|сочинить|бит",
+      "steps": ["создать 4 трека: kick, snare, hats, percussion", "загрузить сэмплы/драм-модуль", "импортировать соответствующие .mid", "зациклить на 8 тактов", "собрать секции: intro/verse/chorus по карте аранжировки"],
+      "verify": ["звучит: воспроизведение без провалов (CPU и dropout-индикатор)", "BPM и сетка совпадают с брифом", "сцены/секции созданы в правильном порядке"],
+      "risk": "write-local",
+      "on_fail": "остановиться и дать послушать пользователю — это чекпойнт «бит»"
+    },
+    {
+      "name": "Свести дорожки в микс",
+      "registry": "music-production|свести|дорожки",
+      "steps": ["выставить гейн-стейджинг: пики инструментов −12…−6 dBFS", "панорама и EQ по маске частот", "сайдчейн на бас от кика", "лимитер на мастер для прослушивания"],
+      "verify": ["LUFS интегральный мастера в диапазоне, заданном брифом", "нет клиппинга ни на одном треке", "в моно микс не разваливается (проверка через утилиту мастера)"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Поправить питч и тайминг вокала",
+      "registry": "music-production|поправить|питч и тайминг вокала",
+      "steps": ["двойной клик по вокальному клипу", "включить Warp: Complex Pro", "править ноты в аудио-редакторе, а не «на слух»"],
+      "verify": ["ноты попадают в тональность проекта (детектор нот)", "артефактов «робота» нет на слух", "длина клипа не изменилась"],
+      "risk": "write-local",
+      "notes": "сильную правку (>50 центов) не делать: лучше перезаписать фразу"
+    },
+    {
+      "name": "Экспортировать мастер",
+      "registry": "music-production|экспортировать|финальный мастер",
+      "steps": ["anchor:arrangement_view", "выделить диапазон", "anchor:export_dialog", "Render as Loop = Off, Sample Rate 44.1k/48k, Bit Depth 24", "нормализация Off — громкость задаёт мастеринг, а не экспорт"],
+      "verify": ["ffprobe: длительность, частота, битность совпадают", "LUFS и true peak измерены после рендера", "файл открывается декодером без ошибок"],
+      "risk": "write-local",
+      "on_fail": "если файл тише/громче ожидаемого на >1 LU — проверить, что нормализация экспорта не включена"
+    },
+    {
+      "name": "Проверить громкость и пики готового мастера",
+      "registry": "music-production|проверить|громкость и пики",
+      "steps": ["cli:ffmpeg -i master.wav -af ebur128=peak=true -f null -", "cli:ffmpeg -i master.wav -af astats=metadata=1 -f null -"],
+      "verify": ["integrated LUFS получен числом", "true peak ≤ −1.0 dBTP", "число клиппированных сэмплов = 0"],
+      "risk": "read",
+      "notes": "проверяем всегда после экспорта, а не на слух: на слух −0.3 и −1.0 dBTP неотличимы"
+    }
+  ]
+}

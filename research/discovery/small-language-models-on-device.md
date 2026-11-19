@@ -1,0 +1,18 @@
+# Discovery: `small language models on device`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 323 | [chrisneagu/FTC-Skystone-Dark-Angels-Romania-2020](https://github.com/chrisneagu/FTC-Skystone-Dark-Angels-Romania-2020) | Java | - | 2024-04-12 | NOTICE This repository contains the public FTC SDK for the SKYSTONE (2019-2020) competition season. If you are looking for the current season's FTC SDK software, please visit the new and permanent home of the public FTC  |
+| 169 | [jettbrains/-L-](https://github.com/jettbrains/-L-) | - | GPL-3.0 | 2021-08-18 | W3C Strategic Highlights  September 2019  This report was prepared for the September 2019 W3C Advisory Committee Meeting (W3C Member link). See the accompanying W3C Fact Sheet — September 2019. For the previous edition,  |
+| 106 | [deepsense-ai/edge-slm](https://github.com/deepsense-ai/edge-slm) | C++ | MIT | 2024-04-12 | This project is a native implementation of a RAG pipeline for Small Language Models tested on Android devices. The main goal was to fit the whole RAG pipeline into a resource constrained device - ie. smartphone. By desig |
+| 78 | [Aryia-Behroziuan/References](https://github.com/Aryia-Behroziuan/References) | - | - | 2022-09-02 |  Poole, Mackworth & Goebel 1998, p. 1.  Russell & Norvig 2003, p. 55.  Definition of AI as the study of intelligent agents: Poole, Mackworth & Goebel (1998), which provides the version that is used in this article. These |
+| 46 | [SamsungLabs/samsone](https://github.com/SamsungLabs/samsone) | Python | - | 2026-09-28 | Samsone: A Family of Open Small Audio Language Models for On-Device Inference |
+| 28 | [yqmark/agreement](https://github.com/yqmark/agreement) | - | - | 2019-10-10 | Privacy Policy introduction We understand the importance of personal information to you and will do our utmost to protect your personal information. We are committed to maintaining your trust in us and to abide by the fo |
+| 25 | [Abhinivesh2729/Thinai](https://github.com/Abhinivesh2729/Thinai) | Dart | MIT | 2026-11-06 | Thinai is a privacy-focused Android app that runs small language models locally on your device, with a local API for integrating and accessing on-device AI inference. |
+| 25 | [mikolajbadyl/flutter_leap_sdk](https://github.com/mikolajbadyl/flutter_leap_sdk) | Dart | MIT | 2025-09-03 | A Flutter plugin for integrating Liquid AI's LEAP SDK, enabling on-device deployment of small language models in Flutter applications. |
+| 18 | [Rushikesh8983/MastersDataScience_Deep-learning-project](https://github.com/Rushikesh8983/MastersDataScience_Deep-learning-project) | Jupyter Notebook | - | 2018-11-27 | Language Translation  In this project, you’re going to take a peek into the realm of neural network machine translation. You’ll be training a sequence to sequence model on a dataset of English and French sentences that c |
+| 14 | [bitlyte-ai/apples2oranges](https://github.com/bitlyte-ai/apples2oranges) | TypeScript | Apache-2.0 | 2026-04-05 | LLM Comparison + Hardware Telemetry Playground for Small Language Models and On-Device AI |
+| 13 | [anujkumarthakur/Rust-tutorial](https://github.com/anujkumarthakur/Rust-tutorial) | - | - | 2019-10-30 | Introduction      Note: This edition of the book is the same as The Rust Programming Language available in print and ebook format from No Starch Press.  Welcome to The Rust Programming Language, an introductory book abou |
+| 9 | [monday8am/edgelab](https://github.com/monday8am/edgelab) | Kotlin | MIT | 2026-08-31 | Edge Agent Lab is an Android testing platform for evaluating small language model (SLM) agents directly on mobile devices. |

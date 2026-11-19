@@ -1,0 +1,17 @@
+{
+  "id": "github:smithery-ai/cli",
+  "kind": "github",
+  "category": "self-extension",
+  "repo": "smithery-ai/cli",
+  "url": "https://github.com/smithery-ai/cli",
+  "description": "Install, manage and develop MCP servers and skills for agents",
+  "stars": 847,
+  "forks": 100,
+  "language": "TypeScript",
+  "license": "AGPL-3.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-05-31T07:11:36Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

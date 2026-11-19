@@ -1,0 +1,45 @@
+{
+  "app": "Командная строка (cmd.exe) и пакетные файлы",
+  "exe": ["cmd.exe"],
+  "ui_stack": "win32",
+  "version_seen": "Windows 10/11 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": { "by": "api", "value": "cmd.exe /d /c <команда>" },
+    "uia_console": { "by": "uia", "value": "ControlType=Document" }
+  },
+  "operations": [
+    {
+      "name": "Запустить командную строку и прочитать вывод",
+      "registry": "apps-windows|запустить|программу",
+      "steps": ["cli:cmd.exe /d /c <команда>", "read:stdout+stderr"],
+      "verify": ["exit code получен", "кодировка вывода определена (cp866/utf8) и не искажена"],
+      "risk": "write-local",
+      "notes": "основная ловушка — кодировка: использовать `chcp 65001` или читать как OEM"
+    },
+    {
+      "name": "Проверить доступность команды",
+      "registry": "distribution|проверить|наличие WebView2 Runtime",
+      "steps": ["cli:where <tool>", "read:exit code"],
+      "verify": ["путь найден или явно отсутствует"],
+      "risk": "read",
+      "notes": "так же проверяются внешние зависимости (ffmpeg, 7z, git)"
+    },
+    {
+      "name": "Работа с длинными путями и юникодом",
+      "registry": "files|скопировать|файлы",
+      "steps": ["cli:robocopy <src> <dst> /E /COPY:DAT /R:2 /W:2 /LOG:<log>"],
+      "verify": ["код возврата robocopy < 8", "число файлов совпадает", "лог сохранён"],
+      "risk": "write-local",
+      "notes": "robocopy понимает UNC и >260 символов; копирование через Python — только фолбэк"
+    },
+    {
+      "name": "Остановить процесс по имени",
+      "registry": "processes-services|завершить|процесс",
+      "steps": ["cli:taskkill /PID <pid> /T", "wait:2s", "cli:tasklist | findstr <name>"],
+      "verify": ["процесса нет в tasklist", "дочерние процессы тоже завершены"],
+      "risk": "destructive",
+      "on_fail": "не повторять /F без подтверждения; проверить, не системный ли процесс"
+    }
+  ]
+}

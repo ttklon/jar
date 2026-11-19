@@ -1,0 +1,22 @@
+{
+  "id": "github:lmstudio-ai/lms",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "lmstudio-ai/lms",
+  "url": "https://github.com/lmstudio-ai/lms",
+  "description": "LM Studio CLI",
+  "stars": 5409,
+  "forks": 470,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "llm",
+    "lmstudio",
+    "nodejs",
+    "typescript"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-14T20:50:03Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

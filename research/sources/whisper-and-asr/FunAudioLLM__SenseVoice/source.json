@@ -1,0 +1,33 @@
+{
+  "id": "github:FunAudioLLM/SenseVoice",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "FunAudioLLM/SenseVoice",
+  "url": "https://github.com/FunAudioLLM/SenseVoice",
+  "description": "Open-source SenseVoiceSmall model for Mandarin, Cantonese, English, Japanese, and Korean ASR, language ID, emotion recognition, and audio event detection.",
+  "stars": 9713,
+  "forks": 846,
+  "language": "C",
+  "license": "MIT",
+  "topics": [
+    "asr",
+    "audio-analysis",
+    "audio-event-detection",
+    "cantonese",
+    "cross-lingual",
+    "emotion-detection",
+    "funasr",
+    "language-identification",
+    "llama-cpp",
+    "multilingual",
+    "multilingual-asr",
+    "pytorch",
+    "sensevoice",
+    "speech-emotion-recognition",
+    "speech-recognition"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-30T10:22:01Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

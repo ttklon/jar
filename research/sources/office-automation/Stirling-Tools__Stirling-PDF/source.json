@@ -1,0 +1,31 @@
+{
+  "id": "github:Stirling-Tools/Stirling-PDF",
+  "kind": "github",
+  "category": "office-automation",
+  "repo": "Stirling-Tools/Stirling-PDF",
+  "url": "https://github.com/Stirling-Tools/Stirling-PDF",
+  "description": "#1 PDF Application on GitHub that lets you edit PDFs on any device anywhere",
+  "stars": 96008,
+  "forks": 10011,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "docker",
+    "hacktoberfest",
+    "java",
+    "pdf",
+    "pdf-converter",
+    "pdf-editor",
+    "pdf-manipulation",
+    "pdf-merger",
+    "pdf-ocr",
+    "pdf-tools",
+    "pdf-web-apps",
+    "pdfmerger",
+    "self-hosted"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T12:27:30Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

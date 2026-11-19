@@ -1,0 +1,21 @@
+{
+  "id": "github:ajv-validator/ajv",
+  "kind": "github",
+  "category": "configuration",
+  "repo": "ajv-validator/ajv",
+  "url": "https://github.com/ajv-validator/ajv",
+  "description": "The fastest JSON schema Validator. Supports JSON Schema draft-04/06/07/2019-09/2020-12 and JSON Type Definition (RFC8927)",
+  "stars": 14872,
+  "forks": 1067,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "ajv",
+    "json-schema",
+    "validator"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-06T19:59:32Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

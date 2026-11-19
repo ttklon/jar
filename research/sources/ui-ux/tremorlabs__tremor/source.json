@@ -1,0 +1,25 @@
+{
+  "id": "github:tremorlabs/tremor",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "tremorlabs/tremor",
+  "url": "https://github.com/tremorlabs/tremor",
+  "description": "Copy & Paste React components to build modern web applications.",
+  "stars": 3692,
+  "forks": 200,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "components",
+    "dashboard",
+    "radix-ui",
+    "react",
+    "tailwindcss",
+    "typescript",
+    "ui"
+  ],
+  "archived": false,
+  "pushed_at": "2025-10-10T13:08:24Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "github:ScoopInstaller/Scoop",
+  "kind": "github",
+  "category": "deployment-admin",
+  "repo": "ScoopInstaller/Scoop",
+  "url": "https://github.com/ScoopInstaller/Scoop",
+  "description": "A command-line installer for Windows.",
+  "stars": 24803,
+  "forks": 1546,
+  "language": "PowerShell",
+  "license": "NOASSERTION",
+  "topics": [
+    "installer",
+    "powershell",
+    "scoop",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:05:16Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

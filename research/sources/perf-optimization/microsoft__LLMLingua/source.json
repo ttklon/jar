@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/LLMLingua",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "microsoft/LLMLingua",
+  "url": "https://github.com/microsoft/LLMLingua",
+  "description": "[EMNLP'23, ACL'24] To speed up LLMs' inference and enhance LLM's perceive of key information, compress the prompt and KV-Cache, which achieves up to 20x compression with minimal performance loss.",
+  "stars": 6809,
+  "forks": 450,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T09:36:47Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "github:xtermjs/xterm.js",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "xtermjs/xterm.js",
+  "url": "https://github.com/xtermjs/xterm.js",
+  "description": "A terminal for the web",
+  "stars": 21327,
+  "forks": 2047,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "console",
+    "development",
+    "javascript",
+    "pty",
+    "ssh",
+    "terminal",
+    "terminal-emulators",
+    "tty",
+    "typescript",
+    "vt100",
+    "webgl",
+    "xterm"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-29T20:34:16Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

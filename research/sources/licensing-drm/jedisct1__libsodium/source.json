@@ -1,0 +1,22 @@
+{
+  "id": "github:jedisct1/libsodium",
+  "kind": "github",
+  "category": "licensing-drm",
+  "repo": "jedisct1/libsodium",
+  "url": "https://github.com/jedisct1/libsodium",
+  "description": "A modern, portable, easy to use crypto library.",
+  "stars": 14047,
+  "forks": 1887,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [
+    "c",
+    "crypto",
+    "cryptography",
+    "zig-package"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T15:27:27Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

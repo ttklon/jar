@@ -1,0 +1,29 @@
+{
+  "id": "github:duplicati/duplicati",
+  "kind": "github",
+  "category": "backup-archive",
+  "repo": "duplicati/duplicati",
+  "url": "https://github.com/duplicati/duplicati",
+  "description": "Store securely encrypted backups in the cloud!",
+  "stars": 15189,
+  "forks": 1090,
+  "language": "C#",
+  "license": "NOASSERTION",
+  "topics": [
+    "backup",
+    "c-sharp",
+    "client-only-backup",
+    "cloud-backup",
+    "cloud-storage-services",
+    "duplicati",
+    "encryption",
+    "sftp",
+    "tno-backup",
+    "trust-no-one-backup",
+    "webdav"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:29:42Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

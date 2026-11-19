@@ -1,0 +1,17 @@
+{
+  "id": "github:resemble-ai/chatterbox",
+  "kind": "github",
+  "category": "tts-and-voice",
+  "repo": "resemble-ai/chatterbox",
+  "url": "https://github.com/resemble-ai/chatterbox",
+  "description": "SoTA open-source TTS",
+  "stars": 27673,
+  "forks": 3725,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-04T18:48:12Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

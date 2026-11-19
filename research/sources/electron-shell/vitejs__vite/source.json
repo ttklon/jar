@@ -1,0 +1,23 @@
+{
+  "id": "github:vitejs/vite",
+  "kind": "github",
+  "category": "electron-shell",
+  "repo": "vitejs/vite",
+  "url": "https://github.com/vitejs/vite",
+  "description": "Next generation frontend tooling. It's fast!",
+  "stars": 83868,
+  "forks": 9429,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "build-tool",
+    "dev-server",
+    "frontend",
+    "hmr",
+    "vite"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T11:40:02Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

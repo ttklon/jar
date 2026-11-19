@@ -1,0 +1,102 @@
+{
+  "app": "PuTTY (plink / pscp / puttygen)",
+  "kind": "tool",
+  "exe": [
+    "putty.exe",
+    "plink.exe",
+    "pscp.exe",
+    "puttygen.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "PuTTY 0.83 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "exec": {
+      "by": "api",
+      "value": "plink -batch -i key.ppk user@host \"<команда>\" — -batch не даёт зависнуть на вопросах"
+    },
+    "hostkey": {
+      "by": "api",
+      "value": "plink -hostkey SHA256:<отпечаток> ... — сверка ключа хоста до ввода пароля"
+    },
+    "copy": {
+      "by": "api",
+      "value": "pscp -i key.ppk file user@host:/path/ ; pscp -r для папок"
+    },
+    "tunnel": {
+      "by": "api",
+      "value": "plink -N -L 8080:127.0.0.1:80 user@host (локальный порт → сервис за сервером)"
+    },
+    "keygen": {
+      "by": "api",
+      "value": "puttygen key -o key.ppk; puttygen key -O public-openssh → для authorized_keys"
+    },
+    "gui": {
+      "by": "uia",
+      "value": "putty.exe — сохранённые сессии; для автоматизации не используется"
+    }
+  },
+  "operations": [
+    {
+      "name": "Подключиться по SSH и проверить, что это тот хост",
+      "registry": "virtualization-remote|подключиться|по SSH",
+      "steps": [
+        "взять известный отпечаток хоста из документации/администратора",
+        "plink -batch -hostkey SHA256:<...> -i key.ppk user@host \"whoami; hostname; uptime\"",
+        "сохранить вывод и код возврата"
+      ],
+      "verify": [
+        "код возврата 0",
+        "вывод содержит ожидаемые hostname и пользователя",
+        "отпечаток совпал; при несовпадении соединение прервано, а не продолжено"
+      ],
+      "risk": "external",
+      "notes": "первое подключение без проверки отпечатка — типичный способ отдать ключ посреднику; -hostkey обязателен при автоматизации"
+    },
+    {
+      "name": "Снять состояние сервера по SSH",
+      "registry": "virtualization-remote|проверить|доступность сервера",
+      "steps": [
+        "plink -batch ... \"uptime; df -h /; free -m; systemctl --failed\"",
+        "разобрать вывод в числа: load average, % занятости диска, память, число упавших юнитов"
+      ],
+      "verify": [
+        "названы числа: uptime, %, память",
+        "перечислены упавшие юниты, если есть",
+        "нет вывода «сервер в порядке» без цифр"
+      ],
+      "risk": "read"
+    },
+    {
+      "name": "Передать файл и подтвердить хэшем",
+      "registry": "virtualization-remote|передать|файл на сервер",
+      "steps": [
+        "certutil -hashfile file SHA256 локально",
+        "pscp -i key.ppk file user@host:/path/",
+        "sha256sum /path/file на сервере"
+      ],
+      "verify": [
+        "хэши совпали посимвольно",
+        "размер файла совпал",
+        "права на файл не 777 (проверить ls -l)"
+      ],
+      "risk": "external"
+    },
+    {
+      "name": "Поднять SSH-туннель к сервису",
+      "registry": "network|запустить|туннель",
+      "steps": [
+        "plink -N -L 8080:127.0.0.1:80 user@host (в отдельном процессе)",
+        "Test-NetConnection localhost -Port 8080",
+        "запрос к http://127.0.0.1:8080"
+      ],
+      "verify": [
+        "локальный порт слушает",
+        "сервис отвечает через туннель (код 200/ожидаемый)",
+        "после задачи процесс туннеля закрыт"
+      ],
+      "risk": "external",
+      "notes": "туннель наружу открывает доступ к внутреннему сервису на локальной машине — только на время задачи"
+    }
+  ]
+}

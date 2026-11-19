@@ -1,0 +1,22 @@
+{
+  "id": "github:MineDojo/Voyager",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "MineDojo/Voyager",
+  "url": "https://github.com/MineDojo/Voyager",
+  "description": "An Open-Ended Embodied Agent with Large Language Models",
+  "stars": 7317,
+  "forks": 707,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "embodied-learning",
+    "large-language-models",
+    "minecraft",
+    "open-ended-learning"
+  ],
+  "archived": false,
+  "pushed_at": "2024-04-03T18:51:36Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

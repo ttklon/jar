@@ -1,0 +1,30 @@
+{
+  "id": "github:spotify/pedalboard",
+  "kind": "github",
+  "category": "daw-music-production",
+  "repo": "spotify/pedalboard",
+  "url": "https://github.com/spotify/pedalboard",
+  "description": "🎛 🔊 A Python library for audio.",
+  "stars": 6467,
+  "forks": 373,
+  "language": "C++",
+  "license": "GPL-3.0",
+  "topics": [
+    "audio",
+    "audio-processing",
+    "audio-production",
+    "audio-research",
+    "audio-unit",
+    "augmentation",
+    "juce",
+    "machine-learning",
+    "pybind11",
+    "python",
+    "vst3",
+    "vst3-host"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-03T20:21:12Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:28:58Z"
+}

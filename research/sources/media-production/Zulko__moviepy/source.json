@@ -1,0 +1,25 @@
+{
+  "id": "github:Zulko/moviepy",
+  "kind": "github",
+  "category": "media-production",
+  "repo": "Zulko/moviepy",
+  "url": "https://github.com/Zulko/moviepy",
+  "description": "Video editing with Python",
+  "stars": 15124,
+  "forks": 2142,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "animation",
+    "gif",
+    "hacktoberfest",
+    "python",
+    "video",
+    "video-editing",
+    "video-processing"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-26T06:17:08Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

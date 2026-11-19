@@ -1,0 +1,21 @@
+{
+  "id": "github:explodinggradients/ragas",
+  "kind": "github",
+  "category": "observability-evals",
+  "repo": "explodinggradients/ragas",
+  "url": "https://github.com/explodinggradients/ragas",
+  "description": "Supercharge Your LLM Application Evaluations 🚀",
+  "stars": 16259,
+  "forks": 1803,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "evaluation",
+    "llm",
+    "llmops"
+  ],
+  "archived": false,
+  "pushed_at": "2026-02-24T07:47:19Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

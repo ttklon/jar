@@ -1,0 +1,22 @@
+{
+  "id": "github:modelcontextprotocol/typescript-sdk",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "modelcontextprotocol/typescript-sdk",
+  "url": "https://github.com/modelcontextprotocol/typescript-sdk",
+  "description": "The official TypeScript SDK for Model Context Protocol servers and clients",
+  "stars": 13730,
+  "forks": 2371,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "mcp",
+    "mcp-client",
+    "mcp-server",
+    "typescript"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T15:00:35Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

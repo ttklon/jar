@@ -1,0 +1,17 @@
+{
+  "id": "github:espressif/esptool",
+  "kind": "github",
+  "category": "devices-peripherals",
+  "repo": "espressif/esptool",
+  "url": "https://github.com/espressif/esptool",
+  "description": "Serial utility for flashing, provisioning, and interacting with Espressif SoCs",
+  "stars": 6542,
+  "forks": 1508,
+  "language": "Python",
+  "license": "GPL-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-03T23:05:04Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

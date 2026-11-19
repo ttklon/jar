@@ -1,0 +1,33 @@
+{
+  "id": "github:dagu-org/dagu",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "dagu-org/dagu",
+  "url": "https://github.com/dagu-org/dagu",
+  "description": "Self-hostable workflow orchestrator for teams whose main work isn't orchestration. Declarative YAML over your scripts, SSH commands, containers, etc; keep workflows separate from business logic. One binary, no database, runs on limited H/W resources. Alternative to Airflow / Cron / Job Scheduler.",
+  "stars": 4558,
+  "forks": 400,
+  "language": "Go",
+  "license": "GPL-3.0",
+  "topics": [
+    "agentic-workflows",
+    "ai-agents",
+    "ai-workflows",
+    "airflow-alternative",
+    "cron",
+    "dag",
+    "data-pipeline",
+    "devops",
+    "durable-execution",
+    "human-in-the-loop",
+    "job-scheduler",
+    "llm",
+    "mcp",
+    "mcp-gateway",
+    "mcp-server"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T03:46:26Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "github:bytedance/UI-TARS",
+  "kind": "github",
+  "category": "screen-understanding",
+  "repo": "bytedance/UI-TARS",
+  "url": "https://github.com/bytedance/UI-TARS",
+  "description": "Pioneering Automated GUI Interaction with Native Agents",
+  "stars": 11685,
+  "forks": 889,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "research"
+  ],
+  "archived": false,
+  "pushed_at": "2026-01-27T04:57:26Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

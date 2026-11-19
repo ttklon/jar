@@ -1,0 +1,21 @@
+{
+  "id": "github:rust-lang/rust-analyzer",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "rust-lang/rust-analyzer",
+  "url": "https://github.com/rust-lang/rust-analyzer",
+  "description": "A Rust compiler front-end for IDEs",
+  "stars": 16975,
+  "forks": 2282,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [
+    "hacktoberfest",
+    "lsp-server",
+    "rust"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T00:50:57Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

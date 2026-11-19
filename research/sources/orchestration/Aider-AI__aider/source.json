@@ -1,0 +1,31 @@
+{
+  "id": "github:Aider-AI/aider",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "Aider-AI/aider",
+  "url": "https://github.com/Aider-AI/aider",
+  "description": "aider is AI pair programming in your terminal",
+  "stars": 50019,
+  "forks": 5148,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "anthropic",
+    "chatgpt",
+    "claude-3",
+    "cli",
+    "command-line",
+    "gemini",
+    "gpt-3",
+    "gpt-35-turbo",
+    "gpt-4",
+    "gpt-4o",
+    "llama",
+    "openai",
+    "sonnet"
+  ],
+  "archived": false,
+  "pushed_at": "2026-05-22T14:02:20Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

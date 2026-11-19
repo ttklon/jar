@@ -1,0 +1,26 @@
+{
+  "id": "github:alex8088/electron-vite",
+  "kind": "github",
+  "category": "electron-shell",
+  "repo": "alex8088/electron-vite",
+  "url": "https://github.com/alex8088/electron-vite",
+  "description": "Next generation Electron build tooling based on Vite 新一代 Electron 开发构建工具，支持源代码保护",
+  "stars": 5636,
+  "forks": 249,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "bytecode",
+    "electron",
+    "hmr",
+    "hot-reloading",
+    "node-worker",
+    "source-code-protection",
+    "typescript-decorator",
+    "vite"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-14T16:28:56Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

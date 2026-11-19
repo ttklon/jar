@@ -1,0 +1,54 @@
+{
+  "app": "Slack",
+  "exe": ["slack.exe"],
+  "ui_stack": "electron",
+  "version_seen": "4.4x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "web_api": { "by": "api", "value": "Slack Web API: chat.postMessage, conversations.history, files.list, search.messages (нужен token из secrets.enc)" },
+    "deep_link": { "by": "api", "value": "slack://channel?team=<TEAM_ID>&id=<CHANNEL_ID>" },
+    "quick_switcher": { "by": "hotkey", "value": "Ctrl+K" },
+    "thread_pane": { "by": "uia", "value": "Pane Name~'Thread' (локализуется)", "fallback": "клик по ответу в треде" },
+    "composer": { "by": "uia", "value": "Edit Name='Message <канал>' / placeholder «Написать сообщение»", "fallback": "js-инъекция через CDP в Electron (если включён remote debugging)" }
+  },
+  "operations": [
+    {
+      "name": "Отправить сообщение в канал",
+      "registry": "chat-social|отправить|сообщение в Telegram",
+      "steps": ["API: chat.postMessage {channel, text, blocks} — сначала в личный канал/черновик", "проверить ответ ok=true и ts", "показать пользователю, что уйдёт, если канал внешний"],
+      "verify": ["ответ API содержит ts и channel", "conversations.history подтверждает сообщение", "текст совпадает символ в символ (не съеден markdown)"],
+      "risk": "external",
+      "on_fail": "при ошибке invalid_auth — не повторять циклами: токен истёк, нужен новый",
+      "notes": "сообщение коллегам — внешнее действие: по умолчанию показываем предпросмотр и ждём «да»"
+    },
+    {
+      "name": "Прочитать канал и выделить главное",
+      "registry": "chat-social|прочитать|чаты",
+      "steps": ["API: conversations.history {channel, limit:200}", "отфильтровать: обращения к пользователю, решения, дедлайны", "сгруппировать по темам"],
+      "verify": ["в выжимке есть ссылки на конкретные сообщения (ts)", "ничего не выдумано: каждое утверждение цитирует текст", "указан период, за который читали"],
+      "risk": "read"
+    },
+    {
+      "name": "Найти файл или сообщение в истории",
+      "registry": "chat-social|найти|файл в чате",
+      "steps": ["API: search.messages {query, sort:'timestamp'}", "при отсутствии прав на search — files.list + локальный поиск по имени", "проверить доступность файла по url_private"],
+      "verify": ["найден объект с датой и автором", "ссылка действительно открывается под текущим токеном", "если не найдено — сказано честно, без «возможно, где-то есть»"],
+      "risk": "read"
+    },
+    {
+      "name": "Собрать переписку в заметку",
+      "registry": "chat-social|собрать|переписку в заметку",
+      "steps": ["взять диапазон сообщений по ts", "сохранить автора, время, текст, вложения", "записать markdown в базу знаний (Obsidian/Notion)"],
+      "verify": ["число сообщений в заметке = числу полученных", "вложения перечислены ссылками", "нет сообщений без автора и времени"],
+      "risk": "read",
+      "notes": "личная переписка — не выгружать в общий канал и не отправлять наружу без спроса"
+    },
+    {
+      "name": "Ответить в треде",
+      "registry": "chat-social|ответить|в мессенджере",
+      "steps": ["найти thread_ts родительского сообщения", "API: chat.postMessage {channel, thread_ts, text}", "проверить, что ответ привязан к треду"],
+      "verify": ["в ответе API тот же thread_ts", "сообщение видно в треде, а не в общем канале"],
+      "risk": "external"
+    }
+  ]
+}

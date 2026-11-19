@@ -1,0 +1,102 @@
+---
+id: "github:thewh1teagle/sherpa-rs"
+kind: "github"
+category: "tauri-rust"
+repo: "thewh1teagle/sherpa-rs"
+url: "https://github.com/thewh1teagle/sherpa-rs"
+description: "Rust bindings to https://github.com/k2-fsa/sherpa-onnx"
+stars: 313
+forks: 71
+language: "Rust"
+license: "MIT"
+topics:
+  - "audio"
+  - "diarization"
+  - "embeddings"
+  - "rust"
+  - "sherpa"
+  - "speech-recognition"
+archived: true
+pushed_at: "2026-03-08T01:09:08Z"
+default_branch: "main"
+fetched_at: "2026-11-08T13:14:43Z"
+---
+
+# sherpa-rs
+
+[![Crates](https://img.shields.io/crates/v/sherpa-rs?logo=rust)](https://crates.io/crates/sherpa-rs/)
+[![License](https://img.shields.io/github/license/thewh1teagle/sherpa-rs?color=00aaaa&logo=license)](https://github.com/thewh1teagle/sherpa-rs/blob/main/LICENSE)
+
+Rust bindings to [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)
+
+---
+
+⚠️ **Deprecated**
+
+This crate is deprecated.
+
+The upstream project **sherpa-onnx** now provides an official Rust API, so this repository is no longer maintained.
+
+Please use the official Rust bindings instead:
+https://github.com/k2-fsa/sherpa-onnx
+
+Example:
+https://github.com/k2-fsa/sherpa-onnx/blob/master/rust-api-examples/examples/silero_vad_remove_silence.rs
+
+See also the VoiceActivityDetector API:
+https://docs.rs/sherpa-onnx/latest/sherpa_onnx/struct.VoiceActivityDetector.html
+
+---
+
+## Features
+
+- Spoken language detection
+- Speaker embedding (labeling)
+- Speaker diarization
+- Speech to text
+- Text to speech
+- Text punctuation
+- Voice activity detection
+- Audio tagging
+- Keyword spotting
+
+## Supported Platforms
+
+- Windows
+- Linux
+- macOS
+- Android
+- IOS
+
+## Install
+
+```console
+cargo add sherpa-rs
+```
+
+## Build
+
+Please see [BUILDING.md](BUILDING.md).
+
+## Feature flags
+
+- `cuda`: enable CUDA support
+- `directml`: enable DirectML support
+- `tts`: enable TTS
+- `download-binaries`: use prebuilt sherpa-onnx libraries for faster builds. cached.
+- `static`: use static sherpa-onnx libraries and link them statically.
+- `sys`: expose raw c bindings (sys crate)
+
+## Documentation
+
+For the documentation on `sherpa_rs`, please visit [docs.rs/sherpa_rs](https://docs.rs/sherpa-rs/latest/sherpa_rs).
+
+For documentation on `sherpa-onnx`, refer to the [sherpa/intro.html](https://k2-fsa.github.io/sherpa/intro.html).
+
+## Examples
+
+See [examples](examples)
+
+## Models
+
+All pretrained models available at [sherpa/onnx/pretrained_models](https://k2-fsa.github.io/sherpa/onnx/pretrained_models/index.html)

@@ -1,0 +1,22 @@
+{
+  "id": "github:lierdakil/pandoc-crossref",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "lierdakil/pandoc-crossref",
+  "url": "https://github.com/lierdakil/pandoc-crossref",
+  "description": "Pandoc filter for cross-references",
+  "stars": 1075,
+  "forks": 82,
+  "language": "Haskell",
+  "license": "GPL-2.0",
+  "topics": [
+    "haskell",
+    "pandoc",
+    "pandoc-crossref",
+    "pandoc-filter"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-29T10:58:55Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

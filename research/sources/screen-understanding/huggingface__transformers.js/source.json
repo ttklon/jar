@@ -1,0 +1,22 @@
+{
+  "id": "github:huggingface/transformers.js",
+  "kind": "github",
+  "category": "screen-understanding",
+  "repo": "huggingface/transformers.js",
+  "url": "https://github.com/huggingface/transformers.js",
+  "description": "State-of-the-art Machine Learning for the web. Run 🤗 Transformers directly in your browser, with no need for a server!",
+  "stars": 16406,
+  "forks": 1227,
+  "language": "JavaScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "browser",
+    "javascript",
+    "transformers",
+    "webml"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-30T06:30:43Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,31 @@
+{
+  "id": "github:triggerdotdev/trigger.dev",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "triggerdotdev/trigger.dev",
+  "url": "https://github.com/triggerdotdev/trigger.dev",
+  "description": "Trigger.dev – build and deploy durable AI agents and workflows",
+  "stars": 16730,
+  "forks": 1524,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "ai",
+    "ai-agent-framework",
+    "ai-agents",
+    "automation",
+    "background-jobs",
+    "mcp",
+    "mcp-server",
+    "nextjs",
+    "orchestration",
+    "scheduler",
+    "serverless",
+    "workflow-automation",
+    "workflows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-03T11:54:09Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

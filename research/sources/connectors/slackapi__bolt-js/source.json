@@ -1,0 +1,27 @@
+{
+  "id": "github:slackapi/bolt-js",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "slackapi/bolt-js",
+  "url": "https://github.com/slackapi/bolt-js",
+  "description": "A framework to build Slack apps using JavaScript",
+  "stars": 2953,
+  "forks": 444,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "framework",
+    "javascript",
+    "slack",
+    "slack-apps",
+    "socket-mode",
+    "typescript",
+    "websocket",
+    "websocket-client",
+    "websockets"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T19:13:37Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "github:librosa/librosa",
+  "kind": "github",
+  "category": "music-audio",
+  "repo": "librosa/librosa",
+  "url": "https://github.com/librosa/librosa",
+  "description": "Python library for audio and music analysis",
+  "stars": 8807,
+  "forks": 1101,
+  "language": "Python",
+  "license": "ISC",
+  "topics": [
+    "audio",
+    "dsp",
+    "librosa",
+    "music",
+    "python",
+    "scipy"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T21:45:58Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

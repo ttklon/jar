@@ -1,0 +1,17 @@
+{
+  "id": "github:actions/attest-build-provenance",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "actions/attest-build-provenance",
+  "url": "https://github.com/actions/attest-build-provenance",
+  "description": "Action for generating build provenance attestations for workflow artifacts",
+  "stars": 1073,
+  "forks": 870,
+  "language": "",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-08-21T19:01:30Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

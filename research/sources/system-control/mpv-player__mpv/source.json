@@ -1,0 +1,25 @@
+{
+  "id": "github:mpv-player/mpv",
+  "kind": "github",
+  "category": "system-control",
+  "repo": "mpv-player/mpv",
+  "url": "https://github.com/mpv-player/mpv",
+  "description": "🎥 Command line media player",
+  "stars": 37992,
+  "forks": 3640,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [
+    "audio",
+    "c",
+    "ffmpeg",
+    "mplayer",
+    "mpv",
+    "multimedia",
+    "video"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:16:07Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

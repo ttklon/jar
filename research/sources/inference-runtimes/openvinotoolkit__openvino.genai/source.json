@@ -1,0 +1,17 @@
+{
+  "id": "github:openvinotoolkit/openvino.genai",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "openvinotoolkit/openvino.genai",
+  "url": "https://github.com/openvinotoolkit/openvino.genai",
+  "description": "Run Generative AI models with simple C++/Python API and using OpenVINO Runtime",
+  "stars": 615,
+  "forks": 508,
+  "language": "C++",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T16:50:59Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

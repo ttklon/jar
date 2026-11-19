@@ -1,0 +1,53 @@
+{
+  "app": "Bitwig Studio",
+  "exe": ["Bitwig Studio.exe"],
+  "ui_stack": "win32",
+  "version_seen": "5.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "controller_api": { "by": "api", "value": "Bitwig Controller API (Java) → свой контроллер ZShelper в ~/Documents/Bitwig Studio/Controller Scripts", "fallback": "OSC-скрипт (generic OSC) на порт 8000" },
+    "arranger": { "by": "hotkey", "value": "Shift+Tab (переключение Arrange/Clip launcher)" },
+    "device_panel": { "by": "hotkey", "value": "Ctrl+Enter (показать панель устройства)" },
+    "export": { "by": "menu", "value": "File → Export Audio…" },
+    "transport": { "by": "hotkey", "value": "Space" }
+  },
+  "operations": [
+    {
+      "name": "Открыть проект и убедиться, что загрузился",
+      "registry": "music-production|открыть|проект в DAW",
+      "steps": ["start:Bitwig Studio.exe <путь.dawproject>", "wait:до 40s", "прочитать транспорт: BPM, тональность"],
+      "verify": ["Controller API: trackCount > 0", "BPM совпадает с брифом", "нет диалога о недостающих плагинах (если есть — сообщить, а не игнорировать)"],
+      "risk": "write-local",
+      "on_fail": "отсутствующий плагин ломает микс — показать список и спросить, заменить ли на встроенный"
+    },
+    {
+      "name": "Импортировать MIDI и назначить инструмент",
+      "registry": "music-production|импортировать|MIDI в проект",
+      "steps": ["создать трек (Ctrl+T)", "перетащить .mid на дорожку", "назначить устройство (встроенный Polymer/FM-4 или VST)"],
+      "verify": ["в клипе видны ноты", "при воспроизведении есть звук (уровень канала > −60 dB)", "ноты в пределах диапазона инструмента"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Собрать инструментал по карте аранжировки",
+      "registry": "music-production|сгенерировать|инструментал",
+      "steps": ["разложить секции по тактам", "импортировать MIDI-партии", "назначить устройства", "проставить автоматизацию энергии по секциям"],
+      "verify": ["длина аранжировки = заказанной", "секции различимы по энергии (анализ RMS по секциям)", "нет пустых тактов внутри секции"],
+      "risk": "write-local",
+      "notes": "Bitwig удобен модуляторами — можно автоматизировать «дыхание» фильтра, чтобы не звучало механически"
+    },
+    {
+      "name": "Свести и проверить баланс",
+      "registry": "music-production|свести|дорожки",
+      "steps": ["гейн-стейджинг −18 dBFS RMS на инструментах", "EQ/компрессия по необходимости", "лимитер на мастер"],
+      "verify": ["LUFS мастера в целевом диапазоне", "ни один канал не клиппует", "проверка в моно и на «телефонном» эквалайзере"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Экспортировать мастер",
+      "registry": "music-production|экспортировать|финальный мастер",
+      "steps": ["anchor:arranger", "выделить диапазон (loop bar)", "anchor:export", "44.1/48 kHz, 24 bit, dither только при снижении разрядности"],
+      "verify": ["ffprobe совпадает по формату", "ebur128 даёт целевой LUFS", "true peak ≤ −1 dBTP"],
+      "risk": "write-local"
+    }
+  ]
+}

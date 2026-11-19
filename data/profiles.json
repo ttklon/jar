@@ -1,0 +1,4065 @@
+[
+ {
+  "slug": "1c",
+  "app": "1С:Предприятие 8 (тонкий/толстый клиент)",
+  "kind": "app",
+  "exe": [
+   "1cv8.exe",
+   "1cv8c.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "8.3.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Открыть отчёт по продажам за период",
+    "registry": "business-finance|открыть|отчёт в 1С",
+    "risk": "read"
+   },
+   {
+    "name": "Выгрузить отчёт в Excel",
+    "registry": "business-finance|экспортировать|отчёт в Excel",
+    "risk": "write-local"
+   },
+   {
+    "name": "Найти документ по номеру",
+    "registry": "business-finance|найти|документ",
+    "risk": "read"
+   },
+   {
+    "name": "Сверить остатки и акты",
+    "registry": "business-finance|свести|акты сверки",
+    "risk": "read"
+   },
+   {
+    "name": "Создать черновик счёта",
+    "registry": "business-finance|создать|счёт",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить дубли счетов",
+    "registry": "business-finance|проверить|дубли документов",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "7zip",
+  "app": "7-Zip",
+  "kind": "app",
+  "exe": [
+   "7zFM.exe",
+   "7z.exe",
+   "7zG.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "24.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 2,
+  "operations": [
+   {
+    "name": "Создать архив с паролем",
+    "registry": "files|сжать|в архив",
+    "risk": "write-local"
+   },
+   {
+    "name": "Распаковать безопасно (без zip-slip)",
+    "registry": "files|распаковать|архив",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить целостность архива",
+    "registry": "files|проверить|размеры и место",
+    "risk": "read"
+   },
+   {
+    "name": "Разбить архив на части и собрать обратно",
+    "registry": "files|сжать|в архив",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "ableton",
+  "app": "Ableton Live 12",
+  "kind": "app",
+  "exe": [
+   "Ableton Live 12.exe",
+   "Ableton Live 12 Beta.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "12.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Открыть проект или шаблон и проверить, что загрузился",
+    "registry": "music-production|открыть|проект в DAW",
+    "risk": "write-local"
+   },
+   {
+    "name": "Импортировать MIDI в новый трек",
+    "registry": "music-production|импортировать|MIDI в проект",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать бит из сгенерированного MIDI",
+    "registry": "music-production|сочинить|бит",
+    "risk": "write-local"
+   },
+   {
+    "name": "Свести дорожки в микс",
+    "registry": "music-production|свести|дорожки",
+    "risk": "write-local"
+   },
+   {
+    "name": "Поправить питч и тайминг вокала",
+    "registry": "music-production|поправить|питч и тайминг вокала",
+    "risk": "write-local"
+   },
+   {
+    "name": "Экспортировать мастер",
+    "registry": "music-production|экспортировать|финальный мастер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить громкость и пики готового мастера",
+    "registry": "music-production|проверить|громкость и пики",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "accessibility",
+  "app": "Доступность (экранный диктор, субтитры, контраст, управление без мыши)",
+  "kind": "system",
+  "exe": [
+   "narrator.exe",
+   "Magnify.exe",
+   "osk.exe",
+   "SystemSettings.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Озвучить интерфейс или текст",
+    "registry": "accessibility|озвучить|интерфейс",
+    "risk": "read"
+   },
+   {
+    "name": "Субтитрировать любой звук",
+    "registry": "accessibility|субтитрировать|для любого звука",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить контраст и читаемость",
+    "registry": "accessibility|проверить|контраст и читаемость",
+    "risk": "read"
+   },
+   {
+    "name": "Увеличить текст и масштаб",
+    "registry": "accessibility|увеличить|текст/масштаб",
+    "risk": "write-local"
+   },
+   {
+    "name": "Управлять компьютером без мыши",
+    "registry": "accessibility|управлять|без мыши",
+    "risk": "destructive"
+   },
+   {
+    "name": "Упростить интерфейс",
+    "registry": "accessibility|упростить|интерфейс",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "acrobat",
+  "app": "Adobe Acrobat",
+  "kind": "app",
+  "exe": [
+   "Acrobat.exe",
+   "AcroRd32.exe",
+   "AcrobatDC.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "2025.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Сжать PDF без потери читаемости",
+    "registry": "slides-pdf-print|сжать|PDF",
+    "risk": "write-local"
+   },
+   {
+    "name": "Защитить PDF паролем",
+    "registry": "slides-pdf-print|защитить|PDF паролем",
+    "risk": "write-local"
+   },
+   {
+    "name": "Разделить PDF на страницы или диапазоны",
+    "registry": "slides-pdf-print|разделить|PDF на страницы",
+    "risk": "write-local"
+   },
+   {
+    "name": "Распознать текст в скане",
+    "registry": "slides-pdf-print|распознать|текст в скане",
+    "risk": "read"
+   },
+   {
+    "name": "Собрать PDF из нескольких файлов и картинок",
+    "registry": "slides-pdf-print|собрать|PDF из нескольких файлов",
+    "risk": "write-local"
+   },
+   {
+    "name": "Поставить электронную подпись",
+    "registry": "slides-pdf-print|подписать|PDF (электронная подпись)",
+    "risk": "identity"
+   }
+  ]
+ },
+ {
+  "slug": "apps-generic",
+  "app": "Автоматизация любого приложения (руки и глаза)",
+  "kind": "tool",
+  "exe": [
+   "python.exe",
+   "uia_probe.py"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "ZShelper tools/uia_probe.py v1 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Снять UIA-дерево приложения",
+    "registry": "apps-generic|снять|UIA-дерево приложения",
+    "risk": "read"
+   },
+   {
+    "name": "Определить тип интерфейса",
+    "registry": "apps-generic|определить|тип интерфейса",
+    "risk": "read"
+   },
+   {
+    "name": "Сгенерировать черновик профиля",
+    "registry": "apps-generic|сгенерировать|профиль приложения по UIA",
+    "risk": "write-local"
+   },
+   {
+    "name": "Найти элемент по описанию",
+    "registry": "apps-generic|найти|элемент по описанию",
+    "risk": "read"
+   },
+   {
+    "name": "Кликнуть по элементу с проверкой",
+    "registry": "apps-generic|кликнуть|по элементу с проверкой",
+    "risk": "write-local"
+   },
+   {
+    "name": "Деградировать до визуального агента",
+    "registry": "apps-generic|деградировать|до визуального агента",
+    "risk": "read"
+   },
+   {
+    "name": "Адаптировать профиль к новой версии приложения",
+    "registry": "apps-generic|адаптировать|профиль к новой версии",
+    "risk": "write-local"
+   },
+   {
+    "name": "Записать траекторию действий пользователя",
+    "registry": "apps-generic|записать|траекторию действий пользователя",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "audacity",
+  "app": "Audacity",
+  "kind": "app",
+  "exe": [
+   "audacity.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "3.7.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Убрать шум и эхо из записи",
+    "registry": "audio|удалить|шум/эхо",
+    "risk": "write-local"
+   },
+   {
+    "name": "Нормализовать громкость под подкаст",
+    "registry": "audio|нормализовать|громкость",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить клиппинг и перегруз",
+    "registry": "audio|замерить|уровень/клиппинг",
+    "risk": "read"
+   },
+   {
+    "name": "Экспортировать в нужный формат",
+    "registry": "audio|конвертировать|формат/битрейт",
+    "risk": "write-local"
+   },
+   {
+    "name": "Нарезать фрагмент по таймкоду",
+    "registry": "audio|нарезать|фрагмент",
+    "risk": "write-local"
+   },
+   {
+    "name": "Склеить дорожки в один файл",
+    "registry": "audio|склеить|дорожки",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "bank",
+  "app": "Банк (веб-кабинет и десктоп-клиент) — только чтение",
+  "kind": "app",
+  "exe": [
+   "chrome.exe",
+   "msedge.exe",
+   "browser.exe"
+  ],
+  "ui_stack": "web",
+  "version_seen": "2026-11",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Скачать выписку за период",
+    "registry": "personal-finance|импортировать|выписку",
+    "risk": "write-local"
+   },
+   {
+    "name": "Показать баланс и последние операции",
+    "registry": "personal-finance|показать|баланс",
+    "risk": "read"
+   },
+   {
+    "name": "Найти конкретную операцию",
+    "registry": "personal-finance|найти|операцию",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить подозрительные списания",
+    "registry": "personal-finance|проверить|подозрительные",
+    "risk": "read"
+   },
+   {
+    "name": "Экспортировать операции в таблицу",
+    "registry": "personal-finance|экспортировать|операции",
+    "risk": "write-local"
+   },
+   {
+    "name": "Показать, как оплатить счёт (без оплаты)",
+    "registry": "personal-finance|оплатить|счёт",
+    "risk": "money"
+   }
+  ]
+ },
+ {
+  "slug": "bitwig",
+  "app": "Bitwig Studio",
+  "kind": "app",
+  "exe": [
+   "Bitwig Studio.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "5.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Открыть проект и убедиться, что загрузился",
+    "registry": "music-production|открыть|проект в DAW",
+    "risk": "write-local"
+   },
+   {
+    "name": "Импортировать MIDI и назначить инструмент",
+    "registry": "music-production|импортировать|MIDI в проект",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать инструментал по карте аранжировки",
+    "registry": "music-production|сгенерировать|инструментал",
+    "risk": "write-local"
+   },
+   {
+    "name": "Свести и проверить баланс",
+    "registry": "music-production|свести|дорожки",
+    "risk": "write-local"
+   },
+   {
+    "name": "Экспортировать мастер",
+    "registry": "music-production|экспортировать|финальный мастер",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "blender",
+  "app": "Blender",
+  "kind": "app",
+  "exe": [
+   "blender.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "4.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 3,
+  "operations": [
+   {
+    "name": "Смоделировать объект по параметрам",
+    "registry": "creative-3d|создать|3D-модель",
+    "risk": "write-local"
+   },
+   {
+    "name": "Пакетный рендер ракурсов",
+    "registry": "creative-3d|автоматизировать|пакетный рендер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить модель на пригодность к печати",
+    "registry": "creative-3d|проверить|модель на ошибки",
+    "risk": "read"
+   },
+   {
+    "name": "Экспортировать в формат печати",
+    "registry": "engineering-3d|конвертировать|форматы",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сделать анимацию по ключевым кадрам",
+    "registry": "creative-3d|сделать|анимацию",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "browser",
+  "app": "Chrome / Edge / Yandex (Chromium)",
+  "kind": "app",
+  "exe": [
+   "chrome.exe",
+   "msedge.exe",
+   "browser.exe"
+  ],
+  "ui_stack": "web",
+  "version_seen": "Chrome 131+ / Edge 131+",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Открыть URL и дождаться загрузки",
+    "registry": "web|открыть|сайт",
+    "risk": "external"
+   },
+   {
+    "name": "Найти текст на странице",
+    "registry": "web|найти|текст на странице",
+    "risk": "read"
+   },
+   {
+    "name": "Снять страницу в PDF",
+    "registry": "web|сохранить|страницу в PDF",
+    "risk": "write-local"
+   },
+   {
+    "name": "Скачать файл по ссылке",
+    "registry": "web|скачать|файл по ссылке",
+    "risk": "write-local"
+   },
+   {
+    "name": "Заполнить форму и отправить",
+    "registry": "web|заполнить|форму",
+    "risk": "external"
+   },
+   {
+    "name": "Войти в сервис (сохранённая сессия)",
+    "registry": "web|войти|в аккаунт",
+    "risk": "identity"
+   },
+   {
+    "name": "Собрать таблицу данных со страницы (парсинг)",
+    "registry": "web|извлечь|данные в таблицу",
+    "risk": "read"
+   },
+   {
+    "name": "Заблокировать рекламу и трекеры для агентских сессий",
+    "registry": "web|настроить|профиль браузера",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "business-docs",
+  "app": "Документы бизнеса (счета, акты, сверка, реестры, КП)",
+  "kind": "system",
+  "exe": [
+   "soffice.exe",
+   "WINWORD.EXE",
+   "AcroRd32.exe",
+   "pdftotext.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "LibreOffice 25.x / Word 365 / poppler pdftotext (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 8,
+  "operations": [
+   {
+    "name": "Создать счёт из шаблона",
+    "registry": "business-finance|создать|счёт/акт",
+    "risk": "write-local"
+   },
+   {
+    "name": "Подготовить пакет документов к сделке",
+    "registry": "business-finance|подготовить|пакет документов к сделке",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сформировать реестр счетов за период",
+    "registry": "business-finance|сформировать|реестр счетов за период",
+    "risk": "read"
+   },
+   {
+    "name": "Свести акты сверки",
+    "registry": "business-finance|свести|акты сверки",
+    "risk": "read"
+   },
+   {
+    "name": "Сверить оплату со счётом",
+    "registry": "business-finance|сверить|оплату со счётом",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить дубли документов",
+    "registry": "business-finance|проверить|дубли документов",
+    "risk": "read"
+   },
+   {
+    "name": "Найти документ по номеру",
+    "registry": "business-finance|найти|документ по номеру",
+    "risk": "read"
+   },
+   {
+    "name": "Сделать коммерческое предложение",
+    "registry": "business-finance|создать|КП/презентацию",
+    "risk": "write-local"
+   },
+   {
+    "name": "Подготовить черновик отчёта для налоговой",
+    "registry": "business-finance|сделать|отчёт для налоговой",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "business-money",
+  "app": "Деньги бизнеса (расходы, дебиторка, прогноз, контрагенты, CRM)",
+  "kind": "system",
+  "exe": [
+   "soffice.exe",
+   "EXCEL.EXE"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "Excel 365 / LibreOffice 25.x / Outlook 365 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Свести расходы по категориям",
+    "registry": "business-finance|свести|расходы",
+    "risk": "read"
+   },
+   {
+    "name": "Посчитать зарплату и налоги",
+    "registry": "business-finance|посчитать|зарплату/налоги",
+    "risk": "read"
+   },
+   {
+    "name": "Спрогнозировать денежный поток",
+    "registry": "business-finance|спрогнозировать|денежный поток",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить контрагента по открытым источникам",
+    "registry": "business-finance|проверить|контрагента",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить ИНН/ОГРН по контрольной сумме",
+    "registry": "business-finance|проверить|ИНН/ОГРН контрагента",
+    "risk": "read"
+   },
+   {
+    "name": "Напомнить об оплате счёта",
+    "registry": "business-finance|выставить|напоминание об оплате",
+    "risk": "external"
+   },
+   {
+    "name": "Ответить на письмо клиенту по счёту",
+    "registry": "business-finance|ответить|на письмо клиенту по счёту",
+    "risk": "external"
+   },
+   {
+    "name": "Записать итог переговоров в CRM",
+    "registry": "business-finance|вести|CRM-заметки",
+    "risk": "external"
+   }
+  ]
+ },
+ {
+  "slug": "calendar-tasks",
+  "app": "Календарь и задачи",
+  "kind": "system",
+  "exe": [
+   "OUTLOOK.EXE",
+   "olk.exe",
+   "schtasks.exe",
+   "Calendar.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Outlook 365 + Windows 11 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Показать расписание на период",
+    "registry": "calendar-tasks|показать|расписание",
+    "risk": "read"
+   },
+   {
+    "name": "Найти свободное окно",
+    "registry": "calendar-tasks|найти|свободное окно",
+    "risk": "read"
+   },
+   {
+    "name": "Создать событие или напоминание",
+    "registry": "calendar-tasks|создать|событие",
+    "risk": "external"
+   },
+   {
+    "name": "Спланировать день",
+    "registry": "calendar-tasks|спланировать|день",
+    "risk": "write-local"
+   },
+   {
+    "name": "Отследить дедлайны",
+    "registry": "calendar-tasks|отследить|дедлайны",
+    "risk": "read"
+   },
+   {
+    "name": "Синхронизировать локальный календарь с облаком",
+    "registry": "calendar-tasks|синхронизировать|календари",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "calibre",
+  "app": "Calibre",
+  "kind": "tool",
+  "exe": [
+   "calibre.exe",
+   "ebook-convert.exe",
+   "calibredb.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "8.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Конвертировать книгу в нужный формат",
+    "registry": "text-docs|конвертировать|формат документа",
+    "risk": "write-local"
+   },
+   {
+    "name": "Исправить метаданные книги",
+    "registry": "music|изменить|теги (ID3) массово",
+    "risk": "write-local"
+   },
+   {
+    "name": "Добавить книги в библиотеку и убрать дубликаты",
+    "registry": "files|сортировать|по типам/датам",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сделать локальную библиотеку доступной по сети",
+    "registry": "files|открыть|файл в программе",
+    "risk": "external"
+   }
+  ]
+ },
+ {
+  "slug": "capcut",
+  "app": "CapCut (Desktop)",
+  "kind": "app",
+  "exe": [
+   "CapCut.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "6.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Импортировать медиа в проект",
+    "registry": "video|монтировать|CapCut",
+    "risk": "write-local"
+   },
+   {
+    "name": "Добавить клип на таймлайн",
+    "registry": "video|монтировать|CapCut",
+    "risk": "write-local"
+   },
+   {
+    "name": "Разрезать клип в позиции курсора",
+    "registry": "video|нарезать|фрагменты",
+    "risk": "write-local"
+   },
+   {
+    "name": "Автосубтитры с распознаванием речи",
+    "registry": "video-production|субтитрировать|автоматически",
+    "risk": "write-local"
+   },
+   {
+    "name": "Добавить текстовый титр",
+    "registry": "video|добавить|субтитры",
+    "risk": "write-local"
+   },
+   {
+    "name": "Экспорт 1080p MP4",
+    "registry": "video|сжать|размер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Вырезать паузы (тишину)",
+    "registry": "video-production|нарезать|по тишине",
+    "risk": "write-local"
+   },
+   {
+    "name": "Изменить скорость участка",
+    "registry": "video|монтировать|CapCut",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сохранить проект",
+    "registry": "video|монтировать|CapCut",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сделать авто-субтитры и поправить их (v2)",
+    "registry": "video|добавить|субтитры",
+    "risk": "write-local"
+   },
+   {
+    "name": "Вырезать паузы и мусор (v2)",
+    "registry": "video|нарезать|фрагменты",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сделать вертикальную версию для Shorts/Reels",
+    "registry": "video|оптимизировать|монтаж на слабом ПК",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "cmd",
+  "app": "Командная строка (cmd.exe) и пакетные файлы",
+  "kind": "app",
+  "exe": [
+   "cmd.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "Windows 10/11 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 2,
+  "operations": [
+   {
+    "name": "Запустить командную строку и прочитать вывод",
+    "registry": "apps-windows|запустить|программу",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить доступность команды",
+    "registry": "distribution|проверить|наличие WebView2 Runtime",
+    "risk": "read"
+   },
+   {
+    "name": "Работа с длинными путями и юникодом",
+    "registry": "files|скопировать|файлы",
+    "risk": "write-local"
+   },
+   {
+    "name": "Остановить процесс по имени",
+    "registry": "processes-services|завершить|процесс",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "control-panel",
+  "app": "Панель управления и установка программ",
+  "kind": "system",
+  "exe": [
+   "control.exe",
+   "appwiz.cpl",
+   "winget.exe",
+   "msiexec.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 + winget 1.9 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Показать установленные программы",
+    "registry": "apps-windows|показать|установленные программы",
+    "risk": "read"
+   },
+   {
+    "name": "Установить программу",
+    "registry": "apps-windows|установить|программу",
+    "risk": "destructive"
+   },
+   {
+    "name": "Удалить программу",
+    "registry": "apps-windows|удалить|программу",
+    "risk": "destructive"
+   },
+   {
+    "name": "Создать точку восстановления перед изменениями",
+    "registry": "storage-backup|создать|точку восстановления",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "davinci",
+  "app": "DaVinci Resolve",
+  "kind": "app",
+  "exe": [
+   "Resolve.exe",
+   "DaVinciResolve.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "19.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Импортировать медиа и разложить по папкам проекта",
+    "registry": "video|импортировать|медиа в проект",
+    "risk": "write-local"
+   },
+   {
+    "name": "Смонтировать по монтажному листу",
+    "registry": "video|монтировать|через ffmpeg",
+    "risk": "write-local"
+   },
+   {
+    "name": "Отрендерить готовый ролик",
+    "registry": "video|экспортировать|готовый ролик",
+    "risk": "write-local"
+   },
+   {
+    "name": "Оптимизировать монтаж на слабом ПК через прокси",
+    "registry": "video|оптимизировать|монтаж на слабом ПК",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить готовый ролик на артефакты",
+    "registry": "video|проверить|качество и артефакты",
+    "risk": "read"
+   },
+   {
+    "name": "Сжать ролик для отправки",
+    "registry": "video|сжать|размер",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "dbeaver",
+  "app": "DBeaver",
+  "kind": "app",
+  "exe": [
+   "dbeaver.exe",
+   "dbeaverc.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "25.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Подключиться к базе и проверить соединение",
+    "registry": "databases|подключиться|к БД",
+    "risk": "read"
+   },
+   {
+    "name": "Выполнить SELECT с ограничением",
+    "registry": "databases|выполнить|SELECT",
+    "risk": "read"
+   },
+   {
+    "name": "Сделать бэкап базы перед изменениями",
+    "registry": "databases|сделать|бэкап БД",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить целостность и индексы",
+    "registry": "databases|проверить|целостность и индексы",
+    "risk": "read"
+   },
+   {
+    "name": "Экспортировать результат в CSV/XLSX",
+    "registry": "databases|экспортировать|результат",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сравнить схемы двух баз",
+    "registry": "databases|сравнить|схемы двух БД",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "devices",
+  "app": "Устройства Windows (USB / Bluetooth / печать)",
+  "kind": "system",
+  "exe": [
+   "pnputil.exe",
+   "printui.exe",
+   "DevicePairingWizard.exe",
+   "SystemSettings.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Проверить USB-устройства и найти проблемные",
+    "registry": "devices|проверить|USB-устройства",
+    "risk": "read"
+   },
+   {
+    "name": "Подключить Bluetooth-устройство",
+    "registry": "devices|подключить|Bluetooth-устройство",
+    "risk": "write-local"
+   },
+   {
+    "name": "Подключить принтер",
+    "registry": "devices|подключить|принтер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Безопасно извлечь флешку",
+    "registry": "devices|извлечь|флешку безопасно",
+    "risk": "write-local"
+   },
+   {
+    "name": "Найти устройства в локальной сети",
+    "registry": "devices|найти|устройства в сети",
+    "risk": "read"
+   },
+   {
+    "name": "Скопировать фото и файлы с телефона",
+    "registry": "devices|скопировать|фото и файлы с телефона",
+    "risk": "write-local"
+   },
+   {
+    "name": "Отформатировать флешку",
+    "registry": "devices|отформатировать|флешку",
+    "risk": "destructive"
+   },
+   {
+    "name": "Записать загрузочную флешку",
+    "registry": "devices|записать|загрузочную флешку",
+    "risk": "destructive"
+   },
+   {
+    "name": "Сделать скриншот экрана телефона",
+    "registry": "devices|сделать|скриншот экрана телефона",
+    "risk": "read"
+   },
+   {
+    "name": "Управлять телефоном по ADB",
+    "registry": "devices|управлять|телефоном",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "discord",
+  "app": "Discord (desktop)",
+  "kind": "app",
+  "exe": [
+   "Discord.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "0.0.9x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Отправить сообщение в канал",
+    "registry": "chat-social|отправить|сообщение",
+    "risk": "external"
+   },
+   {
+    "name": "Прочитать новые сообщения в каналах",
+    "registry": "chat-social|прочитать|чаты",
+    "risk": "read"
+   },
+   {
+    "name": "Найти файл или ссылку в истории",
+    "registry": "chat-social|найти|файл в чате",
+    "risk": "read"
+   },
+   {
+    "name": "Отправить файл/скриншот",
+    "registry": "chat-social|отправить|файл",
+    "risk": "external"
+   },
+   {
+    "name": "Модерация: убрать спам",
+    "registry": "chat-social|модерировать|спам",
+    "risk": "destructive"
+   },
+   {
+    "name": "Голосовой канал: подключиться и записать",
+    "registry": "chat-social|позвонить|через сервис",
+    "risk": "external"
+   }
+  ]
+ },
+ {
+  "slug": "docker",
+  "app": "Docker Desktop",
+  "kind": "app",
+  "exe": [
+   "Docker Desktop.exe",
+   "com.docker.backend.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "4.3x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Проверить, что движок поднялся",
+    "registry": "virtualization-remote|проверить",
+    "risk": "read"
+   },
+   {
+    "name": "Собрать образ",
+    "registry": "dev-code|собрать|Docker-образ",
+    "risk": "write-local"
+   },
+   {
+    "name": "Запустить контейнер или стек",
+    "registry": "virtualization-remote|запустить|контейнер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Прочитать логи и объяснить падение",
+    "registry": "dev-code|объяснить|ошибку",
+    "risk": "read"
+   },
+   {
+    "name": "Перенести сборку в WSL, если Windows-сборка медленная",
+    "registry": "virtualization-remote|работать|в WSL",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить образ на уязвимости",
+    "registry": "dev-code|проверить|уязвимости зависимостей",
+    "risk": "read"
+   },
+   {
+    "name": "Освободить место: убрать неиспользуемое",
+    "registry": "virtualization-remote|удалить",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "eventvwr",
+  "app": "Просмотр событий",
+  "kind": "app",
+  "exe": [
+   "mmc.exe",
+   "eventvwr.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Прочитать журнал и найти критичные ошибки",
+    "registry": "processes-services|прочитать|журнал событий",
+    "risk": "read"
+   },
+   {
+    "name": "Диагностировать синий экран",
+    "registry": "processes-services|диагностировать|синий экран",
+    "risk": "read"
+   },
+   {
+    "name": "Найти подозрительную активность процесса",
+    "registry": "processes-services|найти|подозрительный процесс",
+    "risk": "read"
+   },
+   {
+    "name": "Наблюдать за системой по журналам",
+    "registry": "monitoring-triage|наблюдать|за системой",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить здоровье диска по событиям",
+    "registry": "hardware-diag|проверить|здоровье диска",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "everything",
+  "app": "Everything",
+  "kind": "app",
+  "exe": [
+   "Everything.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "1.5.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 4,
+  "operations": [
+   {
+    "name": "Найти файл по имени или маске",
+    "registry": "files|найти|по имени",
+    "risk": "read"
+   },
+   {
+    "name": "Найти файлы по содержимому",
+    "registry": "files|найти|по содержимому",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить, куда ушло место",
+    "registry": "files|проверить|размеры и место",
+    "risk": "read"
+   },
+   {
+    "name": "Открыть файл в нужной программе",
+    "registry": "files|открыть|файл в программе",
+    "risk": "read"
+   },
+   {
+    "name": "Массово переименовать по правилу",
+    "registry": "files|переименовать|массово по правилу",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "excel",
+  "app": "Microsoft Excel",
+  "kind": "app",
+  "exe": [
+   "EXCEL.EXE"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Microsoft 365 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 4,
+  "operations": [
+   {
+    "name": "Открыть книгу и прочитать диапазон",
+    "registry": "files|открыть|файл в программе",
+    "risk": "read"
+   },
+   {
+    "name": "Вставить данные из CSV/JSON",
+    "registry": "sheets-data|заполнить|данные",
+    "risk": "write-local"
+   },
+   {
+    "name": "Поставить формулу в диапазон",
+    "registry": "sheets-data|заполнить|данные",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сводная таблица",
+    "registry": "sheets-data|посчитать|сводную",
+    "risk": "write-local"
+   },
+   {
+    "name": "Диаграмма по диапазону",
+    "registry": "sheets-data|построить|график",
+    "risk": "write-local"
+   },
+   {
+    "name": "Автофильтр и отбор",
+    "registry": "sheets-data|фильтровать|строки",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сохранить и экспортировать в PDF",
+    "registry": "slides-pdf-print|печатать|документ",
+    "risk": "write-local"
+   },
+   {
+    "name": "Записать макрос с моих действий",
+    "registry": "automation|создать|макрос приложения",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать дашборд из данных",
+    "registry": "sheets-data|визуализировать|дашборд",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить формулы на ошибки",
+    "registry": "sheets-data|проверить|формулы на ошибки",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "explorer",
+  "app": "Проводник Windows",
+  "kind": "app",
+  "exe": [
+   "explorer.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 / Windows 10 22H2",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Найти файлы по имени в папке (рекурсивно)",
+    "registry": "files|найти|по имени",
+    "risk": "read"
+   },
+   {
+    "name": "Пакетное переименование по шаблону",
+    "registry": "files|переименовать|массово",
+    "risk": "write-local"
+   },
+   {
+    "name": "Копировать папку с прогрессом и проверкой",
+    "registry": "files|скопировать|файлы",
+    "risk": "write-local"
+   },
+   {
+    "name": "Показать расширения и скрытые файлы",
+    "registry": "apps-windows|настроить|вид и параметры",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сжать выбранное в ZIP",
+    "registry": "files|сжать|в архив",
+    "risk": "write-local"
+   },
+   {
+    "name": "Корзина: очистить",
+    "registry": "files|удалить|в корзину",
+    "risk": "destructive"
+   },
+   {
+    "name": "Открыть папку и выделить файл для другой программы",
+    "registry": "files|скопировать|файлы",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "ffmpeg",
+  "app": "FFmpeg (медиа-конвейер)",
+  "kind": "tool",
+  "exe": [
+   "ffmpeg.exe",
+   "ffprobe.exe",
+   "ffplay.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "7.1 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Вытащить встроенные субтитры",
+    "registry": "video|получить|встроенные субтитры",
+    "risk": "read"
+   },
+   {
+    "name": "Замерить громкость по стандарту",
+    "registry": "audio|замерить|LUFS и true peak",
+    "risk": "read"
+   },
+   {
+    "name": "Замерить потерю качества после сжатия",
+    "registry": "video|замерить|качество сжатия (SSIM)",
+    "risk": "read"
+   },
+   {
+    "name": "Склеить ролики без перекодирования",
+    "registry": "video|склеить|ролики",
+    "risk": "write-local"
+   },
+   {
+    "name": "Изолировать вокал из микса",
+    "registry": "audio|удалить|музыку из голоса (изоляция вокала)",
+    "risk": "write-local"
+   },
+   {
+    "name": "Конвертировать и ужать под площадку",
+    "registry": "video|конвертировать|формат/кодек",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "figma",
+  "app": "Figma (desktop / web)",
+  "kind": "app",
+  "exe": [
+   "Figma.exe",
+   "chrome.exe"
+  ],
+  "ui_stack": "web",
+  "version_seen": "2026-11",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Открыть файл и найти фрейм",
+    "registry": "creative-3d|открыть|макет",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать макет по описанию",
+    "registry": "creative-3d|создать|макет",
+    "risk": "write-local"
+   },
+   {
+    "name": "Экспортировать ассеты",
+    "registry": "creative-3d|экспортировать|ассеты",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить контраст и читаемость",
+    "registry": "accessibility|проверить|контраст",
+    "risk": "read"
+   },
+   {
+    "name": "Сгенерировать вёрстку по макету",
+    "registry": "dev-code|сгенерировать|вёрстку",
+    "risk": "write-local"
+   },
+   {
+    "name": "Оставить комментарий к элементу",
+    "registry": "creative-3d|аннотировать|макет",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "filezilla",
+  "app": "FileZilla",
+  "kind": "app",
+  "exe": [
+   "filezilla.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "3.6x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Подключиться к серверу",
+    "registry": "virtualization-remote|подключиться|по SSH",
+    "risk": "external"
+   },
+   {
+    "name": "Загрузить файлы на сервер",
+    "registry": "virtualization-remote|передать|файл на сервер",
+    "risk": "external"
+   },
+   {
+    "name": "Скачать файлы с сервера",
+    "registry": "files|скопировать|файлы/папки",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить сертификат и параметры шифрования",
+    "registry": "network|проверить|сертификат/SSL",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "finance-docs",
+  "app": "Личные финансы (выписки, бюджет, чеки)",
+  "kind": "tool",
+  "exe": [
+   "python.exe",
+   "pdftotext.exe",
+   "tesseract.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "pandas 2.x, pdfplumber 0.11, pytesseract 0.3 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Импортировать выписку банка",
+    "registry": "personal-finance|импортировать|выписку банка",
+    "risk": "write-local"
+   },
+   {
+    "name": "Показать баланс и последние операции",
+    "registry": "personal-finance|показать|баланс и последние операции",
+    "risk": "read"
+   },
+   {
+    "name": "Классифицировать траты по категориям",
+    "registry": "personal-finance|классифицировать|траты по категориям",
+    "risk": "write-local"
+   },
+   {
+    "name": "Построить бюджет и отчёт доходы/расходы",
+    "registry": "personal-finance|построить|бюджет на месяц",
+    "risk": "write-local"
+   },
+   {
+    "name": "Найти подписки и забытые платежи",
+    "registry": "personal-finance|найти|подписки и забытые платежи",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить подозрительные списания",
+    "registry": "personal-finance|проверить|подозрительные списания",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "firefox",
+  "app": "Mozilla Firefox",
+  "kind": "app",
+  "exe": [
+   "firefox.exe",
+   "geckodriver.exe"
+  ],
+  "ui_stack": "web",
+  "version_seen": "14x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Открыть сайт и дождаться загрузки",
+    "registry": "web|открыть|сайт",
+    "risk": "external"
+   },
+   {
+    "name": "Извлечь данные в таблицу",
+    "registry": "web|извлечь|данные в таблицу",
+    "risk": "read"
+   },
+   {
+    "name": "Скачать файл по ссылке",
+    "registry": "web|скачать|файл по ссылке",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сохранить страницу в PDF",
+    "registry": "web|сохранить|страницу в PDF",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить сайт на подозрительность",
+    "registry": "web|проверить|фишинг/подозрительность",
+    "risk": "read"
+   },
+   {
+    "name": "Настроить отдельный профиль для агента",
+    "registry": "web|настроить|профиль браузера для агента",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "flstudio",
+  "app": "FL Studio",
+  "kind": "app",
+  "exe": [
+   "FL64.exe",
+   "FL.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "FL Studio 2024/2025 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 8,
+  "operations": [
+   {
+    "name": "Открыть проект-шаблон",
+    "registry": "music-production|открыть|проект в DAW",
+    "risk": "write-local"
+   },
+   {
+    "name": "Импортировать MIDI-паттерн",
+    "registry": "music-production|импортировать|MIDI",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать бит из готовых паттернов",
+    "registry": "music-production|сочинить|бит",
+    "risk": "write-local"
+   },
+   {
+    "name": "Записать вокал с микрофона",
+    "registry": "music-production|записать|вокал",
+    "risk": "write-local"
+   },
+   {
+    "name": "Экспортировать мастер в WAV",
+    "registry": "music-production|экспортировать|финальный мастер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить мастер на клиппинг и громкость",
+    "registry": "music-production|проверить|громкость и пики",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "foobar",
+  "app": "foobar2000",
+  "kind": "app",
+  "exe": [
+   "foobar2000.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "foobar2000 2.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Управлять воспроизведением без окна",
+    "registry": "audio|управлять|воспроизведением",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать плейлист по настроению",
+    "registry": "music|создать|плейлист по настроению",
+    "risk": "write-local"
+   },
+   {
+    "name": "Массово поправить теги",
+    "registry": "music|изменить|теги (ID3) массово",
+    "risk": "write-local"
+   },
+   {
+    "name": "Конвертировать в другой формат",
+    "registry": "music|конвертировать|формат",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "freecad",
+  "app": "FreeCAD (CAD-моделирование)",
+  "kind": "tool",
+  "exe": [
+   "FreeCAD.exe",
+   "FreeCADCmd.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "1.0 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Смоделировать деталь по описанию",
+    "registry": "engineering-3d|смоделировать|деталь по описанию",
+    "risk": "write-local"
+   },
+   {
+    "name": "Конвертировать между форматами",
+    "registry": "engineering-3d|конвертировать|форматы",
+    "risk": "write-local"
+   },
+   {
+    "name": "Посчитать объём, вес и стоимость печати",
+    "registry": "engineering-3d|посчитать|объём и вес",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить модель на прочность",
+    "registry": "engineering-3d|проверить|модель на прочность",
+    "risk": "read"
+   },
+   {
+    "name": "Сделать чертёж с размерами",
+    "registry": "engineering-3d|сделать|чертёж",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать BOM (спецификацию)",
+    "registry": "engineering-3d|собрать|BOM",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сравнить две версии модели",
+    "registry": "engineering-3d|сравнить|версии модели",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "gimp",
+  "app": "GIMP",
+  "kind": "tool",
+  "exe": [
+   "gimp-2.10.exe",
+   "gimp-3.0.exe",
+   "gimp-console-2.10.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "3.0 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Пакетно обработать папку изображений",
+    "registry": "images|автоматизировать|пакетную обработку",
+    "risk": "write-local"
+   },
+   {
+    "name": "Изменить размер и обрезать",
+    "registry": "images|изменить|размер/обрезку",
+    "risk": "write-local"
+   },
+   {
+    "name": "Удалить фон у изображения",
+    "registry": "images|удалить|фон",
+    "risk": "write-local"
+   },
+   {
+    "name": "Убрать метаданные при экспорте",
+    "registry": "images|удалить|метаданные",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "git-bash",
+  "app": "Git for Windows (git-bash / git.exe)",
+  "kind": "app",
+  "exe": [
+   "git-bash.exe",
+   "git.exe",
+   "bash.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "2.4x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 2,
+  "operations": [
+   {
+    "name": "Проверить состояние репозитория",
+    "registry": "dev-code|показать|состояние репозитория",
+    "risk": "read"
+   },
+   {
+    "name": "Сделать локальный коммит",
+    "registry": "dev-code|зафиксировать|изменения локально",
+    "risk": "write-local"
+   },
+   {
+    "name": "Отправить изменения в удалённый репозиторий",
+    "registry": "dev-code|работать|с git",
+    "risk": "external"
+   },
+   {
+    "name": "Найти, кто и когда изменил строку",
+    "registry": "dev-code|найти|в коде",
+    "risk": "read"
+   },
+   {
+    "name": "Безопасно отменить локальные правки",
+    "registry": "automation|откатить|изменения",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "handbrake",
+  "app": "HandBrake",
+  "kind": "app",
+  "exe": [
+   "HandBrake.exe",
+   "HandBrakeCLI.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "1.9.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 2,
+  "operations": [
+   {
+    "name": "Сжать видео для веба",
+    "registry": "video|сжать|размер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сделать вертикальную версию 9:16",
+    "registry": "video|конвертировать|формат",
+    "risk": "write-local"
+   },
+   {
+    "name": "Пакетная обработка папки",
+    "registry": "video|сжать|размер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить результат и не перезаписать оригинал",
+    "registry": "video|проверить|качество",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "hardware-monitor",
+  "app": "Мониторинг железа (HWiNFO / smartctl / diskspd)",
+  "kind": "tool",
+  "exe": [
+   "HWiNFO64.exe",
+   "LibreHardwareMonitor.exe",
+   "smartctl.exe",
+   "diskspd.exe",
+   "crystaldiskinfo.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "HWiNFO 8.x, LibreHardwareMonitor 0.9, smartmontools 7.4 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Показать характеристики железа",
+    "registry": "hardware-diag|показать|характеристики железа",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить SMART через CrystalDiskInfo",
+    "registry": "storage-backup|проверить|SMART диска",
+    "risk": "read"
+   },
+   {
+    "name": "Следить за температурой и нагрузкой",
+    "registry": "hardware-diag|следить|за температурой 24-7",
+    "risk": "read"
+   },
+   {
+    "name": "Замерить скорость диска",
+    "registry": "hardware-diag|замерить|скорость диска",
+    "risk": "read"
+   },
+   {
+    "name": "Оценить энергопотребление и батарею",
+    "registry": "hardware-diag|оценить|энергопотребление",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить память на ошибки",
+    "registry": "hardware-diag|проверить|память на ошибки",
+    "risk": "destructive"
+   },
+   {
+    "name": "Собрать отчёт о системе",
+    "registry": "hardware-diag|собрать|отчёт о системе",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "home-assistant",
+  "app": "Умный дом (Home Assistant / MQTT / Matter)",
+  "kind": "system",
+  "exe": [],
+  "ui_stack": "web",
+  "version_seen": "HA 2026.1 + Matter 1.3 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Включить или выключить устройство",
+    "registry": "smart-home|включить|свет/устройство",
+    "risk": "external"
+   },
+   {
+    "name": "Сделать сцену",
+    "registry": "smart-home|сделать|сцену",
+    "risk": "write-local"
+   },
+   {
+    "name": "Поставить расписание или автоматизацию",
+    "registry": "smart-home|поставить|расписание",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить, кто дома и всё ли доступно",
+    "registry": "smart-home|проверить|кто дома",
+    "risk": "read"
+   },
+   {
+    "name": "Следить за датчиками и алертить",
+    "registry": "smart-home|следить|за датчиками 24-7",
+    "risk": "read"
+   },
+   {
+    "name": "Собрать отчёт по дому и энергии",
+    "registry": "smart-home|собрать|отчёт по дому",
+    "risk": "write-local"
+   },
+   {
+    "name": "Открыть замок или ворота",
+    "registry": "smart-home|открыть|замок/ворота",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "inkscape",
+  "app": "Inkscape",
+  "kind": "tool",
+  "exe": [
+   "inkscape.exe",
+   "inkscape.com"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "1.4 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Векторизовать растр в SVG",
+    "registry": "images|векторизовать|растр в SVG",
+    "risk": "write-local"
+   },
+   {
+    "name": "Экспортировать ассеты в нужных размерах",
+    "registry": "creative-3d|экспортировать|ассеты (PNG/SVG)",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить габариты и вёрстку макета",
+    "registry": "creative-3d|показать|модель и её параметры",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить контраст текста и фона",
+    "registry": "accessibility|проверить|контраст и читаемость",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "input-macros",
+  "app": "Ввод и макросы (AutoHotkey / Rust input layer)",
+  "kind": "tool",
+  "exe": [
+   "AutoHotkey64.exe",
+   "AutoHotkey.exe",
+   "nircmd.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "AHK 2.0.19 + enigo 0.2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Нажать горячие клавиши",
+    "registry": "input|нажать|горячие клавиши",
+    "risk": "write-local"
+   },
+   {
+    "name": "Ввести длинный текст",
+    "registry": "input|ввести|длинный текст",
+    "risk": "write-local"
+   },
+   {
+    "name": "Записать макрос действий",
+    "registry": "input|записать|макрос",
+    "risk": "write-local"
+   },
+   {
+    "name": "Воспроизвести макрос",
+    "registry": "input|воспроизвести|макрос",
+    "risk": "write-local"
+   },
+   {
+    "name": "Использовать буфер обмена",
+    "registry": "input|использовать|буфер обмена",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить, что ввод дошёл",
+    "registry": "input|проверить|что ввод дошёл",
+    "risk": "read"
+   },
+   {
+    "name": "Отключить ввод на время длинной операции",
+    "registry": "input|отключить|ввод на время",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "jetbrains",
+  "app": "JetBrains IDE (IDEA / PyCharm / WebStorm / Rider)",
+  "kind": "app",
+  "exe": [
+   "idea64.exe",
+   "pycharm64.exe",
+   "webstorm64.exe",
+   "studio64.exe",
+   "rider64.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "2025.3 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Собрать проект и прочитать результат",
+    "registry": "dev-code|собрать|релиз",
+    "risk": "write-local"
+   },
+   {
+    "name": "Запустить тесты",
+    "registry": "dev-code|запустить|тесты",
+    "risk": "write-local"
+   },
+   {
+    "name": "Найти в коде",
+    "registry": "dev-code|найти|в коде",
+    "risk": "read"
+   },
+   {
+    "name": "Прогнать инспекции кода",
+    "registry": "dev-code|настроить|линтеры и pre-commit",
+    "risk": "write-local"
+   },
+   {
+    "name": "Отрефакторить переименование по проекту",
+    "registry": "dev-code|отрефакторить|код",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "joplin",
+  "app": "Joplin (десктоп + CLI)",
+  "kind": "tool",
+  "exe": [
+   "Joplin.exe",
+   "joplin.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "Joplin 3.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Найти заметку по содержимому",
+    "registry": "files|найти|по содержимому",
+    "risk": "read"
+   },
+   {
+    "name": "Сохранить конспект в базу знаний",
+    "registry": "learning-research|сделать|конспект",
+    "risk": "write-local"
+   },
+   {
+    "name": "Экспортировать заметки в файлы",
+    "registry": "text-docs|конвертировать|формат документа",
+    "risk": "write-local"
+   },
+   {
+    "name": "Синхронизировать и не потерять заметки",
+    "registry": "files|синхронизировать|папки локально",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "keepassxc",
+  "app": "KeePassXC (хранилище паролей)",
+  "kind": "tool",
+  "exe": [
+   "KeePassXC.exe",
+   "keepassxc-cli.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "2.7.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Найти пароль от сайта",
+    "registry": "security-access|найти|пароль в хранилище",
+    "risk": "read"
+   },
+   {
+    "name": "Создать запись с надёжным паролем",
+    "registry": "security-access|создать|запись в хранилище паролей",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить надёжность и повторное использование паролей",
+    "registry": "security-access|проверить|надёжность и повторное использование паролей",
+    "risk": "read"
+   },
+   {
+    "name": "Сделать резервную копию хранилища",
+    "registry": "security-access|создать|резервную копию хранилища",
+    "risk": "write-local"
+   },
+   {
+    "name": "Получить код двухфакторной аутентификации (TOTP из хранилища)",
+    "registry": "security-access|проверить|права приложений",
+    "risk": "identity"
+   }
+  ]
+ },
+ {
+  "slug": "libreoffice",
+  "app": "LibreOffice",
+  "kind": "tool",
+  "exe": [
+   "soffice.exe",
+   "soffice.com",
+   "soffice.bin"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "25.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Конвертировать документ в PDF/DOCX",
+    "registry": "text-docs|конвертировать|формат документа",
+    "risk": "write-local"
+   },
+   {
+    "name": "Извлечь текст из документа",
+    "registry": "text-docs|извлечь|текст из PDF/DOCX",
+    "risk": "read"
+   },
+   {
+    "name": "Сшить несколько PDF в один",
+    "registry": "text-docs|сшить|несколько PDF",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать оглавление и нумерацию",
+    "registry": "text-docs|собрать|оглавление/нумерацию",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить орфографию и грамматику",
+    "registry": "text-docs|проверить|орфографию/грамматику",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сравнить две версии документа",
+    "registry": "text-docs|сравнить|две версии документа",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "monitoring-triage",
+  "app": "Наблюдение и разбор инцидентов",
+  "kind": "system",
+  "exe": [
+   "perfmon.exe",
+   "wpr.exe",
+   "resmon.exe",
+   "nssm.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Наблюдать за системой и не спамить",
+    "registry": "monitoring-triage|наблюдать|за системой",
+    "risk": "read"
+   },
+   {
+    "name": "Найти причину тормозов",
+    "registry": "monitoring-triage|найти|причину тормозов",
+    "risk": "read"
+   },
+   {
+    "name": "Собрать метрики и отчёт о здоровье",
+    "registry": "monitoring-triage|собрать|метрики",
+    "risk": "read"
+   },
+   {
+    "name": "Изменить пороги алертов",
+    "registry": "monitoring-triage|изменить|пороги алертов",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить, что алерт реально дошёл",
+    "registry": "monitoring-triage|проверить|что алерт дошёл",
+    "risk": "read"
+   },
+   {
+    "name": "Разобрать инцидент: что важнее",
+    "registry": "monitoring-triage|решить|что важнее",
+    "risk": "read"
+   },
+   {
+    "name": "Авто-реакция на инцидент",
+    "registry": "monitoring-triage|автоматизировать|авто-реакцию на инцидент",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "music-library",
+  "app": "Музыкальная библиотека (beets / fpcalc / rsgain)",
+  "kind": "tool",
+  "exe": [
+   "beet.exe",
+   "fpcalc.exe",
+   "rsgain.exe",
+   "loudgain.exe",
+   "ffmpeg.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "beets 2.x, chromaprint 1.5, rsgain 3.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Изменить теги массово",
+    "registry": "music|изменить|теги (ID3) массово",
+    "risk": "write-local"
+   },
+   {
+    "name": "Найти дубликаты треков",
+    "registry": "music|найти|дубликаты треков",
+    "risk": "read"
+   },
+   {
+    "name": "Нормализовать громкость альбома",
+    "registry": "music|нормализовать|громкость альбома",
+    "risk": "write-local"
+   },
+   {
+    "name": "Упорядочить библиотеку по папкам",
+    "registry": "music|упорядочить|библиотеку по папкам",
+    "risk": "write-local"
+   },
+   {
+    "name": "Распознать, что за трек",
+    "registry": "music|распознать|что за трек",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить качество библиотеки",
+    "registry": "music|проверить|качество библиотеки",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "net-cli",
+  "app": "Сеть Windows (netsh / Test-NetConnection / firewall / hosts)",
+  "kind": "tool",
+  "exe": [
+   "netsh.exe",
+   "ping.exe",
+   "tracert.exe",
+   "nslookup.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Проверить подключение и найти, где рвётся",
+    "registry": "network|проверить|подключение",
+    "risk": "read"
+   },
+   {
+    "name": "Настроить DNS",
+    "registry": "network|настроить|DNS",
+    "risk": "destructive"
+   },
+   {
+    "name": "Открыть порт в брандмауэре",
+    "registry": "network|открыть|порт",
+    "risk": "destructive"
+   },
+   {
+    "name": "Подключиться к Wi-Fi",
+    "registry": "network|подключиться|к Wi-Fi",
+    "risk": "write-local"
+   },
+   {
+    "name": "Показать реальную скорость интернета",
+    "registry": "network|показать|скорость",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить сертификат сайта",
+    "registry": "network|проверить|сертификат/SSL",
+    "risk": "read"
+   },
+   {
+    "name": "Прописать домен в hosts",
+    "registry": "network|настроить|файл hosts",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "newman",
+  "app": "Postman / newman",
+  "kind": "tool",
+  "exe": [
+   "Postman.exe",
+   "newman.exe",
+   "newman.cmd"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "Postman 11.x / newman 6.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Прогнать коллекцию и получить отчёт",
+    "registry": "web|работать|с API вместо сайта",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить API на стенде перед выкаткой",
+    "registry": "dev-code|запустить|тесты",
+    "risk": "write-local"
+   },
+   {
+    "name": "Прогнать тесты по набору данных",
+    "registry": "dev-code|покрыть|тестами",
+    "risk": "write-local"
+   },
+   {
+    "name": "Обновить коллекцию из OpenAPI",
+    "registry": "dev-code|документировать|API",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "notion",
+  "app": "Notion",
+  "kind": "app",
+  "exe": [
+   "Notion.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "4.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Сохранить источник в базу знаний",
+    "registry": "learning-research|сохранить|закладку в базу знаний",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать конспект по нескольким источникам",
+    "registry": "learning-research|сделать|конспект",
+    "risk": "write-local"
+   },
+   {
+    "name": "Найти в базе знаний",
+    "registry": "files|найти|по содержимому",
+    "risk": "read"
+   },
+   {
+    "name": "Исследовать тему по своей базе",
+    "registry": "learning-research|исследовать|тему",
+    "risk": "read"
+   },
+   {
+    "name": "Выгрузить базу в markdown для офлайн-поиска",
+    "registry": "learning-research|сохранить|закладку в базу знаний",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "obs",
+  "app": "OBS Studio",
+  "kind": "app",
+  "exe": [
+   "obs64.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "31.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Создать сцену «экран + камера»",
+    "registry": "video|настроить|сцену в OBS",
+    "risk": "write-local"
+   },
+   {
+    "name": "Настроить микрофон и шумоподавление",
+    "registry": "audio|настроить|микрофон",
+    "risk": "write-local"
+   },
+   {
+    "name": "Записать экран",
+    "registry": "video|записать|экран",
+    "risk": "write-local"
+   },
+   {
+    "name": "Запустить стрим",
+    "registry": "video|стримить|в сервис",
+    "risk": "external"
+   },
+   {
+    "name": "Включить виртуальную камеру",
+    "registry": "video|включить|виртуальную камеру",
+    "risk": "write-local"
+   },
+   {
+    "name": "Хоткеи переключения сцен",
+    "registry": "automation|создать|хоткей",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить, что запись не пустая и со звуком",
+    "registry": "video|проверить|качество",
+    "risk": "read"
+   },
+   {
+    "name": "Нарезать запись по тишине и сценам",
+    "registry": "video-production|нарезать|по тишине/сценам",
+    "risk": "write-local"
+   },
+   {
+    "name": "Исправить цвет и звук записи",
+    "registry": "video-production|исправить|цвет и звук",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сделать вертикальные нарезки из длинного видео",
+    "registry": "video-production|сделать|вертикальные нарезки",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сделать обложку и превью",
+    "registry": "video-production|сделать|обложку/превью",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить технические параметры готового видео",
+    "registry": "video-production|проверить|технические параметры",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "obsidian",
+  "app": "Obsidian",
+  "kind": "app",
+  "exe": [
+   "Obsidian.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "1.9.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Сохранить закладку в базу знаний",
+    "registry": "learning-research|сохранить|закладку в базу знаний",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать конспект по источникам",
+    "registry": "learning-research|сделать|конспект",
+    "risk": "write-local"
+   },
+   {
+    "name": "Исследовать тему по своей базе",
+    "registry": "learning-research|исследовать|тему",
+    "risk": "read"
+   },
+   {
+    "name": "Тренировать знания вопросами",
+    "registry": "learning-research|тренировать|знания вопросами",
+    "risk": "read"
+   },
+   {
+    "name": "Собрать библиографию из заметок",
+    "registry": "learning-research|собрать|библиографию",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "os-maintenance",
+  "app": "Обслуживание Windows (sfc / DISM / slmgr / vssadmin / pnputil)",
+  "kind": "system",
+  "exe": [
+   "sfc.exe",
+   "dism.exe",
+   "slmgr.vbs",
+   "vssadmin.exe",
+   "pnputil.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Проверить целостность системы",
+    "registry": "accounts-updates|проверить|целостность установки Windows",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить версию и статус лицензии",
+    "registry": "accounts-updates|проверить|лицензию",
+    "risk": "write-local"
+   },
+   {
+    "name": "Разобрать проблемные драйверы",
+    "registry": "accounts-updates|обновить|драйвер",
+    "risk": "destructive"
+   },
+   {
+    "name": "Удалить старые точки восстановления",
+    "registry": "accounts-updates|удалить|старые точки восстановления",
+    "risk": "destructive"
+   },
+   {
+    "name": "Проверить, что после ремонта не появилось новых ошибок",
+    "registry": "monitoring-triage|наблюдать|за системой",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "outlook",
+  "app": "Microsoft Outlook (классический и новый)",
+  "kind": "app",
+  "exe": [
+   "OUTLOOK.EXE",
+   "olk.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Microsoft 365 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 8,
+  "operations": [
+   {
+    "name": "Прочитать входящие и выделить важное",
+    "registry": "email|прочитать|входящие",
+    "risk": "read"
+   },
+   {
+    "name": "Подготовить и отправить письмо",
+    "registry": "email|отправить|письмо",
+    "risk": "external"
+   },
+   {
+    "name": "Ответить на письмо",
+    "registry": "email|ответить|на письмо",
+    "risk": "external"
+   },
+   {
+    "name": "Приложить файлы и проверить размер",
+    "registry": "email|приложить|файлы",
+    "risk": "write-local"
+   },
+   {
+    "name": "Разобрать вложения (сохранить и проиндексировать)",
+    "registry": "email|разобрать|вложения",
+    "risk": "write-local"
+   },
+   {
+    "name": "Настроить правило сортировки",
+    "registry": "email|настроить|правило",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить подозрительное письмо",
+    "registry": "email|проверить|вложения и ссылки",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "photoshop",
+  "app": "Adobe Photoshop",
+  "kind": "app",
+  "exe": [
+   "Photoshop.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "2026 (v27)",
+  "verified_at": "2026-11-08",
+  "anchors": 8,
+  "operations": [
+   {
+    "name": "Открыть RAW и сохранить рабочий JPEG",
+    "registry": "images|конвертировать|формат",
+    "risk": "write-local"
+   },
+   {
+    "name": "Удалить фон с объекта",
+    "registry": "images|удалить|фон",
+    "risk": "write-local"
+   },
+   {
+    "name": "Ретушь: убрать дефекты кожи",
+    "registry": "images|улучшить|качество",
+    "risk": "write-local"
+   },
+   {
+    "name": "Изменить размер под требование площадки",
+    "registry": "images|изменить|размер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Пакетная обработка папки операцией",
+    "registry": "images|автоматизировать|пакетную обработку",
+    "risk": "write-local"
+   },
+   {
+    "name": "Экспорт для веба (WebP, качество 80)",
+    "registry": "images|конвертировать|формат",
+    "risk": "write-local"
+   },
+   {
+    "name": "Удалить метаданные перед публикацией",
+    "registry": "images|удалить|метаданные",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сравнить результат с оригиналом",
+    "registry": "images|сравнить|два изображения",
+    "risk": "read"
+   },
+   {
+    "name": "Пакетная обработка папки",
+    "registry": "images|автоматизировать|пакетную обработку",
+    "risk": "write-local"
+   },
+   {
+    "name": "Экспортировать ассеты и убрать следы",
+    "registry": "creative-3d|экспортировать|ассеты (PNG/SVG)",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "plink",
+  "app": "PuTTY (plink / pscp / puttygen)",
+  "kind": "tool",
+  "exe": [
+   "putty.exe",
+   "plink.exe",
+   "pscp.exe",
+   "puttygen.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "PuTTY 0.83 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Подключиться по SSH и проверить, что это тот хост",
+    "registry": "virtualization-remote|подключиться|по SSH",
+    "risk": "external"
+   },
+   {
+    "name": "Снять состояние сервера по SSH",
+    "registry": "virtualization-remote|проверить|доступность сервера",
+    "risk": "read"
+   },
+   {
+    "name": "Передать файл и подтвердить хэшем",
+    "registry": "virtualization-remote|передать|файл на сервер",
+    "risk": "external"
+   },
+   {
+    "name": "Поднять SSH-туннель к сервису",
+    "registry": "network|запустить|туннель",
+    "risk": "external"
+   }
+  ]
+ },
+ {
+  "slug": "postgres-cli",
+  "app": "PostgreSQL (psql / pg_dump / pg_restore)",
+  "kind": "tool",
+  "exe": [
+   "psql.exe",
+   "pg_dump.exe",
+   "pg_restore.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "PostgreSQL 16–17 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 8,
+  "operations": [
+   {
+    "name": "Подключиться и убедиться, что права не лишние",
+    "registry": "databases|подключиться|к БД",
+    "risk": "read"
+   },
+   {
+    "name": "Выполнить SELECT с LIMIT и планом",
+    "registry": "databases|выполнить|SELECT",
+    "risk": "read"
+   },
+   {
+    "name": "Оптимизировать запрос индексом",
+    "registry": "databases|оптимизировать|запрос",
+    "risk": "write-local"
+   },
+   {
+    "name": "Найти медленные запросы",
+    "registry": "databases|проверить|медленные запросы",
+    "risk": "read"
+   },
+   {
+    "name": "Сделать бэкап",
+    "registry": "databases|сделать|бэкап БД",
+    "risk": "write-local"
+   },
+   {
+    "name": "Восстановить из дампа в новую базу",
+    "registry": "databases|восстановить|БД",
+    "risk": "destructive"
+   },
+   {
+    "name": "Мониторить базу",
+    "registry": "databases|мониторить|БД",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить права и роли",
+    "registry": "databases|проверить|права и роли",
+    "risk": "read"
+   },
+   {
+    "name": "Закрыть сессии перед обслуживанием",
+    "registry": "databases|закрыть|сессии перед обслуживанием",
+    "risk": "destructive"
+   },
+   {
+    "name": "Сравнить схемы двух баз",
+    "registry": "databases|сравнить|схемы двух БД",
+    "risk": "read"
+   },
+   {
+    "name": "Применить миграцию",
+    "registry": "databases|мигрировать|схему",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "powerpoint",
+  "app": "Microsoft PowerPoint",
+  "kind": "app",
+  "exe": [
+   "POWERPNT.EXE"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Microsoft 365 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Создать презентацию по структуре",
+    "registry": "slides-pdf-print|создать|презентацию",
+    "risk": "write-local"
+   },
+   {
+    "name": "Оформить слайды по брендбуку",
+    "registry": "slides-pdf-print|оформить|слайды по брендбуку",
+    "risk": "write-local"
+   },
+   {
+    "name": "Вставить сноски и ссылки на источники",
+    "registry": "text-docs|вставить|сноски и ссылки",
+    "risk": "write-local"
+   },
+   {
+    "name": "Экспортировать в PDF и подготовить к печати",
+    "registry": "slides-pdf-print|печатать|документ",
+    "risk": "write-local"
+   },
+   {
+    "name": "Извлечь текст и тезисы из готовой презентации",
+    "registry": "text-docs|извлечь|текст из PDF/DOCX",
+    "risk": "read"
+   },
+   {
+    "name": "Перевести презентацию на другой язык",
+    "registry": "text-docs|перевести|документ",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "powershell",
+  "app": "PowerShell 7 / Windows PowerShell",
+  "kind": "app",
+  "exe": [
+   "pwsh.exe",
+   "powershell.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "7.5 / 5.1 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 3,
+  "operations": [
+   {
+    "name": "Выполнить команду и получить структурированный результат",
+    "registry": "automation|запустить|скрипт",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить синтаксис скрипта до запуска",
+    "registry": "automation|проверить|скрипт перед запуском",
+    "risk": "read"
+   },
+   {
+    "name": "Управлять службой",
+    "registry": "processes-services|отключить|службу",
+    "risk": "destructive"
+   },
+   {
+    "name": "Собрать снимок системы",
+    "registry": "processes-services|показать|топ по нагрузке",
+    "risk": "read"
+   },
+   {
+    "name": "Найти файлы и посчитать размер",
+    "registry": "files|найти|по имени",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "premiere",
+  "app": "Adobe Premiere Pro",
+  "kind": "app",
+  "exe": [
+   "Adobe Premiere Pro.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "2026 (v26)",
+  "verified_at": "2026-11-08",
+  "anchors": 8,
+  "operations": [
+   {
+    "name": "Импорт клипов и создание секвенции",
+    "registry": "video|монтировать|в Premiere",
+    "risk": "write-local"
+   },
+   {
+    "name": "Разрезать и убрать лишнее",
+    "registry": "video|нарезать|фрагменты",
+    "risk": "write-local"
+   },
+   {
+    "name": "Автоматические субтитры",
+    "registry": "video-production|субтитрировать|автоматически",
+    "risk": "write-local"
+   },
+   {
+    "name": "Нормализация звука до -14 LUFS",
+    "registry": "audio|нормализовать|громкость",
+    "risk": "write-local"
+   },
+   {
+    "name": "Прокси для слабого ПК",
+    "registry": "video|оптимизировать|монтаж",
+    "risk": "write-local"
+   },
+   {
+    "name": "Экспорт H.264 для YouTube",
+    "registry": "video|сжать|размер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сохранить проект и автосохранения",
+    "registry": "video|монтировать|в Premiere",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "qbittorrent",
+  "app": "qBittorrent",
+  "kind": "tool",
+  "exe": [
+   "qbittorrent.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "5.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Поставить загрузку и проверить, что она пошла",
+    "registry": "web|скачать|файл по ссылке",
+    "risk": "write-local"
+   },
+   {
+    "name": "Ограничить скорость загрузки и отдачи",
+    "registry": "network|ограничить|трафик приложения",
+    "risk": "destructive"
+   },
+   {
+    "name": "Проверить, доступен ли порт извне",
+    "registry": "network|проверить|открытые порты",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить, куда ушло место",
+    "registry": "files|проверить|размеры и место",
+    "risk": "read"
+   },
+   {
+    "name": "Остановить и убрать задачу",
+    "registry": "files|удалить|в корзину",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "rar",
+  "app": "WinRAR (rar.exe / unrar.exe)",
+  "kind": "tool",
+  "exe": [
+   "WinRAR.exe",
+   "rar.exe",
+   "UnRAR.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "WinRAR 7.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Упаковать папку с проверкой архива",
+    "registry": "files|сжать|в архив",
+    "risk": "write-local"
+   },
+   {
+    "name": "Распаковать без перезаписи",
+    "registry": "files|распаковать|архив",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить архив перед отправкой или удалением",
+    "registry": "files|открыть|архив без распаковки",
+    "risk": "read"
+   },
+   {
+    "name": "Зашифровать архив паролем",
+    "registry": "files|зашифровать|файл",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "reaper",
+  "app": "REAPER",
+  "kind": "app",
+  "exe": [
+   "reaper.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "7.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 4,
+  "operations": [
+   {
+    "name": "Собрать сессию из MIDI и аудио",
+    "registry": "music-production|свести|дорожки",
+    "risk": "write-local"
+   },
+   {
+    "name": "Применить цепочку обработки на мастер",
+    "registry": "music-production|мастерить|трек",
+    "risk": "write-local"
+   },
+   {
+    "name": "Отрендерить мастер и стемы",
+    "registry": "music-production|экспортировать|финальный мастер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Нормализовать громкость по стандарту",
+    "registry": "audio|нормализовать|громкость",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сохранить проект с версией",
+    "registry": "music-production|открыть|проект в DAW",
+    "risk": "write-local"
+   },
+   {
+    "name": "Импортировать MIDI-партию в проект",
+    "registry": "music-production|импортировать|MIDI в проект",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить громкость и пики отрендеренного мастера",
+    "registry": "music-production|проверить|громкость и пики",
+    "risk": "read"
+   },
+   {
+    "name": "Разделить трек на стемы и вернуть их в проект",
+    "registry": "music-production|разделить|трек на стемы",
+    "risk": "write-local"
+   },
+   {
+    "name": "Согласовать этап с пользователем",
+    "registry": "music-production|согласовать|этап",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "release-pipeline",
+  "app": "Релизный конвейер (cargo/tauri build, signtool, gh, syft)",
+  "kind": "tool",
+  "exe": [
+   "cargo.exe",
+   "tauri.exe",
+   "signtool.exe",
+   "iscc.exe",
+   "gh.exe",
+   "syft.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "Rust 1.8x, Tauri CLI 2.x, WiX 3.14, NSIS 3.10, signtool 10.0 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Собрать установщик MSI и NSIS",
+    "registry": "distribution|собрать|установщик",
+    "risk": "write-local"
+   },
+   {
+    "name": "Подписать бинарники",
+    "registry": "distribution|подписать|код",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить подпись, совместимость и отсутствие секретов",
+    "registry": "distribution|проверить|подпись перед публикацией",
+    "risk": "read"
+   },
+   {
+    "name": "Собрать SBOM и аудит зависимостей",
+    "registry": "distribution|собрать|SBOM и аудит зависимостей",
+    "risk": "write-local"
+   },
+   {
+    "name": "Настроить канал обновлений",
+    "registry": "distribution|настроить|канал обновлений",
+    "risk": "write-local"
+   },
+   {
+    "name": "Опубликовать релиз",
+    "registry": "distribution|опубликовать|релиз с манифестом",
+    "risk": "external"
+   },
+   {
+    "name": "Откатить релиз",
+    "registry": "distribution|откатить|релиз",
+    "risk": "destructive"
+   },
+   {
+    "name": "Подготовить листинг в Store",
+    "registry": "distribution|подготовить|листинг в Store",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "security-access",
+  "app": "Безопасность аккаунтов и данных",
+  "kind": "system",
+  "exe": [
+   "MpCmdRun.exe",
+   "manage-bde.exe",
+   "secpol.msc",
+   "SystemSettings.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 + Defender (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Проверить угрозы и состояние антивируса",
+    "registry": "security-access|проверить|угрозы",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить, не утекли ли аккаунты",
+    "registry": "security-access|проверить|утечки аккаунта",
+    "risk": "write-local"
+   },
+   {
+    "name": "Найти пароли и ключи в файлах",
+    "registry": "security-access|проверить|пароли в файлах",
+    "risk": "write-local"
+   },
+   {
+    "name": "Зашифровать папку или диск",
+    "registry": "security-access|зашифровать|папку или диск",
+    "risk": "destructive"
+   },
+   {
+    "name": "Проверить правила брандмауэра",
+    "registry": "security-access|настроить|брандмауэр",
+    "risk": "identity"
+   }
+  ]
+ },
+ {
+  "slug": "slack",
+  "app": "Slack",
+  "kind": "app",
+  "exe": [
+   "slack.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "4.4x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Отправить сообщение в канал",
+    "registry": "chat-social|отправить|сообщение в Telegram",
+    "risk": "external"
+   },
+   {
+    "name": "Прочитать канал и выделить главное",
+    "registry": "chat-social|прочитать|чаты",
+    "risk": "read"
+   },
+   {
+    "name": "Найти файл или сообщение в истории",
+    "registry": "chat-social|найти|файл в чате",
+    "risk": "read"
+   },
+   {
+    "name": "Собрать переписку в заметку",
+    "registry": "chat-social|собрать|переписку в заметку",
+    "risk": "read"
+   },
+   {
+    "name": "Ответить в треде",
+    "registry": "chat-social|ответить|в мессенджере",
+    "risk": "external"
+   }
+  ]
+ },
+ {
+  "slug": "slicer-3d",
+  "app": "3D-печать (OrcaSlicer / PrusaSlicer / OctoPrint)",
+  "kind": "tool",
+  "exe": [
+   "orca-slicer.exe",
+   "prusa-slicer-console.exe",
+   "prusa-slicer.exe",
+   "orcaslicer-console.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "OrcaSlicer 2.2, PrusaSlicer 2.9, OctoPrint 1.11 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Подготовить модель к печати",
+    "registry": "engineering-3d|подготовить|модель к печати",
+    "risk": "write-local"
+   },
+   {
+    "name": "Нарезать модель и оценить печать",
+    "registry": "engineering-3d|нарезать|модель для 3D-печати",
+    "risk": "write-local"
+   },
+   {
+    "name": "Оптимизировать поддержки и ориентацию",
+    "registry": "engineering-3d|оптимизировать|поддержки",
+    "risk": "write-local"
+   },
+   {
+    "name": "Откалибровать принтер",
+    "registry": "engineering-3d|откалибровать|принтер",
+    "risk": "write-local"
+   },
+   {
+    "name": "Запустить печать",
+    "registry": "engineering-3d|напечатать|на принтере",
+    "risk": "destructive"
+   },
+   {
+    "name": "Следить за печатью",
+    "registry": "engineering-3d|следить|за печатью",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "snip",
+  "app": "Ножницы / Snipping Tool",
+  "kind": "app",
+  "exe": [
+   "SnippingTool.exe",
+   "ScreenSketch.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Сделать скриншот области",
+    "registry": "images|создать|скриншот области",
+    "risk": "read"
+   },
+   {
+    "name": "Аннотировать скриншот",
+    "registry": "images|аннотировать|скриншот",
+    "risk": "write-local"
+   },
+   {
+    "name": "Извлечь текст со скриншота",
+    "registry": "images|извлечь|текст с картинки",
+    "risk": "read"
+   },
+   {
+    "name": "Записать фрагмент экрана",
+    "registry": "video|записать|экран",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "sqlite-cli",
+  "app": "SQLite (sqlite3.exe)",
+  "kind": "tool",
+  "exe": [
+   "sqlite3.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "SQLite 3.45+ (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Открыть базу только на чтение и понять, что в ней",
+    "registry": "databases|подключиться|к БД",
+    "risk": "read"
+   },
+   {
+    "name": "Выполнить SELECT с ограничением",
+    "registry": "databases|выполнить|SELECT",
+    "risk": "read"
+   },
+   {
+    "name": "Создать таблицу вместе с миграцией",
+    "registry": "databases|создать|таблицу",
+    "risk": "write-local"
+   },
+   {
+    "name": "Применить миграцию к живой базе",
+    "registry": "databases|мигрировать|схему",
+    "risk": "destructive"
+   },
+   {
+    "name": "Изменить данные в транзакции",
+    "registry": "databases|изменить|данные",
+    "risk": "destructive"
+   },
+   {
+    "name": "Импортировать лист Excel в таблицу",
+    "registry": "databases|импортировать|таблицу Excel в базу",
+    "risk": "write-local"
+   },
+   {
+    "name": "Починить повреждённую базу",
+    "registry": "databases|починить|SQLite",
+    "risk": "destructive"
+   },
+   {
+    "name": "Удалить устаревшие записи пачками",
+    "registry": "databases|удалить|устаревшие записи",
+    "risk": "destructive"
+   },
+   {
+    "name": "Создать индекс и доказать, что он помог",
+    "registry": "databases|создать|индекс",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить целостность и индексы",
+    "registry": "databases|проверить|целостность и индексы",
+    "risk": "read"
+   },
+   {
+    "name": "Сделать бэкап живой базы",
+    "registry": "databases|сделать|бэкап БД",
+    "risk": "write-local"
+   },
+   {
+    "name": "Восстановить базу из бэкапа",
+    "registry": "databases|восстановить|БД",
+    "risk": "destructive"
+   },
+   {
+    "name": "Экспортировать результат в CSV/JSON",
+    "registry": "databases|экспортировать|результат",
+    "risk": "write-local"
+   },
+   {
+    "name": "Задокументировать схему базы",
+    "registry": "databases|задокументировать|схему БД",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "steam",
+  "app": "Steam",
+  "kind": "app",
+  "exe": [
+   "steam.exe",
+   "steamwebhelper.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "2026-11",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Проверить, потянет ли игра",
+    "registry": "games|показать|требования игры",
+    "risk": "read"
+   },
+   {
+    "name": "Поставить настройки графики под железо",
+    "registry": "games|изменить|настройки графики",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить целостность файлов",
+    "registry": "games|проверить|целостность файлов",
+    "risk": "read"
+   },
+   {
+    "name": "Записать геймплей",
+    "registry": "games|записать|геймплей",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сделать скриншот",
+    "registry": "games|сделать|скриншот",
+    "risk": "read"
+   },
+   {
+    "name": "Запустить игру с нужными параметрами",
+    "registry": "games|автоматизировать|запуск",
+    "risk": "write-local"
+   },
+   {
+    "name": "Установить игру из библиотеки",
+    "registry": "games|установить|игру из библиотеки",
+    "risk": "destructive"
+   },
+   {
+    "name": "Перенести библиотеку на другой диск",
+    "registry": "games|перенести|библиотеку на другой диск",
+    "risk": "destructive"
+   },
+   {
+    "name": "Проверить, потянет ли игра этот ПК",
+    "registry": "hardware-diag|сравнить|железо с требованиями",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "storage-tools",
+  "app": "Бэкап и диски Windows (robocopy / wbadmin / smartctl)",
+  "kind": "tool",
+  "exe": [
+   "robocopy.exe",
+   "wbadmin.exe",
+   "smartctl.exe",
+   "diskmgmt.msc"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "Windows 11 24H2 + smartmontools 7.4 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Проверить здоровье дисков",
+    "registry": "storage-backup|проверить|SMART диска",
+    "risk": "read"
+   },
+   {
+    "name": "Создать бэкап папки",
+    "registry": "storage-backup|создать|бэкап папки",
+    "risk": "destructive"
+   },
+   {
+    "name": "Восстановить из бэкапа",
+    "registry": "storage-backup|восстановить|из бэкапа",
+    "risk": "destructive"
+   },
+   {
+    "name": "Мониторить заполнение диска",
+    "registry": "storage-backup|мониторить|заполнение диска",
+    "risk": "read"
+   },
+   {
+    "name": "Очистить временные файлы и корзину",
+    "registry": "storage-backup|очистить|временные файлы",
+    "risk": "destructive"
+   },
+   {
+    "name": "Выполнить TRIM на SSD",
+    "registry": "storage-backup|выполнить|TRIM на SSD",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "taskmgr",
+  "app": "Диспетчер задач",
+  "kind": "app",
+  "exe": [
+   "Taskmgr.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Показать, что грузит компьютер",
+    "registry": "processes-services|показать|топ по нагрузке",
+    "risk": "read"
+   },
+   {
+    "name": "Найти подозрительный процесс",
+    "registry": "processes-services|найти|подозрительный процесс",
+    "risk": "read"
+   },
+   {
+    "name": "Завершить процесс",
+    "registry": "processes-services|завершить",
+    "risk": "destructive"
+   },
+   {
+    "name": "Проанализировать автозапуск",
+    "registry": "processes-services|проанализировать|автозапуск",
+    "risk": "read"
+   },
+   {
+    "name": "Поменять приоритет процесса",
+    "registry": "processes-services|настроить|приоритет",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "telegram",
+  "app": "Telegram Desktop",
+  "kind": "app",
+  "exe": [
+   "Telegram.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "5.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Отправить сообщение в чат",
+    "registry": "chat-social|отправить|сообщение",
+    "risk": "external"
+   },
+   {
+    "name": "Отправить файл",
+    "registry": "chat-social|отправить|файл",
+    "risk": "external"
+   },
+   {
+    "name": "Найти файл в истории чата",
+    "registry": "chat-social|найти|файл в чате",
+    "risk": "read"
+   },
+   {
+    "name": "Прочитать новые сообщения и собрать в заметку",
+    "registry": "chat-social|собрать|переписку",
+    "risk": "read"
+   },
+   {
+    "name": "Ответить в чате",
+    "registry": "chat-social|ответить|в мессенджере",
+    "risk": "external"
+   },
+   {
+    "name": "Отправить алерт самому себе через бота",
+    "registry": "chat-social|отправить|сообщение",
+    "risk": "external"
+   },
+   {
+    "name": "Создать канал или группу",
+    "registry": "chat-social|создать|группу/канал",
+    "risk": "external"
+   }
+  ]
+ },
+ {
+  "slug": "tshark",
+  "app": "Wireshark / tshark",
+  "kind": "tool",
+  "exe": [
+   "Wireshark.exe",
+   "tshark.exe",
+   "dumpcap.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "4.4.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Проанализировать трафик за период",
+    "registry": "network|проанализировать|трафик",
+    "risk": "read"
+   },
+   {
+    "name": "Показать, кто в локальной сети",
+    "registry": "network|показать|кто в сети",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить открытые порты на своей машине",
+    "registry": "network|проверить|открытые порты",
+    "risk": "read"
+   },
+   {
+    "name": "Замерить задержку и потери до узла",
+    "registry": "network|замерить|задержку до узла",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить DNS и утечки",
+    "registry": "network|проверить|DNS и утечки",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "virtualbox",
+  "app": "Oracle VirtualBox",
+  "kind": "app",
+  "exe": [
+   "VirtualBox.exe",
+   "VBoxManage.exe",
+   "VBoxHeadless.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "7.1.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Запустить виртуалку и дождаться загрузки",
+    "registry": "virtualization-remote|запустить|виртуалку",
+    "risk": "write-local"
+   },
+   {
+    "name": "Снять снапшот перед рискованным изменением",
+    "registry": "virtualization-remote|снять|снапшот ВМ",
+    "risk": "write-local"
+   },
+   {
+    "name": "Откатить ВМ к снапшоту",
+    "registry": "virtualization-remote|восстановить|ВМ из снапшота",
+    "risk": "destructive"
+   },
+   {
+    "name": "Передать файлы внутрь гостя",
+    "registry": "virtualization-remote|передать|файл на сервер",
+    "risk": "external"
+   },
+   {
+    "name": "Экспортировать ВМ в OVA/импортировать обратно",
+    "registry": "virtualization-remote|синхронизировать|с сервером",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "visualstudio",
+  "app": "Microsoft Visual Studio",
+  "kind": "app",
+  "exe": [
+   "devenv.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "17.x (2022, 2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Собрать решение и прочитать результат",
+    "registry": "dev-code|собрать|релиз",
+    "risk": "write-local"
+   },
+   {
+    "name": "Запустить тесты",
+    "registry": "dev-code|запустить|тесты",
+    "risk": "write-local"
+   },
+   {
+    "name": "Найти в коде",
+    "registry": "dev-code|найти|в коде",
+    "risk": "read"
+   },
+   {
+    "name": "Объяснить ошибку компиляции",
+    "registry": "dev-code|объяснить|ошибку",
+    "risk": "read"
+   },
+   {
+    "name": "Показать состояние репозитория",
+    "registry": "dev-code|показать|состояние репозитория",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "vlc",
+  "app": "VLC media player",
+  "kind": "app",
+  "exe": [
+   "vlc.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "3.0.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 4,
+  "operations": [
+   {
+    "name": "Воспроизвести файл или плейлист",
+    "registry": "video|воспроизвести|файл",
+    "risk": "read"
+   },
+   {
+    "name": "Конвертировать файл без интерфейса",
+    "registry": "video|конвертировать|формат",
+    "risk": "write-local"
+   },
+   {
+    "name": "Извлечь кадр для превью",
+    "registry": "video|извлечь|кадр",
+    "risk": "write-local"
+   },
+   {
+    "name": "Раздать поток по локальной сети",
+    "registry": "video|стримить|в сервис",
+    "risk": "external"
+   },
+   {
+    "name": "Проверить, что файл не битый",
+    "registry": "video|проверить|качество",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "vmware",
+  "app": "VMware Workstation (vmrun)",
+  "kind": "tool",
+  "exe": [
+   "vmware.exe",
+   "vmrun.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "VMware Workstation 17.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Запустить виртуалку и дождаться готовности",
+    "registry": "virtualization-remote|запустить|виртуалку",
+    "risk": "write-local"
+   },
+   {
+    "name": "Снять снапшот перед рискованными изменениями",
+    "registry": "virtualization-remote|снять|снапшот ВМ",
+    "risk": "write-local"
+   },
+   {
+    "name": "Вернуться к снапшоту",
+    "registry": "virtualization-remote|восстановить|ВМ из снапшота",
+    "risk": "destructive"
+   },
+   {
+    "name": "Выполнить команду внутри гостя",
+    "registry": "virtualization-remote|развернуть|сервис",
+    "risk": "write-local"
+   },
+   {
+    "name": "Удалить ненужную ВМ",
+    "registry": "virtualization-remote|удалить|ненужную ВМ",
+    "risk": "destructive"
+   }
+  ]
+ },
+ {
+  "slug": "vscode",
+  "app": "Visual Studio Code",
+  "kind": "app",
+  "exe": [
+   "Code.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "1.9x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Открыть папку проекта",
+    "registry": "dev-code|настроить|окружение",
+    "risk": "write-local"
+   },
+   {
+    "name": "Найти вхождение по проекту",
+    "registry": "dev-code|найти|в коде",
+    "risk": "read"
+   },
+   {
+    "name": "Запустить тесты проекта",
+    "registry": "dev-code|запустить|тесты",
+    "risk": "write-local"
+   },
+   {
+    "name": "Форматирование и линт открытого файла",
+    "registry": "dev-code|отрефакторить|код",
+    "risk": "write-local"
+   },
+   {
+    "name": "Установить расширение",
+    "registry": "dev-code|настроить|окружение",
+    "risk": "write-local"
+   },
+   {
+    "name": "Закоммитить изменения",
+    "registry": "dev-code|зафиксировать|изменения локально",
+    "risk": "write-local"
+   },
+   {
+    "name": "Просмотреть свой дифф перед PR",
+    "registry": "dev-code|ревью|свой дифф",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "whatsapp",
+  "app": "WhatsApp Desktop",
+  "kind": "app",
+  "exe": [
+   "WhatsApp.exe"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "2.24xx (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Отправить сообщение конкретному человеку",
+    "registry": "chat-social|отправить",
+    "risk": "external"
+   },
+   {
+    "name": "Прочитать чаты и выделить важное",
+    "registry": "chat-social|прочитать|чаты",
+    "risk": "read"
+   },
+   {
+    "name": "Найти файл или сообщение в чате",
+    "registry": "chat-social|найти|файл в чате",
+    "risk": "read"
+   },
+   {
+    "name": "Позвонить через мессенджер",
+    "registry": "chat-social|позвонить|через сервис",
+    "risk": "external"
+   }
+  ]
+ },
+ {
+  "slug": "windows-settings",
+  "app": "Параметры Windows",
+  "kind": "app",
+  "exe": [
+   "SystemSettings.exe",
+   "ApplicationFrameHost.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Открыть нужную страницу параметров",
+    "registry": "apps-windows|запустить|программу",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить и поставить обновления Windows",
+    "registry": "accounts-updates|проверить|обновления Windows",
+    "risk": "write-local"
+   },
+   {
+    "name": "Настроить схему питания",
+    "registry": "system-power|настроить|схему питания",
+    "risk": "write-local"
+   },
+   {
+    "name": "Включить ночной режим и настроить яркость",
+    "registry": "display-sound|настроить|ночной режим",
+    "risk": "write-local"
+   },
+   {
+    "name": "Запретить сон на время длинной задачи",
+    "registry": "system-power|запретить|сон",
+    "risk": "write-local"
+   },
+   {
+    "name": "Выбрать устройство вывода звука",
+    "registry": "display-sound|выбрать|устройство вывода",
+    "risk": "write-local"
+   },
+   {
+    "name": "Изменить яркость и громкость",
+    "registry": "display-sound|изменить|громкость",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сделать скриншот всех мониторов",
+    "registry": "display-sound|сделать|скрин всех мониторов",
+    "risk": "read"
+   },
+   {
+    "name": "Переключить раскладку или монитор",
+    "registry": "display-sound|переключить|монитор",
+    "risk": "write-local"
+   },
+   {
+    "name": "Отложить обновления Windows",
+    "registry": "accounts-updates|отложить|обновление",
+    "risk": "write-local"
+   },
+   {
+    "name": "Обновить приложения через winget",
+    "registry": "accounts-updates|обновить|приложение",
+    "risk": "destructive"
+   },
+   {
+    "name": "Настроить питание под задачу",
+    "registry": "system-power|настроить|схему питания",
+    "risk": "write-local"
+   },
+   {
+    "name": "Запретить пробуждение по таймеру",
+    "registry": "system-power|настроить|пробуждение по таймеру",
+    "risk": "write-local"
+   },
+   {
+    "name": "Настроить поведение при закрытии крышки",
+    "registry": "system-power|настроить|крышку ноутбука",
+    "risk": "write-local"
+   },
+   {
+    "name": "Настроить частоту обновления и HDR",
+    "registry": "system-power|настроить|HDR/частоту",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "winscp",
+  "app": "WinSCP",
+  "kind": "app",
+  "exe": [
+   "WinSCP.exe",
+   "winscp.com"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "6.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 4,
+  "operations": [
+   {
+    "name": "Проверить доступность сервера до передачи",
+    "registry": "virtualization-remote|проверить|доступность сервера",
+    "risk": "read"
+   },
+   {
+    "name": "Передать файлы на сервер",
+    "registry": "virtualization-remote|передать|файл на сервер",
+    "risk": "external"
+   },
+   {
+    "name": "Синхронизировать папку с сервером",
+    "registry": "virtualization-remote|синхронизировать|с сервером",
+    "risk": "write-local"
+   },
+   {
+    "name": "Забрать файлы с сервера",
+    "registry": "files|скопировать|файлы/папки",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "word",
+  "app": "Microsoft Word",
+  "kind": "app",
+  "exe": [
+   "WINWORD.EXE"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Microsoft 365 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Создать документ по шаблону методички и сохранить",
+    "registry": "text-docs|создать|документ Word",
+    "risk": "write-local"
+   },
+   {
+    "name": "Вставить абзац в конец раздела",
+    "registry": "text-docs|написать|курсовую",
+    "risk": "write-local"
+   },
+   {
+    "name": "Оформить заголовок стилем",
+    "registry": "text-docs|форматировать|по методичке",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать оглавление и нумерацию страниц",
+    "registry": "text-docs|собрать|оглавление",
+    "risk": "write-local"
+   },
+   {
+    "name": "Добавить сноску с источником",
+    "registry": "text-docs|вставить|сноски",
+    "risk": "write-local"
+   },
+   {
+    "name": "Проверить орфографию и грамматику",
+    "registry": "text-docs|проверить|орфографию",
+    "risk": "read"
+   },
+   {
+    "name": "Сохранить в PDF и проверить страницы",
+    "registry": "text-docs|конвертировать|формат",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сравнить две версии документа",
+    "registry": "text-docs|сравнить|две версии",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "wt",
+  "app": "Windows Terminal",
+  "kind": "app",
+  "exe": [
+   "WindowsTerminal.exe",
+   "wt.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "1.2x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 6,
+  "operations": [
+   {
+    "name": "Открыть рабочую раскладку под задачу",
+    "registry": "apps-windows|разместить|окна",
+    "risk": "write-local"
+   },
+   {
+    "name": "Настроить вид, шрифт и профиль по умолчанию",
+    "registry": "apps-windows|настроить|вид и параметры окна",
+    "risk": "write-local"
+   },
+   {
+    "name": "Запустить тесты в отдельной панели и собрать результат",
+    "registry": "dev-code|запустить|тесты",
+    "risk": "write-local"
+   },
+   {
+    "name": "Прочитать, что показывает терминал",
+    "registry": "apps-windows|прочитать|интерфейс",
+    "risk": "read"
+   },
+   {
+    "name": "Переключиться на нужное окно терминала",
+    "registry": "apps-windows|переключиться|на окно",
+    "risk": "write-local"
+   }
+  ]
+ },
+ {
+  "slug": "youtube-publish",
+  "app": "Публикация видео (YouTube Data API / площадки)",
+  "kind": "tool",
+  "exe": [
+   "python.exe",
+   "yt-dlp.exe",
+   "ffmpeg.exe"
+  ],
+  "ui_stack": "web",
+  "version_seen": "YouTube Data API v3, yt-dlp 2026.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 7,
+  "operations": [
+   {
+    "name": "Выгрузить видео на площадку",
+    "registry": "video-production|выгрузить|на YouTube",
+    "risk": "external"
+   },
+   {
+    "name": "Добавить и проверить субтитры",
+    "registry": "video-production|субтитрировать|автоматически",
+    "risk": "write-local"
+   },
+   {
+    "name": "Перевести и озвучить на другой язык",
+    "registry": "video-production|перевести|видео на другой язык",
+    "risk": "write-local"
+   },
+   {
+    "name": "Собрать плейлист и порядок",
+    "registry": "video-production|собрать|плейлист и порядок",
+    "risk": "write-local"
+   },
+   {
+    "name": "Написать название, описание и теги",
+    "registry": "video-production|написать|название и описание",
+    "risk": "write-local"
+   },
+   {
+    "name": "Ответить на комментарии",
+    "registry": "video-production|ответить|на комментарии",
+    "risk": "external"
+   },
+   {
+    "name": "Следить за комментариями и упоминаниями",
+    "registry": "video-production|следить|за комментариями 24-7",
+    "risk": "external"
+   },
+   {
+    "name": "Подобрать музыку и эффекты с проверкой прав",
+    "registry": "video-production|подобрать|музыку и эффекты",
+    "risk": "read"
+   }
+  ]
+ },
+ {
+  "slug": "zotero",
+  "app": "Zotero",
+  "kind": "app",
+  "exe": [
+   "zotero.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "7.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": 5,
+  "operations": [
+   {
+    "name": "Собрать библиографию по теме",
+    "registry": "learning-research|собрать|библиографию",
+    "risk": "read"
+   },
+   {
+    "name": "Найти цитаты по теме",
+    "registry": "learning-research|найти|цитаты",
+    "risk": "read"
+   },
+   {
+    "name": "Проверить факт по источнику",
+    "registry": "learning-research|проверить|факт",
+    "risk": "write-local"
+   },
+   {
+    "name": "Сохранить статью в библиотеку",
+    "registry": "learning-research|сохранить|закладку в базу знаний",
+    "risk": "write-local"
+   }
+  ]
+ }
+]

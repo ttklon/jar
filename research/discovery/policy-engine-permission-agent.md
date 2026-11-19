@@ -1,0 +1,18 @@
+# Discovery: `policy engine permission agent`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 169 | [jettbrains/-L-](https://github.com/jettbrains/-L-) | - | GPL-3.0 | 2021-08-18 | W3C Strategic Highlights  September 2019  This report was prepared for the September 2019 W3C Advisory Committee Meeting (W3C Member link). See the accompanying W3C Fact Sheet — September 2019. For the previous edition,  |
+| 80 | [Rastaman4e/-1](https://github.com/Rastaman4e/-1) | - | - | 2021-04-16 | NICEHASH PLATFORM TERMS OF USE AND NICEHASH MINING TERMS OF SERVICE   PLEASE READ THESE NICEHASH PLATFORM TERMS OF USE AND NICEHASH MINING TERMS OF SERVICE (“Terms”) CAREFULLY BEFORE USING THE THE PLATFORM OR SERVICES DE |
+| 31 | [ideapacket/voxwright](https://github.com/ideapacket/voxwright) | Python | MIT | 2026-11-01 | Offline voice-agent application layer: session core with byte-deterministic replay, spoken-LLM adapters (scripted/replay/loopback-mock), injection-safe function-call grammar, slot grounding, workflow engine with compensa |
+| 26 | [NestieGuilas/Marketing-Platform-](https://github.com/NestieGuilas/Marketing-Platform-) | - | BSL-1.0 | 2021-07-14 | Marketing Platform Google Analytics Terms of Service These Google Analytics Terms of Service (this "Agreement") are entered into by Google LLC ("Google") and the entity executing this Agreement ("You"). This Agreement go |
+| 7 | [agentic-suite/agent-tooltrust](https://github.com/agentic-suite/agent-tooltrust) | Python | MIT | 2026-10-02 | Contextual risk and permission engine for tool-using AI agents — allow, audit, escalate, or deny with explainable policy |
+| 2 | [Selen-W/Agent-Permission-Gateway-Agent-IAM](https://github.com/Selen-W/Agent-Permission-Gateway-Agent-IAM) | TypeScript | MIT | 2026-08-14 | Agent Permission Gateway / Agent IAM — policy + risk engine + scoped approval + audit in front of every AI agent tool call (ALLOW / DENY / ASK) |
+| 2 | [HsiangNianian/harness-engineering](https://github.com/HsiangNianian/harness-engineering) | Python | MIT | 2026-09-08 | Research and executable reference prototypes for agent runtime permissions, execution, recovery, and evidence. |
+| 1 | [deepankarmathur01/mobile-agent-permission-policy-engine](https://github.com/deepankarmathur01/mobile-agent-permission-policy-engine) | Kotlin | Apache-2.0 | 2026-01-31 |  |
+| 1 | [vasche76/engineering-prompt-policy](https://github.com/vasche76/engineering-prompt-policy) | Python | MIT | 2026-10-07 | Agent Skill for drafting and auditing verifiable, recoverable, permission-aware engineering prompts for Codex and Claude Code. |
+| 1 | [feiiiiii5/agent-identity-permission-system](https://github.com/feiiiiii5/agent-identity-permission-system) | Python | - | 2026-05-03 | Agent Identity & Permission System v2.3 — JWT authentication, RBAC/ABAC policy engine, prompt injection defense, real-time audit, risk auto-lock |
+| 1 | [clawnify/agent-permissions](https://github.com/clawnify/agent-permissions) | TypeScript | MIT | 2026-11-04 | OpenClaw plugin — permission and approval engine. Gates built-in tool calls (bash, file edit, etc.) and plugin tools via a three-bucket policy (allow/deny/ask) with wildcard rules, in-chat approval, and no network calls. |
+| 1 | [rajphanee/enterprise-agent-platform](https://github.com/rajphanee/enterprise-agent-platform) | Python | - | 2026-10-09 |   Three governed enterprise AI agents (permission-aware RAG, IT support, vendor onboarding) with a code-based policy engine, human approvals, and a hash-chained audit log. Runs offline or on Claude. |

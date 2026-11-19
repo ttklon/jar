@@ -1,0 +1,19 @@
+{
+  "id": "github:microsoftgraph/msgraph-sdk-python",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "microsoftgraph/msgraph-sdk-python",
+  "url": "https://github.com/microsoftgraph/msgraph-sdk-python",
+  "description": "",
+  "stars": 633,
+  "forks": 100,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "devxeng"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T05:15:38Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

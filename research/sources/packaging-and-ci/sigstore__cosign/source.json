@@ -1,0 +1,17 @@
+{
+  "id": "github:sigstore/cosign",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "sigstore/cosign",
+  "url": "https://github.com/sigstore/cosign",
+  "description": "Code signing and transparency for containers and binaries",
+  "stars": 6419,
+  "forks": 838,
+  "language": "Go",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-05T00:11:57Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

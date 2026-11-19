@@ -1,0 +1,31 @@
+{
+  "id": "github:aubio/aubio",
+  "kind": "github",
+  "category": "music-audio",
+  "repo": "aubio/aubio",
+  "url": "https://github.com/aubio/aubio",
+  "description": "a library for audio and music analysis",
+  "stars": 3784,
+  "forks": 428,
+  "language": "C",
+  "license": "GPL-3.0",
+  "topics": [
+    "analysis",
+    "annotation",
+    "audio",
+    "beat",
+    "c",
+    "extraction",
+    "mfcc",
+    "music",
+    "onset",
+    "pitch",
+    "python",
+    "sound",
+    "tempo-tracking"
+  ],
+  "archived": false,
+  "pushed_at": "2026-04-10T16:42:19Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

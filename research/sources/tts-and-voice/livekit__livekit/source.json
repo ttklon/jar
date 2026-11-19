@@ -1,0 +1,25 @@
+{
+  "id": "github:livekit/livekit",
+  "kind": "github",
+  "category": "tts-and-voice",
+  "repo": "livekit/livekit",
+  "url": "https://github.com/livekit/livekit",
+  "description": "End-to-end realtime stack for connecting humans and AI",
+  "stars": 22089,
+  "forks": 2547,
+  "language": "Go",
+  "license": "Apache-2.0",
+  "topics": [
+    "golang",
+    "media-server",
+    "sfu",
+    "video",
+    "voice",
+    "voice-ai",
+    "webrtc"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T03:47:52Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "github:OctoPrint/OctoPrint",
+  "kind": "github",
+  "category": "home-iot",
+  "repo": "OctoPrint/OctoPrint",
+  "url": "https://github.com/OctoPrint/OctoPrint",
+  "description": "OctoPrint is the snappy web interface for your 3D printer!",
+  "stars": 9188,
+  "forks": 1700,
+  "language": "Python",
+  "license": "AGPL-3.0",
+  "topics": [
+    "3d-printer",
+    "octoprint",
+    "python",
+    "raspberry-pi"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-30T15:23:28Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

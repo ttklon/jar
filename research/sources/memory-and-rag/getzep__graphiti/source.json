@@ -1,0 +1,22 @@
+{
+  "id": "github:getzep/graphiti",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "getzep/graphiti",
+  "url": "https://github.com/getzep/graphiti",
+  "description": "Build Real-Time Knowledge Graphs for AI Agents",
+  "stars": 32645,
+  "forks": 3357,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agents",
+    "graph",
+    "llms",
+    "rag"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T01:05:18Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "github:assafelovic/gpt-researcher",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "assafelovic/gpt-researcher",
+  "url": "https://github.com/assafelovic/gpt-researcher",
+  "description": "An autonomous agent that conducts deep research on any data using any LLM providers",
+  "stars": 30560,
+  "forks": 4191,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent",
+    "ai",
+    "automation",
+    "deepresearch",
+    "llms",
+    "mcp",
+    "mcp-server",
+    "python",
+    "research",
+    "search",
+    "webscraping"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-10T22:03:53Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

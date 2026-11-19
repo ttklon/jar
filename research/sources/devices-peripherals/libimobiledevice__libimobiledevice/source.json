@@ -1,0 +1,23 @@
+{
+  "id": "github:libimobiledevice/libimobiledevice",
+  "kind": "github",
+  "category": "devices-peripherals",
+  "repo": "libimobiledevice/libimobiledevice",
+  "url": "https://github.com/libimobiledevice/libimobiledevice",
+  "description": "A cross-platform protocol library to communicate with iOS devices",
+  "stars": 8326,
+  "forks": 1539,
+  "language": "C",
+  "license": "LGPL-2.1",
+  "topics": [
+    "c",
+    "ios",
+    "library",
+    "lockdownd",
+    "protocol"
+  ],
+  "archived": false,
+  "pushed_at": "2026-06-10T07:52:18Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

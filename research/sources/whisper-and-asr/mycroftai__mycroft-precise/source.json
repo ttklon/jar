@@ -1,0 +1,26 @@
+{
+  "id": "github:mycroftai/mycroft-precise",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "mycroftai/mycroft-precise",
+  "url": "https://github.com/mycroftai/mycroft-precise",
+  "description": "A lightweight, simple-to-use, RNN wake word listener",
+  "stars": 965,
+  "forks": 241,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "embedded-systems",
+    "hotword-detection",
+    "keyword-spotting",
+    "raspberry-pi",
+    "speech-recognition",
+    "voice-control",
+    "voice-recognition",
+    "wake-word-detection"
+  ],
+  "archived": false,
+  "pushed_at": "2023-11-25T01:38:56Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

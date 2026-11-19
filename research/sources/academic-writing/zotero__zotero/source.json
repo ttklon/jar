@@ -1,0 +1,17 @@
+{
+  "id": "github:zotero/zotero",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "zotero/zotero",
+  "url": "https://github.com/zotero/zotero",
+  "description": "Zotero is a free, easy-to-use tool to help you collect, organize, annotate, cite, and share your research sources.",
+  "stars": 15884,
+  "forks": 1175,
+  "language": "JavaScript",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T03:06:21Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

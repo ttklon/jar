@@ -1,0 +1,33 @@
+{
+  "id": "github:pbatard/rufus",
+  "kind": "github",
+  "category": "system-control",
+  "repo": "pbatard/rufus",
+  "url": "https://github.com/pbatard/rufus",
+  "description": "The Reliable USB Formatting Utility",
+  "stars": 38281,
+  "forks": 3205,
+  "language": "C",
+  "license": "GPL-3.0",
+  "topics": [
+    "bios",
+    "boot",
+    "bootable-drives",
+    "freedos",
+    "gpt",
+    "grub",
+    "grub4dos",
+    "iso",
+    "mbr",
+    "md5",
+    "persistence",
+    "rufus",
+    "secure-boot",
+    "sha1",
+    "sha256"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T12:03:32Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

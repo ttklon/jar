@@ -1,0 +1,118 @@
+{
+  "app": "VMware Workstation (vmrun)",
+  "kind": "tool",
+  "exe": [
+    "vmware.exe",
+    "vmrun.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "VMware Workstation 17.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "start": {
+      "by": "api",
+      "value": "vmrun -T ws start \"<vm>.vmx\" [nogui|gui]"
+    },
+    "list": {
+      "by": "api",
+      "value": "vmrun -T ws list — запущенные ВМ; listSnapshots \"<vm>.vmx\""
+    },
+    "snapshot": {
+      "by": "api",
+      "value": "vmrun -T ws snapshot \"<vm>.vmx\" \"<имя>\""
+    },
+    "revert": {
+      "by": "api",
+      "value": "vmrun -T ws revertToSnapshot \"<vm>.vmx\" \"<имя>\" (ВМ должна быть выключена)"
+    },
+    "guest": {
+      "by": "api",
+      "value": "vmrun -T ws -gu <user> -gp <pass> runProgramInGuest \"<vm>.vmx\" <exe> <args>; пароль — из секрета"
+    },
+    "delete": {
+      "by": "api",
+      "value": "vmrun -T ws deleteVM \"<vm>.vmx\" — удаляет и диск"
+    }
+  },
+  "operations": [
+    {
+      "name": "Запустить виртуалку и дождаться готовности",
+      "registry": "virtualization-remote|запустить|виртуалку",
+      "steps": [
+        "vmrun -T ws start \"<vm>.vmx\" nogui",
+        "дождаться VMware Tools: vmrun getGuestIPAddress \"<vm>.vmx\" -wait",
+        "проверить доступность гостя (ping/порт)"
+      ],
+      "verify": [
+        "vmrun list содержит путь этой ВМ",
+        "IP гостя получен",
+        "гость отвечает на порт из задачи"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Снять снапшот перед рискованными изменениями",
+      "registry": "virtualization-remote|снять|снапшот ВМ",
+      "steps": [
+        "зафиксировать состояние питания ВМ",
+        "vmrun -T ws snapshot \"<vm>.vmx\" \"before-<что-меняем>\"",
+        "vmrun listSnapshots \"<vm>.vmx\""
+      ],
+      "verify": [
+        "снапшот с ожидаемым именем есть в списке",
+        "имя снапшота описывает, что именно откатывается",
+        "свободного места на диске хватает на снапшот"
+      ],
+      "risk": "write-local",
+      "notes": "снапшот — не бэкап: он живёт на том же диске и вырастет в размерах; для сохранности нужна копия VMX/VMDK"
+    },
+    {
+      "name": "Вернуться к снапшоту",
+      "registry": "virtualization-remote|восстановить|ВМ из снапшота",
+      "steps": [
+        "выключить гостя штатно (vmrun stop \"<vm>.vmx\" soft)",
+        "vmrun -T ws revertToSnapshot \"<vm>.vmx\" \"<имя>\"",
+        "запустить и проверить данные внутри"
+      ],
+      "verify": [
+        "ВМ запускается",
+        "данные внутри соответствуют дате снапшота",
+        "все изменения после снапшота потеряны — это сказано пользователю заранее"
+      ],
+      "risk": "destructive",
+      "on_fail": "если откат нужен, а снапшота нет — не «искать вручную», а восстановить из бэкапа копии файлов ВМ"
+    },
+    {
+      "name": "Выполнить команду внутри гостя",
+      "registry": "virtualization-remote|развернуть|сервис",
+      "steps": [
+        "пароль гостя — из секрета",
+        "vmrun -T ws -gu <user> -gp <pass> runProgramInGuest \"<vm>.vmx\" -interactive <команда>",
+        "проверить результат внутри гостя (файл/служба/лог)"
+      ],
+      "verify": [
+        "код возврата vmrun нулевой",
+        "внутри гостя появился ожидаемый артефакт (файл, служба, строка в логе)",
+        "проверка сделана изнутри, а не по факту «команда отправлена»"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Удалить ненужную ВМ",
+      "registry": "virtualization-remote|удалить|ненужную ВМ",
+      "steps": [
+        "убедиться, что внутри нет нужных данных (список файлов/снапшотов)",
+        "сделать копию VMX и, при необходимости, диска",
+        "vmrun -T ws stop \"<vm>.vmx\" hard (если запущена)",
+        "vmrun -T ws deleteVM \"<vm>.vmx\""
+      ],
+      "verify": [
+        "vmrun list больше не содержит ВМ",
+        "папка ВМ удалена, снапшоты не остались",
+        "в корзине/бэкапе есть копия, если она нужна"
+      ],
+      "risk": "destructive",
+      "notes": "deleteVM стирает диск без корзины — операция необратима"
+    }
+  ]
+}

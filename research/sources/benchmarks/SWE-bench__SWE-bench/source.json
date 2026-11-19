@@ -1,0 +1,21 @@
+{
+  "id": "github:SWE-bench/SWE-bench",
+  "kind": "github",
+  "category": "benchmarks",
+  "repo": "SWE-bench/SWE-bench",
+  "url": "https://github.com/SWE-bench/SWE-bench",
+  "description": "SWE-bench: Can Language Models Resolve Real-world Github Issues?",
+  "stars": 6160,
+  "forks": 1049,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "benchmark",
+    "language-model",
+    "software-engineering"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-18T05:08:56Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

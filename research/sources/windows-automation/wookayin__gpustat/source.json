@@ -1,0 +1,24 @@
+{
+  "id": "github:wookayin/gpustat",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "wookayin/gpustat",
+  "url": "https://github.com/wookayin/gpustat",
+  "description": "📊 A simple command-line utility for querying and monitoring GPU status",
+  "stars": 4387,
+  "forks": 287,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "command-line",
+    "gpu",
+    "gpustat",
+    "monitoring",
+    "nvidia-smi",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-08T02:45:45Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

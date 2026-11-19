@@ -1,0 +1,27 @@
+{
+  "id": "github:Ultimaker/Cura",
+  "kind": "github",
+  "category": "home-iot",
+  "repo": "Ultimaker/Cura",
+  "url": "https://github.com/Ultimaker/Cura",
+  "description": "3D printer / slicing GUI built on top of the Uranium framework",
+  "stars": 7073,
+  "forks": 2177,
+  "language": "Python",
+  "license": "LGPL-3.0",
+  "topics": [
+    "3d-printing",
+    "cura",
+    "gcode",
+    "gui",
+    "pyqt6",
+    "python",
+    "qml",
+    "slicer",
+    "uranium"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T12:52:16Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

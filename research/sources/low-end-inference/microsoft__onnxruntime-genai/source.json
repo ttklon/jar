@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/onnxruntime-genai",
+  "kind": "github",
+  "category": "low-end-inference",
+  "repo": "microsoft/onnxruntime-genai",
+  "url": "https://github.com/microsoft/onnxruntime-genai",
+  "description": "Generative AI with ONNX Runtime",
+  "stars": 1153,
+  "forks": 383,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:07:01Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

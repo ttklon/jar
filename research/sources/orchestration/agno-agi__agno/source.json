@@ -1,0 +1,23 @@
+{
+  "id": "github:agno-agi/agno",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "agno-agi/agno",
+  "url": "https://github.com/agno-agi/agno",
+  "description": "The self-driving agent platform",
+  "stars": 43102,
+  "forks": 6262,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agents",
+    "ai",
+    "ai-agents",
+    "developer-tools",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T22:07:31Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

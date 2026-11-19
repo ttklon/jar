@@ -1,0 +1,17 @@
+{
+  "id": "github:webrtc-sdk/webrtc",
+  "kind": "github",
+  "category": "tts-and-voice",
+  "repo": "webrtc-sdk/webrtc",
+  "url": "https://github.com/webrtc-sdk/webrtc",
+  "description": "",
+  "stars": 444,
+  "forks": 206,
+  "language": "C++",
+  "license": "BSD-3-Clause",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T03:45:46Z",
+  "default_branch": "m150_release",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

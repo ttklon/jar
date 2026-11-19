@@ -1,0 +1,17 @@
+{
+  "id": "github:taglib/taglib",
+  "kind": "github",
+  "category": "music-audio",
+  "repo": "taglib/taglib",
+  "url": "https://github.com/taglib/taglib",
+  "description": "TagLib Audio Meta-Data Library",
+  "stars": 1467,
+  "forks": 405,
+  "language": "C++",
+  "license": "LGPL-2.1",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-04T16:17:34Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

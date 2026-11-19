@@ -1,0 +1,17 @@
+{
+  "id": "github:cline/cline",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "cline/cline",
+  "url": "https://github.com/cline/cline",
+  "description": "Autonomous coding agent as an SDK, IDE extension, or CLI assistant.",
+  "stars": 71457,
+  "forks": 7891,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T00:08:40Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

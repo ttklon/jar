@@ -1,0 +1,17 @@
+---
+id: "github:chatmcp/chatmcp"
+kind: "github"
+category: "orchestration"
+repo: "chatmcp/chatmcp"
+url: "https://github.com/chatmcp/chatmcp"
+description: "ChatMCP is an MCP Client"
+stars: 1
+forks: 0
+license: "NOASSERTION"
+archived: false
+pushed_at: "2024-12-11T08:15:34Z"
+default_branch: "main"
+fetched_at: "2026-11-08T11:26:32Z"
+---
+
+_README not available_

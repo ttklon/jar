@@ -1,0 +1,18 @@
+# Discovery: `windows registry powershell automation`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 767 | [Bananz0/GalaxyBookEnabler](https://github.com/Bananz0/GalaxyBookEnabler) | PowerShell | MIT | 2026-10-26 | Enable Samsung Galaxy Book features (Quick Share, Multi Control, Samsung Notes, Galaxy Buds) on any Windows PC. Intelligent installer with 21 device profiles, package manager, Wi-Fi compatibility detection & automated se |
+| 428 | [VikasSukhija/Downloads](https://github.com/VikasSukhija/Downloads) | PowerShell | MIT | 2025-02-16 | AD Health Check, Send HTML Email,  Ping machines, Encrypt Password,Bulk Password,Microsoft Teams,Monitor Certificate expiry, Monitor cert expiry, AD attributes, IP to Hostname, Export AD group, CSV to SQL,Shutdown, Resta |
+| 277 | [Sfedfcv/redesigned-pancake](https://github.com/Sfedfcv/redesigned-pancake) | - | - | 2021-05-16 | Skip to content github / docs Code Issues 80 Pull requests 35 Discussions Actions Projects 2 Security Insights Merge branch 'main' into 1862-Add-Travis-CI-migration-table  1862-Add-Travis-CI-migration-table (#1869, Iixix |
+| 13 | [deploymenttheory/windows-mcp-server](https://github.com/deploymenttheory/windows-mcp-server) | Go | MIT | 2026-11-06 | A MCP server that bridges AI agents to the Windows desktop. UI Automation, synthetic mouse/keyboard input, screenshots, window and application control, PowerShell, the registry, processes, the filesystem, and web scrapin |
+| 7 | [ElScelt/Windows-AutoLogin](https://github.com/ElScelt/Windows-AutoLogin) | PowerShell | MIT | 2025-11-22 | 🚀 Automatically log into Windows 10/11 without password prompts. Disable Windows Hello PIN and password requirements on boot & wake. Bring back the Windows 7 experience! ⚡ |
+| 4 | [PanosGK/FSE-ViVeTool-Automated-Installer](https://github.com/PanosGK/FSE-ViVeTool-Automated-Installer) | PowerShell | - | 2025-10-16 | This is a PowerShell automation script designed to simplify the process of enabling the hidden Full-Screen Experience (FSE) feature on Windows. By using ViVeTool, the script eliminates the need for manual registry edits, |
+| 3 | [LarryWisherMan/WinProfileOps](https://github.com/LarryWisherMan/WinProfileOps) | PowerShell | MIT | 2026-07-29 | PowerShell module for managing Windows user profiles, including detection and removal of orphaned profiles, registry operations, and remote management support. |
+| 3 | [suglasp/pwsh_font_installer](https://github.com/suglasp/pwsh_font_installer) | PowerShell | - | 2023-03-17 | Automation script to (un-)install Windows TrueType fonts (.tff). The script processes native the binary .tff files (it reads the files in Big-Endian) to fetch the name and register the name in registry and on the filesys |
+| 2 | [stubbedev/win-rdp-mcp](https://github.com/stubbedev/win-rdp-mcp) | Go | MIT | 2026-11-07 | MCP server for remote control of a Windows desktop — screenshots, mouse and keyboard, PowerShell, files, services and registry. A Go port of winremote-mcp. |
+| 2 | [MilesthoN/Awesome-Scripts-for-System-Admin](https://github.com/MilesthoN/Awesome-Scripts-for-System-Admin) | Batchfile | - | 2026-01-19 | Awesome Scripts for System Admin \| Потрясающие скрипты для системных администраторов |
+| 1 | [andylshort/dosfiles](https://github.com/andylshort/dosfiles) | AutoHotkey | - | 2019-06-10 | My Windows Automations and Settings |
+| 1 | [Lother13501350/pc-steward](https://github.com/Lother13501350/pc-steward) | PowerShell | MIT | 2026-10-06 | Experimental Windows diagnostics toolkit: JSON evidence for coding agents, approved startup changes, registry backups, and restore scripts. |

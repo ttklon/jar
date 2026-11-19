@@ -1,0 +1,17 @@
+{
+  "id": "github:BtbN/FFmpeg-Builds",
+  "kind": "github",
+  "category": "media-production",
+  "repo": "BtbN/FFmpeg-Builds",
+  "url": "https://github.com/BtbN/FFmpeg-Builds",
+  "description": "",
+  "stars": 11953,
+  "forks": 1568,
+  "language": "Shell",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T20:38:18Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

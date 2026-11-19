@@ -1,0 +1,23 @@
+{
+  "id": "github:microsoft/semantic-kernel",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "microsoft/semantic-kernel",
+  "url": "https://github.com/microsoft/semantic-kernel",
+  "description": "Integrate cutting-edge LLM technology quickly and easily into your apps",
+  "stars": 28746,
+  "forks": 4856,
+  "language": "C#",
+  "license": "MIT",
+  "topics": [
+    "ai",
+    "artificial-intelligence",
+    "llm",
+    "openai",
+    "sdk"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T00:59:55Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

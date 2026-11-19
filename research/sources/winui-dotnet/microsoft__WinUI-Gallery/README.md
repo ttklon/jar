@@ -1,0 +1,146 @@
+---
+id: "github:microsoft/WinUI-Gallery"
+kind: "github"
+category: "winui-dotnet"
+repo: "microsoft/WinUI-Gallery"
+url: "https://github.com/microsoft/WinUI-Gallery"
+description: "This app demonstrates the controls available in WinUI and the Fluent Design System."
+stars: 3722
+forks: 766
+language: "C#"
+license: "MIT"
+topics:
+  - "fluent"
+  - "fluent-design"
+  - "uwp"
+  - "windows"
+  - "windowsappsdk"
+  - "winrt"
+  - "winui"
+  - "winui-controls"
+  - "winui3"
+  - "xaml"
+  - "xaml-layout"
+  - "xaml-style"
+  - "xaml-theme"
+  - "xaml-winrt"
+archived: false
+pushed_at: "2026-11-07T20:02:49Z"
+default_branch: "main"
+fetched_at: "2026-11-08T13:14:43Z"
+---
+
+![WinUI Gallery hero image](./.github/assets/ReadmeHero-dark.png)
+
+<h1 align="center">WinUI Gallery</h1>
+<p align="center">Companion app for <a style="text-decoration:none" href="https://docs.microsoft.com/windows/apps/winui">WinUI</a> & <a style="text-decoration:none" href="https://github.com/microsoft/WindowsAppSDK">Windows App SDK</a> APIs</p>
+
+
+This app demonstrates all of the WinUI 3 controls and styles available to make a modern Windows app with the Windows App SDK. It is the interactive companion to the [Fluent Design guidelines](https://docs.microsoft.com/windows/apps/design/basics/) and shows the usage of [WinUI](https://docs.microsoft.com/windows/apps/winui/) through interactive samples, tools and code snippets. 
+
+
+
+<p align="center">
+  <img src="./.github/assets/Screenshot-light.png" alt="WinUI Gallery" width="800"/>
+</p>
+<p align="center">
+  <a style="text-decoration:none" href="https://apps.microsoft.com/detail/9P3JFPWWDZRC?launch=true&mode=full">
+    <picture>
+      <source media="(prefers-color-scheme: light)" srcset="./.github/assets/StoreBadge-dark.png" width="220" />
+      <img src="./.github/assets/StoreBadge-light.png" width="220" />
+  </picture></a>
+</p>
+
+## ⭐ Features
+
+- **WinUI controls samples:** each control page shows the markup and codebehind used to create each example.
+
+- **Use the Microsoft.UI.Xaml (WinUI) library:** the app includes the latest WinUI NuGet package and shows how to use the [WinUI](https://docs.microsoft.com/windows/apps/winui/) controls like NavigationView, SwipeControl, and more.
+
+- **Adaptive UI:** in addition to showing how each control responds to different form factors, the app itself is responsive and shows various methods for achieving adaptive UI.
+
+- **Design & accessibility guidance**: design and accessibility pages help make the gallery a useful developer companion app. 
+
+
+
+## 👏 Contribute to WinUI Gallery
+
+Any samples or docs improvements you'd like to see? We're always looking for a helping hand. Feel free to file an issue to start the discussion, or even better, create a PR with the change you'd like to see!
+
+Check out these [help wanted](https://github.com/microsoft/WinUI-Gallery/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) issues if you don't know where to start.
+
+You can also learn more about current happenings with WinUI Gallery in the [project board](https://github.com/orgs/microsoft/projects/368).
+
+## 🚀 Getting started
+
+Quick start guide to building the WinUI Gallery:
+
+
+### 1. Set up the environment
+
+> [!NOTE]
+> The WinUI Gallery requires [Visual Studio 2026](https://visualstudio.microsoft.com/vs/) or the [winapp CLI](https://github.com/microsoft/WinAppCli) to build and Windows 10 or later to execute. If you're building an app with WinUI and Windows App SDK for the first time, follow these [installation instructions](https://learn.microsoft.com/windows/apps/get-started/start-here).
+
+**Visual Studio 2026:** install the **WinUI application development** workload.
+
+**winapp CLI:** enable [Developer Mode](https://learn.microsoft.com/windows/apps/get-started/enable-your-device-for-development), install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0), and install the CLI:
+
+```powershell
+winget install --id Microsoft.WinAppCli --exact --source winget
+```
+
+### 2. Clone the Repository
+
+```powershell
+git clone https://github.com/microsoft/WinUI-Gallery.git
+```
+
+### 3. Build and run
+
+**Visual Studio:** open `WinUIGallery.slnx`, make sure `WinUIGallery` is set as the startup project, and press F5.
+
+**winapp CLI:** from the repository root, run:
+
+```powershell
+winapp run WinUIGallery\WinUIGallery.csproj
+```
+
+Gallery uses an experimental Windows App SDK to demonstrate upcoming features.
+Use the normal `Debug` or `Release` configuration; the SDK version is pinned in
+`standalone.props`. The runtime is bundled with the app (self-contained deployment)
+instead of referencing a shared Windows App SDK framework package. Experimental
+APIs can change or be removed before a stable release.
+
+The **Windowing APIs** page combines stable window creation with experimental
+window sizing examples. Each experimental example has its own label and warning;
+the stable example retains its original APIs.
+
+> [!WARNING]
+> Try deleting [`nuget.config`](nuget.config) and building again if you get the following build error:
+> > Assets file 'C:\Users\\...\source\repos\WinUI-Gallery\WinUIGallery\obj\WinUIGallery\project.assets.json' not found. Run a NuGet package restore to generate this file.
+>
+> See [issue #1659: Broken repo build](https://github.com/microsoft/WinUI-Gallery/issues/1659).
+
+## ➡️ Further information
+
+To learn more about Windows app development, go to the [Windows Dev Center](https://developer.microsoft.com/windows).
+
+Maintainers can follow the [release runbook](docs/PublishingNewVersion.md) to
+coordinate Microsoft Store publishing with a GitHub release.
+
+
+### Related topics
+
+
+- [Get started with WinUI](https://learn.microsoft.com/windows/apps/get-started/start-here)  
+- [About WinUI](https://aka.ms/windev)
+- [WinUI repository](https://github.com/microsoft/microsoft-ui-xaml)
+- [WindowsAppSDK repository](https://github.com/microsoft/WindowsAppSDK)
+- [WindowsAppSDK samples](https://github.com/microsoft/WindowsAppSDK-Samples)
+
+## 🏆 Contributors
+Thanks to our amazing contributors!
+
+[![WinUI Gallery Contributors](https://contrib.rocks/image?repo=microsoft/WinUI-Gallery)](https://github.com/microsoft/WinUI-Gallery/graphs/contributors)
+
+Made with [contrib.rocks](https://contrib.rocks).

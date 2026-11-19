@@ -1,0 +1,28 @@
+{
+  "id": "github:lobehub/lobe-chat",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "lobehub/lobe-chat",
+  "url": "https://github.com/lobehub/lobe-chat",
+  "description": "🤯 LobeHub - Super-Agents on Your Team. Add super-agents to the chats your team already uses.They take on work by themselves and get better every week.",
+  "stars": 84372,
+  "forks": 16139,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "agent",
+    "agent-collaboration",
+    "agent-harness",
+    "loop-engineering",
+    "mcp",
+    "personal-assistant",
+    "proactive-agent",
+    "skills",
+    "super-agent",
+    "task-management"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:25:51Z",
+  "default_branch": "canary",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

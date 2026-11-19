@@ -1,0 +1,63 @@
+---
+id: "pypi:invoke"
+kind: "pypi"
+category: "deployment-admin"
+package: "invoke"
+version: "3.0.3"
+url: "https://pypi.org/project/invoke/"
+requires_python: ">=3.9"
+summary: "Pythonic task execution"
+fetched_at: "2026-11-08T12:43:21Z"
+---
+
+# invoke 3.0.3
+
+**Summary:** Pythonic task execution
+
+**Install:** `pip install invoke`
+
+**Python:** >=3.9
+
+## Distribution artifacts
+
+- invoke-3.0.3-py3-none-any.whl (0.2 MB)
+- invoke-3.0.3.tar.gz (0.3 MB)
+
+## Description
+
+|version| |python| |license| |ci| |coverage|
+
+.. |version| image:: https://img.shields.io/pypi/v/invoke
+    :target: https://pypi.org/project/invoke/
+    :alt: PyPI - Package Version
+.. |python| image:: https://img.shields.io/pypi/pyversions/invoke
+    :target: https://pypi.org/project/invoke/
+    :alt: PyPI - Python Version
+.. |license| image:: https://img.shields.io/pypi/l/invoke
+    :target: https://github.com/pyinvoke/invoke/blob/main/LICENSE
+    :alt: PyPI - License
+.. |ci| image:: https://img.shields.io/circleci/build/github/pyinvoke/invoke/main
+    :target: https://app.circleci.com/pipelines/github/pyinvoke/invoke
+    :alt: CircleCI
+.. |coverage| image:: https://img.shields.io/codecov/c/gh/pyinvoke/invoke
+    :target: https://app.codecov.io/gh/pyinvoke/invoke
+    :alt: Codecov
+
+Welcome to Invoke!
+==================
+
+Invoke is a Python library for managing shell-oriented subprocesses and
+organizing executable Python code into CLI-invokable tasks. It draws
+inspiration from various sources (``make``/``rake``, Fabric 1.x, etc) to arrive
+at a powerful & clean feature set.
+
+To find out what's new in this version of Invoke, please see `the changelog
+<https://pyinvoke.org/changelog.html#{}>`_.
+
+For a high level introduction, including example code, please see `our main
+project website <https://pyinvoke.org>`_; or for detailed API docs, see `the
+versioned API website <https://docs.pyinvoke.org>`_.
+
+The project maintainer keeps a `roadmap
+<https://bitprophet.org/projects#roadmap>`_ on his website.
+

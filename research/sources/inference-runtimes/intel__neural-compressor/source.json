@@ -1,0 +1,33 @@
+{
+  "id": "github:intel/neural-compressor",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "intel/neural-compressor",
+  "url": "https://github.com/intel/neural-compressor",
+  "description": "SOTA low-bit LLM quantization (INT8/FP8/MXFP8/INT4/MXFP4/NVFP4) & sparsity; leading model compression techniques on PyTorch, TensorFlow, and ONNX Runtime",
+  "stars": 2729,
+  "forks": 332,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "auto-tuning",
+    "awq",
+    "fp4",
+    "gptq",
+    "int4",
+    "int8",
+    "knowledge-distillation",
+    "large-language-models",
+    "low-precision",
+    "mxformat",
+    "post-training-quantization",
+    "pruning",
+    "quantization",
+    "quantization-aware-training",
+    "smoothquant"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T03:27:05Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,28 @@
+{
+  "id": "github:recharts/recharts",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "recharts/recharts",
+  "url": "https://github.com/recharts/recharts",
+  "description": "Redefined chart library built with React and D3",
+  "stars": 27690,
+  "forks": 2040,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "chart",
+    "charting-library",
+    "components",
+    "d3",
+    "data-visualisation",
+    "javascript",
+    "react",
+    "recharts",
+    "typescript",
+    "ui"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T03:16:38Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

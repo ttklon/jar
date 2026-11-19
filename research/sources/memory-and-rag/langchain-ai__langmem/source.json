@@ -1,0 +1,17 @@
+{
+  "id": "github:langchain-ai/langmem",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "langchain-ai/langmem",
+  "url": "https://github.com/langchain-ai/langmem",
+  "description": "",
+  "stars": 1752,
+  "forks": 206,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-03T15:25:34Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

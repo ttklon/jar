@@ -1,0 +1,23 @@
+{
+  "id": "github:googleapis/google-api-nodejs-client",
+  "kind": "github",
+  "category": "connectors",
+  "repo": "googleapis/google-api-nodejs-client",
+  "url": "https://github.com/googleapis/google-api-nodejs-client",
+  "description": "Google's officially supported Node.js client library for accessing Google APIs. Support for authorization and authentication with OAuth 2.0, API Keys and JWT (Service Tokens) is included.",
+  "stars": 12286,
+  "forks": 2045,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "client",
+    "client-library",
+    "google",
+    "google-api",
+    "nodejs"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-30T15:41:41Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "github:ffmpeg/ffmpeg",
+  "kind": "github",
+  "category": "daw-music-production",
+  "repo": "ffmpeg/ffmpeg",
+  "url": "https://github.com/ffmpeg/ffmpeg",
+  "description": "Mirror of https://git.ffmpeg.org/ffmpeg.git",
+  "stars": 66743,
+  "forks": 14543,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [
+    "audio",
+    "c",
+    "ffmpeg",
+    "fft",
+    "hevc",
+    "hls",
+    "matroska",
+    "mp4",
+    "mpeg",
+    "multimedia",
+    "rtmp",
+    "rtsp",
+    "streaming",
+    "video",
+    "webm"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T13:08:02Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:28:58Z"
+}

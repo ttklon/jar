@@ -1,0 +1,33 @@
+{
+  "id": "github:promptfoo/promptfoo",
+  "kind": "github",
+  "category": "observability-evals",
+  "repo": "promptfoo/promptfoo",
+  "url": "https://github.com/promptfoo/promptfoo",
+  "description": "Test your prompts, agents, and RAGs. Red teaming/pentesting/vulnerability scanning for AI. Compare performance of GPT, Claude, Gemini, DeepSeek, and more. Simple declarative configs with command line and CI/CD integration.  Used by OpenAI and Anthropic.",
+  "stars": 26950,
+  "forks": 2685,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "ci",
+    "ci-cd",
+    "cicd",
+    "evaluation",
+    "evaluation-framework",
+    "llm",
+    "llm-eval",
+    "llm-evaluation",
+    "llm-evaluation-framework",
+    "llmops",
+    "pentesting",
+    "prompt-engineering",
+    "prompt-testing",
+    "prompts",
+    "rag"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:24:53Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

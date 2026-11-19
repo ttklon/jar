@@ -1,0 +1,24 @@
+{
+  "id": "github:chroma-core/chroma",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "chroma-core/chroma",
+  "url": "https://github.com/chroma-core/chroma",
+  "description": "Search infrastructure for AI",
+  "stars": 29652,
+  "forks": 2601,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [
+    "agents",
+    "ai",
+    "ai-agents",
+    "database",
+    "rust",
+    "rust-lang"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T04:52:06Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

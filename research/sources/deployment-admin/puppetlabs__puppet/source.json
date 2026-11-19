@@ -1,0 +1,17 @@
+{
+  "id": "github:puppetlabs/puppet",
+  "kind": "github",
+  "category": "deployment-admin",
+  "repo": "puppetlabs/puppet",
+  "url": "https://github.com/puppetlabs/puppet",
+  "description": "Server automation framework and application",
+  "stars": 7972,
+  "forks": 2201,
+  "language": "Ruby",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-08-06T13:05:18Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

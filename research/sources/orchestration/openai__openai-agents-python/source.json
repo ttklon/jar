@@ -1,0 +1,25 @@
+{
+  "id": "github:openai/openai-agents-python",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "openai/openai-agents-python",
+  "url": "https://github.com/openai/openai-agents-python",
+  "description": "A lightweight, powerful framework for multi-agent workflows",
+  "stars": 30554,
+  "forks": 5012,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agents",
+    "ai",
+    "framework",
+    "harness",
+    "llm",
+    "openai",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:21:07Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "github:chocolatey/choco",
+  "kind": "github",
+  "category": "deployment-admin",
+  "repo": "chocolatey/choco",
+  "url": "https://github.com/chocolatey/choco",
+  "description": "Chocolatey - the package manager for Windows",
+  "stars": 11562,
+  "forks": 967,
+  "language": "C#",
+  "license": "NOASSERTION",
+  "topics": [
+    "c-sharp",
+    "chocolatey",
+    "hacktoberfest",
+    "package-management",
+    "package-manager",
+    "package-manager-tool",
+    "powershell",
+    "software",
+    "software-management",
+    "softwareautomation",
+    "windows",
+    "windows-server"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-28T20:28:35Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "github:BerriAI/litellm",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "BerriAI/litellm",
+  "url": "https://github.com/BerriAI/litellm",
+  "description": "The fastest, litest AI Gateway. Rust core with Python SDK. Call 100+ LLM APIs in OpenAI (or native) format with cost tracking, guardrails, load balancing, and logging [Bedrock, Azure, OpenAI, Anthropic, OpenAI, VertexAI, vLLM, Nvidia NIM]",
+  "stars": 62898,
+  "forks": 13107,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "ai-gateway",
+    "anthropic",
+    "azure-openai",
+    "bedrock",
+    "gateway",
+    "langchain",
+    "litellm",
+    "llm",
+    "llm-gateway",
+    "llmops",
+    "mcp-gateway",
+    "openai",
+    "openai-proxy",
+    "rust",
+    "rust-ai"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:18:00Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

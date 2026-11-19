@@ -1,0 +1,30 @@
+{
+  "id": "github:QwenLM/qwen-code",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "QwenLM/qwen-code",
+  "url": "https://github.com/QwenLM/qwen-code",
+  "description": "An open-source AI coding agent that lives in your terminal.",
+  "stars": 29082,
+  "forks": 3329,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "agentic",
+    "ai",
+    "ai-agent",
+    "ai-coding",
+    "cli",
+    "coding-agent",
+    "developer-tools",
+    "llm",
+    "mcp",
+    "qwen",
+    "terminal",
+    "typescript"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:01:42Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

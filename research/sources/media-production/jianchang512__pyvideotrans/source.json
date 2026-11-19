@@ -1,0 +1,24 @@
+{
+  "id": "github:jianchang512/pyvideotrans",
+  "kind": "github",
+  "category": "media-production",
+  "repo": "jianchang512/pyvideotrans",
+  "url": "https://github.com/jianchang512/pyvideotrans",
+  "description": "Translate the video from one language to another and embed dubbing & subtitles.",
+  "stars": 19672,
+  "forks": 2437,
+  "language": "Python",
+  "license": "GPL-3.0",
+  "topics": [
+    "speech-to-text",
+    "stt",
+    "subtitle-translation",
+    "text-to-speech",
+    "tts",
+    "video-transition"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T03:36:07Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

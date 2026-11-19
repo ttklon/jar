@@ -1,0 +1,24 @@
+{
+  "id": "github:langflow-ai/langflow",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "langflow-ai/langflow",
+  "url": "https://github.com/langflow-ai/langflow",
+  "description": "Langflow is a powerful tool for building and deploying AI-powered agents and workflows.",
+  "stars": 156438,
+  "forks": 10360,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agents",
+    "chatgpt",
+    "generative-ai",
+    "large-language-models",
+    "multiagent",
+    "react-flow"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T04:44:04Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "github:yinkaisheng/Python-UIAutomation-for-Windows",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "yinkaisheng/Python-UIAutomation-for-Windows",
+  "url": "https://github.com/yinkaisheng/Python-UIAutomation-for-Windows",
+  "description": "🐍Python 3 wrapper of Microsoft UIAutomation. Support UIAutomation for MFC, WindowsForm, WPF, Modern UI(Metro UI), Qt, IE, Firefox, Chrome ...",
+  "stars": 3593,
+  "forks": 579,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "automation",
+    "gui",
+    "python",
+    "uiautomation",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-06-02T03:43:03Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

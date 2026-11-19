@@ -1,0 +1,25 @@
+{
+  "id": "github:pydantic/pydantic-ai",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "pydantic/pydantic-ai",
+  "url": "https://github.com/pydantic/pydantic-ai",
+  "description": "How Python does AI. Agents, realtime voice, image generation, embeddings. Every model, every interface, typed end to end.",
+  "stars": 21086,
+  "forks": 3129,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agent-framework",
+    "genai",
+    "harness",
+    "harness-engineering",
+    "llm",
+    "pydantic",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T04:20:33Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

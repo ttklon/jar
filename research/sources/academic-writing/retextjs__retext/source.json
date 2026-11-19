@@ -1,0 +1,24 @@
+{
+  "id": "github:retextjs/retext",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "retextjs/retext",
+  "url": "https://github.com/retextjs/retext",
+  "description": "natural language processor powered by plugins part of the @unifiedjs collective",
+  "stars": 2433,
+  "forks": 93,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "ast",
+    "cst",
+    "javascript",
+    "natural-language",
+    "retext",
+    "unified"
+  ],
+  "archived": false,
+  "pushed_at": "2025-02-04T14:37:32Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

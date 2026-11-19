@@ -1,0 +1,33 @@
+{
+  "id": "github:jdepoix/youtube-transcript-api",
+  "kind": "github",
+  "category": "media-production",
+  "repo": "jdepoix/youtube-transcript-api",
+  "url": "https://github.com/jdepoix/youtube-transcript-api",
+  "description": "This is a python API which allows you to get the transcript/subtitles for a given YouTube video. It also works for automatically generated subtitles and it does not require an API key nor a headless browser, like other selenium based solutions do!",
+  "stars": 8577,
+  "forks": 858,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "asr",
+    "captions",
+    "cli",
+    "python",
+    "subtitle",
+    "subtitles",
+    "transcript",
+    "transcripts",
+    "translating-transcripts",
+    "youtube",
+    "youtube-api",
+    "youtube-asr",
+    "youtube-captions",
+    "youtube-subtitles",
+    "youtube-transcript"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T11:21:31Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

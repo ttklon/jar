@@ -1,0 +1,25 @@
+{
+  "id": "github:aquasecurity/trivy-action",
+  "kind": "github",
+  "category": "safety-and-security",
+  "repo": "aquasecurity/trivy-action",
+  "url": "https://github.com/aquasecurity/trivy-action",
+  "description": "Runs Trivy as GitHub action to scan your Docker container image for vulnerabilities",
+  "stars": 1464,
+  "forks": 360,
+  "language": "Shell",
+  "license": "Apache-2.0",
+  "topics": [
+    "devsecops",
+    "github-actions",
+    "scanner",
+    "scanning",
+    "security",
+    "tools",
+    "vulnerability"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T12:57:25Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

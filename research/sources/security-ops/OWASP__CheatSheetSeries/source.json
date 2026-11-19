@@ -1,0 +1,25 @@
+{
+  "id": "github:OWASP/CheatSheetSeries",
+  "kind": "github",
+  "category": "security-ops",
+  "repo": "OWASP/CheatSheetSeries",
+  "url": "https://github.com/OWASP/CheatSheetSeries",
+  "description": "The OWASP Cheat Sheet Series was created to provide a concise collection of high value information on specific application security topics.",
+  "stars": 33940,
+  "forks": 4716,
+  "language": "JavaScript",
+  "license": "CC-BY-SA-4.0",
+  "topics": [
+    "application-security",
+    "appsec",
+    "best-practices",
+    "cheatsheets",
+    "code",
+    "owasp",
+    "security"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T16:43:10Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

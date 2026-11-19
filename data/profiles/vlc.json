@@ -1,0 +1,53 @@
+{
+  "app": "VLC media player",
+  "exe": ["vlc.exe"],
+  "ui_stack": "win32",
+  "version_seen": "3.0.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": { "by": "api", "value": "vlc --intf dummy --play-and-exit <file>" },
+    "hotkey_play": { "by": "hotkey", "value": "Space" },
+    "snapshot": { "by": "hotkey", "value": "Shift+S", "fallback": "Видео → Сделать снимок" },
+    "stream": { "by": "cli", "value": "--sout '#std{access=http,mux=ts,dst=:8080}'" }
+  },
+  "operations": [
+    {
+      "name": "Воспроизвести файл или плейлист",
+      "registry": "video|воспроизвести|файл",
+      "steps": ["cli:vlc --intf dummy --play-and-exit <path>", "wait:2s", "проверить процесс"],
+      "verify": ["процесс vlc жив", "в заголовке окна имя файла (или лог без ошибок)"],
+      "risk": "read",
+      "notes": "для «проверить, что видео битое» достаточно --play-and-exit и кода возврата"
+    },
+    {
+      "name": "Конвертировать файл без интерфейса",
+      "registry": "video|конвертировать|формат",
+      "steps": ["cli:vlc -I dummy in.mkv --sout '#transcode{vcodec=h264,vb=2000,acodec=mp3}:std{access=file,mux=mp4,dst=out.mp4}' vlc://quit"],
+      "verify": ["ffprobe: целевой кодек/контейнер", "длительность совпадает"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Извлечь кадр для превью",
+      "registry": "video|извлечь|кадр",
+      "steps": ["cli:vlc -I dummy <file> --video-filter=scene --scene-ratio=100 --scene-path=<dir> vlc://quit"],
+      "verify": ["в папке появились PNG", "разрешение = разрешению видео"],
+      "risk": "write-local",
+      "notes": "точнее кадр по таймкоду — через ffmpeg, VLC — фолбэк"
+    },
+    {
+      "name": "Раздать поток по локальной сети",
+      "registry": "video|стримить|в сервис",
+      "steps": ["cli:--sout '#std{access=http,mux=ts,dst=:8080}'", "проверить доступность порта локально"],
+      "verify": ["порт слушается", "тестовый клиент получает поток", "порт не выходит за пределы LAN (правило firewall)"],
+      "risk": "external",
+      "on_fail": "закрыть поток немедленно"
+    },
+    {
+      "name": "Проверить, что файл не битый",
+      "registry": "video|проверить|качество",
+      "steps": ["cli:vlc -I dummy --play-and-exit <file>; код возврата", "ffprobe -v error -show_entries format=duration"],
+      "verify": ["код возврата 0", "ffprobe без ошибок декодирования"],
+      "risk": "read"
+    }
+  ]
+}

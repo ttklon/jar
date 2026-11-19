@@ -1,0 +1,21 @@
+{
+  "id": "github:vitest-dev/vitest",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "vitest-dev/vitest",
+  "url": "https://github.com/vitest-dev/vitest",
+  "description": "Next generation testing framework powered by Vite.",
+  "stars": 17348,
+  "forks": 2142,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "test",
+    "testing-tools",
+    "vite"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T22:47:35Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

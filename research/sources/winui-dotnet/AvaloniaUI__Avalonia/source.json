@@ -1,0 +1,33 @@
+{
+  "id": "github:AvaloniaUI/Avalonia",
+  "kind": "github",
+  "category": "winui-dotnet",
+  "repo": "AvaloniaUI/Avalonia",
+  "url": "https://github.com/AvaloniaUI/Avalonia",
+  "description": "Develop Desktop, Embedded, Mobile and WebAssembly apps with C# and XAML. The future of .NET UI",
+  "stars": 31780,
+  "forks": 2890,
+  "language": "C#",
+  "license": "MIT",
+  "topics": [
+    "android",
+    "app-framework",
+    "avalonia",
+    "avaloniaui",
+    "browser",
+    "c-sharp",
+    "cross-platform",
+    "csharp",
+    "desktop",
+    "dotnet",
+    "gui",
+    "ios",
+    "linux",
+    "macos",
+    "mobile"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T09:52:26Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "github:microsoft/fluentui-system-icons",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "microsoft/fluentui-system-icons",
+  "url": "https://github.com/microsoft/fluentui-system-icons",
+  "description": "Fluent System Icons are a collection of familiar, friendly and modern icons from Microsoft.",
+  "stars": 10968,
+  "forks": 813,
+  "language": "HTML",
+  "license": "MIT",
+  "topics": [
+    "android",
+    "design",
+    "fluent",
+    "flutter",
+    "icons",
+    "ios",
+    "react"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T20:07:44Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

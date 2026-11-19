@@ -1,0 +1,30 @@
+{
+  "id": "github:LibreHardwareMonitor/LibreHardwareMonitor",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "LibreHardwareMonitor/LibreHardwareMonitor",
+  "url": "https://github.com/LibreHardwareMonitor/LibreHardwareMonitor",
+  "description": "Libre Hardware Monitor is free software that can monitor the temperature sensors, fan speeds, voltages, load and clock speeds of your computer.",
+  "stars": 9349,
+  "forks": 1053,
+  "language": "C#",
+  "license": "MPL-2.0",
+  "topics": [
+    "free",
+    "hacktoberfest",
+    "hardware",
+    "hardware-monitoring",
+    "libre-hardware-monitor",
+    "monitor",
+    "monitoring",
+    "open-source",
+    "opensource",
+    "system",
+    "system-monitor",
+    "system-monitoring"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T18:07:18Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

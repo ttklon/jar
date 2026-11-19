@@ -1,0 +1,17 @@
+{
+  "id": "github:noamgat/lm-format-enforcer",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "noamgat/lm-format-enforcer",
+  "url": "https://github.com/noamgat/lm-format-enforcer",
+  "description": "Enforce the output format (JSON Schema, Regex etc) of a language model",
+  "stars": 2038,
+  "forks": 98,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-04-04T14:57:50Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

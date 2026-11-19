@@ -1,0 +1,33 @@
+{
+  "id": "github:Arize-ai/phoenix",
+  "kind": "github",
+  "category": "observability-evals",
+  "repo": "Arize-ai/phoenix",
+  "url": "https://github.com/Arize-ai/phoenix",
+  "description": "AI Observability & Evaluation",
+  "stars": 12201,
+  "forks": 1273,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "agents",
+    "ai-monitoring",
+    "ai-observability",
+    "aiengineering",
+    "anthropic",
+    "datasets",
+    "evals",
+    "langchain",
+    "llamaindex",
+    "llm-eval",
+    "llm-evaluation",
+    "llmops",
+    "llms",
+    "openai",
+    "prompt-engineering"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T05:06:31Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

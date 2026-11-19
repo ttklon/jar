@@ -1,0 +1,26 @@
+{
+  "id": "github:pykeio/ort",
+  "kind": "github",
+  "category": "tauri-rust",
+  "repo": "pykeio/ort",
+  "url": "https://github.com/pykeio/ort",
+  "description": "Fast ML inference & training for ONNX models in Rust",
+  "stars": 2611,
+  "forks": 279,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [
+    "ai",
+    "ai-training",
+    "fine-tuning",
+    "inference",
+    "machine-learning",
+    "onnx",
+    "onnxruntime",
+    "rust"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-01T23:23:32Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

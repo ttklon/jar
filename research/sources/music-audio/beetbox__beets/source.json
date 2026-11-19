@@ -1,0 +1,24 @@
+{
+  "id": "github:beetbox/beets",
+  "kind": "github",
+  "category": "music-audio",
+  "repo": "beetbox/beets",
+  "url": "https://github.com/beetbox/beets",
+  "description": "music library manager and MusicBrainz tagger",
+  "stars": 15909,
+  "forks": 2190,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "cli",
+    "hacktoberfest",
+    "music",
+    "music-library",
+    "musicbrainz",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T08:38:38Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

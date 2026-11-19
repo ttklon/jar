@@ -1,0 +1,27 @@
+{
+  "id": "github:microsoft/WindowsAgentArena",
+  "kind": "github",
+  "category": "benchmarks-extra",
+  "repo": "microsoft/WindowsAgentArena",
+  "url": "https://github.com/microsoft/WindowsAgentArena",
+  "description": "Windows Agent Arena (WAA) 🪟 is a scalable OS platform for testing and benchmarking of multi-modal AI agents.",
+  "stars": 915,
+  "forks": 107,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agentic",
+    "ai",
+    "ai-agent",
+    "ai-benchmark",
+    "ai-research",
+    "computer",
+    "computer-use",
+    "desktop-agent",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-26T18:14:01Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

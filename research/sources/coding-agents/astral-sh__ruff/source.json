@@ -1,0 +1,29 @@
+{
+  "id": "github:astral-sh/ruff",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "astral-sh/ruff",
+  "url": "https://github.com/astral-sh/ruff",
+  "description": "An extremely fast Python linter and code formatter, written in Rust.",
+  "stars": 51078,
+  "forks": 2636,
+  "language": "Rust",
+  "license": "MIT",
+  "topics": [
+    "linter",
+    "pep8",
+    "python",
+    "python3",
+    "ruff",
+    "rust",
+    "rustpython",
+    "static-analysis",
+    "static-code-analysis",
+    "style-guide",
+    "styleguide"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T09:45:46Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

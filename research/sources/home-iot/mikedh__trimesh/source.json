@@ -1,0 +1,22 @@
+{
+  "id": "github:mikedh/trimesh",
+  "kind": "github",
+  "category": "home-iot",
+  "repo": "mikedh/trimesh",
+  "url": "https://github.com/mikedh/trimesh",
+  "description": "Python library for loading and using triangular meshes.",
+  "stars": 3719,
+  "forks": 701,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "geometry",
+    "mesh",
+    "python",
+    "triangular-meshes"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T18:06:00Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

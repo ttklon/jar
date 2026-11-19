@@ -1,0 +1,25 @@
+{
+  "id": "github:Sanster/IOPaint",
+  "kind": "github",
+  "category": "photo-editing",
+  "repo": "Sanster/IOPaint",
+  "url": "https://github.com/Sanster/IOPaint",
+  "description": "Image inpainting tool powered by SOTA AI Model. Remove any unwanted object, defect, people from your pictures or erase and replace(powered by stable diffusion) any thing on your pictures.",
+  "stars": 23284,
+  "forks": 2560,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "inpainting",
+    "lama",
+    "latent-diffusion",
+    "mat",
+    "pytorch",
+    "stable-diffusion",
+    "zits"
+  ],
+  "archived": true,
+  "pushed_at": "2025-04-29T02:13:17Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

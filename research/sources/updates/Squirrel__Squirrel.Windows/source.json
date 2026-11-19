@@ -1,0 +1,22 @@
+{
+  "id": "github:Squirrel/Squirrel.Windows",
+  "kind": "github",
+  "category": "updates",
+  "repo": "Squirrel/Squirrel.Windows",
+  "url": "https://github.com/Squirrel/Squirrel.Windows",
+  "description": "An installation and update framework for Windows desktop apps",
+  "stars": 7989,
+  "forks": 1048,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "c-sharp",
+    "installer",
+    "squirrel",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2024-07-24T10:06:45Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

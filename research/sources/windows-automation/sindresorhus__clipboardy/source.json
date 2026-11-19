@@ -1,0 +1,17 @@
+{
+  "id": "github:sindresorhus/clipboardy",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "sindresorhus/clipboardy",
+  "url": "https://github.com/sindresorhus/clipboardy",
+  "description": "Access the system clipboard (copy/paste)",
+  "stars": 1981,
+  "forks": 72,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-07-23T11:44:38Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

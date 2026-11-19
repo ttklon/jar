@@ -1,0 +1,27 @@
+{
+  "id": "github:amwx/FluentAvalonia",
+  "kind": "github",
+  "category": "winui-dotnet",
+  "repo": "amwx/FluentAvalonia",
+  "url": "https://github.com/amwx/FluentAvalonia",
+  "description": "Control library focused on fluent design and bringing more WinUI controls into Avalonia",
+  "stars": 1625,
+  "forks": 169,
+  "language": "C#",
+  "license": "MIT",
+  "topics": [
+    "avalonia",
+    "avaloniaui",
+    "c-sharp",
+    "cross-platform",
+    "dotnet",
+    "dotnetcore",
+    "fluent",
+    "fluent-design",
+    "xaml"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-22T17:37:48Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

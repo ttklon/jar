@@ -1,0 +1,30 @@
+{
+  "id": "github:dbos-inc/dbos-transact-py",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "dbos-inc/dbos-transact-py",
+  "url": "https://github.com/dbos-inc/dbos-transact-py",
+  "description": "Database-Backed Durable Python Workflows",
+  "stars": 1670,
+  "forks": 120,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "agentic-workflow",
+    "cronjob-scheduler",
+    "dbos",
+    "durable-execution",
+    "microservice-orchestration",
+    "microservices-orchestration",
+    "orchestration",
+    "postgresql",
+    "python",
+    "sqlite",
+    "workflow-engine",
+    "workflows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T01:18:17Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

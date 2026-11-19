@@ -1,0 +1,43 @@
+{
+  "app": "HandBrake",
+  "exe": ["HandBrake.exe", "HandBrakeCLI.exe"],
+  "ui_stack": "win32",
+  "version_seen": "1.9.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": { "by": "api", "value": "HandBrakeCLI -i <in> -o <out> -e x264 -q 22 -B 160" },
+    "gui": { "by": "uia", "value": "ControlType=ComboBox; Name~«Presets»", "fallback": "не нужен при наличии CLI" }
+  },
+  "operations": [
+    {
+      "name": "Сжать видео для веба",
+      "registry": "video|сжать|размер",
+      "steps": ["cli:HandBrakeCLI -i in.mp4 -o out.mp4 -e x264 -q 24 -B 128 --optimize", "wait:по прогрессу"],
+      "verify": ["ffprobe: кодек h264, разрешение то же", "битрейт ниже исходного", "SSIM выборки кадров > 0.95"],
+      "risk": "write-local",
+      "timeouts_ms": 3600000
+    },
+    {
+      "name": "Сделать вертикальную версию 9:16",
+      "registry": "video|конвертировать|формат",
+      "steps": ["cli:--crop 0:0:0:0 --pad 1080:1920", "проверить кадры по краям"],
+      "verify": ["ffprobe: 1080x1920", "нет чёрных полос сверх заданных"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Пакетная обработка папки",
+      "registry": "video|сжать|размер",
+      "steps": ["собрать список файлов", "последовательно запускать CLI", "писать прогресс в журнал"],
+      "verify": ["число выходных файлов = числу входных", "каждый файл открывается (ffprobe)"],
+      "risk": "write-local",
+      "on_fail": "остановить пакет при 2 ошибках подряд, отчёт с именами"
+    },
+    {
+      "name": "Проверить результат и не перезаписать оригинал",
+      "registry": "video|проверить|качество",
+      "steps": ["проверить, что out != in", "сравнить длительность и разрешение", "посчитать SSIM"],
+      "verify": ["файлы различаются", "длительность совпадает ±0.2 с", "SSIM > 0.95"],
+      "risk": "read"
+    }
+  ]
+}

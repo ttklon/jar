@@ -1,0 +1,28 @@
+{
+  "id": "github:microsoft/autogen",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "microsoft/autogen",
+  "url": "https://github.com/microsoft/autogen",
+  "description": "A programming framework for agentic AI",
+  "stars": 61747,
+  "forks": 9384,
+  "language": "Python",
+  "license": "CC-BY-4.0",
+  "topics": [
+    "agentic",
+    "agentic-agi",
+    "agents",
+    "ai",
+    "autogen",
+    "autogen-ecosystem",
+    "chatgpt",
+    "framework",
+    "llm-agent",
+    "llm-framework"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-28T14:45:27Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

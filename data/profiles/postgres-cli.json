@@ -1,0 +1,233 @@
+{
+  "app": "PostgreSQL (psql / pg_dump / pg_restore)",
+  "kind": "tool",
+  "exe": [
+    "psql.exe",
+    "pg_dump.exe",
+    "pg_restore.exe"
+  ],
+  "ui_stack": "win32",
+  "version_seen": "PostgreSQL 16–17 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "connect": {
+      "by": "api",
+      "value": "psql \"postgresql://user@host:5432/db\" -v ON_ERROR_STOP=1 -c \"select version()\""
+    },
+    "readonly": {
+      "by": "api",
+      "value": "SET default_transaction_read_only = on; — сессия только на чтение"
+    },
+    "timing": {
+      "by": "api",
+      "value": "\\timing on; EXPLAIN (ANALYZE, BUFFERS) <sql>"
+    },
+    "dump": {
+      "by": "api",
+      "value": "pg_dump -Fc -Z6 -f db.dump db; pg_dump --schema-only -f schema.sql db"
+    },
+    "restore": {
+      "by": "api",
+      "value": "pg_restore -d newdb --no-owner --exit-on-error db.dump"
+    },
+    "sessions": {
+      "by": "api",
+      "value": "pg_stat_activity; pg_cancel_backend(pid); pg_terminate_backend(pid)"
+    },
+    "slow": {
+      "by": "api",
+      "value": "pg_stat_statements (total_exec_time desc); log_min_duration_statement"
+    },
+    "grants": {
+      "by": "api",
+      "value": "\\du, \\dp, information_schema.role_table_grants, has_table_privilege()"
+    }
+  },
+  "operations": [
+    {
+      "name": "Подключиться и убедиться, что права не лишние",
+      "registry": "databases|подключиться|к БД",
+      "steps": [
+        "пароль из секрета/$env:PGPASSWORD или .pgpass (права только владельцу)",
+        "psql \"postgresql://user@host/db\" -v ON_ERROR_STOP=1 -c \"select version()\"",
+        "для задачи на чтение: SET default_transaction_read_only = on;"
+      ],
+      "verify": [
+        "названы версия сервера и версия клиента",
+        "SELECT 1 возвращает строку",
+        "роль не SUPERUSER, если задача только на чтение"
+      ],
+      "risk": "read",
+      "notes": "ON_ERROR_STOP=1 обязателен: без него psql продолжит после ошибки и покажет «успех» на сломанном скрипте"
+    },
+    {
+      "name": "Выполнить SELECT с LIMIT и планом",
+      "registry": "databases|выполнить|SELECT",
+      "steps": [
+        "\\timing on",
+        "SELECT ... LIMIT 1000;",
+        "EXPLAIN (ANALYZE, BUFFERS) того же запроса при времени > 1 с"
+      ],
+      "verify": [
+        "время выполнения в числах",
+        "LIMIT соблюдён",
+        "при Seq Scan на большой таблице план показан, а не скрыт"
+      ],
+      "risk": "read"
+    },
+    {
+      "name": "Оптимизировать запрос индексом",
+      "registry": "databases|оптимизировать|запрос",
+      "steps": [
+        "EXPLAIN (ANALYZE, BUFFERS) до",
+        "проверить, нет ли уже подходящего индекса (pg_indexes)",
+        "CREATE INDEX CONCURRENTLY ...",
+        "проверить indisvalid в pg_index",
+        "ANALYZE t",
+        "EXPLAIN (ANALYZE, BUFFERS) после"
+      ],
+      "verify": [
+        "план сменился на Index Scan/Bitmap Index Scan",
+        "время до/после названо числами",
+        "индекс не дублирует существующий",
+        "indisvalid = true"
+      ],
+      "risk": "write-local",
+      "on_fail": "неудачный CONCURRENTLY оставляет индекс INVALID — его надо DROP и повторить, а не оставлять"
+    },
+    {
+      "name": "Найти медленные запросы",
+      "registry": "databases|проверить|медленные запросы",
+      "steps": [
+        "SELECT ... FROM pg_stat_statements ORDER BY total_exec_time DESC LIMIT 20;",
+        "pg_stat_activity: state, wait_event_type, query_start",
+        "лог: log_min_duration_statement"
+      ],
+      "verify": [
+        "топ запросов с числом вызовов и средним временем",
+        "отдельно отмечены ждущие блокировку (wait_event_type = 'Lock')",
+        "нет вывода «база тормозит» без метрики"
+      ],
+      "risk": "read"
+    },
+    {
+      "name": "Сделать бэкап",
+      "registry": "databases|сделать|бэкап БД",
+      "steps": [
+        "pg_dump -Fc -Z6 -f db-YYYYMMDD.dump db",
+        "для большой базы — pg_dump -Fd --jobs=4",
+        "pg_dump --schema-only -f schema.sql db"
+      ],
+      "verify": [
+        "pg_restore --list db.dump выдаёт объекты",
+        "размер файла > 0 и сопоставим с объёмом базы",
+        "число таблиц в дампе = числу в pg_class базы"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Восстановить из дампа в новую базу",
+      "registry": "databases|восстановить|БД",
+      "steps": [
+        "CREATE DATABASE restore_check;",
+        "pg_restore -d restore_check --no-owner --exit-on-error db.dump",
+        "сравнить count(*) ключевых таблиц с источником",
+        "переключить приложение только после сравнения"
+      ],
+      "verify": [
+        "pg_restore завершился с кодом 0",
+        "count(*) совпали с источником",
+        "расширения (pgcrypto, postgis) на месте",
+        "исходная база не тронута"
+      ],
+      "risk": "destructive",
+      "on_fail": "ошибки владельцев не глотать через --no-owner без записи в отчёт; повторный restore в ту же базу — только после DROP"
+    },
+    {
+      "name": "Мониторить базу",
+      "registry": "databases|мониторить|БД",
+      "steps": [
+        "pg_stat_activity — сессии, ожидания, долгие транзакции",
+        "pg_locks — кто кого блокирует",
+        "pg_database_size / pg_total_relation_size",
+        "pg_stat_user_tables — n_dead_tup, last_autovacuum",
+        "pg_stat_database — blks_hit ratio, xact_rollback"
+      ],
+      "verify": [
+        "по каждому пункту число",
+        "названы таблицы под autovacuum-долгом",
+        "названы сессии старше заданного порога",
+        "есть порог, при котором поднимается тревога"
+      ],
+      "risk": "read"
+    },
+    {
+      "name": "Проверить права и роли",
+      "registry": "databases|проверить|права и роли",
+      "steps": [
+        "\\du — роли и атрибуты",
+        "\\dp — права на таблицы",
+        "information_schema.role_table_grants",
+        "has_table_privilege('app_user','t','INSERT')"
+      ],
+      "verify": [
+        "перечислены роли с атрибутами SUPERUSER/CREATEDB/LOGIN",
+        "у приложения нет прав выше необходимых",
+        "PUBLIC не имеет прав на таблицы"
+      ],
+      "risk": "read",
+      "notes": "сервис под суперпользователем — типичная причина катастрофы при инъекции; проверка дешёвая, последствия дорогие"
+    },
+    {
+      "name": "Закрыть сессии перед обслуживанием",
+      "registry": "databases|закрыть|сессии перед обслуживанием",
+      "steps": [
+        "список сессий по базе (без своей и репликационных)",
+        "pg_cancel_backend(pid) — мягко",
+        "подождать и предупредить",
+        "pg_terminate_backend(pid) — если не помогло"
+      ],
+      "verify": [
+        "в pg_stat_activity не осталось чужих сессий этой базы",
+        "ни одна не оборвана без предварительного cancel",
+        "в логе сервера есть сообщение о terminate"
+      ],
+      "risk": "destructive",
+      "notes": "terminate обрывает транзакцию: незакоммиченное потеряется, поэтому сначала cancel"
+    },
+    {
+      "name": "Сравнить схемы двух баз",
+      "registry": "databases|сравнить|схемы двух БД",
+      "steps": [
+        "pg_dump --schema-only по обеим базам",
+        "diff с нормализацией (owner/ACL/комментарии убрать)",
+        "отдельно information_schema.columns и pg_indexes"
+      ],
+      "verify": [
+        "для каждого расхождения указано направление (есть в A, нет в B)",
+        "миграционный скрипт проверен на копии",
+        "ни один DROP не выполняется автоматически"
+      ],
+      "risk": "read",
+      "on_fail": "если схемы расходятся неожиданно — остановиться и показать дифф, а не «догонять» прод"
+    },
+    {
+      "name": "Применить миграцию",
+      "registry": "databases|мигрировать|схему",
+      "steps": [
+        "бэкап pg_dump -Fc",
+        "SET lock_timeout = '5s';",
+        "BEGIN; ALTER TABLE ...; COMMIT;",
+        "при таймауте — повторить в окно низкой нагрузки"
+      ],
+      "verify": [
+        "версия схемы (таблица migrations) обновилась",
+        "\\d t показывает изменения",
+        "приложение отвечает после миграции",
+        "бэкап до миграции на месте"
+      ],
+      "risk": "destructive",
+      "on_fail": "ALTER TABLE берёт ACCESS EXCLUSIVE: на большой таблице — новая колонка + backfill + переключение, а не блокировка на минуты"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "github:block/goose",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "block/goose",
+  "url": "https://github.com/block/goose",
+  "description": "an open source, extensible AI agent that goes beyond code suggestions - install, execute, edit, and test with any LLM",
+  "stars": 56348,
+  "forks": 6566,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [
+    "acp",
+    "ai",
+    "ai-agents",
+    "mcp"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T00:56:41Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "github:th-ch/youtube-music",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "th-ch/youtube-music",
+  "url": "https://github.com/th-ch/youtube-music",
+  "description": "Pear 🍐 is extension for music player",
+  "stars": 33998,
+  "forks": 2039,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "desktop-app",
+    "electron",
+    "linux",
+    "mac",
+    "macosx",
+    "music",
+    "music-player",
+    "music-player-application",
+    "music-player-extension",
+    "node",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T01:55:43Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "github:qpdf/qpdf",
+  "kind": "github",
+  "category": "office-automation",
+  "repo": "qpdf/qpdf",
+  "url": "https://github.com/qpdf/qpdf",
+  "description": "qpdf: A content-preserving PDF document transformer",
+  "stars": 5564,
+  "forks": 417,
+  "language": "C++",
+  "license": "Apache-2.0",
+  "topics": [
+    "pdf",
+    "pdf-document-processor"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-26T23:55:04Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

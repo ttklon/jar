@@ -1,0 +1,17 @@
+{
+  "id": "github:huggingface/smollm",
+  "kind": "github",
+  "category": "low-end-inference",
+  "repo": "huggingface/smollm",
+  "url": "https://github.com/huggingface/smollm",
+  "description": "Everything about the SmolLM and SmolVLM family of models",
+  "stars": 3949,
+  "forks": 330,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-06T23:24:19Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

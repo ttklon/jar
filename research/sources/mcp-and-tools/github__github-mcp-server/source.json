@@ -1,0 +1,21 @@
+{
+  "id": "github:github/github-mcp-server",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "github/github-mcp-server",
+  "url": "https://github.com/github/github-mcp-server",
+  "description": "GitHub's official MCP Server",
+  "stars": 34320,
+  "forks": 5306,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [
+    "github",
+    "mcp",
+    "mcp-server"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T23:25:36Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

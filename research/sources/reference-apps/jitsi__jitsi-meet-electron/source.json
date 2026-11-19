@@ -1,0 +1,23 @@
+{
+  "id": "github:jitsi/jitsi-meet-electron",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "jitsi/jitsi-meet-electron",
+  "url": "https://github.com/jitsi/jitsi-meet-electron",
+  "description": "Jitsi Meet desktop application powered by :electron:",
+  "stars": 1636,
+  "forks": 513,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "electron",
+    "jitsi",
+    "jitsi-meet",
+    "video-conferencing",
+    "webrtc"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-28T17:59:09Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

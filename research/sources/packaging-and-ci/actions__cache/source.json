@@ -1,0 +1,17 @@
+{
+  "id": "github:actions/cache",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "actions/cache",
+  "url": "https://github.com/actions/cache",
+  "description": "Cache dependencies and build outputs in GitHub Actions",
+  "stars": 5594,
+  "forks": 1612,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-07-15T18:13:46Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,89 @@
+---
+id: "pypi:pip"
+kind: "pypi"
+category: "self-extension"
+package: "pip"
+version: "26.3"
+url: "https://pypi.org/project/pip/"
+requires_python: ">=3.10"
+summary: "The PyPA recommended tool for installing Python packages."
+fetched_at: "2026-11-08T12:31:02Z"
+---
+
+# pip 26.3
+
+**Summary:** The PyPA recommended tool for installing Python packages.
+
+**Install:** `pip install pip`
+
+**Python:** >=3.10
+
+## Distribution artifacts
+
+- pip-26.3-py3-none-any.whl (1.9 MB)
+- pip-26.3.tar.gz (1.8 MB)
+
+## Description
+
+pip - The Python Package Installer
+==================================
+
+.. |pypi-version| image:: https://img.shields.io/pypi/v/pip.svg
+   :target: https://pypi.org/project/pip/
+   :alt: PyPI
+
+.. |python-versions| image:: https://img.shields.io/pypi/pyversions/pip
+   :target: https://pypi.org/project/pip
+   :alt: PyPI - Python Version
+
+.. |docs-badge| image:: https://readthedocs.org/projects/pip/badge/?version=latest
+   :target: https://pip.pypa.io/en/latest
+   :alt: Documentation
+
+|pypi-version| |python-versions| |docs-badge|
+
+Pip is the `package installer`_ for Python. You can use pip to install packages from the `Python Package Index`_ and other indexes.
+
+Please take a look at our documentation for how to install and use pip:
+
+* `Installation`_
+* `Usage`_
+
+We release updates regularly, with a new version every 3 months. Find more details in our documentation:
+
+* `Release notes`_
+* `Release process`_
+
+If you find bugs, need help, or want to talk to the developers, please use our mailing lists or chat rooms:
+
+* `Issue tracking`_
+* `Discourse channel`_
+* `User IRC`_
+
+If you want to get involved, head over to GitHub to get the source code, look at our development documentation and feel free to jump on the developer mailing lists and chat rooms:
+
+* `GitHub page`_
+* `Development documentation`_
+* `Development IRC`_
+
+Code of Conduct
+---------------
+
+Everyone interacting in the pip project's codebases, issue trackers, chat
+rooms, and mailing lists is expected to follow the `PSF Code of Conduct`_.
+
+.. _package installer: https://packaging.python.org/guides/tool-recommendations/
+.. _Python Package Index: https://pypi.org
+.. _Installation: https://pip.pypa.io/en/stable/installation/
+.. _Usage: https://pip.pypa.io/en/stable/
+.. _Release notes: https://pip.pypa.io/en/stable/news.html
+.. _Release process: https://pip.pypa.io/en/latest/development/release-process/
+.. _GitHub page: https://github.com/pypa/pip
+.. _Development documentation: https://pip.pypa.io/en/latest/development
+.. _Issue tracking: https://github.com/pypa/pip/issues
+.. _Discourse channel: https://discuss.python.org/c/packaging
+.. _User IRC: https://kiwiirc.com/nextclient/#ircs://irc.libera.chat:+6697/pypa
+.. _Development IRC: https://kiwiirc.com/nextclient/#ircs://irc.libera.chat:+6697/pypa-dev
+.. _PSF Code of Conduct: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
+
+

@@ -1,0 +1,25 @@
+{
+  "id": "github:zerotier/ZeroTierOne",
+  "kind": "github",
+  "category": "network-admin",
+  "repo": "zerotier/ZeroTierOne",
+  "url": "https://github.com/zerotier/ZeroTierOne",
+  "description": "A Smart Ethernet Switch for Earth",
+  "stars": 17239,
+  "forks": 1992,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "decentralization",
+    "networking",
+    "peer-to-peer",
+    "sd-wan",
+    "sdn",
+    "virtual-network",
+    "vpn"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-03T17:04:55Z",
+  "default_branch": "dev",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

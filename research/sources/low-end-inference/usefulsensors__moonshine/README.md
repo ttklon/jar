@@ -1,0 +1,66 @@
+---
+id: "github:usefulsensors/moonshine"
+kind: "github"
+category: "low-end-inference"
+repo: "usefulsensors/moonshine"
+url: "https://github.com/usefulsensors/moonshine"
+description: "Very low latency speech to text, intent recognition, and text to speech, for building voice agents and interfaces"
+stars: 11436
+forks: 658
+language: "C++"
+license: "NOASSERTION"
+topics:
+  - "intent-recognition"
+  - "stt"
+  - "tts"
+  - "voice"
+  - "voice-recognition"
+archived: false
+pushed_at: "2026-11-08T03:49:28Z"
+default_branch: "main"
+fetched_at: "2026-11-08T12:31:02Z"
+---
+
+![Moonshine Voice Logo](docs/images/logo.png)
+
+# Moonshine Voice
+
+**Voice Interfaces for Everyone**
+
+[Moonshine](https://moonshine.ai) Voice is an open source AI toolkit for developers building real-time voice agents and applications.
+
+Full guides, models, and API reference are at **[moonshine-voice.readthedocs.io](https://moonshine-voice.readthedocs.io/)**.
+
+- Everything runs on-device — fast, private, and with no account or API keys.
+- Optimized for live streaming, with low latency by doing work while the user is still talking.
+- Speech to text models trained from scratch, from [higher accuracy than Whisper Large V3](https://huggingface.co/spaces/hf-audio/open_asr_leaderboard) down to [tiny 1MB models](micro/README.md).
+- One library across [Python, JavaScript/WASM, iOS, Android, macOS, Linux, Windows, and Raspberry Pi](https://moonshine-voice.readthedocs.io/en/latest/quickstart/).
+- Speech to text in English, Spanish, German, Mandarin, Japanese, Korean, Vietnamese, Tagalog, Ukrainian, and Arabic, and text to speech in English, Spanish, Arabic, German, French, Hindi, Italian, Japanese, Korean, Dutch, Portuguese, Russian, Turkish, Ukrainian, Vietnamese, and Mandarin.
+
+## Quickstart
+
+<!-- doc-test: parse-only -->
+```bash
+pip install moonshine-voice
+moonshine-voice mic --language en
+```
+
+Every other platform is covered in the [Quickstart](https://moonshine-voice.readthedocs.io/en/latest/quickstart/), with runnable samples in [Examples](https://moonshine-voice.readthedocs.io/en/latest/examples/).
+
+Building with a coding agent? Copy [`.agents/skills/moonshine-voice/`](https://github.com/moonshine-ai/moonshine/tree/main/.agents/skills/moonshine-voice) into your project's `.agents/skills/` folder, or run `npx skills add moonshine-ai/moonshine --skill moonshine-voice`. The skill teaches the current API shape so the agent does not reach for Whisper or the old `DialogFlow` names.
+
+## Documentation
+
+- [Quickstart](https://moonshine-voice.readthedocs.io/en/latest/quickstart/) to install and run on your platform.
+- [Using the Library](https://moonshine-voice.readthedocs.io/en/latest/using/) for transcription, text to speech, and conversational agents.
+- [Models](https://moonshine-voice.readthedocs.io/en/latest/models/) for what's available, accuracy, and domain customization.
+- [API Reference](https://moonshine-voice.readthedocs.io/en/latest/api/classes/) for the classes, options, and C API.
+
+## Support
+
+- [Discord](https://discord.gg/27qp9zSRXF) for live support.
+- [GitHub Issues](https://github.com/moonshine-ai/moonshine/issues) for bugs and feature requests.
+
+## License
+
+Licensed under the [MIT License](LICENSE). The models are MIT by default too, in every language and at every size — the only exceptions are the legacy non-streaming models for languages other than English, which stay under the non-commercial Moonshine Community License and are enumerated in [LICENSE](LICENSE).

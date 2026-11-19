@@ -1,0 +1,18 @@
+# Discovery: `llm evaluation tool calling`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 101 | [StoKou/repo-asynctool](https://github.com/StoKou/repo-asynctool) | Python | MIT | 2026-05-27 | 「EMNLP2026 Findings」AsyncTool is a benchmark for evaluating the asynchronous function-calling capability of LLM-based agents in multi-task tool-use scenarios. |
+| 55 | [wuruiwurui/OpenAgentFlow](https://github.com/wuruiwurui/OpenAgentFlow) | Java | MIT | 2026-10-17 | Java AI Agent, Spring Boot 3, Vue3, RAG, Tool Calling, MCP, LLM, OpenAI-compatible, Milvus, MySQL, Redis, Workflow, Trace, Evaluation, Cost Governance. OpenAgentFlow-Java 是开源 Java AI Agent 工作流平台，核心链路自研，支持智能体编排、知识库问答、文档切片 |
+| 37 | [LGAI-Research/PCBWorld](https://github.com/LGAI-Research/PCBWorld) | Python | BSD-3-Clause | 2026-10-21 | A reinforcement learning environment for PCB autorouting, built on KiCad's push-and-shove router. Includes a decoder-only PPO/GRPO agent, LLM tool-calling and rule-based baselines, and a uniform 3-stage evaluation pipeli |
+| 16 | [pie-script/llm-agent-testbed](https://github.com/pie-script/llm-agent-testbed) | Python | MIT | 2026-10-05 | An empirical security testbed evaluating prompt injection, confused-deputy vulnerabilities, and tool-calling defenses in LLM agents. |
+| 11 | [viktor-shcherb/llm-tool-call-sft](https://github.com/viktor-shcherb/llm-tool-call-sft) | Python | CC0-1.0 | 2025-11-07 | LoRA fine-tuning pipeline for tool-calling chat LLMs with config-driven datasets, deterministic prompts, and built-in tool-call evaluation. |
+| 8 | [awslabs/uaef](https://github.com/awslabs/uaef) | Python | Apache-2.0 | 2026-11-03 | Universal Agent Evaluation Framework (UAEF) is a framework-agnostic evaluation system for AI agents. Invoke any agent and score it on multiple metrics spanning tool calling, response quality, safety, performance, and rea |
+| 6 | [yotambraun/Toolscore](https://github.com/yotambraun/Toolscore) | Python | Apache-2.0 | 2026-11-03 | Python framework for evaluating LLM tool-calling behavior with comprehensive metrics on accuracy, efficiency, and correctness |
+| 6 | [MohamedAbdelaiem/Smart-Support-Agent](https://github.com/MohamedAbdelaiem/Smart-Support-Agent) | Python | MIT | 2026-08-15 | An autonomous AI support microservice built with FastAPI, PostgreSQL & pgvector, featuring dynamic few-shot RAG, tool calling, multi-provider LLM fallback, and LangSmith evaluation. |
+| 4 | [GitTanish/Insight](https://github.com/GitTanish/Insight) | Python | MIT | 2026-11-07 | Validated analytics agent for CSV/Excel. LLMs plan - as a JSON plan or a bounded tool-calling loop - while deterministic pandas/scipy/DuckDB computes and re-verifies every number. No arbitrary code execution: the model o |
+| 3 | [alok-vibe-code/agentic-ai-learning-roadmap](https://github.com/alok-vibe-code/agentic-ai-learning-roadmap) | Python | MIT | 2026-08-30 | A practical 12-week Agentic AI learning roadmap covering LLM foundations, tool calling, RAG, memory, MCP, multi-agent systems, evaluation, security, and production deployment. |
+| 3 | [felixzhu97/explore-ai](https://github.com/felixzhu97/explore-ai) | Java | Apache-2.0 | 2026-11-07 | A platform for conversational AI with chat, RAG, tool calling, and quality evaluation. It is written in Java with Spring AI, and uses Angular on the frontend. |
+| 2 | [orlyandico/model-test-python](https://github.com/orlyandico/model-test-python) | Python | MIT | 2026-02-14 | Tool-calling evaluation harness for LLMs across local and cloud backends |

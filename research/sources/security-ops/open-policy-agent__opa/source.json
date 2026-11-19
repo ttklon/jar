@@ -1,0 +1,26 @@
+{
+  "id": "github:open-policy-agent/opa",
+  "kind": "github",
+  "category": "security-ops",
+  "repo": "open-policy-agent/opa",
+  "url": "https://github.com/open-policy-agent/opa",
+  "description": "Open Policy Agent (OPA) is an open source, general-purpose policy engine.",
+  "stars": 12446,
+  "forks": 1708,
+  "language": "Go",
+  "license": "Apache-2.0",
+  "topics": [
+    "authorization",
+    "cloud-native",
+    "compliance",
+    "declarative",
+    "json",
+    "opa",
+    "open-policy-agent",
+    "policy"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T03:45:08Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

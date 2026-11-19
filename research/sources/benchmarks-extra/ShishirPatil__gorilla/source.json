@@ -1,0 +1,26 @@
+{
+  "id": "github:ShishirPatil/gorilla",
+  "kind": "github",
+  "category": "benchmarks-extra",
+  "repo": "ShishirPatil/gorilla",
+  "url": "https://github.com/ShishirPatil/gorilla",
+  "description": "Gorilla: Training and Evaluating LLMs for Function Calls (Tool Calls)",
+  "stars": 13064,
+  "forks": 1419,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "api",
+    "api-documentation",
+    "chatgpt",
+    "claude-api",
+    "gpt-4-api",
+    "llm",
+    "openai-api",
+    "openai-functions"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-17T06:06:24Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

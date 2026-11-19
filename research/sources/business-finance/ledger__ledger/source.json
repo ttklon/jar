@@ -1,0 +1,22 @@
+{
+  "id": "github:ledger/ledger",
+  "kind": "github",
+  "category": "business-finance",
+  "repo": "ledger/ledger",
+  "url": "https://github.com/ledger/ledger",
+  "description": "Double-entry accounting system with a command-line reporting interface",
+  "stars": 6067,
+  "forks": 553,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "accounting",
+    "command-line-tool",
+    "ledger",
+    "plaintext-accounting"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T01:30:47Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

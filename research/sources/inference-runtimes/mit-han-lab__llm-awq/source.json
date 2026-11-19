@@ -1,0 +1,17 @@
+{
+  "id": "github:mit-han-lab/llm-awq",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "mit-han-lab/llm-awq",
+  "url": "https://github.com/mit-han-lab/llm-awq",
+  "description": "[MLSys 2024 Best Paper Award] AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration",
+  "stars": 3664,
+  "forks": 328,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2025-07-17T19:44:51Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

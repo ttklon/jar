@@ -1,0 +1,33 @@
+{
+  "id": "github:openvinotoolkit/openvino",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "openvinotoolkit/openvino",
+  "url": "https://github.com/openvinotoolkit/openvino",
+  "description": "OpenVINO™ is an open source toolkit for optimizing and deploying AI inference",
+  "stars": 11130,
+  "forks": 3542,
+  "language": "C++",
+  "license": "Apache-2.0",
+  "topics": [
+    "ai",
+    "computer-vision",
+    "deep-learning",
+    "deploy-ai",
+    "diffusion-models",
+    "generative-ai",
+    "good-first-issue",
+    "inference",
+    "llm-inference",
+    "natural-language-processing",
+    "nlp",
+    "openvino",
+    "optimize-ai",
+    "performance-boost",
+    "recommendation-system"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T21:58:36Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

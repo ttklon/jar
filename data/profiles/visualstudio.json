@@ -1,0 +1,56 @@
+{
+  "app": "Microsoft Visual Studio",
+  "exe": ["devenv.exe"],
+  "ui_stack": "uia",
+  "version_seen": "17.x (2022, 2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli_build": { "by": "api", "value": "msbuild <solution>.sln /m /p:Configuration=Release /v:minimal /nologo", "fallback": "devenv.com <solution>.sln /Rebuild Release /Project <proj>" },
+    "dt": { "by": "api", "value": "COM: DTE2 (VisualStudio.DTE.17.0) — Solution, SolutionBuild, Debugger", "fallback": "UIA + меню «Сборка»" },
+    "test_cli": { "by": "api", "value": "vstest.console.exe <tests>.dll /Logger:trx /ResultsDirectory:<dir>" },
+    "solution_explorer": { "by": "uia", "value": "Tree Item Name='Solution Explorer' (ControlType=Tree)", "fallback": "Ctrl+Alt+L" },
+    "error_list": { "by": "hotkey", "value": "Ctrl+\\, E", "fallback": "Вид → Список ошибок" },
+    "find_in_files": { "by": "hotkey", "value": "Ctrl+Shift+F" },
+    "output": { "by": "hotkey", "value": "Ctrl+Alt+O" }
+  },
+  "operations": [
+    {
+      "name": "Собрать решение и прочитать результат",
+      "registry": "dev-code|собрать|релиз",
+      "steps": ["anchor:cli_build", "сохранить лог, разобрать warning/error", "при ошибках — открыть anchor:error_list и сопоставить"],
+      "verify": ["код возврата msbuild = 0", "в логе есть «Build succeeded» и число проектов", "артефакты в bin\\Release новее начала сборки"],
+      "risk": "write-local",
+      "timeouts_ms": 900000,
+      "on_fail": "не пересобирать повторно «на удачу»: сначала объяснить первую ошибку и её причину"
+    },
+    {
+      "name": "Запустить тесты",
+      "registry": "dev-code|запустить|тесты",
+      "steps": ["собрать Release (или Debug под тесты)", "cli:vstest.console.exe ... /Logger:trx", "прочитать .trx: сколько прошло, сколько упало и почему"],
+      "verify": ["trx-файл создан и разобран", "есть итоговые счётчики Passed/Failed", "для упавших тестов цитируется стек и сообщение"],
+      "risk": "write-local",
+      "on_fail": "если тестов 0 — это не успех: значит, фильтр или dll не найдены"
+    },
+    {
+      "name": "Найти в коде",
+      "registry": "dev-code|найти|в коде",
+      "steps": ["hotkey:Ctrl+Shift+F → ввести строку поиска", "фильтр по типам файлов (*.cs;*.cshtml)", "прочитать найденные фрагменты с номерами строк"],
+      "verify": ["в ответе файл, строка и контекст", "найденное действительно совпадает с запросом (регистр/подстрока)", "поиск не пропустил бинарные и сгенерированные папки"],
+      "risk": "read"
+    },
+    {
+      "name": "Объяснить ошибку компиляции",
+      "registry": "dev-code|объяснить|ошибку",
+      "steps": ["прочитать код ошибки (CS####) и сообщение", "найти строку в документе, а не только в списке", "предложить минимальное исправление"],
+      "verify": ["назван код ошибки и файл:строка", "объяснение ссылается на фактическую сигнатуру/тип", "после исправления сборка проходит (повторный msbuild)"],
+      "risk": "read"
+    },
+    {
+      "name": "Показать состояние репозитория",
+      "registry": "dev-code|показать|состояние репозитория",
+      "steps": ["cli:git status --short", "cli:git log --oneline -5", "сопоставить с решением VS: какие файлы изменены вне решения"],
+      "verify": ["показаны изменённые/неотслеживаемые файлы", "указана текущая ветка и последний коммит", "нет расхождений между VS и git (файлы, открытые с изменениями, перечислены)"],
+      "risk": "read"
+    }
+  ]
+}

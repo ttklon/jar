@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/BitNet",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "microsoft/BitNet",
+  "url": "https://github.com/microsoft/BitNet",
+  "description": "Official inference framework for 1-bit LLMs",
+  "stars": 41505,
+  "forks": 3872,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-07-27T05:52:06Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

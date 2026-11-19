@@ -1,0 +1,33 @@
+{
+  "id": "github:Portkey-AI/gateway",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "Portkey-AI/gateway",
+  "url": "https://github.com/Portkey-AI/gateway",
+  "description": "A blazing fast AI Gateway with integrated guardrails. Route to 1,600+ LLMs, 50+ AI Guardrails with 1 fast & friendly API.",
+  "stars": 13342,
+  "forks": 1375,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "ai-gateway",
+    "gateway",
+    "generative-ai",
+    "hacktoberfest",
+    "langchain",
+    "llm",
+    "llm-gateway",
+    "llmops",
+    "llms",
+    "mcp",
+    "mcp-client",
+    "mcp-gateway",
+    "mcp-servers",
+    "model-router",
+    "openai"
+  ],
+  "archived": false,
+  "pushed_at": "2026-05-25T13:54:51Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

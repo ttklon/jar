@@ -1,0 +1,33 @@
+{
+  "id": "github:memgraph/memgraph",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "memgraph/memgraph",
+  "url": "https://github.com/memgraph/memgraph",
+  "description": "High-performance open-source in-memory graph database for GraphRAG, AI memory, agentic AI, and real-time graph analytics. Cypher-compatible, built in C++.",
+  "stars": 4653,
+  "forks": 297,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "ai",
+    "ai-agents",
+    "ai-memory",
+    "context-graph",
+    "cypher",
+    "enterprise-context",
+    "graph",
+    "graph-algorithms",
+    "graph-analysis",
+    "graph-database",
+    "graphrag",
+    "kafka",
+    "nosql",
+    "opencypher",
+    "streaming"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:20:41Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

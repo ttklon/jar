@@ -1,0 +1,25 @@
+{
+  "id": "github:rjsf-team/react-jsonschema-form",
+  "kind": "github",
+  "category": "configuration",
+  "repo": "rjsf-team/react-jsonschema-form",
+  "url": "https://github.com/rjsf-team/react-jsonschema-form",
+  "description": "A React component for building Web forms from JSON Schema.",
+  "stars": 15935,
+  "forks": 2348,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "data-validation",
+    "forms",
+    "json",
+    "json-schema",
+    "react",
+    "ui",
+    "web"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T06:37:07Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

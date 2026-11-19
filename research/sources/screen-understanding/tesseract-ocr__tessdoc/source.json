@@ -1,0 +1,17 @@
+{
+  "id": "github:tesseract-ocr/tessdoc",
+  "kind": "github",
+  "category": "screen-understanding",
+  "repo": "tesseract-ocr/tessdoc",
+  "url": "https://github.com/tesseract-ocr/tessdoc",
+  "description": "Tesseract documentation",
+  "stars": 2457,
+  "forks": 437,
+  "language": "HTML",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-29T07:23:56Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

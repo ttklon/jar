@@ -1,0 +1,31 @@
+{
+  "id": "github:mastra-ai/mastra",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "mastra-ai/mastra",
+  "url": "https://github.com/mastra-ai/mastra",
+  "description": "Mastra is the modern TypeScript framework for AI-powered applications and agents.",
+  "stars": 29405,
+  "forks": 3084,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "agents",
+    "ai",
+    "chatbots",
+    "evals",
+    "javascript",
+    "llm",
+    "mcp",
+    "nextjs",
+    "nodejs",
+    "reactjs",
+    "tts",
+    "typescript",
+    "workflows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T06:43:26Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

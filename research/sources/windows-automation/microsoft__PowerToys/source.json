@@ -1,0 +1,30 @@
+{
+  "id": "github:microsoft/PowerToys",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "microsoft/PowerToys",
+  "url": "https://github.com/microsoft/PowerToys",
+  "description": "Microsoft PowerToys is a collection of utilities that supercharge productivity and customization on Windows",
+  "stars": 140714,
+  "forks": 8709,
+  "language": "C",
+  "license": "MIT",
+  "topics": [
+    "advanced-paste",
+    "color-picker",
+    "command-palette",
+    "desktop",
+    "fancyzones",
+    "keyboard-manager",
+    "microsoft-powertoys",
+    "powerrename",
+    "powertoys",
+    "windows",
+    "windows-10",
+    "windows-11"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T22:46:30Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "github:citation-style-language/styles",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "citation-style-language/styles",
+  "url": "https://github.com/citation-style-language/styles",
+  "description": "Official repository for Citation Style Language (CSL) citation styles.",
+  "stars": 3937,
+  "forks": 4188,
+  "language": "Ruby",
+  "license": "NOASSERTION",
+  "topics": [
+    "bibliography",
+    "citation-style-language",
+    "citation-styles",
+    "citations",
+    "csl",
+    "hacktoberfest"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T14:30:18Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

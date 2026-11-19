@@ -1,0 +1,20 @@
+{
+  "id": "github:mhammond/pywin32",
+  "kind": "github",
+  "category": "office-automation",
+  "repo": "mhammond/pywin32",
+  "url": "https://github.com/mhammond/pywin32",
+  "description": "Python for Windows (pywin32) Extensions",
+  "stars": 5633,
+  "forks": 850,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "python",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-03T00:17:20Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

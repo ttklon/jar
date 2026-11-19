@@ -1,0 +1,17 @@
+{
+  "id": "github:modelcontextprotocol/servers",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "modelcontextprotocol/servers",
+  "url": "https://github.com/modelcontextprotocol/servers",
+  "description": "Model Context Protocol Reference Servers",
+  "stars": 91864,
+  "forks": 11927,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-05T06:26:00Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

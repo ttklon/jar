@@ -1,0 +1,31 @@
+{
+  "id": "github:nadermx/backgroundremover",
+  "kind": "github",
+  "category": "photo-editing",
+  "repo": "nadermx/backgroundremover",
+  "url": "https://github.com/nadermx/backgroundremover",
+  "description": "Background Remover lets you Remove Background from images and video using AI with a simple command line interface that is free and open source.",
+  "stars": 8165,
+  "forks": 660,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "ai",
+    "background-removal",
+    "background-remover",
+    "backgroundremover",
+    "photo-editing",
+    "python",
+    "pytorch",
+    "remove-background",
+    "remove-background-image",
+    "remove-background-video",
+    "removebackground",
+    "video",
+    "video-editing"
+  ],
+  "archived": false,
+  "pushed_at": "2026-07-10T01:20:32Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

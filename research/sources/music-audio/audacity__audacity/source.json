@@ -1,0 +1,25 @@
+{
+  "id": "github:audacity/audacity",
+  "kind": "github",
+  "category": "music-audio",
+  "repo": "audacity/audacity",
+  "url": "https://github.com/audacity/audacity",
+  "description": "Audio Editor",
+  "stars": 18992,
+  "forks": 2722,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "audio",
+    "cross-platform",
+    "editor",
+    "gplv2",
+    "qt-application",
+    "qt-qml",
+    "wxwidgets-applications"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T15:45:12Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

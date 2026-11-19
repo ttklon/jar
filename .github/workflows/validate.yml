@@ -1,0 +1,90 @@
+name: validate
+
+on:
+  push:
+    branches: [main, "arena/**"]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  registry:
+    name: action registry, profiles, coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Registry is well-formed (10 fields, risk/tier/human/status valid)
+        run: python3 tools/actions.py
+
+      - name: Every profile op maps to a registry row, risk not lowered, verify present
+        run: python3 tools/profiles.py
+
+      - name: Coverage audit (thin domains, family gaps, orphan verbs)
+        run: python3 tools/audit_actions.py
+
+      - name: Eval plan is generated for every action
+        run: python3 tools/evals.py
+
+      - name: App target catalogue (tier A ⇒ profile exists)
+        run: python3 tools/app_targets.py
+
+      - name: Skills reference real registry rows, risk matches, done criteria present
+        run: python3 tools/skills.py
+
+      - name: Hands (data/tools.json) reference real registry rows and allowed risk
+        run: python3 tools/hands.py
+
+      - name: Flows (data/flows.json) chain real tools and never understate risk
+        run: python3 tools/flows.py
+
+      - name: Ecosystem catalogues (10 catalogues, >=200 each, ids unique, statuses honest)
+        run: |
+          python3 tools/build_ecosystem.py
+          python3 tools/ecosystem.py
+
+      - name: AGENTS.md status block matches the data
+        run: python3 tools/status.py --check
+
+      - name: Dashboard and document index match the data
+        run: python3 tools/dashboard.py
+
+      - name: Relative links in the documentation resolve
+        run: python3 tools/links.py
+
+      - name: SPDX SBOM can be built from both lockfiles
+        run: python3 tools/sbom.py --check
+
+      - name: UIA draft generator works on a fixture dump
+        run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
+
+      - name: Generated artefacts are committed and up to date
+        run: |
+          git diff --exit-code -- data/actions.json docs/ACTIONS.md docs/PROFILES.md docs/COVERAGE.md docs/EVALS.md docs/APP-COVERAGE.md docs/SKILLS.md docs/ECOSYSTEM.md docs/DASHBOARD.md docs/INDEX.md data/evals.json data/ecosystem AGENTS.md \
+            || { echo "::error::generated files are stale — run python3 tools/check_all.py and commit"; exit 1; }
+
+      - name: Summary
+        run: |
+          {
+            echo "### ZShelper registry"
+            echo ""
+            echo '```'
+            python3 - <<'PY'
+          import json
+          from collections import Counter
+          rows = json.load(open("data/actions.json"))
+          print(f"actions: {len(rows)}")
+          print(f"domains: {len({r['domain'] for r in rows})}")
+          print(f"verbs:   {len({r['verb'] for r in rows})}")
+          print("risk:   ", dict(Counter(r["risk"] for r in rows)))
+          print("status: ", dict(Counter(r["status"] for r in rows)))
+          PY
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

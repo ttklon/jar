@@ -1,0 +1,17 @@
+{
+  "id": "github:kyutai-labs/moshi",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "kyutai-labs/moshi",
+  "url": "https://github.com/kyutai-labs/moshi",
+  "description": "Moshi is a speech-text foundation model and full-duplex spoken dialogue framework. It uses Mimi, a state-of-the-art streaming neural audio codec.",
+  "stars": 11454,
+  "forks": 1064,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-09-09T14:37:00Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

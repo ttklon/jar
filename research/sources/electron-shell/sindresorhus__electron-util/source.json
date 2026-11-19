@@ -1,0 +1,22 @@
+{
+  "id": "github:sindresorhus/electron-util",
+  "kind": "github",
+  "category": "electron-shell",
+  "repo": "sindresorhus/electron-util",
+  "url": "https://github.com/sindresorhus/electron-util",
+  "description": "Useful utilities for Electron apps and modules",
+  "stars": 1335,
+  "forks": 65,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "electron",
+    "electron-module",
+    "nodejs",
+    "npm-package"
+  ],
+  "archived": false,
+  "pushed_at": "2025-09-09T05:56:08Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

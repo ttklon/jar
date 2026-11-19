@@ -1,0 +1,27 @@
+{
+  "id": "github:step-security/harden-runner",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "step-security/harden-runner",
+  "url": "https://github.com/step-security/harden-runner",
+  "description": "Harden-Runner is a CI/CD security agent that works like an EDR for GitHub Actions runners. It monitors network egress, file integrity, and process activity on those runners, detecting threats in real-time.",
+  "stars": 1296,
+  "forks": 126,
+  "language": "TypeScript",
+  "license": "Apache-2.0",
+  "topics": [
+    "actions",
+    "egress-filtering",
+    "github-actions",
+    "hardening",
+    "network-security",
+    "runners",
+    "runtime-security",
+    "security-hardening",
+    "supply-chain-security"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T16:28:38Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

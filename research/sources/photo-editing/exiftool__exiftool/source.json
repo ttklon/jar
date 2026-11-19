@@ -1,0 +1,26 @@
+{
+  "id": "github:exiftool/exiftool",
+  "kind": "github",
+  "category": "photo-editing",
+  "repo": "exiftool/exiftool",
+  "url": "https://github.com/exiftool/exiftool",
+  "description": "ExifTool meta information reader/writer",
+  "stars": 5246,
+  "forks": 499,
+  "language": "Perl",
+  "license": "GPL-3.0",
+  "topics": [
+    "api",
+    "cli",
+    "exif",
+    "image-metadata",
+    "iptc",
+    "metadata",
+    "perl",
+    "xmp"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T14:54:52Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

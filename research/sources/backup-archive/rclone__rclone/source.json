@@ -1,0 +1,33 @@
+{
+  "id": "github:rclone/rclone",
+  "kind": "github",
+  "category": "backup-archive",
+  "repo": "rclone/rclone",
+  "url": "https://github.com/rclone/rclone",
+  "description": "\"rsync for cloud storage\" - Google Drive, S3, Dropbox, Backblaze B2, One Drive, Swift, Hubic, Wasabi, Google Cloud Storage, Azure Blob, Azure Files, Yandex Files",
+  "stars": 60862,
+  "forks": 5663,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [
+    "azure-blob",
+    "azure-blob-storage",
+    "azure-files",
+    "backblaze-b2",
+    "cloud-storage",
+    "dropbox",
+    "encryption",
+    "ftp",
+    "fuse-filesystem",
+    "go",
+    "golang",
+    "google-cloud-storage",
+    "google-drive",
+    "onedrive",
+    "openstack-swift"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T19:01:38Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

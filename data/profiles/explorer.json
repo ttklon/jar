@@ -1,0 +1,146 @@
+{
+  "app": "Проводник Windows",
+  "exe": [
+    "explorer.exe"
+  ],
+  "ui_stack": "uia",
+  "version_seen": "Windows 11 24H2 / Windows 10 22H2",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "address_bar": {
+      "by": "hotkey",
+      "value": "Ctrl+L",
+      "fallback": "Alt+D"
+    },
+    "search_box": {
+      "by": "hotkey",
+      "value": "Ctrl+F"
+    },
+    "select_all": {
+      "by": "hotkey",
+      "value": "Ctrl+A"
+    },
+    "rename": {
+      "by": "hotkey",
+      "value": "F2"
+    },
+    "details_view": {
+      "by": "hotkey",
+      "value": "Ctrl+Shift+6"
+    },
+    "file_list": {
+      "by": "uia",
+      "value": "ControlType=List; Name~«Элементы»"
+    }
+  },
+  "operations": [
+    {
+      "name": "Найти файлы по имени в папке (рекурсивно)",
+      "registry": "files|найти|по имени",
+      "steps": [
+        "anchor:address_bar",
+        "type:путь",
+        "Enter",
+        "anchor:search_box",
+        "type:маска",
+        "Enter",
+        "wait:1200"
+      ],
+      "verify": [
+        "в списке есть элементы",
+        "каждый путь начинается с искомой папки"
+      ],
+      "risk": "read",
+      "on_fail": "перейти на индексированный поиск: fs.glob через инструмент, без GUI"
+    },
+    {
+      "name": "Пакетное переименование по шаблону",
+      "registry": "files|переименовать|массово",
+      "steps": [
+        "anchor:select_all",
+        "F2",
+        "type:шаблон",
+        "Enter"
+      ],
+      "verify": [
+        "число файлов не изменилось",
+        "новые имена соответствуют шаблону",
+        "нет коллизий"
+      ],
+      "risk": "write-local",
+      "on_fail": "переименование через fs.rename с журналом для откатов"
+    },
+    {
+      "name": "Копировать папку с прогрессом и проверкой",
+      "registry": "files|скопировать|файлы",
+      "steps": [
+        "Ctrl+C на папке",
+        "перейти вцелевую папку",
+        "Ctrl+V",
+        "wait:по прогрессу"
+      ],
+      "verify": [
+        "число файлов совпадает",
+        "суммарный размер совпадает ±0"
+      ],
+      "risk": "write-local",
+      "notes": "для больших объёмов и длинных путей профиль не используется — robocopy"
+    },
+    {
+      "name": "Показать расширения и скрытые файлы",
+      "registry": "apps-windows|настроить|вид и параметры",
+      "steps": [
+        "Вид → Показать → Расширения имён файлов",
+        "то же для скрытых"
+      ],
+      "verify": [
+        "у файлов видно .txt/.docx"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Сжать выбранное в ZIP",
+      "registry": "files|сжать|в архив",
+      "steps": [
+        "выделить",
+        "правый клик → «Сжать в ZIP»",
+        "type:имя архива"
+      ],
+      "verify": [
+        "архив существует",
+        "размер > 0",
+        "распаковка тестового файла совпадает по хэшу"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Корзина: очистить",
+      "registry": "files|удалить|в корзину",
+      "steps": [
+        "правый клик на «Корзина» → «Очистить»",
+        "подтверждение"
+      ],
+      "verify": [
+        "корзина пуста"
+      ],
+      "risk": "destructive",
+      "on_fail": "не повторять автоматически; спросить человека",
+      "notes": "необратимо: только с явным подтверждением и записью в Telegram"
+    },
+    {
+      "name": "Открыть папку и выделить файл для другой программы",
+      "registry": "files|скопировать|файлы",
+      "steps": [
+        "explorer:путь",
+        "select:файл",
+        "hotkey:Ctrl+C",
+        "switch:целевое окно",
+        "Ctrl+V"
+      ],
+      "verify": [
+        "в целевом окне появился файл"
+      ],
+      "risk": "write-local"
+    }
+  ]
+}

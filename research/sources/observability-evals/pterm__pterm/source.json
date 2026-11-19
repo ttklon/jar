@@ -1,0 +1,33 @@
+{
+  "id": "github:pterm/pterm",
+  "kind": "github",
+  "category": "observability-evals",
+  "repo": "pterm/pterm",
+  "url": "https://github.com/pterm/pterm",
+  "description": "✨ PTerm is a modern Go module to easily beautify console output. Featuring charts, progressbars, tables, trees, text input, select menus and much more 🚀 It's completely configurable and 100% cross-platform compatible.",
+  "stars": 5567,
+  "forks": 229,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [
+    "animation",
+    "ansi-colors",
+    "beautify",
+    "console",
+    "console-framework",
+    "go",
+    "golang",
+    "golang-library",
+    "hacktoberfest",
+    "library",
+    "pretty",
+    "pretty-print",
+    "progressbar",
+    "pterm",
+    "terminal"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-12T04:47:44Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

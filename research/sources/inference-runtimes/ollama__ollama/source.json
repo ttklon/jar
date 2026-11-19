@@ -1,0 +1,32 @@
+{
+  "id": "github:ollama/ollama",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "ollama/ollama",
+  "url": "https://github.com/ollama/ollama",
+  "description": "Get up and running with Kimi, GLM, MiniMax, DeepSeek, gpt-oss, Qwen, Gemma and other models.",
+  "stars": 186326,
+  "forks": 18963,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [
+    "deepseek",
+    "gemma",
+    "glm",
+    "go",
+    "golang",
+    "gpt-oss",
+    "llama",
+    "llm",
+    "llms",
+    "minimax",
+    "mistral",
+    "muse",
+    "ollama",
+    "qwen"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T00:36:55Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

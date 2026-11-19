@@ -1,0 +1,25 @@
+{
+  "id": "github:microsoft/node-pty",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "microsoft/node-pty",
+  "url": "https://github.com/microsoft/node-pty",
+  "description": "Fork pseudoterminals in Node.JS",
+  "stars": 2059,
+  "forks": 348,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "conpty",
+    "forkpty",
+    "openpty",
+    "pseudoterminal",
+    "pty",
+    "terminal",
+    "winpty"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-02T21:27:46Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

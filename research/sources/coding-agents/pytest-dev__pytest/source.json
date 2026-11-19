@@ -1,0 +1,23 @@
+{
+  "id": "github:pytest-dev/pytest",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "pytest-dev/pytest",
+  "url": "https://github.com/pytest-dev/pytest",
+  "description": "The pytest framework makes it easy to write small tests, yet scales to support complex functional testing",
+  "stars": 14670,
+  "forks": 3607,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "hacktoberfest",
+    "python",
+    "test",
+    "testing",
+    "unit-testing"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T07:46:54Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "github:typst/typst",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "typst/typst",
+  "url": "https://github.com/typst/typst",
+  "description": "A markup-based typesetting system that is powerful and easy to learn.",
+  "stars": 57041,
+  "forks": 1787,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [
+    "compiler",
+    "markup",
+    "typesetting",
+    "typst"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T10:38:42Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

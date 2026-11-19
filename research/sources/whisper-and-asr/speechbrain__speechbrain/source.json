@@ -1,0 +1,33 @@
+{
+  "id": "github:speechbrain/speechbrain",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "speechbrain/speechbrain",
+  "url": "https://github.com/speechbrain/speechbrain",
+  "description": "A PyTorch-based Speech Toolkit",
+  "stars": 11928,
+  "forks": 1757,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "asr",
+    "audio",
+    "audio-processing",
+    "deep-learning",
+    "huggingface",
+    "language-model",
+    "pytorch",
+    "speaker-diarization",
+    "speaker-recognition",
+    "speaker-verification",
+    "speech-enhancement",
+    "speech-processing",
+    "speech-recognition",
+    "speech-separation",
+    "speech-to-text"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-14T23:12:55Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

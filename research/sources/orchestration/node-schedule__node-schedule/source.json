@@ -1,0 +1,17 @@
+{
+  "id": "github:node-schedule/node-schedule",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "node-schedule/node-schedule",
+  "url": "https://github.com/node-schedule/node-schedule",
+  "description": "A cron-like and not-cron-like job scheduler for Node.",
+  "stars": 9196,
+  "forks": 501,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-24T23:22:32Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

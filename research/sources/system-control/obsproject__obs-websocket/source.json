@@ -1,0 +1,22 @@
+{
+  "id": "github:obsproject/obs-websocket",
+  "kind": "github",
+  "category": "system-control",
+  "repo": "obsproject/obs-websocket",
+  "url": "https://github.com/obsproject/obs-websocket",
+  "description": "Remote-control of OBS Studio through WebSocket",
+  "stars": 4384,
+  "forks": 750,
+  "language": "C++",
+  "license": "GPL-2.0",
+  "topics": [
+    "hacktoberfest",
+    "obs-studio",
+    "remote-control",
+    "websocket"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-08T19:32:45Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

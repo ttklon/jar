@@ -1,0 +1,25 @@
+{
+  "id": "github:tectonic-typesetting/tectonic",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "tectonic-typesetting/tectonic",
+  "url": "https://github.com/tectonic-typesetting/tectonic",
+  "description": "A modernized, complete, self-contained TeX/LaTeX engine, powered by XeTeX and TeXLive.",
+  "stars": 5232,
+  "forks": 230,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [
+    "rust",
+    "tex",
+    "tex-engine",
+    "tex-typesetting",
+    "texlive",
+    "typesetting",
+    "xetex"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-01T05:01:58Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

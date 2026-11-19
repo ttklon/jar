@@ -1,0 +1,31 @@
+{
+  "id": "github:reviewdog/reviewdog",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "reviewdog/reviewdog",
+  "url": "https://github.com/reviewdog/reviewdog",
+  "description": "🐶 Automated code review tool integrated with any code analysis tools regardless of programming language",
+  "stars": 9726,
+  "forks": 513,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [
+    "bitbucket",
+    "ci",
+    "cli",
+    "code-quality",
+    "code-review",
+    "codereview",
+    "github",
+    "gitlab",
+    "go",
+    "lint",
+    "linter",
+    "static-analysis",
+    "static-code-analysis"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T06:28:31Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

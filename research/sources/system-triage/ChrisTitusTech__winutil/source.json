@@ -1,0 +1,17 @@
+{
+  "id": "github:ChrisTitusTech/winutil",
+  "kind": "github",
+  "category": "system-triage",
+  "repo": "ChrisTitusTech/winutil",
+  "url": "https://github.com/ChrisTitusTech/winutil",
+  "description": "Chris Titus Tech's Windows Utility - Install Programs, Tweaks, Fixes, and Updates",
+  "stars": 65709,
+  "forks": 3866,
+  "language": "PowerShell",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-04T04:01:08Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

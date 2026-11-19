@@ -1,0 +1,62 @@
+{
+  "app": "DBeaver",
+  "exe": ["dbeaver.exe", "dbeaverc.exe"],
+  "ui_stack": "qt",
+  "version_seen": "25.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": { "by": "api", "value": "dbeaver-cli / dbeaverc.exe -con <connection> -sql \"<query>\" -out <file>", "fallback": "нативные клиенты: psql, mysql, sqlite3, sqlcmd — профиль описывает оба пути" },
+    "native_psql": { "by": "api", "value": "psql \"postgresql://user@host/db\" -c \"SELECT ...\" -v ON_ERROR_STOP=1" },
+    "native_sqlite": { "by": "api", "value": "sqlite3 app.db \".tables\" / \"PRAGMA integrity_check\"" },
+    "sql_editor": { "by": "hotkey", "value": "F3 (новый SQL-редактор)", "fallback": "меню SQL Editor → New SQL script" },
+    "execute": { "by": "hotkey", "value": "Ctrl+Enter (выполнить запрос под курсором)" },
+    "export_dialog": { "by": "uia", "value": "результат → ПКМ → Export resultset → CSV" }
+  },
+  "operations": [
+    {
+      "name": "Подключиться к базе и проверить соединение",
+      "registry": "databases|подключиться|к БД",
+      "steps": ["выбрать соединение в панели Database Navigator", "Test Connection → проверить драйвер и версию сервера", "открыть SQL-редактор"],
+      "verify": ["в статусе версия СУБД (например PostgreSQL 16.4)", "пробный SELECT 1 возвращает строку", "соединение read-only, если задача только на чтение"],
+      "risk": "read",
+      "notes": "пароли — из secrets.enc или системного хранилища DBeaver; в профиле и логах их нет"
+    },
+    {
+      "name": "Выполнить SELECT с ограничением",
+      "registry": "databases|выполнить|SELECT",
+      "steps": ["написать запрос с LIMIT 1000", "anchor:execute", "прочитать план: Explain (Ctrl+Shift+E) при подозрении на тяжёлый запрос"],
+      "verify": ["запрос вернул строки и время выполнения", "LIMIT соблюдён (нет выгрузки всей таблицы)", "при времени > 5 с — показан план, а не «ну ладно»"],
+      "risk": "read"
+    },
+    {
+      "name": "Сделать бэкап базы перед изменениями",
+      "registry": "databases|сделать|бэкап БД",
+      "steps": ["для Postgres: pg_dump -Fc -f backup.dump <db>", "для MySQL: mysqldump --single-transaction --routines > backup.sql", "для SQLite: VACUUM INTO 'backup.db' (безопасно на живой базе)"],
+      "verify": ["файл существует и не нулевой", "для dump-файла: pg_restore --list даёт список объектов / mysql --dry-run", "размер сопоставим с объёмом данных"],
+      "risk": "write-local",
+      "notes": "VACUUM INTO — единственный способ снять консистентный бэкап SQLite без блокировки; копирование файла на живой базе даёт битый архив"
+    },
+    {
+      "name": "Проверить целостность и индексы",
+      "registry": "databases|проверить|целостность и индексы",
+      "steps": ["SQLite: PRAGMA integrity_check; PRAGMA foreign_key_check", "Postgres: pg_stat_user_indexes — индексы без использований; VACUUM (ANALYZE) в dry-run режиме", "MySQL: CHECK TABLE, ANALYZE TABLE"],
+      "verify": ["integrity_check = ok", "перечислены неиспользуемые индексы с размером", "перечислены таблицы без первичного ключа"],
+      "risk": "read"
+    },
+    {
+      "name": "Экспортировать результат в CSV/XLSX",
+      "registry": "databases|экспортировать|результат",
+      "steps": ["anchor:export_dialog", "выбрать формат и кодировку UTF-8", "проверить разделитель и заголовки"],
+      "verify": ["число строк в файле = числу строк результата", "кириллица не побилась (открыть и прочитать первые строки)", "числовые поля не стали текстом с разделителями тысяч"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Сравнить схемы двух баз",
+      "registry": "databases|сравнить|схемы двух БД",
+      "steps": ["выгрузить information_schema.columns и pg_indexes по обеим базам", "сравнить таблицы/колонки/типы/индексы", "сформировать список расхождений и миграционный скрипт"],
+      "verify": ["для каждого расхождения указано направление (есть в A, нет в B)", "миграционный скрипт синтаксически валиден (проверка парсером или на копии)", "ни одна destructive-строка (DROP) не выполняется без подтверждения"],
+      "risk": "read",
+      "on_fail": "если схема прода отличается неожиданно — остановиться и показать дифф, не «догонять» прод"
+    }
+  ]
+}

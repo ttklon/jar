@@ -1,0 +1,23 @@
+{
+  "id": "github:daodao97/chatmcp",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "daodao97/chatmcp",
+  "url": "https://github.com/daodao97/chatmcp",
+  "description": "ChatMCP is an AI chat client implementing the Model Context Protocol (MCP).",
+  "stars": 2224,
+  "forks": 210,
+  "language": "Dart",
+  "license": "Apache-2.0",
+  "topics": [
+    "ai",
+    "chat",
+    "client",
+    "mcp",
+    "mcp-client"
+  ],
+  "archived": false,
+  "pushed_at": "2026-09-07T23:56:04Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:33:56Z"
+}

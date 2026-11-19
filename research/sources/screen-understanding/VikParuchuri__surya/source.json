@@ -1,0 +1,17 @@
+{
+  "id": "github:VikParuchuri/surya",
+  "kind": "github",
+  "category": "screen-understanding",
+  "repo": "VikParuchuri/surya",
+  "url": "https://github.com/VikParuchuri/surya",
+  "description": "OCR, layout analysis, reading order, table recognition in 90+ languages",
+  "stars": 21584,
+  "forks": 1571,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-08T01:43:17Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

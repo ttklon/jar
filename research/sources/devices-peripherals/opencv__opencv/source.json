@@ -1,0 +1,23 @@
+{
+  "id": "github:opencv/opencv",
+  "kind": "github",
+  "category": "devices-peripherals",
+  "repo": "opencv/opencv",
+  "url": "https://github.com/opencv/opencv",
+  "description": "Open Source Computer Vision Library",
+  "stars": 91484,
+  "forks": 57082,
+  "language": "C++",
+  "license": "Apache-2.0",
+  "topics": [
+    "c-plus-plus",
+    "computer-vision",
+    "deep-learning",
+    "image-processing",
+    "opencv"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:47:12Z",
+  "default_branch": "5.x",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

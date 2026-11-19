@@ -1,0 +1,125 @@
+---
+id: "pypi:libvirt-python"
+kind: "pypi"
+category: "virtualization-remote"
+package: "libvirt-python"
+version: "12.9.0"
+url: "https://pypi.org/project/libvirt-python/"
+home_page: "http://www.libvirt.org"
+license: "LGPL-v2.0-or-later"
+requires_python: ">=3.9"
+summary: "The libvirt virtualization API python binding"
+fetched_at: "2026-11-08T12:43:21Z"
+---
+
+# libvirt-python 12.9.0
+
+**Summary:** The libvirt virtualization API python binding
+
+**Install:** `pip install libvirt-python`
+
+**Python:** >=3.9
+
+## Distribution artifacts
+
+- libvirt_python-12.9.0.tar.gz (0.2 MB)
+
+## Description
+
+Libvirt Python Binding README
+=============================
+
+This package provides a module that permits applications
+written in the Python 3.x programming language to call the interface
+supplied by the libvirt library, to manage the virtualization
+capabilities of recent versions of Linux (and other OSes).
+As such, the module exposes Python bindings to to the libvirt.so,
+libvirt-qemu.so and libvirt-lxc.so library APIs.
+
+It is written to build against any version of libvirt that
+is 0.9.11 or newer.
+
+This code is distributed under the terms of the LGPL version
+2 or later.
+
+Requirements
+------------
+
+To build the libvirt python binary requires the GCC and pkg-config
+tools, and development headers for the libvirt and python libraries.
+
+Additionally, the Python build module is required and can be installed via:
+
+  $ dnf install python3-build
+
+or
+
+  $ python3 -m pip install --user build
+
+Building and installing
+-----------------------
+
+The module can be built by following the normal python module
+build process
+
+  $ python3 -m build
+
+for testing and distributing purposes or it can be installed directly via pip
+as
+
+  $ python3 -m pip install .
+
+without explicit building.
+
+In order to test the package, you'll need either tox or at least pytest,
+depending on whether you want to test an already installed package in which
+case the latter is sufficient or if you wish to test in a virtual
+environment you'd need tox.
+
+To install pytest, use one of:
+
+  $ dnf install python3-pytest
+
+or
+
+  $ python3 -m pip install --user pytest
+
+To install tox, use one of:
+
+  $ dnf install python3-tox
+
+or
+
+  $ python3 -m pip install --user tox
+
+Additionally, install the remaining test dependencies:
+
+  $ python3 -m pip install -r requirements-test.txt
+
+Depending on your preferred setup, you can run the tests either as
+
+  $ python3 -m pytest
+
+or as
+
+  $ tox
+
+Free-threaded Python (py313t, py314t) test environments require tox>=4.26
+and the corresponding free-threaded interpreters (python3.13t, python3.14t)
+to be installed.
+
+A makefile shim is also provided for your convenience, so that you don't have
+to care about the exact operations mentioned above and instead you simply do
+
+  $ make && make check
+
+As of libvirt 1.2.6, it is possible to develop against an uninstalled
+libvirt.git checkout, by setting PKG_CONFIG_PATH and LD_LIBRARY_PATH
+environment variables to point into that libvirt tree; you can even
+automate this by using libvirt's run script:
+
+  /path/to/libvirt/run python3 -m build
+
+Patches for this code should be submitted as merge requests to the
+project page on gitlab. See CONTRIBUTING.rst for more information.
+

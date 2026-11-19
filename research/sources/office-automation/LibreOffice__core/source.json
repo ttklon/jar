@@ -1,0 +1,20 @@
+{
+  "id": "github:LibreOffice/core",
+  "kind": "github",
+  "category": "office-automation",
+  "repo": "LibreOffice/core",
+  "url": "https://github.com/LibreOffice/core",
+  "description": "Read-only LibreOffice core repo - no pull request (use gerrit instead https://gerrit.libreoffice.org/) - don't download zip, use https://dev-www.libreoffice.org/bundles/  instead",
+  "stars": 4618,
+  "forks": 1009,
+  "language": "C++",
+  "license": "GPL-3.0",
+  "topics": [
+    "libreoffice",
+    "tdf"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:11:33Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "github:quodlibet/mutagen",
+  "kind": "github",
+  "category": "music-audio",
+  "repo": "quodlibet/mutagen",
+  "url": "https://github.com/quodlibet/mutagen",
+  "description": "Python module for handling audio metadata",
+  "stars": 1982,
+  "forks": 212,
+  "language": "Python",
+  "license": "GPL-2.0",
+  "topics": [
+    "apev2",
+    "flac",
+    "id3",
+    "id3v1",
+    "id3v2",
+    "mp3",
+    "mp4",
+    "music",
+    "ogg",
+    "opus",
+    "python",
+    "tagging"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-03T08:45:53Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

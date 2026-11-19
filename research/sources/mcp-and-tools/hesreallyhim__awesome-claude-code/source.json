@@ -1,0 +1,33 @@
+{
+  "id": "github:hesreallyhim/awesome-claude-code",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "hesreallyhim/awesome-claude-code",
+  "url": "https://github.com/hesreallyhim/awesome-claude-code",
+  "description": "A hand-picked collection of the finest of resources for the most awesome of agents, Claude Code, the undisputed champion of coding companions, from the unstoppable team at Anthropic PBC (no affiliation). A delectable showcase of top tier skills, ambidextrous agents, scintillating status lines, top notch developer tooling, and also we have plugins",
+  "stars": 57514,
+  "forks": 4925,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "agent-skills",
+    "agentic-code",
+    "agentic-coding",
+    "ai-workflow-optimization",
+    "ai-workflows",
+    "anthropic",
+    "anthropic-claude",
+    "awesome",
+    "awesome-claude-code",
+    "awesome-list",
+    "awesome-lists",
+    "awesome-resources",
+    "claude",
+    "claude-code",
+    "coding-agent"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T09:06:01Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

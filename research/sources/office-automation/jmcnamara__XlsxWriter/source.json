@@ -1,0 +1,26 @@
+{
+  "id": "github:jmcnamara/XlsxWriter",
+  "kind": "github",
+  "category": "office-automation",
+  "repo": "jmcnamara/XlsxWriter",
+  "url": "https://github.com/jmcnamara/XlsxWriter",
+  "description": "A Python module for creating Excel XLSX files.",
+  "stars": 3992,
+  "forks": 686,
+  "language": "Python",
+  "license": "BSD-2-Clause",
+  "topics": [
+    "charts",
+    "libxlsxwriter",
+    "pandas",
+    "python",
+    "spreadsheet",
+    "xlsx",
+    "xlsx-files",
+    "xlsxwriter"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-28T22:52:36Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

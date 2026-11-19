@@ -1,0 +1,17 @@
+{
+  "id": "github:laude-institute/terminal-bench",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "laude-institute/terminal-bench",
+  "url": "https://github.com/laude-institute/terminal-bench",
+  "description": "A benchmark for LLMs on complicated tasks in the terminal",
+  "stars": 2614,
+  "forks": 567,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-07-11T05:19:08Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

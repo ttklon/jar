@@ -1,0 +1,22 @@
+{
+  "id": "github:astral-sh/uv",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "astral-sh/uv",
+  "url": "https://github.com/astral-sh/uv",
+  "description": "An extremely fast Python package and project manager, written in Rust.",
+  "stars": 91762,
+  "forks": 3777,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [
+    "packaging",
+    "python",
+    "resolver",
+    "uv"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T01:33:53Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

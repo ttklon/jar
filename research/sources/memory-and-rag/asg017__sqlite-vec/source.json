@@ -1,0 +1,20 @@
+{
+  "id": "github:asg017/sqlite-vec",
+  "kind": "github",
+  "category": "memory-and-rag",
+  "repo": "asg017/sqlite-vec",
+  "url": "https://github.com/asg017/sqlite-vec",
+  "description": "A vector search SQLite extension that runs anywhere!",
+  "stars": 8247,
+  "forks": 363,
+  "language": "C",
+  "license": "Apache-2.0",
+  "topics": [
+    "sqlite",
+    "sqlite-extension"
+  ],
+  "archived": false,
+  "pushed_at": "2026-05-18T06:50:45Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

@@ -1,0 +1,72 @@
+{
+  "app": "Docker Desktop",
+  "exe": ["Docker Desktop.exe", "com.docker.backend.exe"],
+  "ui_stack": "electron",
+  "version_seen": "4.3x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": { "by": "api", "value": "docker <sub> --format json" },
+    "engine": { "by": "api", "value": "docker info --format '{{.ServerVersion}}'" },
+    "await_engine": { "by": "api", "value": "wsl -l -v; ждать статус Running у docker-desktop" },
+    "settings_file": { "by": "api", "value": "%APPDATA%\\Docker\\settings-store.json", "fallback": "Settings → Resources в окне Docker Desktop" },
+    "tray_icon": { "by": "uia", "value": "Name='Docker Desktop' в трее", "fallback": "ocr: синий кит в области уведомлений" }
+  },
+  "operations": [
+    {
+      "name": "Проверить, что движок поднялся",
+      "registry": "virtualization-remote|проверить",
+      "steps": ["anchor:engine", "wait:до 90s (первый старт медленный)", "прочитать ServerVersion"],
+      "verify": ["команда вернула версию, а не 'cannot connect to the Docker daemon'", "WSL-бэкенд в статусе Running"],
+      "risk": "read",
+      "timeouts_ms": 100000,
+      "on_fail": "не запускать сборку вслепую: показать пользователю, что именно не поднялось (WSL, Hyper-V, права)"
+    },
+    {
+      "name": "Собрать образ",
+      "registry": "dev-code|собрать|Docker-образ",
+      "steps": ["cli:docker build -t <tag>:<ver> -f <dockerfile> <context>", "лог сборки в файл", "wait:до 15 мин"],
+      "verify": ["код возврата 0", "docker image inspect <tag> даёт Created и Size", "размер не вырос аномально (сравнить с прошлым тегом)"],
+      "risk": "write-local",
+      "notes": "секреты — только через --secret/buildkit, никогда --build-arg с паролем"
+    },
+    {
+      "name": "Запустить контейнер или стек",
+      "registry": "virtualization-remote|запустить|контейнер",
+      "steps": ["cli:docker compose up -d", "wait до healthy", "docker compose ps --format json"],
+      "verify": ["все сервисы State=running", "healthcheck = healthy, а не 'starting'", "порт отвечает локально"],
+      "risk": "write-local",
+      "on_fail": "docker compose logs --tail=200 последнего упавшего сервиса и разбор причины"
+    },
+    {
+      "name": "Прочитать логи и объяснить падение",
+      "registry": "dev-code|объяснить|ошибку",
+      "steps": ["cli:docker compose logs --tail=300 <svc>", "выделить первую ошибку, а не последствия", "сопоставить с healthcheck"],
+      "verify": ["в объяснении есть строка-причина с цитатой из лога", "предложено одно проверяемое исправление"],
+      "risk": "read"
+    },
+    {
+      "name": "Перенести сборку в WSL, если Windows-сборка медленная",
+      "registry": "virtualization-remote|работать|в WSL",
+      "steps": ["cli:wsl -d Ubuntu -- bash -lc 'cd /mnt/wsl/... && docker build ...'", "сравнить время сборки до и после"],
+      "verify": ["время сборки измерено и приведено", "образ тот же (digest совпадает)"],
+      "risk": "write-local",
+      "notes": "файлы проекта держать в ext4-разделе WSL, /mnt/c даёт 5–10-кратное замедление I/O"
+    },
+    {
+      "name": "Проверить образ на уязвимости",
+      "registry": "dev-code|проверить|уязвимости зависимостей",
+      "steps": ["cli:docker scout cves <tag> --only-severity critical,high", "сгруппировать по пакету"],
+      "verify": ["есть список CVE с severity и пакетом", "указано, исправлено ли в более новом базовом образе"],
+      "risk": "read"
+    },
+    {
+      "name": "Освободить место: убрать неиспользуемое",
+      "registry": "virtualization-remote|удалить",
+      "steps": ["docker system df", "показать список к удалению и объём", "cli:docker system prune -af --volumes"],
+      "verify": ["docker system df до/после: объём уменьшился", "запущенные контейнеры и именованные тома с данными живы"],
+      "risk": "destructive",
+      "on_fail": "немедленно остановиться: prune с --volumes удаляет данные без корзины",
+      "notes": "всегда сначала показать пользователю список, потом спрашивать; это единственная операция профиля с риском destructive"
+    }
+  ]
+}

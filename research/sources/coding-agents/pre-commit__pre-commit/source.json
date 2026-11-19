@@ -1,0 +1,23 @@
+{
+  "id": "github:pre-commit/pre-commit",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "pre-commit/pre-commit",
+  "url": "https://github.com/pre-commit/pre-commit",
+  "description": "A framework for managing and maintaining multi-language pre-commit hooks.",
+  "stars": 15688,
+  "forks": 1022,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "git",
+    "linter",
+    "pre-commit",
+    "python",
+    "refactoring"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T20:54:57Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

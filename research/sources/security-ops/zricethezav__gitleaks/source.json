@@ -1,0 +1,33 @@
+{
+  "id": "github:zricethezav/gitleaks",
+  "kind": "github",
+  "category": "security-ops",
+  "repo": "zricethezav/gitleaks",
+  "url": "https://github.com/zricethezav/gitleaks",
+  "description": "Find secrets with Gitleaks 🔑",
+  "stars": 30772,
+  "forks": 2350,
+  "language": "Go",
+  "license": "MIT",
+  "topics": [
+    "ai-powered",
+    "ci-cd",
+    "cicd",
+    "cli",
+    "data-loss-prevention",
+    "devsecops",
+    "dlp",
+    "git",
+    "gitleaks",
+    "go",
+    "golang",
+    "hacktoberfest",
+    "llm",
+    "llm-inference",
+    "llm-training"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-28T04:14:29Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

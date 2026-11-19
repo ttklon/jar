@@ -1,0 +1,33 @@
+{
+  "id": "github:google/adk-python",
+  "kind": "github",
+  "category": "self-extension",
+  "repo": "google/adk-python",
+  "url": "https://github.com/google/adk-python",
+  "description": "An open-source, code-first Python toolkit for building, evaluating, and deploying sophisticated AI agents with flexibility and control.",
+  "stars": 22141,
+  "forks": 4319,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent",
+    "agentic",
+    "agentic-ai",
+    "agents",
+    "agents-sdk",
+    "ai",
+    "ai-agents",
+    "aiagentframework",
+    "genai",
+    "genai-chatbot",
+    "llm",
+    "llms",
+    "multi-agent",
+    "multi-agent-systems",
+    "multi-agents"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T05:29:38Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

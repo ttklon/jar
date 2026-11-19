@@ -1,0 +1,27 @@
+{
+  "id": "github:k2-fsa/sherpa",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "k2-fsa/sherpa",
+  "url": "https://github.com/k2-fsa/sherpa",
+  "description": "Speech-to-text server framework with next-gen Kaldi",
+  "stars": 1016,
+  "forks": 155,
+  "language": "C++",
+  "license": "Apache-2.0",
+  "topics": [
+    "asr",
+    "cpp",
+    "ctc",
+    "end-to-end-asr",
+    "python",
+    "pytorch",
+    "speech-recognition",
+    "transducer",
+    "websocket"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T02:43:51Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

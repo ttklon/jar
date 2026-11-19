@@ -1,0 +1,30 @@
+{
+  "id": "github:trufflesecurity/trufflehog",
+  "kind": "github",
+  "category": "safety-and-security",
+  "repo": "trufflesecurity/trufflehog",
+  "url": "https://github.com/trufflesecurity/trufflehog",
+  "description": "Find, verify, and analyze leaked credentials",
+  "stars": 28956,
+  "forks": 2699,
+  "language": "Go",
+  "license": "AGPL-3.0",
+  "topics": [
+    "credentials",
+    "devsecops",
+    "dynamic-analysis",
+    "precommit",
+    "scanning",
+    "secret",
+    "secret-management",
+    "secrets",
+    "security",
+    "security-tools",
+    "trufflehog",
+    "verification"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T17:40:43Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

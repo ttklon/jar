@@ -1,0 +1,33 @@
+{
+  "id": "github:mediar-ai/screenpipe",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "mediar-ai/screenpipe",
+  "url": "https://github.com/mediar-ai/screenpipe",
+  "description": "YC (S26) | Open Computer History | Continuously record your company computer work, map your workflows, help you find work worth automating, and power your agents' context",
+  "stars": 22267,
+  "forks": 2276,
+  "language": "Rust",
+  "license": "NOASSERTION",
+  "topics": [
+    "agents",
+    "agi",
+    "ai",
+    "ai-memory",
+    "audio-recording",
+    "computer-vision",
+    "hermes",
+    "hermes-agent",
+    "llm",
+    "local-ai",
+    "local-first",
+    "machine-learning",
+    "mcp",
+    "multimodal",
+    "openclaw"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T03:03:38Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

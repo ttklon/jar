@@ -1,0 +1,33 @@
+{
+  "id": "github:JaidedAI/EasyOCR",
+  "kind": "github",
+  "category": "documents-ocr",
+  "repo": "JaidedAI/EasyOCR",
+  "url": "https://github.com/JaidedAI/EasyOCR",
+  "description": "Ready-to-use OCR with 80+ supported languages and all popular writing scripts including Latin, Chinese, Arabic, Devanagari, Cyrillic and etc.",
+  "stars": 30130,
+  "forks": 3618,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "cnn",
+    "crnn",
+    "data-mining",
+    "deep-learning",
+    "easyocr",
+    "image-processing",
+    "information-retrieval",
+    "lstm",
+    "machine-learning",
+    "ocr",
+    "optical-character-recognition",
+    "python",
+    "pytorch",
+    "scene-text",
+    "scene-text-recognition"
+  ],
+  "archived": false,
+  "pushed_at": "2025-12-05T12:23:12Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

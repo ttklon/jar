@@ -1,0 +1,21 @@
+{
+  "id": "github:zylon-ai/private-gpt",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "zylon-ai/private-gpt",
+  "url": "https://github.com/zylon-ai/private-gpt",
+  "description": "Complete API layer for private AI applications on local models: RAG, skills, tools, MCP, text-to-sql, and more. Works with any OpenAI-compatible inference server.",
+  "stars": 57632,
+  "forks": 7623,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "ai",
+    "ai-tools",
+    "on-premise"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-03T10:20:55Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

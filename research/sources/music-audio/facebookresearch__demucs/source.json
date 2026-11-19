@@ -1,0 +1,17 @@
+{
+  "id": "github:facebookresearch/demucs",
+  "kind": "github",
+  "category": "music-audio",
+  "repo": "facebookresearch/demucs",
+  "url": "https://github.com/facebookresearch/demucs",
+  "description": "Code for the paper Hybrid Spectrogram and Waveform Source Separation",
+  "stars": 10405,
+  "forks": 1675,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": true,
+  "pushed_at": "2024-04-24T20:25:19Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

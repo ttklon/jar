@@ -1,0 +1,94 @@
+{
+  "app": "Blender",
+  "exe": [
+    "blender.exe"
+  ],
+  "ui_stack": "qt",
+  "version_seen": "4.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": {
+      "by": "api",
+      "value": "blender -b <file.blend> --python <script.py>"
+    },
+    "bpy": {
+      "by": "api",
+      "value": "bpy: объектная модель, модификаторы, рендер, экспорт"
+    },
+    "gui": {
+      "by": "uia",
+      "value": "только для ручных операций; автоматизация — через bpy"
+    }
+  },
+  "operations": [
+    {
+      "name": "Смоделировать объект по параметрам",
+      "registry": "creative-3d|создать|3D-модель",
+      "steps": [
+        "cli:blender -b --python create.py",
+        "script:bpy.ops.mesh.primitive_* + модификаторы + booleans"
+      ],
+      "verify": [
+        "объект существует",
+        "размеры соответствуют заданию",
+        "нет нулевых нормалей"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Пакетный рендер ракурсов",
+      "registry": "creative-3d|автоматизировать|пакетный рендер",
+      "steps": [
+        "cli:blender -b scene.blend --python render.py (N камер/кадров)"
+      ],
+      "verify": [
+        "файлы изображений существуют",
+        "разрешение совпадает",
+        "нет полностью чёрных кадров"
+      ],
+      "risk": "write-local",
+      "timeouts_ms": 3600000
+    },
+    {
+      "name": "Проверить модель на пригодность к печати",
+      "registry": "creative-3d|проверить|модель на ошибки",
+      "steps": [
+        "script:экспорт в STL",
+        "trimesh: is_watertight, volume > 0, euler_number"
+      ],
+      "verify": [
+        "watertight = True",
+        "объём положительный",
+        "нет вывернутых нормалей"
+      ],
+      "risk": "read"
+    },
+    {
+      "name": "Экспортировать в формат печати",
+      "registry": "engineering-3d|конвертировать|форматы",
+      "steps": [
+        "cli:bpy.ops.export_mesh.stl / obj / gltf"
+      ],
+      "verify": [
+        "файл открывается trimesh",
+        "число треугольников > 0",
+        "масштаб в мм корректен"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Сделать анимацию по ключевым кадрам",
+      "registry": "creative-3d|сделать|анимацию",
+      "steps": [
+        "script:вставить keyframes",
+        "настроить FPS и длительность",
+        "рендер превью"
+      ],
+      "verify": [
+        "в файле есть анимационные данные",
+        "превью-видео с ожидаемым числом кадров"
+      ],
+      "risk": "write-local"
+    }
+  ]
+}

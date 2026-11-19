@@ -1,0 +1,17 @@
+{
+  "id": "github:electron/windows-sign",
+  "kind": "github",
+  "category": "electron-shell",
+  "repo": "electron/windows-sign",
+  "url": "https://github.com/electron/windows-sign",
+  "description": "Codesign Electron apps for Windows",
+  "stars": 67,
+  "forks": 20,
+  "language": "TypeScript",
+  "license": "BSD-2-Clause",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-02T01:34:38Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

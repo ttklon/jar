@@ -1,0 +1,17 @@
+{
+  "id": "github:openai/evals",
+  "kind": "github",
+  "category": "orchestration",
+  "repo": "openai/evals",
+  "url": "https://github.com/openai/evals",
+  "description": "Evals is a framework for evaluating LLMs and LLM systems, and an open-source registry of benchmarks.",
+  "stars": 19715,
+  "forks": 3126,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-04-14T15:29:57Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

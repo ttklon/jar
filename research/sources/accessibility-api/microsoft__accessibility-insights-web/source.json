@@ -1,0 +1,24 @@
+{
+  "id": "github:microsoft/accessibility-insights-web",
+  "kind": "github",
+  "category": "accessibility-api",
+  "repo": "microsoft/accessibility-insights-web",
+  "url": "https://github.com/microsoft/accessibility-insights-web",
+  "description": "Accessibility Insights for Web",
+  "stars": 961,
+  "forks": 183,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "accessibility",
+    "accessibility-insights",
+    "chromeextension",
+    "hacktoberfest",
+    "reactjs",
+    "typescript"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-03T05:20:56Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

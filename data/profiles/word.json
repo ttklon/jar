@@ -1,0 +1,77 @@
+{
+  "app": "Microsoft Word",
+  "exe": ["WINWORD.EXE"],
+  "ui_stack": "uia",
+  "version_seen": "Microsoft 365 (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "styles": { "by": "hotkey", "value": "Ctrl+Alt+Shift+S", "fallback": "вкладка «Главная» → галерея стилей" },
+    "navigation": { "by": "hotkey", "value": "Ctrl+F" },
+    "footnote": { "by": "hotkey", "value": "Alt+Ctrl+F", "fallback": "вкладка «Ссылки» → «Сноска»" },
+    "toc": { "by": "menu", "value": "Ссылки → Оглавление → Автособираемое", "fallback": "поле TOC через F9" },
+    "save": { "by": "hotkey", "value": "Ctrl+S" },
+    "doc_body": { "by": "uia", "value": "ControlType=Document", "fallback": "клик в область текста" },
+    "word_count": { "by": "uia", "value": "Name~«Число слов»", "fallback": "Рецензирование → Статистика" }
+  },
+  "operations": [
+    {
+      "name": "Создать документ по шаблону методички и сохранить",
+      "registry": "text-docs|создать|документ Word",
+      "steps": ["start:WINWORD /t шаблон.dotx", "anchor:doc_body", "type:заголовок работы", "anchor:save", "type:путь", "Enter"],
+      "verify": ["файл существует", "python-docx открывает и видит стили из шаблона"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Вставить абзац в конец раздела",
+      "registry": "text-docs|написать|курсовую",
+      "steps": ["anchor:navigation", "type:заголовок раздела", "Esc", "hotkey:End", "type:абзац", "hotkey:Enter"],
+      "verify": ["python-docx: абзац присутствует в нужном разделе", "число слов увеличилось"],
+      "risk": "write-local",
+      "notes": "вставка текста через COM быстрее и надёжнее, профиль — страховка"
+    },
+    {
+      "name": "Оформить заголовок стилем",
+      "registry": "text-docs|форматировать|по методичке",
+      "steps": ["выделить строку", "anchor:styles", "выбрать «Заголовок 1»"],
+      "verify": ["python-docx: style.name == 'Heading 1'"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Собрать оглавление и нумерацию страниц",
+      "registry": "text-docs|собрать|оглавление",
+      "steps": ["поставить курсор после титула", "anchor:toc", "F9 для обновления полей", "вставка номеров страниц"],
+      "verify": ["в документе есть поле TOC", "pdf: номера страниц видны на всех кроме титула"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Добавить сноску с источником",
+      "registry": "text-docs|вставить|сноски",
+      "steps": ["поставить курсор", "anchor:footnote", "type:описание источника"],
+      "verify": ["python-docx: footnote reference существует (через OOXML)", "текст сноски виден внизу страницы"],
+      "risk": "write-local",
+      "notes": "python-docx не умеет сноски — только OOXML-хелпер, см. notes/19"
+    },
+    {
+      "name": "Проверить орфографию и грамматику",
+      "registry": "text-docs|проверить|орфографию",
+      "steps": ["F7", "пройти по замечаниям с решением для каждого"],
+      "verify": ["нет оставшихся замечаний", "журнал решений сохранён"],
+      "risk": "read",
+      "notes": "не принимать правки, меняющие смысл, без подтверждения"
+    },
+    {
+      "name": "Сохранить в PDF и проверить страницы",
+      "registry": "text-docs|конвертировать|формат",
+      "steps": ["Файл → Экспорт → PDF", "type:путь", "Enter"],
+      "verify": ["pypdf: число страниц > 0", "текст извлекается", "нет пустых страниц"],
+      "risk": "write-local"
+    },
+    {
+      "name": "Сравнить две версии документа",
+      "registry": "text-docs|сравнить|две версии",
+      "steps": ["Рецензирование → Сравнить", "выбрать два файла", "OK"],
+      "verify": ["число правок > 0 при реальных изменениях", "список правок сохранён в отчёт"],
+      "risk": "read"
+    }
+  ]
+}

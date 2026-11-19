@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/DirectML",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "microsoft/DirectML",
+  "url": "https://github.com/microsoft/DirectML",
+  "description": "⚠️DirectML is in maintenance mode ⚠️ DirectML is a high-performance, hardware-accelerated DirectX 12 library for machine learning. DirectML provides GPU acceleration for common machine learning tasks across a broad range of supported hardware and drivers, including all DirectX 12-capable GPUs from vendors such as AMD, Intel, NVIDIA, and Qualcomm.",
+  "stars": 2596,
+  "forks": 342,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-04-27T23:43:38Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,32 @@
+{
+  "id": "github:microsoft/Windows-Machine-Learning",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "microsoft/Windows-Machine-Learning",
+  "url": "https://github.com/microsoft/Windows-Machine-Learning",
+  "description": "Samples and Tools for Windows ML.",
+  "stars": 1125,
+  "forks": 442,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "ai",
+    "caffe2",
+    "coreml",
+    "deep-learning",
+    "keras",
+    "machine-learning",
+    "ml",
+    "neural-network",
+    "onnx",
+    "pytorch",
+    "scikit-learn",
+    "tensorflow",
+    "windows",
+    "winmltools"
+  ],
+  "archived": false,
+  "pushed_at": "2025-08-07T17:04:54Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

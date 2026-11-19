@@ -1,0 +1,28 @@
+{
+  "id": "github:electron/osx-sign",
+  "kind": "github",
+  "category": "electron-shell",
+  "repo": "electron/osx-sign",
+  "url": "https://github.com/electron/osx-sign",
+  "description": "Codesign Electron macOS apps",
+  "stars": 635,
+  "forks": 115,
+  "language": "TypeScript",
+  "license": "BSD-2-Clause",
+  "topics": [
+    "codesigning",
+    "developer-tools",
+    "electron",
+    "electron-osx-sign",
+    "entitlements",
+    "itunes-connect",
+    "mac-app-store",
+    "macos",
+    "provisioning-profiles",
+    "sandbox"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-02T01:35:37Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

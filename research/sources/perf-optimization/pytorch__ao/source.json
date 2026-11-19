@@ -1,0 +1,30 @@
+{
+  "id": "github:pytorch/ao",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "pytorch/ao",
+  "url": "https://github.com/pytorch/ao",
+  "description": "PyTorch native quantization for training and inference",
+  "stars": 3023,
+  "forks": 676,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "brrr",
+    "cuda",
+    "dtypes",
+    "float8",
+    "inference",
+    "llama",
+    "mx",
+    "pytorch",
+    "quantization",
+    "sparsity",
+    "training",
+    "transformer"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T06:25:28Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

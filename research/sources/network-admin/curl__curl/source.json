@@ -1,0 +1,33 @@
+{
+  "id": "github:curl/curl",
+  "kind": "github",
+  "category": "network-admin",
+  "repo": "curl/curl",
+  "url": "https://github.com/curl/curl",
+  "description": "A command line tool and library for transferring data with URL syntax, supporting DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, MQTTS, POP3, POP3S, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET, TFTP, WS and WSS. libcurl offers a myriad of powerful features",
+  "stars": 43429,
+  "forks": 7490,
+  "language": "C",
+  "license": "NOASSERTION",
+  "topics": [
+    "c",
+    "client",
+    "curl",
+    "ftp",
+    "gopher",
+    "hacktoberfest",
+    "http",
+    "https",
+    "imaps",
+    "ldap",
+    "libcurl",
+    "library",
+    "mqtt",
+    "pop3",
+    "scp"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T10:58:05Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

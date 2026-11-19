@@ -1,0 +1,17 @@
+{
+  "id": "github:elapouya/python-docx-template",
+  "kind": "github",
+  "category": "office-automation",
+  "repo": "elapouya/python-docx-template",
+  "url": "https://github.com/elapouya/python-docx-template",
+  "description": "Use a docx as a jinja2 template",
+  "stars": 2730,
+  "forks": 459,
+  "language": "Python",
+  "license": "LGPL-2.1",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-07-07T12:13:00Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

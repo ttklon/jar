@@ -1,0 +1,23 @@
+{
+  "id": "github:pnpm/action-setup",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "pnpm/action-setup",
+  "url": "https://github.com/pnpm/action-setup",
+  "description": "Install pnpm package manager",
+  "stars": 1326,
+  "forks": 217,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "actions",
+    "ci",
+    "github-actions",
+    "nodejs",
+    "pnpm"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T10:08:57Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

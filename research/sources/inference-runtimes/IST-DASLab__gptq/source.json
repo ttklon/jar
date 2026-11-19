@@ -1,0 +1,17 @@
+{
+  "id": "github:IST-DASLab/gptq",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "IST-DASLab/gptq",
+  "url": "https://github.com/IST-DASLab/gptq",
+  "description": "Code for the ICLR 2023 paper \"GPTQ: Accurate Post-training Quantization of Generative Pretrained Transformers\".",
+  "stars": 2394,
+  "forks": 208,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2024-03-27T01:46:02Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

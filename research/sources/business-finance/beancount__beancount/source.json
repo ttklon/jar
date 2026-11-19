@@ -1,0 +1,19 @@
+{
+  "id": "github:beancount/beancount",
+  "kind": "github",
+  "category": "business-finance",
+  "repo": "beancount/beancount",
+  "url": "https://github.com/beancount/beancount",
+  "description": "Beancount: Double-Entry Accounting from Text Files.",
+  "stars": 6153,
+  "forks": 486,
+  "language": "Python",
+  "license": "GPL-2.0",
+  "topics": [
+    "beancount"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-23T20:17:45Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

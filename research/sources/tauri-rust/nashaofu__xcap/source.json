@@ -1,0 +1,23 @@
+{
+  "id": "github:nashaofu/xcap",
+  "kind": "github",
+  "category": "tauri-rust",
+  "repo": "nashaofu/xcap",
+  "url": "https://github.com/nashaofu/xcap",
+  "description": "XCap is a cross-platform screen capture library written in Rust. It supports Linux (X11, Wayland), MacOS, and Windows. XCap supports screenshot and video recording (WIP).",
+  "stars": 1032,
+  "forks": 143,
+  "language": "Rust",
+  "license": "Apache-2.0",
+  "topics": [
+    "monitor",
+    "screen-capture",
+    "screen-record",
+    "screencapture",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-01T09:53:06Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

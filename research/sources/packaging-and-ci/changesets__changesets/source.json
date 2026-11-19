@@ -1,0 +1,17 @@
+{
+  "id": "github:changesets/changesets",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "changesets/changesets",
+  "url": "https://github.com/changesets/changesets",
+  "description": "🦋 A tool to manage versioning and changelogs with a focus on monorepos",
+  "stars": 12559,
+  "forks": 859,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-04T17:55:17Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

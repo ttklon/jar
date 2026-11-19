@@ -1,0 +1,33 @@
+{
+  "id": "github:Mintplex-Labs/anything-llm",
+  "kind": "github",
+  "category": "reference-apps",
+  "repo": "Mintplex-Labs/anything-llm",
+  "url": "https://github.com/Mintplex-Labs/anything-llm",
+  "description": "Stop renting your intelligence. Own it with AnythingLLM. Everything you need for a powerful local-first agent experience",
+  "stars": 68058,
+  "forks": 7686,
+  "language": "JavaScript",
+  "license": "MIT",
+  "topics": [
+    "agent-computer",
+    "agent-harness",
+    "agent-orchestration",
+    "agentic-ai",
+    "agentic-workflow",
+    "ai-agents",
+    "computer-use",
+    "hermes-agent",
+    "llm",
+    "local-ai",
+    "localai",
+    "multimodal",
+    "rag",
+    "self-hosted-ai",
+    "vector-database"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T02:20:14Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

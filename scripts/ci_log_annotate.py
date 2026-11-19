@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""
+Превращает хвост лога в аннотации GitHub Actions.
+
+Зачем: логи джоб в этом окружении недоступны (`gh run view --log-failed` упирается
+в закрытое хранилище), а аннотации читаются через API всегда. Аннотация ограничена
+по длине, поэтому лог режется на куски и каждая строка уходит отдельным сообщением.
+
+Usage:
+    python3 scripts/ci_log_annotate.py build.log --title "tauri build" --tail 80
+
+Печатает `::error title=…::строка` — GitHub складывает это в аннотации шага.
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+
+
+def escape(text: str) -> str:
+    """Экранирование по правилам workflow-команд GitHub."""
+    return (
+        text.replace("%", "%25")
+        .replace("\r", "")
+        .replace("\n", "%0A")
+    )
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("log", help="файл с выводом команды")
+    parser.add_argument("--title", default="лог", help="заголовок аннотации")
+    parser.add_argument("--tail", type=int, default=80, help="сколько последних строк показать")
+    parser.add_argument("--chunk", type=int, default=600, help="длина куска строки")
+    parser.add_argument(
+        "--grep",
+        default="",
+        help="показывать только строки, подходящие под регулярное выражение",
+    )
+    parser.add_argument(
+        "--max",
+        type=int,
+        default=8,
+        help="сколько аннотаций максимум (GitHub принимает не больше десяти на шаг)",
+    )
+    parser.add_argument(
+        "--after",
+        type=int,
+        default=0,
+        help="сколько строк после совпадения тоже показать: сообщение паники живёт там",
+    )
+    args = parser.parse_args()
+
+    try:
+        with open(args.log, encoding="utf-8", errors="replace") as handle:
+            lines = [line.rstrip() for line in handle.readlines()]
+    except FileNotFoundError:
+        print(f"::error title={escape(args.title)}::лог не создан — команда не запускалась")
+        return 0
+
+    tail = [line for line in lines if line.strip()]
+    if args.grep:
+        pattern = re.compile(args.grep)
+        # Строка «panicked at …» говорит где, но не почему: причина — в следующих строках.
+        # Поэтому к каждому совпадению можно добрать несколько строк следом.
+        picked: list[str] = []
+        last = -1
+        for index, line in enumerate(tail):
+            if not pattern.search(line):
+                continue
+            for extra in range(index, min(index + 1 + args.after, len(tail))):
+                if extra > last:
+                    picked.append(tail[extra])
+                    last = extra
+        tail = picked
+    # Берём самый конец: в логе тестов причина всегда ниже списка упавших тестов.
+    tail = tail[-args.tail :][-args.max :]
+
+    if not tail:
+        print(f"::error title={escape(args.title)}::в логе нет строк, о которых стоит сказать")
+        return 0
+
+    print(
+        f"::error title={escape(args.title)}::{escape(str(len(lines)))} строк, "
+        f"показываю {len(tail)} самых важных"
+    )
+    for line in tail:
+        for start in range(0, len(line), args.chunk):
+            piece = line[start : start + args.chunk]
+            print(f"::error title={escape(args.title)}::{escape(piece)}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

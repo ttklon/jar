@@ -1,0 +1,22 @@
+{
+  "id": "github:modelcontextprotocol/modelcontextprotocol",
+  "kind": "github",
+  "category": "mcp-and-tools",
+  "repo": "modelcontextprotocol/modelcontextprotocol",
+  "url": "https://github.com/modelcontextprotocol/modelcontextprotocol",
+  "description": "Specification and documentation for the Model Context Protocol",
+  "stars": 9644,
+  "forks": 1899,
+  "language": "TypeScript",
+  "license": "NOASSERTION",
+  "topics": [
+    "docs",
+    "mcp",
+    "specification",
+    "standard"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T05:17:05Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:26:32Z"
+}

@@ -1,0 +1,102 @@
+---
+id: "github:akaunting/akaunting"
+kind: "github"
+category: "business-finance"
+repo: "akaunting/akaunting"
+url: "https://github.com/akaunting/akaunting"
+description: "Online Accounting Software"
+stars: 10287
+forks: 3017
+language: "PHP"
+license: "NOASSERTION"
+topics:
+  - "accounting"
+  - "akaunting"
+  - "balance"
+  - "billing"
+  - "bookkeeping"
+  - "budget"
+  - "crm"
+  - "erp"
+  - "expenses"
+  - "finance"
+  - "fintech"
+  - "invoices"
+  - "invoicing"
+  - "laravel"
+  - "laravel-application"
+archived: false
+pushed_at: "2026-11-07T15:14:05Z"
+default_branch: "master"
+fetched_at: "2026-11-08T12:43:21Z"
+---
+
+﻿# Akaunting™
+
+[![Release](https://img.shields.io/github/v/release/akaunting/akaunting?label=release)](https://github.com/akaunting/akaunting/releases)
+![Downloads](https://img.shields.io/github/downloads/akaunting/akaunting/total?label=downloads)
+[![Tests](https://img.shields.io/github/actions/workflow/status/akaunting/akaunting/tests.yml?label=tests)](https://github.com/akaunting/akaunting/actions)
+
+Online accounting software designed for small businesses and freelancers. Akaunting is built with modern technologies such as Laravel, VueJS, Tailwind, RESTful API etc. Thanks to its modular structure, Akaunting provides an awesome App Store for users and developers.
+
+* [Home](https://akaunting.com) - The house of Akaunting
+* [Forum](https://akaunting.com/forum) - Ask for support
+* [Documentation](https://akaunting.com/hc/docs) - Learn how to use
+* [Developer Portal](https://developer.akaunting.com) - Generate passive income
+* [App Store](https://akaunting.com/apps) - Extend your Akaunting
+
+## Requirements
+
+* PHP 8.2 or higher
+* Node.js 18 or 20 (the asset pipeline does not build on Node 21+ yet)
+* Database (e.g.: MariaDB, MySQL, PostgreSQL, SQLite)
+* Web Server (eg: Apache, Nginx, IIS)
+* [Other libraries](https://akaunting.com/hc/docs/on-premise/requirements/)
+
+## Framework
+
+Akaunting uses [Laravel](http://laravel.com), the best existing PHP framework, as the foundation framework and [Module](https://github.com/akaunting/module) package for Apps.
+
+## Installation
+
+* Clone the repository: `git clone https://github.com/akaunting/akaunting.git`
+* Install dependencies: `composer install ; npm install ; npm run dev`
+* Install Akaunting:
+
+```bash
+php artisan install --db-name="akaunting" --db-username="root" --db-password="pass" --admin-email="admin@company.com" --admin-password="123456"
+```
+
+* Create sample data (optional): `php artisan sample-data:seed`
+
+Point the web server's document root at the project root, not at `public`.
+Akaunting serves itself through the `index.php` in the project root and builds
+its asset URLs accordingly.
+
+> If you prefer, `php artisan serve` also works for a quick local run.
+
+## Contributing
+
+Please, be very clear on your commit messages and Pull Requests, empty Pull Request messages may be rejected without reason.
+
+When contributing code to Akaunting, you must follow the PSR coding standards. The golden rule is: Imitate the existing Akaunting code.
+
+Please note that this project is released with a [Contributor Code of Conduct](https://akaunting.com/conduct). *By participating in this project you agree to abide by its terms*.
+
+## Changelog
+
+Please see [Releases](../../releases) for more information about what has changed recently.
+
+## Security
+
+Please review [our security policy](https://github.com/akaunting/akaunting/security/policy) on how to report security vulnerabilities.
+
+## Credits
+
+* [Denis Duliçi](https://github.com/denisdulici)
+* [Cüneyt Şentürk](https://github.com/cuneytsenturk)
+* [All Contributors](../../contributors)
+
+## License
+
+Akaunting is released under the [BSL license](LICENSE.txt).

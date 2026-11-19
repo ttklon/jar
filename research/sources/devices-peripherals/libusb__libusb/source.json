@@ -1,0 +1,21 @@
+{
+  "id": "github:libusb/libusb",
+  "kind": "github",
+  "category": "devices-peripherals",
+  "repo": "libusb/libusb",
+  "url": "https://github.com/libusb/libusb",
+  "description": "A cross-platform library to access USB devices",
+  "stars": 6191,
+  "forks": 2092,
+  "language": "C",
+  "license": "LGPL-2.1",
+  "topics": [
+    "c",
+    "libusb",
+    "usb"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T22:15:02Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

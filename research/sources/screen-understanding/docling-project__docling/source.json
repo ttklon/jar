@@ -1,0 +1,33 @@
+{
+  "id": "github:docling-project/docling",
+  "kind": "github",
+  "category": "screen-understanding",
+  "repo": "docling-project/docling",
+  "url": "https://github.com/docling-project/docling",
+  "description": "Get your documents ready for gen AI",
+  "stars": 70278,
+  "forks": 5287,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "ai",
+    "convert",
+    "document-parser",
+    "document-parsing",
+    "documents",
+    "docx",
+    "html",
+    "markdown",
+    "pdf",
+    "pdf-converter",
+    "pdf-to-json",
+    "pdf-to-text",
+    "pptx",
+    "tables",
+    "xlsx"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:34:47Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

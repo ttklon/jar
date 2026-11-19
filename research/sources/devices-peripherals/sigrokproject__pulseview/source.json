@@ -1,0 +1,17 @@
+{
+  "id": "github:sigrokproject/pulseview",
+  "kind": "github",
+  "category": "devices-peripherals",
+  "repo": "sigrokproject/pulseview",
+  "url": "https://github.com/sigrokproject/pulseview",
+  "description": "Read-only mirror of the official repo at git://sigrok.org/pulseview. Pull requests welcome. Please file bugreports at sigrok.org/bugzilla.",
+  "stars": 815,
+  "forks": 256,
+  "language": "C++",
+  "license": "GPL-3.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2025-11-10T00:51:54Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

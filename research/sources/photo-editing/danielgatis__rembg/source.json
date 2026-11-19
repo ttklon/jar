@@ -1,0 +1,21 @@
+{
+  "id": "github:danielgatis/rembg",
+  "kind": "github",
+  "category": "photo-editing",
+  "repo": "danielgatis/rembg",
+  "url": "https://github.com/danielgatis/rembg",
+  "description": "Rembg is a tool to remove images background",
+  "stars": 25387,
+  "forks": 2476,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "background-removal",
+    "image-processing",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T01:18:29Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

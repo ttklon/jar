@@ -1,0 +1,21 @@
+{
+  "id": "github:emilkowalski/sonner",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "emilkowalski/sonner",
+  "url": "https://github.com/emilkowalski/sonner",
+  "description": "An opinionated toast component for React.",
+  "stars": 13159,
+  "forks": 469,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "notifications",
+    "react",
+    "toast"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-10T11:13:03Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

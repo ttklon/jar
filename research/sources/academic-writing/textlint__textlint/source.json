@@ -1,0 +1,25 @@
+{
+  "id": "github:textlint/textlint",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "textlint/textlint",
+  "url": "https://github.com/textlint/textlint",
+  "description": "textlint is the pluggable linter for natural language text.",
+  "stars": 3206,
+  "forks": 174,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "javascript",
+    "lint",
+    "linter",
+    "markdown",
+    "natural-language",
+    "nlp",
+    "textlint"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T05:02:47Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

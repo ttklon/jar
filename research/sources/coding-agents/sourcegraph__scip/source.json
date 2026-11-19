@@ -1,0 +1,17 @@
+{
+  "id": "github:sourcegraph/scip",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "sourcegraph/scip",
+  "url": "https://github.com/sourcegraph/scip",
+  "description": "SCIP Code Intelligence Protocol",
+  "stars": 873,
+  "forks": 83,
+  "language": "Go",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T21:30:19Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

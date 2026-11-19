@@ -1,0 +1,28 @@
+{
+  "id": "github:nvidia/NeMo",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "nvidia/NeMo",
+  "url": "https://github.com/nvidia/NeMo",
+  "description": "A scalable generative AI framework built for researchers and developers working on Large Language Models, Multimodal, and Speech AI (Automatic Speech Recognition and Text-to-Speech)",
+  "stars": 18716,
+  "forks": 3682,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "asr",
+    "deeplearning",
+    "generative-ai",
+    "machine-translation",
+    "neural-networks",
+    "speaker-diariazation",
+    "speaker-recognition",
+    "speech-synthesis",
+    "speech-translation",
+    "tts"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-07T22:21:33Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

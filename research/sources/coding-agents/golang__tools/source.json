@@ -1,0 +1,17 @@
+{
+  "id": "github:golang/tools",
+  "kind": "github",
+  "category": "coding-agents",
+  "repo": "golang/tools",
+  "url": "https://github.com/golang/tools",
+  "description": "[mirror] Go Tools",
+  "stars": 8016,
+  "forks": 2467,
+  "language": "Go",
+  "license": "BSD-3-Clause",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T21:06:19Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

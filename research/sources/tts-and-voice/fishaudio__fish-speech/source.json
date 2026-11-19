@@ -1,0 +1,25 @@
+{
+  "id": "github:fishaudio/fish-speech",
+  "kind": "github",
+  "category": "tts-and-voice",
+  "repo": "fishaudio/fish-speech",
+  "url": "https://github.com/fishaudio/fish-speech",
+  "description": "SOTA Open Source TTS",
+  "stars": 33615,
+  "forks": 2923,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "llama",
+    "transformer",
+    "tts",
+    "valle",
+    "vits",
+    "vqgan",
+    "vqvae"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-02T20:02:21Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

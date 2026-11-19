@@ -1,0 +1,33 @@
+{
+  "id": "github:PSAppDeployToolkit/PSAppDeployToolkit",
+  "kind": "github",
+  "category": "deployment-admin",
+  "repo": "PSAppDeployToolkit/PSAppDeployToolkit",
+  "url": "https://github.com/PSAppDeployToolkit/PSAppDeployToolkit",
+  "description": "Project Homepage & Forums",
+  "stars": 2441,
+  "forks": 565,
+  "language": "C#",
+  "license": "LGPL-3.0",
+  "topics": [
+    "appdeploy",
+    "appdeploytoolkit",
+    "application-deployment",
+    "configmgr",
+    "configuration-manager",
+    "intune",
+    "memcm",
+    "microsoft-intune",
+    "osd",
+    "patch-management",
+    "powershell",
+    "powershell-module",
+    "psadt",
+    "psappdeploytoolkit",
+    "sccm"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T15:24:59Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

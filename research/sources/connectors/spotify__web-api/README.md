@@ -1,0 +1,18 @@
+---
+id: "github:spotify/web-api"
+kind: "github"
+category: "connectors"
+repo: "spotify/web-api"
+url: "https://github.com/spotify/web-api"
+description: "This issue tracker is no longer used. Join us in the Spotify for Developers forum for support with the Spotify Web API ➡️ https://community.spotify.com/t5/Spotify-for-Developers/bd-p/Spotify_Developer"
+stars: 969
+forks: 77
+language: "RAML"
+license: "NOASSERTION"
+archived: true
+pushed_at: "2020-05-07T13:23:08Z"
+default_branch: "master"
+fetched_at: "2026-11-08T11:20:04Z"
+---
+
+We've moved! Visit the [Spotify for Developers community forum](https://community.spotify.com/t5/Spotify-for-Developers/bd-p/Spotify_Developer) to find help with the Web API.

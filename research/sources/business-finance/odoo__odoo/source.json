@@ -1,0 +1,25 @@
+{
+  "id": "github:odoo/odoo",
+  "kind": "github",
+  "category": "business-finance",
+  "repo": "odoo/odoo",
+  "url": "https://github.com/odoo/odoo",
+  "description": "Odoo. Open Source Apps To Grow Your Business.",
+  "stars": 55637,
+  "forks": 34245,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "apps",
+    "business",
+    "erp",
+    "management",
+    "odoo",
+    "odoo-apps",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:44:02Z",
+  "default_branch": "20.0",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

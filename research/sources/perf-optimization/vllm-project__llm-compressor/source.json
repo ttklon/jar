@@ -1,0 +1,20 @@
+{
+  "id": "github:vllm-project/llm-compressor",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "vllm-project/llm-compressor",
+  "url": "https://github.com/vllm-project/llm-compressor",
+  "description": "State-of-the-art LLM compression, built for production inference with vLLM",
+  "stars": 3952,
+  "forks": 729,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "compression",
+    "quantization"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T01:40:47Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

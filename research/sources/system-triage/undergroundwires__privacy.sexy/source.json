@@ -1,0 +1,33 @@
+{
+  "id": "github:undergroundwires/privacy.sexy",
+  "kind": "github",
+  "category": "system-triage",
+  "repo": "undergroundwires/privacy.sexy",
+  "url": "https://github.com/undergroundwires/privacy.sexy",
+  "description": "Open-source tool to enforce privacy & security best-practices on Windows, macOS and Linux, because privacy is sexy",
+  "stars": 6170,
+  "forks": 309,
+  "language": "TypeScript",
+  "license": "AGPL-3.0",
+  "topics": [
+    "bloatware",
+    "bloatware-removal",
+    "cleanup",
+    "cybersecurity",
+    "debloat",
+    "debloater",
+    "debotnet",
+    "domain-driven-design",
+    "linux",
+    "macos",
+    "privacy",
+    "privacy-protection",
+    "privacy-tools",
+    "security",
+    "security-hardening"
+  ],
+  "archived": false,
+  "pushed_at": "2026-02-13T10:55:07Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

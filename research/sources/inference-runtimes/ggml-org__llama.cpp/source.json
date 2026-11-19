@@ -1,0 +1,19 @@
+{
+  "id": "github:ggml-org/llama.cpp",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "ggml-org/llama.cpp",
+  "url": "https://github.com/ggml-org/llama.cpp",
+  "description": "LLM inference in C/C++",
+  "stars": 133706,
+  "forks": 25254,
+  "language": "C++",
+  "license": "MIT",
+  "topics": [
+    "ggml"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T11:21:06Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

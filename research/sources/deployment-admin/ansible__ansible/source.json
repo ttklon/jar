@@ -1,0 +1,20 @@
+{
+  "id": "github:ansible/ansible",
+  "kind": "github",
+  "category": "deployment-admin",
+  "repo": "ansible/ansible",
+  "url": "https://github.com/ansible/ansible",
+  "description": "Ansible is a radically simple IT automation platform that makes your applications and systems easier to deploy and maintain. Automate everything from code deployment to network configuration to cloud management, in a language that approaches plain English, using SSH, with no agents to install on remote systems. https://docs.ansible.com.",
+  "stars": 71275,
+  "forks": 24441,
+  "language": "Python",
+  "license": "GPL-3.0",
+  "topics": [
+    "ansible",
+    "python"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T20:37:11Z",
+  "default_branch": "devel",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

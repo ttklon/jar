@@ -1,0 +1,17 @@
+{
+  "id": "github:hexgrad/kokoro",
+  "kind": "github",
+  "category": "tts-and-voice",
+  "repo": "hexgrad/kokoro",
+  "url": "https://github.com/hexgrad/kokoro",
+  "description": "https://hf.co/hexgrad/Kokoro-82M",
+  "stars": 9970,
+  "forks": 1120,
+  "language": "JavaScript",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2025-08-06T22:28:53Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

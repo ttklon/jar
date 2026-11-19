@@ -1,0 +1,17 @@
+{
+  "id": "github:microsoft/CsWin32",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "microsoft/CsWin32",
+  "url": "https://github.com/microsoft/CsWin32",
+  "description": "A source generator to add a user-defined set of Win32 P/Invoke methods and supporting types to a C# project.",
+  "stars": 2527,
+  "forks": 132,
+  "language": "C#",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-06T19:55:38Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

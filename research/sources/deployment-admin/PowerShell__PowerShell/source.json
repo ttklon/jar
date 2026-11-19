@@ -1,0 +1,26 @@
+{
+  "id": "github:PowerShell/PowerShell",
+  "kind": "github",
+  "category": "deployment-admin",
+  "repo": "PowerShell/PowerShell",
+  "url": "https://github.com/PowerShell/PowerShell",
+  "description": "PowerShell for every system!",
+  "stars": 56054,
+  "forks": 8530,
+  "language": "C#",
+  "license": "MIT",
+  "topics": [
+    "command-line",
+    "hacktoberfest",
+    "linux",
+    "macos",
+    "netcore",
+    "powershell",
+    "shell",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T19:41:07Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

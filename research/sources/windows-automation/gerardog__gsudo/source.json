@@ -1,0 +1,30 @@
+{
+  "id": "github:gerardog/gsudo",
+  "kind": "github",
+  "category": "windows-automation",
+  "repo": "gerardog/gsudo",
+  "url": "https://github.com/gerardog/gsudo",
+  "description": "Sudo for Windows",
+  "stars": 6072,
+  "forks": 165,
+  "language": "C#",
+  "license": "MIT",
+  "topics": [
+    "command-line",
+    "elevate",
+    "elevated-commands",
+    "elevated-permissions",
+    "powershell",
+    "runas",
+    "sudo",
+    "sudo-for-windows",
+    "terminal",
+    "uac",
+    "windows",
+    "wsl"
+  ],
+  "archived": false,
+  "pushed_at": "2026-08-12T04:39:51Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

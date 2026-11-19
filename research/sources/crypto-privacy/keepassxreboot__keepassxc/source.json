@@ -1,0 +1,30 @@
+{
+  "id": "github:keepassxreboot/keepassxc",
+  "kind": "github",
+  "category": "crypto-privacy",
+  "repo": "keepassxreboot/keepassxc",
+  "url": "https://github.com/keepassxreboot/keepassxc",
+  "description": "KeePassXC is a cross-platform community-driven port of the Windows application “KeePass Password Safe”.",
+  "stars": 29853,
+  "forks": 2015,
+  "language": "C++",
+  "license": "NOASSERTION",
+  "topics": [
+    "cross-platform",
+    "hacktoberfest",
+    "keepass",
+    "keepassxc",
+    "linux",
+    "macos",
+    "password",
+    "password-manager",
+    "privacy",
+    "security",
+    "windows",
+    "yubikey"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T08:46:27Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T13:07:59Z"
+}

@@ -1,0 +1,43 @@
+{
+  "app": "7-Zip",
+  "exe": ["7zFM.exe", "7z.exe", "7zG.exe"],
+  "ui_stack": "win32",
+  "version_seen": "24.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "cli": { "by": "api", "value": "7z.exe a|x|e|l -p<pwd> -mhe=on" },
+    "gui": { "by": "uia", "value": "ControlType=List; Name~«Список файлов»", "fallback": "не используем, если доступен CLI" }
+  },
+  "operations": [
+    {
+      "name": "Создать архив с паролем",
+      "registry": "files|сжать|в архив",
+      "steps": ["cli:7z a -t7z -mhe=on -p<secret> <arch> <files>"],
+      "verify": ["архив существует", "7z l -slt показывает Encryption = +", "тестовая распаковка первого файла успешна"],
+      "risk": "write-local",
+      "notes": "пароль берём из secrets.enc, не из аргументов в логах — маскировать в аудите"
+    },
+    {
+      "name": "Распаковать безопасно (без zip-slip)",
+      "registry": "files|распаковать|архив",
+      "steps": ["cli:7z l -slt <arch> → список путей", "проверить отсутствие '..' и абсолютных путей", "cli:7z x -o<dir>"],
+      "verify": ["все извлечённые пути внутри целевой папки", "нет исполняемых файлов вне ожидаемых"],
+      "risk": "write-local",
+      "on_fail": "остановиться и показать подозрительные записи"
+    },
+    {
+      "name": "Проверить целостность архива",
+      "registry": "files|проверить|размеры и место",
+      "steps": ["cli:7z t <arch>"],
+      "verify": ["Everything is Ok", "exit code 0"],
+      "risk": "read"
+    },
+    {
+      "name": "Разбить архив на части и собрать обратно",
+      "registry": "files|сжать|в архив",
+      "steps": ["cli:7z a -v100m <arch> <files>", "контроль: число частей и суммарный размер"],
+      "verify": ["части .001.. присутствуют", "7z t по первой части проходит"],
+      "risk": "write-local"
+    }
+  ]
+}

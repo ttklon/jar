@@ -1,0 +1,23 @@
+{
+  "id": "github:pacocoursey/cmdk",
+  "kind": "github",
+  "category": "ui-ux",
+  "repo": "pacocoursey/cmdk",
+  "url": "https://github.com/pacocoursey/cmdk",
+  "description": "Fast, unstyled command menu React component.",
+  "stars": 13078,
+  "forks": 381,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "combobox",
+    "command-menu",
+    "command-palette",
+    "radix-ui",
+    "react"
+  ],
+  "archived": false,
+  "pushed_at": "2025-10-29T04:13:58Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

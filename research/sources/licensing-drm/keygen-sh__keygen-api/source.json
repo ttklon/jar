@@ -1,0 +1,28 @@
+{
+  "id": "github:keygen-sh/keygen-api",
+  "kind": "github",
+  "category": "licensing-drm",
+  "repo": "keygen-sh/keygen-api",
+  "url": "https://github.com/keygen-sh/keygen-api",
+  "description": "Keygen is a modern, fair source software licensing and distribution API. For developers, by developers.",
+  "stars": 1627,
+  "forks": 139,
+  "language": "Gherkin",
+  "license": "NOASSERTION",
+  "topics": [
+    "api",
+    "fair-source",
+    "license-keys",
+    "rails",
+    "rails-api",
+    "ruby",
+    "ruby-on-rails",
+    "software-distribution",
+    "software-licensing",
+    "source-available"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-05T14:50:29Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:14:43Z"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "github:camelot-dev/camelot",
+  "kind": "github",
+  "category": "documents-ocr",
+  "repo": "camelot-dev/camelot",
+  "url": "https://github.com/camelot-dev/camelot",
+  "description": "A Python library to extract tabular data from PDFs",
+  "stars": 3849,
+  "forks": 549,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-30T20:58:50Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T13:04:20Z"
+}

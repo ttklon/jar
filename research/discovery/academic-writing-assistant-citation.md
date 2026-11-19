@@ -1,0 +1,18 @@
+# Discovery: `academic writing assistant citation`
+
+_GitHub search, sorted by stars, captured 2026-11-08T12:34:15Z. Candidates for later mining._
+
+| Stars | Repo | Language | License | Updated | Description |
+| --- | --- | --- | --- | --- | --- |
+| 15 | [Marazii/research-co-pilot](https://github.com/Marazii/research-co-pilot) | Shell | MIT | 2026-06-04 | Comprehensive research co-pilot for Claude Code and claude.ai — 14 skills covering literature review, methodology, ethics review, data analysis, qualitative coding, brainstorming, manuscript drafting, replication design, |
+| 2 | [jiangye999/SCI-Writting-Agenet](https://github.com/jiangye999/SCI-Writting-Agenet) | Python | - | 2026-01-17 | Academic Paper Writing Assistant: AI-powered system analyzing research documents and journal styles to generate complete academic papers. Features multi-agent coordination, LaTeX output with strict citations, and customi |
+| 1 | [Hira-s-Help-Line/Academic-Paper-Research-Citation-Assistant-Prompt-Template](https://github.com/Hira-s-Help-Line/Academic-Paper-Research-Citation-Assistant-Prompt-Template) | - | - | 2026-07-08 | A reusable, battle-tested prompt template for working with LLMs (Claude, GPT, Gemini, etc.) on academic paper writing  specifically for finding, verifying, and citing real, non-fabricated literature section by section. |
+| 0 | [Jesher77777/ai-academic-writing-assistant3](https://github.com/Jesher77777/ai-academic-writing-assistant3) | - | MIT | 2025-10-17 | AI tool for academic writing (citations & intros) - JavaScript implementation of arXiv:2503.13771 |
+| 0 | [Jesher77777/ai-academic-writing-assistant2](https://github.com/Jesher77777/ai-academic-writing-assistant2) | - | - | 2025-10-17 | Implementation of AI-assisted academic writing tools for citation recommendation and introduction generation, inspired by arXiv:2503.13771 |
+| 0 | [Jesher77777/ai-academic-writing-assistant1](https://github.com/Jesher77777/ai-academic-writing-assistant1) | - | MIT | 2025-10-16 | An AI-assisted tool for academic writing, including citation recommendation and introduction generation, inspired by arXiv:2503.13771 |
+| 0 | [Jesher77777/ai-academic-writing-assistant](https://github.com/Jesher77777/ai-academic-writing-assistant) | - | MIT | 2025-10-16 | Implementation of AI-assisted academic writing tools for citation recommendation and introduction generation, inspired by arXiv:2503.13771 |
+| 0 | [Feliren88/ai-writing-assistant](https://github.com/Feliren88/ai-writing-assistant) | Python | - | 2026-08-13 | Local writing stack for academic papers: two open models, adaptive literature search, and every citation resolved against Crossref before it ships |
+| 0 | [suvankar-paul/AI-Research-Assistant_Agents](https://github.com/suvankar-paul/AI-Research-Assistant_Agents) | Python | - | 2025-06-23 | This Projects will help you in your Academic Research, Paper writing, Proper citation. |
+| 0 | [Nikki-SU/PaperAssistant](https://github.com/Nikki-SU/PaperAssistant) | Python | AGPL-3.0 | 2026-06-30 | Local-first academic writing assistant. Topic selection, literature review, writing, citation, LaTeX typesetting. Tauri v2 + Python FastAPI sidecar. CSV + Markdown only. |
+| 0 | [VandanaSiingh/paperpilot-ai](https://github.com/VandanaSiingh/paperpilot-ai) | - | - | 2026-07-05 | AI-powered research assistant for writing, paraphrasing, and citation-based academic papers. |
+| 0 | [sidharth188/research-humanizer-ai](https://github.com/sidharth188/research-humanizer-ai) | - | NOASSERTION | 2026-06-25 | An AI-powered academic writing assistant that humanizes research papers while preserving technical accuracy, citations, equations, and academic style. |

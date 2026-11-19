@@ -1,0 +1,128 @@
+//! Иконка в системном трее: «открыть», «пауза», «выход».
+//!
+//! Ассистент живёт в фоне, поэтому трей — не украшение, а основной способ
+//! управления: закрытие окна не завершает работу, завершение — только через
+//! явный пункт меню.
+
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+use tauri::{AppHandle, Emitter, Manager};
+
+pub fn install(app: &AppHandle) -> tauri::Result<()> {
+    let show = MenuItem::with_id(app, "show", "Открыть ZShelper", true, None::<&str>)?;
+    let stop_voice =
+        MenuItem::with_id(app, "stop-voice", "Остановить микрофон", true, None::<&str>)?;
+    let separator = PredefinedMenuItem::separator(app)?;
+    let quit = MenuItem::with_id(app, "quit", "Выход", true, None::<&str>)?;
+
+    let menu = Menu::with_items(app, &[&show, &stop_voice, &separator, &quit])?;
+
+    let mut builder = TrayIconBuilder::with_id("main")
+        .tooltip("ZShelper — готово")
+        .menu(&menu)
+        .show_menu_on_left_click(false)
+        .on_menu_event(|app, event| match event.id.as_ref() {
+            "quit" => {
+                tracing::info!("трей: выход");
+                app.exit(0);
+            }
+            "show" => show_main_window(app),
+            "stop-voice" => {
+                // Не ставим ready здесь: emit лишь отправляет запрос, а не доказывает,
+                // что UI получил его и действительно закрыл микрофон.
+                if let Err(error) = app.emit("voice://stop", ()) {
+                    tracing::warn!(%error, "команда остановки голоса не отправлена");
+                }
+            }
+            _ => {}
+        })
+        .on_tray_icon_event(|tray, event| {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
+                show_main_window(tray.app_handle());
+            }
+        });
+
+    if let Some(icon) = app.default_window_icon() {
+        builder = builder.icon(icon.clone());
+    }
+
+    builder.build(app)?;
+    tracing::info!("трей установлен");
+    Ok(())
+}
+
+/// Индикатор удержания для фонового разговора. Окно остаётся скрытым;
+/// системный tooltip — единственная видимая подсказка без вмешательства в чужое окно.
+fn voice_tooltip(status: &str) -> Result<&'static str, String> {
+    match status {
+        "ready" => Ok("ZShelper — готово"),
+        "key-down" => Ok("ZShelper — голосовая клавиша зажата"),
+        "key-up" => Ok("ZShelper — клавиша отпущена"),
+        "listening" => Ok("ZShelper — слушаю"),
+        "working" => Ok("ZShelper — обрабатываю запрос"),
+        "awaiting-confirmation" => Ok("ZShelper — жду подтверждения"),
+        "executing" => Ok("ZShelper — выполняю действие"),
+        "error" => Ok("ZShelper — ошибка; откройте окно"),
+        _ => Err("неизвестное состояние голоса".to_string()),
+    }
+}
+
+pub fn set_voice_status(app: &AppHandle, status: &str) -> Result<(), String> {
+    let tooltip = voice_tooltip(status)?;
+    let tray = app
+        .tray_by_id("main")
+        .ok_or_else(|| "иконка трея не найдена".to_string())?;
+    tray.set_tooltip(Some(tooltip))
+        .map_err(|error| format!("статус голоса не обновлён в трее: {error}"))
+}
+
+pub fn set_voice_hold(app: &AppHandle, active: bool) {
+    let status = if active { "key-down" } else { "key-up" };
+    if let Err(error) = set_voice_status(app, status) {
+        tracing::warn!(%error, "voice status не обновлён");
+    }
+}
+
+fn show_main_window(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::voice_tooltip;
+
+    #[test]
+    fn tray_has_explicit_voice_states_and_rejects_unknown_values() {
+        assert_eq!(
+            voice_tooltip("key-down").unwrap(),
+            "ZShelper — голосовая клавиша зажата"
+        );
+        assert_eq!(voice_tooltip("listening").unwrap(), "ZShelper — слушаю");
+        assert_eq!(
+            voice_tooltip("working").unwrap(),
+            "ZShelper — обрабатываю запрос"
+        );
+        assert_eq!(
+            voice_tooltip("awaiting-confirmation").unwrap(),
+            "ZShelper — жду подтверждения"
+        );
+        assert_eq!(
+            voice_tooltip("executing").unwrap(),
+            "ZShelper — выполняю действие"
+        );
+        assert_eq!(
+            voice_tooltip("error").unwrap(),
+            "ZShelper — ошибка; откройте окно"
+        );
+        assert!(voice_tooltip("untrusted arbitrary tooltip").is_err());
+    }
+}

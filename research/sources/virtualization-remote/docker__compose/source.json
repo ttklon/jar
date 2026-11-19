@@ -1,0 +1,23 @@
+{
+  "id": "github:docker/compose",
+  "kind": "github",
+  "category": "virtualization-remote",
+  "repo": "docker/compose",
+  "url": "https://github.com/docker/compose",
+  "description": "Define and run multi-container applications with Docker",
+  "stars": 38644,
+  "forks": 5900,
+  "language": "Go",
+  "license": "Apache-2.0",
+  "topics": [
+    "docker",
+    "docker-compose",
+    "go",
+    "golang",
+    "orchestration"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T09:02:49Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:43:21Z"
+}

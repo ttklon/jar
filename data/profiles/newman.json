@@ -1,0 +1,101 @@
+{
+  "app": "Postman / newman",
+  "kind": "tool",
+  "exe": [
+    "Postman.exe",
+    "newman.exe",
+    "newman.cmd"
+  ],
+  "ui_stack": "electron",
+  "version_seen": "Postman 11.x / newman 6.x (2026-11)",
+  "verified_at": "2026-11-08",
+  "anchors": {
+    "run": {
+      "by": "api",
+      "value": "newman run collection.json -e env.json --reporters cli,json --reporter-json-export report.json"
+    },
+    "bail": {
+      "by": "api",
+      "value": "newman run ... --bail — остановиться на первом падении (для CI)"
+    },
+    "data": {
+      "by": "api",
+      "value": "newman run ... --iteration-data rows.csv — прогон по набору данных"
+    },
+    "env": {
+      "by": "api",
+      "value": "переменные окружения — из файла; секреты — из переменных среды/хранилища, не в коллекцию"
+    },
+    "openapi": {
+      "by": "api",
+      "value": "Postman → Import → OpenAPI 3.x (или openapi-to-postmanv2)"
+    },
+    "gui": {
+      "by": "uia",
+      "value": "окно Postman: коллекции, окружения, runner"
+    }
+  },
+  "operations": [
+    {
+      "name": "Прогнать коллекцию и получить отчёт",
+      "registry": "web|работать|с API вместо сайта",
+      "steps": [
+        "newman run collection.json -e env.json --reporters cli,json --reporter-json-export report.json",
+        "прочитать итог: requests, assertions, failed",
+        "сохранить отчёт рядом с задачей"
+      ],
+      "verify": [
+        "итог назван числами: сколько запросов и сколько упало",
+        "отчёт report.json существует и открывается",
+        "при падении указан конкретный запрос и код ответа"
+      ],
+      "risk": "read"
+    },
+    {
+      "name": "Проверить API на стенде перед выкаткой",
+      "registry": "dev-code|запустить|тесты",
+      "steps": [
+        "newman run collection.json -e staging.json --bail",
+        "код возврата проверить явно (0/1)",
+        "при падении — не «перезапустить пока не пройдёт», а разобрать ответ"
+      ],
+      "verify": [
+        "код возврата 0 и failed = 0",
+        "в отчёте видны коды ответов по каждому запросу",
+        "проверка шла против стенда, а не прода (URL в отчёте)"
+      ],
+      "risk": "write-local",
+      "on_fail": "если тесты падают нестабильно (флаки) — записать, какие именно, и не выдавать за успех"
+    },
+    {
+      "name": "Прогнать тесты по набору данных",
+      "registry": "dev-code|покрыть|тестами",
+      "steps": [
+        "подготовить CSV с колонками переменных",
+        "newman run collection.json -e env.json --iteration-data cases.csv",
+        "сверить число итераций и упавших"
+      ],
+      "verify": [
+        "число итераций = числу строк CSV",
+        "падения перечислены с номером итерации",
+        "отчёт содержит данные каждой итерации"
+      ],
+      "risk": "write-local"
+    },
+    {
+      "name": "Обновить коллекцию из OpenAPI",
+      "registry": "dev-code|документировать|API",
+      "steps": [
+        "импортировать актуальную спецификацию (Import → OpenAPI)",
+        "сравнить число эндпоинтов со спецификацией",
+        "проверить, что секреты не попали в коллекцию"
+      ],
+      "verify": [
+        "число эндпоинтов в коллекции = числу в спецификации",
+        "ни в одном запросе нет токена/пароля в открытом виде",
+        "новая коллекция прогнана newman и проходит"
+      ],
+      "risk": "write-local"
+    }
+  ]
+}

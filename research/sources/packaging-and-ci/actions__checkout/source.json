@@ -1,0 +1,17 @@
+{
+  "id": "github:actions/checkout",
+  "kind": "github",
+  "category": "packaging-and-ci",
+  "repo": "actions/checkout",
+  "url": "https://github.com/actions/checkout",
+  "description": "Action for checking out a repo",
+  "stars": 9009,
+  "forks": 2746,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-10-17T10:14:02Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

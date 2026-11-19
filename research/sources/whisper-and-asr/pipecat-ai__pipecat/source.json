@@ -1,0 +1,24 @@
+{
+  "id": "github:pipecat-ai/pipecat",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "pipecat-ai/pipecat",
+  "url": "https://github.com/pipecat-ai/pipecat",
+  "description": "Open Source framework for voice agents, multimodal apps, and realtime AI. Maintained by Daily and the community.",
+  "stars": 17121,
+  "forks": 3055,
+  "language": "Python",
+  "license": "BSD-2-Clause",
+  "topics": [
+    "ai",
+    "chatbot-framework",
+    "chatbots",
+    "real-time",
+    "voice",
+    "voice-assistant"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T00:09:05Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

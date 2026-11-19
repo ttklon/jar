@@ -1,0 +1,28 @@
+{
+  "id": "github:mozilla/DeepSpeech",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "mozilla/DeepSpeech",
+  "url": "https://github.com/mozilla/DeepSpeech",
+  "description": "DeepSpeech is an open source embedded (offline, on-device) speech-to-text engine which can run in real time on devices ranging from a Raspberry Pi 4 to high power GPU servers.",
+  "stars": 26771,
+  "forks": 4067,
+  "language": "C++",
+  "license": "MPL-2.0",
+  "topics": [
+    "deep-learning",
+    "deepspeech",
+    "embedded",
+    "machine-learning",
+    "neural-networks",
+    "offline",
+    "on-device",
+    "speech-recognition",
+    "speech-to-text",
+    "tensorflow"
+  ],
+  "archived": true,
+  "pushed_at": "2025-06-19T12:52:51Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

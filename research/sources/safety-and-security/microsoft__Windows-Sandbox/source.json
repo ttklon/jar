@@ -1,0 +1,21 @@
+{
+  "id": "github:microsoft/Windows-Sandbox",
+  "kind": "github",
+  "category": "safety-and-security",
+  "repo": "microsoft/Windows-Sandbox",
+  "url": "https://github.com/microsoft/Windows-Sandbox",
+  "description": "Disposable, secure and lightweight Windows Desktop Environment",
+  "stars": 587,
+  "forks": 59,
+  "language": "PowerShell",
+  "license": "MIT",
+  "topics": [
+    "developer-tools",
+    "sandbox",
+    "windows"
+  ],
+  "archived": false,
+  "pushed_at": "2024-09-20T21:13:02Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

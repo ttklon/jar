@@ -1,0 +1,17 @@
+{
+  "id": "github:google/gemma.cpp",
+  "kind": "github",
+  "category": "inference-runtimes",
+  "repo": "google/gemma.cpp",
+  "url": "https://github.com/google/gemma.cpp",
+  "description": "lightweight, standalone C++ inference engine for Google's Gemma models.",
+  "stars": 7081,
+  "forks": 672,
+  "language": "C++",
+  "license": "Apache-2.0",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-11-07T15:48:58Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

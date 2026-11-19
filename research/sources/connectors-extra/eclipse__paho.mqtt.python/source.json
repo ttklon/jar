@@ -1,0 +1,21 @@
+{
+  "id": "github:eclipse/paho.mqtt.python",
+  "kind": "github",
+  "category": "connectors-extra",
+  "repo": "eclipse/paho.mqtt.python",
+  "url": "https://github.com/eclipse/paho.mqtt.python",
+  "description": "paho.mqtt.python",
+  "stars": 2434,
+  "forks": 751,
+  "language": "Python",
+  "license": "NOASSERTION",
+  "topics": [
+    "eclipseiot",
+    "internet-of-things",
+    "mqtt"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-04T20:19:48Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "github:retorquere/zotero-better-bibtex",
+  "kind": "github",
+  "category": "academic-writing",
+  "repo": "retorquere/zotero-better-bibtex",
+  "url": "https://github.com/retorquere/zotero-better-bibtex",
+  "description": "Make Zotero effective for us LaTeX holdouts",
+  "stars": 7286,
+  "forks": 397,
+  "language": "TypeScript",
+  "license": "MIT",
+  "topics": [
+    "bib",
+    "biblatex",
+    "bibtex",
+    "citation-keys",
+    "latex",
+    "zotero"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T12:29:09Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

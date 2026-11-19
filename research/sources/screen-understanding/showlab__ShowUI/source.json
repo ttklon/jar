@@ -1,0 +1,23 @@
+{
+  "id": "github:showlab/ShowUI",
+  "kind": "github",
+  "category": "screen-understanding",
+  "repo": "showlab/ShowUI",
+  "url": "https://github.com/showlab/ShowUI",
+  "description": "[CVPR 2025] Open-source, End-to-end, Vision-Language-Action model for GUI Agent & Computer Use.",
+  "stars": 1929,
+  "forks": 144,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "agent",
+    "computer-use",
+    "gui-agent",
+    "vision-language-action",
+    "vision-language-model"
+  ],
+  "archived": false,
+  "pushed_at": "2026-04-24T07:16:50Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

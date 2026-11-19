@@ -1,0 +1,33 @@
+{
+  "id": "github:PyMuPDF/pymupdf",
+  "kind": "github",
+  "category": "office-automation",
+  "repo": "PyMuPDF/pymupdf",
+  "url": "https://github.com/PyMuPDF/pymupdf",
+  "description": "PyMuPDF is a high performance Python library for data extraction, analysis, conversion & manipulation of PDF (and other) documents.",
+  "stars": 11086,
+  "forks": 834,
+  "language": "Python",
+  "license": "AGPL-3.0",
+  "topics": [
+    "data-science",
+    "epub",
+    "extract-data",
+    "font",
+    "mupdf",
+    "ocr",
+    "pdf",
+    "pdf-documents",
+    "pymupdf",
+    "python",
+    "table-extraction",
+    "tesseract",
+    "text-processing",
+    "text-shaping",
+    "xps"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-08T07:54:11Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

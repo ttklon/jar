@@ -1,0 +1,17 @@
+{
+  "id": "github:openai/simple-evals",
+  "kind": "github",
+  "category": "benchmarks",
+  "repo": "openai/simple-evals",
+  "url": "https://github.com/openai/simple-evals",
+  "description": "",
+  "stars": 4696,
+  "forks": 523,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [],
+  "archived": false,
+  "pushed_at": "2026-04-22T22:16:18Z",
+  "default_branch": "main",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}

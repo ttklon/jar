@@ -1,0 +1,33 @@
+{
+  "id": "github:openvinotoolkit/nncf",
+  "kind": "github",
+  "category": "perf-optimization",
+  "repo": "openvinotoolkit/nncf",
+  "url": "https://github.com/openvinotoolkit/nncf",
+  "description": "Neural Network Compression Framework for enhanced OpenVINO™ inference",
+  "stars": 1218,
+  "forks": 314,
+  "language": "Python",
+  "license": "Apache-2.0",
+  "topics": [
+    "bert",
+    "classification",
+    "compression",
+    "deep-learning",
+    "genai",
+    "llm",
+    "mixed-precision-training",
+    "nlp",
+    "object-detection",
+    "onnx",
+    "openvino",
+    "pruning",
+    "pytorch",
+    "quantization",
+    "quantization-aware-training"
+  ],
+  "archived": false,
+  "pushed_at": "2026-11-06T12:36:49Z",
+  "default_branch": "develop",
+  "fetched_at": "2026-11-08T12:31:02Z"
+}

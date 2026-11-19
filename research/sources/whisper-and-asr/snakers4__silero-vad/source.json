@@ -1,0 +1,30 @@
+{
+  "id": "github:snakers4/silero-vad",
+  "kind": "github",
+  "category": "whisper-and-asr",
+  "repo": "snakers4/silero-vad",
+  "url": "https://github.com/snakers4/silero-vad",
+  "description": "Silero VAD: pre-trained enterprise-grade Voice Activity Detector",
+  "stars": 10613,
+  "forks": 884,
+  "language": "Python",
+  "license": "MIT",
+  "topics": [
+    "onnx",
+    "onnx-runtime",
+    "onnxruntime",
+    "pytorch",
+    "speech",
+    "speech-processing",
+    "vad",
+    "voice-activity-detection",
+    "voice-commands",
+    "voice-control",
+    "voice-detection",
+    "voice-recognition"
+  ],
+  "archived": false,
+  "pushed_at": "2026-10-22T02:02:27Z",
+  "default_branch": "master",
+  "fetched_at": "2026-11-08T11:20:04Z"
+}
