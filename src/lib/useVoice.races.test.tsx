@@ -34,7 +34,9 @@ describe("ASR session isolation", () => {
     act(() => result.current.start()); await opened();
     act(() => result.current.stop());
     await waitFor(() => expect(transcribe).toHaveBeenCalledOnce());
+    const signal = transcribe.mock.calls[0]![1] as AbortSignal;
     act(() => result.current.cancel());
+    expect(signal.aborted).toBe(true);
     await act(async () => answer.resolve("удали файлы"));
     expect(onText).not.toHaveBeenCalled(); expect(onError).not.toHaveBeenCalled();
   });
@@ -127,7 +129,9 @@ describe("ASR session isolation", () => {
     });
     act(() => result.current.start()); await opened(); phrase();
     await waitFor(() => expect(transcribe).toHaveBeenCalledOnce());
+    const signal = transcribe.mock.calls[0]![1] as AbortSignal;
     act(() => result.current.cancel());
+    expect(signal.aborted).toBe(true);
     await act(async () => answer.resolve("не выполнять"));
     await waitFor(() => expect(startRecording).toHaveBeenCalledTimes(2));
     expect(result.current.listening).toBe(true); expect(onText).not.toHaveBeenCalled();

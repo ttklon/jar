@@ -7,6 +7,8 @@ import { Voice } from "../src/screens/Voice";
 
 const state = {
   commands: [] as string[],
+  asrRequests: [] as string[],
+  cancelledRequests: [] as string[],
   queries: [] as string[],
   wavs: [] as { bytes: number; rate: number; samples: number; peak: number }[],
   spoken: [] as string[],
@@ -17,6 +19,8 @@ const state = {
   micError: false,
   unknown: [] as string[],
 };
+let activeRequest: string | null = null;
+let nextRequest = 0;
 let resolveAsr: ((text: string) => void) | null = null;
 const nativeGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
 navigator.mediaDevices.getUserMedia = async (constraints) => {
@@ -56,7 +60,24 @@ mockIPC((command, payload) => {
     case "plan_for": return [];
     case "draft_plan": return null;
     case "request_learning": return null;
+    case "begin_transcription": {
+      if (activeRequest !== null) throw new Error("SIMULATED ASR busy");
+      activeRequest = String(++nextRequest);
+      state.asrRequests.push(activeRequest);
+      return activeRequest;
+    }
+    case "cancel_transcription": {
+      const id = args?.requestId as string;
+      state.cancelledRequests.push(id);
+      if (id === activeRequest) {
+        activeRequest = null;
+        resolveAsr?.("SIMULATED cancelled ASR result");
+        resolveAsr = null;
+      }
+      return;
+    }
     case "transcribe_local": {
+      if (args?.requestId !== activeRequest) throw new Error("SIMULATED ASR invalid ID");
       const bytes = Uint8Array.from(args?.audio as number[]);
       const view = new DataView(bytes.buffer);
       const ascii = (start: number, end: number) => String.fromCharCode(...bytes.slice(start, end));

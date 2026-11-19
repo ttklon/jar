@@ -873,7 +873,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   // покидает компьютер. Нет — слушаем тем, что даёт система, и говорим об этом выше.
   const localEngine =
     speech && speech.found && speech.model
-      ? { transcribe: (wav: Uint8Array) => transcribeLocal(Array.from(wav)) }
+      ? { transcribe: (wav: Uint8Array, signal?: AbortSignal) => transcribeLocal(Array.from(wav), signal) }
       : null;
 
   // Колбэк микрофона живёт дольше одного рендера, поэтому «какой вопрос слушаем» читаем

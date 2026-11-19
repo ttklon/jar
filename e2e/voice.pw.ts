@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
 type SimState = {
-  commands: string[]; queries: string[]; micRequests: number; spoken: string[]; unknown: string[];
+  commands: string[]; asrRequests: string[]; cancelledRequests: string[]; queries: string[]; micRequests: number; spoken: string[]; unknown: string[];
   wavs: { bytes: number; rate: number; samples: number; peak: number }[];
   streams: MediaStream[]; asrError: boolean; delayAsr: boolean; micError: boolean;
 };
@@ -110,5 +110,6 @@ test("Escape after release rejects delayed ASR before it becomes a task", async 
   await expect(page.getByLabel("Услышал", { exact: true })).toHaveValue("");
   const state = await page.evaluate(() => window.voiceSimulation.state);
   expect(state.queries).toEqual([]);
+  expect(state.cancelledRequests).toContain(state.asrRequests[0]);
   expect(state.commands).not.toContain("run_plan");
 });

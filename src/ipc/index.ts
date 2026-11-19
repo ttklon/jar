@@ -788,10 +788,10 @@ export async function speechStatus(): Promise<SpeechStatus> {
  * Распознать запись своим движком. В браузере этого нет и быть не может: движок —
  * это файл рядом с приложением, а не то, что умеет вкладка.
  */
-export async function transcribeLocal(audio: number[]): Promise<string> {
+export async function transcribeLocal(audio: number[], signal?: AbortSignal): Promise<string> {
   if (isTauri()) {
     const { transcribeLocal: fromCore } = await import("./tauri");
-    return fromCore(audio);
+    return fromCore(audio, signal);
   }
   const { transcribeLocal: fromData } = await import("./dev");
   return fromData(audio);

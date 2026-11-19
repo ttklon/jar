@@ -57,6 +57,7 @@ pub struct Inner {
     /// Запущенный движок. Один: две модели на одной видеокарте — это не «параллельно»,
     /// это «обе тормозят».
     pub engine: std::sync::Mutex<Option<Server>>,
+    pub asr: Arc<crate::stt_session::Requests>,
     pub policy: PolicyState,
     pub cancel: AtomicBool,
     /// Слово человека о себе: «я ухожу» или «я работаю». `None` — не говорил, решает таймер.
@@ -1813,11 +1814,25 @@ pub fn speech_status(state: State<'_, AppState>) -> SpeechStatus {
 /// редко и короткими кусками, а висящий процесс — это утечка, о которой человек не
 /// знает. Ошибки разные: нет движка, нет модели, не открыл порт, не разобрал.
 #[tauri::command]
+pub fn begin_transcription(state: State<'_, AppState>) -> Result<String, String> {
+    state.inner.asr.reserve()
+}
+
+#[tauri::command]
+pub async fn cancel_transcription(state: State<'_, AppState>, request_id: String) -> Result<(), String> {
+    let requests = state.inner.asr.clone();
+    tauri::async_runtime::spawn_blocking(move || requests.cancel(&request_id))
+        .await.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
 pub async fn transcribe_local(
     state: State<'_, AppState>,
     audio: Vec<u8>,
+    request_id: String,
 ) -> Result<String, String> {
     let inner = state.inner.clone();
+    let lease = inner.asr.acquire(&request_id)?;
     let status = read_speech_status(&state);
 
     let program = stt::find_program(&inner.base_dir).ok_or_else(|| {
@@ -1833,8 +1848,8 @@ pub async fn transcribe_local(
         )
     })?;
 
-    if audio.is_empty() {
-        return Err("нечего распознавать: пустая запись".to_string());
+    if audio.is_empty() || audio.len() > 16 * 1024 * 1024 {
+        return Err("запись ASR пуста или превышает 16 МиБ".to_string());
     }
 
     let run = inner
@@ -1845,25 +1860,18 @@ pub async fn transcribe_local(
     let memory_owner = inner.clone();
 
     let result = tauri::async_runtime::spawn_blocking(move || {
+        lease.ticket.check()?;
         let port = server::free_port()?;
         let log = inner.base_dir.join(format!("whisper-server-{port}.log"));
-        let mut child = stt::start(
-            &program,
-            &model,
-            port,
-            &log,
-            std::time::Duration::from_secs(60),
+        stt::start_owned(
+            &program, &model, port, &log, std::time::Duration::from_secs(60), &lease.ticket,
         )?;
-
-        let text = stt::post(port, &audio, stt::TIMEOUT);
-
-        // Останавливаем всегда, даже если распознавание не удалось: движок не должен
-        // переживать запрос.
-        let stopped = child.kill().and_then(|()| child.wait());
-        if let Err(error) = stopped {
-            tracing::warn!("движок распознавания не остановился: {error}");
-        }
-
+        let text = stt::post_cancellable(port, &audio, stt::TIMEOUT, &lease.ticket);
+        // Check cancellation before delivering a result. Lease Drop kills/reaps on
+        // every exit, including readiness/transport errors and unwinding.
+        lease.ticket.check()?;
+        lease.ticket.stop()?;
+        drop(lease);
         text
     })
     .await

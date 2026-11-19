@@ -66,6 +66,7 @@ pub mod server;
 pub mod services;
 pub mod step;
 pub mod stt;
+pub mod stt_session;
 pub mod tools;
 pub mod tray;
 pub mod trial;
@@ -138,6 +139,7 @@ pub fn run() {
             models_dir: models::dir(&base),
             base_dir: base.clone(),
             engine: std::sync::Mutex::new(None),
+            asr: Arc::default(),
             policy: PolicyState::new(),
             cancel: AtomicBool::new(false),
             presence: std::sync::Mutex::new(None),
@@ -214,6 +216,8 @@ pub fn run() {
             ipc::facts,
             ipc::remember_fact,
             ipc::forget_fact,
+            ipc::begin_transcription,
+            ipc::cancel_transcription,
             ipc::transcribe_local,
             ipc::list_profiles,
             ipc::policy_for,
@@ -257,6 +261,7 @@ pub fn run() {
             let Some(state) = app.try_state::<AppState>() else {
                 return;
             };
+            state.inner.asr.shutdown();
             let taken = state
                 .inner
                 .engine

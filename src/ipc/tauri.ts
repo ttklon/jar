@@ -4,6 +4,7 @@
  */
 
 import { invoke } from "@tauri-apps/api/core";
+import { transcribeCancellable } from "../lib/transcription";
 import type {
   MachineState,
   Presence,
@@ -281,8 +282,8 @@ export function speechStatus(): Promise<SpeechStatus> {
 }
 
 /** Распознать запись своим движком: звук не покидает компьютер. */
-export function transcribeLocal(audio: number[]): Promise<string> {
-  return invoke<string>("transcribe_local", { audio });
+export function transcribeLocal(audio: number[], signal?: AbortSignal): Promise<string> {
+  return transcribeCancellable(invoke, audio, signal);
 }
 
 export function searchEpisodes(query: string, limit = 20): Promise<Episode[]> {

@@ -1262,7 +1262,7 @@ describe("локальное распознавание на экране", () =
     fireEvent.pointerUp(mic);
 
     await waitFor(() => {
-      expect(transcribeLocal).toHaveBeenCalledWith(Array.from(wav));
+      expect(transcribeLocal).toHaveBeenCalledWith(Array.from(wav), expect.any(AbortSignal));
     });
     await waitFor(() => {
       expect(planFor).toHaveBeenCalledWith("почисти диск", 8);

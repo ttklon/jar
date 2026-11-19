@@ -41,7 +41,7 @@ export interface VoiceOptions {
    * Свой движок распознавания. Есть — записываем звук и отдаём ему, звук остаётся на
    * компьютере. Нет — слушаем тем, что даёт система.
    */
-  local?: { transcribe(wav: Uint8Array): Promise<string> } | null;
+  local?: { transcribe(wav: Uint8Array, signal?: AbortSignal): Promise<string> } | null;
   /**
    * Режим «слушаю всегда»: микрофон открыт, фразу вырезает `vad`, разбор запускается сам.
    * Работает только со своим движком: системное распознавание однократное, и делать вид,
@@ -118,11 +118,22 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   const generation = useRef(0);
   const utterance = useRef(0);
   const capture = useRef<AbortController | null>(null);
+  const asr = useRef<AbortController | null>(null);
   const invalidate = useCallback(() => {
     generation.current += 1;
     pending.current = false;
+    asr.current?.abort();
+    asr.current = null;
     capture.current?.abort();
     capture.current = null;
+  }, []);
+  const transcribe = useCallback(async (
+    engine: NonNullable<VoiceOptions["local"]>, wav: Uint8Array,
+  ) => {
+    const controller = new AbortController();
+    asr.current = controller;
+    try { return await engine.transcribe(wav, controller.signal); }
+    finally { if (asr.current === controller) asr.current = null; }
   }, []);
   /** Режим «слушаю всегда» живёт в ссылке: он меняется, не пересоздавая слушание. */
   const alwaysRef = useRef(always);
@@ -224,7 +235,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
               if (!forever) callbacks.current.onError(callbacks.current.nothingHeard);
               return null;
             }
-            return engine.transcribe(recording.wav);
+            return transcribe(engine, recording.wav);
           })
           .then((text) => {
             if (!wanted() || text === null) return;
@@ -317,7 +328,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     }
 
     run();
-  }, [finish, invalidate]);
+  }, [finish, invalidate, transcribe]);
 
   const start = useCallback(() => {
     if (!permission.current.enabled) {
@@ -435,7 +446,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
             callbacks.current.onError(callbacks.current.nothingHeard);
             return null;
           }
-          return engine.transcribe(recording.wav);
+          return transcribe(engine, recording.wav);
         })
         .then((text) => {
           if (!valid() || text === null) return;
@@ -463,7 +474,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
       }
       finish();
     }, grace);
-  }, [clearGrace, finish, grace, invalidate]);
+  }, [clearGrace, finish, grace, invalidate, transcribe]);
 
   const cancel = useCallback(() => {
     if (!activeRef.current) {
@@ -474,6 +485,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     // «Слушаю всегда»: фраза не считается, микрофон продолжает слушать.
     if (alwaysStop.current) {
       utterance.current += 1;
+      asr.current?.abort();
       discardRef.current = true;
       setSpeaking(false);
       return;
