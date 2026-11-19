@@ -314,8 +314,14 @@ mod tests {
         ticket.stop().unwrap();
         ticket.fail_stop.store(true, Ordering::SeqCst);
         let child = Command::new("powershell.exe")
-            .args(["-NoProfile", "-NonInteractive", "-Command", "Start-Sleep -Seconds 60"])
-            .spawn().unwrap();
+            .args([
+                "-NoProfile",
+                "-NonInteractive",
+                "-Command",
+                "Start-Sleep -Seconds 60",
+            ])
+            .spawn()
+            .unwrap();
         let failed = ticket.attach(child).is_err();
         let retained = ticket.child.lock().unwrap().is_some();
         ticket.fail_stop.store(false, Ordering::SeqCst);
@@ -323,5 +329,4 @@ mod tests {
         assert!(failed && retained);
         assert!(ticket.exited().unwrap());
     }
-
 }

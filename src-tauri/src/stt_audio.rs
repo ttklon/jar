@@ -9,12 +9,21 @@ pub fn validate(wav: &[u8]) -> Result<(), String> {
     }
     let u16_at = |at| u16::from_le_bytes([wav[at], wav[at + 1]]);
     let u32_at = |at| u32::from_le_bytes([wav[at], wav[at + 1], wav[at + 2], wav[at + 3]]);
-    if &wav[0..4] != b"RIFF" || &wav[8..12] != b"WAVE" ||
-        &wav[12..16] != b"fmt " || &wav[36..40] != b"data" || u32_at(16) != 16 {
+    if &wav[0..4] != b"RIFF"
+        || &wav[8..12] != b"WAVE"
+        || &wav[12..16] != b"fmt "
+        || &wav[36..40] != b"data"
+        || u32_at(16) != 16
+    {
         return Err("ASR: ожидается стандартный WAV с fmt и data без дополнительных блоков".into());
     }
-    if u16_at(20) != 1 || u16_at(22) != 1 || u32_at(24) != 16_000 ||
-        u32_at(28) != 32_000 || u16_at(32) != 2 || u16_at(34) != 16 {
+    if u16_at(20) != 1
+        || u16_at(22) != 1
+        || u32_at(24) != 16_000
+        || u32_at(28) != 32_000
+        || u16_at(32) != 2
+        || u16_at(34) != 16
+    {
         return Err("ASR: нужен PCM WAV, моно, 16 бит, 16000 Гц".into());
     }
     let data = wav.len() - 44;
@@ -57,7 +66,9 @@ mod tests {
     #[test]
     fn rejects_truncation_at_every_header_offset_without_panicking() {
         let wav = fixture(10);
-        for end in 0..wav.len() { assert!(validate(&wav[..end]).is_err(), "offset {end}"); }
+        for end in 0..wav.len() {
+            assert!(validate(&wav[..end]).is_err(), "offset {end}");
+        }
     }
 
     #[test]
@@ -68,9 +79,11 @@ mod tests {
             altered[offset] ^= 0xff;
             assert!(validate(&altered).is_err(), "offset {offset}");
         }
-        let mut extra = wav.clone(); extra.extend_from_slice(b"RIFF");
+        let mut extra = wav.clone();
+        extra.extend_from_slice(b"RIFF");
         assert!(validate(&extra).is_err());
-        let mut odd = wav; odd.push(0);
+        let mut odd = wav;
+        odd.push(0);
         let length = odd.len();
         odd[4..8].copy_from_slice(&((length - 8) as u32).to_le_bytes());
         odd[40..44].copy_from_slice(&((length - 44) as u32).to_le_bytes());
