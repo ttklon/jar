@@ -456,7 +456,7 @@ describe("локальное распознавание на экране", () =
     await screen.findByLabelText("Путь");
 
     fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "да" } });
-    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ответить" }));
 
     expect(await screen.findByText(/Этого слова мало/)).toBeTruthy();
     expect(screen.getByLabelText("Путь")).toBeTruthy();
@@ -494,6 +494,160 @@ describe("локальное распознавание на экране", () =
     expect(vi.mocked(cancelTool)).toHaveBeenCalled();
     expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
     expect(vi.mocked(requestLearning)).not.toHaveBeenCalled();
+  });
+
+  it("фраза в поле «Услышал» отвечает на вопрос и не становится новым поиском", async () => {
+    const initial = {
+      plan: {
+        goal: "удали выбранный файл",
+        steps: [{ registry: "files|удалить|файл", params: {} }],
+      },
+      problems: [],
+      questions: [{ position: 1, name: "path", label: "Путь", hint: "" }],
+      gates: [
+        {
+          position: 1,
+          registry: "files|удалить|файл",
+          decision: "confirm" as const,
+          risk: "destructive",
+          wants_approval: true,
+        },
+      ],
+    };
+    vi.mocked(draftPlan).mockResolvedValueOnce(initial);
+    vi.mocked(fillPlan).mockResolvedValueOnce({
+      ...initial,
+      questions: [],
+      plan: {
+        ...initial.plan,
+        steps: [{ registry: "files|удалить|файл", params: { path: "C:\\tmp\\a.txt" } }],
+      },
+    });
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "удали файл" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await screen.findByRole("button", { name: "Ответить" });
+
+    vi.mocked(draftPlan).mockClear();
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "C:\\tmp\\a.txt" } });
+    fireEvent.click(screen.getByRole("button", { name: "Ответить" }));
+
+    await waitFor(() => expect(vi.mocked(fillPlan)).toHaveBeenCalledTimes(1));
+    expect(vi.mocked(fillPlan).mock.calls[0]?.[1]).toEqual([
+      { position: 1, name: "path", value: "C:\\tmp\\a.txt" },
+    ]);
+    expect(vi.mocked(draftPlan)).not.toHaveBeenCalled();
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
+    expect(await screen.findByText(/Параметры обновились/)).toBeTruthy();
+
+    vi.mocked(runPlan).mockResolvedValue({
+      goal: "удали выбранный файл",
+      steps: [],
+      stopped: null,
+      run_id: 1,
+      sight: null,
+    });
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "да" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledOnce());
+    expect(vi.mocked(runPlan).mock.calls[0]?.[1]).toEqual([1]);
+  });
+
+  it("безопасное чтение после ответа начинается само, запись — нет", async () => {
+    vi.mocked(draftPlan).mockResolvedValueOnce({
+      plan: {
+        goal: "сколько места в папке",
+        steps: [{ registry: "storage-backup|проверить|свободное место", params: {} }],
+      },
+      problems: [],
+      questions: [{ position: 1, name: "path", label: "Путь", hint: "" }],
+      gates: [
+        {
+          position: 1,
+          registry: "storage-backup|проверить|свободное место",
+          decision: "allow",
+          risk: "read",
+          wants_approval: false,
+        },
+      ],
+    });
+    vi.mocked(fillPlan).mockResolvedValueOnce({
+      plan: {
+        goal: "сколько места в папке",
+        steps: [
+          {
+            registry: "storage-backup|проверить|свободное место",
+            params: { path: "C:\\tmp" },
+          },
+        ],
+      },
+      problems: [],
+      questions: [],
+      gates: [
+        {
+          position: 1,
+          registry: "storage-backup|проверить|свободное место",
+          decision: "allow",
+          risk: "read",
+          wants_approval: false,
+        },
+      ],
+    });
+    vi.mocked(runPlan).mockResolvedValue({
+      goal: "сколько места в папке",
+      steps: [],
+      stopped: null,
+      run_id: 1,
+      sight: null,
+    });
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сколько места" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await screen.findByRole("button", { name: "Ответить" });
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "C:\\tmp" } });
+    fireEvent.click(screen.getByRole("button", { name: "Ответить" }));
+
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledOnce());
+    expect(vi.mocked(fillPlan).mock.calls[0]?.[1]).toEqual([
+      { position: 1, name: "path", value: "C:\\tmp" },
+    ]);
+  });
+
+  it("«стоп» бросает открытый вопрос и не делает из него поиск", async () => {
+    vi.mocked(draftPlan).mockResolvedValueOnce({
+      plan: {
+        goal: "удали файл",
+        steps: [{ registry: "files|удалить|файл", params: {} }],
+      },
+      problems: [],
+      questions: [{ position: 1, name: "path", label: "Путь", hint: "" }],
+      gates: [
+        {
+          position: 1,
+          registry: "files|удалить|файл",
+          decision: "confirm",
+          risk: "destructive",
+          wants_approval: true,
+        },
+      ],
+    });
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "удали файл" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await screen.findByLabelText("Путь");
+
+    vi.mocked(draftPlan).mockClear();
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "стоп" } });
+    fireEvent.click(screen.getByRole("button", { name: "Ответить" }));
+
+    expect(await screen.findByText(/Новое не начну/)).toBeTruthy();
+    expect(screen.queryByLabelText("Путь")).toBeNull();
+    expect(vi.mocked(draftPlan)).not.toHaveBeenCalled();
+    expect(vi.mocked(fillPlan)).not.toHaveBeenCalled();
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
   });
 
   it("«ещё» продолжает прошлую фразу и без неё ничего не выдумывает", async () => {

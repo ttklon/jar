@@ -49,6 +49,7 @@ import type {
 } from "../ipc";
 import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
+import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { consentCanRun, consentPositions, isSpokenConsent, keepsPendingPlan } from "../lib/consent";
 import { installedEngine, isEngineDown } from "../lib/engineReady";
 import { followUpQuery, isFollowUp } from "../lib/followUp";
@@ -326,7 +327,11 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   draftRef.current = draft;
   const runningRef = useRef(running);
   runningRef.current = running;
-  const executeRef = useRef<(granted?: number[]) => void>(() => {});
+  const executeRef = useRef<(granted?: number[], answerOverride?: Record<string, string>) => void>(
+    () => {},
+  );
+  const answersRef = useRef(answers);
+  answersRef.current = answers;
   const askModelRef = useRef<(phrase: string) => void>(() => {});
   const micStopRef = useRef<() => void>(() => {});
   /** Одна попытка на фразу: повторный отказ не крутит запуск по кругу. */
@@ -840,6 +845,11 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       setEngineBusy(false);
       setAlways(false);
       lastTaskRef.current = null;
+      setDraft(null);
+      setAnswers({});
+      answersRef.current = {};
+      setRemembered([]);
+      setApproved([]);
       stopSpeaking();
       micStopRef.current();
       void cancelTool().catch(() => undefined);
@@ -1009,6 +1019,34 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       const heard = voice.consentHeard;
       setSpoken(speak(heard) ? voice.said(heard) : heard);
       executeRef.current(positions);
+      return;
+    }
+    // Пока план ждёт уточнение, фраза в этом же поле — ответ, не новый поиск.
+    // «Да» сюда не доходит: оно уже разобрано как разрешение и вопрос не закрыло.
+    if (pending && pending.questions.length > 0 && query.length === 0) {
+      setBusy(false);
+      return;
+    }
+    if (pending && pending.questions.length > 0 && phraseIsAnswer(query)) {
+      const open = firstOpenQuestion(pending.questions, answersRef.current);
+      if (!open) {
+        executeRef.current(undefined, answersRef.current);
+        return;
+      }
+      const field = questionField(open);
+      const nextAnswers = { ...answersRef.current, [field]: query };
+      answersRef.current = nextAnswers;
+      setAnswers(nextAnswers);
+      setApproved((current) => current.filter((position) => position !== open.position));
+      setRemembered((current) => current.filter((name) => name !== field));
+      const heard = voice.answerTaken(query);
+      setSpoken(speak(heard) ? voice.said(heard) : heard);
+      const following = firstOpenQuestion(pending.questions, nextAnswers);
+      if (following) {
+        speak(voice.askSpoken(following.label));
+        return;
+      }
+      executeRef.current(undefined, nextAnswers);
       return;
     }
     const asked = followUpQuery(lastTaskRef.current, query);
@@ -1417,21 +1455,22 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       });
   };
 
-  const execute = useCallback((granted?: number[]) => {
+  const execute = useCallback((granted?: number[], answerOverride?: Record<string, string>) => {
     const allowed = Array.isArray(granted) ? granted : approved;
     const request = ++executeRequestRef.current;
     const plan = draft?.plan;
     if (!plan) return;
+    const usedAnswers = answerOverride ?? answers;
 
     const asked = draft.questions.map((question) => ({
       position: question.position,
       name: question.name,
-      value: answers[`${question.position}:${question.name}`] ?? "",
+      value: usedAnswers[`${question.position}:${question.name}`] ?? "",
     }));
 
     // Сказал один раз — помню. Запоминаем само сказанное, а не «что сработало»:
     // неудачный запуск не должен подтверждать ответ.
-    const toRemember = factsToRemember(draft.questions, answers);
+    const toRemember = factsToRemember(draft.questions, usedAnswers);
     if (toRemember.length > 0) {
       void Promise.all(toRemember.map((fact) => rememberFact(fact.key, fact.value).catch(() => undefined)))
         .then(() => facts().then(setKnownFacts).catch(() => undefined));
@@ -1754,10 +1793,16 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           className={styles.input}
           value={text}
           aria-label={voice.heard}
-          placeholder={voice.heardPlaceholder}
+          placeholder={
+            draft && draft.questions.length > 0 ? voice.answerPlaceholder : voice.heardPlaceholder
+          }
           onChange={(_, data) => {
-            // Набор «да» — это разрешение на уже показанный план, а не новая задача.
-            if (draftRef.current && keepsPendingPlan(data.value)) {
+            // Набор «да» — разрешение. Пока вопрос открыт, набор — ответ, не новая задача.
+            const pendingDraft = draftRef.current;
+            if (
+              pendingDraft &&
+              (keepsPendingPlan(data.value) || pendingDraft.questions.length > 0)
+            ) {
               setText(data.value);
               return;
             }
@@ -1776,7 +1821,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           }}
         />
         <Button type="submit" disabled={busy}>
-          {voice.find}
+          {draft && draft.questions.length > 0 ? voice.answerSubmit : voice.find}
         </Button>
       </form>
 
