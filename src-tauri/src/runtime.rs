@@ -55,7 +55,7 @@ fn marker(dir: &Path) -> Option<Marker> {
 }
 
 pub fn directory(base: &Path, kind: Kind) -> PathBuf {
-    base.join("sidecars").join(kind.spec().id)
+    base.join("sidecars").join(&kind.spec().id)
 }
 
 /// Windows path rules, also on Linux tests. Never trust a marker as a path.
@@ -463,8 +463,8 @@ mod tests {
         let _ = std::fs::remove_dir_all(&base);
         let dir = directory(&base, kind);
         std::fs::create_dir_all(&dir).unwrap();
-        std::fs::write(dir.join(kind.spec().program), b"fixture-not-executed").unwrap();
-        let sha = models::sha256_file(&dir.join(kind.spec().program)).unwrap();
+        std::fs::write(dir.join(&kind.spec().program), b"fixture-not-executed").unwrap();
+        let sha = models::sha256_file(&dir.join(&kind.spec().program)).unwrap();
         let meta = serde_json::json!({
             "archive_sha256": kind.spec().sha256,
             "program": kind.spec().program,
@@ -488,7 +488,7 @@ mod tests {
             let base = fixture("integrity", kind);
             assert!(find(&base, kind).is_some());
             assert!(verify(&base, kind).is_ok());
-            std::fs::write(directory(&base, kind).join(kind.spec().program), b"changed").unwrap();
+            std::fs::write(directory(&base, kind).join(&kind.spec().program), b"changed").unwrap();
             assert!(verify(&base, kind).unwrap_err().contains("изменился"));
             std::fs::remove_dir_all(base).unwrap();
         }
@@ -557,7 +557,7 @@ mod tests {
         let base = fixture("both-kinds", Kind::Llama);
         let whisper_dir = directory(&base, Kind::Whisper);
         std::fs::create_dir_all(&whisper_dir).unwrap();
-        std::fs::write(whisper_dir.join(Kind::Whisper.spec().program), b"fixture").unwrap();
+        std::fs::write(whisper_dir.join(&Kind::Whisper.spec().program), b"fixture").unwrap();
         let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());

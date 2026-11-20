@@ -295,12 +295,10 @@ mod tests {
             &catalog.whisper_model.id,
             &catalog.whisper_runtime.id,
         ];
+        let mut seen = std::collections::BTreeSet::new();
         for id in ids {
             assert!(!id.is_empty(), "пустой id в каталоге");
-            assert!(
-                ids.iter().filter(|other| *other == id).count() == 1,
-                "id не уникален: {id}"
-            );
+            assert!(seen.insert(id.as_str()), "id не уникален: {id}");
         }
     }
 
