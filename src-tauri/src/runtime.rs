@@ -595,7 +595,7 @@ mod tests {
         let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
-        remove(&base, Kind::Llama);
+        remove(&base, Kind::Llama).unwrap();
         assert!(!directory(&base, Kind::Llama).exists());
         std::fs::remove_dir_all(base).unwrap();
     }
