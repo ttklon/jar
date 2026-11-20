@@ -18,6 +18,7 @@ import {
   stopRemaining,
   summary,
   takeDeed,
+  phraseIsEnough,
   unattended,
   usesScreen,
   type QueueItem,
@@ -184,6 +185,40 @@ describe("сколько дел идёт сразу", () => {
 describe("что можно без человека", () => {
   it("простой план без подтверждений исполняется сам", () => {
     expect(unattended(plan()).can).toBe(true);
+  });
+
+  it("фразы хватает только когда каждый шаг явно разрешён", () => {
+    expect(phraseIsEnough(plan())).toBe(false);
+    expect(
+      phraseIsEnough(
+        plan({
+          gates: [
+            {
+              position: 1,
+              registry: "звук|убавить|громкость",
+              decision: "allow",
+              risk: "read",
+              wants_approval: false,
+            },
+          ],
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      phraseIsEnough(
+        plan({
+          gates: [
+            {
+              position: 1,
+              registry: "файлы|удалить|папка",
+              decision: "confirm",
+              risk: "destructive",
+              wants_approval: true,
+            },
+          ],
+        }),
+      ),
+    ).toBe(false);
   });
 
   it("план, которому нужно подтверждение, ждёт человека", () => {

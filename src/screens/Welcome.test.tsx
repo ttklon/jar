@@ -36,7 +36,7 @@ describe("экран знакомства", () => {
     const onOpen = vi.fn();
     render(<Welcome source="ядро" onStart={onStart} onOpen={onOpen} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Понятно, начать" }));
+    fireEvent.click(screen.getByRole("button", { name: "К разговору" }));
 
     expect(onStart).toHaveBeenCalledTimes(1);
     expect(onOpen).not.toHaveBeenCalled();

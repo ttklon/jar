@@ -60,3 +60,86 @@ export function hasRoom(freeBytes: number | null, neededBytes: number): boolean 
   if (freeBytes === null) return true;
   return freeBytes >= neededBytes;
 }
+
+/** Шаг одной подготовки. `smoke` — запуск движка после сверки, не во время скачивания. */
+export type PrepareStep = "runtime" | "model" | "speech-runtime" | "speech-model" | "smoke";
+
+/** Почему одним заходом разговор не собрать. Чужой каталог при этом не удаляется. */
+export type PrepareBlock = "runtime-unsupported" | "runtime-owned" | "no-room";
+
+export interface PreparePlan {
+  steps: PrepareStep[];
+  bytes: number;
+  block: PrepareBlock | null;
+  /** Локальная речь в этот заход не входит. Разговор от этого не отменяется. */
+  speechSkipped: "unsupported" | "owned" | "no-room" | null;
+}
+
+/**
+ * Что скачать одним согласием.
+ *
+ * Обязательны только движок разговора и модель. Речь добавляется, если человек
+ * не снял отметку и для неё хватает места. Нехватка места на речь не отменяет
+ * разговор. Нехватка места на модель или чужой каталог движка — отменяют весь
+ * заход: по частям это уже отдельные кнопки, а не «всё само».
+ */
+export function planPrepare(status: ReadinessStatus, includeSpeech: boolean): PreparePlan {
+  const steps: PrepareStep[] = [];
+  let bytes = 0;
+  let block: PrepareBlock | null = null;
+  let speechSkipped: PreparePlan["speechSkipped"] = null;
+  const fits = (extra: number) => hasRoom(status.free_bytes, bytes + extra);
+
+  if (!status.engine_found) {
+    if (!status.runtime_supported) block = "runtime-unsupported";
+    else if (status.runtime_managed) block = "runtime-owned";
+    else if (!fits(status.runtime_spec.bytes)) block = "no-room";
+    else {
+      steps.push("runtime");
+      bytes += status.runtime_spec.bytes;
+    }
+  }
+
+  if (!block && !status.model_present) {
+    if (!fits(status.model_spec.bytes)) block = "no-room";
+    else {
+      steps.push("model");
+      bytes += status.model_spec.bytes;
+    }
+  }
+
+  if (block) return { steps: [], bytes: 0, block, speechSkipped: null };
+
+  if (includeSpeech) {
+    let speechEngine = status.speech_found;
+    if (!status.speech_found) {
+      if (!status.runtime_supported) speechSkipped = "unsupported";
+      else if (status.speech_runtime_managed) speechSkipped = "owned";
+      else if (!fits(status.speech_runtime_spec.bytes)) speechSkipped = "no-room";
+      else {
+        steps.push("speech-runtime");
+        bytes += status.speech_runtime_spec.bytes;
+        speechEngine = true;
+      }
+    }
+    if (status.speech_model === null) {
+      if (!speechEngine) speechSkipped = speechSkipped ?? "unsupported";
+      else if (!fits(status.speech_model_spec.bytes)) {
+        speechSkipped = "no-room";
+        const runtime = steps.indexOf("speech-runtime");
+        if (runtime >= 0) {
+          steps.splice(runtime, 1);
+          bytes -= status.speech_runtime_spec.bytes;
+        }
+      } else {
+        steps.push("speech-model");
+        bytes += status.speech_model_spec.bytes;
+      }
+    }
+  }
+
+  const canTalk = status.engine_found || steps.includes("runtime");
+  const hasModel = status.model_present || steps.includes("model");
+  if (canTalk && hasModel && !status.engine_running && steps.length > 0) steps.push("smoke");
+  return { steps, bytes, block: null, speechSkipped };
+}

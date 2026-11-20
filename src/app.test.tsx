@@ -72,7 +72,7 @@ describe("App", () => {
     // Знакомство закрывает работу: голосового экрана за ним ещё нет.
     expect(screen.queryByRole("button", { name: "Держать и говорить" })).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "Понятно, начать" }));
+    fireEvent.click(screen.getByRole("button", { name: "К разговору" }));
 
     await loaded();
     // Ответ запомнен: второй раз экран не появится.

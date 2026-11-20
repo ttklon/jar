@@ -548,3 +548,19 @@ export function unattended(check: PlanCheck | null): Verdict {
 
   return { can: true, why: "можно без вас: ни подтверждений, ни вопросов" };
 }
+
+/**
+ * Хватает ли уже сказанной фразы, чтобы начать.
+ *
+ * Пустые ворота — не разрешение: очередь может так ждать явного режима «без меня»,
+ * а экран разговора не должен сам нажимать кнопку, если политика шаг не назвала `allow`.
+ */
+export function phraseIsEnough(check: PlanCheck | null): boolean {
+  if (!unattended(check).can || !check?.plan) return false;
+  const steps = check.plan.steps.length;
+  return (
+    steps > 0 &&
+    check.gates.length === steps &&
+    check.gates.every((gate) => gate.decision === "allow" && !gate.wants_approval)
+  );
+}

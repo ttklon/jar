@@ -71,11 +71,11 @@ export function Welcome({
       />
 
       <div className={styles.actions}>
-        <Button appearance="primary" onClick={() => onOpen("models")}>
-          {welcome.setupAI}
-        </Button>
-        <Button appearance="secondary" onClick={onStart}>
+        <Button appearance="primary" onClick={onStart}>
           {welcome.start}
+        </Button>
+        <Button appearance="secondary" onClick={() => onOpen("models")}>
+          {welcome.setupAI}
         </Button>
         <Button appearance="secondary" onClick={() => onOpen("ask")}>
           {welcome.openAsk}

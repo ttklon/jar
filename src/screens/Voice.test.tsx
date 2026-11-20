@@ -99,9 +99,12 @@ describe("голосовой экран", () => {
     await waitFor(() => {
       expect(screen.getByText("Что могу сделать")).toBeTruthy();
     });
-    expect(
-      (screen.getByRole("button", { name: "Выполнить" }) as HTMLButtonElement).disabled,
-    ).toBe(false);
+    await waitFor(() => {
+      expect(screen.getByText(/делаю сам/)).toBeTruthy();
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/план исполняет приложение/)).toBeTruthy();
+    });
   });
 
   it("если данных нет — спрашивает, а не падает на середине", async () => {

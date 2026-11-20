@@ -132,6 +132,7 @@ describe("карточка готовности", () => {
 
     expect(screen.queryByRole("button", { name: "Скачать модель" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Скачать движок" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Скачать недостающее и открыть разговор" })).toBeNull();
     expect(screen.getByText(/В браузере машины нет/)).toBeTruthy();
   });
 
@@ -492,6 +493,80 @@ describe("ошибки восстановления не подменяются 
     fireEvent.click(screen.getByRole("button", { name: "Скачать движок" }));
     await waitFor(() => expect(screen.getByText(/распаковка превысила 120 секунд/)).toBeTruthy());
     expect(screen.queryByText("скачивание отменено, недокачанный файл убран")).toBeNull();
+  });
+
+  it("одна кнопка качает по порядку и запускает проверку только после скачивания", async () => {
+    mocks.desktop = true;
+    const order: string[] = [];
+    mocks.runtime.mockImplementation(async (kind: string) => {
+      order.push(kind);
+      return { program: kind };
+    });
+    mocks.download.mockImplementation(async (_url: string, name: string) => {
+      order.push(name);
+      return { name, bytes: 1, sha256: "a".repeat(64), verified: true };
+    });
+    mocks.smoke.mockImplementation(async () => {
+      order.push("smoke");
+      return { ok: true, answer: "да", note: "текст", model: null, port: 1 };
+    });
+    const onToVoice = vi.fn();
+    render(<ReadinessCard status={status()} error={null} onToVoice={onToVoice} />);
+
+    expect(mocks.runtime).not.toHaveBeenCalled();
+    expect(mocks.smoke).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Скачать недостающее и открыть разговор" }));
+
+    await waitFor(() => expect(onToVoice).toHaveBeenCalledOnce());
+    expect(order).toEqual([
+      "llama",
+      "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf",
+      "whisper",
+      "ggml-base.bin",
+      "smoke",
+    ]);
+  });
+
+  it("снятая речь не качает whisper, но разговор всё равно открывает", async () => {
+    mocks.desktop = true;
+    const order: string[] = [];
+    mocks.runtime.mockImplementation(async (kind: string) => {
+      order.push(kind);
+      return { program: kind };
+    });
+    mocks.download.mockImplementation(async (_url: string, name: string) => {
+      order.push(name);
+      return { name, bytes: 1, sha256: "a".repeat(64), verified: true };
+    });
+    mocks.smoke.mockImplementation(async () => {
+      order.push("smoke");
+      return { ok: true, answer: "да", note: "текст", model: null, port: 1 };
+    });
+    const onToVoice = vi.fn();
+    render(<ReadinessCard status={status()} error={null} onToVoice={onToVoice} />);
+    fireEvent.click(screen.getByRole("checkbox", { name: /Включить локальное распознавание/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Скачать недостающее и открыть разговор" }));
+    await waitFor(() => expect(onToVoice).toHaveBeenCalledOnce());
+    expect(order).toEqual(["llama", "Qwen2.5-1.5B-Instruct-Q4_K_M.gguf", "smoke"]);
+  });
+
+  it("ошибка на первом шаге не запускает движок", async () => {
+    mocks.desktop = true;
+    mocks.runtime.mockRejectedValueOnce(new Error("сеть недоступна"));
+    const onToVoice = vi.fn();
+    render(<ReadinessCard status={status()} error={null} onToVoice={onToVoice} />);
+    fireEvent.click(screen.getByRole("button", { name: "Скачать недостающее и открыть разговор" }));
+    await waitFor(() => expect(screen.getByText(/сеть недоступна/)).toBeTruthy());
+    expect(mocks.smoke).not.toHaveBeenCalled();
+    expect(onToVoice).not.toHaveBeenCalled();
+  });
+
+  it("нехватка места не предлагает один заход", () => {
+    mocks.desktop = true;
+    render(<ReadinessCard status={status({ free_bytes: 1000 })} error={null} />);
+    expect(screen.queryByRole("button", { name: "Скачать недостающее и открыть разговор" })).toBeNull();
+    expect(screen.getByText(/Одним заходом не подготовить/)).toBeTruthy();
+    expect(mocks.download).not.toHaveBeenCalled();
   });
 
   it("перечитывает файлы и при частичном успехе публикации", async () => {

@@ -67,6 +67,7 @@ import {
   stopRemaining,
   summary,
   takeDeed,
+  phraseIsEnough,
   unattended,
   usesScreen,
   type HourLog,
@@ -181,6 +182,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const [busy, setBusy] = useState(false);
   const searchRequestRef = useRef(0);
   const executeRequestRef = useRef(0);
+  const runCheckedRef = useRef<(check: PlanCheck) => void>(() => {});
   const thoughtRequestRef = useRef(0);
   const promptRequestRef = useRef(0);
   const [error, setError] = useState<string | null>(null);
@@ -793,6 +795,14 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         if (request !== searchRequestRef.current) return;
         setDraft(proposal);
         setLearning(null);
+        // Чтение без вопросов политика уже разрешила: отдельная кнопка здесь была бы
+        // вторым «да» на то, что человек только что сказал. Запись и внешнее — нет.
+        if (proposal && phraseIsEnough(proposal)) {
+          setSpoken(voice.autoRun);
+          speak(voice.autoRun);
+          runCheckedRef.current(proposal);
+          return;
+        }
 
         // Слова не совпали — не тупик: спрашиваем модель. Она нужна ровно здесь, где
         // поиск по буквам бессилен («сделай потише» → «убавить громкость»). Молча
@@ -1091,6 +1101,33 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     const timer = setInterval(() => setSeconds((value) => value + 1), 1000);
     return () => clearInterval(timer);
   }, [mic.listening]);
+
+  runCheckedRef.current = (check) => {
+    const request = executeRequestRef.current;
+    const plan = check.plan;
+    if (!plan || request !== executeRequestRef.current) return;
+    setRunning(true);
+    setError(null);
+    setDraft(check);
+    void runPlan(JSON.stringify(plan), [])
+      .then((result) => {
+        if (request !== executeRequestRef.current) return;
+        setReport(result);
+        const phrase = result.stopped
+          ? voice.draftSpokenStopped(result.stopped)
+          : voice.planSpeech(result.steps.length);
+        setSpoken(speak(phrase) ? voice.said(phrase) : voice.silent);
+      })
+      .catch((reason: unknown) => {
+        if (request !== executeRequestRef.current) return;
+        const message = reason instanceof Error ? reason.message : String(reason);
+        setError(message);
+        speak(voice.draftSpokenStopped(message));
+      })
+      .finally(() => {
+        if (request === executeRequestRef.current) setRunning(false);
+      });
+  };
 
   const execute = useCallback(() => {
     const request = ++executeRequestRef.current;

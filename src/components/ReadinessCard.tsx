@@ -13,7 +13,7 @@ import {
   stopEngine,
 } from "../ipc";
 import type { ReadinessStatus, SmokeResult } from "../ipc";
-import { assessReadiness, formatSize, hasRoom } from "../lib/readiness";
+import { assessReadiness, formatSize, hasRoom, planPrepare } from "../lib/readiness";
 import { readiness as text } from "../i18n/ru";
 
 const useStyles = makeStyles({
@@ -117,6 +117,9 @@ export function ReadinessCard({
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [confirmSpeechRemove, setConfirmSpeechRemove] = useState(false);
   const [smoke, setSmoke] = useState<SmokeResult | null>(null);
+  const [includeSpeech, setIncludeSpeech] = useState(true);
+  const [sequence, setSequence] = useState<string | null>(null);
+  const stopPrepare = useRef(false);
 
   const requestRef = useRef(0);
   const alive = useRef(true);
@@ -307,10 +310,81 @@ export function ReadinessCard({
   useEffect(() => { setSmoke(null); }, [status?.engine_program, status?.model_name]);
 
   const cancel = useCallback(() => {
+    stopPrepare.current = true;
     void cancelDownload().catch((reason: unknown) => {
       if (alive.current) setActionError(text.downloadError(reason instanceof Error ? reason.message : String(reason)));
     });
   }, []);
+
+  const prepare = useCallback(async () => {
+    if (!status || actionLock.current) return;
+    const speechWanted = includeSpeech && (!status.speech_found || status.speech_model === null);
+    const plan = planPrepare(status, speechWanted);
+    if (plan.block || plan.steps.length === 0) return;
+    actionLock.current = true;
+    stopPrepare.current = false;
+    setActionError(null);
+    setDone(null);
+    setSmoke(null);
+    const cancelled = (message: string) =>
+      ["скачивание отменено человеком", "установка отменена человеком", "распаковка отменена человеком"].includes(message);
+    try {
+      for (let index = 0; index < plan.steps.length; index += 1) {
+        if (stopPrepare.current || !alive.current) {
+          setActionError(text.cancelled);
+          return;
+        }
+        const step = plan.steps[index];
+        if (!step) return;
+        setBusy(step === "smoke" ? "smoke" : step);
+        setSequence(text.prepareProgress(index + 1, plan.steps.length, text.prepareStep[step]));
+        if (step === "smoke") {
+          if (statusProp === undefined) {
+            const fresh = await readinessStatus();
+            if (!fresh.engine_found || !fresh.model_present) {
+              setActionError(text.prepareIncomplete);
+              return;
+            }
+          }
+          const generation = ++smokeGeneration.current;
+          const result = await smokeCheck();
+          if (!alive.current || generation !== smokeGeneration.current) return;
+          setSmoke(result);
+          refresh();
+          if (result.ok) onToVoice?.();
+          else setActionError(text.smokeFailed(result.note));
+          return;
+        }
+        if (step === "model") {
+          await downloadModel(status.model_spec.url, status.model_spec.file, status.model_spec.sha256);
+        } else if (step === "speech-model") {
+          await downloadModel(status.speech_model_spec.url, status.speech_model_spec.file, status.speech_model_spec.sha256);
+        } else if (step === "runtime") {
+          await downloadRuntime("llama");
+        } else {
+          await downloadRuntime("whisper");
+        }
+        if (!alive.current) return;
+        refresh();
+      }
+      if (alive.current) {
+        setDone(text.prepareOpened);
+        onToVoice?.();
+      }
+    } catch (reason: unknown) {
+      if (!alive.current) return;
+      const message = reason instanceof Error ? reason.message : String(reason);
+      refresh();
+      setActionError(cancelled(message) || stopPrepare.current ? text.cancelled : text.downloadError(message));
+    } finally {
+      actionLock.current = false;
+      if (alive.current) {
+        setBusy(null);
+        setProgress(null);
+        setSequence(null);
+      }
+    }
+  }, [status, includeSpeech, statusProp, refresh, onToVoice]);
 
   if (status === null && error === null) {
     return (
@@ -338,6 +412,9 @@ export function ReadinessCard({
   }
 
   const assessment = assessReadiness(status);
+  const speechOptional = assessment.speechMissing.length > 0;
+  const plan = planPrepare(status, speechOptional && includeSpeech);
+  const showPrepare = !browser && plan.block === null && plan.steps.some((step) => step !== "smoke");
   const modelTotal = formatSize(status.model_spec.bytes);
   const runtimeTotal = formatSize(status.runtime_spec.bytes);
   const speechModelTotal = formatSize(status.speech_model_spec.bytes);
@@ -351,6 +428,59 @@ export function ReadinessCard({
       <Text className={styles.title}>
         {assessment.ready ? text.readyTitle : text.title}
       </Text>
+
+      {showPrepare ? (
+        <div className={styles.item}>
+          {speechOptional ? (
+            <label>
+              <input
+                type="checkbox"
+                checked={includeSpeech}
+                disabled={busy !== null}
+                onChange={(event) => setIncludeSpeech(event.target.checked)}
+              />{" "}
+              {text.prepareSpeech}
+            </label>
+          ) : null}
+          {speechOptional ? <Text className={styles.note}>{text.prepareSpeechHint}</Text> : null}
+          <Text className={styles.note}>
+            {plan.steps.includes("smoke")
+              ? text.prepareHint(formatSize(plan.bytes))
+              : text.prepareHintNoStart(formatSize(plan.bytes))}
+          </Text>
+          {plan.speechSkipped ? (
+            <Text className={styles.note}>
+              {text.prepareSpeechSkipped(
+                plan.speechSkipped === "no-room"
+                  ? text.prepareSpeechSkipRoom
+                  : plan.speechSkipped === "owned"
+                    ? text.prepareSpeechSkipOwned
+                    : text.prepareSpeechSkipUnsupported,
+              )}
+            </Text>
+          ) : null}
+          <div className={styles.row}>
+            <Button
+              appearance="primary"
+              disabled={busy !== null || !!status.download_name}
+              onClick={() => void prepare()}
+            >
+              {text.prepare}
+            </Button>
+            {sequence ? (
+              <Button size="small" onClick={cancel}>
+                {text.cancel}
+              </Button>
+            ) : null}
+          </div>
+          {sequence ? <Text className={styles.progress}>{sequence}</Text> : null}
+        </div>
+      ) : null}
+      {!browser && plan.block === "no-room" ? <Text className={styles.error}>{text.prepareNoRoom}</Text> : null}
+      {!browser && plan.block === "runtime-unsupported" ? (
+        <Text className={styles.error}>{text.prepareUnsupported}</Text>
+      ) : null}
+      {!browser && plan.block === "runtime-owned" ? <Text className={styles.error}>{text.prepareOwned}</Text> : null}
 
       {assessment.ready ? (
         <Text className={styles.ok}>{text.readyText}</Text>

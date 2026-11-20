@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
-import { assessReadiness, formatSize, hasRoom } from "./readiness";
+import { assessReadiness, formatSize, hasRoom, planPrepare } from "./readiness";
 import type { ReadinessStatus } from "../ipc";
 
 /**
@@ -153,7 +153,42 @@ describe("размер и место", () => {
     expect(formatSize(512)).toBe("512 Б");
   });
 
-  it("нехватку места видит, неизвестное — не блокирует", () => {
+  it("одним заходом качает обязательное и речь, а движок запускает только последним шагом", () => {
+    const plan = planPrepare(status(), true);
+    expect(plan.block).toBeNull();
+    expect(plan.steps).toEqual(["runtime", "model", "speech-runtime", "speech-model", "smoke"]);
+    expect(plan.bytes).toBe(986048768 + 25696689 + 8928640 + 147951465);
+  });
+
+  it("без отметки речи не качает whisper и всё равно проверяет разговор", () => {
+    const plan = planPrepare(status(), false);
+    expect(plan.steps).toEqual(["runtime", "model", "smoke"]);
+    expect(plan.speechSkipped).toBeNull();
+  });
+
+  it("нехватка места на речь не отменяет разговор", () => {
+    const plan = planPrepare(
+      status({ free_bytes: 986048768 + 25696689 + 1000 }),
+      true,
+    );
+    expect(plan.block).toBeNull();
+    expect(plan.steps).toEqual(["runtime", "model", "smoke"]);
+    expect(plan.speechSkipped).toBe("no-room");
+  });
+
+  it("нехватка места на модель отменяет весь заход, а не качает движок молча", () => {
+    const plan = planPrepare(status({ free_bytes: 30_000_000 }), true);
+    expect(plan.block).toBe("no-room");
+    expect(plan.steps).toEqual([]);
+  });
+
+  it("чужой каталог движка одним заходом не перезаписывается", () => {
+    const plan = planPrepare(status({ runtime_managed: true }), true);
+    expect(plan.block).toBe("runtime-owned");
+    expect(plan.steps).toEqual([]);
+  });
+
+  it("нехватка места видит, неизвестное — не блокирует", () => {
     expect(hasRoom(100, 1000)).toBe(false);
     expect(hasRoom(2000, 1000)).toBe(true);
     expect(hasRoom(null, 1000)).toBe(true);
