@@ -51,6 +51,7 @@ import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { consentCanRun, consentPositions, isSpokenConsent, keepsPendingPlan } from "../lib/consent";
 import { installedEngine, isEngineDown } from "../lib/engineReady";
+import { followUpQuery, isFollowUp } from "../lib/followUp";
 import { isSpokenStop } from "../lib/spoken";
 import { speak, stopSpeaking } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
@@ -330,6 +331,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const micStopRef = useRef<() => void>(() => {});
   /** Одна попытка на фразу: повторный отказ не крутит запуск по кругу. */
   const engineAttemptRef = useRef<string | null>(null);
+  /** Последняя настоящая задача. «Ещё» и «стоп» её не подменяют. */
+  const lastTaskRef = useRef<string | null>(null);
   const startInstalledEngineRef = useRef<() => Promise<EngineStart>>(async () => ({ kind: "unknown" }));
 
   const startInstalledEngine = useCallback(async (): Promise<EngineStart> => {
@@ -351,6 +354,32 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     }
   }, []);
   startInstalledEngineRef.current = startInstalledEngine;
+
+  // Уже установленный движок поднимается вместе с экраном, не по первой фразе.
+  // Скачивания нет. Неуспех не кричит: следующая фраза объяснит сама.
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      let status = null;
+      try {
+        status = await readinessStatus();
+      } catch {
+        return;
+      }
+      if (!alive || installedEngine(status) !== "start") return;
+      setEngineBusy(true);
+      try {
+        await smokeCheck();
+      } catch {
+        return;
+      } finally {
+        if (alive) setEngineBusy(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   /**
    * Фраза, которой нужна модель, сама запускает уже установленный движок.
@@ -810,6 +839,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       setThinking(false);
       setEngineBusy(false);
       setAlways(false);
+      lastTaskRef.current = null;
       stopSpeaking();
       micStopRef.current();
       void cancelTool().catch(() => undefined);
@@ -981,6 +1011,16 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       executeRef.current(positions);
       return;
     }
+    const asked = followUpQuery(lastTaskRef.current, query);
+    if (isFollowUp(query)) {
+      if (asked !== query) {
+        setText(asked);
+        const heard = voice.followHeard(lastTaskRef.current ?? "");
+        setSpoken(speak(heard) ? voice.said(heard) : heard);
+      }
+    } else if (query.length > 0) {
+      lastTaskRef.current = query;
+    }
     if (
       engineAttemptRef.current &&
       engineAttemptRef.current !== query &&
@@ -1005,7 +1045,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
 
     setBusy(true);
     setError(null);
-    planFor(query, LIMIT)
+    planFor(asked, LIMIT)
       .then(async (raw) => {
         if (request !== searchRequestRef.current) return;
         // Сначала то, что про программу перед человеком. Решения и опасность не меняются.
@@ -1018,7 +1058,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
 
         // Черновик плана: что именно приложение собирается сделать. Спрашиваем его
         // сразу — человек сказал задачу, и ответ «могу сделать вот это» полезнее списка.
-        const proposal = await draftPlan(query).catch(() => null);
+        const proposal = await draftPlan(asked).catch(() => null);
         if (request !== searchRequestRef.current) return;
         setDraft(proposal);
         setLearning(null);
@@ -1042,7 +1082,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           if (request !== searchRequestRef.current) return;
           try {
             answered = await think(
-              query,
+              asked,
               window
                 ? { title: window.title, process: window.process, screen: screenText }
                 : null,
@@ -1081,13 +1121,13 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         const promise =
           proposal || answered?.plan
             ? null
-            : answered?.learning ?? (await requestLearning(query).catch(() => null));
+            : answered?.learning ?? (await requestLearning(asked).catch(() => null));
         if (request !== searchRequestRef.current) return;
         if (promise) {
           setLearning(promise);
           speak(
             answered?.learning
-              ? voice.thinkLearnRecorded(query, promise.example)
+              ? voice.thinkLearnRecorded(asked, promise.example)
               : voice.learnSpoken(promise.example),
           );
           return;

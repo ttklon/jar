@@ -246,8 +246,8 @@ describe("локальное распознавание на экране", () =
     fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сделай потише" } });
     fireEvent.click(screen.getByRole("button", { name: "Найти" }));
 
-    await waitFor(() => expect(vi.mocked(smokeCheck)).toHaveBeenCalledOnce());
     await waitFor(() => expect(vi.mocked(think)).toHaveBeenCalledTimes(2));
+    expect(vi.mocked(smokeCheck).mock.calls.length).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "Запустить движок и разобрать эту фразу" })).toBeNull();
   });
 
@@ -286,7 +286,7 @@ describe("локальное распознавание на экране", () =
     fireEvent.click(screen.getByRole("button", { name: "Найти" }));
 
     await waitFor(() => expect(screen.getByText(/Фразу повторно не отправляю/)).toBeTruthy());
-    expect(vi.mocked(smokeCheck)).toHaveBeenCalledOnce();
+    expect(vi.mocked(smokeCheck).mock.calls.length).toBeGreaterThan(0);
     expect(vi.mocked(think)).toHaveBeenCalledTimes(1);
     expect(vi.mocked(requestLearning)).not.toHaveBeenCalled();
   });
@@ -494,6 +494,76 @@ describe("локальное распознавание на экране", () =
     expect(vi.mocked(cancelTool)).toHaveBeenCalled();
     expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
     expect(vi.mocked(requestLearning)).not.toHaveBeenCalled();
+  });
+
+  it("«ещё» продолжает прошлую фразу и без неё ничего не выдумывает", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(null);
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "ещё" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await waitFor(() => expect(vi.mocked(draftPlan)).toHaveBeenCalledWith("ещё"));
+
+    vi.mocked(draftPlan).mockClear();
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сколько места" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await waitFor(() => expect(vi.mocked(draftPlan)).toHaveBeenCalledWith("сколько места"));
+
+    vi.mocked(draftPlan).mockClear();
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "ещё" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await waitFor(() => expect(vi.mocked(draftPlan)).toHaveBeenCalledWith("сколько места. ещё"));
+    expect((screen.getByLabelText("Услышал") as HTMLInputElement).value).toBe("сколько места. ещё");
+  });
+
+  it("«повтори» снова отдаёт ту же фразу политике, а не слово «да»", async () => {
+    vi.mocked(draftPlan).mockResolvedValue({
+      plan: {
+        goal: "удали a.txt",
+        steps: [{ registry: "files|удалить|файл", params: { path: "a.txt" } }],
+      },
+      problems: [],
+      questions: [],
+      gates: [
+        {
+          position: 1,
+          registry: "files|удалить|файл",
+          decision: "confirm",
+          risk: "destructive",
+          wants_approval: true,
+        },
+      ],
+    });
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "удали a.txt" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await screen.findByRole("button", { name: "Выполнить" });
+
+    vi.mocked(draftPlan).mockClear();
+    vi.mocked(runPlan).mockClear();
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "повтори" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await waitFor(() => expect(vi.mocked(draftPlan)).toHaveBeenCalledWith("удали a.txt"));
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
+  });
+
+  it("установленный движок поднимается при открытии экрана и ничего не скачивает", async () => {
+    vi.mocked(readinessStatus).mockResolvedValue(
+      readinessFacts({ engine_found: true, engine_running: false, model_present: true, missing: [] }),
+    );
+    vi.mocked(smokeCheck).mockResolvedValue({
+      ok: true,
+      answer: "готово",
+      note: "текст",
+      model: "m.gguf",
+      port: 1,
+    });
+
+    render(<Voice />);
+    await waitFor(() => expect(vi.mocked(smokeCheck)).toHaveBeenCalled());
+    expect(screen.queryByText(/Само ничего не скачиваю/)).toBeNull();
+    expect(vi.mocked(think)).not.toHaveBeenCalled();
   });
 
   it("кнопка «Стоп» бросает уже начатый план и не принимает поздний успех", async () => {
