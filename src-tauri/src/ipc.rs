@@ -457,7 +457,7 @@ pub async fn draft_hand(state: State<'_, AppState>, key: String) -> Result<hand:
         Ok(guard) => match guard.as_ref() {
             Some(server) => server.port(),
             None => {
-                return Err("движок не запущен: откройте «Модели» и запустите модель".to_string())
+                return Err("движок не запущен: на экране «Голос» нажмите «Запустить движок и разобрать эту фразу». Экран «Модели» для запуска не нужен".to_string())
             }
         },
         Err(_) => return Err("движок не под контролем приложения: перезапустите его".to_string()),
@@ -663,7 +663,7 @@ pub async fn think(
         Ok(guard) => match guard.as_ref() {
             Some(server) => server.port(),
             None => {
-                return Err("движок не запущен: откройте «Модели» и запустите модель".to_string())
+                return Err("движок не запущен: на экране «Голос» нажмите «Запустить движок и разобрать эту фразу». Экран «Модели» для запуска не нужен".to_string())
             }
         },
         Err(_) => return Err("движок не под контролем приложения: перезапустите его".to_string()),
@@ -1059,7 +1059,7 @@ pub async fn smoke_check(state: State<'_, AppState>) -> Result<SmokeResult, Stri
             .into_iter()
             .find(|file| file.ok)
             .map(|file| file.name)
-            .ok_or_else(|| "нет модели с читаемым заголовком: откройте «Модели»".to_string())?;
+            .ok_or_else(|| "нет модели с читаемым заголовком: на карточке готовности нажмите «Скачать недостающее и открыть разговор»".to_string())?;
         let status = start_engine(state, name.clone()).await?;
         let port = status.port.ok_or_else(|| "движок не запущен".to_string())?;
         (port, Some(name))

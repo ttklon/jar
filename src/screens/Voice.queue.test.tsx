@@ -29,6 +29,7 @@ vi.mock("../ipc", () => ({
   requestLearning: vi.fn().mockResolvedValue(null),
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn().mockResolvedValue(null),
+  smokeCheck: vi.fn(),
   uiDump: vi.fn().mockRejectedValue(new Error("нет UI Automation")),
   declarePresence: vi.fn(),
   machineState: vi.fn().mockResolvedValue({

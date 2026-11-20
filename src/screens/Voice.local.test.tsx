@@ -11,6 +11,7 @@ import {
   modelPrompt,
   planFor,
   speechStatus,
+  smokeCheck,
   think,
   trialHand,
   runPlan,
@@ -37,6 +38,7 @@ vi.mock("../ipc", () => ({
   requestLearning: vi.fn().mockResolvedValue(null),
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn().mockResolvedValue(null),
+  smokeCheck: vi.fn(),
   uiDump: vi.fn().mockRejectedValue(new Error("в браузере нет UI Automation")),
   uiPress: vi.fn().mockRejectedValue(new Error("в браузере окон нет")),
   uiType: vi.fn().mockRejectedValue(new Error("в браузере окон нет")),
@@ -111,6 +113,7 @@ afterEach(() => {
   vi.mocked(modelPrompt).mockReset().mockResolvedValue("Ты выбираешь одно действие для помощника на Windows.\nЗадача человека:\nубавить громкость");
   vi.mocked(startRecording).mockReset();
   vi.mocked(speechStatus).mockReset().mockResolvedValue(null as never);
+  vi.mocked(smokeCheck).mockReset();
 });
 
 const FOUND = {
@@ -186,6 +189,121 @@ describe("локальное распознавание на экране", () =
     expect(screen.queryByText(/Разрешаю системное распознавание речи/)).toBeNull();
     expect(screen.queryByText(/работает со своим движком распознавания/)).toBeNull();
     expect(screen.queryByText(/кнопкой в карточке выше/)).toBeNull();
+  });
+
+  it("движок не запущен — это не «не умею», а одна кнопка на этом экране", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(null);
+    vi.mocked(think).mockRejectedValueOnce(new Error("движок не запущен: нажмите кнопку"));
+    vi.mocked(smokeCheck).mockResolvedValue({
+      ok: true,
+      answer: "готово",
+      note: "текст",
+      model: "m.gguf",
+      port: 1,
+    });
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сделай потише" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Запустить движок и разобрать эту фразу" })).toBeTruthy();
+    });
+    expect(screen.getByText(/Это не «не умею»/)).toBeTruthy();
+    expect(vi.mocked(requestLearning)).not.toHaveBeenCalled();
+    expect(vi.mocked(smokeCheck)).not.toHaveBeenCalled();
+
+    vi.mocked(think).mockResolvedValue(null as never);
+    fireEvent.click(screen.getByRole("button", { name: "Запустить движок и разобрать эту фразу" }));
+    await waitFor(() => expect(vi.mocked(smokeCheck)).toHaveBeenCalledOnce());
+    await waitFor(() => expect(vi.mocked(think)).toHaveBeenCalledTimes(2));
+  });
+
+  it("план модели с явным allow выполняется без второй кнопки", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(null);
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Call: {
+          registry: "storage-backup|проверить|свободное место",
+          params: {},
+          why: "человек спросил место",
+        },
+      },
+      plan: {
+        plan: {
+          goal: "сколько места",
+          steps: [{ registry: "storage-backup|проверить|свободное место", params: {} }],
+        },
+        problems: [],
+        questions: [],
+        gates: [
+          {
+            position: 1,
+            registry: "storage-backup|проверить|свободное место",
+            decision: "allow",
+            risk: "read",
+            wants_approval: false,
+          },
+        ],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+    vi.mocked(runPlan).mockResolvedValue({
+      goal: "сколько места",
+      steps: [],
+      stopped: null,
+      run_id: 1,
+      sight: null,
+    });
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сколько места" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledOnce());
+    expect(screen.queryByText(/предложение модели ничего не выполняет/)).toBeNull();
+  });
+
+  it("план модели с подтверждением сам не выполняется", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(null);
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: {
+        Call: { registry: "files|удалить|файл", params: { path: "a.txt" }, why: "просил" },
+      },
+      plan: {
+        plan: {
+          goal: "удали a.txt",
+          steps: [{ registry: "files|удалить|файл", params: { path: "a.txt" } }],
+        },
+        problems: [],
+        questions: [],
+        gates: [
+          {
+            position: 1,
+            registry: "files|удалить|файл",
+            decision: "confirm",
+            risk: "destructive",
+            wants_approval: true,
+          },
+        ],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "удали a.txt" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    await waitFor(() => expect(screen.getByText(/предложение модели ничего не выполняет/)).toBeTruthy());
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
   });
 
   it("если движок есть, а модели нет, указывает кнопку карточки", async () => {
@@ -624,7 +742,7 @@ describe("локальное распознавание на экране", () =
   it("модель не ответила — фраза всё равно не пропадает: записываем в обучение", async () => {
     vi.mocked(planFor).mockResolvedValueOnce([]);
     vi.mocked(draftPlan).mockResolvedValueOnce(null);
-    vi.mocked(think).mockRejectedValueOnce(new Error("движок не запущен"));
+    vi.mocked(think).mockRejectedValueOnce(new Error("модель не ответила"));
     vi.mocked(requestLearning).mockResolvedValueOnce({
       registry: "видео|включить|субтитры",
       example: "включить субтитры в видео",
@@ -643,6 +761,7 @@ describe("локальное распознавание на экране", () =
     fireEvent.click(screen.getByText("Найти"));
 
     await waitFor(() => expect(screen.getByText("Чему нужно научиться")).toBeTruthy());
+    expect(screen.queryByRole("button", { name: "Запустить движок и разобрать эту фразу" })).toBeNull();
   });
 
   it("показывает по просьбе, что именно уйдёт модели", async () => {

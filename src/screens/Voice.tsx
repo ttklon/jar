@@ -17,6 +17,7 @@ import {
   requestLearning,
   runPlan,
   isolationStatus,
+  smokeCheck,
   speechStatus,
   setVoiceTrayStatus,
   machineState,
@@ -280,6 +281,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const [thought, setThought] = useState<Thought | null>(null);
   const [thinking, setThinking] = useState(false);
   const [thinkError, setThinkError] = useState<string | null>(null);
+  const [enginePrompt, setEnginePrompt] = useState<string | null>(null);
+  const [engineBusy, setEngineBusy] = useState(false);
   /** Что именно уйдёт модели — по кнопке и честно, без «доверьтесь нам». */
   const [promptText, setPromptText] = useState<string | null>(null);
   const [promptError, setPromptError] = useState<string | null>(null);
@@ -757,6 +760,22 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     }
   }, [readScreen]);
 
+  const acceptModelPlan = (check: PlanCheck) => {
+    setDraft(check);
+    setAnswers({});
+    setRemembered([]);
+    setApproved([]);
+    setReport(null);
+    if (phraseIsEnough(check)) {
+      setSpoken(voice.autoRun);
+      speak(voice.autoRun);
+      runCheckedRef.current(check);
+      return;
+    }
+    const phrase = `${voice.thinkPlanReady(check.plan?.steps.length ?? 0)}. ${voice.thinkNotExecuted}`;
+    setSpoken(speak(phrase) ? voice.said(phrase) : voice.silent);
+  };
+
   const search = useCallback((phrase: string) => {
     executeRequestRef.current += 1;
     thoughtRequestRef.current += 1;
@@ -813,24 +832,33 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           // Экран читаем до вопроса: без него у «нажми эту кнопку» нет адресата.
           const screenText = window ? await readScreen() : null;
           if (request !== searchRequestRef.current) return;
-          answered = await Promise.resolve(
-            think(
+          try {
+            answered = await think(
               query,
               window
                 ? { title: window.title, process: window.process, screen: screenText }
                 : null,
-            ),
-          ).catch(() => null);
+            );
+          } catch (reason: unknown) {
+            if (request !== searchRequestRef.current) return;
+            const message = reason instanceof Error ? reason.message : String(reason);
+            // Только «движок не запущен» — не тупик обучения: умения хватает, некому разобрать.
+            // Другой отказ (в браузере модели нет) по-прежнему идёт в запись «не умею».
+            if (message.includes("движок не запущен")) {
+              setThinkError(message);
+              setEnginePrompt(query);
+              return;
+            }
+            setThinkError(message);
+            answered = null;
+          }
           if (request !== searchRequestRef.current) return;
+          setEnginePrompt(null);
           setThought(answered);
 
           // План от модели — обычный план: политика, вопросы и подтверждение те же.
           if (answered?.plan) {
-            setDraft(answered.plan);
-            setApproved([]);
-            setReport(null);
-            const phrase = `${voice.thinkPlanReady(answered.plan.plan?.steps.length ?? 0)}. ${voice.thinkNotExecuted}`;
-            setSpoken(speak(phrase) ? voice.said(phrase) : voice.silent);
+            acceptModelPlan(answered.plan);
             return;
           }
         }
@@ -1506,13 +1534,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
                   // только словами: человек видит, что задача осталась, а не исчезла с фразой.
                   if (answer.learning) setLearning(answer.learning);
 
-                  if (answer.plan) {
-                    setDraft(answer.plan);
-                    setAnswers({});
-                    setRemembered([]);
-                    setApproved([]);
-                    setReport(null);
-                  }
+                  if (answer.plan) acceptModelPlan(answer.plan);
 
                   const phrase = answer.plan
                     ? `${describeThought(answer)}. ${voice.thinkPlanReady(answer.plan.plan?.steps.length ?? 0)}`
@@ -1520,9 +1542,10 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
                   speak(phrase);
                 })
                 .catch((reason: unknown) => {
-                  if (request === thoughtRequestRef.current) {
-                    setThinkError(reason instanceof Error ? reason.message : String(reason));
-                  }
+                  if (request !== thoughtRequestRef.current) return;
+                  const message = reason instanceof Error ? reason.message : String(reason);
+                  setThinkError(message);
+                  setEnginePrompt(message.includes("движок не запущен") ? requestedText : null);
                 })
                 .finally(() => {
                   if (request === thoughtRequestRef.current) setThinking(false);
@@ -1584,10 +1607,45 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           {thinkError ? (
             <Text className={styles.error}>{voice.thinkError(thinkError)}</Text>
           ) : null}
+          {enginePrompt ? (
+            <div className={styles.bar}>
+              <Text className={styles.note}>
+                {thinkError?.includes("нет модели") ? voice.engineNoModel : voice.engineDown}
+              </Text>
+              {thinkError?.includes("нет модели") ? null : (
+                <Button
+                  appearance="primary"
+                  disabled={engineBusy}
+                  onClick={() => {
+                    const phrase = enginePrompt;
+                    setEngineBusy(true);
+                    setThinkError(null);
+                    void smokeCheck()
+                      .then((result) => {
+                        if (!result.ok) {
+                          setThinkError(voice.engineStartFailed(result.note));
+                          return;
+                        }
+                        setEnginePrompt(null);
+                        search(phrase);
+                      })
+                      .catch((reason: unknown) => {
+                        setThinkError(reason instanceof Error ? reason.message : String(reason));
+                      })
+                      .finally(() => setEngineBusy(false));
+                  }}
+                >
+                  {engineBusy ? voice.engineStarting : voice.engineStartAndRetry}
+                </Button>
+              )}
+            </div>
+          ) : null}
           {thought?.proposal ? (
             <>
               <Text className={styles.spoken}>{describeThought(thought)}</Text>
-              <Text className={styles.note}>{voice.thinkNotExecuted}</Text>
+              {thought.plan && phraseIsEnough(thought.plan) ? null : (
+                <Text className={styles.note}>{voice.thinkNotExecuted}</Text>
+              )}
               {"Split" in thought.proposal
                 ? thought.proposal.Split.deeds.map((deed, index) => (
                     <Text key={`deed-${index}`} className={styles.note}>
