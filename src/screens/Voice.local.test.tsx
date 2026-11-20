@@ -226,6 +226,22 @@ describe("локальное распознавание на экране", () =
     await waitFor(() => expect(vi.mocked(think)).toHaveBeenCalledTimes(2));
   });
 
+  it("ошибка микрофона гаснет при новой попытке и по кнопке «Понятно»", async () => {
+    // Свой движок на диске: путь записи без системного согласия, ошибка — от микрофона.
+    vi.mocked(speechStatus).mockResolvedValue(FOUND);
+    vi.mocked(startRecording).mockRejectedValue(new Error("микрофон занят другой программой"));
+
+    render(<Voice />);
+    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
+    fireEvent.pointerUp(screen.getByRole("button", { name: "Держать и говорить" }));
+
+    // Старая ошибка не приговор: она уходит, как только человек пробует снова.
+    expect(await screen.findByText(/микрофон занят другой программой/)).toBeTruthy();
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
+    await waitFor(() => expect(screen.queryByText(/микрофон занят другой программой/)).toBeNull());
+  });
+
   it("«ещё» после запуска движка разбирает продолжение, а не голое слово", async () => {
     vi.mocked(draftPlan).mockResolvedValue(null);
     vi.mocked(readinessStatus).mockResolvedValue(

@@ -1667,6 +1667,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         onPointerDown={(event) => {
           event.preventDefault();
           setCancelled(false);
+          // Новая попытка — новая ошибка: старая не должна пугать до разбора.
+          setVoiceError(null);
           // В режиме «слушаю всегда» нажатие — это переключатель, а не «держать».
           if (always) {
             if (mic.listening) mic.stop();
@@ -1774,7 +1776,16 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
 
       <MicrophoneCheck active={active} disabled={mic.listening || mic.processing} onBusyChange={setMicCheckBusy} />
 
-      {voiceError ? <Text className={styles.error}>{voiceError}</Text> : null}
+      {voiceError ? (
+        <div className={styles.bar}>
+          <Text className={styles.error}>{voiceError}</Text>
+          {/* Ошибка — про попытку, а не про приговор: убираем её, не дожидаясь,
+              когда человек сам догадается, что старое уже неправда. */}
+          <Button size="small" appearance="subtle" onClick={() => setVoiceError(null)}>
+            {voice.errorDismiss}
+          </Button>
+        </div>
+      ) : null}
 
       {/*
         Слово человека о себе. Стоит выше поля задачи и не спрятано за измерениями:
