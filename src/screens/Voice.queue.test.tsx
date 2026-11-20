@@ -166,6 +166,46 @@ describe("очередь дел на экране", () => {
     expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1);
   });
 
+  it("дело «нужно ваше слово» берётся в руки с этого же экрана и убирается", async () => {
+    vi.mocked(draftPlan).mockResolvedValueOnce(safePlan as never).mockResolvedValueOnce(needsWord as never);
+    vi.mocked(runPlan).mockResolvedValue({
+      goal: "убавить громкость",
+      steps: [
+        {
+          position: 1,
+          registry: "звук|убавить|громкость",
+          status: "ok",
+          reason: "сделано",
+          evidence: "system",
+          duration_ms: 5,
+        },
+      ],
+      stopped: null,
+      run_id: 1,
+    } as never);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    addToQueue("убавить громкость");
+    addToQueue("удалить папку");
+    fireEvent.click(screen.getByText("Работать без меня"));
+
+    await waitFor(() => expect(screen.getByText(/нужно ваше слово · удалить папку/)).toBeTruthy());
+
+    // «Взять в руки» возвращает фразу в поле: её не нужно набирать заново.
+    fireEvent.click(screen.getByRole("button", { name: "Взять в руки" }));
+    expect((screen.getByLabelText("Услышал") as HTMLInputElement).value).toBe("удалить папку");
+    expect(screen.getByText(/снова ждёт: фраза разберётся заново/)).toBeTruthy();
+    // И дело снова ждёт, а не висит отложенным.
+    await waitFor(() => expect(screen.getByText(/ждёт · удалить папку/)).toBeTruthy());
+
+    // «Убрать» убирает ждущее дело из очереди совсем.
+    fireEvent.click(screen.getByRole("button", { name: "Убрать" }));
+    await waitFor(() => expect(screen.queryByText(/ждёт · удалить папку/)).toBeNull());
+    expect(screen.getByText(/готово · убавить громкость/)).toBeTruthy();
+  });
+
   it("два дела без окон идут одновременно, а не по очереди", async () => {
     vi.mocked(draftPlan).mockResolvedValue(safePlan as never);
 

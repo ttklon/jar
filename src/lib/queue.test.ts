@@ -9,8 +9,10 @@ import {
   markScreen,
   pick,
   progress,
+  remove,
   replenish,
   retry,
+  revive,
   rollHour,
   setState,
   startHour,
@@ -50,6 +52,25 @@ const plan = (over: Partial<PlanCheck> = {}): PlanCheck => ({
 });
 
 describe("очередь дел", () => {
+  it("«нужно ваше слово» — не тупик: дело можно взять в руки или убрать", () => {
+    let items = add([], "удалить папку", "1");
+    items = setState(items, "1", "held", "шаг 1 требует подтверждения");
+
+    // Взяли в руки: дело снова ждёт, а объяснение «нужно слово» не висит на нём.
+    const revived = revive(items, "1");
+    expect(revived[0]?.state).toBe("waiting");
+    expect(revived[0]?.note).toBe("");
+    // Чужое дело и уже начатое не трогаем.
+    expect(revive(setState(items, "1", "running", "делаю"), "1")[0]?.state).toBe("running");
+    expect(revive(items, "2")[0]?.state).toBe("held");
+
+    // Убрать можно ждущее, отложенное и проваленное; отчёт и начатое — нет.
+    expect(remove(items, "1")).toHaveLength(0);
+    expect(remove(setState(items, "1", "running", "делаю"), "1")).toHaveLength(1);
+    expect(remove(setState(items, "1", "done", "готово"), "1")).toHaveLength(1);
+    expect(remove(add(items, "второе", "2"), "2")).toHaveLength(1);
+  });
+
   it("пустое не дело: в очередь не попадает, а пробелы вокруг слов убираются", () => {
     let items: QueueItem[] = [];
     items = add(items, "   ", "1");

@@ -247,6 +247,32 @@ export function stopRemaining(items: readonly QueueItem[]): QueueItem[] {
 }
 
 /**
+ * Вернуть дело к человеку: «нужно ваше слово» — не тупик.
+ *
+ * Слово, которого ждёт очередь, звучит на этом же экране. Если его набирать заново,
+ * человек повторяет задачу и теряет то, что уже собрано. Поэтому дело становится
+ * ждущим, а с него снимается «нужно слово»: очередь снова возьмёт его, когда
+ * разрешение уже будет дано. Начатое и законченное не трогаем.
+ */
+export function revive(items: readonly QueueItem[], id: string): QueueItem[] {
+  return items.map((item) =>
+    item.id === id && item.state === "held"
+      ? { ...item, state: "waiting", note: "" }
+      : item,
+  );
+}
+
+/**
+ * Убрать дело из очереди. Сделанное и идущее не убираем: отчёт о нём — не мусор,
+ * а идущее всё равно доводится до шага, где его можно бросить.
+ */
+export function remove(items: readonly QueueItem[], id: string): QueueItem[] {
+  return items.filter(
+    (item) => item.id !== id || item.state === "running" || item.state === "done",
+  );
+}
+
+/**
  * Остановить одну цель, не трогая остальные.
  *
  * Зачем отдельно от общего «стоп». Цели — разные работы: «наведи порядок в загрузках» и

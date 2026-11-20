@@ -76,6 +76,8 @@ import {
   summary,
   takeDeed,
   phraseIsEnough,
+  remove,
+  revive,
   unattended,
   usesScreen,
   type HourLog,
@@ -2072,9 +2074,42 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           <Text className={styles.note}>{voice.queueHour(hour.deeds, DEEDS_PER_HOUR)}</Text>
           {queueIdle ? <Text className={styles.note}>{voice.queueIdle(queueIdle)}</Text> : null}
           {queue.map((item) => (
-            <Text key={item.id} className={item.state === "held" ? styles.error : styles.note}>
-              {voice.queueLine(item.goal, item.state, item.note)}
-            </Text>
+            <div key={item.id} className={styles.bar}>
+              <Text className={item.state === "held" ? styles.error : styles.note}>
+                {voice.queueLine(item.goal, item.state, item.note)}
+              </Text>
+              {item.state === "held" ? (
+                // «Нужно ваше слово» — это про этот экран, а не про память человека.
+                // Забираем дело обратно в поле и разбираем заново, уже с его словом.
+                <Button
+                  size="small"
+                  appearance="subtle"
+                  onClick={() => {
+                    const next = revive(queueRef.current, item.id);
+                    queueRef.current = next;
+                    setQueue(next);
+                    setText(item.goal);
+                    setSpoken(voice.queueRevived(item.goal));
+                    setQueueIdle(null);
+                  }}
+                >
+                  {voice.queueTake}
+                </Button>
+              ) : null}
+              {item.state === "waiting" || item.state === "held" || item.state === "failed" ? (
+                <Button
+                  size="small"
+                  appearance="subtle"
+                  onClick={() => {
+                    const next = remove(queueRef.current, item.id);
+                    queueRef.current = next;
+                    setQueue(next);
+                  }}
+                >
+                  {voice.queueRemove}
+                </Button>
+              ) : null}
+            </div>
           ))}
         </div>
       ) : null}

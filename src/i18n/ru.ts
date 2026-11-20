@@ -726,6 +726,10 @@ export const voice = {
         : `цель «${goal}»: сделано ${done}, новых дел нет`,
   queueStopGoal: "Стоп по цели",
   queueGoalStopped: "остановлена вами — новых дел по ней не беру",
+  queueTake: "Взять в руки",
+  queueRemove: "Убрать",
+  queueRevived: (goal: string) =>
+    `«${goal}» снова ждёт: фраза разберётся заново, уже с вашим словом`,
   queueHour: (deeds: number, cap: number) =>
     `за этот час сам начал ${deeds} из ${cap} — это потолок: больше ${cap} не начну, пока час не пройдёт. Счёт обнуляется при перезапуске`,
   queueLine: (goal: string, state: string, note: string) => {
