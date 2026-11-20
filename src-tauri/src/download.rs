@@ -548,24 +548,20 @@ mod tests {
             );
         }
 
-        // Модель распознавания — законное имя: pinned ggml-base.bin должен
-        // проходить проверку имени и отклоняться только дальше (по сети),
-        // а не «ждём файл .gguf».
-        {
-            let _test_guard = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
-            let error = download(
-                &dir,
-                "ggml-base.bin",
-                "https://127.0.0.1:1/nothing.bin",
-                None,
-                &memory,
-            )
-            .expect_err("по этому адресу ничего нет");
-            assert!(
-                !error.contains(".gguf"),
-                "ggml-*.bin — допустимое имя, отказ только по другой причине: {error}"
-            );
-        }
+        // Модель распознавания — законное имя: pinned ggml-base.bin проходит
+        // проверку имени и отклоняется уже на ссылке, без сети. Повторный
+        // TEST_LOCK здесь нельзя: Mutex не реентерабельный, внешний захват
+        // ещё жив, и второй lock вешает весь `cargo test`.
+        let error = download(&dir, "ggml-base.bin", "not-a-url", None, &memory)
+            .expect_err("имя годится, ссылка нет");
+        assert!(
+            error.contains("ссылка"),
+            "ggml-*.bin — допустимое имя, отказ только по ссылке: {error}"
+        );
+        assert!(
+            !error.contains(".gguf"),
+            "законное имя не должно отвергаться как не-.gguf: {error}"
+        );
 
         for url in [
             "file:///etc/passwd",
