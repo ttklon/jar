@@ -110,6 +110,7 @@ afterEach(() => {
   vi.mocked(transcribeLocal).mockReset();
   vi.mocked(modelPrompt).mockReset().mockResolvedValue("Ты выбираешь одно действие для помощника на Windows.\nЗадача человека:\nубавить громкость");
   vi.mocked(startRecording).mockReset();
+  vi.mocked(speechStatus).mockReset().mockResolvedValue(null as never);
 });
 
 const FOUND = {
@@ -155,6 +156,48 @@ describe("локальное распознавание на экране", () =
       expect(screen.getByText(/локальное распознавание готово/)).toBeTruthy();
     });
     expect(screen.getByText(/звук не покидает компьютер/)).toBeTruthy();
+    expect(screen.getByText(/Распознавание идёт локальным whisper/)).toBeTruthy();
+    expect(screen.queryByText(/звук покидает компьютер/)).toBeNull();
+  });
+
+  it("после установки на карточке подхватывает движок без перезапуска экрана", async () => {
+    const missing = {
+      found: false,
+      program: null,
+      model: null,
+      search_dir: "C:\\jar\\sidecars",
+      models_dir: "C:\\jar\\models",
+    };
+    vi.mocked(speechStatus).mockResolvedValueOnce(missing).mockResolvedValue(FOUND);
+
+    const view = render(<Voice active={false} />);
+    await waitFor(() => {
+      expect(screen.getByText(/локального распознавания нет/)).toBeTruthy();
+    });
+    expect(screen.getAllByText(/кнопкой в карточке выше/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/локальное распознавание готово/)).toBeNull();
+
+    view.rerender(<Voice active />);
+    await waitFor(() => {
+      expect(screen.getByText(/локальное распознавание готово/)).toBeTruthy();
+    });
+    expect(screen.queryByText(/локального распознавания нет/)).toBeNull();
+    expect(screen.getByText(/Распознавание идёт локальным whisper/)).toBeTruthy();
+    expect(screen.queryByText(/Разрешаю системное распознавание речи/)).toBeNull();
+    expect(screen.queryByText(/работает со своим движком распознавания/)).toBeNull();
+    expect(screen.queryByText(/кнопкой в карточке выше/)).toBeNull();
+  });
+
+  it("если движок есть, а модели нет, указывает кнопку карточки", async () => {
+    vi.mocked(speechStatus).mockResolvedValue({ ...FOUND, model: null });
+
+    render(<Voice />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/движок распознавания есть, а модели нет/)).toBeTruthy();
+    });
+    expect(screen.getAllByText(/кнопкой в карточке выше/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/локальное распознавание готово/)).toBeNull();
   });
 
   it("показывает, где оно находится: заголовок и программа окна", async () => {

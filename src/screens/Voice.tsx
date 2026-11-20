@@ -192,6 +192,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const [cancelledAsr, setCancelledAsr] = useState(false);
   const [micCheckBusy, setMicCheckBusy] = useState(false);
   const [speech, setSpeech] = useState<SpeechStatus | null>(null);
+  const speechRequest = useRef(0);
+  const aliveRef = useRef(true);
   const [systemSpeechConsent, setSystemSpeechConsent] = useState(false);
   const [isolation, setIsolation] = useState<IsolationStatus | null>(null);
   /** Что перед человеком: спрашиваем в момент, когда он заговорил, а не один раз. */
@@ -1046,12 +1048,27 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     };
   }, []);
 
-  // Чем распознаём — видно сразу: пока своего движка нет, звук уходит наружу, и
-  // человек должен знать это до того, как заговорит, а не после.
-  useEffect(() => {
+  // Чем распознаём — видно сразу и после установки на карточке: экран остаётся
+  // смонтированным, поэтому одного чтения при первом показе мало. Поздний ответ
+  // не затирает более новый статус.
+  const reloadSpeech = useCallback(() => {
+    const request = ++speechRequest.current;
     speechStatus()
-      .then(setSpeech)
-      .catch(() => setSpeech(null));
+      .then((value) => {
+        if (aliveRef.current && request === speechRequest.current) setSpeech(value);
+      })
+      .catch(() => {
+        if (aliveRef.current && request === speechRequest.current) setSpeech(null);
+      });
+  }, []);
+  useEffect(() => {
+    aliveRef.current = true;
+    return () => {
+      aliveRef.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    reloadSpeech();
 
     // Потолки — вторая половина того же честного разговора: чем распознаём и что
     // будет, если запущенная команда ошибётся. Сказать об этом один раз на экране
@@ -1064,7 +1081,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     facts()
       .then(setKnownFacts)
       .catch(() => setKnownFacts([]));
-  }, []);
+  }, [reloadSpeech]);
 
   useEffect(() => {
     if (!mic.listening) {
@@ -1166,7 +1183,11 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         </Text>
       </div>
 
-      <ReadinessCard active={active} onToModels={onOpen ? () => onOpen("models") : undefined} />
+      <ReadinessCard
+        active={active}
+        onRefresh={reloadSpeech}
+        onToModels={onOpen ? () => onOpen("models") : undefined}
+      />
 
       {mic.listening && !always ? (
         <Text className={styles.note}>{voice.pauseSend}</Text>
@@ -1252,7 +1273,9 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       />
       <Text className={styles.note}>{voice.alwaysHint}</Text>
       {!mic.alwaysSupported ? (
-        <Text className={styles.note}>{voice.alwaysNoEngine}</Text>
+        <Text className={styles.note}>
+          {localEngine ? voice.alwaysNoMic : voice.alwaysNoEngine}
+        </Text>
       ) : null}
 
       {front ? (
@@ -1268,7 +1291,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       ) : null}
 
       <Text className={styles.note}>{voice.hotkey}</Text>
-      <Text className={styles.note}>{voice.privacy}</Text>
+      <Text className={styles.note}>{localEngine ? voice.privacyLocal : voice.privacy}</Text>
       {!localEngine ? (
         <>
           <label>

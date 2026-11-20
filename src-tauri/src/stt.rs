@@ -33,7 +33,7 @@ const BOUNDARY: &str = "jar-whisper-form";
 /// но первый запуск грузит модель, поэтому запас большой.
 pub const TIMEOUT: Duration = Duration::from_secs(120);
 
-/// Где приложение ищет движок: рядом с собой, затем в `PATH`.
+/// Где приложение ищет движок: сначала управляемая установка, затем рядом с собой и в `PATH`.
 pub fn find_program(base: &Path) -> Option<PathBuf> {
     // Управляемая установка (pinned-релиз) предпочтительнее ручного файла:
     // её происхождение и целостность известны приложению.
@@ -541,6 +541,50 @@ mod tests {
         assert!(flags.contains(&"8081".to_string()));
 
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn managed_install_is_preferred_over_a_manual_sidecar() {
+        let base = std::env::temp_dir().join(format!(
+            "zshelper-stt-managed-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("время")
+                .as_nanos()
+        ));
+        let _ = std::fs::remove_dir_all(&base);
+        let kind = crate::runtime::Kind::Whisper;
+        let spec = kind.spec();
+        let managed = crate::runtime::directory(&base, kind);
+        std::fs::create_dir_all(&managed).expect("каталог");
+        // Поля спека за общей ссылкой: в join и json только &str, иначе E0507.
+        let program_name = spec.program.as_str();
+        let program = managed.join(program_name);
+        std::fs::write(&program, b"managed-not-executed").expect("файл");
+        let file_sha = "ab".repeat(32);
+        let meta = serde_json::json!({
+            "archive_sha256": spec.sha256.as_str(),
+            "program": program_name,
+            "files": [{ "path": program_name, "sha256": file_sha }]
+        });
+        std::fs::write(managed.join("installed.json"), serde_json::to_vec(&meta).unwrap()).unwrap();
+        std::fs::write(managed.join(".zshelper-owner"), spec.sha256.as_bytes()).unwrap();
+        let manual = base.join("sidecars").join(PROGRAM);
+        std::fs::write(&manual, b"manual").expect("ручной файл");
+
+        assert_eq!(
+            find_program(&base),
+            Some(program),
+            "управляемая установка предпочтительнее ручного exe"
+        );
+        std::fs::remove_file(managed.join(".zshelper-owner")).unwrap();
+        assert_eq!(
+            find_program(&base),
+            Some(manual),
+            "без метки владения остаётся ручной файл, чужой каталог не подменяется"
+        );
+        let _ = std::fs::remove_dir_all(&base);
     }
 
     #[test]

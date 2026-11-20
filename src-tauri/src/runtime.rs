@@ -558,6 +558,10 @@ mod tests {
         let whisper_dir = directory(&base, Kind::Whisper);
         std::fs::create_dir_all(&whisper_dir).unwrap();
         std::fs::write(whisper_dir.join(&Kind::Whisper.spec().program), b"fixture").unwrap();
+        // Без метки владения удаление запрещено — иначе тест проверял бы не
+        // «свой каталог убран, чужой остался», а обход защиты.
+        std::fs::write(whisper_dir.join(OWNER), Kind::Whisper.spec().sha256.as_bytes()).unwrap();
+        assert!(is_managed(&base, Kind::Whisper));
         let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
