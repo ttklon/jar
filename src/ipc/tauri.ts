@@ -369,9 +369,11 @@ export function memoryRuns(limit: number): Promise<RunRecord[]> {
   return invoke<RunRecord[]>("memory_runs", { limit });
 }
 
-export function downloadRuntime(): Promise<import("./types").Installed> {
-  return invoke("download_runtime");
+export function downloadRuntime(
+  kind: import("./types").RuntimeKind,
+): Promise<import("./types").Installed> {
+  return invoke("download_runtime", { kind });
 }
-export function removeRuntime(): Promise<void> {
-  return invoke("remove_runtime");
+export function removeRuntime(kind: import("./types").RuntimeKind): Promise<void> {
+  return invoke("remove_runtime", { kind });
 }

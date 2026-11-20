@@ -1,5 +1,10 @@
 //! Pinned runtime delivery. The archive is never executed. Publication is a directory
 //! rename on the same volume, after bounded extraction and Windows x64 PE validation.
+//!
+//! Два движка — `llama-server` (разговор) и `whisper-server` (распознавание) — идут
+//! одним и тем же путём: pinned-релиз, сверка хеша архива до распаковки, ограниченная
+//! распаковка, PE-проверка, атомарная публикация в свой управляемый каталог и метка
+//! владения. Отличаются только записью в каталоге готовности.
 use crate::{download, models, readiness};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
@@ -7,6 +12,23 @@ use std::path::{Path, PathBuf};
 pub const MAX_EXPANDED: u64 = 500 * 1024 * 1024;
 const OWNER: &str = ".zshelper-owner";
 const SCRIPT: &str = include_str!("runtime-install.ps1");
+
+/// Какой движок доставляем. Источник истины по URL/хешу — `data/readiness.json`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Kind {
+    Llama,
+    Whisper,
+}
+
+impl Kind {
+    /// Pinned-спецификация из каталога готовности.
+    pub fn spec(self) -> &'static readiness::RuntimeSpec {
+        match self {
+            Kind::Llama => &readiness::catalog().runtime,
+            Kind::Whisper => &readiness::catalog().whisper_runtime,
+        }
+    }
+}
 
 #[derive(Debug, Serialize)]
 pub struct Installed {
@@ -32,8 +54,8 @@ fn marker(dir: &Path) -> Option<Marker> {
     serde_json::from_slice(&std::fs::read(path).ok()?).ok()
 }
 
-pub fn directory(base: &Path) -> PathBuf {
-    base.join("sidecars").join(&readiness::catalog().runtime.id)
+pub fn directory(base: &Path, kind: Kind) -> PathBuf {
+    base.join("sidecars").join(kind.spec().id)
 }
 
 /// Windows path rules, also on Linux tests. Never trust a marker as a path.
@@ -73,8 +95,8 @@ fn link_or_reparse(info: &std::fs::Metadata) -> bool {
 
 /// Ownership is separate from the payload manifest so a broken payload can still
 /// be removed. An arbitrary directory with the version name is NOT app-owned.
-pub fn is_managed(base: &Path) -> bool {
-    let dir = directory(base);
+pub fn is_managed(base: &Path, kind: Kind) -> bool {
+    let dir = directory(base, kind);
     let Ok(info) = std::fs::symlink_metadata(&dir) else {
         return false;
     };
@@ -88,12 +110,11 @@ pub fn is_managed(base: &Path) -> bool {
     info.is_file()
         && !link_or_reparse(&info)
         && info.len() == 64
-        && std::fs::read(path)
-            .is_ok_and(|bytes| bytes == readiness::catalog().runtime.sha256.as_bytes())
+        && std::fs::read(path).is_ok_and(|bytes| bytes == kind.spec().sha256.as_bytes())
 }
 
 /// Validate the record and filesystem structure without claiming a fresh hash check.
-fn payload(dir: &Path) -> Result<Marker, String> {
+fn payload(dir: &Path, kind: Kind) -> Result<Marker, String> {
     let info = std::fs::symlink_metadata(dir).map_err(|e| e.to_string())?;
     if !info.is_dir() || link_or_reparse(&info) {
         return Err("каталог движка является ссылкой".into());
@@ -103,16 +124,17 @@ fn payload(dir: &Path) -> Result<Marker, String> {
     if !marker_info.is_file() || link_or_reparse(&marker_info) {
         return Err("запись установки является ссылкой".into());
     }
+    let spec = kind.spec();
     let meta = marker(dir)
         .ok_or_else(|| "повреждена запись установки движка; переустановите его".to_string())?;
-    if meta.archive_sha256 != readiness::catalog().runtime.sha256
+    if meta.archive_sha256 != spec.sha256
         || !safe_relative(&meta.program)
         || !meta
             .program
             .replace('\\', "/")
             .rsplit('/')
             .next()
-            .is_some_and(|name| name.eq_ignore_ascii_case("llama-server.exe"))
+            .is_some_and(|name| name.eq_ignore_ascii_case(&spec.program))
         || meta.files.is_empty()
         || meta.files.len() > 2048
     {
@@ -162,17 +184,17 @@ fn payload(dir: &Path) -> Result<Marker, String> {
     Ok(meta)
 }
 
-pub fn find(base: &Path) -> Option<PathBuf> {
-    if !is_managed(base) {
+pub fn find(base: &Path, kind: Kind) -> Option<PathBuf> {
+    if !is_managed(base, kind) {
         return None;
     }
-    let dir = directory(base);
-    let meta = payload(&dir).ok()?;
+    let dir = directory(base, kind);
+    let meta = payload(&dir, kind).ok()?;
     Some(dir.join(meta.program))
 }
 
-fn verify_directory(dir: &Path, cancellable: bool) -> Result<(), String> {
-    let meta = payload(dir)?;
+fn verify_directory(dir: &Path, kind: Kind, cancellable: bool) -> Result<(), String> {
+    let meta = payload(dir, kind)?;
     for file in meta.files {
         let path = dir.join(&file.path);
         let actual = if cancellable {
@@ -191,28 +213,25 @@ fn verify_directory(dir: &Path, cancellable: bool) -> Result<(), String> {
 }
 
 /// The manifest detects corruption; it is not a signature against same-user attackers.
-pub fn verify(base: &Path) -> Result<(), String> {
-    if !is_managed(base) {
+pub fn verify(base: &Path, kind: Kind) -> Result<(), String> {
+    if !is_managed(base, kind) {
         return Err("владение установкой движка не подтверждено; проверьте каталог вручную".into());
     }
-    verify_directory(&directory(base), false)
+    verify_directory(&directory(base, kind), kind, false)
 }
 
-pub fn install(base: &Path) -> Result<Installed, String> {
+pub fn install(base: &Path, kind: Kind) -> Result<Installed, String> {
     if !cfg!(all(windows, target_arch = "x86_64")) {
         return Err("этот движок предназначен только для Windows x64".into());
     }
     let _guard = download::acquire()?;
-    let spec = &readiness::catalog().runtime;
+    let spec = kind.spec();
     download::set_name(&spec.asset);
     // Source is compiled-in, no URL or destination is accepted over IPC.
-    if !spec
-        .url
-        .starts_with("https://github.com/ggml-org/llama.cpp/releases/download/")
-    {
+    if !allowed_source(spec) {
         return Err("источник движка вне allowlist".into());
     }
-    let target = directory(base);
+    let target = directory(base, kind);
     let target_present = match std::fs::symlink_metadata(&target) {
         Ok(_) => true,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => false,
@@ -254,8 +273,8 @@ pub fn install(base: &Path) -> Result<Installed, String> {
             return Err("скачивание отменено человеком".into());
         }
         std::fs::write(&script, SCRIPT).map_err(|e| e.to_string())?;
-        extract(&script, &archive, &stage, &spec.sha256, spec.bytes)?;
-        verify_directory(&stage, true)?;
+        extract(&script, &archive, &stage, &spec.sha256, spec.bytes, &spec.program)?;
+        verify_directory(&stage, kind, true)?;
         // Write our own ownership marker, never one supplied by the ZIP.
         let mut owner = std::fs::OpenOptions::new()
             .write(true)
@@ -268,7 +287,8 @@ pub fn install(base: &Path) -> Result<Installed, String> {
             return Err("установка отменена человеком".into());
         }
         std::fs::rename(&stage, &target).map_err(|e| format!("установка не опубликована: {e}"))?;
-        let program = find(base).ok_or_else(|| "не найден установленный движок".to_string())?;
+        let program =
+            find(base, kind).ok_or_else(|| "не найден установленный движок".to_string())?;
         Ok(Installed {
             program: program.display().to_string(),
         })
@@ -285,12 +305,27 @@ pub fn install(base: &Path) -> Result<Installed, String> {
     }
 }
 
+/// Оба движка приходят только из своих официальных релизов: никакого URL из IPC.
+fn allowed_source(spec: &readiness::RuntimeSpec) -> bool {
+    let prefix = match spec.id.as_str() {
+        id if id.starts_with("llama-cpp-") => {
+            "https://github.com/ggml-org/llama.cpp/releases/download/"
+        }
+        id if id.starts_with("whisper-cpp-") => {
+            "https://github.com/ggml-org/whisper.cpp/releases/download/"
+        }
+        _ => return false,
+    };
+    spec.url.starts_with(prefix)
+}
+
 fn extract(
     script: &Path,
     archive: &Path,
     stage: &Path,
     hash: &str,
     bytes: u64,
+    program: &str,
 ) -> Result<(), String> {
     use std::process::{Command, Stdio};
     use std::time::{Duration, Instant};
@@ -311,6 +346,8 @@ fn extract(
         .arg(hash)
         .arg("-ExpectedBytes")
         .arg(bytes.to_string())
+        .arg("-Program")
+        .arg(program)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
@@ -338,15 +375,15 @@ fn extract(
 }
 
 /// Only our versioned directory, never manual sidecars or PATH files. Caller stops engine first.
-pub fn remove(base: &Path) -> Result<(), String> {
+pub fn remove(base: &Path, kind: Kind) -> Result<(), String> {
     let _guard = download::acquire()?;
-    let dir = directory(base);
+    let dir = directory(base, kind);
     match std::fs::symlink_metadata(&dir) {
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
         Err(error) => return Err(error.to_string()),
         Ok(_) => {}
     }
-    if !is_managed(base) {
+    if !is_managed(base, kind) {
         return Err(format!("каталог не имеет корректной метки владения ZShelper: {}; автоматическое удаление запрещено", dir.display()));
     }
     std::fs::remove_dir_all(dir).map_err(|e| format!("движок не удалён: {e}"))
@@ -377,25 +414,61 @@ mod tests {
         }
         assert!(safe_relative("bin/llama-server.exe"));
         assert!(safe_relative("llama-server.exe"));
+        assert!(safe_relative("Release/whisper-server.exe"));
     }
     #[test]
     fn off_windows_never_installs() {
         if !cfg!(all(windows, target_arch = "x86_64")) {
-            assert!(install(Path::new("unused")).is_err());
+            for kind in [Kind::Llama, Kind::Whisper] {
+                assert!(install(Path::new("unused"), kind).is_err());
+            }
         }
     }
-    fn fixture(tag: &str) -> PathBuf {
+    #[test]
+    fn kinds_have_distinct_homes_and_programs() {
+        // Оба движка живут в своих каталогах: установка одного не должна
+        // ни прятать, ни удалять другой.
+        let base = Path::new("unused-base");
+        assert_ne!(directory(base, Kind::Llama), directory(base, Kind::Whisper));
+        assert_eq!(Kind::Llama.spec().program, "llama-server.exe");
+        assert_eq!(Kind::Whisper.spec().program, "whisper-server.exe");
+        assert_ne!(Kind::Llama.spec().id, Kind::Whisper.spec().id);
+    }
+    #[test]
+    fn only_official_release_prefixes_are_allowed() {
+        for kind in [Kind::Llama, Kind::Whisper] {
+            assert!(
+                allowed_source(kind.spec()),
+                "pinned-источник {} должен проходить allowlist",
+                kind.spec().id
+            );
+        }
+        let mut stranger = Kind::Llama.spec().clone();
+        stranger.url = "https://example.com/llama.zip".into();
+        assert!(!allowed_source(&stranger));
+        let mut swapped = Kind::Llama.spec().clone();
+        swapped.url = Kind::Whisper.spec().url.clone();
+        assert!(
+            !allowed_source(&swapped),
+            "id и источник должны совпадать"
+        );
+    }
+    fn fixture(tag: &str, kind: Kind) -> PathBuf {
         let base =
-            std::env::temp_dir().join(format!("zshelper-managed-{tag}-{}", std::process::id()));
+            std::env::temp_dir().join(format!(
+            "zshelper-managed-{tag}-{}-{}",
+            kind.spec().id,
+            std::process::id()
+        ));
         let _ = std::fs::remove_dir_all(&base);
-        let dir = directory(&base);
+        let dir = directory(&base, kind);
         std::fs::create_dir_all(&dir).unwrap();
-        std::fs::write(dir.join("llama-server.exe"), b"fixture-not-executed").unwrap();
-        let sha = models::sha256_file(&dir.join("llama-server.exe")).unwrap();
+        std::fs::write(dir.join(kind.spec().program), b"fixture-not-executed").unwrap();
+        let sha = models::sha256_file(&dir.join(kind.spec().program)).unwrap();
         let meta = serde_json::json!({
-            "archive_sha256": readiness::catalog().runtime.sha256,
-            "program": "llama-server.exe",
-            "files": [{"path": "llama-server.exe", "sha256": sha}]
+            "archive_sha256": kind.spec().sha256,
+            "program": kind.spec().program,
+            "files": [{"path": kind.spec().program, "sha256": sha}]
         });
         std::fs::write(
             dir.join("installed.json"),
@@ -404,110 +477,159 @@ mod tests {
         .unwrap();
         std::fs::write(
             dir.join(OWNER),
-            readiness::catalog().runtime.sha256.as_bytes(),
+            kind.spec().sha256.as_bytes(),
         )
         .unwrap();
         base
     }
     #[test]
     fn restart_detects_managed_install_and_corruption_blocks_launch_check() {
-        let base = fixture("integrity");
-        assert!(find(&base).is_some());
-        assert!(verify(&base).is_ok());
-        std::fs::write(directory(&base).join("llama-server.exe"), b"changed").unwrap();
-        assert!(verify(&base).unwrap_err().contains("изменился"));
-        std::fs::remove_dir_all(base).unwrap();
+        for kind in [Kind::Llama, Kind::Whisper] {
+            let base = fixture("integrity", kind);
+            assert!(find(&base, kind).is_some());
+            assert!(verify(&base, kind).is_ok());
+            std::fs::write(directory(&base, kind).join(kind.spec().program), b"changed").unwrap();
+            assert!(verify(&base, kind).unwrap_err().contains("изменился"));
+            std::fs::remove_dir_all(base).unwrap();
+        }
     }
     #[test]
     fn malicious_marker_path_is_not_followed() {
-        let base = fixture("traversal");
-        let marker = serde_json::json!({
-            "archive_sha256": readiness::catalog().runtime.sha256,
-            "program": "../llama-server.exe", "files": []
-        });
+        for kind in [Kind::Llama, Kind::Whisper] {
+            let base = fixture("traversal", kind);
+            let marker = serde_json::json!({
+                "archive_sha256": kind.spec().sha256,
+                "program": "../llama-server.exe", "files": []
+            });
+            std::fs::write(
+                directory(&base, kind).join("installed.json"),
+                serde_json::to_vec(&marker).unwrap(),
+            )
+            .unwrap();
+            assert!(find(&base, kind).is_none());
+            assert!(verify(&base, kind).is_err());
+            std::fs::remove_dir_all(base).unwrap();
+        }
+    }
+    #[test]
+    fn marker_of_the_other_kind_is_rejected() {
+        // Запись установки llama не должна опознавать whisper-каталог и наоборот:
+        // у каждого вида своя метка владения.
+        let base = fixture("cross-kind", Kind::Whisper);
         std::fs::write(
-            directory(&base).join("installed.json"),
-            serde_json::to_vec(&marker).unwrap(),
+            directory(&base, Kind::Whisper).join(OWNER),
+            Kind::Llama.spec().sha256.as_bytes(),
         )
         .unwrap();
-        assert!(find(&base).is_none());
-        assert!(verify(&base).is_err());
+        assert!(
+            !is_managed(&base, Kind::Whisper),
+            "чужая метка не опознаётся"
+        );
+        assert!(find(&base, Kind::Whisper).is_none());
+        let _guard = download::TEST_LOCK
+            .lock()
+            .unwrap_or_else(|e| e.into_inner());
+        assert!(remove(&base, Kind::Whisper).unwrap_err().contains("метки владения"));
         std::fs::remove_dir_all(base).unwrap();
     }
     #[test]
     fn managed_removal_preserves_manual_runtime_and_models() {
-        let base = fixture("removal");
-        std::fs::write(base.join("sidecars/llama-server.exe"), b"manual").unwrap();
-        std::fs::write(base.join("model.gguf"), b"weights").unwrap();
-        let _test_guard = download::TEST_LOCK
+        for kind in [Kind::Llama, Kind::Whisper] {
+            let base = fixture("removal", kind);
+            std::fs::write(base.join("sidecars/llama-server.exe"), b"manual").unwrap();
+            std::fs::write(base.join("model.gguf"), b"weights").unwrap();
+            let _test_guard = download::TEST_LOCK
+                .lock()
+                .unwrap_or_else(|e| e.into_inner());
+            remove(&base, kind).unwrap();
+            assert!(!directory(&base, kind).exists());
+            assert_eq!(
+                std::fs::read(base.join("sidecars/llama-server.exe")).unwrap(),
+                b"manual"
+            );
+            assert_eq!(std::fs::read(base.join("model.gguf")).unwrap(), b"weights");
+            std::fs::remove_dir_all(base).unwrap();
+        }
+    }
+
+    #[test]
+    fn removing_one_kind_keeps_the_other() {
+        let base = fixture("both-kinds", Kind::Llama);
+        let whisper_dir = directory(&base, Kind::Whisper);
+        std::fs::create_dir_all(&whisper_dir).unwrap();
+        std::fs::write(whisper_dir.join(Kind::Whisper.spec().program), b"fixture").unwrap();
+        let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
-        remove(&base).unwrap();
-        assert!(!directory(&base).exists());
-        assert_eq!(
-            std::fs::read(base.join("sidecars/llama-server.exe")).unwrap(),
-            b"manual"
+        remove(&base, Kind::Whisper).unwrap();
+        assert!(!whisper_dir.exists(), "whisper удалён");
+        assert!(
+            directory(&base, Kind::Llama).is_dir(),
+            "llama остался на месте"
         );
-        assert_eq!(std::fs::read(base.join("model.gguf")).unwrap(), b"weights");
+        assert!(find(&base, Kind::Llama).is_some());
         std::fs::remove_dir_all(base).unwrap();
     }
 
     #[test]
     fn arbitrary_version_directory_is_not_owned_or_deleted() {
-        let base = fixture("not-owned");
-        std::fs::remove_file(directory(&base).join(OWNER)).unwrap();
-        assert!(!is_managed(&base));
-        assert!(find(&base).is_none());
+        let base = fixture("not-owned", Kind::Llama);
+        std::fs::remove_file(directory(&base, Kind::Llama).join(OWNER)).unwrap();
+        assert!(!is_managed(&base, Kind::Llama));
+        assert!(find(&base, Kind::Llama).is_none());
         let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
-        assert!(remove(&base).unwrap_err().contains("метки владения"));
-        assert!(directory(&base).join("llama-server.exe").is_file());
+        assert!(remove(&base, Kind::Llama).unwrap_err().contains("метки владения"));
+        assert!(directory(&base, Kind::Llama).join("llama-server.exe").is_file());
         std::fs::remove_dir_all(base).unwrap();
     }
 
     #[test]
     fn broken_manifest_keeps_ownership_for_explicit_recovery() {
-        let base = fixture("broken-manifest");
-        std::fs::write(directory(&base).join("installed.json"), b"broken").unwrap();
-        assert!(is_managed(&base));
-        assert!(find(&base).is_none());
-        assert!(verify(&base).is_err());
+        let base = fixture("broken-manifest", Kind::Llama);
+        std::fs::write(directory(&base, Kind::Llama).join("installed.json"), b"broken").unwrap();
+        assert!(is_managed(&base, Kind::Llama));
+        assert!(find(&base, Kind::Llama).is_none());
+        assert!(verify(&base, Kind::Llama).is_err());
         let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
-        remove(&base).unwrap();
-        assert!(!directory(&base).exists());
+        remove(&base, Kind::Llama);
+        assert!(!directory(&base, Kind::Llama).exists());
         std::fs::remove_dir_all(base).unwrap();
     }
 
     #[test]
     fn missing_payload_is_not_detected_as_an_engine() {
-        let base = fixture("missing-payload");
-        std::fs::remove_file(directory(&base).join("llama-server.exe")).unwrap();
-        assert!(is_managed(&base));
-        assert!(find(&base).is_none());
-        assert!(verify_directory(&directory(&base), false).is_err());
+        let base = fixture("missing-payload", Kind::Llama);
+        std::fs::remove_file(directory(&base, Kind::Llama).join("llama-server.exe")).unwrap();
+        assert!(is_managed(&base, Kind::Llama));
+        assert!(find(&base, Kind::Llama).is_none());
+        assert!(
+            verify_directory(&directory(&base, Kind::Llama), Kind::Llama, false).is_err()
+        );
         std::fs::remove_dir_all(base).unwrap();
     }
 
     #[cfg(unix)]
     #[test]
     fn linked_payload_or_manifest_is_rejected_without_following_it() {
-        let base = fixture("linked");
-        let dir = directory(&base);
+        let base = fixture("linked", Kind::Llama);
+        let dir = directory(&base, Kind::Llama);
         std::fs::rename(dir.join("llama-server.exe"), base.join("outside.exe")).unwrap();
         std::os::unix::fs::symlink(base.join("outside.exe"), dir.join("llama-server.exe")).unwrap();
-        assert!(find(&base).is_none());
-        assert!(verify(&base).is_err());
+        assert!(find(&base, Kind::Llama).is_none());
+        assert!(verify(&base, Kind::Llama).is_err());
         std::fs::remove_file(dir.join("llama-server.exe")).unwrap();
         std::fs::write(dir.join("llama-server.exe"), b"fixture-not-executed").unwrap();
         std::fs::rename(dir.join("installed.json"), base.join("outside.json")).unwrap();
         std::os::unix::fs::symlink(base.join("outside.json"), dir.join("installed.json")).unwrap();
-        assert!(find(&base).is_none());
-        assert!(verify(&base).is_err());
+        assert!(find(&base, Kind::Llama).is_none());
+        assert!(verify(&base, Kind::Llama).is_err());
         std::fs::remove_dir_all(base).unwrap();
     }
+
     /// Network and upstream binary execution are opt-in, never part of normal tests.
     #[cfg(all(windows, target_arch = "x86_64"))]
     #[test]
@@ -554,8 +676,9 @@ mod tests {
         .expect("pinned model download and hash verification");
         assert!(downloaded.verified);
         println!("RUNTIME_SMOKE model bytes and SHA256 verified");
-        let installed = install(&work.0).expect("pinned runtime download and atomic installation");
-        verify(&work.0).expect("installed payload SHA256 inventory");
+        let installed = install(&work.0, Kind::Llama)
+            .expect("pinned runtime download and atomic installation");
+        verify(&work.0, Kind::Llama).expect("installed payload SHA256 inventory");
         println!("RUNTIME_SMOKE runtime installed and verified");
         let port = crate::server::free_port().unwrap();
         let spec = crate::llama::spec(
@@ -582,8 +705,8 @@ mod tests {
         println!("RUNTIME_SMOKE nonempty text response received");
         engine.0.stop().expect("stop runtime");
         assert!(!engine.0.is_alive());
-        remove(&work.0).expect("remove managed runtime after stopping");
-        assert!(find(&work.0).is_none());
+        remove(&work.0, Kind::Llama).expect("remove managed runtime after stopping");
+        assert!(find(&work.0, Kind::Llama).is_none());
         assert!(
             models_dir.join(&model.file).is_file(),
             "runtime removal must preserve model"

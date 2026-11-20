@@ -4,7 +4,8 @@ param(
     [Parameter(Mandatory=$true)][string]$Archive,
     [Parameter(Mandatory=$true)][string]$Stage,
     [Parameter(Mandatory=$true)][string]$ExpectedHash,
-    [Parameter(Mandatory=$true)][long]$ExpectedBytes
+    [Parameter(Mandatory=$true)][long]$ExpectedBytes,
+    [Parameter(Mandatory=$true)][string]$Program
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression
@@ -75,8 +76,9 @@ try {
         }
     }
     # Do not assume a flat archive. Exactly one server, with siblings kept together.
-    $servers = @(Get-ChildItem -LiteralPath $Stage -Recurse -File -Filter 'llama-server.exe')
-    if ($servers.Count -ne 1 -or $servers[0].Length -lt 64) { throw 'missing/ambiguous server' }
+    # The program name comes from the pinned manifest, never from the archive.
+    $servers = @(Get-ChildItem -LiteralPath $Stage -Recurse -File -Filter $Program)
+    if ($servers.Count -ne 1 -or $servers[0].Length -lt 64) { throw "missing/ambiguous $Program" }
     $pe = [IO.File]::OpenRead($servers[0].FullName)
     $reader = [IO.BinaryReader]::new($pe)
     try {

@@ -870,12 +870,18 @@ pub async fn download_model(
     let inner = state.inner.clone();
     let run = inner.memory.start_run("download", &name).ok();
 
-    let spec = &readiness::catalog().model;
-    let expected_bytes = if url == spec.url && name == spec.file {
-        Some(spec.bytes)
-    } else {
-        None
-    };
+    // Для pinned-моделей из каталога первого запуска размер известен, поэтому
+    // место на диске проверяется до скачивания. Обе модели: разговора и распознавания.
+    let catalog = readiness::catalog();
+    let expected_bytes = [(&catalog.model.url, &catalog.model.file, catalog.model.bytes)]
+        .into_iter()
+        .chain([(
+            &catalog.whisper_model.url,
+            &catalog.whisper_model.file,
+            catalog.whisper_model.bytes,
+        )])
+        .find(|(pinned_url, pinned_name, _)| url == **pinned_url && name == **pinned_name)
+        .map(|(_, _, bytes)| bytes);
 
     let result = tauri::async_runtime::spawn_blocking(move || {
         download::download_sized(
@@ -939,40 +945,64 @@ pub fn readiness_status(state: State<'_, AppState>) -> Result<readiness::Readine
     let model_name = first_ok.map(|file| file.name.clone());
     let model_bytes = first_ok.map(|file| file.size_bytes).unwrap_or(0);
 
-    let mut status = readiness::build(
-        engine.found,
-        engine.running,
-        engine.program,
-        engine.search_dir,
+    let mut status = readiness::build(readiness::Facts {
+        engine_found: engine.found,
+        engine_running: engine.running,
+        engine_program: engine.program,
+        engine_search_dir: engine.search_dir,
         model_present,
         model_name,
         model_bytes,
-        inner.models_dir.display().to_string(),
-        models::free_space(&inner.models_dir),
-        speech.found,
-        speech.model,
-        speech.search_dir,
-    );
+        models_dir: inner.models_dir.display().to_string(),
+        free_bytes: models::free_space(&inner.models_dir),
+        speech_found: speech.found,
+        speech_model: speech.model,
+        speech_search_dir: speech.search_dir,
+        speech_runtime_managed: crate::runtime::is_managed(
+            &inner.base_dir,
+            crate::runtime::Kind::Whisper,
+        ),
+    });
     status.download_name = download::active_name();
-    status.runtime_managed = crate::runtime::is_managed(&inner.base_dir);
+    status.runtime_managed =
+        crate::runtime::is_managed(&inner.base_dir, crate::runtime::Kind::Llama);
     Ok(status)
 }
 
+/// Какой движок доставляем по кнопке. Строка, а не enum: через IPC приходят строки,
+/// и незнакомое имя должно честно отклоняться, а не молча трактоваться как llama.
+fn runtime_kind(name: &str) -> Result<crate::runtime::Kind, String> {
+    match name {
+        "llama" => Ok(crate::runtime::Kind::Llama),
+        "whisper" => Ok(crate::runtime::Kind::Whisper),
+        other => Err(format!(
+            "неизвестный движок «{other}»: доступны llama и whisper"
+        )),
+    }
+}
+
 /// Download only the compiled-in pinned runtime. No execution after install.
+/// The kind is named by the caller; the source, hash and destination are not.
 #[tauri::command]
 pub async fn download_runtime(
     state: State<'_, AppState>,
+    kind: String,
 ) -> Result<crate::runtime::Installed, String> {
+    let kind = runtime_kind(&kind)?;
     let base = state.inner.base_dir.clone();
-    tauri::async_runtime::spawn_blocking(move || crate::runtime::install(&base))
+    tauri::async_runtime::spawn_blocking(move || crate::runtime::install(&base, kind))
         .await
         .map_err(|e| e.to_string())?
 }
 
 /// Only the app-owned versioned directory may be removed. Never manual files.
 #[tauri::command]
-pub async fn remove_runtime(state: State<'_, AppState>) -> Result<(), String> {
+pub async fn remove_runtime(
+    state: State<'_, AppState>,
+    kind: String,
+) -> Result<(), String> {
     use std::sync::atomic::Ordering;
+    let kind = runtime_kind(&kind)?;
     ENGINE_STARTING
         .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
         .map_err(|_| "движок запускается; дождитесь завершения".to_string())?;
@@ -986,8 +1016,15 @@ pub async fn remove_runtime(state: State<'_, AppState>) -> Result<(), String> {
     {
         return Err("сначала остановите движок в «Моделях»".into());
     }
+    // Whisper запускается на каждый запрос распознавания: пока запрос идёт,
+    // файлы заняты и удалять их рано — честнее попросить подождать.
+    if matches!(kind, crate::runtime::Kind::Whisper) && state.inner.asr.busy() {
+        return Err(
+            "локальное распознавание ещё работает; дождитесь конца и повторите".into(),
+        );
+    }
     let base = state.inner.base_dir.clone();
-    tauri::async_runtime::spawn_blocking(move || crate::runtime::remove(&base))
+    tauri::async_runtime::spawn_blocking(move || crate::runtime::remove(&base, kind))
         .await
         .map_err(|e| e.to_string())?
 }
@@ -1182,10 +1219,13 @@ pub async fn start_engine(
     let run = inner.memory.start_run("server", &name).ok();
 
     let managed_base = state.inner.base_dir.clone();
-    let managed = program.starts_with(crate::runtime::directory(&managed_base));
+    let managed = program.starts_with(crate::runtime::directory(
+        &managed_base,
+        crate::runtime::Kind::Llama,
+    ));
     let started = tauri::async_runtime::spawn_blocking(move || {
         if managed {
-            crate::runtime::verify(&managed_base)?;
+            crate::runtime::verify(&managed_base, crate::runtime::Kind::Llama)?;
         }
         Server::start(&spec, &log, std::time::Duration::from_secs(60))
     })
@@ -1842,16 +1882,23 @@ pub async fn transcribe_local(
 
     let program = stt::find_program(&inner.base_dir).ok_or_else(|| {
         format!(
-            "локально распознавать нечем: положите whisper-server.exe в {}",
+            "локально распознавать нечем: положите whisper-server.exe в {} или установите его кнопкой на карточке готовности",
             status.search_dir
         )
     })?;
     let model = speech_model(&inner).ok_or_else(|| {
         format!(
-            "нет модели распознавания: положите ggml-*.bin в {}",
+            "нет модели распознавания: положите ggml-*.bin в {} или скачайте рекомендованную кнопкой на карточке готовности",
             status.models_dir
         )
     })?;
+    // Управляемая установка сверяется по хешам до запуска — как и движок разговора:
+    // изменить файлы между установкой и запуском нельзя незаметно.
+    let managed_base = inner.base_dir.clone();
+    let managed = program.starts_with(crate::runtime::directory(
+        &managed_base,
+        crate::runtime::Kind::Whisper,
+    ));
 
     let run = inner
         .memory
@@ -1862,6 +1909,9 @@ pub async fn transcribe_local(
 
     let result = tauri::async_runtime::spawn_blocking(move || {
         lease.ticket.check()?;
+        if managed {
+            crate::runtime::verify(&managed_base, crate::runtime::Kind::Whisper)?;
+        }
         let port = server::free_port()?;
         let log = inner.base_dir.join(format!("whisper-server-{port}.log"));
         stt::start_owned(

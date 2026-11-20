@@ -100,11 +100,22 @@ export function ReadinessCard({
     return () => { active = false; permission?.removeEventListener("change", update); };
   }, []);
 
-  const [busy, setBusy] = useState<"model" | "runtime" | "remove" | "stop" | "smoke" | null>(null);
+  const [busy, setBusy] = useState<
+    | "model"
+    | "runtime"
+    | "speech-model"
+    | "speech-runtime"
+    | "remove"
+    | "speech-remove"
+    | "stop"
+    | "smoke"
+    | null
+  >(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
+  const [confirmSpeechRemove, setConfirmSpeechRemove] = useState(false);
   const [smoke, setSmoke] = useState<SmokeResult | null>(null);
 
   const requestRef = useRef(0);
@@ -145,7 +156,16 @@ export function ReadinessCard({
 
   // Прогресс скачивания: опрашиваем размер `.part`, пока качаем.
   useEffect(() => {
-    const name = busy === "model" ? status?.model_spec.file : busy === "runtime" ? status?.runtime_spec.asset : status?.download_name;
+    const name =
+      busy === "model"
+        ? status?.model_spec.file
+        : busy === "runtime"
+          ? status?.runtime_spec.asset
+          : busy === "speech-model"
+            ? status?.speech_model_spec.file
+            : busy === "speech-runtime"
+              ? status?.speech_runtime_spec.asset
+              : status?.download_name;
     if (!name) return;
     let active = true;
     let polling = false;
@@ -167,7 +187,7 @@ export function ReadinessCard({
   }, [active, statusProp, status?.download_name, refresh]);
 
   const download = useCallback(
-    async (kind: "model" | "runtime") => {
+    async (kind: "model" | "runtime" | "speech-model" | "speech-runtime") => {
       if (!status || actionLock.current) return;
       actionLock.current = true;
       setBusy(kind);
@@ -176,15 +196,25 @@ export function ReadinessCard({
       setDone(null);
       setSmoke(null);
       try {
-        const name = kind === "model" ? status.model_spec.file : status.runtime_spec.program;
         if (kind === "model") {
           const spec = status.model_spec;
           await downloadModel(spec.url, spec.file, spec.sha256);
+          if (!alive.current) return;
+          setDone(text.downloaded(spec.file));
+        } else if (kind === "speech-model") {
+          const spec = status.speech_model_spec;
+          await downloadModel(spec.url, spec.file, spec.sha256);
+          if (!alive.current) return;
+          setDone(text.downloaded(spec.file));
+        } else if (kind === "runtime") {
+          const installed = await downloadRuntime("llama");
+          if (!alive.current) return;
+          setDone(text.downloaded(installed.program));
         } else {
-          await downloadRuntime();
+          const installed = await downloadRuntime("whisper");
+          if (!alive.current) return;
+          setDone(text.downloaded(installed.program));
         }
-        if (!alive.current) return;
-        setDone(text.downloaded(name));
         refresh();
       } catch (reason: unknown) {
         if (!alive.current) return;
@@ -244,21 +274,29 @@ export function ReadinessCard({
     }
   }, [refresh, busy]);
 
-  const remove = useCallback(async () => {
+  const remove = useCallback(async (kind: "llama" | "whisper") => {
     if (actionLock.current) return;
     actionLock.current = true;
-    setBusy("remove");
+    setBusy(kind === "llama" ? "remove" : "speech-remove");
     setActionError(null);
     setSmoke(null);
     setDone(null);
     try {
-      await removeRuntime();
+      await removeRuntime(kind);
       if (!alive.current) return;
       setConfirmRemove(false);
-      setDone(text.removeRuntimeDone);
+      setConfirmSpeechRemove(false);
+      setDone(kind === "llama" ? text.removeRuntimeDone : text.removeSpeechRuntimeDone);
       refresh();
     } catch (reason: unknown) {
-      if (alive.current) setActionError(text.removeRuntimeError(reason instanceof Error ? reason.message : String(reason)));
+      const message = reason instanceof Error ? reason.message : String(reason);
+      if (alive.current) {
+        setActionError(
+          kind === "llama"
+            ? text.removeRuntimeError(message)
+            : text.removeSpeechRuntimeError(message),
+        );
+      }
     } finally {
       actionLock.current = false;
       if (alive.current) setBusy(null);
@@ -302,6 +340,11 @@ export function ReadinessCard({
   const assessment = assessReadiness(status);
   const modelTotal = formatSize(status.model_spec.bytes);
   const runtimeTotal = formatSize(status.runtime_spec.bytes);
+  const speechModelTotal = formatSize(status.speech_model_spec.bytes);
+  const speechRuntimeTotal = formatSize(status.speech_runtime_spec.bytes);
+  const speechNeeded =
+    status.speech_model_spec.bytes + status.speech_runtime_spec.bytes;
+  const speechRoom = hasRoom(status.free_bytes, speechNeeded);
 
   return (
     <section className={styles.card} aria-label={text.title}>
@@ -366,7 +409,95 @@ export function ReadinessCard({
         </>
       )}
 
-      {status.download_name && busy !== "model" && busy !== "runtime" ? <div className={styles.row}>
+      {assessment.speechMissing.length > 0 ? (
+        <div className={styles.item}>
+          <Text weight="semibold">{text.speechSectionTitle}</Text>
+          <Text className={styles.note}>{text.speechWhy}</Text>
+
+          {assessment.speechMissing.includes("speech-engine") ? (
+            <>
+              <Text weight="semibold">{status.speech_runtime_spec.title}</Text>
+              <Text className={styles.note}>{text.speechMissingEngine}</Text>
+              <Text className={styles.note}>{text.runtimeSize(speechRuntimeTotal)}</Text>
+              <Text className={styles.note}>{text.license(status.speech_runtime_spec.license)}</Text>
+              <Text className={styles.note}>{text.source(status.speech_runtime_spec.source)}</Text>
+              <Text className={styles.mono}>{text.sha(status.speech_runtime_spec.sha256)}</Text>
+              <Text className={styles.note}>{text.runtimeDelivery(status.speech_search_dir, status.speech_runtime_spec.url, status.speech_runtime_spec.sha256)}</Text>
+              {!browser && status.runtime_supported && !status.speech_runtime_managed ? (
+                <div className={styles.row}>
+                  <Button
+                    size="small"
+                    appearance="primary"
+                    disabled={busy !== null || !!status.download_name}
+                    onClick={() => void download("speech-runtime")}
+                  >
+                    {busy === "speech-runtime" ? text.installing : text.downloadSpeechRuntime}
+                  </Button>
+                  {busy === "speech-runtime" ? (
+                    <Button size="small" appearance="subtle" onClick={cancel}>
+                      {text.cancel}
+                    </Button>
+                  ) : null}
+                </div>
+              ) : null}
+              {!browser && !status.runtime_supported ? <Text className={styles.error}>{text.runtimeUnsupported}</Text> : null}
+            </>
+          ) : null}
+
+          {assessment.speechMissing.includes("speech-model") ? (
+            <>
+              <Text weight="semibold">{status.speech_model_spec.title}</Text>
+              <Text className={styles.note}>{text.speechMissingModel}</Text>
+              <Text className={styles.note}>{text.modelSize(speechModelTotal)}</Text>
+              <Text className={styles.note}>{text.modelRequirements(status.speech_model_spec.min_ram_gb, status.models_dir)}</Text>
+              {!speechRoom ? <Text className={styles.error}>{text.noRoom}</Text> : null}
+              <Text className={styles.note}>{text.license(status.speech_model_spec.license)}</Text>
+              <Text className={styles.note}>{text.source(status.speech_model_spec.source)}</Text>
+              <Text className={styles.mono}>{text.sha(status.speech_model_spec.sha256)}</Text>
+              {!browser ? (
+                <div className={styles.row}>
+                  <Button
+                    size="small"
+                    appearance="primary"
+                    disabled={busy !== null || !!status.download_name || !speechRoom}
+                    onClick={() => void download("speech-model")}
+                  >
+                    {busy === "speech-model" ? text.downloading : text.downloadSpeechModel}
+                  </Button>
+                  {busy === "speech-model" ? (
+                    <Button size="small" appearance="subtle" onClick={cancel}>
+                      {text.cancel}
+                    </Button>
+                  ) : null}
+                </div>
+              ) : null}
+            </>
+          ) : null}
+
+        </div>
+      ) : null}
+
+      {status.speech_runtime_managed && !browser ? (
+        <div className={styles.row}>
+          {confirmSpeechRemove ? (
+            <>
+              <Text>{text.removeSpeechRuntimeConfirm}</Text>
+              <Button disabled={busy !== null || !!status.download_name} onClick={() => void remove("whisper")}>
+                {text.removeSpeechRuntime}
+              </Button>
+              <Button disabled={busy !== null} onClick={() => setConfirmSpeechRemove(false)}>
+                {text.cancel}
+              </Button>
+            </>
+          ) : (
+            <Button disabled={busy !== null || !!status.download_name} onClick={() => setConfirmSpeechRemove(true)}>
+              {text.removeSpeechRuntime}
+            </Button>
+          )}
+        </div>
+      ) : null}
+
+      {status.download_name && busy !== "model" && busy !== "runtime" && busy !== "speech-model" && busy !== "speech-runtime" ? <div className={styles.row}>
         <Text>{text.ongoing(status.download_name, progress === null ? null : formatSize(progress))}</Text>
         {!browser ? <Button onClick={cancel}>{text.cancel}</Button> : null}
       </div> : null}
@@ -376,11 +507,17 @@ export function ReadinessCard({
       {busy === "runtime" && progress !== null ? (
         <Text className={styles.progress}>{text.progress(formatSize(progress), runtimeTotal)}</Text>
       ) : null}
+      {busy === "speech-model" && progress !== null ? (
+        <Text className={styles.progress}>{text.progress(formatSize(progress), speechModelTotal)}</Text>
+      ) : null}
+      {busy === "speech-runtime" && progress !== null ? (
+        <Text className={styles.progress}>{text.progress(formatSize(progress), speechRuntimeTotal)}</Text>
+      ) : null}
       {status.runtime_managed && !browser ? (
         <div className={styles.row}>
           {confirmRemove ? <>
             <Text>{text.removeRuntimeConfirm}</Text>
-            <Button disabled={busy !== null || status.engine_running || !!status.download_name} onClick={() => void remove()}>{text.removeRuntime}</Button>
+            <Button disabled={busy !== null || status.engine_running || !!status.download_name} onClick={() => void remove("llama")}>{text.removeRuntime}</Button>
             <Button disabled={busy !== null} onClick={() => setConfirmRemove(false)}>{text.cancel}</Button>
           </> : <Button disabled={busy !== null || status.engine_running || !!status.download_name} onClick={() => setConfirmRemove(true)}>{text.removeRuntime}</Button>}
           {status.engine_running ? <Text className={styles.note}>{text.stopBeforeRemove}</Text> : null}

@@ -25,6 +25,31 @@ function status(partial: Partial<ReadinessStatus> = {}): ReadinessStatus {
     speech_found: false,
     speech_model: null,
     speech_search_dir: "sidecars",
+    speech_runtime_managed: false,
+    speech_runtime_spec: {
+      id: "w",
+      title: "whisper.cpp (Windows x64, CPU)",
+      asset: "whisper-bin-x64.zip",
+      url: "https://example.com/whisper-bin-x64.zip",
+      sha256: "c".repeat(64),
+      bytes: 8928640,
+      license: "MIT",
+      source: "тест",
+      program: "whisper-server.exe",
+      description: "тест",
+    },
+    speech_model_spec: {
+      id: "wm",
+      title: "Whisper base (многоязычная)",
+      file: "ggml-base.bin",
+      url: "https://example.com/ggml-base.bin",
+      sha256: "d".repeat(64),
+      bytes: 147951465,
+      license: "MIT",
+      source: "тест",
+      min_ram_gb: 4,
+      description: "тест",
+    },
     model_spec: {
       id: "m",
       title: "Модель",
@@ -88,6 +113,7 @@ describe("оценка готовности", () => {
     );
     expect(assessment.ready).toBe(true);
     expect(assessment.speechLocal).toBe(false);
+    expect(assessment.speechMissing).toEqual(["speech-engine", "speech-model"]);
   });
 
   it("локальное распознавание видно отдельно", () => {
@@ -100,6 +126,7 @@ describe("оценка готовности", () => {
       }),
     );
     expect(assessment.speechLocal).toBe(true);
+    expect(assessment.speechMissing).toEqual([]);
   });
 
   it("движок без модели распознавания — не локальный голос", () => {
@@ -107,6 +134,15 @@ describe("оценка готовности", () => {
       status({ speech_found: true, speech_model: null }),
     );
     expect(assessment.speechLocal).toBe(false);
+    expect(assessment.speechMissing).toEqual(["speech-model"]);
+  });
+
+  it("модель без движка распознавания — тоже не локальный голос", () => {
+    const assessment = assessReadiness(
+      status({ speech_found: false, speech_model: "ggml-base.bin" }),
+    );
+    expect(assessment.speechLocal).toBe(false);
+    expect(assessment.speechMissing).toEqual(["speech-engine"]);
   });
 });
 

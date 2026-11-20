@@ -148,10 +148,16 @@ fn check_name(name: &str) -> Result<(), String> {
     if !crate::runtime::safe_relative(name) || name.contains(['/', '\\']) {
         return Err("имя файла не может быть путём".to_string());
     }
-    if !name.to_lowercase().ends_with(".gguf") {
-        return Err("ждём файл .gguf: другие расширения папка моделей не показывает".to_string());
+    let lower = name.to_lowercase();
+    if lower.ends_with(".gguf") {
+        return Ok(());
     }
-    Ok(())
+    // Модель распознавания whisper — `ggml-*.bin`: ядро ищет её в папке моделей
+    // именно по такому имени. Произвольный `.bin` не принимаем.
+    if lower.ends_with(".bin") && lower.starts_with("ggml-") {
+        return Ok(());
+    }
+    Err("ждём файл .gguf (модель разговора) или ggml-*.bin (модель распознавания)".to_string())
 }
 
 /// Разрешены только http(s): file:// и ftp:// — это уже не «скачать по ссылке».
@@ -528,6 +534,7 @@ mod tests {
             "../escape.gguf",
             "sub/model.gguf",
             "model.bin",
+            "ggml-evil.exe",
             "CON.gguf",
             "LPT1.gguf",
             "m:ads.gguf",
@@ -538,6 +545,25 @@ mod tests {
             assert!(
                 error.contains("имя файла") || error.contains(".gguf"),
                 "{error}"
+            );
+        }
+
+        // Модель распознавания — законное имя: pinned ggml-base.bin должен
+        // проходить проверку имени и отклоняться только дальше (по сети),
+        // а не «ждём файл .gguf».
+        {
+            let _test_guard = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+            let error = download(
+                &dir,
+                "ggml-base.bin",
+                "https://127.0.0.1:1/nothing.bin",
+                None,
+                &memory,
+            )
+            .expect_err("по этому адресу ничего нет");
+            assert!(
+                !error.contains(".gguf"),
+                "ggml-*.bin — допустимое имя, отказ только по другой причине: {error}"
             );
         }
 

@@ -1,5 +1,5 @@
 {
-  "note": "Каталог первого запуска: что нужно для первого разговора и откуда это брать. Значения сверены с авторитетными источниками 2026-11-19: модель — Hugging Face API (tree/main репозитория bartowski/Qwen2.5-1.5B-Instruct-GGUF, LFS oid = SHA-256 файла), движок — GitHub Releases API (digest ассета llama.cpp b12535). Не менять URL/sha256/размер без повторной сверки с источником.",
+  "note": "Каталог первого запуска: что нужно для первого разговора и откуда это брать. Значения сверены с авторитетными источниками: модель — Hugging Face API (tree/main репозитория bartowski/Qwen2.5-1.5B-Instruct-GGUF, LFS oid = SHA-256 файла), движок — GitHub Releases API (digest ассета llama.cpp b12535), 2026-11-19. Локальное распознавание (необязательно для разговора) добавлено 2026-11-20: движок whisper.cpp — digest ассета b5454 из GitHub Releases API; модель ggml-base.bin — SHA-256 и размер сверены с MacPorts (audio/whisper Portfile) и Shotcut (whispermodel.qml), которые скачивают этот же файл по этой же ссылке. Ссылка модели следует main, а не зафиксированному коммиту (коммит-хеш HF недоступен для сверки офлайн): целостность гарантируется сверкой SHA-256 при скачивании, и файл, изменившийся в main, просто не установится. Не менять URL/sha256/размер без повторной сверки с источником.",
   "model": {
     "id": "qwen2.5-1.5b-q4km",
     "title": "Qwen2.5 1.5B Instruct (Q4_K_M)",
@@ -23,5 +23,29 @@
     "source": "GitHub Releases: ggml-org/llama.cpp, тег b12535 (digest ассета из API релиза)",
     "program": "llama-server.exe",
     "description": "Локальный движок, который запускает модель на этом компьютере. Архив весит около 25 МБ, внутри — llama-server.exe и его библиотеки."
+  },
+  "whisper_model": {
+    "id": "whisper-base",
+    "title": "Whisper base (многоязычная)",
+    "file": "ggml-base.bin",
+    "url": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin",
+    "sha256": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+    "bytes": 147951465,
+    "license": "MIT",
+    "source": "Hugging Face: ggerganov/whisper.cpp, файл ggml-base.bin (многоязычная, включая русский); SHA-256 и размер сверены с MacPorts и Shotcut",
+    "min_ram_gb": 4,
+    "description": "Модель локального распознавания речи, понимает русский. Около 141 МБ, работает на процессоре. Более точная small весит 466 МБ, но заметно медленнее на слабом процессоре."
+  },
+  "whisper_runtime": {
+    "id": "whisper-cpp-b5454-win-cpu-x64",
+    "title": "whisper.cpp (Windows x64, CPU)",
+    "asset": "whisper-bin-x64.zip",
+    "url": "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-x64.zip",
+    "sha256": "6ba69e3482d7826214f90a6a9c84ca07782aec1e1d0c6a7c30c994fd5d816ccb",
+    "bytes": 8928640,
+    "license": "MIT",
+    "source": "GitHub Releases: ggml-org/whisper.cpp, тег b5454 (digest ассета из API релиза)",
+    "program": "whisper-server.exe",
+    "description": "Локальный движок распознавания: со звуком работает на этом компьютере, без системной службы. Архив весит около 9 МБ, внутри — whisper-server.exe и его библиотеки."
   }
 }

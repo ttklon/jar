@@ -264,7 +264,10 @@ export function Models() {
       setDownloadError(text.download.missingUrl);
       return;
     }
-    if (!trimmedName.toLowerCase().endsWith(".gguf")) {
+    const lower = trimmedName.toLowerCase();
+    const validName =
+      lower.endsWith(".gguf") || (lower.endsWith(".bin") && lower.startsWith("ggml-"));
+    if (!validName) {
       setDownloadError(text.download.missingName);
       return;
     }

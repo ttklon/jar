@@ -6,6 +6,10 @@
 //! нужно …». Здесь только факты и pinned-каталог (`data/readiness.json`): ни скачивания, ни
 //! запуска, ни скрытых действий. Всё это — отдельные команды по явной кнопке.
 //!
+//! Локальное распознавание (whisper) — необязательная часть разговора, но с той же
+//! дисциплиной доставки: pinned-источник, SHA-256 и явное согласие. Без него голос
+//! идёт системной службой, и карточка обязана это сказать, а не молчать.
+//!
 //! Каталог — данные, а не код: URL, SHA-256, размер и лицензия сверены с авторитетными
 //! источниками (Hugging Face API для модели, GitHub Releases API для движка) и лежат в
 //! `data/readiness.json`. Выдуманный хеш здесь был бы хуже отсутствия: скачанный файл
@@ -60,6 +64,10 @@ pub struct RuntimeSpec {
 pub struct Catalog {
     pub model: ModelSpec,
     pub runtime: RuntimeSpec,
+    /// Необязательное локальное распознавание: движок whisper.cpp.
+    pub whisper_runtime: RuntimeSpec,
+    /// Необязательное локальное распознавание: модель whisper.
+    pub whisper_model: ModelSpec,
 }
 
 fn parsed() -> &'static Catalog {
@@ -101,6 +109,11 @@ pub struct ReadinessStatus {
     pub speech_search_dir: String,
     pub model_spec: ModelSpec,
     pub runtime_spec: RuntimeSpec,
+    /// Установлен ли движок распознавания нашим установщиком (управляемый каталог).
+    pub speech_runtime_managed: bool,
+    /// Pinned-спецификации необязательного локального распознавания.
+    pub speech_runtime_spec: RuntimeSpec,
+    pub speech_model_spec: ModelSpec,
     /// Готов ли первый разговор: движок найден и есть модель с читаемым заголовком.
     pub download_name: Option<String>,
     pub runtime_managed: bool,
@@ -110,47 +123,56 @@ pub struct ReadinessStatus {
     pub missing: Vec<String>,
 }
 
+/// Факты о машине, из которых собирается статус. Отдельная структура, а не пятнадцать
+/// аргументов: факт и его источник видны рядом, а тесты не гоняют пустые строки.
+#[derive(Debug, Clone)]
+pub struct Facts {
+    pub engine_found: bool,
+    pub engine_running: bool,
+    pub engine_program: Option<String>,
+    pub engine_search_dir: String,
+    pub model_present: bool,
+    pub model_name: Option<String>,
+    pub model_bytes: u64,
+    pub models_dir: String,
+    pub free_bytes: Option<u64>,
+    /// Движок распознавания найден (управляемый, sidecars или PATH).
+    pub speech_found: bool,
+    pub speech_model: Option<String>,
+    pub speech_search_dir: String,
+    pub speech_runtime_managed: bool,
+}
+
 /// Собирает статус из уже прочитанных фактов. Чистая функция: её проверяют тесты
 /// на пустой установке, настроенной машине и частичных состояниях.
-#[allow(clippy::too_many_arguments)]
-pub fn build(
-    engine_found: bool,
-    engine_running: bool,
-    engine_program: Option<String>,
-    engine_search_dir: String,
-    model_present: bool,
-    model_name: Option<String>,
-    model_bytes: u64,
-    models_dir: String,
-    free_bytes: Option<u64>,
-    speech_found: bool,
-    speech_model: Option<String>,
-    speech_search_dir: String,
-) -> ReadinessStatus {
+pub fn build(facts: Facts) -> ReadinessStatus {
     let mut missing = Vec::new();
-    if !engine_found {
+    if !facts.engine_found {
         missing.push("engine".to_string());
     }
-    if !model_present {
+    if !facts.model_present {
         missing.push("model".to_string());
     }
 
     let catalog = catalog();
     ReadinessStatus {
-        engine_found,
-        engine_running,
-        engine_program,
-        engine_search_dir,
-        model_present,
-        model_name,
-        model_bytes,
-        models_dir,
-        free_bytes,
-        speech_found,
-        speech_model,
-        speech_search_dir,
+        engine_found: facts.engine_found,
+        engine_running: facts.engine_running,
+        engine_program: facts.engine_program,
+        engine_search_dir: facts.engine_search_dir,
+        model_present: facts.model_present,
+        model_name: facts.model_name,
+        model_bytes: facts.model_bytes,
+        models_dir: facts.models_dir,
+        free_bytes: facts.free_bytes,
+        speech_found: facts.speech_found,
+        speech_model: facts.speech_model,
+        speech_search_dir: facts.speech_search_dir,
         model_spec: catalog.model.clone(),
         runtime_spec: catalog.runtime.clone(),
+        speech_runtime_managed: facts.speech_runtime_managed,
+        speech_runtime_spec: catalog.whisper_runtime.clone(),
+        speech_model_spec: catalog.whisper_model.clone(),
         download_name: None,
         runtime_managed: false,
         runtime_supported: cfg!(all(windows, target_arch = "x86_64")),
@@ -174,12 +196,42 @@ mod tests {
 
         assert!(sha256_well_formed(&catalog.model.sha256), "хеш модели");
         assert!(sha256_well_formed(&catalog.runtime.sha256), "хеш движка");
+        assert!(
+            sha256_well_formed(&catalog.whisper_model.sha256),
+            "хеш модели распознавания"
+        );
+        assert!(
+            sha256_well_formed(&catalog.whisper_runtime.sha256),
+            "хеш движка распознавания"
+        );
         assert!(catalog.model.bytes > 0, "размер модели известен");
         assert!(catalog.runtime.bytes > 0, "размер движка известен");
+        assert!(
+            catalog.whisper_model.bytes > 0,
+            "размер модели распознавания известен"
+        );
+        assert!(
+            catalog.whisper_runtime.bytes > 0,
+            "размер движка распознавания известен"
+        );
         assert!(catalog.model.url.starts_with("https://"), "модель по https");
         assert!(
             catalog.runtime.url.starts_with("https://"),
             "движок по https"
+        );
+        assert!(
+            catalog
+                .whisper_model
+                .url
+                .starts_with("https://"),
+            "модель распознавания по https"
+        );
+        assert!(
+            catalog
+                .whisper_runtime
+                .url
+                .starts_with("https://"),
+            "движок распознавания по https"
         );
         assert!(
             catalog
@@ -197,87 +249,137 @@ mod tests {
             "модель только из проверенного репозитория: {}",
             catalog.model.url
         );
+        assert!(
+            catalog
+                .whisper_runtime
+                .url
+                .contains("github.com/ggml-org/whisper.cpp/releases/download/"),
+            "движок распознавания только из релизов whisper.cpp: {}",
+            catalog.whisper_runtime.url
+        );
+        assert!(
+            catalog
+                .whisper_model
+                .url
+                .contains("huggingface.co/ggerganov/whisper.cpp"),
+            "модель распознавания только из проверенного репозитория: {}",
+            catalog.whisper_model.url
+        );
         assert_eq!(catalog.runtime.program, "llama-server.exe");
+        assert_eq!(catalog.whisper_runtime.program, "whisper-server.exe");
         assert!(catalog.model.file.ends_with(".gguf"), "модель — .gguf");
+        assert!(
+            catalog.whisper_model.file.starts_with("ggml-")
+                && catalog.whisper_model.file.ends_with(".bin"),
+            "модель распознавания — ggml-*.bin, как ищет ядро: {}",
+            catalog.whisper_model.file
+        );
         assert!(!catalog.model.license.is_empty(), "лицензия модели названа");
         assert!(
             !catalog.runtime.license.is_empty(),
             "лицензия движка названа"
         );
+        assert!(
+            !catalog.whisper_model.license.is_empty(),
+            "лицензия модели распознавания названа"
+        );
+        assert!(
+            !catalog.whisper_runtime.license.is_empty(),
+            "лицензия движка распознавания названа"
+        );
+        // У каждого компонента свой id: каталоги установки и записи не должны
+        // столкнуться.
+        let ids = [
+            &catalog.model.id,
+            &catalog.runtime.id,
+            &catalog.whisper_model.id,
+            &catalog.whisper_runtime.id,
+        ];
+        for id in ids {
+            assert!(!id.is_empty(), "пустой id в каталоге");
+            assert!(
+                ids.iter().filter(|other| *other == id).count() == 1,
+                "id не уникален: {id}"
+            );
+        }
     }
 
     #[test]
     fn empty_install_misses_both() {
-        let status = build(
-            false,
-            false,
-            None,
-            "sidecars".into(),
-            false,
-            None,
-            0,
-            "models".into(),
-            Some(10_000_000_000),
-            false,
-            None,
-            "sidecars".into(),
-        );
+        let status = build(Facts {
+            engine_found: false,
+            engine_running: false,
+            engine_program: None,
+            engine_search_dir: "sidecars".into(),
+            model_present: false,
+            model_name: None,
+            model_bytes: 0,
+            models_dir: "models".into(),
+            free_bytes: Some(10_000_000_000),
+            speech_found: false,
+            speech_model: None,
+            speech_search_dir: "sidecars".into(),
+            speech_runtime_managed: false,
+        });
         assert!(!status.ready);
         assert_eq!(status.missing, ["engine", "model"]);
     }
 
     #[test]
     fn configured_machine_is_ready() {
-        let status = build(
-            true,
-            false,
-            Some("sidecars/llama-server.exe".into()),
-            "sidecars".into(),
-            true,
-            Some("m.gguf".into()),
-            986_048_768,
-            "models".into(),
-            Some(10_000_000_000),
-            false,
-            None,
-            "sidecars".into(),
-        );
+        let status = build(Facts {
+            engine_found: true,
+            engine_running: false,
+            engine_program: Some("sidecars/llama-server.exe".into()),
+            engine_search_dir: "sidecars".into(),
+            model_present: true,
+            model_name: Some("m.gguf".into()),
+            model_bytes: 986_048_768,
+            models_dir: "models".into(),
+            free_bytes: Some(10_000_000_000),
+            speech_found: true,
+            speech_model: Some("models/ggml-base.bin".into()),
+            speech_search_dir: "sidecars".into(),
+            speech_runtime_managed: true,
+        });
         assert!(status.ready, "движок и модель есть — разговор возможен");
         assert!(status.missing.is_empty());
     }
 
     #[test]
     fn partial_install_names_only_what_is_missing() {
-        let only_engine = build(
-            true,
-            false,
-            Some("x".into()),
-            "s".into(),
-            false,
-            None,
-            0,
-            "m".into(),
-            None,
-            false,
-            None,
-            "s".into(),
-        );
+        let only_engine = build(Facts {
+            engine_found: true,
+            engine_running: false,
+            engine_program: Some("x".into()),
+            engine_search_dir: "s".into(),
+            model_present: false,
+            model_name: None,
+            model_bytes: 0,
+            models_dir: "m".into(),
+            free_bytes: None,
+            speech_found: false,
+            speech_model: None,
+            speech_search_dir: "s".into(),
+            speech_runtime_managed: false,
+        });
         assert_eq!(only_engine.missing, ["model"]);
 
-        let only_model = build(
-            false,
-            false,
-            None,
-            "s".into(),
-            true,
-            Some("m.gguf".into()),
-            1,
-            "m".into(),
-            None,
-            false,
-            None,
-            "s".into(),
-        );
+        let only_model = build(Facts {
+            engine_found: false,
+            engine_running: false,
+            engine_program: None,
+            engine_search_dir: "s".into(),
+            model_present: true,
+            model_name: Some("m.gguf".into()),
+            model_bytes: 1,
+            models_dir: "m".into(),
+            free_bytes: None,
+            speech_found: false,
+            speech_model: None,
+            speech_search_dir: "s".into(),
+            speech_runtime_managed: false,
+        });
         assert_eq!(only_model.missing, ["engine"]);
     }
 
@@ -285,25 +387,50 @@ mod tests {
     fn speech_is_optional_for_readiness() {
         // Локальное распознавание — не обязательное условие первого разговора:
         // голос может идти через системную службу с согласия человека.
-        let status = build(
-            true,
-            false,
-            Some("x".into()),
-            "s".into(),
-            true,
-            Some("m.gguf".into()),
-            1,
-            "m".into(),
-            None,
-            false,
-            None,
-            "s".into(),
-        );
+        let status = build(Facts {
+            engine_found: true,
+            engine_running: false,
+            engine_program: Some("x".into()),
+            engine_search_dir: "s".into(),
+            model_present: true,
+            model_name: Some("m.gguf".into()),
+            model_bytes: 1,
+            models_dir: "m".into(),
+            free_bytes: None,
+            speech_found: false,
+            speech_model: None,
+            speech_search_dir: "s".into(),
+            speech_runtime_managed: false,
+        });
         assert!(
             status.ready,
             "без локального ASR разговор всё равно возможен"
         );
         assert!(!status.speech_found);
+    }
+
+    #[test]
+    fn speech_parts_are_reported_separately() {
+        // Движок распознавания есть, модели нет — карточка должна предложить
+        // именно модель, а не «переустановите всё».
+        let status = build(Facts {
+            engine_found: true,
+            engine_running: false,
+            engine_program: Some("x".into()),
+            engine_search_dir: "s".into(),
+            model_present: true,
+            model_name: Some("m.gguf".into()),
+            model_bytes: 1,
+            models_dir: "m".into(),
+            free_bytes: Some(500_000_000_000),
+            speech_found: true,
+            speech_model: None,
+            speech_search_dir: "s".into(),
+            speech_runtime_managed: true,
+        });
+        assert!(status.speech_found, "движок распознавания найден");
+        assert!(status.speech_model.is_none(), "модели распознавания нет");
+        assert!(status.speech_runtime_managed, "движок — управляемый");
     }
 
     #[test]

@@ -520,11 +520,13 @@ export async function downloadProgress(_name: string): Promise<number | null> {
 // честные («не найден, не запущен»), а запуск/скачивание отвечают отказом.
 
 import readinessJson from "../../data/readiness.json";
-import type { ReadinessStatus, SmokeResult } from "./types";
+import type { ReadinessStatus, RuntimeKind, SmokeResult } from "./types";
 
 const READINESS_CATALOG = readinessJson as unknown as {
   model: ReadinessStatus["model_spec"];
   runtime: ReadinessStatus["runtime_spec"];
+  whisper_model: ReadinessStatus["speech_model_spec"];
+  whisper_runtime: ReadinessStatus["speech_runtime_spec"];
 };
 
 export async function readinessStatus(): Promise<ReadinessStatus> {
@@ -544,6 +546,9 @@ export async function readinessStatus(): Promise<ReadinessStatus> {
     speech_found: false,
     speech_model: null,
     speech_search_dir: "sidecars/ — рядом с приложением",
+    speech_runtime_managed: false,
+    speech_runtime_spec: READINESS_CATALOG.whisper_runtime,
+    speech_model_spec: READINESS_CATALOG.whisper_model,
     model_spec: READINESS_CATALOG.model,
     runtime_spec: READINESS_CATALOG.runtime,
     ready: false,
@@ -892,9 +897,9 @@ function learningSteps(implementation: string[], example: string) {
   ];
 }
 
-export async function downloadRuntime(): Promise<import("./types").Installed> {
-  throw new Error("установка движка доступна только в Windows-приложении");
+export async function downloadRuntime(kind: RuntimeKind): Promise<import("./types").Installed> {
+  throw new Error(`установка движка (${kind}) доступна только в Windows-приложении`);
 }
-export async function removeRuntime(): Promise<void> {
-  throw new Error("удаление движка доступно только в Windows-приложении");
+export async function removeRuntime(kind: RuntimeKind): Promise<void> {
+  throw new Error(`удаление движка (${kind}) доступно только в Windows-приложении`);
 }

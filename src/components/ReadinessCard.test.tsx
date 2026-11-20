@@ -53,6 +53,31 @@ function status(partial: Partial<ReadinessStatus> = {}): ReadinessStatus {
     speech_found: false,
     speech_model: null,
     speech_search_dir: "sidecars",
+    speech_runtime_managed: false,
+    speech_runtime_spec: {
+      id: "w",
+      title: "whisper.cpp (Windows x64, CPU)",
+      asset: "whisper-bin-x64.zip",
+      url: "https://github.com/ggml-org/whisper.cpp/releases/download/b5454/whisper-bin-x64.zip",
+      sha256: "6ba69e3482d7826214f90a6a9c84ca07782aec1e1d0c6a7c30c994fd5d816ccb",
+      bytes: 8928640,
+      license: "MIT",
+      source: "GitHub Releases: ggml-org/whisper.cpp, тег b5454",
+      program: "whisper-server.exe",
+      description: "тест",
+    },
+    speech_model_spec: {
+      id: "wm",
+      title: "Whisper base (многоязычная)",
+      file: "ggml-base.bin",
+      url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin",
+      sha256: "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe",
+      bytes: 147951465,
+      license: "MIT",
+      source: "Hugging Face: ggerganov/whisper.cpp",
+      min_ram_gb: 4,
+      description: "тест",
+    },
     model_spec: {
       id: "m",
       title: "Qwen2.5 1.5B Instruct (Q4_K_M)",
@@ -90,10 +115,16 @@ describe("карточка готовности", () => {
     expect(screen.getByText("Чтобы начать разговор, нужно…")).toBeTruthy();
     expect(screen.getByText("llama.cpp (Windows x64, CPU)")).toBeTruthy();
     expect(screen.getByText("Qwen2.5 1.5B Instruct (Q4_K_M)")).toBeTruthy();
-    expect(screen.getByText(/лицензия: MIT/)).toBeTruthy();
     expect(screen.getByText(/лицензия: Apache-2.0/)).toBeTruthy();
     expect(screen.getByText(/GitHub Releases: ggml-org\/llama\.cpp/)).toBeTruthy();
     expect(screen.getByText(/Hugging Face: bartowski/)).toBeTruthy();
+    // Локальное распознавание — тоже с лицензией и источником, а не безымянной кнопкой.
+    expect(screen.getByText("Локальное распознавание речи (необязательно)")).toBeTruthy();
+    expect(screen.getByText("whisper.cpp (Windows x64, CPU)")).toBeTruthy();
+    expect(screen.getByText("Whisper base (многоязычная)")).toBeTruthy();
+    expect(screen.getByText(/GitHub Releases: ggml-org\/whisper\.cpp/)).toBeTruthy();
+    expect(screen.getByText(/Hugging Face: ggerganov\/whisper\.cpp/)).toBeTruthy();
+    expect(screen.getAllByText(/лицензия: MIT/).length).toBeGreaterThanOrEqual(3);
   });
 
   it("в браузере кнопок скачивания нет, а оговорка есть", () => {
@@ -145,7 +176,11 @@ describe("явные действия desktop-карточки", () => {
     expect(mocks.smoke).not.toHaveBeenCalled();
     expect(mocks.runtime).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Скачать движок" })).toBeTruthy();
-    expect(screen.getByText(/Установка не запускает exe/)).toBeTruthy();
+    expect(screen.getAllByText(/Установка не запускает exe/).length).toBeGreaterThanOrEqual(2);
+    // Речь — необязательная часть: её кнопки тоже не нажимаются сами.
+    expect(mocks.remove).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Скачать движок распознавания" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Скачать модель распознавания" })).toBeTruthy();
   });
 
   it("передаёт эталонный хеш и показывает ошибку с возможностью повторить", async () => {
@@ -193,7 +228,12 @@ describe("недоступные условия", () => {
     expect(button.disabled).toBe(true);
     fireEvent.click(button);
     expect(mocks.download).not.toHaveBeenCalled();
-    expect(screen.getByText(/Недостаточно свободного места/)).toBeTruthy();
+    expect(screen.getAllByText(/Недостаточно свободного места/).length).toBeGreaterThanOrEqual(1);
+    // Кнопка модели распознавания тоже заблокирована: место известно и его мало.
+    const speechModel = screen.getByRole("button", { name: "Скачать модель распознавания" }) as HTMLButtonElement;
+    expect(speechModel.disabled).toBe(true);
+    fireEvent.click(speechModel);
+    expect(mocks.download).not.toHaveBeenCalled();
   });
 
   it("неудачный smoke не называется работающим разговором", async () => {
@@ -228,7 +268,8 @@ describe("Windows x64 runtime: модель окружения, не насто�
     render(<ReadinessCard status={status()} error={null} />);
     expect(mocks.runtime).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Скачать движок" }));
-    await waitFor(() => expect(screen.getByText(/готово: llama-server.exe/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/готово: .*llama-server\.exe/)).toBeTruthy());
+    expect(mocks.runtime).toHaveBeenCalledWith("llama");
     expect(mocks.runtime).toHaveBeenCalledOnce();
     expect(mocks.smoke).not.toHaveBeenCalled();
   });
@@ -237,7 +278,8 @@ describe("Windows x64 runtime: модель окружения, не насто�
     mocks.desktop = true;
     render(<ReadinessCard status={status({ runtime_supported: false })} error={null} />);
     expect(screen.queryByRole("button", { name: "Скачать движок" })).toBeNull();
-    expect(screen.getByText(/только в приложении на Windows x64/)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Скачать движок распознавания" })).toBeNull();
+    expect(screen.getAllByText(/только в приложении на Windows x64/).length).toBe(2);
   });
 
   it("неверный хеш runtime — ошибка и повтор, не найденный движок", async () => {
@@ -262,6 +304,7 @@ describe("Windows x64 runtime: модель окружения, не насто�
     fireEvent.click(screen.getByRole("button", { name: "Удалить движок" }));
     await waitFor(() => expect(screen.getByText("движок удалён")).toBeTruthy());
     expect(mocks.remove).toHaveBeenCalledOnce();
+    expect(mocks.remove).toHaveBeenCalledWith("llama");
   });
 
   it("не предлагает удалять ручной exe и блокирует удаление работающего", () => {
@@ -282,6 +325,115 @@ describe("Windows x64 runtime: модель окружения, не насто�
     finish({ program: "llama-server.exe" });
     await Promise.resolve();
     expect(mocks.smoke).not.toHaveBeenCalled();
+  });
+});
+
+describe("локальное распознавание — необязательная часть разговора", () => {
+  it("когда всё на месте, секции речи нет; готовность от неё не зависит", () => {
+    render(
+      <ReadinessCard
+        status={status({
+          engine_found: true,
+          model_present: true,
+          ready: true,
+          missing: [],
+          speech_found: true,
+          speech_model: "ggml-base.bin",
+        })}
+        error={null}
+      />,
+    );
+    expect(screen.getByText("Компоненты найдены")).toBeTruthy();
+    expect(screen.queryByText("Локальное распознавание речи (необязательно)")).toBeNull();
+  });
+
+  it("в браузере кнопок речи нет, а объяснение — на карточке", () => {
+    render(<ReadinessCard status={status()} error={null} />);
+    expect(screen.queryByRole("button", { name: "Скачать движок распознавания" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Скачать модель распознавания" })).toBeNull();
+    expect(screen.getByText("Локальное распознавание речи (необязательно)")).toBeTruthy();
+    expect(screen.getByText(/не покидает компьютер/)).toBeTruthy();
+  });
+
+  it("клик ставит именно whisper и не трогает движок разговора", async () => {
+    mocks.desktop = true;
+    mocks.runtime.mockResolvedValueOnce({
+      program: "sidecars/whisper-cpp/Release/whisper-server.exe",
+    });
+    render(<ReadinessCard status={status()} error={null} />);
+    expect(mocks.runtime).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Скачать движок распознавания" }));
+    await waitFor(() =>
+      expect(screen.getByText(/готово: .*whisper-server\.exe/)).toBeTruthy(),
+    );
+    expect(mocks.runtime).toHaveBeenCalledWith("whisper");
+    expect(mocks.runtime).toHaveBeenCalledOnce();
+    expect(mocks.smoke).not.toHaveBeenCalled();
+  });
+
+  it("модель распознавания качается по pinned-ссылке с эталонным хешем", async () => {
+    mocks.desktop = true;
+    mocks.download.mockResolvedValueOnce({ name: "ggml-base.bin", bytes: 1, sha256: "x", verified: true });
+    const props = status();
+    render(<ReadinessCard status={props} error={null} />);
+    fireEvent.click(screen.getByRole("button", { name: "Скачать модель распознавания" }));
+    await waitFor(() => expect(screen.getByText(/готово: ggml-base\.bin/)).toBeTruthy());
+    expect(mocks.download).toHaveBeenCalledWith(
+      props.speech_model_spec.url,
+      props.speech_model_spec.file,
+      props.speech_model_spec.sha256,
+    );
+  });
+
+  it("движок распознавания есть, модели нет — предлагается только модель", () => {
+    mocks.desktop = true;
+    render(
+      <ReadinessCard
+        status={status({ speech_found: true, speech_model: null })}
+        error={null}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: "Скачать движок распознавания" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Скачать модель распознавания" })).toBeTruthy();
+  });
+
+  it("ошибка установки whisper не называется готовностью и не мешает повтору", async () => {
+    mocks.desktop = true;
+    mocks.runtime.mockRejectedValueOnce(new Error("размер или SHA-256 архива движка не совпал"));
+    render(<ReadinessCard status={status()} error={null} />);
+    fireEvent.click(screen.getByRole("button", { name: "Скачать движок распознавания" }));
+    await waitFor(() =>
+      expect(screen.getByText(/SHA-256 архива движка не совпал/)).toBeTruthy(),
+    );
+    expect(screen.queryByText(/готово:/)).toBeNull();
+    const retry = screen.getByRole("button", { name: "Скачать движок распознавания" }) as HTMLButtonElement;
+    expect(retry.disabled).toBe(false);
+  });
+
+  it("удаление управляемого whisper — только после подтверждения", async () => {
+    mocks.desktop = true;
+    mocks.remove.mockResolvedValueOnce(undefined);
+    render(
+      <ReadinessCard
+        status={status({
+          speech_runtime_managed: true,
+          speech_found: true,
+          speech_model: "ggml-base.bin",
+        })}
+        error={null}
+      />,
+    );
+    // Всё установлено — секции «не хватает» нет, но управляемый движок
+    // распознавания можно убрать осознанно, как и движок разговора.
+    expect(screen.queryByText("Локальное распознавание речи (необязательно)")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Удалить движок распознавания" }));
+    expect(mocks.remove).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Отменить" }));
+    expect(mocks.remove).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Удалить движок распознавания" }));
+    fireEvent.click(screen.getByRole("button", { name: "Удалить движок распознавания" }));
+    await waitFor(() => expect(screen.getByText("движок распознавания удалён")).toBeTruthy());
+    expect(mocks.remove).toHaveBeenCalledWith("whisper");
   });
 });
 

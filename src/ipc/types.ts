@@ -533,7 +533,8 @@ export interface RuntimeSpec {
 /**
  * Готовность к первому разговору. Только факты: что есть на машине и чего не хватает.
  * `missing` — `engine` и/или `model`; пусто — готово. Локальное распознавание
- * (`speech_*`) для первого разговора необязательно и в `missing` не входит.
+ * (`speech_*`) для первого разговора необязательно и в `missing` не входит:
+ * без него голос идёт системной службой, с ним — не покидает компьютер.
  */
 export interface ReadinessStatus {
   download_name: string | null;
@@ -551,11 +552,19 @@ export interface ReadinessStatus {
   speech_found: boolean;
   speech_model: string | null;
   speech_search_dir: string;
+  /** Движок распознавания установлен нашим установщиком (управляемый каталог). */
+  speech_runtime_managed: boolean;
+  /** Pinned-спецификации необязательного локального распознавания. */
+  speech_runtime_spec: RuntimeSpec;
+  speech_model_spec: ModelSpec;
   model_spec: ModelSpec;
   runtime_spec: RuntimeSpec;
   ready: boolean;
   missing: string[];
 }
+
+/** Какой движок доставляет `download_runtime`/`remove_runtime`. */
+export type RuntimeKind = "llama" | "whisper";
 
 /** Итог проверки разговора: движок запущен и ответил (или нет) на тестовый вопрос. */
 export interface SmokeResult {

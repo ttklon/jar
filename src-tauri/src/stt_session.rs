@@ -142,6 +142,12 @@ impl Requests {
         })
     }
 
+    /// Есть ли незавершённое распознавание (резерв или работающий запрос).
+    /// Нужно, чтобы не удалять движок из-под работающего процесса.
+    pub fn busy(&self) -> bool {
+        self.slot.lock().map(|slot| slot.is_some()).unwrap_or(true)
+    }
+
     pub fn cancel(&self, id: &str) -> Result<(), String> {
         let ticket = {
             let mut slot = self.slot.lock().map_err(|_| "очередь ASR недоступна")?;

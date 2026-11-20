@@ -13,12 +13,17 @@ import type { ReadinessStatus } from "../ipc";
 /** Чего не хватает для первого разговора. */
 export type MissingKind = "engine" | "model";
 
+/** Чего не хватает для локального распознавания (необязательной части). */
+export type SpeechMissingKind = "speech-engine" | "speech-model";
+
 /** Оценка готовности: готово ли и что именно не хватает. */
 export interface ReadinessAssessment {
   ready: boolean;
   missing: MissingKind[];
   /** Есть ли локальное распознавание (необязательно, но звук не покидает компьютер). */
   speechLocal: boolean;
+  /** Чего не хватает для локального распознавания; пусто — всё на месте. */
+  speechMissing: SpeechMissingKind[];
   /** Движок уже запущен. */
   engineRunning: boolean;
 }
@@ -29,10 +34,15 @@ export function assessReadiness(status: ReadinessStatus): ReadinessAssessment {
   if (!status.engine_found) missing.push("engine");
   if (!status.model_present) missing.push("model");
 
+  const speechMissing: SpeechMissingKind[] = [];
+  if (!status.speech_found) speechMissing.push("speech-engine");
+  if (status.speech_model === null) speechMissing.push("speech-model");
+
   return {
     ready: missing.length === 0,
     missing,
-    speechLocal: status.speech_found && status.speech_model !== null,
+    speechLocal: speechMissing.length === 0,
+    speechMissing,
     engineRunning: status.engine_running,
   };
 }

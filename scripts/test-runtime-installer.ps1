@@ -10,7 +10,7 @@ $pe = [byte[]]::new(128)
 $pe[0] = 77; $pe[1] = 90; $pe[60] = 64
 $pe[64] = 80; $pe[65] = 69; $pe[68] = 100; $pe[69] = 134
 $script:passed = 0
-function Check-Archive([string]$id, [array]$entries, [bool]$accept = $false, [bool]$badHash = $false, [bool]$truncate = $false) {
+function Check-Archive([string]$id, [array]$entries, [bool]$accept = $false, [bool]$badHash = $false, [bool]$truncate = $false, [string]$program = 'llama-server.exe') {
     $zipPath = Join-Path $root ($id + '.zip')
     $stage = Join-Path $root ($id + '-stage')
     $stream = [IO.File]::Open($zipPath, 'CreateNew')
@@ -31,7 +31,7 @@ function Check-Archive([string]$id, [array]$entries, [bool]$accept = $false, [bo
     if ($badHash) { $hash = '0' * 64 }
     $failed = $false
     try {
-        & $installer -Archive $zipPath -Stage $stage -ExpectedHash $hash -ExpectedBytes (Get-Item -LiteralPath $zipPath).Length
+        & $installer -Archive $zipPath -Stage $stage -ExpectedHash $hash -ExpectedBytes (Get-Item -LiteralPath $zipPath).Length -Program $program
     } catch { $failed = $true }
     if ($failed -eq $accept) { throw "unexpected result: $id failed=$failed accept=$accept" }
     $marker = Join-Path $stage 'installed.json'
@@ -48,6 +48,9 @@ function Check-Archive([string]$id, [array]$entries, [bool]$accept = $false, [bo
 try {
     Check-Archive 'flat' @(@{name='llama-server.exe'; bytes=$pe}) $true
     Check-Archive 'nested' @(@{name='bin/llama-server.exe'; bytes=$pe}, @{name='bin/ggml.dll'; bytes=[byte[]](1,2,3)}) $true
+    # Реальная раскладка архива whisper.cpp: бинарники внутри каталога Release.
+    Check-Archive 'whisper-release' @(@{name='Release/whisper-server.exe'; bytes=$pe}, @{name='Release/ggml.dll'; bytes=[byte[]](1,2,3)}) $true $false $false 'whisper-server.exe'
+    Check-Archive 'wrong-program' @(@{name='Release/whisper-server.exe'; bytes=$pe}) $false $false $false 'llama-server.exe'
     Check-Archive 'wrong-hash' @(@{name='llama-server.exe'; bytes=$pe}) $false $true
     Check-Archive 'truncated' @(@{name='llama-server.exe'; bytes=$pe}) $false $false $true
     Check-Archive 'owner-collision' @(@{name='.ZSHELPER-OWNER'; bytes=[byte[]](1)})

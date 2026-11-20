@@ -798,12 +798,14 @@ export async function transcribeLocal(audio: number[], signal?: AbortSignal): Pr
 }
 
 /** Explicit consent: install only pinned Windows x64 runtime; never auto-start. */
-export async function downloadRuntime(): Promise<import("./types").Installed> {
+export async function downloadRuntime(
+  kind: import("./types").RuntimeKind,
+): Promise<import("./types").Installed> {
   const adapter = isTauri() ? await import("./tauri") : await import("./dev");
-  return adapter.downloadRuntime();
+  return adapter.downloadRuntime(kind);
 }
 /** Only app-managed runtime, with UI confirmation and stopped process. */
-export async function removeRuntime(): Promise<void> {
+export async function removeRuntime(kind: import("./types").RuntimeKind): Promise<void> {
   const adapter = isTauri() ? await import("./tauri") : await import("./dev");
-  return adapter.removeRuntime();
+  return adapter.removeRuntime(kind);
 }
