@@ -17,6 +17,7 @@ import {
   requestLearning,
   runPlan,
   isolationStatus,
+  readinessStatus,
   smokeCheck,
   speechStatus,
   setVoiceTrayStatus,
@@ -47,6 +48,8 @@ import type {
 } from "../ipc";
 import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
+import { consentCanRun, consentPositions, isSpokenConsent, keepsPendingPlan } from "../lib/consent";
+import { installedEngine, isEngineDown } from "../lib/engineReady";
 import { speak } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
 import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
@@ -176,6 +179,12 @@ export interface VoiceScreenProps {
   onOpen?: (screen: string) => void;
 }
 
+type EngineStart =
+  | { kind: "started" }
+  | { kind: "missing" }
+  | { kind: "failed"; note: string }
+  | { kind: "unknown" };
+
 export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const styles = useStyles();
   const [text, setText] = useState("");
@@ -283,6 +292,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const [thinkError, setThinkError] = useState<string | null>(null);
   const [enginePrompt, setEnginePrompt] = useState<string | null>(null);
   const [engineBusy, setEngineBusy] = useState(false);
+  /** files — скачивать нечего; failed — запуск не подтвердился; manual — статус не прочитался. */
+  const [engineGap, setEngineGap] = useState<"files" | "failed" | "manual" | null>(null);
   /** Что именно уйдёт модели — по кнопке и честно, без «доверьтесь нам». */
   const [promptText, setPromptText] = useState<string | null>(null);
   const [promptError, setPromptError] = useState<string | null>(null);
@@ -308,6 +319,85 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
    * Ошибка чтения — не ошибка задачи: без экрана помощник просто менее зрячий, и об этом
    * говорится вслух. Молча подставлять «наверное, браузер» было бы хуже пустоты.
    */
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
+  const runningRef = useRef(running);
+  runningRef.current = running;
+  const executeRef = useRef<(granted?: number[]) => void>(() => {});
+  const askModelRef = useRef<(phrase: string) => void>(() => {});
+  /** Одна попытка на фразу: повторный отказ не крутит запуск по кругу. */
+  const engineAttemptRef = useRef<string | null>(null);
+  const startInstalledEngineRef = useRef<() => Promise<EngineStart>>(async () => ({ kind: "unknown" }));
+
+  const startInstalledEngine = useCallback(async (): Promise<EngineStart> => {
+    let status = null;
+    try {
+      status = await readinessStatus();
+    } catch {
+      return { kind: "unknown" };
+    }
+    const need = installedEngine(status);
+    if (need === "running") return { kind: "started" };
+    if (need === "missing") return { kind: "missing" };
+    if (need !== "start") return { kind: "unknown" };
+    try {
+      const result = await smokeCheck();
+      return result.ok ? { kind: "started" } : { kind: "failed", note: result.note };
+    } catch (reason: unknown) {
+      return { kind: "failed", note: reason instanceof Error ? reason.message : String(reason) };
+    }
+  }, []);
+  startInstalledEngineRef.current = startInstalledEngine;
+
+  /**
+   * Фраза, которой нужна модель, сама запускает уже установленный движок.
+   * Файлов нет — не скачиваем. Запуск не подтвердился — фразу повторно не шлём.
+   */
+  const wakeEngine = useCallback(
+    async (query: string, stillCurrent: () => boolean, retry: () => void) => {
+      if (!stillCurrent()) return;
+      if (engineAttemptRef.current === query) {
+        setThinkError(voice.engineDown);
+        setEngineGap("manual");
+        setEnginePrompt(query);
+        return;
+      }
+      engineAttemptRef.current = query;
+      setEnginePrompt(query);
+      setEngineGap(null);
+      setEngineBusy(true);
+      setThinkError(null);
+      speak(voice.engineStarting);
+      const outcome = await startInstalledEngine();
+      setEngineBusy(false);
+      if (!stillCurrent()) return;
+      if (outcome.kind === "started") {
+        setEnginePrompt(null);
+        setEngineGap(null);
+        retry();
+        return;
+      }
+      if (outcome.kind === "missing") {
+        setEngineGap("files");
+        setEnginePrompt(query);
+        speak(voice.engineFilesMissing);
+        return;
+      }
+      if (outcome.kind === "failed") {
+        setEngineGap("failed");
+        setEnginePrompt(query);
+        const note = voice.engineStartFailed(outcome.note);
+        setThinkError(note);
+        speak(note);
+        return;
+      }
+      setEngineGap("manual");
+      setEnginePrompt(query);
+      setThinkError(voice.engineDown);
+    },
+    [startInstalledEngine],
+  );
+
   /**
    * Идти по очереди, пока не скажут «стоп».
    *
@@ -507,7 +597,62 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
 
         const query =
           decision.action === "fix" ? fixQuery(origin, items) : continuationQuery(origin, items);
-        const answer = await think(query, null).catch(() => null);
+        let answer: Thought | null = null;
+        try {
+          answer = await think(query, null);
+        } catch (reason: unknown) {
+          const message = reason instanceof Error ? reason.message : String(reason);
+          // Отказ движка — не «модель промолчала»: очередь иначе выдумает тупик.
+          if (!isEngineDown(message)) {
+            answer = null;
+          } else {
+            const key = `queue:${origin}`;
+            if (engineAttemptRef.current === key) {
+              why = voice.engineDown;
+              continue;
+            }
+            engineAttemptRef.current = key;
+            setEnginePrompt(query);
+            setEngineGap(null);
+            setEngineBusy(true);
+            setThinkError(null);
+            speak(voice.engineStarting);
+            const outcome = await startInstalledEngineRef.current();
+            setEngineBusy(false);
+            if (queueStopRef.current) break;
+            if (outcome.kind === "started") {
+              setEnginePrompt(null);
+              setEngineGap(null);
+              try {
+                answer = await think(query, null);
+              } catch (again: unknown) {
+                const againMessage = again instanceof Error ? again.message : String(again);
+                why = isEngineDown(againMessage)
+                  ? voice.engineDown
+                  : `модель не сказала, что делать дальше по цели «${origin}»: новых дел не выдумываю`;
+                continue;
+              }
+            } else if (outcome.kind === "missing") {
+              setEngineGap("files");
+              setEnginePrompt(query);
+              why = voice.engineFilesMissing;
+              continue;
+            } else if (outcome.kind === "failed") {
+              setEngineGap("failed");
+              setEnginePrompt(query);
+              const note = voice.engineStartFailed(outcome.note);
+              setThinkError(note);
+              why = note;
+              continue;
+            } else {
+              setEngineGap("manual");
+              setEnginePrompt(query);
+              setThinkError(voice.engineDown);
+              why = voice.engineDown;
+              continue;
+            }
+          }
+        }
         // Пока модель думала, человек мог сказать «стоп» — тогда новые дела не берём.
         if (queueStopRef.current) break;
 
@@ -780,6 +925,35 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     executeRequestRef.current += 1;
     thoughtRequestRef.current += 1;
     promptRequestRef.current += 1;
+    const query = phrase.trim();
+    const request = ++searchRequestRef.current;
+    const pending = draftRef.current;
+    // «Да» на уже показанный план — отдельное слово, а не новая задача.
+    if (query.length > 0 && pending && isSpokenConsent(query) && !runningRef.current) {
+      setText(query);
+      setBusy(false);
+      setThinkError(null);
+      setEnginePrompt(null);
+      setEngineGap(null);
+      if (!consentCanRun(pending)) {
+        const heard = voice.consentNotEnough;
+        setSpoken(speak(heard) ? voice.said(heard) : heard);
+        return;
+      }
+      const positions = consentPositions(pending);
+      setApproved(positions);
+      const heard = voice.consentHeard;
+      setSpoken(speak(heard) ? voice.said(heard) : heard);
+      executeRef.current(positions);
+      return;
+    }
+    if (
+      engineAttemptRef.current &&
+      engineAttemptRef.current !== query &&
+      !engineAttemptRef.current.startsWith("queue:")
+    ) {
+      engineAttemptRef.current = null;
+    }
     setDraft(null);
     setAnswers({});
     setRemembered([]);
@@ -787,8 +961,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     setReport(null);
     setThought(null);
     setThinking(false);
-    const query = phrase.trim();
-    const request = ++searchRequestRef.current;
+    setEnginePrompt(null);
+    setEngineGap(null);
     if (query.length === 0) {
       setItems(null);
       setBusy(false);
@@ -844,16 +1018,21 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
             const message = reason instanceof Error ? reason.message : String(reason);
             // Только «движок не запущен» — не тупик обучения: умения хватает, некому разобрать.
             // Другой отказ (в браузере модели нет) по-прежнему идёт в запись «не умею».
-            if (message.includes("движок не запущен")) {
-              setThinkError(message);
-              setEnginePrompt(query);
+            if (isEngineDown(message)) {
+              await wakeEngine(
+                query,
+                () => request === searchRequestRef.current,
+                () => search(query),
+              );
               return;
             }
             setThinkError(message);
             answered = null;
           }
           if (request !== searchRequestRef.current) return;
+          engineAttemptRef.current = null;
           setEnginePrompt(null);
+          setEngineGap(null);
           setThought(answered);
 
           // План от модели — обычный план: политика, вопросы и подтверждение те же.
@@ -908,7 +1087,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       .finally(() => {
         if (request === searchRequestRef.current) setBusy(false);
       });
-  }, [knownFacts]);
+  }, [knownFacts, wakeEngine]);
 
   // Свой движок есть — пишем звук и отдаём ему: это единственный путь, где звук не
   // покидает компьютер. Нет — слушаем тем, что даёт система, и говорим об этом выше.
@@ -1157,7 +1336,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       });
   };
 
-  const execute = useCallback(() => {
+  const execute = useCallback((granted?: number[]) => {
+    const allowed = Array.isArray(granted) ? granted : approved;
     const request = ++executeRequestRef.current;
     const plan = draft?.plan;
     if (!plan) return;
@@ -1210,7 +1390,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           speak(voice.draftChangedReview);
           return null;
         }
-        return runPlan(JSON.stringify(checked.plan), approved);
+        return runPlan(JSON.stringify(checked.plan), allowed);
       })
       .then((result) => {
         if (!result) return;
@@ -1227,6 +1407,53 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       })
       .finally(() => setRunning(false));
   }, [draft, approved, answers]);
+  executeRef.current = execute;
+
+  askModelRef.current = (requestedText: string) => {
+    const request = ++thoughtRequestRef.current;
+    const around = front;
+    setThinking(true);
+    setThinkError(null);
+    setThought(null);
+    readScreen()
+      .then((screenText) => {
+        if (request !== thoughtRequestRef.current) return null;
+        return think(
+          requestedText,
+          around ? { title: around.title, process: around.process, screen: screenText } : null,
+        );
+      })
+      .then((answer) => {
+        if (!answer || request !== thoughtRequestRef.current) return;
+        engineAttemptRef.current = null;
+        setEnginePrompt(null);
+        setEngineGap(null);
+        setThought(answer);
+        if (answer.learning) setLearning(answer.learning);
+        if (answer.plan) acceptModelPlan(answer.plan);
+        const phrase = answer.plan
+          ? `${describeThought(answer)}. ${voice.thinkPlanReady(answer.plan.plan?.steps.length ?? 0)}`
+          : describeThought(answer);
+        speak(phrase);
+      })
+      .catch((reason: unknown) => {
+        if (request !== thoughtRequestRef.current) return;
+        const message = reason instanceof Error ? reason.message : String(reason);
+        if (isEngineDown(message)) {
+          void wakeEngine(
+            requestedText,
+            () => request === thoughtRequestRef.current,
+            () => askModelRef.current(requestedText),
+          );
+          return;
+        }
+        setThinkError(message);
+        setEnginePrompt(null);
+      })
+      .finally(() => {
+        if (request === thoughtRequestRef.current) setThinking(false);
+      });
+  };
 
   // Цели, которые человек сам разложил на дела: по ним и показывается счёт.
   const goals = [
@@ -1448,6 +1675,11 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           aria-label={voice.heard}
           placeholder={voice.heardPlaceholder}
           onChange={(_, data) => {
+            // Набор «да» — это разрешение на уже показанный план, а не новая задача.
+            if (draftRef.current && keepsPendingPlan(data.value)) {
+              setText(data.value);
+              return;
+            }
             thoughtRequestRef.current += 1;
             promptRequestRef.current += 1;
             setThinking(false);
@@ -1509,47 +1741,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
             appearance="subtle"
             disabled={thinking}
             onClick={() => {
-              const request = ++thoughtRequestRef.current;
-              const requestedText = text.trim();
-              setThinking(true);
-              setThinkError(null);
-              setThought(null);
-              readScreen()
-                .then((screenText) => {
-                  if (request !== thoughtRequestRef.current) return null;
-                  return think(
-                    requestedText,
-                    front
-                      ? { title: front.title, process: front.process, screen: screenText }
-                      : null,
-                  );
-                })
-                .then((answer) => {
-                  if (!answer || request !== thoughtRequestRef.current) return;
-                  setThought(answer);
-
-                  // План модели — это обычный план: политика, вопросы и подтверждение те же.
-                  // Никакого «модель сказала, значит можно».
-                  // Просьба об обучении уже записана ядром — показываем её карточкой, а не
-                  // только словами: человек видит, что задача осталась, а не исчезла с фразой.
-                  if (answer.learning) setLearning(answer.learning);
-
-                  if (answer.plan) acceptModelPlan(answer.plan);
-
-                  const phrase = answer.plan
-                    ? `${describeThought(answer)}. ${voice.thinkPlanReady(answer.plan.plan?.steps.length ?? 0)}`
-                    : describeThought(answer);
-                  speak(phrase);
-                })
-                .catch((reason: unknown) => {
-                  if (request !== thoughtRequestRef.current) return;
-                  const message = reason instanceof Error ? reason.message : String(reason);
-                  setThinkError(message);
-                  setEnginePrompt(message.includes("движок не запущен") ? requestedText : null);
-                })
-                .finally(() => {
-                  if (request === thoughtRequestRef.current) setThinking(false);
-                });
+              askModelRef.current(text.trim());
             }}
           >
             {thinking ? voice.thinkThinking : voice.thinkShow}
@@ -1604,32 +1796,45 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           >
             {voice.queueStop}
           </Button>
-          {thinkError ? (
+          {thinkError && !enginePrompt ? (
             <Text className={styles.error}>{voice.thinkError(thinkError)}</Text>
           ) : null}
           {enginePrompt ? (
             <div className={styles.bar}>
               <Text className={styles.note}>
-                {thinkError?.includes("нет модели") ? voice.engineNoModel : voice.engineDown}
+                {engineGap === "files"
+                  ? voice.engineFilesMissing
+                  : engineBusy
+                    ? voice.engineStarting
+                    : thinkError?.includes("нет модели")
+                      ? voice.engineNoModel
+                      : engineGap === "failed" && thinkError
+                        ? thinkError
+                        : voice.engineDown}
               </Text>
-              {thinkError?.includes("нет модели") ? null : (
+              {engineGap === "files" || engineBusy || thinkError?.includes("нет модели") ? null : (
                 <Button
                   appearance="primary"
                   disabled={engineBusy}
                   onClick={() => {
                     const phrase = enginePrompt;
+                    engineAttemptRef.current = phrase;
                     setEngineBusy(true);
                     setThinkError(null);
+                    speak(voice.engineStarting);
                     void smokeCheck()
                       .then((result) => {
                         if (!result.ok) {
+                          setEngineGap("failed");
                           setThinkError(voice.engineStartFailed(result.note));
                           return;
                         }
                         setEnginePrompt(null);
+                        setEngineGap(null);
                         search(phrase);
                       })
                       .catch((reason: unknown) => {
+                        setEngineGap("failed");
                         setThinkError(reason instanceof Error ? reason.message : String(reason));
                       })
                       .finally(() => setEngineBusy(false));
@@ -1989,7 +2194,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
                     !(draft.questions.length > 0 && problem.problem.includes("не хватает данных")),
                 )
               }
-              onClick={execute}
+              onClick={() => execute()}
             >
               {running
                 ? voice.draftRunning

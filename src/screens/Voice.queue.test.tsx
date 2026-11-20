@@ -6,12 +6,15 @@ import {
   draftPlan,
   machineState,
   planFor,
+  readinessStatus,
   requestLearning,
   runPlan,
+  smokeCheck,
   think,
   uiDump,
   foregroundWindow,
 } from "../ipc";
+import { readinessFacts } from "./readinessFixture";
 import { Voice } from "./Voice";
 
 /**
@@ -22,7 +25,7 @@ import { Voice } from "./Voice";
  */
 
 vi.mock("../ipc", () => ({
-  readinessStatus: async () => { throw new Error("статус недоступен в этом тесте"); },
+  readinessStatus: vi.fn().mockRejectedValue(new Error("статус недоступен в этом тесте")),
   isTauri: () => true,
   planFor: vi.fn().mockResolvedValue([]),
   draftPlan: vi.fn().mockResolvedValue(null),
@@ -105,6 +108,8 @@ afterEach(() => {
   vi.mocked(machineState).mockReset().mockResolvedValue(away as never);
   vi.mocked(planFor).mockReset().mockResolvedValue([]);
   vi.mocked(think).mockReset().mockResolvedValue(null as never);
+  vi.mocked(smokeCheck).mockReset();
+  vi.mocked(readinessStatus).mockReset().mockRejectedValue(new Error("статус недоступен в этом тесте"));
   vi.mocked(declarePresence).mockReset();
   vi.mocked(requestLearning).mockReset().mockResolvedValue(null);
   vi.mocked(uiDump).mockReset().mockRejectedValue(new Error("нет UI Automation"));
@@ -395,6 +400,58 @@ describe("очередь дел на экране", () => {
     await waitFor(() =>
       expect(screen.getByText(/модель не сказала, что делать дальше/)).toBeTruthy(),
     );
+  });
+
+  it("очереди нужен движок, а файлов нет — это не «модель промолчала» и не скачивание", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(safePlan as never);
+    vi.mocked(runPlan).mockResolvedValue({
+      goal: "найди дубликаты в загрузках",
+      steps: [
+        {
+          position: 1,
+          registry: "звук|убавить|громкость",
+          status: "ok",
+          reason: "сделано",
+          evidence: "system",
+          duration_ms: 5,
+        },
+      ],
+      stopped: null,
+      run_id: 1,
+    } as never);
+    vi.mocked(readinessStatus).mockResolvedValue(readinessFacts());
+    vi.mocked(think)
+      .mockResolvedValue(null as never)
+      .mockResolvedValueOnce({
+        prompt: "…",
+        answer: "…",
+        proposal: {
+          Split: {
+            goal: "наведи порядок в загрузках",
+            deeds: ["найди дубликаты в загрузках"],
+            why: "одна работа",
+          },
+        },
+        plan: null,
+        learning: null,
+        deeds: ["найди дубликаты в загрузках"],
+        problem: null,
+      } as never)
+      .mockRejectedValueOnce(new Error("движок не запущен"));
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), {
+      target: { value: "наведи порядок в загрузках" },
+    });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText(/разложил/)).toBeTruthy());
+    fireEvent.click(screen.getByText("Поставить все в очередь"));
+    fireEvent.click(screen.getByText("Работать без меня"));
+
+    await waitFor(() => expect(screen.getAllByText(/Само ничего не скачиваю/).length).toBeGreaterThan(0));
+    expect(vi.mocked(smokeCheck)).not.toHaveBeenCalled();
+    expect(screen.queryByText(/модель не сказала, что делать дальше/)).toBeNull();
   });
 
   it("дело по цели не сделалось — очередь просит одну поправку, а не придумывает новые", async () => {

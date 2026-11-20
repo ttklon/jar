@@ -117,7 +117,7 @@ export function readinessStatus(): Promise<ReadinessStatus> {
 
 /**
  * Запустить движок (если ещё не запущен) и проверить разговор одним безопасным вопросом.
- * Только по явной кнопке: нажатие кнопки и есть согласие на запуск.
+ * Ничего не скачивает. Вызов — явная кнопка или фраза, которой нужна уже установленная модель.
  */
 export function smokeCheck(): Promise<SmokeResult> {
   return invoke<SmokeResult>("smoke_check");
