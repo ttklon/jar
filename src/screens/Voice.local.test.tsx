@@ -226,6 +226,38 @@ describe("локальное распознавание на экране", () =
     await waitFor(() => expect(vi.mocked(think)).toHaveBeenCalledTimes(2));
   });
 
+  it("«ещё» после запуска движка разбирает продолжение, а не голое слово", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(null);
+    vi.mocked(readinessStatus).mockResolvedValue(
+      readinessFacts({ engine_found: true, engine_running: false, model_present: true, missing: [] }),
+    );
+    // Первая задача уходит в модель — и модель просит запустить движок.
+    vi.mocked(think).mockRejectedValueOnce(new Error("движок не запущен: файлы уже на диске"));
+    vi.mocked(smokeCheck).mockResolvedValue({
+      ok: true,
+      answer: "готово",
+      note: "текст",
+      model: "m.gguf",
+      port: 1,
+    });
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сделай потише" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await waitFor(() => expect(vi.mocked(smokeCheck).mock.calls.length).toBeGreaterThan(0));
+
+    // «Ещё» без прошлой фразы рядом не просит: продолжение несёт прошлую задачу.
+    vi.mocked(think).mockClear();
+    vi.mocked(think).mockRejectedValueOnce(new Error("движок не запущен: файлы уже на диске"));
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "ещё" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    await waitFor(() => expect(vi.mocked(think)).toHaveBeenCalled());
+    const sent = String(vi.mocked(think).mock.calls[0]?.[0] ?? "");
+    expect(sent).toContain("сделай потише");
+    expect(sent).not.toBe("ещё");
+  });
+
   it("установленный движок фраза запускает сама и не скачивает отсутствующее", async () => {
     vi.mocked(draftPlan).mockResolvedValue(null);
     vi.mocked(readinessStatus).mockResolvedValue(
