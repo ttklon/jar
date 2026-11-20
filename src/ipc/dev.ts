@@ -503,6 +503,63 @@ export async function downloadModel(
   throw new Error("скачивание делает приложение: запустите npm run tauri dev");
 }
 
+/** Отменить в браузере нечего: скачивания здесь нет. */
+export async function cancelDownload(): Promise<void> {
+  // Скачивание делает только ядро: отменять здесь нечего.
+}
+
+/** Прогресса в браузере нет: скачивания здесь нет. */
+export async function downloadProgress(_name: string): Promise<number | null> {
+  return null;
+}
+
+// ── Готовность к первому разговору в браузере ───────────────────────────────
+//
+// В браузере машины нет: ни движка, ни моделей. Каталог — те же данные, что читает
+// ядро (`data/readiness.json`), поэтому карточка верстается без Rust. Состояния
+// честные («не найден, не запущен»), а запуск/скачивание отвечают отказом.
+
+import readinessJson from "../../data/readiness.json";
+import type { ReadinessStatus, SmokeResult } from "./types";
+
+const READINESS_CATALOG = readinessJson as unknown as {
+  model: ReadinessStatus["model_spec"];
+  runtime: ReadinessStatus["runtime_spec"];
+};
+
+export async function readinessStatus(): Promise<ReadinessStatus> {
+  return {
+    download_name: null,
+    runtime_managed: false,
+    runtime_supported: false,
+    engine_found: false,
+    engine_running: false,
+    engine_program: null,
+    engine_search_dir: "sidecars/ — рядом с приложением",
+    model_present: false,
+    model_name: null,
+    model_bytes: 0,
+    models_dir: "папка моделей приложения",
+    free_bytes: null,
+    speech_found: false,
+    speech_model: null,
+    speech_search_dir: "sidecars/ — рядом с приложением",
+    model_spec: READINESS_CATALOG.model,
+    runtime_spec: READINESS_CATALOG.runtime,
+    ready: false,
+    missing: ["engine", "model"],
+  };
+}
+
+
+
+
+
+/** Проверяет разговор только ядро: в браузере нет движка на 127.0.0.1. */
+export async function smokeCheck(): Promise<SmokeResult> {
+  throw new Error("проверка разговора — только в приложении: в браузере нет движка");
+}
+
 // ── Движок в браузере ───────────────────────────────────────────────────────
 //
 // Процессов в браузере нет: состояние честное («не найден, не запущен»), а запуск
@@ -833,4 +890,11 @@ function learningSteps(implementation: string[], example: string) {
     { title: "Написать руку и подключить её к реестру", done: false },
     { title: `Проверить на живом примере: «${example}»`, done: false },
   ];
+}
+
+export async function downloadRuntime(): Promise<import("./types").Installed> {
+  throw new Error("установка движка доступна только в Windows-приложении");
+}
+export async function removeRuntime(): Promise<void> {
+  throw new Error("удаление движка доступно только в Windows-приложении");
 }

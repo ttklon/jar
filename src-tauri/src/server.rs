@@ -110,6 +110,11 @@ impl Server {
         }
     }
 
+    /// Read process liveness without sending any request or starting work.
+    pub fn is_alive(&mut self) -> bool {
+        matches!(self.child.try_wait(), Ok(None))
+    }
+
     pub fn pid(&self) -> u32 {
         self.child.id()
     }

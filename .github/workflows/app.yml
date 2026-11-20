@@ -11,6 +11,11 @@ on:
         type: boolean
         required: true
         default: false
+      runtime_smoke:
+        description: Download ~1 GB pinned model/runtime and execute conversation smoke on Windows runner
+        type: boolean
+        required: false
+        default: false
       release_tag:
         description: Release tag (must match the app version, for example v0.1.0)
         type: string
@@ -83,6 +88,34 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+  voice-simulation:
+    name: voice simulation (Windows Chromium, virtual microphone)
+    runs-on: windows-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Install test browser (not a user runtime)
+        run: npx playwright install chromium
+      - name: Virtual microphone and dialogue contract simulation
+        run: npm run test:voice-simulation
+      - name: Upload simulation evidence (no real user audio)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice-simulation-windows
+          path: |
+            artifacts/voice-report
+            artifacts/voice-simulation
+          if-no-files-found: error
+          retention-days: 14
 
   # Спайк релиза из `RUNTIME.md` §5: приложение должно не только компилироваться в
   # dev-профиле, но и собираться в release с установщиком. Делается на push, а не на
@@ -314,6 +347,10 @@ jobs:
 
       # Вывод компилятора пишем в файл и превращаем в аннотации: логи джобов
       # доступны не всегда, а аннотации читаются через API в любом случае.
+      - name: Runtime archive attack tests (no binary execution)
+        shell: powershell
+        run: ./scripts/test-runtime-installer.ps1
+
       - name: Clippy
         id: clippy
         shell: bash
@@ -371,6 +408,37 @@ jobs:
         run: |
           echo "::error::cargo test упал — подробности в аннотациях выше"
           exit 1
+
+      - name: Pinned runtime conversation smoke (explicit network/execution consent)
+        if: steps.tests.outputs.status == '0' && ((github.event_name == 'workflow_dispatch' && inputs.runtime_smoke) || (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/arena/') && contains(github.event.head_commit.message, '[runtime-smoke]')))
+        id: runtime_smoke
+        shell: bash
+        env:
+          ZSHELPER_RUNTIME_SMOKE: "1"
+        run: |
+          set +e
+          cargo test --manifest-path src-tauri/Cargo.toml pinned_runtime_conversation_smoke -- --ignored --nocapture > runtime-smoke.log 2>&1
+          code=$?
+          # cargo test can exit 0 when a filter matches no tests. Require the final
+          # milestone, emitted only after real inference, stop and removal assertions.
+          if [ "$code" = 0 ] && ! grep -Fq "RUNTIME_SMOKE process stopped; managed runtime removed; model preserved" runtime-smoke.log; then
+            echo "RUNTIME_SMOKE did not complete all milestones" >> runtime-smoke.log
+            code=1
+          fi
+          echo "status=$code" >> "$GITHUB_OUTPUT"
+          grep "RUNTIME_SMOKE" runtime-smoke.log >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Runtime smoke failure report
+        if: always() && steps.runtime_smoke.outputs.status != '' && steps.runtime_smoke.outputs.status != '0'
+        shell: bash
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/ci_log_annotate.py runtime-smoke.log --title "pinned runtime smoke" --grep "FAILED|panicked|RUNTIME_SMOKE|error|Error" --after 4 --max 20
+
+      - name: Runtime smoke gate
+        if: steps.runtime_smoke.outputs.status != '' && steps.runtime_smoke.outputs.status != '0'
+        shell: bash
+        run: exit 1
 
       # У разработчика может не быть Rust-тулчейна (песочница, новая машина), а
       # форматирование детерминировано. Поэтому ветку чинит сам CI отдельным

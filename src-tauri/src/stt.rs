@@ -12,7 +12,7 @@
 //! один ответ на JSON не стоят ещё одной зависимости.
 
 use std::io::{Read, Write};
-use std::net::{TcpStream, ToSocketAddrs};
+use std::net::TcpStream;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -189,13 +189,49 @@ pub fn start(
     }
 }
 
-/// Отделяет тело ответа от заголовков.
-fn body_of(response: &[u8]) -> &[u8] {
-    response
-        .windows(4)
-        .position(|window| window == b"\r\n\r\n")
-        .map(|at| &response[at + 4..])
-        .unwrap_or(response)
+/// A request owns its child before readiness polling starts, so cancel/shutdown
+/// can kill it during model loading as well as during inference.
+pub fn start_owned(
+    program: &Path,
+    model: &Path,
+    port: u16,
+    log: &Path,
+    timeout: Duration,
+    ticket: &crate::stt_session::Ticket,
+) -> Result<(), String> {
+    use std::process::{Command, Stdio};
+    ticket.check()?;
+    let out = std::fs::File::create(log).map_err(|e| format!("лог ASR не создаётся: {e}"))?;
+    let errors = out.try_clone().map_err(|e| e.to_string())?;
+    let mut command = Command::new(program);
+    command
+        .args(args(model, port))
+        .stdin(Stdio::null())
+        .stdout(Stdio::from(out))
+        .stderr(Stdio::from(errors));
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        command.creation_flags(0x08000000); // CREATE_NO_WINDOW
+    }
+    ticket.attach(
+        command
+            .spawn()
+            .map_err(|e| format!("ASR не запустился: {e}"))?,
+    )?;
+    let deadline = std::time::Instant::now() + timeout;
+    loop {
+        ticket.check()?;
+        if ticket.exited()? {
+            return Err("ASR завершился до готовности".into());
+        }
+        if wait_port(port, Duration::from_millis(100)) {
+            return ticket.check();
+        }
+        if std::time::Instant::now() >= deadline {
+            return Err("ASR не открыл порт вовремя".into());
+        }
+    }
 }
 
 /// Отправляет звук движку и возвращает распознанный текст.
@@ -203,37 +239,92 @@ fn body_of(response: &[u8]) -> &[u8] {
 /// Ошибки различаются по смыслу: «движок не отвечает» (не запущен или умер) и
 /// «движок ответил, но не тем» (разбирать должен человек, а не догадка).
 pub fn post(port: u16, wav: &[u8], timeout: Duration) -> Result<String, String> {
+    post_checked(port, wav, timeout, None)
+}
+
+pub fn post_cancellable(
+    port: u16,
+    wav: &[u8],
+    timeout: Duration,
+    ticket: &crate::stt_session::Ticket,
+) -> Result<String, String> {
+    post_checked(port, wav, timeout, Some(ticket))
+}
+
+fn post_checked(
+    port: u16,
+    wav: &[u8],
+    timeout: Duration,
+    ticket: Option<&crate::stt_session::Ticket>,
+) -> Result<String, String> {
     if wav.is_empty() {
-        return Err("нечего распознавать: пустая запись".to_string());
+        return Err("нечего распознавать: пустая запись".into());
     }
-
-    let address = ("127.0.0.1", port)
-        .to_socket_addrs()
-        .map_err(|error| format!("адрес движка не разобрался: {error}"))?
-        .next()
-        .ok_or_else(|| "адрес движка не разобрался".to_string())?;
-
-    let mut stream = TcpStream::connect_timeout(&address, timeout)
+    if wav.len() > 16 * 1024 * 1024 {
+        return Err("запись ASR превышает 16 МиБ".into());
+    }
+    crate::stt_audio::validate(wav)?;
+    let deadline = std::time::Instant::now() + timeout;
+    let checkpoint = || -> Result<(), String> {
+        if let Some(ticket) = ticket {
+            ticket.check()?;
+        }
+        if std::time::Instant::now() >= deadline {
+            return Err("время ожидания ASR истекло".into());
+        }
+        Ok(())
+    };
+    checkpoint()?;
+    let address = std::net::SocketAddr::from(([127, 0, 0, 1], port));
+    let poll = Duration::from_millis(100).min(timeout);
+    let mut stream = TcpStream::connect_timeout(&address, poll)
         .map_err(|_| format!("движок не отвечает на 127.0.0.1:{port}"))?;
-    stream.set_read_timeout(Some(timeout)).ok();
-    stream.set_write_timeout(Some(timeout)).ok();
-
     stream
-        .write_all(&request(wav))
-        .map_err(|error| format!("запись не отправилась: {error}"))?;
-    stream.flush().ok();
-
-    let mut response = Vec::new();
+        .set_read_timeout(Some(poll))
+        .map_err(|e| e.to_string())?;
     stream
-        .read_to_end(&mut response)
-        .map_err(|error| format!("ответ движка не прочитался: {error}"))?;
-
-    if response.is_empty() {
-        return Err("движок закрыл соединение, ничего не ответив".to_string());
+        .set_write_timeout(Some(poll))
+        .map_err(|e| e.to_string())?;
+    let retry = |e: &std::io::Error| {
+        matches!(
+            e.kind(),
+            std::io::ErrorKind::WouldBlock
+                | std::io::ErrorKind::TimedOut
+                | std::io::ErrorKind::Interrupted
+        )
+    };
+    let bytes = request(wav);
+    let mut at = 0;
+    while at < bytes.len() {
+        checkpoint()?;
+        match stream.write(&bytes[at..]) {
+            Ok(0) => return Err("ASR закрыл соединение при отправке".into()),
+            Ok(n) => at += n,
+            Err(e) if retry(&e) => continue,
+            Err(e) => return Err(format!("запись не отправилась: {e}")),
+        }
     }
-
-    let body = String::from_utf8_lossy(body_of(&response)).to_string();
-    text_from_json(&body)
+    let mut response = Vec::new();
+    let mut buffer = [0; 8192];
+    loop {
+        checkpoint()?;
+        match stream.read(&mut buffer) {
+            Ok(0) => break,
+            Ok(n) => {
+                if response.len() + n > 1024 * 1024 {
+                    return Err("ответ ASR превышает 1 МиБ".into());
+                }
+                response.extend_from_slice(&buffer[..n]);
+            }
+            Err(e) if retry(&e) => continue,
+            Err(e) => return Err(format!("ответ движка не прочитался: {e}")),
+        }
+    }
+    checkpoint()?;
+    if response.is_empty() {
+        return Err("движок закрыл соединение, ничего не ответив".into());
+    }
+    text_from_json(crate::stt_http::json_body(&response)?)
 }
 
 #[cfg(test)]
@@ -243,12 +334,20 @@ mod tests {
     use std::thread;
 
     fn wav_fixture() -> Vec<u8> {
-        // Настоящий WAV не нужен: проверяем, что байты дошли без перекодирования.
-        let mut bytes = b"RIFF".to_vec();
-        bytes.extend_from_slice(&[0x24, 0x00, 0x00, 0x00]);
-        bytes.extend_from_slice(b"WAVEfmt ");
-        bytes.extend_from_slice(&[1, 2, 3, 4, 5]);
-        bytes
+        let mut wav = vec![0; 46];
+        wav[0..4].copy_from_slice(b"RIFF");
+        wav[4..8].copy_from_slice(&38u32.to_le_bytes());
+        wav[8..16].copy_from_slice(b"WAVEfmt ");
+        wav[16..20].copy_from_slice(&16u32.to_le_bytes());
+        wav[20..22].copy_from_slice(&1u16.to_le_bytes());
+        wav[22..24].copy_from_slice(&1u16.to_le_bytes());
+        wav[24..28].copy_from_slice(&16000u32.to_le_bytes());
+        wav[28..32].copy_from_slice(&32000u32.to_le_bytes());
+        wav[32..34].copy_from_slice(&2u16.to_le_bytes());
+        wav[34..36].copy_from_slice(&16u16.to_le_bytes());
+        wav[36..40].copy_from_slice(b"data");
+        wav[40..44].copy_from_slice(&2u32.to_le_bytes());
+        wav
     }
 
     #[test]
@@ -320,6 +419,29 @@ mod tests {
     }
 
     #[test]
+    fn a_valid_text_in_an_http_error_never_becomes_recognition() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let worker = thread::spawn(move || {
+            let (mut socket, _) = listener.accept().unwrap();
+            let mut buffer = [0; 8192];
+            let read = socket.read(&mut buffer).unwrap();
+            assert!(read > 0);
+            socket.write_all(b"HTTP/1.1 500 Error\r\nContent-Type: application/json\r\nContent-Length: 15\r\n\r\n{\"text\":\"fake\"}").unwrap();
+        });
+        let result = post(port, &wav_fixture(), Duration::from_secs(5));
+        worker.join().unwrap();
+        assert!(result.unwrap_err().contains("HTTP 500"));
+    }
+
+    #[test]
+    fn malformed_wav_is_rejected_before_connecting_to_any_server() {
+        let error = post(1, b"not a wave file", Duration::from_secs(1)).unwrap_err();
+        assert!(error.contains("WAV"), "{error}");
+        assert!(!error.contains("не отвечает"));
+    }
+
+    #[test]
     fn a_silent_engine_is_named_as_silent() {
         // Порт, который никто не слушает: свободный порт закрываем сразу.
         let port = {
@@ -332,6 +454,66 @@ mod tests {
 
         let error = post(port, &[], Duration::from_millis(300)).expect_err("пустая запись");
         assert!(error.contains("пустая запись"), "{error}");
+    }
+
+    #[test]
+    fn cancellation_interrupts_a_stalled_response() {
+        use std::sync::{mpsc, Arc};
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let (accepted, received) = mpsc::channel();
+        let (finish, finished) = mpsc::channel();
+        let server = thread::spawn(move || {
+            let (mut socket, _) = listener.accept().unwrap();
+            let mut buffer = [0; 8192];
+            let _ = socket.read(&mut buffer);
+            accepted.send(()).unwrap();
+            let _ = finished.recv_timeout(Duration::from_secs(5));
+        });
+        let ticket = Arc::new(crate::stt_session::Ticket::default());
+        let worker_ticket = ticket.clone();
+        let worker = thread::spawn(move || {
+            post_cancellable(
+                port,
+                &wav_fixture(),
+                Duration::from_secs(10),
+                &worker_ticket,
+            )
+        });
+        received.recv_timeout(Duration::from_secs(5)).unwrap();
+        let now = std::time::Instant::now();
+        ticket.stop().unwrap();
+        let result = worker.join().unwrap();
+        let _ = finish.send(());
+        server.join().unwrap();
+        assert_eq!(result.unwrap_err(), crate::stt_session::CANCELLED);
+        assert!(now.elapsed() < Duration::from_secs(2));
+    }
+
+    #[test]
+    fn oversized_audio_is_rejected_before_connecting() {
+        let result = post(1, &vec![0; 16 * 1024 * 1024 + 1], Duration::from_secs(1));
+        assert!(result.unwrap_err().contains("16 МиБ"));
+    }
+
+    #[test]
+    fn a_stalled_response_has_a_total_deadline() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let server = thread::spawn(move || {
+            let (mut socket, _) = listener.accept().unwrap();
+            for _ in 0..100 {
+                if socket.write_all(b" ").is_err() {
+                    break;
+                }
+                thread::sleep(Duration::from_millis(10));
+            }
+        });
+        let now = std::time::Instant::now();
+        let error = post(port, &wav_fixture(), Duration::from_millis(200)).unwrap_err();
+        assert!(error.contains("время ожидания"), "{error}");
+        assert!(now.elapsed() < Duration::from_secs(2));
+        server.join().unwrap();
     }
 
     #[test]

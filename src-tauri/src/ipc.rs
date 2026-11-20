@@ -31,6 +31,7 @@ use crate::plan::{self, Answer, Plan, Problem, Question, StepGate};
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
 use crate::profiles::{self, ProfileOperation, ProfileSpec};
+use crate::readiness;
 use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::restricted;
 use crate::roles;
@@ -56,6 +57,7 @@ pub struct Inner {
     /// Запущенный движок. Один: две модели на одной видеокарте — это не «параллельно»,
     /// это «обе тормозят».
     pub engine: std::sync::Mutex<Option<Server>>,
+    pub asr: Arc<crate::stt_session::Requests>,
     pub policy: PolicyState,
     pub cancel: AtomicBool,
     /// Слово человека о себе: «я ухожу» или «я работаю». `None` — не говорил, решает таймер.
@@ -856,7 +858,8 @@ pub async fn verify_model(
 ///
 /// Ссылку даёт человек, а не приложение: выдуманный адрес — это не «удобство», а
 /// скачанный мусор с правильным именем. `sha256` необязателен; если он задан и не
-/// сошёлся, файл не появится вовсе.
+/// сошёлся, файл не появится вовсе. Для pinned-модели из каталога первого запуска
+/// размер известен, поэтому место на диске проверяется до скачивания.
 #[tauri::command]
 pub async fn download_model(
     state: State<'_, AppState>,
@@ -867,12 +870,21 @@ pub async fn download_model(
     let inner = state.inner.clone();
     let run = inner.memory.start_run("download", &name).ok();
 
+    let spec = &readiness::catalog().model;
+    let expected_bytes = if url == spec.url && name == spec.file {
+        Some(spec.bytes)
+    } else {
+        None
+    };
+
     let result = tauri::async_runtime::spawn_blocking(move || {
-        download::download(
+        download::download_sized(
             &inner.models_dir,
             &name,
             &url,
             sha256.as_deref(),
+            expected_bytes,
+            download::MAX_MODEL_BYTES,
             &inner.memory,
         )
     })
@@ -885,6 +897,172 @@ pub async fn download_model(
     }
 
     result
+}
+
+/// Отменяет текущее скачивание: процесс curl убивается, `.part` убирается.
+/// Скачивания нет — не ошибка: цель уже достигнута.
+#[tauri::command]
+pub fn cancel_download() {
+    download::request_cancel();
+}
+
+/// Сколько байт уже скачано в `<имя>.part`. `None` — скачивания нет.
+/// Имя проверяется как имя файла, а не путь: папку выбирает приложение.
+#[tauri::command]
+pub fn download_progress(state: State<'_, AppState>, name: String) -> Option<u64> {
+    if name.is_empty() || name.contains(['/', '\\', ':', '\0']) || name.contains("..") {
+        return None;
+    }
+    download::progress(&state.inner.models_dir, &name)
+        .or_else(|| download::progress(&state.inner.base_dir.join("sidecars"), &name))
+}
+
+/// Готовность к первому разговору: движок, модель, локальное распознавание, место.
+/// Только чтение — ничего не скачивает и не запускает.
+#[tauri::command]
+pub fn readiness_status(state: State<'_, AppState>) -> Result<readiness::ReadinessStatus, String> {
+    let inner = &state.inner;
+    let engine = read_engine_status(&state);
+    let speech = read_speech_status(&state);
+
+    let files = match std::fs::metadata(&inner.models_dir) {
+        Ok(_) => models::scan(&inner.models_dir)?,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Vec::new(),
+        Err(e) => {
+            return Err(format!(
+                "папку моделей прочитать не удалось: {e}; проверьте права и путь в «Моделях»"
+            ))
+        }
+    };
+    let first_ok = files.iter().find(|file| file.ok);
+    let model_present = first_ok.is_some();
+    let model_name = first_ok.map(|file| file.name.clone());
+    let model_bytes = first_ok.map(|file| file.size_bytes).unwrap_or(0);
+
+    let mut status = readiness::build(
+        engine.found,
+        engine.running,
+        engine.program,
+        engine.search_dir,
+        model_present,
+        model_name,
+        model_bytes,
+        inner.models_dir.display().to_string(),
+        models::free_space(&inner.models_dir),
+        speech.found,
+        speech.model,
+        speech.search_dir,
+    );
+    status.download_name = download::active_name();
+    status.runtime_managed = crate::runtime::is_managed(&inner.base_dir);
+    Ok(status)
+}
+
+/// Download only the compiled-in pinned runtime. No execution after install.
+#[tauri::command]
+pub async fn download_runtime(
+    state: State<'_, AppState>,
+) -> Result<crate::runtime::Installed, String> {
+    let base = state.inner.base_dir.clone();
+    tauri::async_runtime::spawn_blocking(move || crate::runtime::install(&base))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+/// Only the app-owned versioned directory may be removed. Never manual files.
+#[tauri::command]
+pub async fn remove_runtime(state: State<'_, AppState>) -> Result<(), String> {
+    use std::sync::atomic::Ordering;
+    ENGINE_STARTING
+        .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+        .map_err(|_| "движок запускается; дождитесь завершения".to_string())?;
+    let _guard = EngineStartGuard;
+    if state
+        .inner
+        .engine
+        .lock()
+        .map_err(|e| e.to_string())?
+        .is_some()
+    {
+        return Err("сначала остановите движок в «Моделях»".into());
+    }
+    let base = state.inner.base_dir.clone();
+    tauri::async_runtime::spawn_blocking(move || crate::runtime::remove(&base))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+/// Итог проверки разговора: движок запущен (или уже был запущен) и ответил на
+/// безопасный вопрос. `ok` — это «модель ответила непустым текстом», а не «всё хорошо».
+#[derive(Debug, Serialize)]
+pub struct SmokeResult {
+    pub ok: bool,
+    /// Что ответила модель, если ответила.
+    pub answer: Option<String>,
+    /// С какой моделью проверяли.
+    pub model: Option<String>,
+    pub port: Option<u16>,
+    /// Честная приписка: что именно проверено и что нет.
+    pub note: String,
+}
+
+/// Проверяет разговор: запускает движок с первой целой моделью (если он ещё не запущен)
+/// и задаёт один безопасный вопрос.
+///
+/// Вызывается только по явной кнопке «Запустить локальный движок и проверить разговор»:
+/// нажатие кнопки и есть согласие на запуск. Без кнопки движок не запускается.
+#[tauri::command]
+pub async fn smoke_check(state: State<'_, AppState>) -> Result<SmokeResult, String> {
+    // Clear an exited process, without starting anything.
+    let _ = read_engine_status(&state);
+    let running_port = match state.inner.engine.lock() {
+        Ok(guard) => guard.as_ref().map(|server| server.port()),
+        Err(_) => return Err("движок не под контролем приложения: перезапустите его".to_string()),
+    };
+
+    let (port, model_name) = if let Some(port) = running_port {
+        (port, None) // Имя уже загруженной модели здесь не известно: не угадываем.
+    } else {
+        let name = models::scan(&state.inner.models_dir)?
+            .into_iter()
+            .find(|file| file.ok)
+            .map(|file| file.name)
+            .ok_or_else(|| "нет модели с читаемым заголовком: откройте «Модели»".to_string())?;
+        let status = start_engine(state, name.clone()).await?;
+        let port = status.port.ok_or_else(|| "движок не запущен".to_string())?;
+        (port, Some(name))
+    };
+
+    let body = llm::chat_body("Ответь одним словом: готово", "local");
+    let answered = tauri::async_runtime::spawn_blocking(move || {
+        llm::ask(port, &body, std::time::Duration::from_secs(30))
+    })
+    .await
+    .map_err(|error| format!("проверка не выполнилась: {error}"))?;
+
+    match answered {
+        Ok(answer) if !answer.trim().is_empty() => Ok(SmokeResult {
+            ok: true,
+            answer: Some(answer),
+            model: model_name,
+            port: Some(port),
+            note: "движок запущен и ответил на тестовый вопрос. Это проверяет только разговор, а не выполнение действий".to_string(),
+        }),
+        Ok(_) => Ok(SmokeResult {
+            ok: false,
+            answer: None,
+            model: model_name,
+            port: Some(port),
+            note: "движок ответил пустым текстом: разговор не подтверждён".to_string(),
+        }),
+        Err(error) => Ok(SmokeResult {
+            ok: false,
+            answer: None,
+            model: model_name,
+            port: Some(port),
+            note: format!("движок не ответил: {error}"),
+        }),
+    }
 }
 
 /// Удаляет файл модели.
@@ -914,10 +1092,15 @@ fn read_engine_status(state: &AppState) -> EngineStatus {
     let program = llama::find_program(&state.inner.base_dir);
 
     let (running, port, pid) = match state.inner.engine.lock() {
-        Ok(guard) => match guard.as_ref() {
-            Some(server) => (true, Some(server.port()), Some(server.pid())),
-            None => (false, None, None),
-        },
+        Ok(mut guard) => {
+            if guard.as_mut().is_some_and(|server| !server.is_alive()) {
+                *guard = None;
+            }
+            match guard.as_ref() {
+                Some(server) => (true, Some(server.port()), Some(server.pid())),
+                None => (false, None, None),
+            }
+        }
         // Отравленный мьютекс: считаем, что движок не под нашим контролем.
         Err(_) => (false, None, None),
     };
@@ -938,6 +1121,15 @@ pub fn engine_status(state: State<'_, AppState>) -> EngineStatus {
     read_engine_status(&state)
 }
 
+static ENGINE_STARTING: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static ENGINE_STOP_EPOCH: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+struct EngineStartGuard;
+impl Drop for EngineStartGuard {
+    fn drop(&mut self) {
+        ENGINE_STARTING.store(false, std::sync::atomic::Ordering::SeqCst);
+    }
+}
+
 /// Запускает `llama-server` с файлом модели `name`.
 ///
 /// Ошибки разные и говорят разное: «движка нет» (положите файл), «модели нет»
@@ -948,6 +1140,13 @@ pub async fn start_engine(
     state: State<'_, AppState>,
     name: String,
 ) -> Result<EngineStatus, String> {
+    use std::sync::atomic::Ordering;
+    let stop_epoch = ENGINE_STOP_EPOCH.load(Ordering::SeqCst);
+    ENGINE_STARTING
+        .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+        .map_err(|_| "движок уже запускается".to_string())?;
+    let _start_guard = EngineStartGuard;
+    let _ = read_engine_status(&state);
     if state
         .inner
         .engine
@@ -959,6 +1158,12 @@ pub async fn start_engine(
     }
 
     let inner = state.inner.clone();
+    if !crate::runtime::safe_relative(&name)
+        || name.contains(['/', '\\'])
+        || !name.to_ascii_lowercase().ends_with(".gguf")
+    {
+        return Err("нужно имя файла .gguf из папки моделей, а не путь".into());
+    }
     let model = inner.models_dir.join(&name);
     if !model.is_file() {
         return Err(format!("файла модели нет: {name}"));
@@ -976,19 +1181,28 @@ pub async fn start_engine(
     let spec = llama::spec(&program, &model, port);
     let run = inner.memory.start_run("server", &name).ok();
 
+    let managed_base = state.inner.base_dir.clone();
+    let managed = program.starts_with(crate::runtime::directory(&managed_base));
     let started = tauri::async_runtime::spawn_blocking(move || {
+        if managed {
+            crate::runtime::verify(&managed_base)?;
+        }
         Server::start(&spec, &log, std::time::Duration::from_secs(60))
     })
     .await
     .map_err(|error| format!("запуск не выполнился: {error}"))?;
 
     let result = match started {
-        Ok(server) => {
-            if let Ok(mut guard) = state.inner.engine.lock() {
+        Ok(mut server) => match state.inner.engine.lock() {
+            Ok(mut guard) if ENGINE_STOP_EPOCH.load(Ordering::SeqCst) == stop_epoch => {
                 *guard = Some(server);
+                Ok(())
             }
-            Ok(())
-        }
+            _ => {
+                let _ = server.stop();
+                Err("запуск отменён или состояние движка недоступно".to_string())
+            }
+        },
         Err(error) => Err(error),
     };
 
@@ -1003,6 +1217,7 @@ pub async fn start_engine(
 /// Останавливает движок. Не запущен — не ошибка: цель достигнута.
 #[tauri::command]
 pub fn stop_engine(state: State<'_, AppState>) -> EngineStatus {
+    ENGINE_STOP_EPOCH.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     let taken = state
         .inner
         .engine
@@ -1599,11 +1814,30 @@ pub fn speech_status(state: State<'_, AppState>) -> SpeechStatus {
 /// редко и короткими кусками, а висящий процесс — это утечка, о которой человек не
 /// знает. Ошибки разные: нет движка, нет модели, не открыл порт, не разобрал.
 #[tauri::command]
+pub fn begin_transcription(state: State<'_, AppState>) -> Result<String, String> {
+    state.inner.asr.reserve()
+}
+
+#[tauri::command]
+pub async fn cancel_transcription(
+    state: State<'_, AppState>,
+    request_id: String,
+) -> Result<(), String> {
+    let requests = state.inner.asr.clone();
+    tauri::async_runtime::spawn_blocking(move || requests.cancel(&request_id))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
 pub async fn transcribe_local(
     state: State<'_, AppState>,
     audio: Vec<u8>,
+    request_id: String,
 ) -> Result<String, String> {
     let inner = state.inner.clone();
+    let lease = inner.asr.acquire(&request_id)?;
+    crate::stt_audio::validate(&audio)?;
     let status = read_speech_status(&state);
 
     let program = stt::find_program(&inner.base_dir).ok_or_else(|| {
@@ -1619,10 +1853,6 @@ pub async fn transcribe_local(
         )
     })?;
 
-    if audio.is_empty() {
-        return Err("нечего распознавать: пустая запись".to_string());
-    }
-
     let run = inner
         .memory
         .start_run("speech", "локальное распознавание")
@@ -1631,25 +1861,23 @@ pub async fn transcribe_local(
     let memory_owner = inner.clone();
 
     let result = tauri::async_runtime::spawn_blocking(move || {
+        lease.ticket.check()?;
         let port = server::free_port()?;
         let log = inner.base_dir.join(format!("whisper-server-{port}.log"));
-        let mut child = stt::start(
+        stt::start_owned(
             &program,
             &model,
             port,
             &log,
             std::time::Duration::from_secs(60),
+            &lease.ticket,
         )?;
-
-        let text = stt::post(port, &audio, stt::TIMEOUT);
-
-        // Останавливаем всегда, даже если распознавание не удалось: движок не должен
-        // переживать запрос.
-        let stopped = child.kill().and_then(|()| child.wait());
-        if let Err(error) = stopped {
-            tracing::warn!("движок распознавания не остановился: {error}");
-        }
-
+        let text = stt::post_cancellable(port, &audio, stt::TIMEOUT, &lease.ticket);
+        // Check cancellation before delivering a result. Lease Drop kills/reaps on
+        // every exit, including readiness/transport errors and unwinding.
+        lease.ticket.check()?;
+        lease.ticket.stop()?;
+        drop(lease);
         text
     })
     .await

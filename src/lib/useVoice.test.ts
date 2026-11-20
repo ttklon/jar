@@ -184,7 +184,7 @@ describe("свой движок распознавания", () => {
 
     // Системное распознавание не трогали: звук ушёл своему движку.
     expect(vi.mocked(listen)).not.toHaveBeenCalled();
-    expect(transcribe).toHaveBeenCalledWith(WAV);
+    expect(transcribe).toHaveBeenCalledWith(WAV, expect.any(AbortSignal));
     expect(onText).toHaveBeenCalledWith("открой почту");
     expect(result.current.listening).toBe(false);
   });

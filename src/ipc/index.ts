@@ -26,6 +26,7 @@ export type {
   HashCheck,
   Learning,
   ModelFile,
+  ModelSpec,
   ModelsView,
   ParamSpec,
   Plan,
@@ -38,12 +39,15 @@ export type {
   PlanReport,
   ProfileOpView,
   ProfileView,
+  ReadinessStatus,
   RegistrySnapshot,
   RegistryStats,
   RunRecord,
   RunStep,
   Risk,
   RoleView,
+  RuntimeSpec,
+  SmokeResult,
   ForegroundWindow,
   HandDraft,
   IsolationStatus,
@@ -70,7 +74,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, RoleView, RunRecord, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, ReadinessStatus, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -307,6 +311,59 @@ export async function removeModel(name: string): Promise<void> {
   }
   const { removeModel: fromData } = await import("./dev");
   return fromData(name);
+}
+
+/** Отменить текущее скачивание. Скачивания нет — не ошибка. */
+export async function cancelDownload(): Promise<void> {
+  if (isTauri()) {
+    const { cancelDownload: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { cancelDownload: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Сколько байт уже скачано в `<имя>.part`. `null` — скачивания нет. */
+export async function downloadProgress(name: string): Promise<number | null> {
+  if (isTauri()) {
+    const { downloadProgress: fromCore } = await import("./tauri");
+    return fromCore(name);
+  }
+  const { downloadProgress: fromData } = await import("./dev");
+  return fromData(name);
+}
+
+// ── Готовность к первому разговору ──────────────────────────────────────────
+
+/**
+ * Готовность к первому разговору: движок, модель, локальное распознавание, место.
+ * Только чтение — ничего не скачивает и не запускает. В браузере машины нет,
+ * поэтому состояния честные («не найден»), а каталог — те же данные.
+ */
+export async function readinessStatus(): Promise<ReadinessStatus> {
+  if (isTauri()) {
+    const { readinessStatus: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { readinessStatus: fromData } = await import("./dev");
+  return fromData();
+}
+
+
+
+
+
+/**
+ * Запустить движок (если ещё не запущен) и проверить разговор одним безопасным вопросом.
+ * Только по явной кнопке: нажатие кнопки и есть согласие на запуск.
+ */
+export async function smokeCheck(): Promise<SmokeResult> {
+  if (isTauri()) {
+    const { smokeCheck: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { smokeCheck: fromData } = await import("./dev");
+  return fromData();
 }
 
 // ── Движок моделей ──────────────────────────────────────────────────────────
@@ -731,11 +788,22 @@ export async function speechStatus(): Promise<SpeechStatus> {
  * Распознать запись своим движком. В браузере этого нет и быть не может: движок —
  * это файл рядом с приложением, а не то, что умеет вкладка.
  */
-export async function transcribeLocal(audio: number[]): Promise<string> {
+export async function transcribeLocal(audio: number[], signal?: AbortSignal): Promise<string> {
   if (isTauri()) {
     const { transcribeLocal: fromCore } = await import("./tauri");
-    return fromCore(audio);
+    return fromCore(audio, signal);
   }
   const { transcribeLocal: fromData } = await import("./dev");
   return fromData(audio);
+}
+
+/** Explicit consent: install only pinned Windows x64 runtime; never auto-start. */
+export async function downloadRuntime(): Promise<import("./types").Installed> {
+  const adapter = isTauri() ? await import("./tauri") : await import("./dev");
+  return adapter.downloadRuntime();
+}
+/** Only app-managed runtime, with UI confirmation and stopped process. */
+export async function removeRuntime(): Promise<void> {
+  const adapter = isTauri() ? await import("./tauri") : await import("./dev");
+  return adapter.removeRuntime();
 }

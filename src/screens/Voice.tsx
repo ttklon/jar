@@ -44,6 +44,8 @@ import type {
   UiPress,
   UiTyped,
 } from "../ipc";
+import { MicrophoneCheck } from "../components/MicrophoneCheck";
+import { ReadinessCard } from "../components/ReadinessCard";
 import { speak } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
 import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
@@ -82,7 +84,7 @@ import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
 import { describePlanParams } from "../lib/planPreview";
 import { ActionList } from "../components/ActionList";
-import { voice } from "../i18n/ru";
+import { voice, microphoneCheck as micTestText } from "../i18n/ru";
 
 /**
  * Главный экран. Человек ничего здесь не выбирает: он держит кнопку, говорит задачу,
@@ -167,11 +169,12 @@ const useStyles = makeStyles({
 });
 
 export interface VoiceScreenProps {
+  active?: boolean;
   /** Переход к доказательству: реестр, руки, сценарии, история. */
   onOpen?: (screen: string) => void;
 }
 
-export function Voice({ onOpen }: VoiceScreenProps) {
+export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const styles = useStyles();
   const [text, setText] = useState("");
   const [items, setItems] = useState<PlanItem[] | null>(null);
@@ -186,6 +189,8 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const [spoken, setSpoken] = useState<string | null>(null);
   /** Отменил ли человек запись — чтобы «ничего не ушло» было видно, а не молчало. */
   const [cancelled, setCancelled] = useState(false);
+  const [cancelledAsr, setCancelledAsr] = useState(false);
+  const [micCheckBusy, setMicCheckBusy] = useState(false);
   const [speech, setSpeech] = useState<SpeechStatus | null>(null);
   const [systemSpeechConsent, setSystemSpeechConsent] = useState(false);
   const [isolation, setIsolation] = useState<IsolationStatus | null>(null);
@@ -842,7 +847,9 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         );
         if (first) speak(voice.askSpoken(first.label));
         // Отвечаем вслух: человек, который говорит, не смотрит в экран.
-        const phraseOut = !proposal
+        const phraseOut = answered?.proposal
+          ? describeThought(answered)
+          : !proposal
           ? found.length === 0
             ? voice.spokenNothing
             : found.some((item) => Boolean(item.tool))
@@ -867,7 +874,7 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   // покидает компьютер. Нет — слушаем тем, что даёт система, и говорим об этом выше.
   const localEngine =
     speech && speech.found && speech.model
-      ? { transcribe: (wav: Uint8Array) => transcribeLocal(Array.from(wav)) }
+      ? { transcribe: (wav: Uint8Array, signal?: AbortSignal) => transcribeLocal(Array.from(wav), signal) }
       : null;
 
   // Колбэк микрофона живёт дольше одного рендера, поэтому «какой вопрос слушаем» читаем
@@ -878,8 +885,8 @@ export function Voice({ onOpen }: VoiceScreenProps) {
   const mic = useVoice({
     local: localEngine,
     always,
-    enabled: localEngine !== null || systemSpeechConsent,
-    disabledReason: voice.systemSpeechRequired,
+    enabled: !micCheckBusy && (localEngine !== null || systemSpeechConsent),
+    disabledReason: micCheckBusy ? micTestText.busyReason : voice.systemSpeechRequired,
     onText: (heard) => {
       setVoiceError(null);
       const target = answerTargetRef.current;
@@ -914,15 +921,17 @@ export function Voice({ onOpen }: VoiceScreenProps) {
     ) === true;
   const trayVoiceState = voiceError
     ? "error"
-    : mic.listening
-      ? "listening"
-      : running
-        ? "executing"
-        : waitingForConfirmation
-          ? "awaiting-confirmation"
-          : busy || thinking
-            ? "working"
-            : "ready";
+    : mic.processing
+      ? "working"
+      : mic.listening
+        ? "listening"
+        : running
+          ? "executing"
+          : waitingForConfirmation
+            ? "awaiting-confirmation"
+            : busy || thinking
+              ? "working"
+              : "ready";
   useEffect(() => {
     void setVoiceTrayStatus(trayVoiceState).catch(() => {
       // В браузере и при отсутствующей иконке трея UI продолжает работать.
@@ -1157,23 +1166,28 @@ export function Voice({ onOpen }: VoiceScreenProps) {
         </Text>
       </div>
 
+      <ReadinessCard active={active} onToModels={onOpen ? () => onOpen("models") : undefined} />
+
       {mic.listening && !always ? (
         <Text className={styles.note}>{voice.pauseSend}</Text>
       ) : null}
 
-      {mic.listening && !always ? (
+      {mic.processing ? <Text role="status" className={styles.note}>{voice.asrProcessing}</Text> : null}
+
+      {(mic.listening && !always) || mic.processing ? (
         <Button
           appearance="subtle"
           onClick={() => {
+            setCancelledAsr(mic.processing);
             mic.cancel();
             setCancelled(true);
           }}
         >
-          {voice.cancelShow}
+          {mic.processing ? voice.asrCancel : voice.cancelShow}
         </Button>
       ) : null}
 
-      {cancelled ? <Text className={styles.note}>{voice.cancelled}</Text> : null}
+      {cancelled ? <Text className={styles.note}>{cancelledAsr ? voice.asrCancelled : voice.cancelled}</Text> : null}
 
       <Button
         className={mic.listening ? styles.micListening : styles.mic}
@@ -1214,7 +1228,9 @@ export function Voice({ onOpen }: VoiceScreenProps) {
           mic.stop();
         }}
       >
-        {always
+        {mic.processing
+          ? voice.asrProcessingShort
+          : always
           ? mic.listening
             ? mic.speaking
               ? voice.alwaysSpeaking
@@ -1283,6 +1299,8 @@ export function Voice({ onOpen }: VoiceScreenProps) {
             : voice.ceilingsNone(isolation.note)}
         </Text>
       ) : null}
+
+      <MicrophoneCheck active={active} disabled={mic.listening || mic.processing} onBusyChange={setMicCheckBusy} />
 
       {voiceError ? <Text className={styles.error}>{voiceError}</Text> : null}
 

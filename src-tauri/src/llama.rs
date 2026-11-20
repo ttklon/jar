@@ -18,7 +18,7 @@ pub const PROGRAM: &str = "llama-server.exe";
 
 /// Где приложение ищет движок: сначала рядом с собой, потом в `PATH`.
 pub fn find_program(base: &Path) -> Option<PathBuf> {
-    find_named(base, PROGRAM)
+    crate::runtime::find(base).or_else(|| find_named(base, PROGRAM))
 }
 
 /// Ищет `program` в `base/sidecars`, в самом `base` и в `PATH`.

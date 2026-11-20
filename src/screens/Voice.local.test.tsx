@@ -29,6 +29,7 @@ import { Voice } from "./Voice";
  */
 
 vi.mock("../ipc", () => ({
+  readinessStatus: async () => { throw new Error("статус недоступен в этом тесте"); },
   isTauri: () => true,
   planFor: vi.fn().mockResolvedValue([]),
   draftPlan: vi.fn().mockResolvedValue(null),
@@ -1261,7 +1262,7 @@ describe("локальное распознавание на экране", () =
     fireEvent.pointerUp(mic);
 
     await waitFor(() => {
-      expect(transcribeLocal).toHaveBeenCalledWith(Array.from(wav));
+      expect(transcribeLocal).toHaveBeenCalledWith(Array.from(wav), expect.any(AbortSignal));
     });
     await waitFor(() => {
       expect(planFor).toHaveBeenCalledWith("почисти диск", 8);

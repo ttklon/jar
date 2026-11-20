@@ -56,14 +56,19 @@ pub mod plan;
 pub mod planner;
 pub mod policy;
 pub mod profiles;
+pub mod readiness;
 pub mod registry;
 pub mod restricted;
 pub mod roles;
+pub mod runtime;
 pub mod sandbox;
 pub mod server;
 pub mod services;
 pub mod step;
 pub mod stt;
+pub mod stt_audio;
+pub mod stt_http;
+pub mod stt_session;
 pub mod tools;
 pub mod tray;
 pub mod trial;
@@ -136,6 +141,7 @@ pub fn run() {
             models_dir: models::dir(&base),
             base_dir: base.clone(),
             engine: std::sync::Mutex::new(None),
+            asr: Arc::default(),
             policy: PolicyState::new(),
             cancel: AtomicBool::new(false),
             presence: std::sync::Mutex::new(None),
@@ -162,6 +168,12 @@ pub fn run() {
             ipc::list_models,
             ipc::verify_model,
             ipc::download_model,
+            ipc::cancel_download,
+            ipc::download_progress,
+            ipc::readiness_status,
+            ipc::download_runtime,
+            ipc::remove_runtime,
+            ipc::smoke_check,
             ipc::remove_model,
             ipc::engine_status,
             ipc::start_engine,
@@ -206,6 +218,8 @@ pub fn run() {
             ipc::facts,
             ipc::remember_fact,
             ipc::forget_fact,
+            ipc::begin_transcription,
+            ipc::cancel_transcription,
             ipc::transcribe_local,
             ipc::list_profiles,
             ipc::policy_for,
@@ -249,6 +263,7 @@ pub fn run() {
             let Some(state) = app.try_state::<AppState>() else {
                 return;
             };
+            state.inner.asr.shutdown();
             let taken = state
                 .inner
                 .engine

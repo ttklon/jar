@@ -41,7 +41,7 @@ export interface VoiceOptions {
    * Свой движок распознавания. Есть — записываем звук и отдаём ему, звук остаётся на
    * компьютере. Нет — слушаем тем, что даёт система.
    */
-  local?: { transcribe(wav: Uint8Array): Promise<string> } | null;
+  local?: { transcribe(wav: Uint8Array, signal?: AbortSignal): Promise<string> } | null;
   /**
    * Режим «слушаю всегда»: микрофон открыт, фразу вырезает `vad`, разбор запускается сам.
    * Работает только со своим движком: системное распознавание однократное, и делать вид,
@@ -61,6 +61,8 @@ export interface VoiceOptions {
 
 export interface VoiceControl {
   listening: boolean;
+  /** Audio is closed/closing and a local ASR result is pending. */
+  processing: boolean;
   supported: boolean;
   /** Идёт ли сейчас фраза в режиме «слушаю всегда». */
   speaking: boolean;
@@ -105,6 +107,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     disabledReason = "сначала подтвердите использование системной речи",
   } = options;
   const [listening, setListening] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const [speaking, setSpeaking] = useState(false);
 
   const voiceRef = useRef<Voice | null>(null);
@@ -112,6 +115,33 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   const graceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heardRef = useRef(false);
   const activeRef = useRef(false);
+  // ASR is an input trust boundary: a superseded/cancelled capture must never
+  // deliver text (and therefore a task), even if the native request finishes later.
+  const pending = useRef(false);
+  const setPending = useCallback((value: boolean) => {
+    pending.current = value;
+    setProcessing(value);
+  }, []);
+  const generation = useRef(0);
+  const utterance = useRef(0);
+  const capture = useRef<AbortController | null>(null);
+  const asr = useRef<AbortController | null>(null);
+  const invalidate = useCallback(() => {
+    generation.current += 1;
+    setPending(false);
+    asr.current?.abort();
+    asr.current = null;
+    capture.current?.abort();
+    capture.current = null;
+  }, [setPending]);
+  const transcribe = useCallback(async (
+    engine: NonNullable<VoiceOptions["local"]>, wav: Uint8Array,
+  ) => {
+    const controller = new AbortController();
+    asr.current = controller;
+    try { return await engine.transcribe(wav, controller.signal); }
+    finally { if (asr.current === controller) asr.current = null; }
+  }, []);
   /** Режим «слушаю всегда» живёт в ссылке: он меняется, не пересоздавая слушание. */
   const alwaysRef = useRef(always);
   alwaysRef.current = always;
@@ -145,6 +175,8 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     clearGrace();
     activeRef.current = false;
     voiceRef.current = null;
+    alwaysStop.current = null;
+    flushRef.current = null;
     setListening(false);
   }, [clearGrace]);
 
@@ -159,16 +191,24 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   const listenSegments = useCallback((forever: boolean) => {
     const engine = callbacks.current.local;
     if (!engine || !permission.current.enabled) return;
+    const session = generation.current;
+    const signal = capture.current?.signal;
+    const valid = () => generation.current === session && permission.current.enabled;
 
     const run = () => {
-      if (!activeRef.current) return;
+      if (!valid() || !activeRef.current) return;
+      const phrase = ++utterance.current;
+      const wanted = () => valid() && utterance.current === phrase;
+      discardRef.current = false;
 
       let recorder: Recorder | null = null;
       let vad: Vad | null = null;
       let ended = false;
       let stopWhenReady = false;
+      let closing = false;
 
       const close = () => {
+        if (closing) return;
         const current = recorder;
         recorder = null;
         if (!current) {
@@ -176,32 +216,36 @@ export function useVoice(options: VoiceOptions): VoiceControl {
           return;
         }
 
+        closing = true;
         // Фразу отменили: закрываем микрофон и начинаем заново, без разбора.
-        if (discardRef.current) {
-          discardRef.current = false;
+        if (!wanted() || discardRef.current) {
+          if (valid()) discardRef.current = false;
           current
             .stop()
             .catch(() => undefined)
             .finally(() => {
+              if (!valid()) return;
               if (activeRef.current) run();
               else finish();
             });
           return;
         }
 
+        setPending(true);
         current
           .stop()
           .then((recording) => {
+            if (!wanted()) return null;
             if (recording.seconds === 0) {
               // При удержании молчание — это «ничего не сказано»: человек ждёт ответа.
               // В режиме «слушаю всегда» так же молчать правильно: шумят постоянно.
               if (!forever) callbacks.current.onError(callbacks.current.nothingHeard);
               return null;
             }
-            return engine.transcribe(recording.wav);
+            return transcribe(engine, recording.wav);
           })
           .then((text) => {
-            if (text === null) return;
+            if (!wanted() || text === null) return;
             const said = text.trim();
             if (said.length > 0) {
               callbacks.current.onText(said);
@@ -211,9 +255,11 @@ export function useVoice(options: VoiceOptions): VoiceControl {
             if (!forever) callbacks.current.onError(callbacks.current.nothingHeard);
           })
           .catch((error: unknown) => {
-            callbacks.current.onError(error instanceof Error ? error.message : String(error));
+            if (wanted()) callbacks.current.onError(error instanceof Error ? error.message : String(error));
           })
           .finally(() => {
+            if (!valid()) return;
+            setPending(false);
             if (activeRef.current) run();
             else finish();
           });
@@ -229,6 +275,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
       };
 
       startRecording(undefined, (frame, sampleRate) => {
+        if (!valid() || ended) return false;
         if (!vad) {
           vad = createVad({ frameMs: (frame.length / sampleRate) * 1000 });
         }
@@ -246,8 +293,12 @@ export function useVoice(options: VoiceOptions): VoiceControl {
         }
 
         return true;
-      })
+      }, { signal })
         .then((opened) => {
+          if (!valid()) {
+            void opened.stop().catch(() => undefined);
+            return;
+          }
           recorder = opened;
           // Здесь мы уже не внутри обработчика звука: закрывать можно сразу, без таймера.
           if (stopWhenReady) {
@@ -257,6 +308,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
           if (!activeRef.current) close();
         })
         .catch((error: unknown) => {
+          if (!valid()) return;
           finish();
           callbacks.current.onError(
             error instanceof Error ? error.message : String(error),
@@ -270,6 +322,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
         // Stop immediately, not at the next VAD silence boundary. Discard any partial
         // utterance so turning the mode off (or using tray Stop) never submits it.
         discardRef.current = true;
+        invalidate();
         activeRef.current = false;
         setListening(false);
         setSpeaking(false);
@@ -282,7 +335,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     }
 
     run();
-  }, [finish]);
+  }, [finish, invalidate, setPending, transcribe]);
 
   const start = useCallback(() => {
     if (!permission.current.enabled) {
@@ -291,6 +344,11 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     }
     if (activeRef.current) return;
 
+    invalidate();
+    capture.current = new AbortController();
+    const session = generation.current;
+    const valid = () => generation.current === session && permission.current.enabled;
+    const signal = capture.current.signal;
     discardRef.current = false;
     stopSpeaking();
     heardRef.current = false;
@@ -312,9 +370,9 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     if (engine) {
       // Свой движок: пишем звук, распознаём после отпускания. Разрешение на микрофон
       // спрашивается здесь же, и отказ должен быть слышен, а не проглочен.
-      startRecording()
+      startRecording(undefined, undefined, { signal })
         .then((recorder) => {
-          if (!activeRef.current) {
+          if (!valid() || !activeRef.current) {
             // Отпустили раньше, чем открылся микрофон: не держим его включённым.
             recorder.stop().catch(() => {});
             return;
@@ -322,6 +380,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
           recorderRef.current = recorder;
         })
         .catch((error: unknown) => {
+          if (!valid()) return;
           finish();
           callbacks.current.onError(
             error instanceof Error ? error.message : String(error),
@@ -332,21 +391,23 @@ export function useVoice(options: VoiceOptions): VoiceControl {
 
     voiceRef.current = listen({
       onText: (text) => {
+        if (!valid() || !activeRef.current) return;
         // Одна фраза — одно нажатие: услышали, дальше слушать нечего.
         heardRef.current = true;
         finish();
         callbacks.current.onText(text);
       },
       onError: (message) => {
+        if (!valid() || !activeRef.current) return;
         finish();
         callbacks.current.onError(message);
       },
       onEnd: () => {
         // Разбор закончился — ждать больше нечего.
-        if (heardRef.current) finish();
+        if (valid() && heardRef.current) finish();
       },
     });
-  }, [finish, listenSegments]);
+  }, [finish, invalidate, listenSegments]);
 
   const stop = useCallback(() => {
     if (!activeRef.current) return;
@@ -370,36 +431,42 @@ export function useVoice(options: VoiceOptions): VoiceControl {
 
     const engine = callbacks.current.local;
     if (engine) {
+      const session = generation.current;
+      const valid = () => generation.current === session && permission.current.enabled;
       const recorder = recorderRef.current;
       recorderRef.current = null;
       finish();
 
       if (!recorder) {
+        invalidate();
         // Микрофон ещё не открылся — сказать нечего, но и молчать не надо.
         callbacks.current.onError("микрофон не успел открыться — попробуйте ещё раз");
         return;
       }
 
+      setPending(true);
       recorder
         .stop()
         .then((recording) => {
+          if (!valid()) return null;
           if (recording.seconds === 0) {
             callbacks.current.onError(callbacks.current.nothingHeard);
             return null;
           }
-          return engine.transcribe(recording.wav);
+          return transcribe(engine, recording.wav);
         })
         .then((text) => {
-          if (text === null) return;
+          if (!valid() || text === null) return;
           if (text.trim().length === 0) {
             callbacks.current.onError(callbacks.current.nothingHeard);
             return;
           }
           callbacks.current.onText(text.trim());
         })
-        .catch((error: unknown) =>
-          callbacks.current.onError(error instanceof Error ? error.message : String(error)),
-        );
+        .catch((error: unknown) => {
+          if (valid()) callbacks.current.onError(error instanceof Error ? error.message : String(error));
+        })
+        .finally(() => { if (valid()) setPending(false); });
       return;
     }
 
@@ -414,13 +481,18 @@ export function useVoice(options: VoiceOptions): VoiceControl {
       }
       finish();
     }, grace);
-  }, [clearGrace, finish, grace]);
+  }, [clearGrace, finish, grace, invalidate, setPending, transcribe]);
 
   const cancel = useCallback(() => {
-    if (!activeRef.current) return;
+    if (!activeRef.current) {
+      invalidate(); // A released microphone can still have an ASR request in flight.
+      return;
+    }
 
     // «Слушаю всегда»: фраза не считается, микрофон продолжает слушать.
     if (alwaysStop.current) {
+      utterance.current += 1;
+      asr.current?.abort();
       discardRef.current = true;
       setSpeaking(false);
       return;
@@ -431,6 +503,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     if (flush) {
       flushRef.current = null;
       discardRef.current = true;
+      invalidate();
       activeRef.current = false;
       setListening(false);
       setSpeaking(false);
@@ -443,13 +516,16 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     recorderRef.current = null;
     flushRef.current = null;
     clearGrace();
+    const voice = voiceRef.current;
+    invalidate();
     finish();
+    voice?.stop();
 
     // Запись выбрасываем молча: разбор отменённой фразы — это отправка того, что человек
     // передумал говорить.
     recorder?.stop().catch(() => undefined);
     if (!engine) voiceRef.current = null;
-  }, [clearGrace, finish]);
+  }, [clearGrace, finish, invalidate]);
 
   // Хоткей «держи и говори»: Ctrl+Space. Печатающему человеку он не мешает.
   useEffect(() => {
@@ -460,8 +536,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
 
     // Esc — «нет, не то»: выбрасываем запись, ничего не разбирая и не ругаясь.
     const escape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      if (!activeRef.current) return;
+      if (event.key !== "Escape" || (!activeRef.current && !pending.current)) return;
       event.preventDefault();
       cancel();
     };
@@ -493,17 +568,18 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   useEffect(
     () => () => {
       clearGrace();
+      invalidate();
       activeRef.current = false;
       alwaysStop.current?.();
       voiceRef.current?.stop();
       recorderRef.current?.stop().catch(() => {});
     },
-    [clearGrace],
+    [clearGrace, invalidate],
   );
 
   // Режим выключили, а микрофон ещё открыт — закрываем, не дожидаясь следующей фразы.
   useEffect(() => {
-    if (!enabled && activeRef.current) {
+    if (!enabled) {
       if (alwaysStop.current) alwaysStop.current();
       else cancel();
     }
@@ -522,5 +598,5 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   // а системное распознавание однократное.
   const alwaysSupported = local !== null && microphoneAvailable();
 
-  return { listening, supported, speaking, alwaysSupported, start, stop, cancel };
+  return { listening, processing, supported, speaking, alwaysSupported, start, stop, cancel };
 }
