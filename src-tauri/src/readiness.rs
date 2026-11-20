@@ -220,17 +220,11 @@ mod tests {
             "движок по https"
         );
         assert!(
-            catalog
-                .whisper_model
-                .url
-                .starts_with("https://"),
+            catalog.whisper_model.url.starts_with("https://"),
             "модель распознавания по https"
         );
         assert!(
-            catalog
-                .whisper_runtime
-                .url
-                .starts_with("https://"),
+            catalog.whisper_runtime.url.starts_with("https://"),
             "движок распознавания по https"
         );
         assert!(

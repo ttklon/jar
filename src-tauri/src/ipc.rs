@@ -997,10 +997,7 @@ pub async fn download_runtime(
 
 /// Only the app-owned versioned directory may be removed. Never manual files.
 #[tauri::command]
-pub async fn remove_runtime(
-    state: State<'_, AppState>,
-    kind: String,
-) -> Result<(), String> {
+pub async fn remove_runtime(state: State<'_, AppState>, kind: String) -> Result<(), String> {
     use std::sync::atomic::Ordering;
     let kind = runtime_kind(&kind)?;
     ENGINE_STARTING
@@ -1019,9 +1016,7 @@ pub async fn remove_runtime(
     // Whisper запускается на каждый запрос распознавания: пока запрос идёт,
     // файлы заняты и удалять их рано — честнее попросить подождать.
     if matches!(kind, crate::runtime::Kind::Whisper) && state.inner.asr.busy() {
-        return Err(
-            "локальное распознавание ещё работает; дождитесь конца и повторите".into(),
-        );
+        return Err("локальное распознавание ещё работает; дождитесь конца и повторите".into());
     }
     let base = state.inner.base_dir.clone();
     tauri::async_runtime::spawn_blocking(move || crate::runtime::remove(&base, kind))

@@ -568,7 +568,11 @@ mod tests {
             "program": program_name,
             "files": [{ "path": program_name, "sha256": file_sha }]
         });
-        std::fs::write(managed.join("installed.json"), serde_json::to_vec(&meta).unwrap()).unwrap();
+        std::fs::write(
+            managed.join("installed.json"),
+            serde_json::to_vec(&meta).unwrap(),
+        )
+        .unwrap();
         std::fs::write(managed.join(".zshelper-owner"), spec.sha256.as_bytes()).unwrap();
         let manual = base.join("sidecars").join(PROGRAM);
         std::fs::write(&manual, b"manual").expect("ручной файл");

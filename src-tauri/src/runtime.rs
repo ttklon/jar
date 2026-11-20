@@ -273,7 +273,14 @@ pub fn install(base: &Path, kind: Kind) -> Result<Installed, String> {
             return Err("скачивание отменено человеком".into());
         }
         std::fs::write(&script, SCRIPT).map_err(|e| e.to_string())?;
-        extract(&script, &archive, &stage, &spec.sha256, spec.bytes, &spec.program)?;
+        extract(
+            &script,
+            &archive,
+            &stage,
+            &spec.sha256,
+            spec.bytes,
+            &spec.program,
+        )?;
         verify_directory(&stage, kind, true)?;
         // Write our own ownership marker, never one supplied by the ZIP.
         let mut owner = std::fs::OpenOptions::new()
@@ -448,14 +455,10 @@ mod tests {
         assert!(!allowed_source(&stranger));
         let mut swapped = Kind::Llama.spec().clone();
         swapped.url = Kind::Whisper.spec().url.clone();
-        assert!(
-            !allowed_source(&swapped),
-            "id и источник должны совпадать"
-        );
+        assert!(!allowed_source(&swapped), "id и источник должны совпадать");
     }
     fn fixture(tag: &str, kind: Kind) -> PathBuf {
-        let base =
-            std::env::temp_dir().join(format!(
+        let base = std::env::temp_dir().join(format!(
             "zshelper-managed-{tag}-{}-{}",
             kind.spec().id,
             std::process::id()
@@ -475,11 +478,7 @@ mod tests {
             serde_json::to_vec(&meta).unwrap(),
         )
         .unwrap();
-        std::fs::write(
-            dir.join(OWNER),
-            kind.spec().sha256.as_bytes(),
-        )
-        .unwrap();
+        std::fs::write(dir.join(OWNER), kind.spec().sha256.as_bytes()).unwrap();
         base
     }
     #[test]
@@ -488,7 +487,11 @@ mod tests {
             let base = fixture("integrity", kind);
             assert!(find(&base, kind).is_some());
             assert!(verify(&base, kind).is_ok());
-            std::fs::write(directory(&base, kind).join(&kind.spec().program), b"changed").unwrap();
+            std::fs::write(
+                directory(&base, kind).join(&kind.spec().program),
+                b"changed",
+            )
+            .unwrap();
             assert!(verify(&base, kind).unwrap_err().contains("изменился"));
             std::fs::remove_dir_all(base).unwrap();
         }
@@ -529,7 +532,9 @@ mod tests {
         let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
-        assert!(remove(&base, Kind::Whisper).unwrap_err().contains("метки владения"));
+        assert!(remove(&base, Kind::Whisper)
+            .unwrap_err()
+            .contains("метки владения"));
         std::fs::remove_dir_all(base).unwrap();
     }
     #[test]
@@ -560,7 +565,11 @@ mod tests {
         std::fs::write(whisper_dir.join(&Kind::Whisper.spec().program), b"fixture").unwrap();
         // Без метки владения удаление запрещено — иначе тест проверял бы не
         // «свой каталог убран, чужой остался», а обход защиты.
-        std::fs::write(whisper_dir.join(OWNER), Kind::Whisper.spec().sha256.as_bytes()).unwrap();
+        std::fs::write(
+            whisper_dir.join(OWNER),
+            Kind::Whisper.spec().sha256.as_bytes(),
+        )
+        .unwrap();
         assert!(is_managed(&base, Kind::Whisper));
         let _guard = download::TEST_LOCK
             .lock()
@@ -584,15 +593,23 @@ mod tests {
         let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
-        assert!(remove(&base, Kind::Llama).unwrap_err().contains("метки владения"));
-        assert!(directory(&base, Kind::Llama).join("llama-server.exe").is_file());
+        assert!(remove(&base, Kind::Llama)
+            .unwrap_err()
+            .contains("метки владения"));
+        assert!(directory(&base, Kind::Llama)
+            .join("llama-server.exe")
+            .is_file());
         std::fs::remove_dir_all(base).unwrap();
     }
 
     #[test]
     fn broken_manifest_keeps_ownership_for_explicit_recovery() {
         let base = fixture("broken-manifest", Kind::Llama);
-        std::fs::write(directory(&base, Kind::Llama).join("installed.json"), b"broken").unwrap();
+        std::fs::write(
+            directory(&base, Kind::Llama).join("installed.json"),
+            b"broken",
+        )
+        .unwrap();
         assert!(is_managed(&base, Kind::Llama));
         assert!(find(&base, Kind::Llama).is_none());
         assert!(verify(&base, Kind::Llama).is_err());
@@ -610,9 +627,7 @@ mod tests {
         std::fs::remove_file(directory(&base, Kind::Llama).join("llama-server.exe")).unwrap();
         assert!(is_managed(&base, Kind::Llama));
         assert!(find(&base, Kind::Llama).is_none());
-        assert!(
-            verify_directory(&directory(&base, Kind::Llama), Kind::Llama, false).is_err()
-        );
+        assert!(verify_directory(&directory(&base, Kind::Llama), Kind::Llama, false).is_err());
         std::fs::remove_dir_all(base).unwrap();
     }
 
@@ -680,8 +695,8 @@ mod tests {
         .expect("pinned model download and hash verification");
         assert!(downloaded.verified);
         println!("RUNTIME_SMOKE model bytes and SHA256 verified");
-        let installed = install(&work.0, Kind::Llama)
-            .expect("pinned runtime download and atomic installation");
+        let installed =
+            install(&work.0, Kind::Llama).expect("pinned runtime download and atomic installation");
         verify(&work.0, Kind::Llama).expect("installed payload SHA256 inventory");
         println!("RUNTIME_SMOKE runtime installed and verified");
         let port = crate::server::free_port().unwrap();
