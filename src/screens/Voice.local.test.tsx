@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   cancelTool,
   declarePresence,
@@ -763,6 +763,58 @@ describe("локальное распознавание на экране", () =
       sight: null,
     });
     await waitFor(() => expect(screen.queryByText(/сделал, шагов/)).toBeNull());
+  });
+
+  it("ручное «Выполнить» тоже не принимает поздний успех после «Стоп»", async () => {
+    let resolveRun: (value: object) => void = () => {};
+    vi.mocked(draftPlan).mockResolvedValue({
+      plan: {
+        goal: "удали a.txt",
+        steps: [{ registry: "files|удалить|файл", params: { path: "a.txt" } }],
+      },
+      problems: [],
+      questions: [],
+      gates: [
+        {
+          position: 1,
+          registry: "files|удалить|файл",
+          decision: "confirm",
+          risk: "destructive",
+          wants_approval: true,
+        },
+      ],
+    });
+    vi.mocked(runPlan).mockReturnValue(
+      new Promise((resolve) => {
+        resolveRun = resolve as (value: object) => void;
+      }) as never,
+    );
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "удали a.txt" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    fireEvent.click(await screen.findByLabelText("разрешить шаг 1"));
+    fireEvent.click(await screen.findByRole("button", { name: "Выполнить" }));
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledOnce());
+
+    fireEvent.click(screen.getByRole("button", { name: "Стоп" }));
+    expect(await screen.findByText(/Новое не начну/)).toBeTruthy();
+
+    resolveRun({
+      goal: "удали a.txt",
+      steps: [],
+      stopped: null,
+      run_id: 1,
+      sight: null,
+    });
+    // Даём обещанию точно доехать: без сверки номера запроса поздний успех
+    // подменил бы сказанное после стопа своей фразой.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(screen.queryByText(/проговорить не могу/)).toBeNull();
+    expect(screen.queryByText(/сделал, шагов/)).toBeNull();
+    expect(screen.getByText(/Новое не начну/)).toBeTruthy();
   });
 
   it("если движок есть, а модели нет, указывает кнопку карточки", async () => {

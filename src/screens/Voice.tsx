@@ -195,7 +195,13 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const [items, setItems] = useState<PlanItem[] | null>(null);
   const [busy, setBusy] = useState(false);
   const searchRequestRef = useRef(0);
+  /**
+   * Номер запуска плана. Отдельно от «человек что-то поправил»: правка ответа
+   * отменяет старый запуск, но не должна стирать «выполняю…» у того, кто просто
+   * ждёт перепроверку.
+   */
   const executeRequestRef = useRef(0);
+  const planRunRef = useRef(0);
   const runCheckedRef = useRef<(check: PlanCheck) => void>(() => {});
   const thoughtRequestRef = useRef(0);
   const promptRequestRef = useRef(0);
@@ -1429,15 +1435,16 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   }, [mic.listening]);
 
   runCheckedRef.current = (check) => {
-    const request = executeRequestRef.current;
+    const guard = executeRequestRef.current;
+    const request = ++planRunRef.current;
     const plan = check.plan;
-    if (!plan || request !== executeRequestRef.current) return;
+    if (!plan || guard !== executeRequestRef.current) return;
     setRunning(true);
     setError(null);
     setDraft(check);
     void runPlan(JSON.stringify(plan), [])
       .then((result) => {
-        if (request !== executeRequestRef.current) return;
+        if (request !== planRunRef.current) return;
         setReport(result);
         const phrase = result.stopped
           ? voice.draftSpokenStopped(result.stopped)
@@ -1445,19 +1452,20 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         setSpoken(speak(phrase) ? voice.said(phrase) : voice.silent);
       })
       .catch((reason: unknown) => {
-        if (request !== executeRequestRef.current) return;
+        if (request !== planRunRef.current) return;
         const message = reason instanceof Error ? reason.message : String(reason);
         setError(message);
         speak(voice.draftSpokenStopped(message));
       })
       .finally(() => {
-        if (request === executeRequestRef.current) setRunning(false);
+        if (request === planRunRef.current) setRunning(false);
       });
   };
 
   const execute = useCallback((granted?: number[], answerOverride?: Record<string, string>) => {
     const allowed = Array.isArray(granted) ? granted : approved;
-    const request = ++executeRequestRef.current;
+    const guard = ++executeRequestRef.current;
+    const request = ++planRunRef.current;
     const plan = draft?.plan;
     if (!plan) return;
     const usedAnswers = answerOverride ?? answers;
@@ -1484,7 +1492,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     const prepared =
       asked.length > 0
         ? fillPlan(JSON.stringify(plan), asked).catch((reason: unknown) => {
-            if (request === executeRequestRef.current) {
+            if (guard === executeRequestRef.current) {
               const message = reason instanceof Error ? reason.message : String(reason);
               setError(message);
             }
@@ -1494,7 +1502,11 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
 
     prepared
       .then((checked) => {
-        if (!checked || request !== executeRequestRef.current) return null;
+        // Правка любого поля после нажатия отменяет этот запуск: уходит и поздний план,
+        // и запуск уже перепроверенного.
+        const edited = guard !== executeRequestRef.current;
+        if (!checked || edited) return null;
+        if (request !== planRunRef.current) return null;
         setDraft(checked);
         if (checked.problems.length > 0) {
           const message = checked.problems[0]?.problem ?? voice.loadError;
@@ -1513,7 +1525,11 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         return runPlan(JSON.stringify(checked.plan), allowed);
       })
       .then((result) => {
-        if (!result) return;
+        // Устаревший путь не докладывает ни успех, ни отказ: «стоп» или правка поля
+        // уже сказали человеку своё, и поздний голос был бы вторым ответом.
+        if (!result || request !== planRunRef.current || guard !== executeRequestRef.current) {
+          return;
+        }
         setReport(result);
         const phrase = result.stopped
           ? voice.draftSpokenStopped(result.stopped)
@@ -1521,11 +1537,17 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         setSpoken(speak(phrase) ? voice.said(phrase) : voice.silent);
       })
       .catch((reason: unknown) => {
+        if (request !== planRunRef.current || guard !== executeRequestRef.current) return;
         const message = reason instanceof Error ? reason.message : String(reason);
         setError(message);
         speak(voice.draftSpokenStopped(message));
       })
-      .finally(() => setRunning(false));
+      .finally(() => {
+        // «выполняю…» снимает только последний запуск: остановленный вручную уже
+        // снял его через halt, а отменённая правкой перепроверка не должна тянуть
+        // чужую надпись дольше, чем живёт её поле.
+        if (request === planRunRef.current) setRunning(false);
+      });
   }, [draft, approved, answers]);
   executeRef.current = execute;
 
