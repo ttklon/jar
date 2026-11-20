@@ -554,6 +554,40 @@ describe("локальное распознавание на экране", () =
     expect(vi.mocked(runPlan).mock.calls[0]?.[1]).toEqual([1]);
   });
 
+  it("«повтори» при открытом вопросе не становится значением поля", async () => {
+    vi.mocked(draftPlan).mockResolvedValueOnce({
+      plan: {
+        goal: "удали файл",
+        steps: [{ registry: "files|удалить|файл", params: {} }],
+      },
+      problems: [],
+      questions: [{ position: 1, name: "path", label: "Путь", hint: "" }],
+      gates: [
+        {
+          position: 1,
+          registry: "files|удалить|файл",
+          decision: "confirm",
+          risk: "destructive",
+          wants_approval: true,
+        },
+      ],
+    });
+    vi.mocked(draftPlan).mockResolvedValue(null);
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "удали файл" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    const path = await screen.findByLabelText("Путь");
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "повтори" } });
+    fireEvent.click(screen.getByRole("button", { name: "Ответить" }));
+
+    // Продолжение прошлой фразы — это новый поиск, а не ответ на «Путь».
+    await waitFor(() => expect(vi.mocked(draftPlan)).toHaveBeenCalled());
+    expect((path as HTMLInputElement).value).toBe("");
+    expect(vi.mocked(fillPlan)).not.toHaveBeenCalled();
+  });
+
   it("безопасное чтение после ответа начинается само, запись — нет", async () => {
     vi.mocked(draftPlan).mockResolvedValueOnce({
       plan: {

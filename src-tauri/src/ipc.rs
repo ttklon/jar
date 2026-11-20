@@ -2233,6 +2233,16 @@ pub async fn run_plan(
     for (index, step) in plan.steps.iter().enumerate() {
         let position = index + 1;
         let key = step.registry.trim().to_string();
+
+        // «Стоп» между шагами — тоже стоп. Долгий процесс внутри шага бросает сам
+        // исполнитель, а шаг без процесса (папка, файл, буфер) иначе начнётся сразу
+        // после нажатия: отмена успела бы пройти мимо, и план сделал бы лишнее.
+        let cancelled = inner.cancel.load(Ordering::Relaxed);
+        if let Some(reason) = plan::stopped_before(position, cancelled) {
+            stopped = Some(reason);
+            break;
+        }
+
         let args: Vec<(String, String)> = step.params.clone().into_iter().collect();
         let fingerprint = format!("{:016x}", policy::fingerprint(&key, &args));
         let (decision, risk) = decision_of(&inner, &key);

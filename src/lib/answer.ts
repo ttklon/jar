@@ -1,18 +1,21 @@
 import type { PlanQuestion } from "../ipc";
 import { isSpokenConsent } from "./consent";
+import { isFollowUp } from "./followUp";
 import { isSpokenStop } from "./spoken";
 
 /**
  * Пока план ждёт уточнение, следующая обычная фраза — ответ, не новая задача.
  *
  * «Стоп» бросает план. Отдельное «да» не закрывает вопрос и не становится
- * значением: разрешение и ответ — разные слова. Пустую фразу не подставляем.
+ * значением: разрешение и ответ — разные слова. «Ещё» и «повтори» остаются
+ * продолжением прошлой фразы, а не значением поля. Пустую фразу не подставляем.
  */
 export function phraseIsAnswer(phrase: string): boolean {
   const word = phrase.trim();
   if (word.length === 0) return false;
   if (isSpokenStop(word)) return false;
   if (isSpokenConsent(word)) return false;
+  if (isFollowUp(word)) return false;
   return true;
 }
 

@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "./answer";
 
 describe("ответ на открытый вопрос", () => {
-  it("обычная фраза — ответ, стоп и «да» — нет", () => {
+  it("обычная фраза — ответ, стоп, «да» и продолжение — нет", () => {
     expect(phraseIsAnswer("C:\\tmp\\a.txt")).toBe(true);
-    expect(phraseIsAnswer("ещё")).toBe(true);
+    expect(phraseIsAnswer("ещё тише")).toBe(true);
+    expect(phraseIsAnswer("ещё")).toBe(false);
+    expect(phraseIsAnswer("повтори")).toBe(false);
     expect(phraseIsAnswer("да")).toBe(false);
     expect(phraseIsAnswer("Стоп.")).toBe(false);
     expect(phraseIsAnswer("  ")).toBe(false);

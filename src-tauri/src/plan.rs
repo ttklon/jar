@@ -227,6 +227,19 @@ pub fn blocker(gates: &[StepGate]) -> Option<String> {
     None
 }
 
+/// Почему этот шаг не начинать прямо сейчас. `None` — можно.
+///
+/// Долгий процесс внутри шага бросает сам исполнитель по тому же флагу. Но шаг без
+/// процесса — папка, файл, буфер — проверял бы флаг только на входе, и нажатое между
+/// шагами «стоп» прошло бы мимо: план сделал бы ещё одно действие уже после остановки.
+/// Поэтому перед каждым шагом спрашиваем одно и то же место, а не надеемся на руку.
+pub fn stopped_before(position: usize, cancelled: bool) -> Option<String> {
+    if !cancelled {
+        return None;
+    }
+    Some(format!("отменено человеком: шаг {position} не начинался"))
+}
+
 /// Разбирает JSON плана. Ошибка — человеческая строка: её увидит и модель, и человек.
 pub fn parse(json: &str) -> Result<Plan, String> {
     if json.trim().is_empty() {
@@ -834,6 +847,18 @@ mod tests {
     fn money_never_becomes_a_draft() {
         // Даже если строка нашлась, `deny` — это отказ, а не черновик.
         assert!(draft("оплати счёт за интернет", &registry(), None).is_none());
+    }
+
+    #[test]
+    fn a_stop_between_steps_means_the_next_step_does_not_start() {
+        // Нажатое «стоп» — это не совет: следующий шаг не начинается и говорит, что его
+        // не было, а не «выполнено».
+        let reason = stopped_before(2, true).expect("отмена до шага — это остановка");
+        assert!(reason.contains("шаг 2"), "{reason}");
+        assert!(reason.contains("не начинался"), "{reason}");
+        assert_eq!(stopped_before(2, false), None);
+        // И до первого шага тоже: план, остановленный до старта, ничего не делает.
+        assert!(stopped_before(1, true).is_some());
     }
 
     #[test]
