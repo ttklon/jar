@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
+  cancelTool,
   declarePresence,
   draftHand,
   draftPlan,
@@ -41,6 +42,7 @@ vi.mock("../ipc", () => ({
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn().mockResolvedValue(null),
   smokeCheck: vi.fn(),
+  cancelTool: vi.fn().mockResolvedValue(undefined),
   uiDump: vi.fn().mockRejectedValue(new Error("в браузере нет UI Automation")),
   uiPress: vi.fn().mockRejectedValue(new Error("в браузере окон нет")),
   uiType: vi.fn().mockRejectedValue(new Error("в браузере окон нет")),
@@ -116,6 +118,7 @@ afterEach(() => {
   vi.mocked(startRecording).mockReset();
   vi.mocked(speechStatus).mockReset().mockResolvedValue(null as never);
   vi.mocked(smokeCheck).mockReset();
+  vi.mocked(cancelTool).mockReset().mockResolvedValue(undefined);
   vi.mocked(readinessStatus).mockReset().mockRejectedValue(new Error("статус недоступен в этом тесте"));
 });
 
@@ -458,6 +461,84 @@ describe("локальное распознавание на экране", () =
     expect(await screen.findByText(/Этого слова мало/)).toBeTruthy();
     expect(screen.getByLabelText("Путь")).toBeTruthy();
     expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
+  });
+
+  it("«стоп» — не новая задача и не разрешение", async () => {
+    vi.mocked(draftPlan).mockResolvedValue({
+      plan: {
+        goal: "удали a.txt",
+        steps: [{ registry: "files|удалить|файл", params: { path: "a.txt" } }],
+      },
+      problems: [],
+      questions: [],
+      gates: [
+        {
+          position: 1,
+          registry: "files|удалить|файл",
+          decision: "confirm",
+          risk: "destructive",
+          wants_approval: true,
+        },
+      ],
+    });
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "удали a.txt" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await screen.findByRole("button", { name: "Выполнить" });
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "Стоп." } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    expect(await screen.findByText(/Новое не начну/)).toBeTruthy();
+    expect(vi.mocked(cancelTool)).toHaveBeenCalled();
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
+    expect(vi.mocked(requestLearning)).not.toHaveBeenCalled();
+  });
+
+  it("кнопка «Стоп» бросает уже начатый план и не принимает поздний успех", async () => {
+    let resolveRun: (value: object) => void = () => {};
+    vi.mocked(draftPlan).mockResolvedValue({
+      plan: {
+        goal: "сколько места",
+        steps: [{ registry: "storage-backup|проверить|свободное место", params: {} }],
+      },
+      problems: [],
+      questions: [],
+      gates: [
+        {
+          position: 1,
+          registry: "storage-backup|проверить|свободное место",
+          decision: "allow",
+          risk: "read",
+          wants_approval: false,
+        },
+      ],
+    });
+    vi.mocked(runPlan).mockReturnValue(
+      new Promise((resolve) => {
+        resolveRun = resolve as (value: object) => void;
+      }) as never,
+    );
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сколько места" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    const stop = await screen.findByRole("button", { name: "Стоп" });
+    expect((stop as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(stop);
+    expect(await screen.findByText(/Новое не начну/)).toBeTruthy();
+    expect(vi.mocked(cancelTool)).toHaveBeenCalled();
+
+    resolveRun({
+      goal: "сколько места",
+      steps: [],
+      stopped: null,
+      run_id: 1,
+      sight: null,
+    });
+    await waitFor(() => expect(screen.queryByText(/сделал, шагов/)).toBeNull());
   });
 
   it("если движок есть, а модели нет, указывает кнопку карточки", async () => {

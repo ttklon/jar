@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
+  cancelTool,
   declarePresence,
   draftPlan,
   machineState,
@@ -33,6 +34,7 @@ vi.mock("../ipc", () => ({
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn().mockResolvedValue(null),
   smokeCheck: vi.fn(),
+  cancelTool: vi.fn().mockResolvedValue(undefined),
   uiDump: vi.fn().mockRejectedValue(new Error("нет UI Automation")),
   declarePresence: vi.fn(),
   machineState: vi.fn().mockResolvedValue({
@@ -109,6 +111,7 @@ afterEach(() => {
   vi.mocked(planFor).mockReset().mockResolvedValue([]);
   vi.mocked(think).mockReset().mockResolvedValue(null as never);
   vi.mocked(smokeCheck).mockReset();
+  vi.mocked(cancelTool).mockReset().mockResolvedValue(undefined);
   vi.mocked(readinessStatus).mockReset().mockRejectedValue(new Error("статус недоступен в этом тесте"));
   vi.mocked(declarePresence).mockReset();
   vi.mocked(requestLearning).mockReset().mockResolvedValue(null);

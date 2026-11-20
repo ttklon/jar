@@ -16,6 +16,7 @@ import {
   rememberFact,
   requestLearning,
   runPlan,
+  cancelTool,
   isolationStatus,
   readinessStatus,
   smokeCheck,
@@ -50,7 +51,8 @@ import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { consentCanRun, consentPositions, isSpokenConsent, keepsPendingPlan } from "../lib/consent";
 import { installedEngine, isEngineDown } from "../lib/engineReady";
-import { speak } from "../lib/voice";
+import { isSpokenStop } from "../lib/spoken";
+import { speak, stopSpeaking } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
 import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
 import { describeThought } from "../lib/thought";
@@ -325,6 +327,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   runningRef.current = running;
   const executeRef = useRef<(granted?: number[]) => void>(() => {});
   const askModelRef = useRef<(phrase: string) => void>(() => {});
+  const micStopRef = useRef<() => void>(() => {});
   /** Одна попытка на фразу: повторный отказ не крутит запуск по кругу. */
   const engineAttemptRef = useRef<string | null>(null);
   const startInstalledEngineRef = useRef<() => Promise<EngineStart>>(async () => ({ kind: "unknown" }));
@@ -792,6 +795,33 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   }, []);
 
   /**
+   * «Стоп» — слово или кнопка. Новая задача из этого слова не делается.
+   * Начатый шаг просим бросить; уже сделанное не откатываем.
+   */
+  const halt = useCallback(
+    (phrase: string) => {
+      executeRequestRef.current += 1;
+      thoughtRequestRef.current += 1;
+      promptRequestRef.current += 1;
+      searchRequestRef.current += 1;
+      stopQueue();
+      setBusy(false);
+      setRunning(false);
+      setThinking(false);
+      setEngineBusy(false);
+      setAlways(false);
+      stopSpeaking();
+      micStopRef.current();
+      void cancelTool().catch(() => undefined);
+      const heard = voice.stopHeard;
+      setSpoken(speak(heard) ? voice.said(heard) : heard);
+      const shown = phrase.trim();
+      if (shown.length > 0) setText(shown);
+    },
+    [stopQueue],
+  );
+
+  /**
    * Остановить одну цель, не трогая остальные.
    *
    * Общее «стоп» остаётся для всего сразу; это — для одной работы. Начатое доводится до
@@ -926,6 +956,10 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     thoughtRequestRef.current += 1;
     promptRequestRef.current += 1;
     const query = phrase.trim();
+    if (isSpokenStop(query)) {
+      halt(query);
+      return;
+    }
     const request = ++searchRequestRef.current;
     const pending = draftRef.current;
     // «Да» на уже показанный план — отдельное слово, а не новая задача.
@@ -1087,7 +1121,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       .finally(() => {
         if (request === searchRequestRef.current) setBusy(false);
       });
-  }, [knownFacts, wakeEngine]);
+  }, [knownFacts, wakeEngine, halt]);
 
   // Свой движок есть — пишем звук и отдаём ему: это единственный путь, где звук не
   // покидает компьютер. Нет — слушаем тем, что даёт система, и говорим об этом выше.
@@ -1108,6 +1142,10 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     disabledReason: micCheckBusy ? micTestText.busyReason : voice.systemSpeechRequired,
     onText: (heard) => {
       setVoiceError(null);
+      if (isSpokenStop(heard)) {
+        halt(heard);
+        return;
+      }
       const target = answerTargetRef.current;
 
       if (target) {
@@ -1133,6 +1171,9 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     },
     onError: (message) => setVoiceError(message),
   });
+  micStopRef.current = () => {
+    mic.stop();
+  };
 
   const waitingForConfirmation =
     draft?.gates.some(
@@ -1791,8 +1832,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           <Button
             size="small"
             appearance="subtle"
-            disabled={!queueOn && summary(queue).waiting === 0}
-            onClick={stopQueue}
+            disabled={!queueOn && summary(queue).waiting === 0 && !running && !busy && !thinking && !engineBusy}
+            onClick={() => halt("стоп")}
           >
             {voice.queueStop}
           </Button>
