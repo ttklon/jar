@@ -1050,12 +1050,10 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       setBusy(false);
       return;
     }
-    if (pending && pending.questions.length > 0 && phraseIsAnswer(query)) {
-      const open = firstOpenQuestion(pending.questions, answersRef.current);
-      if (!open) {
-        executeRef.current(undefined, answersRef.current);
-        return;
-      }
+    // Все поля уже заполнены — это не ответ, а новая задача: молча съесть фразу
+    // значило бы ответить не на то, что человек сказал.
+    const open = pending ? firstOpenQuestion(pending.questions, answersRef.current) : null;
+    if (pending && pending.questions.length > 0 && open && phraseIsAnswer(query)) {
       const field = questionField(open);
       const nextAnswers = { ...answersRef.current, [field]: query };
       answersRef.current = nextAnswers;

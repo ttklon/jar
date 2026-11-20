@@ -586,6 +586,41 @@ describe("локальное распознавание на экране", () =
     expect(vi.mocked(runPlan).mock.calls[0]?.[1]).toEqual([1]);
   });
 
+  it("все поля заполнены — новая фраза становится новым поиском, а не запуском", async () => {
+    const initial = {
+      plan: {
+        goal: "создай папку",
+        steps: [{ registry: "files|создать|папку", params: {} }],
+      },
+      problems: [],
+      questions: [
+        { position: 1, name: "path", label: "Путь", hint: "" },
+        { position: 1, name: "name", label: "Имя", hint: "" },
+      ],
+      gates: [],
+    };
+    vi.mocked(draftPlan).mockResolvedValueOnce(initial as never);
+    vi.mocked(draftPlan).mockResolvedValue(null);
+
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "создай папку" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    fireEvent.change(await screen.findByLabelText("Путь"), { target: { value: "C:\\tmp\\a" } });
+    fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "отчёты" } });
+
+    vi.mocked(draftPlan).mockClear();
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сколько места на диске" } });
+    fireEvent.click(screen.getByRole("button", { name: "Ответить" }));
+
+    // Ответить некуда: все поля заполнены, значит это новая задача.
+    await waitFor(() =>
+      expect(vi.mocked(draftPlan)).toHaveBeenCalledWith("сколько места на диске"),
+    );
+    expect(vi.mocked(runPlan)).not.toHaveBeenCalled();
+    expect(vi.mocked(fillPlan)).not.toHaveBeenCalled();
+  });
+
   it("«повтори» при открытом вопросе не становится значением поля", async () => {
     vi.mocked(draftPlan).mockResolvedValueOnce({
       plan: {
