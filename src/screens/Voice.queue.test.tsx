@@ -286,6 +286,44 @@ describe("очередь дел на экране", () => {
     await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(2));
   });
 
+  it("убрали ждущее дело, пока очередь идёт, — оно не запускается", async () => {
+    // Первое дело держим незавершённым: пока оно идёт, человек успевает передумать
+    // насчёт второго. Убранное дело не должно всплыть из копии, снятой на старте.
+    let release: (value: object) => void = () => {};
+    // Одно дело за раз: второе честно ждёт, пока идёт первое, — его и убираем.
+    vi.mocked(machineState).mockResolvedValue({
+      ...away,
+      budget: { parallel: 1, mode: "away" as const, reason: "одно дело за раз", may_start: true },
+    } as never);
+    vi.mocked(draftPlan).mockResolvedValue(safePlan as never);
+    vi.mocked(runPlan)
+      .mockReturnValueOnce(new Promise((resolve) => { release = resolve as (value: object) => void; }) as never)
+      .mockResolvedValue({
+        goal: "второе",
+        steps: [],
+        stopped: null,
+        run_id: 2,
+        sight: null,
+      } as never);
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    addToQueue("убавить громкость");
+    addToQueue("второе дело");
+    fireEvent.click(screen.getByText("Работать без меня"));
+
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByText(/ждёт · второе дело/)).toBeTruthy());
+
+    fireEvent.click(screen.getByRole("button", { name: "Убрать" }));
+    await waitFor(() => expect(screen.queryByText(/ждёт · второе дело/)).toBeNull());
+
+    release({ goal: "первое", steps: [], stopped: null, run_id: 1, sight: null });
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1));
+    expect(screen.queryByText(/· второе дело/)).toBeNull();
+  });
+
   it("человек вернулся — очередь новые дела не начинает", async () => {
     vi.mocked(machineState).mockResolvedValue({
       ...away,

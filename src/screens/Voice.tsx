@@ -468,6 +468,15 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     const plans = new Map<string, PlanCheck | null>();
     const inFlight = new Map<string, Promise<void>>();
 
+    // Пока очередь идёт, человек продолжает жить на этом же экране: он может убрать
+    // дело или вернуть его в руки. Поэтому каждое своё изменение очередь кладёт поверх
+    // того, что лежит сейчас, а не поверх копии, снятой на старте.
+    const mine = (change: (current: QueueItem[]) => QueueItem[]) => {
+      const next = change(queueRef.current);
+      sync(next);
+      return next;
+    };
+
     const sync = (next: QueueItem[]) => {
       items = next;
       queueRef.current = items;
@@ -504,7 +513,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         const verdict = unattended(check);
 
         if (!verdict.can || !check?.plan) {
-          sync(setState(items, item.id, "held", verdict.why));
+          mine((current) => setState(current, item.id, "held", verdict.why));
           return;
         }
 
@@ -514,9 +523,9 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         let tries = 0;
         for (;;) {
           tries += 1;
-          sync(
+          mine((current) =>
             setState(
-              items,
+              current,
               item.id,
               "running",
               tries > 1 ? `попытка ${tries} из ${MAX_TRIES}` : "",
@@ -525,13 +534,13 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
 
           const report = await runPlan(JSON.stringify(check.plan), []).catch(() => null);
           if (!report) {
-            sync(setState(items, item.id, "failed", "запуск не состоялся: ядро не ответило"));
+            mine((current) => setState(current, item.id, "failed", "запуск не состоялся: ядро не ответило"));
             outcome = { completed: 0, steps: 0, stopped: "ядро не ответило" };
             return;
           }
 
           if (!report.stopped) {
-            sync(setState(items, item.id, "done", `шагов: ${report.steps.length}, всё выполнено`));
+            mine((current) => setState(current, item.id, "done", `шагов: ${report.steps.length}, всё выполнено`));
             outcome = {
               completed: report.steps.length,
               steps: report.steps.length,
@@ -548,9 +557,9 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
             : retry({ completed, stopped: report.stopped }, tries);
 
           if (!verdict.again) {
-            sync(
+            mine((current) =>
               setState(
-                items,
+                current,
                 item.id,
                 "failed",
                 `${verdict.why} — остановилось на: ${report.stopped}`,
@@ -561,7 +570,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           }
 
           // Короткая пауза: помеха могла быть случайной, но ждать её «когда-нибудь» нельзя.
-          sync(setState(items, item.id, "running", verdict.why));
+          mine((current) => setState(current, item.id, "running", verdict.why));
           await new Promise((resolve) => setTimeout(resolve, 300));
         }
       })().finally(() => {
@@ -585,6 +594,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
      */
     const continueGoals = async (): Promise<{ added: number; why: string | null }> => {
       if (queueStopRef.current) return { added: 0, why: null };
+      // Читаем то, что лежит сейчас: человек мог убрать дело или вернуть его в руки.
+      items = queueRef.current;
 
       const origins = [
         ...new Set(
@@ -744,11 +755,13 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         }
 
         const stamp = Date.now();
-        let updated = items;
-        deeds.forEach((deed, index) => {
-          updated = add(updated, deed, `n${stamp}${index}`, origin);
+        mine((current) => {
+          let updated = current;
+          deeds.forEach((deed, index) => {
+            updated = add(updated, deed, `n${stamp}${index}`, origin);
+          });
+          return updated;
         });
-        sync(updated);
         added += deeds.length;
       }
 
@@ -757,6 +770,8 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
 
     try {
       for (;;) {
+        // Правки с экрана — тоже очередь: убранное не запускаем, возвращённое видим.
+        items = queueRef.current;
         if (queueStopRef.current) {
           setQueueIdle("остановлено вами: начатое доведено, остальное не начиналось");
           break;
@@ -770,7 +785,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           const check = await draftPlan(item.goal).catch(() => null);
           if (queueStopRef.current) break;
           plans.set(item.id, check);
-          sync(markScreen(items, item.id, usesScreen(check)));
+          mine((current) => markScreen(current, item.id, usesScreen(check)));
         }
         if (queueStopRef.current) continue;
 
