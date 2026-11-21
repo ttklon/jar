@@ -147,28 +147,11 @@ if ($installer) {
         # и проверка не должна из-за этого «падать» на исправной программе.
         if ($text -notmatch 'actions=[0-9]+') { throw "реестр не загрузился: $text" }
 
-        # Один экземпляр (шаг 146 плана): второй запуск не должен оставлять
-        # второй процесс. Иначе трей и горячая клавиша удваиваются, а журнал
-        # пишется из двух мест — и человек видит «приложение не отвечает».
-        $first = Start-Process -FilePath $exe -PassThru
-        Start-Sleep -Seconds 3
-        $second = Start-Process -FilePath $exe -PassThru
-        Start-Sleep -Seconds 4
-        $running = @(Get-Process -Name 'zshelper' -ErrorAction SilentlyContinue)
-        $count = $running.Count
-        if (-not $second.HasExited) { $second.Kill() }
-        if (-not $first.HasExited) { $first.Kill() }
-        if ($count -gt 1) { throw "второй запуск оставил $count процессов вместо одного" }
-        Say "  один экземпляр: процессов после второго запуска — $count"
-
-        # Копия памяти (шаг 147): после запуска на диске должна лежать настоящая
-        # база, а не пустой файл. Проверяем не «папка есть», а «файл не пустой».
-        $backups = Get-ChildItem -Path $env:APPDATA, $env:LOCALAPPDATA -Recurse -Directory -Filter 'backups' -ErrorAction SilentlyContinue |
-            Where-Object { Test-Path (Join-Path $_.FullName 'memory-*.db') } | Select-Object -First 1
-        if (-not $backups) { throw 'после запуска нет резервной копии памяти' }
-        $copy = Get-ChildItem -Path $backups.FullName -Filter 'memory-*.db' | Sort-Object Name -Descending | Select-Object -First 1
-        if ($copy.Length -le 0) { throw 'резервная копия памяти пустая' }
-        Say ("  копия памяти: {0} ({1} Б)" -f $copy.Name, $copy.Length)
+        # Один экземпляр (шаг 146) проверяется отдельным пунктом ниже — здесь
+        # только запоминаем, что именно запускать. Внутри этого пункта проверка
+        # была бы невидимой: наружу уходят только строки PASS/FAIL, а «процессов
+        # 0» тихо проходило бы как успех.
+        $script:installedExe = $exe
 
         # Удаление: программа уходит.
         $uninstaller = Get-ChildItem -Path $target -Filter '*uninstall*.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -178,9 +161,54 @@ if ($installer) {
     }
 } else {
     Say 'SKIP installer-silent-install-and-run — установщик не собран в этой джобе'
-    # Один экземпляр проверяем, только если есть установленная программа:
-    # проверка «второй запуск не плодит процессов» требует запуска.
-    Say 'SKIP single-instance-reveals-window — нужна установленная программа'
+}
+
+# ── 4б. Копия памяти при запуске (шаг 147) ────────────────────────────────────
+# Отдельный пункт, а не строка внутри установки: наружу уходят только PASS/FAIL,
+# и проверка, спрятанная в чужом пункте, либо не видна, либо проходит вхолостую.
+if ($script:installedExe) {
+    Check 'memory-backup-on-start' {
+        # База копируется до открытия, поэтому копия должна появиться уже после
+        # одного запуска. Проверяем «файл не пустой», а не «папка есть»: папку
+        # создаст кто угодно, а страховку — только снимок.
+        $run = Start-Process -FilePath $script:installedExe -PassThru
+        Start-Sleep -Seconds 6
+        $backups = @(Get-ChildItem -Path $env:APPDATA, $env:LOCALAPPDATA -Recurse -Directory -Filter 'backups' -ErrorAction SilentlyContinue |
+            Where-Object { Test-Path (Join-Path $_.FullName 'memory-*.db') })
+        if ($backups.Count -eq 0) { throw 'после запуска нет папки с резервными копиями' }
+        $copy = Get-ChildItem -Path $backups[0].FullName -Filter 'memory-*.db' |
+            Sort-Object Name -Descending | Select-Object -First 1
+        if ($copy.Length -le 0) { throw 'резервная копия памяти пустая' }
+        # Копия должна быть настоящей базой, а не файлом с именем .db.
+        $head = [IO.File]::ReadAllBytes($copy.FullName)[0..15]
+        $magic = [Text.Encoding]::ASCII.GetString($head)
+        if (-not $magic.StartsWith('SQLite format 3')) { throw "копия не база: $magic" }
+        Say ("  копия памяти: {0} ({1} Б, заголовок SQLite)" -f $copy.Name, $copy.Length)
+        if (-not $run.HasExited) { $run.Kill() }
+    }
+} else {
+    Say 'SKIP memory-backup-on-start — нужна установленная программа'
+}
+
+# ── 4в. Второй запуск не плодит процессы (шаг 146) ────────────────────────────
+if ($script:installedExe) {
+    Check 'single-instance-one-process' {
+        $first = Start-Process -FilePath $script:installedExe -PassThru
+        Start-Sleep -Seconds 5
+        $before = @(Get-Process -Name 'zshelper' -ErrorAction SilentlyContinue).Count
+        # Проверка обязана быть способной упасть: если первый запуск не оставил
+        # процесса, дальше проверять нечего, и «0 ≤ 1» было бы ложью.
+        if ($before -lt 1) { throw 'первый запуск не оставил ни одного процесса — проверять нечего' }
+        $second = Start-Process -FilePath $script:installedExe -PassThru
+        Start-Sleep -Seconds 5
+        $after = @(Get-Process -Name 'zshelper' -ErrorAction SilentlyContinue).Count
+        if (-not $second.HasExited) { $second.Kill() }
+        if (-not $first.HasExited) { $first.Kill() }
+        if ($after -gt $before) { throw "второй запуск добавил процесс: было $before, стало $after" }
+        Say "  процессов: до второго запуска $before, после — $after"
+    }
+} else {
+    Say 'SKIP single-instance-one-process — нужна установленная программа'
 }
 
 # ── 5. WebView2: то, без чего приложение белое ────────────────────────────────
