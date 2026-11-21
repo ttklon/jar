@@ -447,3 +447,15 @@ export async function memoryBackups(): Promise<MemoryBackup[]> {
 export async function memoryRestore(file: string, confirm: boolean): Promise<MemoryRestored> {
   return invoke<MemoryRestored>("memory_restore", { file, confirm });
 }
+
+/** Диагностический пакет для просмотра перед отправкой (шаг 148). */
+export type DiagnosticsPack = {
+  text: string;
+  paths_scrubbed: number;
+  secrets_scrubbed: number;
+  notes: string[];
+};
+
+export async function diagnosticsPack(lines?: number): Promise<DiagnosticsPack> {
+  return invoke<DiagnosticsPack>("diagnostics_pack", { lines: lines ?? null });
+}

@@ -14,6 +14,7 @@ use tauri::{AppHandle, Emitter, State};
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::autostart;
 use crate::backup;
+use crate::diagnostics;
 use crate::container;
 use crate::custom;
 use crate::download::{self, Downloaded};
@@ -794,6 +795,43 @@ pub async fn think_stream(
     }
 
     Ok(answered)
+}
+
+/// Последние `want` строк журнала.
+///
+/// Читаем весь файл: журнал пишется с ограничением, и «прочитать хвост файла»
+/// на Windows требует позиционирования, которое ради нескольких сот строк не
+/// окупается. Зато ошибка чтения — не повод падать: пакет без журнала полезнее,
+/// чем «диагностика не собралась».
+fn tail_of(path: std::path::PathBuf, want: usize) -> Vec<String> {
+    let Ok(text) = std::fs::read_to_string(&path) else {
+        return Vec::new();
+    };
+    let all: Vec<&str> = text.lines().collect();
+    let from = all.len().saturating_sub(want);
+    all[from..].iter().map(|line| line.to_string()).collect()
+}
+
+/// Диагностический пакет для просмотра перед отправкой (шаг 148 плана).
+///
+/// Команда только собирает текст и ничего не отправляет: сеть здесь ни при чём,
+/// и человек сначала читает, что именно уедет. Возвращается и то, что вычищено, —
+/// иначе «мы всё почистили» пришлось бы принимать на веру.
+#[tauri::command]
+pub fn diagnostics_pack(state: State<'_, AppState>, lines: Option<usize>) -> diagnostics::Pack {
+    // Предел по умолчанию: 300 строк журнала — это обычно последние несколько
+    // минут, то есть ровно то, что нужно для разбора. Весь журнал за неделю
+    // человек не прочитает, а отправит.
+    let want = lines.unwrap_or(300).min(2000);
+    let log = tail_of(crate::logging::log_file(), want);
+
+    let head = vec![
+        format!("приложение: {}", env!("CARGO_PKG_VERSION")),
+        format!("система: {}", diagnostics::platform()),
+        format!("инструментов: {}", state.inner.registry.stats().actions),
+    ];
+
+    diagnostics::pack(&head, &log)
 }
 
 /// Список резервных копий памяти: что можно вернуть.

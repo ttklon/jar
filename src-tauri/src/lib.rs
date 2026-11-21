@@ -37,6 +37,7 @@ pub mod autostart;
 pub mod backup;
 pub mod container;
 pub mod custom;
+pub mod diagnostics;
 pub mod download;
 pub mod evals;
 pub mod executor;
@@ -233,6 +234,7 @@ pub fn run() {
             ipc::think_stream,
             ipc::say,
             ipc::memory_backups,
+            ipc::diagnostics_pack,
             ipc::memory_restore,
             ipc::engine_status,
             ipc::start_engine,
