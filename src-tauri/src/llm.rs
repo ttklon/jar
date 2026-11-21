@@ -15,7 +15,7 @@
 //! `plan` и человек.
 
 use std::io::{Read, Write};
-use std::net::{TcpStream, ToSocketAddrs};
+use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 use std::time::Duration;
 
 /// Путь к чату в `llama-server` (совместим с OpenAI).
@@ -76,13 +76,25 @@ pub fn ask(port: u16, body: &str, timeout: Duration) -> Result<String, String> {
     content(&answer)
 }
 
+/// Адрес движка на петле — **без разрешения имени**.
+///
+/// Это звучит как мелочь, но это не мелочь. `("127.0.0.1", port).to_socket_addrs()`
+/// идёт через системный резолвер, а резолвер на Windows в момент смены сети
+/// (Wi-Fi ↔ кабель, подключение VPN, «нет доступа к интернету») перезагружает
+/// список сетевых интерфейсов и на секунды перестаёт отвечать даже на числовой
+/// адрес. Соединение с движком, который стоит на этой же машине, при этом падает
+/// с «движок не отвечает» — и человек видит, что локальный помощник сломался от
+/// смены Wi-Fi, хотя ни движок, ни наша машина никуда не делись.
+///
+/// Петля — это константа. Разрешать её через резолвер — значит ставить локальное в
+/// зависимость от сетевого, то есть ровно наоборот.
+fn loopback(port: u16) -> Result<SocketAddr, String> {
+    Ok(SocketAddr::from((Ipv4Addr::LOCALHOST, port)))
+}
+
 /// Один POST на петлю. Ошибки говорят, на каком шаге всё встало.
 pub fn post(port: u16, path: &str, body: &str, timeout: Duration) -> Result<String, String> {
-    let address = ("127.0.0.1", port)
-        .to_socket_addrs()
-        .map_err(|error| format!("адрес движка не разобрался: {error}"))?
-        .next()
-        .ok_or_else(|| "адрес движка не разобрался".to_string())?;
+    let address = loopback(port)?;
 
     let mut stream = TcpStream::connect_timeout(&address, timeout)
         .map_err(|_| format!("движок не отвечает на 127.0.0.1:{port}"))?;
@@ -138,11 +150,7 @@ pub fn post_lines<F>(
 where
     F: FnMut(&str) -> Result<(), String>,
 {
-    let address = ("127.0.0.1", port)
-        .to_socket_addrs()
-        .map_err(|error| format!("адрес движка не разобрался: {error}"))?
-        .next()
-        .ok_or_else(|| "адрес движка не разобрался".to_string())?;
+    let address = loopback(port)?;
 
     let mut stream = TcpStream::connect_timeout(&address, timeout)
         .map_err(|_| format!("движок не отвечает на 127.0.0.1:{port}"))?;
@@ -678,6 +686,80 @@ mod tests {
 
         out = state.feed(body_second.as_bytes());
         assert_eq!(out.concat(), second.as_bytes());
+    }
+
+    #[test]
+    fn the_loopback_address_never_goes_through_a_resolver() {
+        // Это проверка того, что локальный путь не зависит от сети. Резолвер на
+        // Windows при смене Wi-Fi на кабель перезагружает интерфейсы и на секунды
+        // не отвечает даже на числовой адрес; `to_socket_addrs` в этот момент
+        // возвращает ошибку, и соединение с движком на этой же машине падало.
+        //
+        // Функция ничего не разрешает: она просто собирает адрес из константы.
+        // Тест держит это свойство: если кто-то вернёт сюда `to_socket_addrs`
+        // «для единообразия», адрес перестанет быть константой, и падение от
+        // смены сети вернётся.
+        for port in [1u16, 8080, 65_535] {
+            let address = loopback(port).expect("петля");
+            assert_eq!(address.port(), port);
+            assert!(address.ip().is_loopback(), "{address}");
+            // Именно IPv4-петля, а не `[::1]`: движок слушает `127.0.0.1`
+            // (`llama.rs`), и подключение к `::1` ушло бы не туда.
+            assert_eq!(address, SocketAddr::from((Ipv4Addr::LOCALHOST, port)));
+        }
+    }
+
+    #[test]
+    fn the_loopback_address_depends_only_on_the_port() {
+        // Свойство, а не скорость: адрес — чистая функция от порта. Резолвер
+        // зависит от сети, конфигурации, hosts-файла и службы DNS; константа —
+        // ни от чего. Если однажды сюда вернут `to_socket_addrs`, тест этого не
+        // заметит (значение то же), поэтому рядом стоит проверка прямо на текст
+        // исходника — грубо, но честно: свойство «без резолвера» иначе не
+        // удержать.
+        let source = include_str!("llm.rs");
+        let body = source
+            .split("fn loopback(port: u16)")
+            .nth(1)
+            .expect("функция на месте");
+        let body = &body[..body.find('\n}').expect("конец функции")];
+        assert!(
+            !body.contains("to_socket_addrs"),
+            "в loopback снова разрешение имени: локальный путь снова зависит от сети"
+        );
+
+        // И само значение: IPv4-петля, ровно тот порт, который просили.
+        assert_eq!(
+            loopback(8080).expect("петля"),
+            SocketAddr::from((Ipv4Addr::LOCALHOST, 8080))
+        );
+    }
+
+    #[test]
+    fn the_engine_is_reached_even_while_the_network_name_lookup_is_down() {
+        // Заглушка слушает петлю, а «интернета» нет вовсе — здесь его и не бывает.
+        // Проверяется, что разговор с движком от сети не зависит: резолвер имени
+        // не участвует, адрес известен заранее.
+        let listener = TcpListener::bind("127.0.0.1:0").expect("порт");
+        let port = listener.local_addr().expect("адрес").port();
+        let server = std::thread::spawn(move || {
+            if let Ok((mut stream, _)) = listener.accept() {
+                // Читаем запрос до конца заголовков и отвечаем телом.
+                let mut buffer = [0u8; 1024];
+                let _ = stream.read(&mut buffer);
+                let body = "{\"ok\":true}";
+                let answer = format!(
+                    "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                    body.len()
+                );
+                let _ = stream.write_all(answer.as_bytes());
+            }
+        });
+
+        let answer = post(port, "/v1/chat/completions", "{}", Duration::from_secs(3));
+        let _ = server.join();
+        let text = answer.expect("движок ответил");
+        assert!(text.contains("\"ok\""), "{text}");
     }
 
     #[test]
