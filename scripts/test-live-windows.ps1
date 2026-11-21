@@ -51,21 +51,41 @@ function Check([string]$id, [scriptblock]$body) {
 Check 'registry-autostart-roundtrip' {
     $key = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
     $name = 'ZShelperLiveTest'
-    $exe = Join-Path $root 'zshelper.exe'
     # Путь с пробелом — та самая ловушка, из-за которой Windows запускает
     # `C:\Program.exe`: кавычки обязаны стоять в записанном значении.
     $spaced = Join-Path $root 'Program Files\zshelper.exe'
     [IO.Directory]::CreateDirectory((Split-Path $spaced)) | Out-Null
     Set-Content -LiteralPath $spaced -Value 'stub'
 
-    New-ItemProperty -Path $key -Name $name -Value ('"' + $spaced + '"') -PropertyType String -Force | Out-Null
-    $read = (Get-ItemProperty -Path $key -Name $name).$name
-    if ($read -ne ('"' + $spaced + '"')) { throw "запись не совпала: $read" }
-    if (-not $read.StartsWith('"')) { throw 'путь без кавычек — Windows запустит не то' }
+    # На свежей машине раздела Run может не быть вовсе — установщик Windows его
+    # не создаёт, пока кто-то не запишет первое значение. Это не сбой, и
+    # проверять надо то, что делает приложение: `reg add` создаёт раздел сам.
+    # Первая версия этой проверки падала ровно здесь, и падала не по делу.
+    $created = -not (Test-Path -LiteralPath $key)
+    if ($created) {
+        New-Item -Path $key -Force | Out-Null
+        Say '  раздел Run отсутствовал — создаю, как это делает reg add'
+    }
 
-    Remove-ItemProperty -Path $key -Name $name
-    $after = Get-ItemProperty -Path $key -Name $name -ErrorAction SilentlyContinue
-    if ($null -ne $after) { throw 'выключение не удалило значение' }
+    try {
+        New-ItemProperty -Path $key -Name $name -Value ('"' + $spaced + '"') -PropertyType String -Force | Out-Null
+        $read = (Get-ItemProperty -Path $key -Name $name).$name
+        if ($read -ne ('"' + $spaced + '"')) { throw "запись не совпала: $read" }
+        if (-not $read.StartsWith('"')) { throw 'путь без кавычек — Windows запустит не то' }
+
+        Remove-ItemProperty -Path $key -Name $name
+        $after = Get-ItemProperty -Path $key -Name $name -ErrorAction SilentlyContinue
+        if ($null -ne $after) { throw 'выключение не удалило значение' }
+    } finally {
+        # Убираем за собой: если раздел создали мы, он не должен остаться в
+        # профиле раннера после прогона.
+        if ($created -and (Test-Path -LiteralPath $key)) {
+            $leftover = Get-ItemProperty -Path $key -ErrorAction SilentlyContinue
+            if ($null -eq $leftover -or $leftover.PSObject.Properties.Name.Count -le 0) {
+                Remove-Item -LiteralPath $key -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
 }
 
 # ── 2. Уезд за пределы папки — настоящая файловая система ─────────────────────
