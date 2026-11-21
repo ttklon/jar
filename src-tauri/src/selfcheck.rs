@@ -33,11 +33,21 @@ pub fn run() -> i32 {
     failed += report("память", memory_check);
     failed += report("автозапуск", autostart_check);
 
+    // Итог — латиницей и одной строкой. Причина не в любви к английскому:
+    // приёмочный скрипт на Windows может прочитать файл в другой кодировке, и
+    // тогда кириллица превратится в мусор. Вердикт не должен зависеть от
+    // кодировки — по нему принимают решение.
     if failed == 0 {
-        println!("SELF-CHECK: ok");
+        println!(
+            "SELF-CHECK: ok version={} actions={}",
+            env!("CARGO_PKG_VERSION"),
+            crate::registry::Registry::load()
+                .map(|registry| registry.len())
+                .unwrap_or(0)
+        );
         0
     } else {
-        println!("SELF-CHECK: {failed} проверок не прошло");
+        println!("SELF-CHECK: failed count={failed}");
         1
     }
 }

@@ -263,10 +263,11 @@ jobs:
         if: steps.bundle.outcome == 'success'
         shell: powershell
         run: |
-          # Один прогон: и вердикт, и доказательство. Повторять проверку ради
-          # второго лога — значит делать установку дважды без причины.
-          ./scripts/test-live-windows.ps1 2>&1 | Tee-Object -FilePath live-windows.log
-          exit $LASTEXITCODE
+          # Скрипт пишет свой лог сам (`Say` в `live-windows.log`). Через конвейер
+          # и `exit` внутри него лог оставался пустым — доказательств не было.
+          # Код возврата не глотаем: он и есть вердикт.
+          ./scripts/test-live-windows.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Upload live Windows evidence
         if: always() && steps.bundle.outcome == 'success'

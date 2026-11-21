@@ -17,6 +17,20 @@
 # нет), подпись Authenticode (нужен сертификат издателя). Эти пункты остаются
 # открытыми, и этот скрипт их не «закрывает» — он не притворяется приёмкой.
 $ErrorActionPreference = 'Stop'
+$script:logPath = Join-Path (Get-Location) 'live-windows.log'
+
+# Пишем в лог сами, а не через Tee-Object в конвейере: `exit` внутри конвейера
+# завершает его до сброса файла, и тогда от прогона не остаётся доказательств
+# (именно так и вышло в первом прогоне — лог был пуст).
+function Say([string]$text) {
+    Write-Output $text
+    Add-Content -LiteralPath $script:logPath -Value $text -Encoding utf8
+}
+
+Say "ЖИВАЯ ПРОВЕРКА WINDOWS: старт"
+Say ("  PowerShell {0} · {1}" -f $PSVersionTable.PSVersion, [Environment]::OSVersion.VersionString)
+Say ("  папка: {0}" -f (Get-Location))
+
 $root = Join-Path ([IO.Path]::GetTempPath()) ('zshelper-live-' + [Guid]::NewGuid().ToString('N'))
 [IO.Directory]::CreateDirectory($root) | Out-Null
 $script:passed = 0
@@ -25,10 +39,10 @@ $script:failed = 0
 function Check([string]$id, [scriptblock]$body) {
     try {
         & $body
-        Write-Output "PASS $id"
+        Say "PASS $id"
         $script:passed++
     } catch {
-        Write-Output "FAIL $id — $($_.Exception.Message)"
+        Say "FAIL $id — $($_.Exception.Message)"
         $script:failed++
     }
 }
@@ -96,10 +110,12 @@ if ($installer) {
             -RedirectStandardOutput $out
         $text = Get-Content -LiteralPath $out -Raw -ErrorAction SilentlyContinue
         $flat = ($text -split "`r?`n") -join ' | '
-        Write-Output "  self-check: $flat"
+        Say "  self-check: $flat"
         if ($run.ExitCode -ne 0) { throw "самопроверка вернула $($run.ExitCode): $text" }
         if ($text -notmatch 'SELF-CHECK: ok') { throw "нет строки успеха: $text" }
-        if ($text -notmatch 'реестр: [0-9]+ действий') { throw "реестр не загрузился: $text" }
+        # Вердикт по латинице: кириллица в выводе может прийти в другой кодировке,
+        # и проверка не должна из-за этого «падать» на исправной программе.
+        if ($text -notmatch 'actions=[0-9]+') { throw "реестр не загрузился: $text" }
 
         # Удаление: программа уходит.
         $uninstaller = Get-ChildItem -Path $target -Filter '*uninstall*.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -108,7 +124,7 @@ if ($installer) {
         if (Test-Path -LiteralPath $exe) { throw 'удаление оставило программу' }
     }
 } else {
-    Write-Output 'SKIP installer-silent-install-and-run — установщик не собран в этой джобе'
+    Say 'SKIP installer-silent-install-and-run — установщик не собран в этой джобе'
 }
 
 # ── 5. WebView2: то, без чего приложение белое ────────────────────────────────
@@ -121,12 +137,12 @@ Check 'webview2-present' {
     foreach ($path in $paths) {
         if (Test-Path $path) {
             $version = (Get-ItemProperty -Path $path).pv
-            if ($version) { Write-Output "  WebView2: $version"; $found = $true }
+            if ($version) { Say "  WebView2: $version"; $found = $true }
         }
     }
     if (-not $found) { throw 'WebView2 не найден: приложение будет белым окном' }
 }
 
 Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue
-Write-Output "ИТОГО: $($script:passed) прошло, $($script:failed) упало"
+Say "ИТОГО: $($script:passed) прошло, $($script:failed) упало"
 if ($script:failed -gt 0) { exit 1 }
