@@ -271,10 +271,30 @@ jobs:
           [Console]::OutputEncoding = [Text.Encoding]::UTF8
           $OutputEncoding = [Text.Encoding]::UTF8
           $ErrorActionPreference = 'Continue'
+
+          # Сначала разбор без выполнения: синтаксическая ошибка иначе убивает
+          # скрипт до первой строки, и от прогона не остаётся ни лога, ни причины.
+          # Ошибку печатаем аннотацией: аннотации читаются через API, а логи и
+          # артефакты недоступны.
+          $tokens = $null; $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path ./scripts/test-live-windows.ps1), [ref]$tokens, [ref]$errors)
+          if ($errors -and $errors.Count -gt 0) {
+            foreach ($e in $errors) {
+              Write-Host ("::error file=scripts/test-live-windows.ps1,line={0}::{1}" -f $e.Extent.StartLineNumber, ($e.Message -replace "`r?`n", ' '))
+            }
+            exit 2
+          }
+
           ./scripts/test-live-windows.ps1 2>&1 | Out-File -FilePath live-windows-step.log -Encoding utf8
           $code = $LASTEXITCODE
           Get-Content -LiteralPath live-windows-step.log | Write-Host
-          if ($code -ne 0) { exit $code }
+          if ($code -ne 0) {
+            # Последние строки — аннотацией: так причина видна без доступа к файлам.
+            $tail = (Get-Content -LiteralPath live-windows-step.log -Tail 12 -ErrorAction SilentlyContinue) -join ' ⏎ '
+            Write-Host ("::error::живой прогон Windows упал (код {0}): {1}" -f $code, $tail)
+            exit $code
+          }
 
       - name: Upload live Windows evidence
         if: always() && steps.bundle.outcome == 'success'
