@@ -92,6 +92,13 @@ export const t = {
   settingsThemeLight: "светлая",
   settingsThemeDark: "тёмная",
   settingsThemeSystemLabel: "как в системе",
+  /**
+   * Три раздела настроек — по вопросу, с которым человек сюда пришёл, а не по
+   * устройству кода. Двадцать пунктов подряд не делятся на «где что».
+   */
+  settingsSectionLook: "Как выглядит",
+  settingsSectionStart: "Что происходит при запуске",
+  settingsSectionData: "Что с моими данными",
   settingsAutostart: "Запускать при входе в Windows",
   settingsAutostartOn: "включено: приложение поднимется само после перезагрузки",
   settingsAutostartOff: "выключено: приложение запускается, когда вы его откроете",

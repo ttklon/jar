@@ -13,6 +13,9 @@ import { Diagnostics } from "../components/Diagnostics";
 
 const useStyles = makeStyles({
   root: { display: "flex", flexDirection: "column", gap: "20px", maxWidth: "760px" },
+  // Отступ сверху больше, чем между карточками: раздел начинается заметно, а не
+  // продолжается. Без этого три заголовка читаются как ещё три карточки.
+  sectionTitle: { display: "block", marginTop: "10px" },
   lead: { color: tokens.colorNeutralForeground2 },
   card: {
     display: "flex",
@@ -77,6 +80,16 @@ export function Settings({
     }
   };
 
+  // Разделы, а не двадцать пунктов подряд. Порядок — по вопросу, с которым
+  // человек сюда пришёл: «как выглядит», «что происходит при запуске», «что с
+  // моими данными». Заголовок — `h3`: он младше заголовка экрана и старше
+  // подписей внутри карточек, так что диктор и оглавление видят структуру.
+  const section = (title: string) => (
+    <Text as="h3" size={400} weight="semibold" className={styles.sectionTitle}>
+      {title}
+    </Text>
+  );
+
   return (
     <div className={styles.root}>
       <div>
@@ -87,6 +100,8 @@ export function Settings({
           {t.settingsLead}
         </Text>
       </div>
+
+      {section(t.settingsSectionLook)}
 
       <div className={styles.card}>
         <div className={styles.row}>
@@ -121,6 +136,8 @@ export function Settings({
           </div>
         </div>
       </div>
+
+      {section(t.settingsSectionStart)}
 
       <div className={styles.card}>
         <div className={styles.row}>
@@ -203,9 +220,13 @@ export function Settings({
         </div>
       </div>
 
+      {section(t.settingsSectionData)}
+
+      {/* Выравнивание исправлено: две карточки стояли с разным отступом, и одна
+          из них выглядела подпунктом другой. */}
       <MemoryNote />
-        <MemoryBackups />
-        <Diagnostics />
+      <MemoryBackups />
+      <Diagnostics />
 
       <DataPlaces />
 
