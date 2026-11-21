@@ -147,6 +147,20 @@ if ($installer) {
         # и проверка не должна из-за этого «падать» на исправной программе.
         if ($text -notmatch 'actions=[0-9]+') { throw "реестр не загрузился: $text" }
 
+        # Один экземпляр (шаг 146 плана): второй запуск не должен оставлять
+        # второй процесс. Иначе трей и горячая клавиша удваиваются, а журнал
+        # пишется из двух мест — и человек видит «приложение не отвечает».
+        $first = Start-Process -FilePath $exe -PassThru
+        Start-Sleep -Seconds 3
+        $second = Start-Process -FilePath $exe -PassThru
+        Start-Sleep -Seconds 4
+        $running = @(Get-Process -Name 'zshelper' -ErrorAction SilentlyContinue)
+        $count = $running.Count
+        if (-not $second.HasExited) { $second.Kill() }
+        if (-not $first.HasExited) { $first.Kill() }
+        if ($count -gt 1) { throw "второй запуск оставил $count процессов вместо одного" }
+        Say "  один экземпляр: процессов после второго запуска — $count"
+
         # Удаление: программа уходит.
         $uninstaller = Get-ChildItem -Path $target -Filter '*uninstall*.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
         if (-not $uninstaller) { throw 'в установленной папке нет удаления' }
@@ -155,6 +169,9 @@ if ($installer) {
     }
 } else {
     Say 'SKIP installer-silent-install-and-run — установщик не собран в этой джобе'
+    # Один экземпляр проверяем, только если есть установленная программа:
+    # проверка «второй запуск не плодит процессов» требует запуска.
+    Say 'SKIP single-instance-reveals-window — нужна установленная программа'
 }
 
 # ── 5. WebView2: то, без чего приложение белое ────────────────────────────────
