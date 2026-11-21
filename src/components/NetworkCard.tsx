@@ -47,6 +47,11 @@ const useStyles = makeStyles({
     overflowWrap: "anywhere",
   },
   needed: { color: tokens.colorBrandForeground1 },
+  price: {
+    fontSize: tokens.fontSizeBase500,
+    fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorBrandForeground1,
+  },
 });
 
 /** Вес в человеческих единицах: 986048768 → «940 МБ». */
@@ -80,6 +85,13 @@ export function NetworkCard() {
   return (
     <section className={styles.card} aria-label={models.networkTitle}>
       <Text weight="semibold">{models.networkTitle}</Text>
+      {/*
+        Цена — числом, а не словом «бесплатно». «Бесплатно» ничего не стоит на
+        фоне «бесплатно на 7 дней»; 0 ₽ — конкретно. И рядом причина, иначе это
+        лозунг: платить некому, потому что нет сервиса.
+      */}
+      <Text className={styles.price}>{models.networkPrice}</Text>
+      <Text className={styles.lead}>{models.networkWhyFree}</Text>
       <Text className={styles.lead}>{models.networkLead}</Text>
 
       {failed ? (

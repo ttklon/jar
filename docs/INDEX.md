@@ -109,6 +109,7 @@
 | `hands.py` | валидатор рук: реальные строки реестра, допустимый риск |
 | `links.py` | проверка относительных ссылок в документах |
 | `mine_awesome.py` | разбор awesome-листов |
+| `no_telemetry.py` | — |
 | `profiles.py` | валидатор профилей → docs/PROFILES.md |
 | `rust_literals.py` | — |
 | `rust_prose.py` | — |

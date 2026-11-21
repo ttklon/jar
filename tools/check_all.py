@@ -59,6 +59,9 @@ STEPS: list[tuple[str, list[str], str]] = [
     # которому текст показали. Случаев было три (контейнер, заметка о базе,
     # плюс две при правке) прежде, чем появилась эта проверка.
     ("rust prose", ["tools/rust_prose.py", "--quiet"], "no double spaces inside Russian prose"),
+    # «Никакой телеметрии» ломается тихо: одна зависимость — и приложение
+    # начинает куда-то ходить. Ни сборка, ни тесты этого не заметят.
+    ("no telemetry", ["tools/no_telemetry.py", "--quiet"], "no analytics in deps or code"),
     # Типы проверяются с ВЫКЛЮЧЕННЫМ кэшем: `tsc -b` дважды сказал «чисто», потому
     # что верил своему `tsbuildinfo`, а CI без кэша находил ошибку.
     ("types", ["tools/ts_typecheck.py", "--quiet"], "tsc -b with a fresh cache"),

@@ -123,4 +123,15 @@ describe("сетевой след приложения", () => {
     expect(alert.textContent).toContain("не получен");
     expect(screen.queryAllByRole("listitem")).toHaveLength(0);
   });
+
+  it("называет цену числом, а не словом «бесплатно»", async () => {
+    // Шаги 208 и 215. «Бесплатно» ничего не значит рядом с «бесплатно на 7
+    // дней»; 0 ₽ — значит. И причина рядом, иначе это лозунг, а не обещание.
+    list.addresses = four();
+    render(<NetworkCard />);
+
+    expect(screen.getByText(/0 ₽/)).toBeTruthy();
+    // Причина названа: платить некому.
+    expect(screen.getByText(/Платить некому/)).toBeTruthy();
+  });
 });
