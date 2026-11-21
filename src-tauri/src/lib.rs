@@ -143,6 +143,12 @@ pub fn run() {
     // а придумывать свой — значит ошибиться в високосном году. Секунды сортируются
     // по имени так же честно, и их видно в `backups/` без разбора.
     let stamp = format!("{seconds:012}");
+    let note_copy = |error: String| {
+        // Не беда, если копии не будет: приложение всё равно должно запуститься.
+        // Но и молча глотать нельзя — это единственная страховка памяти.
+        tracing::warn!(%error, "резервная копия памяти не сделана");
+    };
+    // До открытия: копия рабочей базы, какой она была в прошлый раз.
     if let Err(error) = backup::make(
         &base.join("memory.db"),
         &backup::dir(&base),
@@ -150,9 +156,7 @@ pub fn run() {
         (seconds % u32::MAX as u64) as u32,
         backup::KEEP,
     ) {
-        // Не беда, если копии не будет: приложение всё равно должно запуститься.
-        // Но и молча глотать нельзя — это единственная страховка памяти.
-        tracing::warn!(%error, "резервная копия памяти не сделана");
+        note_copy(error);
     }
 
     let memory = match Memory::open(base.join("memory.db")) {
@@ -166,6 +170,22 @@ pub fn run() {
                 .expect("временная память обязана открыться")
         }
     };
+
+    // После открытия: если копий нет вовсе (первый запуск — копировать было
+    // нечего), снимаем первую прямо сейчас. Иначе у человека, у которого база
+    // только что создалась, страховки нет до следующего запуска, и живая
+    // проверка `memory-backup-on-start` это честно поймала.
+    if backup::list(&backup::dir(&base)).is_empty() {
+        if let Err(error) = backup::make(
+            &base.join("memory.db"),
+            &backup::dir(&base),
+            &format!("{stamp}-0"),
+            (seconds % u32::MAX as u64) as u32,
+            backup::KEEP,
+        ) {
+            note_copy(error);
+        }
+    }
 
     let state = AppState {
         inner: Arc::new(Inner {
