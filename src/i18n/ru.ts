@@ -102,6 +102,7 @@ export const t = {
   palettePlaceholder: "начните печатать: голос, руки, журнал…",
   paletteEmpty: (query: string) => `ничего не нашлось по «${query}». Esc — закрыть, или очистите поле`,
   paletteHint: "Ctrl+K — любой экран по первым буквам",
+
   settingsThemeSystem: (dark: boolean) =>
     `как в системе — сейчас ${dark ? "тёмная" : "светлая"}`,
   settingsSource: "Источник данных",
@@ -614,6 +615,8 @@ export const voice = {
   answerTaken: (value: string) =>
     `Принял «${value}» как ответ на вопрос. Это не новая задача и не разрешение.`,
   find: "Найти",
+  findHint: "Enter — найти. Ctrl+K — любой экран",
+  answerSubmitHint: "Enter — отправить ответ. Ctrl+K — любой экран",
   nothingYet:
     "Пока ничего не сказано. Напишите задачу и нажмите Enter — или зажмите кнопку и скажите.",
   engineDown: "Движок не запущен, поэтому фразу некому разобрать. Это не «не умею».",

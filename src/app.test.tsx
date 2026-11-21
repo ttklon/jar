@@ -107,6 +107,47 @@ describe("App", () => {
     expect(screen.getByText(/ничего не нашлось по «квантовая телепортация»/)).toBeTruthy();
   });
 
+  it("главный сценарий проходится с клавиатуры: палитра, Enter, дело текстом", async () => {
+    render(<App />);
+    await loaded();
+
+    // 1. Экран меняется без мыши: Ctrl+K, буквы, Enter — на первый найденный.
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    fireEvent.change(await screen.findByLabelText("Поиск экрана", {}, { timeout: 5000 }), {
+      target: { value: "история" },
+    });
+    fireEvent.keyDown(screen.getByLabelText("Поиск экрана"), { key: "Enter" });
+    await waitFor(() => expect(screen.queryByLabelText("Поиск экрана")).toBeNull(), {
+      timeout: 5000,
+    });
+
+    // 2. Возврат на «Голос» — тоже без мыши.
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    fireEvent.change(await screen.findByLabelText("Поиск экрана", {}, { timeout: 5000 }), {
+      target: { value: "голос" },
+    });
+    fireEvent.keyDown(screen.getByLabelText("Поиск экрана"), { key: "Enter" });
+
+    // 3. Поле задачи доступно с клавиатуры и подписано клавишей Enter.
+    //    Ищем среди всех полей «Услышал»: голосовой экран остаётся смонтированным
+    //    за скрытыми экранами, и полей два — это не дубль, а цена фонового голоса.
+    const fields = await screen.findAllByLabelText("Услышал", {}, { timeout: 2000 });
+    const field = fields[fields.length - 1];
+    expect(field).toBeTruthy();
+    fireEvent.change(field as HTMLElement, { target: { value: "сколько места на диске" } });
+    // Кнопка подписана клавишей, а не молчит. Ищем по обеим подписям: после
+    // заполнения шагов поле может ждать ответа, и это тоже честная подсказка.
+    // Проверяем через eventual-ожидание: поиск по фразе асинхронный.
+    await waitFor(
+      () =>
+        expect(
+          screen.queryByTitle("Enter — найти. Ctrl+K — любой экран") ??
+            screen.queryByTitle("Enter — отправить ответ. Ctrl+K — любой экран"),
+        ).toBeTruthy(),
+      { timeout: 2000 },
+    );
+  });
+
   it("при первом запуске сначала знакомит, а потом открывает голос", async () => {
     globalThis.localStorage?.clear?.();
     render(<App />);

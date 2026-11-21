@@ -1890,7 +1890,13 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
             setPromptError(null);
           }}
         />
-        <Button type="submit" disabled={busy}>
+        <Button
+          type="submit"
+          disabled={busy}
+          // Подпись подсказывает клавишу: сценарий «напечатал и нажал Enter»
+          // должен находиться сам, а не угадываться.
+          title={draftWaitingAnswer ? voice.answerSubmitHint : voice.findHint}
+        >
           {draftWaitingAnswer ? voice.answerSubmit : voice.find}
         </Button>
       </form>
