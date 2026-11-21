@@ -314,10 +314,12 @@ export function App() {
             </div>
           ) : null}
           {error ? (
-            <div className={styles.error}>
+            <div className={styles.error} role="alert" aria-live="assertive">
               <Text as="h2" size={600}>
                 {t.loadError}
               </Text>
+              {/* Здесь заголовок уже сказал «ошибка», поэтому без подписи
+                  диктора: дважды «ошибка» в одном объявлении — шум. */}
               <Text>{error}</Text>
             </div>
           ) : snapshot === null ? (

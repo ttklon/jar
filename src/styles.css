@@ -49,3 +49,22 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/*
+  Только для диктора: текст есть в дереве доступности, но не занимает места на
+  экране. Не `display: none` и не `visibility: hidden` — эти два прячут текст и
+  от диктора тоже, и подпись «Ошибка.» просто исчезла бы. Не `left: -9999px`:
+  при прокрутке вправо такое поле тянет за собой страницу.
+*/
+.screen-reader-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { isTauri } from "../ipc";
 import { t } from "../i18n/ru";
+import { ErrorLine } from "./ErrorLine";
 
 /**
  * «Резервные копии памяти» — в настройках, рядом с предупреждением о базе.
@@ -134,7 +135,7 @@ export function MemoryBackups() {
               )
             ) : (
               // Битая копия: видна, названа причиной, кнопки нет.
-              <Text className={styles.problem}>{row.problem || t.settingsBackupsBroken}</Text>
+              <ErrorLine className={styles.problem} text={row.problem || t.settingsBackupsBroken} />
             )}
           </div>
         ))

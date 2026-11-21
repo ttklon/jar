@@ -16,6 +16,7 @@ import { speak } from "../lib/voice";
 import { useVoice } from "../lib/useVoice";
 import { describePlanParams } from "../lib/planPreview";
 import { ActionList } from "../components/ActionList";
+import { ErrorLine } from "../components/ErrorLine";
 
 const LIMIT = 8;
 
@@ -371,7 +372,9 @@ export function Ask() {
         {report !== null ? (
           <>
             <Text weight="semibold">{ask.planReportTitle}</Text>
-            <ul className={styles.problems}>
+            {/* Итог плана объявляется целиком — и провалы, и успехи: это
+                ответ на «что получилось», и человек ждёт его после запуска. */}
+            <ul className={styles.problems} role="status" aria-live="polite">
               {report.steps.map((step) => (
                 <li
                   key={step.position}
@@ -389,15 +392,18 @@ export function Ask() {
               ))}
             </ul>
             {report.stopped ? (
-              <Text className={styles.problem}>{ask.planStopped(report.stopped)}</Text>
+              <ErrorLine className={styles.problem} text={ask.planStopped(report.stopped)} />
             ) : null}
           </>
         ) : null}
 
         {check !== null && check.problems.length > 0 ? (
           <>
-            <Text className={styles.problem}>{ask.planProblems(check.problems.length)}</Text>
-            <ul className={styles.problems}>
+            <ErrorLine className={styles.problem} text={ask.planProblems(check.problems.length)} />
+            {/* Один `alert` на список, а не на каждую строку: пять проблем —
+                пять перебиваний подряд, и человек не слышит ни одной. Число
+                проблем уже сказано в `ErrorLine` выше. */}
+            <ul className={styles.problems} role="alert">
               {check.problems.map((problem, index) => (
                 <li key={`${problem.position}-${index}`} className={styles.problem}>
                   {problem.position > 0 ? `шаг ${problem.position}: ` : ""}

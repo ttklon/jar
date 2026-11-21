@@ -15,6 +15,7 @@ import {
 import type { ReadinessStatus, SmokeResult } from "../ipc";
 import { assessReadiness, formatSize, hasRoom, planPrepare } from "../lib/readiness";
 import { readiness as text } from "../i18n/ru";
+import { ErrorLine } from "./ErrorLine";
 
 const useStyles = makeStyles({
   card: {
@@ -401,7 +402,7 @@ export function ReadinessCard({
     return (
       <section className={styles.card} aria-label={text.title}>
         <Text className={styles.title}>{text.title}</Text>
-        <Text className={styles.error}>{text.loadError(error ?? "")}</Text>
+        <ErrorLine className={styles.error} text={text.loadError(error ?? "")} />
         <div className={styles.row}>
           <Button size="small" icon={<ArrowClockwiseRegular />} onClick={refresh}>
             {text.refresh}
@@ -476,11 +477,11 @@ export function ReadinessCard({
           {sequence ? <Text className={styles.progress}>{sequence}</Text> : null}
         </div>
       ) : null}
-      {!browser && plan.block === "no-room" ? <Text className={styles.error}>{text.prepareNoRoom}</Text> : null}
+      {!browser && plan.block === "no-room" ? <ErrorLine className={styles.error} text={text.prepareNoRoom} /> : null}
       {!browser && plan.block === "runtime-unsupported" ? (
-        <Text className={styles.error}>{text.prepareUnsupported}</Text>
+        <ErrorLine className={styles.error} text={text.prepareUnsupported} />
       ) : null}
-      {!browser && plan.block === "runtime-owned" ? <Text className={styles.error}>{text.prepareOwned}</Text> : null}
+      {!browser && plan.block === "runtime-owned" ? <ErrorLine className={styles.error} text={text.prepareOwned} /> : null}
 
       {assessment.ready ? (
         <Text className={styles.ok}>{text.readyText}</Text>
@@ -503,7 +504,7 @@ export function ReadinessCard({
                   {busy === "runtime" ? <Button size="small" onClick={cancel}>{text.cancel}</Button> : null}
                 </div>
               ) : null}
-              {!browser && !status.runtime_supported ? <Text className={styles.error}>{text.runtimeUnsupported}</Text> : null}
+              {!browser && !status.runtime_supported ? <ErrorLine className={styles.error} text={text.runtimeUnsupported} /> : null}
             </div>
           ) : null}
 
@@ -513,7 +514,7 @@ export function ReadinessCard({
               <Text className={styles.note}>{text.missingModel}</Text>
               <Text className={styles.note}>{text.modelSize(modelTotal)}</Text>
               <Text className={styles.note}>{text.modelRequirements(status.model_spec.min_ram_gb, status.models_dir)}</Text>
-              {!hasRoom(status.free_bytes, status.model_spec.bytes) ? <Text className={styles.error}>{text.noRoom}</Text> : null}
+              {!hasRoom(status.free_bytes, status.model_spec.bytes) ? <ErrorLine className={styles.error} text={text.noRoom} /> : null}
               <Text className={styles.note}>{text.license(status.model_spec.license)}</Text>
               <Text className={styles.note}>{text.source(status.model_spec.source)}</Text>
               <Text className={styles.mono}>{text.sha(status.model_spec.sha256)}</Text>
@@ -570,7 +571,7 @@ export function ReadinessCard({
                   ) : null}
                 </div>
               ) : null}
-              {!browser && !status.runtime_supported ? <Text className={styles.error}>{text.runtimeUnsupported}</Text> : null}
+              {!browser && !status.runtime_supported ? <ErrorLine className={styles.error} text={text.runtimeUnsupported} /> : null}
             </>
           ) : null}
 
@@ -580,7 +581,7 @@ export function ReadinessCard({
               <Text className={styles.note}>{text.speechMissingModel}</Text>
               <Text className={styles.note}>{text.modelSize(speechModelTotal)}</Text>
               <Text className={styles.note}>{text.modelRequirements(status.speech_model_spec.min_ram_gb, status.models_dir)}</Text>
-              {!speechRoom ? <Text className={styles.error}>{text.noRoom}</Text> : null}
+              {!speechRoom ? <ErrorLine className={styles.error} text={text.noRoom} /> : null}
               <Text className={styles.note}>{text.license(status.speech_model_spec.license)}</Text>
               <Text className={styles.note}>{text.source(status.speech_model_spec.source)}</Text>
               <Text className={styles.mono}>{text.sha(status.speech_model_spec.sha256)}</Text>
@@ -653,8 +654,8 @@ export function ReadinessCard({
           {status.engine_running ? <Text className={styles.note}>{text.stopBeforeRemove}</Text> : null}
         </div>
       ) : null}
-      {error ? <Text className={styles.error}>{text.loadError(error)}</Text> : null}
-      {actionError ? <Text className={styles.error}>{actionError}</Text> : null}
+      {error ? <ErrorLine className={styles.error} text={text.loadError(error)} /> : null}
+      {actionError ? <ErrorLine className={styles.error} text={actionError} /> : null}
       {done ? <Text className={styles.ok}>{done}</Text> : null}
 
       {assessment.ready ? <Text className={styles.note}>{text.detected(status.engine_program, status.model_name, status.engine_running)}</Text> : null}
@@ -681,7 +682,14 @@ export function ReadinessCard({
         <Button size="small" disabled={busy === "stop"} onClick={() => void stop()}>{text.stop}</Button>
       ) : null}
       {smoke ? (
-        <Text className={smoke.ok ? styles.ok : styles.error}>
+        // Пробный запуск: успех — обычная новость, провал — ошибка, и её
+        // должен услышать диктор. `assertive` только у провала: объявлять
+        // добрую весть срочно значит перебивать человека по пустякам.
+        <Text
+          className={smoke.ok ? styles.ok : styles.error}
+          role={smoke.ok ? "status" : "alert"}
+          aria-live={smoke.ok ? "polite" : "assertive"}
+        >
           {smoke.ok ? text.smokeOk(smoke.answer ?? "") : text.smokeFailed(smoke.note)}
         </Text>
       ) : null}

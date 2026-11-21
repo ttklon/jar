@@ -2325,7 +2325,10 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           {queueIdle ? <Text className={styles.note}>{voice.queueIdle(queueIdle)}</Text> : null}
           {queue.map((item) => (
             <div key={item.id} className={styles.bar}>
-              <Text className={item.state === "held" ? styles.error : styles.note}>
+              <Text
+                className={item.state === "held" ? styles.error : styles.note}
+                role={item.state === "held" ? "alert" : undefined}
+              >
                 {voice.queueLine(item.goal, item.state, item.note)}
               </Text>
               {item.resumeAt !== undefined && item.state !== "done" ? (
@@ -2646,7 +2649,10 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
                   : voice.draftRun}
             </Button>
             {report ? (
-              <Text className={report.stopped ? styles.error : styles.localReady}>
+              <Text
+                className={report.stopped ? styles.error : styles.localReady}
+                role={report.stopped ? "alert" : "status"}
+              >
                 {report.stopped ? report.stopped : voice.draftDone}
               </Text>
             ) : null}

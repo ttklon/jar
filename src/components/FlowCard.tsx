@@ -22,6 +22,7 @@ import type { FlowRun, StepRecord } from "../lib/flows";
 import { missingInputs, runFlow } from "../lib/flows";
 import { RISK_LABEL, flows } from "../i18n/ru";
 import { RiskBadge } from "./RiskBadge";
+import { ErrorLine } from "./ErrorLine";
 
 const useStyles = makeStyles({
   card: {
@@ -288,7 +289,7 @@ export function FlowCard({ flow }: { flow: FlowView }) {
         {!isTauri() ? <Text className={styles.muted}>{flows.readOnly}</Text> : null}
       </div>
 
-      {error ? <Text className={styles.error}>{error}</Text> : null}
+      {error ? <ErrorLine className={styles.error} text={error} /> : null}
 
       {run ? (
         <div className={`${styles.summaryBox} ${run.ok ? "" : styles.summaryFailed}`}>
