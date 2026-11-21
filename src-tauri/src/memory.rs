@@ -693,7 +693,7 @@ mod tests {
         // обрыва записи. Байты только ASCII: клиппи справедливо запрещает
         // кириллицу в байтовом литерале (кодировка не видна из кода).
         let mut bytes = b"SQLite format 3\0".to_vec();
-        bytes.extend(std::iter::repeat(0xde).take(512));
+        bytes.extend(std::iter::repeat_n(0xde, 512));
         std::fs::write(&path, bytes).expect("запись");
 
         // `expect_err` требует `Debug` у успешного значения, а `Memory` его не
