@@ -39,9 +39,18 @@ pub struct Pack {
 /// руками и почти всегда говорит правду. Регистр не важен, разделители тоже.
 pub fn looks_secret(name: &str) -> bool {
     let lower = name.to_ascii_lowercase();
-    ["token", "secret", "password", "passwd", "api_key", "apikey", "private_key", "credential"]
-        .iter()
-        .any(|needle| lower.contains(needle))
+    [
+        "token",
+        "secret",
+        "password",
+        "passwd",
+        "api_key",
+        "apikey",
+        "private_key",
+        "credential",
+    ]
+    .iter()
+    .any(|needle| lower.contains(needle))
 }
 
 /// Путь ли это.
@@ -95,9 +104,10 @@ pub fn scrub_line(line: &str) -> (String, usize, usize) {
     // «значение» `:\Users\…`, путь переставал быть путём и уезжал в пакет
     // целиком. Это ровно та утечка, ради которой модуль написан, и её нашёл CI,
     // а не придуманная строка в тесте.
-    let split = line
-        .find('=')
-        .or_else(|| line.find(": ").filter(|index| !line[..*index].contains(' ')));
+    let split = line.find('=').or_else(|| {
+        line.find(": ")
+            .filter(|index| !line[..*index].contains(' '))
+    });
 
     let (key, rest) = match split {
         Some(index) if index > 0 => (&line[..index], &line[index..]),
