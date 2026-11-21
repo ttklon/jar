@@ -31,6 +31,19 @@ describe("экран знакомства", () => {
     expect(screen.queryByText(/всё умеет/i)).toBeNull();
   });
 
+  it("первое дело предлагается до настройки, а не после неё", () => {
+    // Пока модель качается, реестр уже отвечает: «что умею», «где данные»,
+    // «сколько места». Человек должен увидеть это на первом экране, а не искать
+    // кнопку настройки, чтобы получить первый ответ.
+    const onStart = vi.fn();
+    render(<Welcome source="ядро" onStart={onStart} onOpen={() => {}} />);
+
+    expect(screen.getByText("Можно сразу, без настройки:")).toBeTruthy();
+    expect(screen.getByText("«что умею»")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Сказать первое дело" }));
+    expect(onStart).toHaveBeenCalledTimes(1);
+  });
+
   it("«начать» закрывает знакомство, а не выполняет дело", () => {
     const onStart = vi.fn();
     const onOpen = vi.fn();

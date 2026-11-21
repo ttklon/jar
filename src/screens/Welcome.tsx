@@ -16,6 +16,23 @@ import { welcome } from "../i18n/ru";
 
 const useStyles = makeStyles({
   root: { display: "flex", flexDirection: "column", gap: "20px", maxWidth: "760px" },
+  // Фраза — главное на первом экране: человек должен увидеть, что можно просто
+  // сказать, а не изучать карточки. Поэтому она стоит выше правил.
+  firstPhrase: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: "10px",
+    padding: "14px 16px",
+    borderRadius: tokens.borderRadiusLarge,
+    backgroundColor: tokens.colorNeutralBackground3,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  phrase: {
+    fontFamily: tokens.fontFamilyMonospace,
+    fontSize: tokens.fontSizeBase300,
+    color: tokens.colorNeutralForeground1,
+  },
   lead: { color: tokens.colorNeutralForeground2, lineHeight: tokens.lineHeightBase300 },
   rules: { display: "flex", flexDirection: "column", gap: "12px" },
   card: {
@@ -54,6 +71,19 @@ export function Welcome({
         <Text className={styles.lead} block>
           {welcome.lead}
         </Text>
+      </div>
+
+      {/*
+        Первое дело — до настройки. Пока модель качается, реестр уже отвечает на
+        «что умею», «где данные», «сколько места». Человек получает ответ, а не
+        анкету; остальное догружается в фоне.
+      */}
+      <div className={styles.firstPhrase}>
+        <Text weight="semibold">{welcome.firstPhraseTitle}</Text>
+        <Text className={styles.phrase}>«{welcome.firstPhraseExample}»</Text>
+        <Button appearance="primary" onClick={onStart}>
+          {welcome.firstPhraseGo}
+        </Button>
       </div>
 
       <div className={styles.rules}>
