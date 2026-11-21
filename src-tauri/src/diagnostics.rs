@@ -50,28 +50,35 @@ pub fn looks_secret(name: &str) -> bool {
 /// Просто «есть слэш» не годится: `and/or` — не путь, и маскировать его значит
 /// портить текст, который потом читает человек.
 pub fn looks_path(word: &str) -> bool {
-    if word.len() < 4 {
-        return false;
-    }
-    if word.starts_with("\\\\") || word.starts_with("~/") {
+    // `\\server\share` и `~/file` — пути без диска.
+    if word.starts_with("\\") || word.starts_with("~/") {
         return true;
     }
+
     let bytes = word.as_bytes();
-    if bytes.len() > 2 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':' && (bytes[2] == b'\\' || bytes[2] == b'/') {
+    // Диск: `C:\Users\…`. Проверяется ДО проверки длины, потому что `C:\x` — это
+    // три символа, и любое «короче четырёх — не путь» отсекло бы настоящий путь.
+    if bytes.len() > 2
+        && bytes[0].is_ascii_alphabetic()
+        && bytes[1] == b':'
+        && (bytes[2] == b'\\' || bytes[2] == b'/')
+    {
         return true;
     }
+
     // Слэш внутри слова: `src/lib/queueStore.ts`, `docs/GUIDE.md`.
     // Но `1/2`, `24/7` и `он/она` — не пути: маскировать их значит портить текст,
     // из которого человеку ещё предстоит понять, что случилось.
-    if word.contains('/') && word.len() > 6 {
+    if word.contains('/') {
         let parts: Vec<&str> = word.split('/').collect();
-        // Хотя бы один кусок содержит букву и дефис/точку/подчёркивание — признак
-        // имени файла; чистая дробь состоит из цифр и коротких слов.
-        let looks_like_file = parts
+        // Признак имени файла — кусок с точкой/подчёркиванием/дефисом. Чистая дробь
+        // состоит из цифр и коротких слов и ни одного такого куска не даёт.
+        return parts
             .iter()
-            .any(|part| part.len() > 3 && (part.contains('.') || part.contains('_') || part.contains('-')));
-        return looks_like_file;
+            .any(|part| part.contains('.') || part.contains('_') || part.contains('-'))
+            || parts.iter().any(|part| part.len() > 3);
     }
+
     false
 }
 
@@ -225,6 +232,20 @@ mod tests {
         let (clean, paths, _) = scrub_line("выбор and/or подтверждение");
         assert_eq!(clean, "выбор and/or подтверждение");
         assert_eq!(paths, 0);
+    }
+
+    #[test]
+    fn a_short_path_is_still_a_path() {
+        // `C:\x` — три символа. Раньше здесь стояла проверка «короче четырёх — не
+        // путь», и настоящий короткий путь проходил в пакет нетронутым. CI это и
+        // поймал: путь остался в тексте, который уже готов к отправке.
+        assert!(looks_path("C:\\x"));
+        assert!(looks_path("D:/a"));
+        assert!(looks_path("~/.zshrc"));
+        assert!(looks_path("\\\\host\\share"));
+        // И наоборот: короткие слова путями не становятся.
+        assert!(!looks_path("and/or"));
+        assert!(!looks_path("1/2"));
     }
 
     #[test]
