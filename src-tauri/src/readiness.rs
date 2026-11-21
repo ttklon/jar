@@ -117,7 +117,8 @@ pub fn network_addresses() -> Vec<NetworkAddress> {
             url: catalog.model.url.clone(),
             bytes: catalog.model.bytes,
             needed: true,
-            reason: "единственный разговорный движок; файл лежит у вас в папке моделей после скачивания",
+            reason:
+                "единственный разговорный движок; файл лежит у вас в папке моделей после скачивания",
         },
         NetworkAddress {
             purpose: "движок llama.cpp",
@@ -507,9 +508,16 @@ mod tests {
             &catalog.whisper_runtime.url,
             &catalog.whisper_model.url,
         ] {
-            assert!(urls.contains(&spec.as_str()), "адрес не попал в список: {spec}");
+            assert!(
+                urls.contains(&spec.as_str()),
+                "адрес не попал в список: {spec}"
+            );
         }
-        assert_eq!(addresses.len(), 4, "список не должен ни расти, ни сжиматься сам");
+        assert_eq!(
+            addresses.len(),
+            4,
+            "список не должен ни расти, ни сжиматься сам"
+        );
     }
 
     #[test]
