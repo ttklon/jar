@@ -689,7 +689,12 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("zshelper-broken-{}", now_ms()));
         std::fs::create_dir_all(&dir).expect("папка");
         let path = dir.join("memory.db");
-        std::fs::write(&path, b"SQLite format 3\0 но дальше мусор").expect("запись");
+        // Заголовок правильный, дальше — мусор: именно так выглядит файл после
+        // обрыва записи. Байты только ASCII: клиппи справедливо запрещает
+        // кириллицу в байтовом литерале (кодировка не видна из кода).
+        let mut bytes = b"SQLite format 3\0".to_vec();
+        bytes.extend_from_slice(&[0xde, 0xad, 0xbe, 0xef; 512]);
+        std::fs::write(&path, bytes).expect("запись");
 
         let error = Memory::open(path).expect_err("битая база не открывается как здоровая");
         let text = error.to_string();
