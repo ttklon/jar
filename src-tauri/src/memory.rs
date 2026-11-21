@@ -704,7 +704,10 @@ mod tests {
         };
         let text = error.to_string();
         // Действие человека другое: не «проверьте путь», а «база повреждена».
-        assert!(text.contains("повреждена") || text.contains("не открылась"), "{text}");
+        assert!(
+            text.contains("повреждена") || text.contains("не открылась"),
+            "{text}"
+        );
         let _ = std::fs::remove_dir_all(dir);
     }
 
@@ -718,7 +721,9 @@ mod tests {
         std::fs::write(&path, b"").expect("пустой файл");
 
         let memory = Memory::open(path).expect("пустой файл открывается");
-        memory.remember("ключ", "значение").expect("запись работает");
+        memory
+            .remember("ключ", "значение")
+            .expect("запись работает");
         assert_eq!(memory.fact("ключ").as_deref(), Some("значение"));
         let _ = std::fs::remove_dir_all(dir);
     }
