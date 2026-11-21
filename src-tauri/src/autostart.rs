@@ -119,7 +119,15 @@ pub fn status(output: Result<String, String>, target: &str) -> Autostart {
             enabled: false,
             command: None,
             target: target_owned,
-            note,
+            // «Значения нет» — это нормальное «выключено», а не сбой: `reg query`
+            // возвращает ту же единицу и на «раздел не найден», и на «нет доступа».
+            // Показывать человеку «ОШИБКА: не удалось найти» под выключенным
+            // выключателем — значит пугать его тем, что работает как задумано.
+            note: if missing_entry(&note) {
+                String::new()
+            } else {
+                note
+            },
         },
         Ok(text) => match parse_query(&text) {
             None => Autostart {
@@ -128,19 +136,41 @@ pub fn status(output: Result<String, String>, target: &str) -> Autostart {
                 target: target_owned,
                 note: String::new(),
             },
-            Some(command) => Autostart {
+            Some(command) if same_target(&command, target) => Autostart {
                 enabled: true,
-                note: if same_target(&command, target) {
-                    String::new()
-                } else {
-                    "в автозапуске уже есть другая запись с этим именем — включение её заменит"
-                        .to_string()
-                },
+                note: String::new(),
+                command: Some(command),
+                target: target_owned,
+            },
+            Some(command) => Autostart {
+                // Значение есть, но запускает **не нас**. Показывать выключатель
+                // включённым значит утверждать «автозапуск работает», а работать
+                // будет чужая программа. Поэтому выключено, а причина названа.
+                enabled: false,
+                note: format!(
+                    "в автозапуске уже есть другая запись с этим именем — она запускает «{command}», а не это приложение; включение её заменит"
+                ),
                 command: Some(command),
                 target: target_owned,
             },
         },
     }
+}
+
+/// Сказал ли `reg.exe` «такого значения нет», а не «не смог прочитать».
+///
+/// Разница важна для человека: первое — нормальное «выключено», второе — сбой,
+/// о котором нужно сказать. Сообщения локализованы, поэтому проверяем оба языка:
+/// раннер CI и машины людей говорят по-разному.
+pub fn missing_entry(note: &str) -> bool {
+    let lower = note.to_lowercase();
+    const ABSENT: [&str; 4] = [
+        "не удалось найти",
+        "не удалось открыть указанный раздел",
+        "unable to find",
+        "cannot find",
+    ];
+    ABSENT.iter().any(|sign| lower.contains(sign))
 }
 
 /// Одна ли и та же программа: сравниваем без кавычек и без учёта регистра.
@@ -208,8 +238,11 @@ mod tests {
             args[position + 1],
             r#""C:\Program Files\ZShelper\zshelper.exe""#
         );
-        // Уже закавыченный путь не получает вторые кавычки.
-        assert_eq!(quoted(r#""C:\A\b.exe""#), r#""C:\A\b.exe""#);
+        // Уже закавыченный путь не получает вторые кавычки: важно ровно одно
+        // обрамление, а не то, что строка совпала символ в символ.
+        let once = quoted(r#""C:\A\b.exe""#);
+        assert!(once.starts_with('"') && once.ends_with('"'), "{once}");
+        assert_eq!(once.matches('"').count(), 2, "кавычки удвоились: {once}");
     }
 
     #[test]
@@ -245,8 +278,14 @@ mod tests {
             Ok("    ZShelper    REG_SZ    \"C:\\old\\zshelper.exe\"".into()),
             r"C:\new\zshelper.exe",
         );
-        assert!(entry.enabled);
+        // Чужая запись не «включена»: включённой выглядела бы работа, которой нет.
+        assert!(!entry.enabled, "чужая программа — не наш автозапуск");
         assert!(!entry.note.is_empty(), "чужая запись должна быть названа");
+        assert!(
+            entry.note.contains("C:\\old\\zshelper.exe"),
+            "человек должен видеть, что именно там записано: {}",
+            entry.note
+        );
 
         let mine = status(
             Ok("    ZShelper    REG_SZ    C:\\new\\zshelper.exe".into()),
@@ -266,7 +305,32 @@ mod tests {
             "x.exe",
         );
         assert!(!off.enabled);
-        // Отсутствие записи — это норма, а не сбой: текст должен быть спокойным.
-        assert!(!off.note.to_lowercase().contains("сбой"));
+        // «Значения нет» — это «выключено», а не сбой. Пустая заметка вместо
+        // «ОШИБКА: не удалось найти» под спокойным выключателем.
+        assert_eq!(off.note, "", "отсутствие записи — норма, а не ошибка");
+
+        // А настоящий отказ доступа по-прежнему называется: молчать о нём нельзя.
+        let denied = status(Err("ОШИБКА: отказано в доступе".into()), "x.exe");
+        assert!(!denied.enabled);
+        assert!(denied.note.contains("отказано"));
+    }
+
+    #[test]
+    fn an_english_missing_entry_is_also_quiet() {
+        // Раннер CI и системы с английским языком отвечают иначе — правило то же.
+        let off = status(Err("ERROR: The system was unable to find the specified registry key or value.".into()), "x.exe");
+        assert!(!off.enabled);
+        assert_eq!(off.note, "");
+    }
+
+    #[test]
+    fn our_own_entry_is_on_and_silent() {
+        let mine = status(
+            Ok("    ZShelper    REG_SZ    \"C:\\Tools\\zshelper.exe\"".into()),
+            r"C:\Tools\zshelper.exe",
+        );
+        assert!(mine.enabled);
+        assert_eq!(mine.note, "");
+        assert_eq!(mine.command.as_deref(), Some(r#""C:\Tools\zshelper.exe""#));
     }
 }
