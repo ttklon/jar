@@ -17,6 +17,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { microphoneAvailable, startRecording, type Recorder } from "./recorder";
 import { createVad, type Vad } from "./vad";
+import { bandEnergy, classify, createHistory } from "./voiceActivity";
 import { listen, speechSupported, stopSpeaking, type Voice } from "./voice";
 
 /** Сколько ждём разбор после того, как человек отпустил кнопку. */
@@ -274,14 +275,43 @@ export function useVoice(options: VoiceOptions): VoiceControl {
         close();
       };
 
+      // История уровней и решения «речь или шум»: порог по громкости не отличает
+      // улицу от голоса, поэтому решение принимается по спектру.
+      const levels = createHistory(12);
+      let noiseRun = 0;
+
       startRecording(undefined, (frame, sampleRate) => {
         if (!valid() || ended) return false;
         if (!vad) {
           vad = createVad({ frameMs: (frame.length / sampleRate) * 1000 });
         }
 
+        // Громкость — только грубый фильтр: тишину дальше не разбираем.
+        let sum = 0;
+        for (let index = 0; index < frame.length; index += 1) {
+          const sample = frame[index] ?? 0;
+          sum += sample * sample;
+        }
+        const level = Math.sqrt(sum / Math.max(1, frame.length));
+        const history = levels.levels();
+        const verdict = classify(bandEnergy(frame), level, history, {
+          // Порог тишины — тот же, что у `vad`: два разных порога путали бы.
+          silence: 0.004,
+        });
+
+        if (verdict === "speech") {
+          levels.push(level);
+          noiseRun = 0;
+        } else {
+          // Шум, который идёт долго и ровно, — не фраза: сбрасываем историю,
+          // иначе «изменчивость» шума накопится и он пройдёт как речь.
+          noiseRun += 1;
+          if (noiseRun >= 25) levels.reset();
+        }
+
         const event = vad.feed(frame);
-        if (event === "start") setSpeaking(true);
+        // Фраза начинается, только если и громкость, и спектр согласны.
+        if (event === "start" && verdict === "speech") setSpeaking(true);
 
         if (event === "end" && !ended) {
           ended = true;
