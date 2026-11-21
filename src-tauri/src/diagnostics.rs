@@ -81,19 +81,19 @@ pub fn looks_path(word: &str) -> bool {
 /// после замены пути на `<путь>` имя переменной могло исчезнуть, и `TOKEN=…`
 /// перестал бы опознаваться как секрет.
 pub fn scrub_line(line: &str) -> (String, usize, usize) {
-    let mut paths = 0usize;
-    let mut secrets = 0usize;
-
     // `ИМЯ=значение` и `ИМЯ: значение` — обе формы встречаются в логах и конфигах.
     let (key, rest) = match line.find('=').or_else(|| line.find(':')) {
         Some(index) if index > 0 => (&line[..index], &line[index..]),
         _ => ("", line),
     };
 
+    // Секрет: пути в этой строке не считаются — она уходит целиком, искать в ней
+    // пути уже нечего. Поэтому здесь явный ноль, а не «сколько успели».
     if !key.is_empty() && looks_secret(key.trim()) {
-        return (format!("{key}=<скрыто>"), paths, secrets + 1);
+        return (format!("{key}=<скрыто>"), 0, 1);
     }
 
+    let mut paths = 0usize;
     let mut out: Vec<String> = Vec::new();
     for word in rest.split(' ') {
         if looks_path(word) {
@@ -104,7 +104,7 @@ pub fn scrub_line(line: &str) -> (String, usize, usize) {
         }
     }
 
-    (format!("{key}{}", out.join(" ")), paths, secrets)
+    (format!("{key}{}", out.join(" ")), paths, 0)
 }
 
 /// Собрать пакет из строк журнала.
