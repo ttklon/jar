@@ -221,6 +221,31 @@ describe("App", () => {
     fireEvent(window, new Event("resize"));
   });
 
+  it("Esc закрывает палитру и возвращает фокус туда, откуда пришли", async () => {
+    // Открыли с клавиатуры — фокус был на кнопке навигации. После Esc он должен
+    // вернуться туда же, а не упасть в `document.body`: иначе следующий Tab
+    // начинает с начала страницы, и человек, который ходит табуляцией, теряет
+    // место. Это дефект, который не виден ни глазами, ни в обычных тестах.
+    render(<App />);
+    await loaded();
+
+    const nav = screen.getByRole("navigation");
+    const first = within(nav).getAllByRole("button")[0] as HTMLElement;
+    first.focus();
+    expect(document.activeElement).toBe(first);
+
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    const input = await screen.findByLabelText(/поиск|найти/i);
+    // Палитра забрала фокус — так и должно быть.
+    expect(document.activeElement).not.toBe(first);
+    expect(input).toBeTruthy();
+
+    fireEvent.keyDown(document.activeElement as HTMLElement, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    // Фокус вернулся на ту же кнопку, а не в тело документа.
+    await waitFor(() => expect(document.activeElement).toBe(first));
+  });
+
   it("при первом запуске сначала знакомит, а потом открывает голос", async () => {
     globalThis.localStorage?.clear?.();
     render(<App />);

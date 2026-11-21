@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogBody,
@@ -214,7 +214,9 @@ export function App() {
       if (event.ctrlKey && !event.altKey && !event.metaKey && (event.key === "k" || event.key === "л")) {
         event.preventDefault();
         setQuery("");
-        setPaletteOpen((open) => !open);
+        // Ctrl+K и закрывает тоже: тогда фокус возвращается, а не теряется.
+        if (paletteOpen) togglePalette(false);
+        else togglePalette(true);
       }
     };
     globalThis.addEventListener("keydown", onKey);
@@ -223,8 +225,47 @@ export function App() {
   const matches = filterCommands(NAV_COMMANDS, query);
   const go = (id: string) => {
     setScreen(id as Screen);
-    setPaletteOpen(false);
+    // Через `togglePalette`, а не голый `setPaletteOpen`: выбор экрана тоже
+    // закрывает палитру, и фокус должен вернуться так же, как после Esc.
+    togglePalette(false);
   };
+
+  // Куда вернуть фокус после закрытия палитры. Открыть её можно было и мышью
+  // (кнопка), и клавишей (Ctrl+K) — во втором случае «откуда пришли» это то
+  // место, где человек был до неё. Без возврата фокус после Esc падает в
+  // `document.body`, и следующий Tab начинает с самого начала страницы:
+  // для того, кто ходит табуляцией, это потеря места.
+  const beforePalette = useRef<HTMLElement | null>(null);
+
+  /** Открыть/закрыть палитру, запомнив, куда вернуть фокус. */
+  const togglePalette = (open: boolean) => {
+    if (open) {
+      // Запоминать надо **здесь**, а не в эффекте: к моменту, когда эффект
+      // увидит `paletteOpen === true`, Fluent уже перехватил фокус в диалог, и
+      // «откуда пришли» оказывается самим диалогом. Проверено: сохранялся DIV
+      // панели, а не кнопка навигации.
+      const active = document.activeElement;
+      beforePalette.current =
+        active instanceof HTMLElement && active !== document.body ? active : null;
+    }
+    setPaletteOpen(open);
+  };
+
+  /** Вернуть фокус туда, откуда палитру открыли. */
+  const restoreFocus = () => {
+    const target = beforePalette.current;
+    beforePalette.current = null;
+    // Если запомнить было нечего (открыли сразу после запуска, до первого Tab),
+    // ведём в навигацию: это начало пути по приложению, а не пустое тело.
+    const fallback = document.querySelector<HTMLElement>("nav button");
+    const to = target && document.contains(target) ? target : fallback;
+    to?.focus();
+  };
+
+  useEffect(() => {
+    if (paletteOpen) return;
+    restoreFocus();
+  }, [paletteOpen]);
   const onThemeChange = (next: ThemeChoice) => {
     setChoice(next);
     try {
@@ -399,7 +440,7 @@ export function App() {
         Палитра — путь к любому экрану без мыши. Она же выход из «я не помню,
         где это было»: человек помнит слово, а не пункт меню.
       */}
-      <Dialog open={paletteOpen} onOpenChange={(_, data) => setPaletteOpen(data.open)}>
+      <Dialog open={paletteOpen} onOpenChange={(_, data) => togglePalette(data.open)}>
         <DialogSurface aria-label={t.paletteTitle}>
           <DialogBody>
             <DialogTitle>{t.paletteTitle}</DialogTitle>
@@ -414,6 +455,13 @@ export function App() {
                   if (event.key === "Enter" && matches[0]) {
                     event.preventDefault();
                     go(matches[0].id);
+                    return;
+                  }
+                  // Esc внутри палитры — тот же выход, что и у диалога, но с
+                  // возвратом фокуса. Fluent закрывает сам, но без возврата.
+                  if (event.key === "Escape") {
+                    event.preventDefault();
+                    togglePalette(false);
                   }
                 }}
               />
