@@ -693,10 +693,15 @@ mod tests {
         // обрыва записи. Байты только ASCII: клиппи справедливо запрещает
         // кириллицу в байтовом литерале (кодировка не видна из кода).
         let mut bytes = b"SQLite format 3\0".to_vec();
-        bytes.extend_from_slice(&[0xde, 0xad, 0xbe, 0xef; 512]);
+        bytes.extend(std::iter::repeat(0xde).take(512));
         std::fs::write(&path, bytes).expect("запись");
 
-        let error = Memory::open(path).expect_err("битая база не открывается как здоровая");
+        // `expect_err` требует `Debug` у успешного значения, а `Memory` его не
+        // реализует нарочно (внутри соединение). Поэтому сравниваем явно.
+        let error = match Memory::open(path) {
+            Ok(_) => panic!("битая база не должна открываться как здоровая"),
+            Err(error) => error,
+        };
         let text = error.to_string();
         // Действие человека другое: не «проверьте путь», а «база повреждена».
         assert!(text.contains("повреждена") || text.contains("не открылась"), "{text}");
