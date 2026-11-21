@@ -106,6 +106,21 @@ describe("ответ голосом", () => {
     expect(screen.queryByLabelText("Путь")).toBeNull();
   });
 
+  it("«да», сказанное у поля вопроса, не становится путём", async () => {
+    render(<Voice onOpen={() => {}} />);
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "создай папку" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    const path = await screen.findByLabelText("Путь");
+
+    fireEvent.pointerDown(screen.getByRole("button", { name: /Сказать ответ: Путь/ }));
+    mocks.options?.onText("да");
+
+    // «Да» — разрешение, а не значение: поле вопроса остаётся пустым.
+    await waitFor(() => expect(mocks.speak).toHaveBeenCalled());
+    expect((path as HTMLInputElement).value).toBe("");
+  });
+
   it("когда ответов нет, приложение не притворяется, что услышало", async () => {
     render(<Voice onOpen={() => {}} />);
 

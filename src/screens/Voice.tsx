@@ -1250,6 +1250,15 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       }
       const target = answerTargetRef.current;
 
+      // «Да» и «ещё» — не значение поля, даже если микрофон зажали у самого вопроса:
+      // разрешение и продолжение разбираются там же, где всегда, а не становятся путём.
+      if (target && !phraseIsAnswer(heard)) {
+        setAnswerTarget(null);
+        setText(heard);
+        search(heard);
+        return;
+      }
+
       if (target) {
         const value = heard.trim();
         setAnswerTarget(null);
