@@ -1,4 +1,4 @@
-﻿# Живой прогон на настоящей Windows — то, чего нельзя изобразить в jsdom.
+﻿﻿# Живой прогон на настоящей Windows — то, чего нельзя изобразить в jsdom.
 #
 # Зачем этот файл: в песочнице нет Wine, и «проверить установщик» там можно только
 # вслепую. Но у проекта есть настоящий windows-latest в CI, и на нём можно проверить
@@ -75,11 +75,21 @@ Check 'filesystem-traversal-refused' {
     $escape = Join-Path $inside '..\outside.txt'
     $full = [IO.Path]::GetFullPath($escape)
     $resolvedRoot = [IO.Path]::GetFullPath($root)
-    # Приложение обязано отказать; здесь проверяем, что проверка (полный путь
-    # нормализуется) ловит выход, а не «доверяет строкам».
-    if ($full.StartsWith($resolvedRoot)) { throw 'проверка пути не отличила выход от входа' }
-    if (-not $full.StartsWith([IO.Path]::GetFullPath((Split-Path $resolvedRoot)))) {
-        throw 'нормализация пути не работает'
+    # Приёмка проверяет то, что обещает приложение: путь внутри папки остаётся
+    # внутри, а путь с `..` нормализуется и указывает ровно на ожидаемое место.
+    # Первая версия этого теста брала `$root\inside\..\outside.txt` — это ВНУТРИ
+    # `$root`, то есть проверка была неверной, а не приложение: `..` не выводит за
+    # границу, если начинать с подпапки. Урок записан здесь, чтобы не повторять.
+    $stay = [IO.Path]::GetFullPath((Join-Path $inside 'file.txt'))
+    if (-not $stay.StartsWith($resolvedRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "путь внутри папки посчитан вне неё: $stay"
+    }
+    $expected = [IO.Path]::Combine($resolvedRoot, 'outside.txt')
+    if ($full -ne $expected) { throw "нормализация `..` дала $full, а не $expected" }
+    # А вот настоящий выход: соседняя папка на уровень выше.
+    $realEscape = [IO.Path]::GetFullPath((Join-Path $root '..\zshelper-escape.txt'))
+    if ($realEscape.StartsWith($resolvedRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'выход на уровень выше не отличился от входа'
     }
 }
 

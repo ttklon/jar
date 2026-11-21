@@ -291,8 +291,12 @@ jobs:
           Get-Content -LiteralPath live-windows-step.log | Write-Host
           if ($code -ne 0) {
             # Последние строки — аннотацией: так причина видна без доступа к файлам.
-            $tail = (Get-Content -LiteralPath live-windows-step.log -Tail 12 -ErrorAction SilentlyContinue) -join ' ⏎ '
-            Write-Host ("::error::живой прогон Windows упал (код {0}): {1}" -f $code, $tail)
+            # Только ASCII-маркеры: русские подписи в потоке могут прийти в другой
+            # кодировке, и тогда причина падения станет нечитаемой.
+            $marks = Select-String -LiteralPath live-windows.log -Pattern '^(PASS|FAIL|SKIP)' -ErrorAction SilentlyContinue |
+              ForEach-Object { $_.Line }
+            $summary = if ($marks) { $marks -join ' ; ' } else { 'нет строк PASS/FAIL — скрипт упал до проверок' }
+            Write-Host ("::error::live windows failed code={0}: {1}" -f $code, $summary)
             exit $code
           }
 
