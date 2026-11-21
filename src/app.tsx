@@ -369,7 +369,7 @@ export function App() {
               {matches.length === 0 ? (
                 <Text className={styles.paletteEmpty}>{t.paletteEmpty(query)}</Text>
               ) : (
-                <ul className={styles.paletteList}>
+                <ul className={styles.paletteList} data-testid="palette">
                   {matches.map((command) => (
                     <li key={command.id}>
                       <button type="button" className={styles.paletteItem} onClick={() => go(command.id)}>

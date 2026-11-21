@@ -77,8 +77,17 @@ describe("App", () => {
     fireEvent.change(search, { target: { value: "микрофон" } });
     // «Голос» есть и в меню, и в палитре. Нажимаем именно пункт палитры:
     // иначе тест доказывал бы работу меню, а не открытой палитры.
-    const list = within(screen.getByRole("dialog"));
-    fireEvent.click(list.getByRole("button", { name: "Голос" }));
+    // Кнопку ищем по видимому тексту, а не по роли: диалог Fluent прячет
+    // содержимое от дерева доступности (`aria-hidden`), пока анимируется
+    // открытие, и `getByRole` под общей нагрузкой его не видит. Роль при этом
+    // настоящая — в браузере кнопка доступна; здесь мы не проверяем Fluent,
+    // а проверяем, что палитра нашла экран и переход по ней закрыл палитру.
+    const list = screen.getByTestId("palette");
+    const voice = Array.from(list.querySelectorAll("button")).find(
+      (button) => button.textContent?.trim() === "Голос",
+    );
+    expect(voice).toBeTruthy();
+    fireEvent.click(voice as HTMLButtonElement);
 
     // Палитра закрылась — иначе она закрывала бы собой тот самый экран.
     await waitFor(() => expect(screen.queryByLabelText("Поиск экрана")).toBeNull(), {
