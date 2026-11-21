@@ -509,6 +509,17 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     loopRef.current = new Map();
     setLoopLines({});
 
+    // Ссылка на дела пополняется эффектом выше, но при монтировании он ещё не
+    // выполнялся: `queueRef` пуста, а восстановленные дела лежат в состоянии
+    // `queue`. Без этой строки такая очередь не начиналась никогда — она честно
+    // сообщала «начинать нечего: в очереди пусто», а дела ждали на экране.
+    //
+    // Только если ссылка пуста: дела, добавленные кнопкой между рендером и
+    // нажатием «Работать без меня», в состоянии ещё могут отсутствовать, и
+    // затирать их копией из состояния значило бы терять только что добавленное.
+    if (queueRef.current.length === 0) {
+      queueRef.current = queue;
+    }
     let items = queueRef.current;
     const plans = new Map<string, PlanCheck | null>();
     const inFlight = new Map<string, Promise<void>>();
@@ -577,7 +588,20 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
             ),
           );
 
-          const report = await runPlan(JSON.stringify(check.plan), []).catch(() => null);
+          // Ошибку не глотаем в `null`: «ядро не ответило» и «ядро ответило отказом» —
+          // разные причины, и человеку нужна настоящая. При этом исключение здесь не
+          // должно оставлять дело в «идёт»: именно так очередь вставала навсегда.
+          let report: Awaited<ReturnType<typeof runPlan>> | null = null;
+          try {
+            report = await runPlan(JSON.stringify(check.plan), []);
+          } catch (reason: unknown) {
+            const message = reason instanceof Error ? reason.message : String(reason);
+            mine((current) =>
+              setState(current, item.id, "failed", `запуск прервался: ${message}`),
+            );
+            outcome = { completed: 0, steps: 0, stopped: message };
+            return;
+          }
           if (!report) {
             mine((current) => setState(current, item.id, "failed", "запуск не состоялся: ядро не ответило"));
             outcome = { completed: 0, steps: 0, stopped: "ядро не ответило" };
