@@ -160,10 +160,7 @@ pub fn reg(args: &[String]) -> Result<String, String> {
     if !cfg!(windows) {
         return Err("автозапуск — функция Windows; здесь её нет".to_string());
     }
-    let request = crate::executor::ExecRequest::new(
-        "reg.exe",
-        args.to_vec(),
-    );
+    let request = crate::executor::ExecRequest::new("reg.exe", args.to_vec());
     let cancel = std::sync::atomic::AtomicBool::new(false);
     let output = crate::executor::run(&request, &cancel).map_err(|error| error.to_string())?;
     if output.exit_code == Some(0) {
@@ -207,7 +204,10 @@ mod tests {
     fn path_with_spaces_is_quoted_exactly_once() {
         let args = add_args(r"C:\Program Files\ZShelper\zshelper.exe");
         let position = args.iter().position(|a| a == "/d").expect("/d есть");
-        assert_eq!(args[position + 1], r#""C:\Program Files\ZShelper\zshelper.exe""#);
+        assert_eq!(
+            args[position + 1],
+            r#""C:\Program Files\ZShelper\zshelper.exe""#
+        );
         // Уже закавыченный путь не получает вторые кавычки.
         assert_eq!(quoted(r#""C:\A\b.exe""#), r#""C:\A\b.exe""#);
     }
@@ -217,7 +217,10 @@ mod tests {
         let args = delete_args();
         assert_eq!(args[0], "delete");
         assert!(args.contains(&VALUE_NAME.to_string()));
-        assert!(!args.iter().any(|a| a == "/d"), "пустое значение — не выключение");
+        assert!(
+            !args.iter().any(|a| a == "/d"),
+            "пустое значение — не выключение"
+        );
     }
 
     #[test]
@@ -250,12 +253,18 @@ mod tests {
             r"c:\new\zshelper.exe",
         );
         assert!(mine.enabled);
-        assert!(mine.note.is_empty(), "своя запись сравнивается без регистра");
+        assert!(
+            mine.note.is_empty(),
+            "своя запись сравнивается без регистра"
+        );
     }
 
     #[test]
     fn a_missing_entry_is_off_without_scary_words() {
-        let off = status(Err("ОШИБКА: не удалось найти указанный раздел".into()), "x.exe");
+        let off = status(
+            Err("ОШИБКА: не удалось найти указанный раздел".into()),
+            "x.exe",
+        );
         assert!(!off.enabled);
         // Отсутствие записи — это норма, а не сбой: текст должен быть спокойным.
         assert!(!off.note.to_lowercase().contains("сбой"));
