@@ -147,17 +147,14 @@ if ($installer) {
         # и проверка не должна из-за этого «падать» на исправной программе.
         if ($text -notmatch 'actions=[0-9]+') { throw "реестр не загрузился: $text" }
 
-        # Один экземпляр (шаг 146) проверяется отдельным пунктом ниже — здесь
-        # только запоминаем, что именно запускать. Внутри этого пункта проверка
-        # была бы невидимой: наружу уходят только строки PASS/FAIL, а «процессов
-        # 0» тихо проходило бы как успех.
+        # Один экземпляр и копия памяти проверяются отдельными пунктами ниже —
+        # здесь только запоминаем, что запускать. Внутри этого пункта проверки
+        # были бы невидимыми: наружу уходят только строки PASS/FAIL.
+        # Удаление тоже уехало в свой пункт: раньше программа стиралась прямо
+        # здесь, и следующие проверки запускали несуществующий файл.
         $script:installedExe = $exe
-
-        # Удаление: программа уходит.
-        $uninstaller = Get-ChildItem -Path $target -Filter '*uninstall*.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
-        if (-not $uninstaller) { throw 'в установленной папке нет удаления' }
-        Start-Process -FilePath $uninstaller.FullName -ArgumentList '/S' -Wait | Out-Null
-        if (Test-Path -LiteralPath $exe) { throw 'удаление оставило программу' }
+        $script:uninstaller = Get-ChildItem -Path $target -Filter '*uninstall*.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $script:uninstaller) { throw 'в установленной папке нет удаления' }
     }
 } else {
     Say 'SKIP installer-silent-install-and-run — установщик не собран в этой джобе'
@@ -209,6 +206,18 @@ if ($script:installedExe) {
     }
 } else {
     Say 'SKIP single-instance-one-process — нужна установленная программа'
+}
+
+# ── 4г. Удаление убирает программу (проверка установщика, шаг установки) ───────
+if ($script:installedExe -and $script:uninstaller) {
+    Check 'uninstall-removes-program' {
+        Start-Process -FilePath $script:uninstaller.FullName -ArgumentList '/S' -Wait | Out-Null
+        Start-Sleep -Seconds 2
+        if (Test-Path -LiteralPath $script:installedExe) { throw 'удаление оставило программу' }
+        Say '  после удаления программы нет'
+    }
+} else {
+    Say 'SKIP uninstall-removes-program — нужна установленная программа'
 }
 
 # ── 5. WebView2: то, без чего приложение белое ────────────────────────────────
