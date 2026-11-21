@@ -57,7 +57,10 @@ fn report(name: &str, body: impl FnOnce() -> Result<String, String>) -> i32 {
 }
 
 fn registry_check() -> Result<String, String> {
-    let registry = crate::registry::Registry::load()?;
+    // `RegistryError` не приводится к `String` сам — и не должен: у него своя
+    // формулировка («дубль ключа …»), которая полезнее общей. Поэтому берём текст.
+    let registry = crate::registry::Registry::load()
+        .map_err(|error| error.to_string())?;
     Ok(format!(
         "{} действий, {} доменов",
         registry.len(),
