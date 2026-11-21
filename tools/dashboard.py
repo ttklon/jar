@@ -46,6 +46,8 @@ GENERATED = {
 
 PURPOSE = {
     "docs/BUILD-GUIDE.md": "инструкция по сборке приложения — главный документ для разработки",
+    "docs/MASTER-PLAN-500.md":
+        "план из 500 проверяемых шагов: боли по коду, порядок, доказательства",
     "docs/DECISION-STACK.md": "почему Tauri 2 + Rust + React, а не Electron",
     "docs/RUNTIME.md": "как приложение запускается и обновляется на Windows",
     "docs/LICENSING.md": "лицензирование и защита сборки",
