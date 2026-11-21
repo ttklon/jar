@@ -722,7 +722,7 @@ mod tests {
             .split("fn loopback(port: u16)")
             .nth(1)
             .expect("функция на месте");
-        let body = &body[..body.find('\n}').expect("конец функции")];
+        let body = &body[..body.find("\n}").expect("конец функции")];
         assert!(
             !body.contains("to_socket_addrs"),
             "в loopback снова разрешение имени: локальный путь снова зависит от сети"

@@ -49,6 +49,11 @@ STEPS: list[tuple[str, list[str], str]] = [
     # Rust, не документы: без этого `b"чужой"` доезжает до CI и валит clippy
     # (non_ascii_literal). Случилось трижды, каждый раз — круг ожидания.
     ("rust literals", ["tools/rust_literals.py", "--quiet"], "no non-ASCII inside Rust byte strings"),
+    # Та же история: апостроф, съевший перевод строки, вместо двух символов
+    # бэк-слэш-n, стоил круга CI и глазами читается как нормальный код.
+    # У валидатора есть свой --selftest: проверка на саму проверку, иначе она
+    # молча перестаёт ловить и продолжает говорить «чисто».
+    ("rust strings", ["tools/rust_strings.py", "--quiet"], "no char literal swallowed a line break"),
     # Типы проверяются с ВЫКЛЮЧЕННЫМ кэшем: `tsc -b` дважды сказал «чисто», потому
     # что верил своему `tsbuildinfo`, а CI без кэша находил ошибку.
     ("types", ["tools/ts_typecheck.py", "--quiet"], "tsc -b with a fresh cache"),
