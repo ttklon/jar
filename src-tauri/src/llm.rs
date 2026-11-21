@@ -255,7 +255,8 @@ impl ChunkedState {
 
             match self.need {
                 None => {
-                    let Some(at) = self.buffer.windows(2).position(|window| window == b"\r\n") else {
+                    let Some(at) = self.buffer.windows(2).position(|window| window == b"\r\n")
+                    else {
                         break;
                     };
                     let header = String::from_utf8_lossy(&self.buffer[..at]).to_string();
@@ -319,7 +320,10 @@ pub fn stream_delta(line: &str) -> (Option<String>, Option<String>) {
                     .and_then(|value| value.as_str())
                     .map(str::to_string)
                     .unwrap_or_else(|| error.to_string());
-                return (None, Some(format!("движок ответил отказом: {}", snippet(&message))));
+                return (
+                    None,
+                    Some(format!("движок ответил отказом: {}", snippet(&message))),
+                );
             }
 
             let delta = parsed
@@ -334,10 +338,7 @@ pub fn stream_delta(line: &str) -> (Option<String>, Option<String>) {
                 _ => (None, None),
             }
         }
-        Err(error) => (
-            None,
-            Some(format!("кусок потока не разобрался: {error}")),
-        ),
+        Err(error) => (None, Some(format!("кусок потока не разобрался: {error}"))),
     }
 }
 
@@ -610,7 +611,8 @@ mod tests {
             let mut buffer = [0u8; 4096];
             let _ = stream.read(&mut buffer);
 
-            let head = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nConnection: close\r\n\r\n";
+            let head =
+                "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nConnection: close\r\n\r\n";
             let _ = stream.write_all(head.as_bytes());
             let _ = stream.write_all(first.as_bytes());
             let _ = stream.flush();
@@ -645,7 +647,10 @@ mod tests {
         })
         .expect("поток прочитан");
 
-        assert!(whole.contains("Первое") && whole.contains("Второе"), "{whole}");
+        assert!(
+            whole.contains("Первое") && whole.contains("Второе"),
+            "{whole}"
+        );
         // Первая строка пришла до того, как сервер отправил вторую.
         let first_at = first_at.expect("первая строка увидана");
         assert!(
@@ -664,11 +669,7 @@ mod tests {
 
         let mut state = ChunkedState::default();
         let body_first = format!("{:X}\r\n{}\r\n", first.len(), first);
-        let body_second = format!(
-            "{:X}\r\n{}\r\n0\r\n\r\n",
-            second.len(),
-            second
-        );
+        let body_second = format!("{:X}\r\n{}\r\n0\r\n\r\n", second.len(), second);
 
         let mut out = state.feed(body_first.as_bytes());
         // Разбор по частям: данные первого куска на месте, второй ещё не пришёл.
@@ -736,9 +737,7 @@ mod tests {
 
     #[test]
     fn an_error_in_the_middle_of_a_stream_keeps_its_words() {
-        let (delta, error) = stream_delta(
-            "data: {\"error\":{\"message\":\"context full\"}}",
-        );
+        let (delta, error) = stream_delta("data: {\"error\":{\"message\":\"context full\"}}");
         assert!(delta.is_none());
         let error = error.expect("причина");
         assert!(error.contains("context full"), "{error}");
@@ -749,12 +748,16 @@ mod tests {
         let (sender, _receiver) = std::sync::mpsc::channel();
         let port = serve(b"".to_vec(), sender);
         let error = ask_stream(port, "{}", Duration::from_secs(5)).expect_err("пусто");
-        assert!(error.contains("ничего") || error.contains("ничего не ответив"), "{error}");
+        assert!(
+            error.contains("ничего") || error.contains("ничего не ответив"),
+            "{error}"
+        );
     }
 
     #[test]
     fn the_body_can_ask_for_a_stream_and_still_defaults_to_whole() {
-        let whole: serde_json::Value = serde_json::from_str(&chat_body("привет", "m")).expect("json");
+        let whole: serde_json::Value =
+            serde_json::from_str(&chat_body("привет", "m")).expect("json");
         assert_eq!(whole["stream"], false);
 
         let streamed: serde_json::Value =
