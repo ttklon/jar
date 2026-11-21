@@ -274,6 +274,17 @@ jobs:
             Out-File -FilePath live-windows-step.log -Append -Encoding utf8
           $code = $LASTEXITCODE
           Get-Content -LiteralPath live-windows-step.log | Write-Host
+          # Artefact downloads are blocked from the dev sandbox, and job logs are
+          # not served by the API, so the only readable evidence channel is the
+          # annotations API. Emit every PASS/FAIL/SKIP line and the self-check
+          # verdict as notices (GitHub keeps up to 10 per step).
+          $marks = @(Select-String -LiteralPath live-windows.log -Pattern '^(PASS|FAIL|SKIP)|SELF-CHECK' -ErrorAction SilentlyContinue |
+            ForEach-Object { $_.Line })
+          $shown = $marks | Select-Object -First 9
+          foreach ($m in $shown) { Write-Host ("::notice::{0}" -f $m) }
+          if ($marks.Count -gt 9) {
+            Write-Host ("::notice::... {0} more check lines, see live-windows.log" -f ($marks.Count - 9))
+          }
           if ($code -ne 0) {
             $marks = Select-String -LiteralPath live-windows.log -Pattern '^(PASS|FAIL|SKIP)' -ErrorAction SilentlyContinue |
               ForEach-Object { $_.Line }
