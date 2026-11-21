@@ -64,6 +64,40 @@ describe("App", () => {
       { timeout: 4000 },
     );
 
+  it("Ctrl+K открывает палитру, а первые буквы ведут на экран без мыши", async () => {
+    render(<App />);
+    await loaded();
+
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    // Под общей нагрузкой (полный прогон) диалог может открываться дольше секунды;
+    // ждём с запасом, иначе тест падает от загрузки машины, а не от поломки.
+    const search = await screen.findByLabelText("Поиск экрана", {}, { timeout: 5000 });
+
+    // Слово, которого нет в меню глазами: человек помнит «микрофон», а не «Голос».
+    fireEvent.change(search, { target: { value: "микрофон" } });
+    // «Голос» есть и в меню, и в палитре. Нажимаем именно пункт палитры:
+    // иначе тест доказывал бы работу меню, а не открытой палитры.
+    const list = within(screen.getByRole("dialog"));
+    fireEvent.click(list.getByRole("button", { name: "Голос" }));
+
+    // Палитра закрылась — иначе она закрывала бы собой тот самый экран.
+    await waitFor(() => expect(screen.queryByLabelText("Поиск экрана")).toBeNull(), {
+      timeout: 5000,
+    });
+  });
+
+  it("палитра честно говорит, когда совпадений нет", async () => {
+    render(<App />);
+    await loaded();
+
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    fireEvent.change(await screen.findByLabelText("Поиск экрана", {}, { timeout: 5000 }), {
+      target: { value: "квантовая телепортация" },
+    });
+
+    expect(screen.getByText(/ничего не нашлось по «квантовая телепортация»/)).toBeTruthy();
+  });
+
   it("при первом запуске сначала знакомит, а потом открывает голос", async () => {
     globalThis.localStorage?.clear?.();
     render(<App />);

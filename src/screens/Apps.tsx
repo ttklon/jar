@@ -67,7 +67,7 @@ export function Apps() {
         </Text>
       </div>
 
-      {error ? <Text className={styles.error}>{`${apps.loadError}: ${error}`}</Text> : null}
+      {error ? <Text className={styles.error} role="alert" aria-live="polite">{`${apps.loadError}: ${error}`}</Text> : null}
 
       {profiles === null && !error ? (
         <div className={styles.center}>

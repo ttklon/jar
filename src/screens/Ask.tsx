@@ -294,7 +294,7 @@ export function Ask() {
         )}
 
         {planError ? (
-          <Text className={styles.error}>
+          <Text className={styles.error} role="alert" aria-live="polite">
             {ask.planError}: {planError}
           </Text>
         ) : null}
@@ -467,11 +467,11 @@ export function Ask() {
       <Text className={styles.note}>{ask.voiceHold}</Text>
       <Text className={styles.note}>{ask.voiceNote}</Text>
 
-      {voiceError ? <Text className={styles.error}>{voiceError}</Text> : null}
+      {voiceError ? <Text className={styles.error} role="alert" aria-live="polite">{voiceError}</Text> : null}
       {spokenNote ? <Text className={styles.note}>{spokenNote}</Text> : null}
 
       {error ? (
-        <Text className={styles.error}>
+        <Text className={styles.error} role="alert" aria-live="polite">
           {ask.loadError}: {error}
         </Text>
       ) : busy ? (

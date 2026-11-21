@@ -1,5 +1,6 @@
-import { Button, makeStyles, Switch, Text, tokens } from "@fluentui/react-components";
+import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { t } from "../i18n/ru";
+import type { ThemeChoice } from "../lib/theme";
 import { UndoCard } from "./Undo";
 import { DataPlaces } from "./DataPlaces";
 import { SelfCheckCard } from "./SelfCheck";
@@ -22,14 +23,16 @@ const useStyles = makeStyles({
 });
 
 export function Settings({
+  theme,
   dark,
   onThemeChange,
   onShowWelcome,
   source,
   version,
 }: {
+  theme: ThemeChoice;
   dark: boolean;
-  onThemeChange: (dark: boolean) => void;
+  onThemeChange: (theme: ThemeChoice) => void;
   onShowWelcome: () => void;
   source: string;
   version: string;
@@ -52,10 +55,32 @@ export function Settings({
           <div>
             <Text weight="semibold">{t.settingsTheme}</Text>
             <Text className={styles.muted} block>
-              {dark ? t.settingsThemeDark : t.settingsThemeLight}
+              {theme === "system"
+                ? t.settingsThemeSystem(dark)
+                : dark
+                  ? t.settingsThemeDark
+                  : t.settingsThemeLight}
             </Text>
           </div>
-          <Switch checked={dark} onChange={(_, data) => onThemeChange(data.checked)} />
+          {/* Три состояния, а не выключатель: «как в системе» — это не «светлая»
+              и не «тёмная», и человек должен видеть, что он выбрал именно это. */}
+          <div className={styles.row} role="radiogroup" aria-label={t.settingsTheme}>
+            {(["light", "dark", "system"] as const).map((option) => (
+              <Button
+                key={option}
+                size="small"
+                appearance={theme === option ? "primary" : "subtle"}
+                aria-pressed={theme === option}
+                onClick={() => onThemeChange(option)}
+              >
+                {option === "light"
+                  ? t.settingsThemeLight
+                  : option === "dark"
+                    ? t.settingsThemeDark
+                    : t.settingsThemeSystemLabel}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 

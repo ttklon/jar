@@ -59,7 +59,7 @@ export function Flows() {
         </Text>
       ) : null}
 
-      {error ? <Text className={styles.error}>{`${flows.loadError}: ${error}`}</Text> : null}
+      {error ? <Text className={styles.error} role="alert" aria-live="polite">{`${flows.loadError}: ${error}`}</Text> : null}
 
       {list === null && !error ? (
         <div className={styles.center}>

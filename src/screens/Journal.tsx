@@ -188,7 +188,7 @@ export function Journal() {
         </Text>
       ) : null}
 
-      {error ? <Text className={styles.error}>{`${journal.loadError}: ${error}`}</Text> : null}
+      {error ? <Text className={styles.error} role="alert" aria-live="polite">{`${journal.loadError}: ${error}`}</Text> : null}
 
       <section className={styles.runs}>
         <Text as="h3" size={500} weight="semibold">

@@ -1800,7 +1800,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
 
       {voiceError ? (
         <div className={styles.bar}>
-          <Text className={styles.error}>{voiceError}</Text>
+          <Text className={styles.error} role="alert" aria-live="polite">{voiceError}</Text>
           {/* Ошибка — про попытку, а не про приговор: убираем её, не дожидаясь,
               когда человек сам догадается, что старое уже неправда. */}
           <Button size="small" appearance="subtle" onClick={() => setVoiceError(null)}>
@@ -1849,7 +1849,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         </Text>
       </div>
       {presenceError ? (
-        <Text className={styles.error}>{voice.presenceError(presenceError)}</Text>
+        <Text className={styles.error} role="alert" aria-live="polite">{voice.presenceError(presenceError)}</Text>
       ) : null}
 
       <form
@@ -1993,7 +1993,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
             {voice.queueStop}
           </Button>
           {thinkError && !enginePrompt ? (
-            <Text className={styles.error}>{voice.thinkError(thinkError)}</Text>
+            <Text className={styles.error} role="alert" aria-live="polite">{voice.thinkError(thinkError)}</Text>
           ) : null}
           {enginePrompt ? (
             <div className={styles.bar}>
@@ -2086,7 +2086,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           ) : null}
           {thought && !thought.proposal ? (
             <>
-              <Text className={styles.error}>{voice.thinkBroken(thought.problem ?? "")}</Text>
+              <Text className={styles.error} role="alert" aria-live="polite">{voice.thinkBroken(thought.problem ?? "")}</Text>
               <pre className={styles.prompt}>{thought.answer}</pre>
             </>
           ) : null}
@@ -2183,11 +2183,11 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
             </Text>
           ) : null}
           {machine && !machine.budget.may_start ? (
-            <Text className={styles.error}>{voice.machineStop}</Text>
+            <Text className={styles.error} role="alert" aria-live="polite">{voice.machineStop}</Text>
           ) : null}
           {machine ? <Text className={styles.note}>{machine.note}</Text> : null}
           {machineError ? (
-            <Text className={styles.error}>{voice.machineError(machineError)}</Text>
+            <Text className={styles.error} role="alert" aria-live="polite">{voice.machineError(machineError)}</Text>
           ) : null}
         </div>
       ) : null}
@@ -2279,21 +2279,21 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
                 ))
             : null}
           {typed ? (
-            <Text className={typed.verified ? styles.note : styles.error}>
+            <Text role={typed.verified ? "status" : "alert"} aria-live="polite" className={typed.verified ? styles.note : styles.error}>
               {voice.typeResult(typed.target.name, typed.read_back, typed.note)}
             </Text>
           ) : null}
-          {typeError ? <Text className={styles.error}>{voice.typeError(typeError)}</Text> : null}
+          {typeError ? <Text className={styles.error} role="alert" aria-live="polite">{voice.typeError(typeError)}</Text> : null}
           {pressResult ? (
-            <Text className={pressResult.changed ? styles.note : styles.error}>
+            <Text role={pressResult.changed ? "status" : "alert"} aria-live="polite" className={pressResult.changed ? styles.note : styles.error}>
               {voice.pressResult(pressResult.target.name, pressResult.changed, pressResult.note)}
             </Text>
           ) : null}
           {pressError ? (
-            <Text className={styles.error}>{voice.pressError(pressError)}</Text>
+            <Text className={styles.error} role="alert" aria-live="polite">{voice.pressError(pressError)}</Text>
           ) : null}
           {screenError ? (
-            <Text className={styles.error}>{voice.screenError(screenError)}</Text>
+            <Text className={styles.error} role="alert" aria-live="polite">{voice.screenError(screenError)}</Text>
           ) : null}
         </div>
       ) : null}
@@ -2301,7 +2301,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       {spoken ? <Text className={styles.spoken}>{spoken}</Text> : null}
 
       {error ? (
-        <Text className={styles.error}>{`${voice.loadError}: ${error}`}</Text>
+        <Text className={styles.error} role="alert" aria-live="polite">{`${voice.loadError}: ${error}`}</Text>
       ) : items === null ? (
         <Text className={styles.note}>{voice.nothingYet}</Text>
       ) : items.length === 0 ? (
@@ -2402,7 +2402,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
                 !(draft.questions.length > 0 && problem.problem.includes("не хватает данных")),
             )
             .map((problem, index) => (
-              <Text key={`${problem.position}-${index}`} className={styles.error}>
+              <Text key={`${problem.position}-${index}`} role="alert" aria-live="polite" className={styles.error}>
                 {`${voice.draftMissing}: ${problem.problem}`}
               </Text>
             ))}
@@ -2499,7 +2499,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           </Button>
 
           {handError ? (
-            <Text className={styles.error}>{voice.handFilter(handError)}</Text>
+            <Text className={styles.error} role="alert" aria-live="polite">{voice.handFilter(handError)}</Text>
           ) : null}
 
           {handDraft ? (
@@ -2546,7 +2546,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
                     <pre className={styles.prompt}>{trial.stderr}</pre>
                   ) : null}
                   {!trial.ran ? (
-                    <Text className={styles.error}>{voice.trialNotRan(trial.note)}</Text>
+                    <Text className={styles.error} role="alert" aria-live="polite">{voice.trialNotRan(trial.note)}</Text>
                   ) : null}
 
                   {/* Рукой черновик становится только по слову человека и только после пробы. */}

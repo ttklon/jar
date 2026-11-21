@@ -342,7 +342,7 @@ export function Models() {
           </Button>
         </div>
         {downloadError ? (
-          <Text className={styles.error}>
+          <Text className={styles.error} role="alert" aria-live="polite">
             {text.download.error}: {downloadError}
           </Text>
         ) : null}
@@ -399,7 +399,7 @@ export function Models() {
         ))}
 
         {rolesError ? (
-          <Text className={styles.error}>
+          <Text className={styles.error} role="alert" aria-live="polite">
             {text.roles.error}: {rolesError}
           </Text>
         ) : null}
@@ -455,14 +455,14 @@ export function Models() {
 
         {!isTauri() ? <Text className={styles.note}>{text.engine.browserNote}</Text> : null}
         {engineError ? (
-          <Text className={styles.error}>
+          <Text className={styles.error} role="alert" aria-live="polite">
             {text.engine.startError}: {engineError}
           </Text>
         ) : null}
       </section>
 
       {error ? (
-        <Text className={styles.error}>
+        <Text className={styles.error} role="alert" aria-live="polite">
           {text.loadError}: {error}
         </Text>
       ) : view === null ? (
@@ -497,7 +497,7 @@ export function Models() {
           {!isTauri() ? <Text className={styles.note}>{text.browserNote}</Text> : null}
 
           {view.error ? (
-            <Text className={styles.error}>{view.error}</Text>
+            <Text className={styles.error} role="alert" aria-live="polite">{view.error}</Text>
           ) : view.items.length === 0 ? (
             !isTauri() ? null : <Text className={styles.note}>{text.empty}</Text>
           ) : (
@@ -608,7 +608,7 @@ export function Models() {
                 {removing?.name} · {size(removing?.size_bytes ?? 0)}
               </Text>
               {removeError ? (
-                <Text block className={styles.error}>
+                <Text block role="alert" aria-live="polite" className={styles.error}>
                   {text.removeError}: {removeError}
                 </Text>
               ) : null}

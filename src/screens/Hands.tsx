@@ -80,7 +80,7 @@ export function Hands() {
         </Text>
       ) : null}
 
-      {error ? <Text className={styles.error}>{`${hands.loadError}: ${error}`}</Text> : null}
+      {error ? <Text className={styles.error} role="alert" aria-live="polite">{`${hands.loadError}: ${error}`}</Text> : null}
 
       {tools === null && !error ? (
         <div className={styles.center}>
@@ -140,7 +140,7 @@ export function Hands() {
                 </button>
                 {reports[hand.key] ? <Text className={styles.note}>{reports[hand.key]}</Text> : null}
                 {refusals[hand.key] ? (
-                  <Text className={styles.error}>{refusals[hand.key]}</Text>
+                  <Text className={styles.error} role="alert" aria-live="polite">{refusals[hand.key]}</Text>
                 ) : null}
                 <button
                   type="button"

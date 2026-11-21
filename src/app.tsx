@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogSurface,
+  DialogTitle,
   FluentProvider,
+  Input,
   makeStyles,
   mergeClasses,
   Spinner,
@@ -35,6 +41,15 @@ import { Apps } from "./screens/Apps";
 import { Settings } from "./screens/Settings";
 import { Welcome } from "./screens/Welcome";
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
+import { filterCommands, type Command } from "./lib/commands";
+import {
+  DEFAULT_CHOICE,
+  THEME_KEY,
+  parseChoice,
+  prefersDark,
+  resolveTheme,
+  type ThemeChoice,
+} from "./lib/theme";
 import { apps, ask, flows, hands, journal, models, t, voice } from "./i18n/ru";
 import { APP_VERSION } from "./version";
 
@@ -69,6 +84,27 @@ const useStyles = makeStyles({
     overflow: "hidden",
   },
   brand: { display: "flex", flexDirection: "column", gap: "2px", padding: "0 8px" },
+  paletteList: { listStyle: "none", margin: "10px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "2px" },
+  paletteItem: {
+    width: "100%",
+    textAlign: "left",
+    padding: "10px 12px",
+    borderRadius: tokens.borderRadiusMedium,
+    border: "none",
+    background: "transparent",
+    color: tokens.colorNeutralForeground1,
+    fontFamily: tokens.fontFamilyBase,
+    fontSize: tokens.fontSizeBase300,
+    cursor: "pointer",
+    ":hover": { backgroundColor: tokens.colorNeutralBackground2Hover },
+    ":focus-visible": { outline: `2px solid ${tokens.colorStrokeFocus2}`, outlineOffset: "2px" },
+  },
+  paletteEmpty: { display: "block", marginTop: "10px", color: tokens.colorNeutralForeground3 },
+  paletteHint: {
+    padding: "0 10px",
+    color: tokens.colorNeutralForeground3,
+    fontSize: tokens.fontSizeBase200,
+  },
   brandName: { fontSize: "19px", fontWeight: tokens.fontWeightSemibold, letterSpacing: "-0.2px" },
   tagline: { color: tokens.colorNeutralForeground3, fontSize: tokens.fontSizeBase200 },
   nav: { display: "flex", flexDirection: "column", gap: "4px" },
@@ -119,18 +155,21 @@ const useStyles = makeStyles({
 
 // Голос первым и по умолчанию: приложение открывается для задачи, а не для осмотра.
 // Остальное — доказательство под капотом, к которому ходят, когда хотят проверить.
-const NAV: { id: Screen; label: string; icon: React.ReactElement }[] = [
-  { id: "voice", label: voice.nav, icon: <MicRegular /> },
-  { id: "overview", label: t.navOverview, icon: <HomeRegular /> },
-  { id: "catalog", label: t.navCatalog, icon: <AppsListDetailRegular /> },
-  { id: "ask", label: ask.nav, icon: <SearchRegular /> },
-  { id: "hands", label: hands.nav, icon: <HandRightRegular /> },
-  { id: "flows", label: flows.nav, icon: <BranchRegular /> },
-  { id: "apps", label: apps.nav, icon: <AppGenericRegular /> },
-  { id: "models", label: models.nav, icon: <BrainCircuitRegular /> },
-  { id: "journal", label: journal.nav, icon: <HistoryRegular /> },
-  { id: "settings", label: t.navSettings, icon: <SettingsRegular /> },
+const NAV: { id: Screen; label: string; icon: React.ReactElement; keywords: readonly string[] }[] = [
+  { id: "voice", label: voice.nav, icon: <MicRegular />, keywords: ["голос", "микрофон", "voice", "сказать"] },
+  { id: "overview", label: t.navOverview, icon: <HomeRegular />, keywords: ["обзор", "сводка", "overview"] },
+  { id: "catalog", label: t.navCatalog, icon: <AppsListDetailRegular />, keywords: ["каталог", "действия", "catalog"] },
+  { id: "ask", label: ask.nav, icon: <SearchRegular />, keywords: ["спросить", "план", "ask", "поиск"] },
+  { id: "hands", label: hands.nav, icon: <HandRightRegular />, keywords: ["руки", "инструменты", "hands", "tools"] },
+  { id: "flows", label: flows.nav, icon: <BranchRegular />, keywords: ["сценарии", "цепочки", "flows"] },
+  { id: "apps", label: apps.nav, icon: <AppGenericRegular />, keywords: ["приложения", "профили", "apps"] },
+  { id: "models", label: models.nav, icon: <BrainCircuitRegular />, keywords: ["модели", "движок", "models", "llm"] },
+  { id: "journal", label: journal.nav, icon: <HistoryRegular />, keywords: ["история", "журнал", "journal", "logs"] },
+  { id: "settings", label: t.navSettings, icon: <SettingsRegular />, keywords: ["настройки", "тема", "settings"] },
 ];
+
+/** Что палитра знает о навигации: имя экрана плюс слова, по которым его ищут. */
+const NAV_COMMANDS: Command[] = NAV.map(({ id, label, keywords }) => ({ id, label, keywords }));
 
 export function App() {
   const styles = useStyles();
@@ -138,7 +177,52 @@ export function App() {
   // Знакомство показывается один раз. Решение — в `firstRun`, чтобы его проверяли тесты,
   // а не глаза: «один раз» слишком легко превращается в «каждый раз».
   const [welcome, setWelcome] = useState(() => shouldShowWelcome());
-  const [dark, setDark] = useState(true);
+  // Тема — не украшение: раньше она была зашита тёмной и системная настройка
+  // Windows не значила ничего. «Как в системе» — третий выбор рядом с двумя явными.
+  const [choice, setChoice] = useState<ThemeChoice>(() => {
+    const stored = parseChoice(globalThis.localStorage?.getItem(THEME_KEY));
+    return stored ?? DEFAULT_CHOICE;
+  });
+  const [systemDark, setSystemDark] = useState(() => {
+    const mql = globalThis.matchMedia?.("(prefers-color-scheme: dark)");
+    return mql ? mql.matches : prefersDark(() => true);
+  });
+  useEffect(() => {
+    const mql = globalThis.matchMedia?.("(prefers-color-scheme: dark)");
+    if (!mql) return;
+    const onChange = (event: MediaQueryListEvent) => setSystemDark(event.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  const dark = resolveTheme(choice, systemDark) === "dark";
+  // Палитра: открывается с клавиатуры, ведёт на любой экран по первым буквам.
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      // Ctrl+K и Ctrl+K в русской раскладке (л) — одна и та же привычка.
+      if (event.ctrlKey && !event.altKey && !event.metaKey && (event.key === "k" || event.key === "л")) {
+        event.preventDefault();
+        setQuery("");
+        setPaletteOpen((open) => !open);
+      }
+    };
+    globalThis.addEventListener("keydown", onKey);
+    return () => globalThis.removeEventListener("keydown", onKey);
+  }, []);
+  const matches = filterCommands(NAV_COMMANDS, query);
+  const go = (id: string) => {
+    setScreen(id as Screen);
+    setPaletteOpen(false);
+  };
+  const onThemeChange = (next: ThemeChoice) => {
+    setChoice(next);
+    try {
+      globalThis.localStorage?.setItem(THEME_KEY, next);
+    } catch {
+      // Запомнить негде — тема всё равно применилась; это не повод падать.
+    }
+  };
   const [snapshot, setSnapshot] = useState<RegistrySnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -181,6 +265,8 @@ export function App() {
               </button>
             ))}
           </nav>
+
+          <div className={styles.paletteHint}>{t.paletteHint}</div>
 
           <div className={styles.spacer} />
 
@@ -247,8 +333,9 @@ export function App() {
             <Journal />
           ) : (
             <Settings
+              theme={choice}
               dark={dark}
-              onThemeChange={setDark}
+              onThemeChange={onThemeChange}
               onShowWelcome={() => setWelcome(true)}
               source={source}
               version={APP_VERSION}
@@ -256,6 +343,46 @@ export function App() {
           )}
         </main>
       </div>
+
+      {/*
+        Палитра — путь к любому экрану без мыши. Она же выход из «я не помню,
+        где это было»: человек помнит слово, а не пункт меню.
+      */}
+      <Dialog open={paletteOpen} onOpenChange={(_, data) => setPaletteOpen(data.open)}>
+        <DialogSurface aria-label={t.paletteTitle}>
+          <DialogBody>
+            <DialogTitle>{t.paletteTitle}</DialogTitle>
+            <DialogContent>
+              <Input
+                autoFocus
+                aria-label={t.paletteSearch}
+                placeholder={t.palettePlaceholder}
+                value={query}
+                onChange={(_, data) => setQuery(data.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && matches[0]) {
+                    event.preventDefault();
+                    go(matches[0].id);
+                  }
+                }}
+              />
+              {matches.length === 0 ? (
+                <Text className={styles.paletteEmpty}>{t.paletteEmpty(query)}</Text>
+              ) : (
+                <ul className={styles.paletteList}>
+                  {matches.map((command) => (
+                    <li key={command.id}>
+                      <button type="button" className={styles.paletteItem} onClick={() => go(command.id)}>
+                        {command.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </DialogContent>
+          </DialogBody>
+        </DialogSurface>
+      </Dialog>
     </FluentProvider>
   );
 }

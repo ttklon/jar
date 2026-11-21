@@ -11,11 +11,12 @@ import { Settings } from "./Settings";
 
 afterEach(cleanup);
 
-const renderSettings = (onShowWelcome = vi.fn()) => {
+const renderSettings = (onShowWelcome = vi.fn(), onThemeChange = vi.fn()) => {
   render(
     <Settings
+      theme="dark"
       dark
-      onThemeChange={() => {}}
+      onThemeChange={onThemeChange}
       onShowWelcome={onShowWelcome}
       source="ядро"
       version="1.0.0"
@@ -31,6 +32,17 @@ describe("настройки", () => {
     fireEvent.click(screen.getByRole("button", { name: "Показать знакомство" }));
 
     expect(onShowWelcome).toHaveBeenCalledTimes(1);
+  });
+
+  it("тема выбирается тремя состояниями, а не выключателем", () => {
+    // «Как в системе» — не синоним светлой и не синоним тёмной. Раньше выключатель
+    // не мог этого выразить, и человек терял свой выбор при каждой смене системы.
+    const onThemeChange = vi.fn();
+    renderSettings(vi.fn(), onThemeChange);
+
+    fireEvent.click(screen.getByRole("button", { name: "как в системе" }));
+
+    expect(onThemeChange).toHaveBeenCalledWith("system");
   });
 
   it("показывают версию и откуда данные", () => {
