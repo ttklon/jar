@@ -118,6 +118,22 @@ fn snapshot(source: &Path, dest: &Path) -> Result<(), String> {
 
     let conn = rusqlite::Connection::open(source)
         .map_err(|error| format!("база не открылась для копирования: {error}"))?;
+
+    // `VACUUM INTO` отказывается писать в существующий файл — а при
+    // восстановлении цель как раз существует. Удаляем её явно, вместе с хвостами
+    // WAL: `-wal`/`-shm` от прежней базы рядом с новой — это чужой журнал, и
+    // оставлять его нельзя.
+    if dest.exists() {
+        std::fs::remove_file(dest)
+            .map_err(|error| format!("старый файл не убран: {error}"))?;
+    }
+    for suffix in ["-wal", "-shm"] {
+        let stale = PathBuf::from(format!("{}{suffix}", dest_text));
+        if stale.exists() {
+            let _ = std::fs::remove_file(stale);
+        }
+    }
+
     conn.execute("VACUUM INTO ?1", [&dest_text])
         .map_err(|error| format!("снимок не записался: {error}"))?;
     Ok(())
@@ -131,6 +147,11 @@ fn snapshot(source: &Path, dest: &Path) -> Result<(), String> {
 pub fn make(source: &Path, dest_dir: &Path, stamp: &str, version: u32, keep: usize) -> Result<Made, String> {
     if !source.exists() {
         return Err("копировать нечего: файла базы ещё нет".to_string());
+    }
+    // Ноль байт — это ещё не память, а пустышка: копия из неё вышла бы годной
+    // базой без единого факта внутри, и человек принял бы её за страховку.
+    if std::fs::metadata(source).map(|meta| meta.len()).unwrap_or(0) == 0 {
+        return Err("копировать нечего: файл базы пуст".to_string());
     }
 
     std::fs::create_dir_all(dest_dir)
@@ -168,9 +189,11 @@ pub fn verify(path: &Path) -> Result<(), String> {
     )
     .map_err(|error| format!("копия не открылась: {error}"))?;
 
+    // Ошибка чтения — это тоже «не открылась», а не отдельная загадка: файл с
+    // расширением `.db` может открыться как соединение и упасть на первом запросе.
     let answer: String = conn
         .query_row("PRAGMA quick_check", [], |row| row.get(0))
-        .map_err(|error| format!("проверка копии не прошла: {error}"))?;
+        .map_err(|error| format!("копия не открылась: {error}"))?;
 
     if answer.trim().eq_ignore_ascii_case("ok") {
         Ok(())
@@ -256,9 +279,18 @@ pub fn restore(base_dir: &Path, file: &str) -> Result<Restored, String> {
     let target = base_dir.join("memory.db");
     let previous = if target.exists() {
         let aside = dir.join(format!("replace-{file}"));
-        // Откладываем прежнюю базу тоже снимком, а не копией файла: у неё может
-        // быть свой `-wal`, и без него откат потерял бы свежие записи.
-        snapshot(&target, &aside)?;
+        // Откладываем прежнюю базу снимком, а не копией файла: у неё может быть
+        // свой `-wal`, и без него откат потерял бы свежие записи.
+        //
+        // Но снимок с битой базы не снимается — а битая база это и есть самый
+        // частый повод для восстановления. Требовать здесь годности значило бы
+        // отказывать ровно в том случае, ради которого команда существует.
+        // Поэтому: снимок, а не вышло — хотя бы побайтовая копия. Мусор, но
+        // мусор сохранённый: его можно отдать в разбор, и он не уничтожен молча.
+        if snapshot(&target, &aside).is_err() {
+            std::fs::copy(&target, &aside)
+                .map_err(|error| format!("прежняя база не отложена: {error}"))?;
+        }
         // Имя отложенной базы нужно человеку, чтобы её найти. Если имя не
         // читается как UTF-8, откат всё равно сделан — говорим хотя бы «рядом».
         Some(
@@ -338,7 +370,7 @@ mod tests {
         let db = dir.join("memory.db");
         std::fs::write(&db, b"").expect("пустой");
         let error = make(&db, &dir.join("backups"), "x", 1, KEEP).expect_err("пусто");
-        assert!(error.contains("пустой"), "{error}");
+        assert!(error.contains("пуст"), "{error}");
         let _ = std::fs::remove_dir_all(dir);
     }
 
@@ -415,6 +447,45 @@ mod tests {
         assert_eq!(value, "свежая запись");
 
         drop(conn);
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn a_snapshot_can_replace_a_file_that_already_exists() {
+        // Восстановление всегда пишет поверх существующей базы, а `VACUUM INTO`
+        // в существующий файл писать отказывается. Без явного удаления команда
+        // «вернуть память» не работала бы никогда.
+        let dir = temp("overwrite");
+        let db = database(&dir);
+        let backups = dir.join("backups");
+        make(&db, &backups, "20261121-120000", 1, KEEP).expect("копия");
+
+        // Поверх той же цели второй раз, и рядом чужой журнал.
+        std::fs::write(dir.join("memory.db-wal"), b"чужой журнал").expect("журнал");
+        let made = make(&db, &backups, "20261121-130000", 1, KEEP).expect("вторая копия");
+        verify(&made.path).expect("годна");
+
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn a_broken_current_database_is_put_aside_not_refused() {
+        // Самая частая причина восстановления — битая текущая база. Требовать
+        // снимок с неё значило бы отказывать ровно в том случае, ради которого
+        // команда существует.
+        let dir = temp("brokenaway");
+        let db = database(&dir);
+        let backups = dir.join("backups");
+        let made = make(&db, &backups, "20261121-120000", 1, KEEP).expect("копия");
+        std::fs::write(&db, b"garbage").expect("порча");
+
+        let file = made.path.file_name().expect("имя").to_string_lossy().to_string();
+        let done = restore(&dir, &file).expect("восстановлено");
+        // Прежний мусор сохранён, а не уничтожен: его можно показать в разбор.
+        let aside = done.previous.expect("отложена");
+        assert!(backups.join(aside).exists());
+        verify(&dir.join("memory.db")).expect("рабочая база на месте");
+
         let _ = std::fs::remove_dir_all(dir);
     }
 
