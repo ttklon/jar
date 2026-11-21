@@ -88,6 +88,9 @@ const useStyles = makeStyles({
   paletteList: { listStyle: "none", margin: "10px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "2px" },
   paletteItem: {
     width: "100%",
+    // Палитра открывается с клавиатуры, но выбирают в ней и мышью: 40 px было
+    // на грани, 44 — тот же размер, что у навигации.
+    minHeight: "44px",
     textAlign: "left",
     padding: "10px 12px",
     borderRadius: tokens.borderRadiusMedium,
@@ -113,6 +116,11 @@ const useStyles = makeStyles({
     display: "flex",
     alignItems: "center",
     gap: "10px",
+    // 44 px — цель, в которую попадает палец и дрожащая рука. Раньше было
+    // 36 (8+8 и строка): по правилу доступности (WCAG 2.5.8) это проходит, но
+    // шаг 196 просит «крупные цели», а не «минимально допустимые». Вертикальные
+    // отступы дали бы разъехавшуюся колонку, поэтому высота задана прямо.
+    minHeight: "44px",
     padding: "8px 10px",
     borderRadius: tokens.borderRadiusMedium,
     border: "none",

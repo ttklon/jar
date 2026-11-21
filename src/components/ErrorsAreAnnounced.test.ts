@@ -167,6 +167,62 @@ export function silentSpinners(source: string): { line: number; text: string }[]
   return found;
 }
 
+/**
+ * Интерактивные элементы ниже 44 px.
+ *
+ * Шаг 196: «крупные цели нажатия». Правило известно — 44×44 (Apple HIG, WCAG
+ * 2.5.5), но проверяется оно глазами, а значит не проверяется никогда. Здесь
+ * считается ожидаемая высота: вертикальные отступы плюс строка.
+ *
+ * Оценка честно приблизительная: шрифт бывает крупнее, и это в сторону
+ * «пропустить». Проверка ищет грубые случаи — 36 px в навигации, 40 в палитре,
+ * а не разницу в два пикселя.
+ */
+export function smallTargets(source: string): { line: number; name: string; height: number }[] {
+  const found: { line: number; name: string; height: number }[] = [];
+  const lines = source.split("\n");
+  let current: { name: string; line: number; body: string[] } | null = null;
+
+  const flush = () => {
+    if (!current) return;
+    const body = current.body.join("\n");
+    if (!/cursor: "pointer"/.test(body)) {
+      current = null;
+      return;
+    }
+    const minHeight = /minHeight: "(\d+)px"/.exec(body);
+    const padding = /padding: "(\d+)px (\d+)px"/.exec(body);
+    if (minHeight) {
+      const height = Number(minHeight[1]);
+      if (height < 44) found.push({ line: current.line, name: current.name, height });
+    } else if (padding) {
+      // Строка текста — 20 px: токен fontSizeBase300 даёт около этого.
+      const height = Number(padding[1]) * 2 + 20;
+      if (height < 44) found.push({ line: current.line, name: current.name, height });
+    }
+    current = null;
+  };
+
+  lines.forEach((line, index) => {
+    const open = /^  (\w+): \{\s*$/.exec(line);
+    if (open) {
+      flush();
+      current = { name: open[1]!, line: index + 1, body: [] };
+      return;
+    }
+    if (current) {
+      if (/^  \},?\s*$/.test(line)) {
+        flush();
+      } else {
+        current.body.push(line);
+      }
+    }
+  });
+  flush();
+
+  return found;
+}
+
 describe("ошибки объявляются экранному диктору", () => {
   it("ни одна ошибка на экране не появляется молча", () => {
     const offenders: string[] = [];
@@ -190,6 +246,35 @@ describe("ошибки объявляются экранному диктору"
       }
     }
     expect(offenders).toEqual([]);
+  });
+
+  it("цели нажатия не мельче 44 px", () => {
+    const offenders: string[] = [];
+    for (const path of files(SRC)) {
+      const source = readFileSync(path, "utf8");
+      for (const hit of smallTargets(source)) {
+        offenders.push(`${relative(SRC, path)}: ${hit.name} ≈${hit.height}px`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("сторож целей видит поломку", () => {
+    const small = [
+      "  navItem: {",
+      '    padding: "8px 10px",',
+      '    cursor: "pointer",',
+      "  },",
+    ].join("\n");
+    expect(smallTargets(small)).toHaveLength(1);
+    const fixed = [
+      "  navItem: {",
+      '    minHeight: "44px",',
+      '    padding: "8px 10px",',
+      '    cursor: "pointer",',
+      "  },",
+    ].join("\n");
+    expect(smallTargets(fixed)).toHaveLength(0);
   });
 
   it("сторож спиннеров видит поломку", () => {

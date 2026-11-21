@@ -26,6 +26,9 @@ const useStyles = makeStyles({
     backgroundColor: "transparent",
     color: tokens.colorNeutralForeground2,
     padding: "4px 12px",
+    // Фильтр-«чип» — цель нажатия, а не подпись: 4+4 и строка 16 давали 24 px,
+    // вдвое меньше удобного. Горизонтальные отступы оставлены, они не мешают.
+    minHeight: "44px",
     fontSize: tokens.fontSizeBase200,
     cursor: "pointer",
     fontFamily: tokens.fontFamilyBase,
