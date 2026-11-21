@@ -83,6 +83,29 @@ describe("ответ голосом", () => {
     expect((screen.getByLabelText("Услышал") as HTMLInputElement).value).toBe("создай папку");
   });
 
+  it("«стоп» снимает цель микрофона: следующая фраза — новая задача, а не ответ", async () => {
+    render(<Voice onOpen={() => {}} />);
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "создай папку" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await screen.findByLabelText("Путь");
+
+    // Зажали «сказать ответ» — цель поставлена, но человек передумал и сказал «стоп».
+    fireEvent.pointerDown(screen.getByRole("button", { name: /Сказать ответ: Путь/ }));
+    mocks.options?.onText("стоп");
+    await waitFor(() => expect(mocks.speak.mock.calls.some(([p]) => /Новое не начну/.test(String(p)))).toBe(true));
+
+    // Следующая фраза — уже новая задача: в поле, а не в исчезнувший вопрос.
+    mocks.speak.mockClear();
+    mocks.options?.onText("сколько места на диске");
+    await waitFor(() =>
+      expect((screen.getByLabelText("Услышал") as HTMLInputElement).value).toBe(
+        "сколько места на диске",
+      ),
+    );
+    expect(screen.queryByLabelText("Путь")).toBeNull();
+  });
+
   it("когда ответов нет, приложение не притворяется, что услышало", async () => {
     render(<Voice onOpen={() => {}} />);
 

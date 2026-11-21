@@ -868,6 +868,9 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       setEngineBusy(false);
       setAlways(false);
       lastTaskRef.current = null;
+      // Стоп снимает и «какой вопрос слушаем»: иначе следующая фраза уходит в поле
+      // вопроса, которого больше нет, и пропадает вместо новой задачи.
+      setAnswerTarget(null);
       setDraft(null);
       setAnswers({});
       answersRef.current = {};
