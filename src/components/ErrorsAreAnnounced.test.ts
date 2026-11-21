@@ -223,6 +223,33 @@ export function smallTargets(source: string): { line: number; name: string; heig
   return found;
 }
 
+/**
+ * Таймеры, которые убирают ошибку с экрана.
+ *
+ * Шаг 195: «ошибки остаются на экране до прочтения, а не исчезают через
+ * секунду». Проверить «остаются навсегда» ожиданием нельзя — тест ждёт секунды,
+ * а человек читает дольше. Зато можно проверить причину: рядом со сбросом
+ * ошибки нет таймера. Именно таймер и делает сообщение нечитаемым.
+ *
+ * Сброс по новому действию (`setError(null)` перед новой попыткой) — законен и
+ * здесь не ловится: ошибка относится к прошлому запросу, а не к этому.
+ */
+export function errorsOnTimers(source: string): { line: number; text: string }[] {
+  const lines = source.split("\n");
+  const found: { line: number; text: string }[] = [];
+
+  lines.forEach((line, index) => {
+    if (!/(set\w*Error|setError)\(null\)/.test(line)) return;
+    // Таймер рядом: в этой же строке или в пределах пяти строк вокруг.
+    const around = lines.slice(Math.max(0, index - 5), index + 6).join("\n");
+    if (/setTimeout|setInterval/.test(around)) {
+      found.push({ line: index + 1, text: line.trim() });
+    }
+  });
+
+  return found;
+}
+
 describe("ошибки объявляются экранному диктору", () => {
   it("ни одна ошибка на экране не появляется молча", () => {
     const offenders: string[] = [];
@@ -257,6 +284,32 @@ describe("ошибки объявляются экранному диктору"
       }
     }
     expect(offenders).toEqual([]);
+  });
+
+  it("ошибка не исчезает по таймеру", () => {
+    const offenders: string[] = [];
+    for (const path of files(SRC)) {
+      const source = readFileSync(path, "utf8");
+      for (const hit of errorsOnTimers(source)) {
+        offenders.push(`${relative(SRC, path)}:${hit.line} ${hit.text}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("сторож таймеров видит поломку", () => {
+    const timed = [
+      "    setError(message);",
+      "    setTimeout(() => setError(null), 2000);",
+    ].join("\n");
+    expect(errorsOnTimers(timed)).toHaveLength(1);
+
+    // Сброс перед новой попыткой — законен.
+    const fine = [
+      "    setError(null);",
+      "    void run();",
+    ].join("\n");
+    expect(errorsOnTimers(fine)).toHaveLength(0);
   });
 
   it("сторож целей видит поломку", () => {
