@@ -525,7 +525,7 @@ pub async fn draft_hand(state: State<'_, AppState>, key: String) -> Result<hand:
     let answered =
         tauri::async_runtime::spawn_blocking(move || llm::ask(port, &body, llm::TIMEOUT))
             .await
-            .map_err(|error| format!("разговор с моделью не выполнился: {error}"))?;
+            .map_err(|error| format!("разговор с моделью не выполнился: {error}"))??;
 
     // Рука не в реестре — значит `call` тут невозможен; принимаем только `hand`.
     match intent::parse(&answered, &[]) {
@@ -742,10 +742,16 @@ pub async fn think_stream(
     let sender = app.clone();
     let answered = tauri::async_runtime::spawn_blocking(move || {
         let count = sent;
-        llm::post_lines(port, llm::CHAT_PATH, &body, llm::TIMEOUT, |line| {
+        let mut collected = String::new();
+        let outcome = llm::post_lines(port, llm::CHAT_PATH, &body, llm::TIMEOUT, |line| {
             let (delta, error) = llm::stream_delta(line);
 
+            // Собираем всё, что сказала модель: `post_lines` отдаёт строки SSE,
+            // а не текст. Склейка — там же, где разбор, чтобы «сказанное» и
+            // «возвращённое» не разошлись.
             if let Some(delta) = delta {
+                collected.push_str(&delta);
+
                 // Событие на каждый токен — тысячи событий в секунду, и это не
                 // «плавность», а лишняя работа. Отдаём по границам фраз.
                 let piece = delta.trim().to_string();
@@ -764,15 +770,15 @@ pub async fn think_stream(
                 Some(error) => Err(error),
                 None => Ok(()),
             }
-        })
+        });
+
+        outcome.map(|_| collected)
     })
     .await
     .map_err(|error| format!("разговор с моделью не выполнился: {error}"))??;
 
-    // `post_lines` отдаёт тело как есть, строками SSE. Склеиваем его теми же
-    // кусками, что ушли человеку: иначе «сказанное» и «возвращённое» разойдутся.
-    let answered = llm::stream_text(&answered).0;
-    if answered.trim().is_empty() {
+    let answered = answered.trim().to_string();
+    if answered.is_empty() {
         return Err("модель закрыла поток, не сказав ни слова".to_string());
     }
 

@@ -155,7 +155,7 @@ where
     stream.flush().ok();
 
     // Заголовки читаются по байту: иначе тело уже началось, а границу мы не знаем.
-    let mut head = Vec::new();
+    let mut head: Vec<u8> = Vec::new();
     let mut byte = [0u8; 1];
     while head.len() < 64 * 1024 {
         match stream.read(&mut byte) {
@@ -178,7 +178,7 @@ where
     let chunked = headers.contains("transfer-encoding: chunked");
 
     let mut raw = Vec::new();
-    let mut decoded = Vec::new();
+    let mut decoded: Vec<u8> = Vec::new();
     let mut chunked_state = ChunkedState::default();
     let mut pending: Vec<u8> = Vec::new();
     let mut buffer = [0u8; 8192];
@@ -599,7 +599,7 @@ mod tests {
     ///
     /// Так проверяется именно «раньше»: если клиент ждёт закрытия соединения,
     /// второй кусок придёт только по таймауту, и тест это увидит.
-    fn serve_stream(first: &str, second: &str, seen: std::sync::mpsc::Sender<Vec<String>>) -> u16 {
+    fn serve_stream(first: &str, second: &str) -> u16 {
         let listener = TcpListener::bind("127.0.0.1:0").expect("порт");
         let port = listener.local_addr().expect("адрес").port();
 
@@ -620,8 +620,6 @@ mod tests {
             thread::sleep(Duration::from_millis(150));
             let _ = stream.write_all(second.as_bytes());
             let _ = stream.flush();
-
-            let _ = seen.send(Vec::new());
         });
 
         port
@@ -629,11 +627,9 @@ mod tests {
 
     #[test]
     fn lines_arrive_before_the_answer_is_finished() {
-        let (sender, _receiver) = std::sync::mpsc::channel();
         let port = serve_stream(
             "data: {\"choices\":[{\"delta\":{\"content\":\"Первое.\"}}]}\n",
             "data: {\"choices\":[{\"delta\":{\"content\":\"Второе.\"}}]}\ndata: [DONE]\n",
-            sender,
         );
 
         let started = std::time::Instant::now();
