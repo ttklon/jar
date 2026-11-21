@@ -318,7 +318,10 @@ mod tests {
     #[test]
     fn an_english_missing_entry_is_also_quiet() {
         // Раннер CI и системы с английским языком отвечают иначе — правило то же.
-        let off = status(Err("ERROR: The system was unable to find the specified registry key or value.".into()), "x.exe");
+        let off = status(
+            Err("ERROR: The system was unable to find the specified registry key or value.".into()),
+            "x.exe",
+        );
         assert!(!off.enabled);
         assert_eq!(off.note, "");
     }
