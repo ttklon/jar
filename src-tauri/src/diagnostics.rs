@@ -76,7 +76,7 @@ pub fn looks_path(word: &str) -> bool {
         return parts
             .iter()
             .any(|part| part.contains('.') || part.contains('_') || part.contains('-'))
-            || parts.iter().any(|part| part.len() > 3);
+            || parts.iter().any(|part| part.chars().count() > 3);
     }
 
     false
@@ -89,7 +89,17 @@ pub fn looks_path(word: &str) -> bool {
 /// перестал бы опознаваться как секрет.
 pub fn scrub_line(line: &str) -> (String, usize, usize) {
     // `ИМЯ=значение` и `ИМЯ: значение` — обе формы встречаются в логах и конфигах.
-    let (key, rest) = match line.find('=').or_else(|| line.find(':')) {
+    //
+    // Двоеточие считается разделителем ТОЛЬКО когда за ним пробел и слева нет
+    // пробелов. Иначе `открываю C:\Users\…` распадалось бы на ключ «открываю C» и
+    // «значение» `:\Users\…`, путь переставал быть путём и уезжал в пакет
+    // целиком. Это ровно та утечка, ради которой модуль написан, и её нашёл CI,
+    // а не придуманная строка в тесте.
+    let split = line
+        .find('=')
+        .or_else(|| line.find(": ").filter(|index| !line[..*index].contains(' ')));
+
+    let (key, rest) = match split {
         Some(index) if index > 0 => (&line[..index], &line[index..]),
         _ => ("", line),
     };
@@ -232,6 +242,16 @@ mod tests {
         let (clean, paths, _) = scrub_line("выбор and/or подтверждение");
         assert_eq!(clean, "выбор and/or подтверждение");
         assert_eq!(paths, 0);
+    }
+
+    #[test]
+    fn a_drive_letter_colon_is_not_a_key_separator() {
+        // Именно эта строка уронила CI: двоеточие в `C:` принималось за разделитель
+        // «ИМЯ: значение», путь распадался, и имя человека уезжало в пакет целиком.
+        let (clean, paths, _) = scrub_line(r"открываю C:\Users\Иван\Документы\отчёт.docx");
+        assert!(!clean.contains("Иван"), "{clean}");
+        assert!(clean.contains("<путь>"), "{clean}");
+        assert_eq!(paths, 1);
     }
 
     #[test]
