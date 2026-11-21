@@ -257,7 +257,6 @@ pub fn decide_with(sample: &Sample, said: Option<Presence>) -> Budget {
              хватает на {allowed} {}",
             sample.idle_seconds,
             sample.ram_free_mb,
-            allowed,
             deeds_word(allowed)
         ),
         may_start: true,
