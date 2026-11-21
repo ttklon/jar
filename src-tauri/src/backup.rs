@@ -461,7 +461,7 @@ mod tests {
         make(&db, &backups, "20261121-120000", 1, KEEP).expect("копия");
 
         // Поверх той же цели второй раз, и рядом чужой журнал.
-        std::fs::write(dir.join("memory.db-wal"), b"чужой журнал").expect("журнал");
+        std::fs::write(dir.join("memory.db-wal"), b"stale").expect("журнал");
         let made = make(&db, &backups, "20261121-130000", 1, KEEP).expect("вторая копия");
         verify(&made.path).expect("годна");
 

@@ -110,6 +110,7 @@
 | `links.py` | проверка относительных ссылок в документах |
 | `mine_awesome.py` | разбор awesome-листов |
 | `profiles.py` | валидатор профилей → docs/PROFILES.md |
+| `rust_literals.py` | — |
 | `sbom.py` | — |
 | `shortlist.py` | раскладка инвентаризации по доменам |
 | `skills.py` | валидатор скиллов → docs/SKILLS.md |

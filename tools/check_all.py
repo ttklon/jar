@@ -46,6 +46,9 @@ STEPS: list[tuple[str, list[str], str]] = [
     ("status", ["tools/status.py"], "AGENTS.md status block matches the data"),
     ("dashboard", ["tools/dashboard.py"], "DASHBOARD.md + INDEX.md match the data"),
     ("links", ["tools/links.py"], "every relative link in the docs points at a real file"),
+    # Rust, не документы: без этого `b"чужой"` доезжает до CI и валит clippy
+    # (non_ascii_literal). Случилось трижды, каждый раз — круг ожидания.
+    ("rust literals", ["tools/rust_literals.py", "--quiet"], "no non-ASCII inside Rust byte strings"),
 ]
 
 # Files whose staleness means "you forgot to run a generator". Kept in sync with
