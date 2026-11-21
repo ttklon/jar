@@ -37,6 +37,7 @@ import type {
 } from "../ipc";
 import catalog from "../../data/readiness.json";
 import { ReadinessCard } from "../components/ReadinessCard";
+import { NetworkCard } from "../components/NetworkCard";
 import { models as text } from "../i18n/ru";
 
 const useStyles = makeStyles({
@@ -295,6 +296,10 @@ export function Models() {
       <Text className={styles.lead}>{text.lead}</Text>
 
       <ReadinessCard />
+
+      {/* Список сетевых адресов — рядом с готовностью: человек решает «скачивать
+          или нет» именно здесь, и здесь же должен видеть, куда это пойдёт. */}
+      <NetworkCard />
 
       <section className={styles.download}>
         <Text as="h2" size={500}>

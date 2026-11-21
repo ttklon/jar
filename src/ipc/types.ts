@@ -832,3 +832,18 @@ export interface SelfCheckVerdict {
 }
 
 export interface Installed { program: string }
+
+/**
+ * Один сетевой адрес приложения.
+ *
+ * Список нужен не для отладки, а для человека: «бесплатно и локально» —
+ * обещание, которое нельзя проверить, не видя, куда приложение ходит. Здесь
+ * видно каждый адрес, что по нему качается и нужно ли это для разговора.
+ */
+export interface NetworkAddress {
+  purpose: string;
+  url: string;
+  bytes: number;
+  needed: boolean;
+  reason: string;
+}

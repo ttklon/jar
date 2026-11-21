@@ -15,6 +15,7 @@ import type {
   Action,
   Autostart,
   MachineState,
+  NetworkAddress,
   Presence,
   RegistrySnapshot,
   RegistryStats,
@@ -550,6 +551,41 @@ const READINESS_CATALOG = readinessJson as unknown as {
   whisper_model: ReadinessStatus["speech_model_spec"];
   whisper_runtime: ReadinessStatus["speech_runtime_spec"];
 };
+
+/** Те же четыре адреса, что в ядре, — из тех же данных. */
+export async function networkAddresses(): Promise<NetworkAddress[]> {
+  const c = READINESS_CATALOG;
+  return [
+    {
+      purpose: "модель для разговора",
+      url: c.model.url,
+      bytes: c.model.bytes,
+      needed: true,
+      reason: "единственный разговорный движок; файл лежит у вас в папке моделей после скачивания",
+    },
+    {
+      purpose: "движок llama.cpp",
+      url: c.runtime.url,
+      bytes: c.runtime.bytes,
+      needed: true,
+      reason: "pinned-релиз: версия не «последняя», а названная, и её хеш проверяется",
+    },
+    {
+      purpose: "движок распознавания речи",
+      url: c.whisper_runtime.url,
+      bytes: c.whisper_runtime.bytes,
+      needed: false,
+      reason: "нужен только для голоса, а не для текста; без него приложение работает",
+    },
+    {
+      purpose: "модель распознавания речи",
+      url: c.whisper_model.url,
+      bytes: c.whisper_model.bytes,
+      needed: false,
+      reason: "нужна только для голоса; скачивается по явному нажатию",
+    },
+  ];
+}
 
 export async function readinessStatus(): Promise<ReadinessStatus> {
   return {

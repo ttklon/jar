@@ -31,6 +31,7 @@ import type {
   PlanItem,
   PlanReport,
   ProfileView,
+  NetworkAddress,
   ReadinessStatus,
   RegistrySnapshot,
   RoleView,
@@ -110,6 +111,11 @@ export function downloadProgress(name: string): Promise<number | null> {
 }
 
 /** Готовность к первому разговору. Только чтение: ничего не скачивает и не запускает. */
+/** Все сетевые адреса — из ядра, списком. */
+export function networkAddresses(): Promise<NetworkAddress[]> {
+  return invoke<NetworkAddress[]>("network_addresses");
+}
+
 export function readinessStatus(): Promise<ReadinessStatus> {
   return invoke<ReadinessStatus>("readiness_status");
 }

@@ -75,7 +75,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { Autostart, AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, ReadinessStatus, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, ReadinessStatus, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -377,6 +377,19 @@ export async function downloadProgress(name: string): Promise<number | null> {
  * Только чтение — ничего не скачивает и не запускает. В браузере машины нет,
  * поэтому состояния честные («не найден»), а каталог — те же данные.
  */
+/**
+ * Все сетевые адреса приложения. В браузере ядра нет, но адреса те же: они
+ * лежат в `data/readiness.json`, а не в бинарнике.
+ */
+export async function networkAddresses(): Promise<NetworkAddress[]> {
+  if (isTauri()) {
+    const { networkAddresses: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { networkAddresses: fromData } = await import("./dev");
+  return fromData();
+}
+
 export async function readinessStatus(): Promise<ReadinessStatus> {
   if (isTauri()) {
     const { readinessStatus: fromCore } = await import("./tauri");

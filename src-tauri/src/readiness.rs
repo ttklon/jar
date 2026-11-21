@@ -84,6 +84,65 @@ pub fn catalog() -> &'static Catalog {
     parsed()
 }
 
+/// Куда приложение может обратиться в сети — весь список, для человека.
+///
+/// Зачем это отдельной функцией и отдельным экраном. «Бесплатно и локально» —
+/// обещание, которое легко проверить на словах и невозможно проверить на деле,
+/// если человек не видит списка. Здесь он видит: четыре адреса, и у каждого —
+/// что именно качается, сколько весит и почему именно оттуда.
+///
+/// Список строится **из каталога**, а не пишется рядом: список, написанный
+/// отдельно, однажды разойдётся с тем, что приложение делает, и станет ещё одной
+/// обещалкой. Тест сверяет его с каталогом и с `download.rs`.
+#[derive(Debug, Clone, Serialize)]
+pub struct NetworkAddress {
+    /// Что качается: «модель», «движок», «распознавание»…
+    pub purpose: &'static str,
+    pub url: String,
+    /// Сколько байт. Ноль — размер неизвестен заранее.
+    pub bytes: u64,
+    /// Обязательно ли для первого разговора.
+    pub needed: bool,
+    /// Почему именно оттуда, а не «просто на всякий случай».
+    pub reason: &'static str,
+}
+
+/// Все сетевые адреса приложения. Пусто быть не может: тогда бы не было и
+/// приложения, умеющего говорить.
+pub fn network_addresses() -> Vec<NetworkAddress> {
+    let catalog = catalog();
+    vec![
+        NetworkAddress {
+            purpose: "модель для разговора",
+            url: catalog.model.url.clone(),
+            bytes: catalog.model.bytes,
+            needed: true,
+            reason: "единственный разговорный движок; файл лежит у вас в папке моделей после скачивания",
+        },
+        NetworkAddress {
+            purpose: "движок llama.cpp",
+            url: catalog.runtime.url.clone(),
+            bytes: catalog.runtime.bytes,
+            needed: true,
+            reason: "pinned-релиз: версия не «последняя», а названная, и её хеш проверяется",
+        },
+        NetworkAddress {
+            purpose: "движок распознавания речи",
+            url: catalog.whisper_runtime.url.clone(),
+            bytes: catalog.whisper_runtime.bytes,
+            needed: false,
+            reason: "нужен только для голоса, а не для текста; без него приложение работает",
+        },
+        NetworkAddress {
+            purpose: "модель распознавания речи",
+            url: catalog.whisper_model.url.clone(),
+            bytes: catalog.whisper_model.bytes,
+            needed: false,
+            reason: "нужна только для голоса; скачивается по явному нажатию",
+        },
+    ]
+}
+
 /// Что известно о готовности к первому разговору. Только чтение: ничего не скачивает
 /// и не запускает. Имена полей совпадают с `src/ipc/types.ts`.
 #[derive(Debug, Clone, Serialize)]
@@ -431,5 +490,44 @@ mod tests {
         assert!(!sha256_well_formed("короткий"));
         assert!(!sha256_well_formed(&"g".repeat(64)));
         assert!(!sha256_well_formed(""));
+    }
+
+    #[test]
+    fn the_list_of_network_addresses_is_the_catalog_and_nothing_else() {
+        // Список не пишется руками — он строится из каталога. Тест держит это:
+        // если кто-то добавит адрес в каталог и забудет список (или наоборот),
+        // человек увидит на экране не то, что приложение делает.
+        let catalog = catalog();
+        let addresses = network_addresses();
+
+        let urls: Vec<&str> = addresses.iter().map(|a| a.url.as_str()).collect();
+        for spec in [
+            &catalog.model.url,
+            &catalog.runtime.url,
+            &catalog.whisper_runtime.url,
+            &catalog.whisper_model.url,
+        ] {
+            assert!(urls.contains(&spec.as_str()), "адрес не попал в список: {spec}");
+        }
+        assert_eq!(addresses.len(), 4, "список не должен ни расти, ни сжиматься сам");
+    }
+
+    #[test]
+    fn every_address_says_why_it_exists_and_whether_it_is_needed_for_talking() {
+        // «Зачем» — не украшение: адрес без причины читается как «зовём куда-то,
+        // сами не знаем зачем». И обязательность обязана быть у двух, а не у
+        // четырёх: голос не должен выглядеть обязательным для первого разговора.
+        for address in network_addresses() {
+            assert!(!address.reason.is_empty(), "{}: нет причины", address.url);
+            assert!(
+                address.url.starts_with("https://"),
+                "{}: не https — значит трафик можно подменить",
+                address.url
+            );
+            assert!(!address.purpose.is_empty());
+        }
+
+        let needed = network_addresses().iter().filter(|a| a.needed).count();
+        assert_eq!(needed, 2, "для разговора нужны ровно движок и модель");
     }
 }

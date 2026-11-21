@@ -23,6 +23,7 @@ import { Models } from "./Models";
  */
 
 vi.mock("../ipc", () => ({
+  networkAddresses: async () => [],
   readinessStatus: async () => { throw new Error("статус недоступен в этом тесте"); },
   isTauri: () => true,
   listModels: vi.fn(),

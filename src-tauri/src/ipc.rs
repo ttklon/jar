@@ -1175,6 +1175,16 @@ pub fn download_progress(state: State<'_, AppState>, name: String) -> Option<u64
         .or_else(|| download::progress(&state.inner.base_dir.join("sidecars"), &name))
 }
 
+/// Все сетевые адреса приложения — для экрана «Модели», списком.
+///
+/// Отдельная команда, а не поле в `readiness_status`: статус тяжёлый (смотрит
+/// диск, запущенный движок, место), а список адресов — константа из каталога.
+/// Человек должен уметь увидеть его мгновенно, не дожидаясь опроса диска.
+#[tauri::command]
+pub fn network_addresses() -> Vec<readiness::NetworkAddress> {
+    readiness::network_addresses()
+}
+
 /// Готовность к первому разговору: движок, модель, локальное распознавание, место.
 /// Только чтение — ничего не скачивает и не запускает.
 #[tauri::command]

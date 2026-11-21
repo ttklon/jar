@@ -249,6 +249,7 @@ pub fn run() {
             ipc::cancel_download,
             ipc::download_progress,
             ipc::readiness_status,
+            ipc::network_addresses,
             ipc::download_runtime,
             ipc::remove_runtime,
             ipc::smoke_check,
