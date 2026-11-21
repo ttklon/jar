@@ -100,6 +100,29 @@ pub struct Made {
     pub notes: Vec<String>,
 }
 
+/// Снимок базы в отдельный файл — единственно правильный способ копировать.
+///
+/// `fs::copy` для этого не годится, и вот почему. База памяти живёт в WAL: свежие
+/// записи могут лежать в `memory.db-wal`, а не в основном файле. Копия одного
+/// файла тогда тихо теряет именно последние данные — то есть в точности то, ради
+/// чего копия делается. `VACUUM INTO` собирает консистентный снимок с учётом WAL
+/// и не требует, чтобы база была закрыта.
+///
+/// Путь передаётся параметром (`?1`), а не склейкой строки: путь с кавычкой не
+/// должен ломать запрос.
+fn snapshot(source: &Path, dest: &Path) -> Result<(), String> {
+    let dest_text = dest
+        .to_str()
+        .ok_or_else(|| "путь копии не читается".to_string())?
+        .to_string();
+
+    let conn = rusqlite::Connection::open(source)
+        .map_err(|error| format!("база не открылась для копирования: {error}"))?;
+    conn.execute("VACUUM INTO ?1", [&dest_text])
+        .map_err(|error| format!("снимок не записался: {error}"))?;
+    Ok(())
+}
+
 /// Сделать копию базы.
 ///
 /// `source` может отсутствовать — тогда копии не нужны и функция говорит это
@@ -114,7 +137,7 @@ pub fn make(source: &Path, dest_dir: &Path, stamp: &str, version: u32, keep: usi
         .map_err(|error| format!("папка копий не создалась: {error}"))?;
 
     let path = dest_dir.join(name(stamp, version));
-    std::fs::copy(source, &path).map_err(|error| format!("копия не записалась: {error}"))?;
+    snapshot(source, &path)?;
 
     let bytes = std::fs::metadata(&path).map(|meta| meta.len()).unwrap_or(0);
     if bytes == 0 {
@@ -233,14 +256,22 @@ pub fn restore(base_dir: &Path, file: &str) -> Result<Restored, String> {
     let target = base_dir.join("memory.db");
     let previous = if target.exists() {
         let aside = dir.join(format!("replace-{file}"));
-        std::fs::copy(&target, &aside)
-            .map_err(|error| format!("прежняя база не отложена: {error}"))?;
-        Some(aside.file_name().and_then(|name| name.to_str()).map(str::to_string))
+        // Откладываем прежнюю базу тоже снимком, а не копией файла: у неё может
+        // быть свой `-wal`, и без него откат потерял бы свежие записи.
+        snapshot(&target, &aside)?;
+        // Имя отложенной базы нужно человеку, чтобы её найти. Если имя не
+        // читается как UTF-8, откат всё равно сделан — говорим хотя бы «рядом».
+        Some(
+            aside
+                .file_name()
+                .map(|name| name.to_string_lossy().into_owned())
+                .unwrap_or_else(|| "replace-…".to_string()),
+        )
     } else {
         None
     };
 
-    std::fs::copy(&source, &target).map_err(|error| format!("копия не легла на место: {error}"))?;
+    snapshot(&source, &target)?;
 
     // После замены проверяем результат: «скопировали» и «открывается» — разные
     // утверждения, и человеку нужно второе.
@@ -356,6 +387,34 @@ mod tests {
 
         let error = verify(&path).expect_err("это не база");
         assert!(error.contains("повреждена") || error.contains("не открылась"), "{error}");
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn write_ahead_log_records_reach_the_copy() {
+        // Это и есть причина, по которой копия делается снимком, а не копией файла.
+        // Запись лежит в `-wal`, в основном файле её нет — и копия одного файла
+        // потеряла бы ровно то, что человек ввёл последним.
+        let dir = temp("wal");
+        let db = dir.join("memory.db");
+        let conn = rusqlite::Connection::open(&db).expect("база");
+        conn.execute_batch("PRAGMA journal_mode = WAL; CREATE TABLE t (x TEXT);")
+            .expect("схема");
+        conn.execute("INSERT INTO t VALUES ('свежая запись')", [])
+            .expect("запись");
+        // Соединение намеренно не закрываем: так выглядит живая работа.
+
+        let backups = dir.join("backups");
+        let made = make(&db, &backups, "20261121-120000", 1, KEEP).expect("копия");
+        verify(&made.path).expect("копия годна");
+
+        let copy = rusqlite::Connection::open(&made.path).expect("копия открылась");
+        let value: String = copy
+            .query_row("SELECT x FROM t LIMIT 1", [], |row| row.get(0))
+            .expect("запись в копии");
+        assert_eq!(value, "свежая запись");
+
+        drop(conn);
         let _ = std::fs::remove_dir_all(dir);
     }
 
