@@ -124,8 +124,7 @@ fn snapshot(source: &Path, dest: &Path) -> Result<(), String> {
     // WAL: `-wal`/`-shm` от прежней базы рядом с новой — это чужой журнал, и
     // оставлять его нельзя.
     if dest.exists() {
-        std::fs::remove_file(dest)
-            .map_err(|error| format!("старый файл не убран: {error}"))?;
+        std::fs::remove_file(dest).map_err(|error| format!("старый файл не убран: {error}"))?;
     }
     for suffix in ["-wal", "-shm"] {
         let stale = PathBuf::from(format!("{}{suffix}", dest_text));
@@ -144,13 +143,23 @@ fn snapshot(source: &Path, dest: &Path) -> Result<(), String> {
 /// `source` может отсутствовать — тогда копии не нужны и функция говорит это
 /// прямо, а не создаёт пустой файл «на всякий случай»: пустая копия опаснее её
 /// отсутствия, потому что выглядит годной.
-pub fn make(source: &Path, dest_dir: &Path, stamp: &str, version: u32, keep: usize) -> Result<Made, String> {
+pub fn make(
+    source: &Path,
+    dest_dir: &Path,
+    stamp: &str,
+    version: u32,
+    keep: usize,
+) -> Result<Made, String> {
     if !source.exists() {
         return Err("копировать нечего: файла базы ещё нет".to_string());
     }
     // Ноль байт — это ещё не память, а пустышка: копия из неё вышла бы годной
     // базой без единого факта внутри, и человек принял бы её за страховку.
-    if std::fs::metadata(source).map(|meta| meta.len()).unwrap_or(0) == 0 {
+    if std::fs::metadata(source)
+        .map(|meta| meta.len())
+        .unwrap_or(0)
+        == 0
+    {
         return Err("копировать нечего: файл базы пуст".to_string());
     }
 
@@ -163,7 +172,9 @@ pub fn make(source: &Path, dest_dir: &Path, stamp: &str, version: u32, keep: usi
     let bytes = std::fs::metadata(&path).map(|meta| meta.len()).unwrap_or(0);
     if bytes == 0 {
         let _ = std::fs::remove_file(&path);
-        return Err("копия получилась пустой — удалена, чтобы не выдать пустое за страховку".to_string());
+        return Err(
+            "копия получилась пустой — удалена, чтобы не выдать пустое за страховку".to_string(),
+        );
     }
 
     let mut notes = Vec::new();
@@ -183,11 +194,9 @@ pub fn make(source: &Path, dest_dir: &Path, stamp: &str, version: u32, keep: usi
 /// Отдельная функция, потому что «файл есть» и «файл годен» — разные утверждения,
 /// и путать их в отчёте было бы обманом.
 pub fn verify(path: &Path) -> Result<(), String> {
-    let conn = rusqlite::Connection::open_with_flags(
-        path,
-        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
-    )
-    .map_err(|error| format!("копия не открылась: {error}"))?;
+    let conn =
+        rusqlite::Connection::open_with_flags(path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+            .map_err(|error| format!("копия не открылась: {error}"))?;
 
     // Ошибка чтения — это тоже «не открылась», а не отдельная загадка: файл с
     // расширением `.db` может открыться как соединение и упасть на первом запросе.
@@ -201,7 +210,6 @@ pub fn verify(path: &Path) -> Result<(), String> {
         Err(format!("копия повреждена: {}", answer.trim()))
     }
 }
-
 
 /// Копия для показа человеку: путь, размер, годна ли и когда сделана.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
@@ -309,7 +317,9 @@ pub fn restore(base_dir: &Path, file: &str) -> Result<Restored, String> {
     // утверждения, и человеку нужно второе.
     verify(&target)?;
 
-    let bytes = std::fs::metadata(&target).map(|meta| meta.len()).unwrap_or(0);
+    let bytes = std::fs::metadata(&target)
+        .map(|meta| meta.len())
+        .unwrap_or(0);
     Ok(Restored {
         file: file.to_string(),
         previous,
@@ -322,10 +332,8 @@ mod tests {
     use super::*;
 
     fn temp(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!(
-            "zshelper-backup-{name}-{}",
-            std::process::id()
-        ));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-backup-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("папка");
         dir
@@ -381,7 +389,14 @@ mod tests {
         let backups = dir.join("backups");
 
         for index in 1..=7 {
-            make(&db, &backups, &format!("2026112{index}-120000"), index, KEEP).expect("копия");
+            make(
+                &db,
+                &backups,
+                &format!("2026112{index}-120000"),
+                index,
+                KEEP,
+            )
+            .expect("копия");
         }
 
         let left = list(&backups);
@@ -418,7 +433,10 @@ mod tests {
         std::fs::write(&path, bytes).expect("мусор");
 
         let error = verify(&path).expect_err("это не база");
-        assert!(error.contains("повреждена") || error.contains("не открылась"), "{error}");
+        assert!(
+            error.contains("повреждена") || error.contains("не открылась"),
+            "{error}"
+        );
         let _ = std::fs::remove_dir_all(dir);
     }
 
@@ -479,7 +497,12 @@ mod tests {
         let made = make(&db, &backups, "20261121-120000", 1, KEEP).expect("копия");
         std::fs::write(&db, b"garbage").expect("порча");
 
-        let file = made.path.file_name().expect("имя").to_string_lossy().to_string();
+        let file = made
+            .path
+            .file_name()
+            .expect("имя")
+            .to_string_lossy()
+            .to_string();
         let done = restore(&dir, &file).expect("восстановлено");
         // Прежний мусор сохранён, а не уничтожен: его можно показать в разбор.
         let aside = done.previous.expect("отложена");
@@ -513,7 +536,12 @@ mod tests {
 
         // Портим текущую базу: теперь восстановление — единственный путь.
         std::fs::write(&db, b"garbage").expect("порча");
-        let file = made.path.file_name().expect("имя").to_string_lossy().to_string();
+        let file = made
+            .path
+            .file_name()
+            .expect("имя")
+            .to_string_lossy()
+            .to_string();
 
         let done = restore(&dir, &file).expect("восстановлено");
         assert!(done.bytes > 0);
@@ -549,7 +577,10 @@ mod tests {
         std::fs::write(&broken, bytes).expect("мусор");
 
         let error = restore(&dir, &name("20261121-120000", 1)).expect_err("битая копия");
-        assert!(error.contains("повреждена") || error.contains("не открылась"), "{error}");
+        assert!(
+            error.contains("повреждена") || error.contains("не открылась"),
+            "{error}"
+        );
 
         // Рабочая база не тронута: отказ не должен ничего ломать.
         verify(&db).expect("рабочая база цела");
@@ -568,8 +599,14 @@ mod tests {
 
         let rows = listed(&backups);
         assert_eq!(rows.len(), 2);
-        let good = rows.iter().find(|row| row.file.contains("-v1")).expect("годная");
-        let bad = rows.iter().find(|row| row.file.contains("-v2")).expect("битая");
+        let good = rows
+            .iter()
+            .find(|row| row.file.contains("-v1"))
+            .expect("годная");
+        let bad = rows
+            .iter()
+            .find(|row| row.file.contains("-v2"))
+            .expect("битая");
         assert!(good.usable);
         assert!(!bad.usable);
         // Причина названа, а не «ошибка».
