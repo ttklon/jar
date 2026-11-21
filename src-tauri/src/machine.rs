@@ -97,8 +97,28 @@ const AWAY_SECONDS: u64 = 180;
 /// Меньше этого свободной памяти — не начинаем ничего нового.
 const RAM_FLOOR_MB: u32 = 800;
 
-/// Меньше этого — работаем по одному, даже если человек отошёл.
-const RAM_TIGHT_MB: u32 = 1500;
+
+/// Сколько памяти считаем нужным на одно дело.
+///
+/// Не «сколько ест дело» — этого не знает никто, дела бывают разные (чтение
+/// реестра и распаковка архива несопоставимы). Это оценка сверху для самой
+/// тяжёлой из частых: примерно столько нужно, чтобы открыть окно и обработать
+/// файл, не начиная свопиться.
+const RAM_PER_DEED_MB: u32 = 700;
+
+/// Предел, выше которого не идём даже на очень свободной машине.
+///
+/// Почему не бесконечность: три дела, нажимающих в одном окне, — это гонка, а не
+/// скорость; три дела, читающих диск, — это очередь к головке. Предел стоит не
+/// ради экономии, а ради предсказуемости: человек должен понимать, сколько
+/// сейчас происходит, не считая строки в отчёте.
+const PARALLEL_CEILING: u8 = 3;
+
+/// Сколько дел разрешает память. Не меньше одного: под этот порог мы уже не
+/// опускаемся (`RAM_FLOOR_MB`), и ноль здесь означал бы «ничего и никогда».
+fn by_memory(ram_free_mb: u32) -> u8 {
+    (ram_free_mb / RAM_PER_DEED_MB).clamp(1, PARALLEL_CEILING as u32) as u8
+}
 
 /// Загрузка выше этой — машина занята кем-то ещё.
 const CPU_BUSY: u8 = 70;
@@ -154,7 +174,7 @@ pub fn decide_with(sample: &Sample, said: Option<Presence>) -> Budget {
     // Слово человека сильнее таймера — в обе стороны.
     match said {
         Some(Presence::Away) => {
-            if sample.ram_free_mb < RAM_TIGHT_MB {
+            if by_memory(sample.ram_free_mb) == 1 {
                 return Budget {
                     parallel: 1,
                     mode: Mode::Away,
@@ -166,13 +186,15 @@ pub fn decide_with(sample: &Sample, said: Option<Presence>) -> Budget {
                 };
             }
 
+            let allowed = by_memory(sample.ram_free_mb);
             return Budget {
-                parallel: 3,
+                parallel: allowed,
                 mode: Mode::Away,
                 reason: format!(
                     "вы сказали, что уходите, — верю слову, а не таймеру (ввод молчит {} с): \
-                     можно три дела сразу",
-                    sample.idle_seconds
+                     памяти хватает на {allowed} {}, и это решает измерение, а не обещание",
+                    sample.idle_seconds,
+                    deeds_word(allowed)
                 ),
                 may_start: true,
             };
@@ -212,7 +234,9 @@ pub fn decide_with(sample: &Sample, said: Option<Presence>) -> Budget {
     }
 
     // Человек отошёл. Сколько взять — зависит от того, хватит ли памяти на несколько.
-    if sample.ram_free_mb < RAM_TIGHT_MB {
+    // Порог тот же, по которому считается число дел: двух правил «когда памяти мало»
+    // быть не должно, иначе они однажды разойдутся и расскажут человеку разное.
+    if by_memory(sample.ram_free_mb) == 1 {
         return Budget {
             parallel: 1,
             mode: Mode::Away,
@@ -224,14 +248,28 @@ pub fn decide_with(sample: &Sample, said: Option<Presence>) -> Budget {
         };
     }
 
+    let allowed = by_memory(sample.ram_free_mb);
     Budget {
-        parallel: 3,
+        parallel: allowed,
         mode: Mode::Away,
         reason: format!(
-            "по тишине ({} с) человек отошёл, процессор свободен, памяти {} МБ — можно три дела сразу",
-            sample.idle_seconds, sample.ram_free_mb
+            "по тишине ({} с) человек отошёл, процессор свободен, памяти {} МБ — \
+             хватает на {allowed} {}",
+            sample.idle_seconds,
+            sample.ram_free_mb,
+            allowed,
+            deeds_word(allowed)
         ),
         may_start: true,
+    }
+}
+
+/// «дело» / «дела» / «дел» — числительное согласуется, иначе текст читается как перевод.
+fn deeds_word(count: u8) -> &'static str {
+    match count {
+        1 => "дело",
+        2..=4 => "дела",
+        _ => "дел",
     }
 }
 
@@ -572,5 +610,50 @@ mod tests {
         } else {
             assert!(note.contains("Windows"));
         }
+    }
+
+    #[test]
+    fn the_number_of_deeds_comes_from_memory_not_from_optimism() {
+        // Раньше при «отошёл» бралось ровно три дела — и при 60 ГБ памяти, и при
+        // 1.6 ГБ. Второе — это не скорость, это своп: три дела одновременно на
+        // почти полной памяти делают машину неотзывчивой, и человек возвращается
+        // к зависшему компьютеру вместо сделанных дел.
+        assert_eq!(by_memory(800), 1, "у самого порога — одно дело");
+        assert_eq!(by_memory(1_399), 1, "меньше двух порций — одно");
+        assert_eq!(by_memory(1_400), 2, "ровно две порции — два");
+        assert_eq!(by_memory(2_099), 2);
+        assert_eq!(by_memory(2_100), 3);
+        // Потолок: очень свободная машина не получает больше трёх.
+        assert_eq!(by_memory(64_000), 3);
+    }
+
+    #[test]
+    fn the_budget_never_exceeds_what_memory_allows() {
+        // Сквозная проверка через решение, а не через формулу: важно, чтобы
+        // правило было применено там, где решается, а не только существовало.
+        let tight = Sample {
+            cpu_percent: 5,
+            ram_free_mb: 1_500,
+            ram_total_mb: 16_384,
+            idle_seconds: 600,
+        };
+        let away = decide_with(&tight, Some(Presence::Away));
+        assert_eq!(away.mode, Mode::Away);
+        assert_eq!(away.parallel, 2, "{}", away.reason);
+        // И причина говорит числами, а не обещаниями.
+        assert!(away.reason.contains("2"), "{}", away.reason);
+
+        let roomy = Sample {
+            ram_free_mb: 8_192,
+            ..tight
+        };
+        assert_eq!(decide_with(&roomy, Some(Presence::Away)).parallel, 3);
+
+        // По таймеру — то же правило, без слова человека.
+        let timed = Sample {
+            idle_seconds: 900,
+            ..tight
+        };
+        assert_eq!(decide_with(&timed, None).parallel, 2);
     }
 }
