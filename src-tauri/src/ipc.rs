@@ -793,10 +793,7 @@ pub async fn think_stream(
 ///
 /// Ошибки разделены, как и везде: «движок не запущен» — это не «модель молчит».
 #[tauri::command]
-pub async fn say(
-    state: State<'_, AppState>,
-    question: String,
-) -> Result<String, String> {
+pub async fn say(state: State<'_, AppState>, question: String) -> Result<String, String> {
     let inner = state.inner.clone();
 
     let port = match inner.engine.lock() {

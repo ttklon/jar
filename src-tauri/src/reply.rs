@@ -89,7 +89,10 @@ mod tests {
     #[test]
     fn plain_speech_passes_through_unchanged() {
         let answer = "  На диске 42 гигабайта свободно.  ";
-        assert_eq!(speakable(answer).expect("речь"), "На диске 42 гигабайта свободно.");
+        assert_eq!(
+            speakable(answer).expect("речь"),
+            "На диске 42 гигабайта свободно."
+        );
     }
 
     #[test]
@@ -100,15 +103,22 @@ mod tests {
         assert!(error.contains("JSON"), "{error}");
 
         // Даже если это валидный JSON, но не объект — отвечать им тоже нельзя.
-        assert!(speakable("{это не json}").is_ok(), "не-json в скобках — это текст");
+        assert!(
+            speakable("{это не json}").is_ok(),
+            "не-json в скобках — это текст"
+        );
     }
 
     #[test]
     fn protocol_lines_and_empty_answers_are_named_not_spoken() {
-        assert!(speakable("").expect_err("пусто").contains("ничего не сказала"));
+        assert!(speakable("")
+            .expect_err("пусто")
+            .contains("ничего не сказала"));
         assert!(speakable("   ").is_err());
         assert!(speakable("...").is_err(), "одна точка — не ответ");
         let stream = "data: {\"choices\":[{\"delta\":{}}]}\ndata: [DONE]";
-        assert!(speakable(stream).expect_err("протокол").contains("протокол"));
+        assert!(speakable(stream)
+            .expect_err("протокол")
+            .contains("протокол"));
     }
 }
