@@ -59,8 +59,7 @@ fn report(name: &str, body: impl FnOnce() -> Result<String, String>) -> i32 {
 fn registry_check() -> Result<String, String> {
     // `RegistryError` не приводится к `String` сам — и не должен: у него своя
     // формулировка («дубль ключа …»), которая полезнее общей. Поэтому берём текст.
-    let registry = crate::registry::Registry::load()
-        .map_err(|error| error.to_string())?;
+    let registry = crate::registry::Registry::load().map_err(|error| error.to_string())?;
     Ok(format!(
         "{} действий, {} доменов",
         registry.len(),
@@ -76,8 +75,8 @@ fn data_dir_check() -> Result<String, String> {
     let probe = base.join("self-check.txt");
     std::fs::write(&probe, "проверка записи")
         .map_err(|error| format!("запись не удалась: {error}"))?;
-    let read = std::fs::read_to_string(&probe)
-        .map_err(|error| format!("чтение не удалось: {error}"))?;
+    let read =
+        std::fs::read_to_string(&probe).map_err(|error| format!("чтение не удалось: {error}"))?;
     let _ = std::fs::remove_file(&probe);
     if read != "проверка записи" {
         return Err("прочиталось не то, что записано".to_string());
