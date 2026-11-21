@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { checkPlan, runPlan, savePlan } from "../ipc";
+import { cancelTool, checkPlan, runPlan, savePlan } from "../ipc";
 import { Ask } from "./Ask";
 
 /**
@@ -15,6 +15,7 @@ vi.mock("../ipc", () => ({
   checkPlan: vi.fn(),
   savePlan: vi.fn(),
   runPlan: vi.fn(),
+  cancelTool: vi.fn().mockResolvedValue(undefined),
 }));
 
 class ResizeObserverStub {
@@ -30,6 +31,7 @@ afterEach(() => {
   vi.mocked(checkPlan).mockReset();
   vi.mocked(savePlan).mockReset();
   vi.mocked(runPlan).mockReset();
+  vi.mocked(cancelTool).mockReset().mockResolvedValue(undefined);
 });
 
 const GOOD_GATES = [
@@ -280,6 +282,47 @@ describe("запуск плана", () => {
         screen.getByText(/остановлено: шаг 1 не выполнен: powershell не ответил/),
       ).toBeTruthy();
     });
+  });
+
+  it("идущий план можно остановить, и поздний успех не выдаёт себя за него", async () => {
+    let release: (value: object) => void = () => {};
+    vi.mocked(checkPlan).mockResolvedValue({ plan: GOOD, problems: [], gates: GOOD_GATES, questions: [] });
+    vi.mocked(runPlan).mockReturnValue(
+      new Promise((resolve) => {
+        release = resolve as (value: object) => void;
+      }) as never,
+    );
+
+    render(<Ask />);
+    fireEvent.click(screen.getByRole("button", { name: /^проверить$/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /выполнить план/i }));
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledOnce());
+
+    // Без этого человек мог только ждать: на экране не было ни одной остановки.
+    fireEvent.click(screen.getByRole("button", { name: "Стоп" }));
+    expect(await screen.findByText(/остановлено вами/)).toBeTruthy();
+    expect(vi.mocked(cancelTool)).toHaveBeenCalled();
+
+    release({
+      goal: GOOD.goal,
+      steps: [
+        {
+          position: 1,
+          registry: "storage-backup|проверить|свободное место",
+          status: "ok",
+          reason: "сделано",
+          evidence: "stdout_marker",
+          duration_ms: 10,
+        },
+      ],
+      stopped: null,
+      run_id: 11,
+      sight: null,
+    });
+
+    // Поздний успех не проговаривается поверх стопа.
+    await waitFor(() => expect(screen.queryByText(/план выполнен/)).toBeNull());
+    expect(screen.getByText(/остановлено вами/)).toBeTruthy();
   });
 
   it("отказ ядра виден как отказ, а не как пустой отчёт", async () => {

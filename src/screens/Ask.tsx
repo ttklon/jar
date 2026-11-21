@@ -9,7 +9,7 @@ import {
   tokens,
 } from "@fluentui/react-components";
 import { MicRegular, SearchRegular } from "@fluentui/react-icons";
-import { checkPlan, isTauri, planFor, runPlan, savePlan } from "../ipc";
+import { cancelTool, checkPlan, isTauri, planFor, runPlan, savePlan } from "../ipc";
 import type { PlanCheck, PlanItem, PlanReport } from "../ipc";
 import { ask } from "../i18n/ru";
 import { speak } from "../lib/voice";
@@ -98,6 +98,8 @@ export function Ask() {
   const [voiceSeconds, setVoiceSeconds] = useState(0);
   const searchRequest = useRef(0);
   const planRequest = useRef(0);
+  /** Номер запуска плана: «стоп» и поздний успех не должны спорить, кто прав. */
+  const planRunRequest = useRef(0);
 
   const search = useCallback((text: string) => {
     const trimmed = text.trim();
@@ -200,11 +202,15 @@ export function Ask() {
     const validated = check?.plan;
     if (!validated) return;
 
+    // Номер запуска: нажатый «стоп» или правка плана не должны получить поздний
+    // успех вместо остановки — так же, как на экране «Голос».
+    const request = ++planRunRequest.current;
     setPlanBusy(true);
     setPlanError(null);
     setReport(null);
     runPlan(JSON.stringify(validated), approved)
       .then((result) => {
+        if (request !== planRunRequest.current) return;
         setReport(result);
         // Проговариваем итог: человек не смотрит в экран, он говорит.
         const phrase = result.stopped
@@ -212,11 +218,30 @@ export function Ask() {
           : ask.planSpeech(result.steps.length);
         setSpokenNote(speak(phrase) ? null : ask.voiceSilent);
       })
-      .catch((reason: unknown) =>
-        setPlanError(reason instanceof Error ? reason.message : String(reason)),
-      )
-      .finally(() => setPlanBusy(false));
+      .catch((reason: unknown) => {
+        if (request !== planRunRequest.current) return;
+        setPlanError(reason instanceof Error ? reason.message : String(reason));
+      })
+      .finally(() => {
+        if (request === planRunRequest.current) setPlanBusy(false);
+      });
   }, [check, approved]);
+
+  /**
+   * Остановить план, который уже идёт.
+   *
+   * До этого остановить план на этом экране было нечем: человек нажимал «Выполнить
+   * план» и мог только ждать. Начатый шаг просим бросить, сделанное не откатываем.
+   */
+  const stopPlan = useCallback(() => {
+    planRunRequest.current += 1;
+    void cancelTool().catch(() => undefined);
+    setPlanBusy(false);
+    setPlanError(null);
+    setReport(null);
+    setSpokenNote(ask.planStoppedByMe);
+    speak(ask.planStoppedByMe);
+  }, []);
 
   return (
     <div className={styles.root}>
@@ -335,6 +360,9 @@ export function Ask() {
                 onClick={executePlan}
               >
                 {ask.planRun}
+              </Button>
+              <Button appearance="subtle" disabled={!planBusy} onClick={stopPlan}>
+                {ask.planStop}
               </Button>
             </div>
           </>

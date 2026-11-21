@@ -476,6 +476,8 @@ export const ask = {
   planRunError: "План не запущен",
   planReportTitle: "Что получилось",
   planStopped: (reason: string) => `остановлено: ${reason}`,
+  planStop: "Стоп",
+  planStoppedByMe: "остановлено вами: начатый шаг бросаю, если его можно бросить. Сделанное не откатываю",
   planStepOk: "готово",
   planStepFailed: "не выполнено",
   planStepCancelled: "отменено",
