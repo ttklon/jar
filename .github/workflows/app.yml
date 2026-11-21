@@ -271,6 +271,7 @@ jobs:
           [Console]::OutputEncoding = [Text.Encoding]::UTF8
           $OutputEncoding = [Text.Encoding]::UTF8
           $ErrorActionPreference = 'Continue'
+          'STEP-STARTED' | Out-File -FilePath live-windows-step.log -Encoding utf8
 
           # Сначала разбор без выполнения: синтаксическая ошибка иначе убивает
           # скрипт до первой строки, и от прогона не остаётся ни лога, ни причины.
@@ -280,6 +281,11 @@ jobs:
           [void][System.Management.Automation.Language.Parser]::ParseFile(
             (Resolve-Path ./scripts/test-live-windows.ps1), [ref]$tokens, [ref]$errors)
           if ($errors -and $errors.Count -gt 0) {
+            "SYNTAX-ERRORS: $($errors.Count)" | Out-File -FilePath live-windows-step.log -Encoding utf8
+            foreach ($e in $errors) {
+              ("  line {0}: {1}" -f $e.Extent.StartLineNumber, $e.Message) |
+                Out-File -FilePath live-windows-step.log -Append -Encoding utf8
+            }
             foreach ($e in $errors) {
               Write-Host ("::error file=scripts/test-live-windows.ps1,line={0}::{1}" -f $e.Extent.StartLineNumber, ($e.Message -replace "`r?`n", ' '))
             }
@@ -292,6 +298,11 @@ jobs:
           & powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/test-live-windows.ps1 2>&1 |
             Out-File -FilePath live-windows-step.log -Encoding utf8
           $code = $LASTEXITCODE
+          if (-not (Test-Path live-windows-step.log)) {
+            # Процесс мог умереть, не сказав ни слова: тогда причина — сам факт
+            # молчания, и это тоже надо записать, а не потерять.
+            ("NO-OUTPUT code={0}" -f $code) | Out-File -FilePath live-windows-step.log -Encoding utf8
+          }
           Get-Content -LiteralPath live-windows-step.log | Write-Host
           if ($code -ne 0) {
             # Последние строки — аннотацией: так причина видна без доступа к файлам.
