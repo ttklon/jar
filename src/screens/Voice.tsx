@@ -57,6 +57,7 @@ import { followUpQuery, isFollowUp } from "../lib/followUp";
 import { isSpokenStop } from "../lib/spoken";
 import { createSpeechQueue } from "../lib/speechQueue";
 import { createAudioMachine } from "../lib/audio";
+import { createWriter, load as loadQueue } from "../lib/queueStore";
 import { speak, stopSpeaking } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
 import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
@@ -249,7 +250,19 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   /** Принятые руки: отдельно от встроенных, запускаются только в клетке и по слову. */
   const [adopted, setAdopted] = useState<CustomHand | null>(null);
   /** Очередь дел: несколько задач подряд, пока человек не скажет «стоп». */
-  const [queue, setQueue] = useState<QueueItem[]>([]);
+  /**
+   * Очередь дел переживает перезапуск окна.
+   *
+   * Восстанавливаем при старте, а не «когда понадобится»: человек, закрывший окно
+   * и вернувшийся, должен увидеть свои дела, а не пустой список. Дела, которые в
+   * момент закрытия шли, возвращаются в ожидание с честной пометкой — процесса
+   * уже нет, и делать вид, что работа продолжается, нельзя.
+   */
+  const [queue, setQueue] = useState<QueueItem[]>(() => {
+    const store = globalThis.localStorage;
+    if (!store) return [];
+    return loadQueue(store).items;
+  });
   const [queueOn, setQueueOn] = useState(false);
   /** Почему очередь стоит — словами, а не пустым местом. */
   const [queueIdle, setQueueIdle] = useState<string | null>(null);
@@ -353,6 +366,25 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   );
   const answersRef = useRef(answers);
   answersRef.current = answers;
+  // Пишем на диск с паузой: на каждое изменение — десятки записей в секунду.
+  // `flush` вызывается при уходе с экрана, чтобы последняя правка не потерялась.
+  const queueWriterRef = useRef<ReturnType<typeof createWriter> | null>(null);
+  if (queueWriterRef.current === null && globalThis.localStorage) {
+    queueWriterRef.current = createWriter(globalThis.localStorage);
+  }
+
+  useEffect(() => {
+    queueWriterRef.current?.write(queue);
+  }, [queue]);
+
+  useEffect(
+    () => () => {
+      // Последняя правка уходит на диск немедленно: закрытие окна не ждёт паузы.
+      queueWriterRef.current?.flush();
+    },
+    [],
+  );
+
   const askModelRef = useRef<(phrase: string) => void>(() => {});
   const micStopRef = useRef<() => void>(() => {});
   /** Одна попытка на фразу: повторный отказ не крутит запуск по кругу. */
