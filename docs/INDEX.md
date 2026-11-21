@@ -111,6 +111,7 @@
 | `mine_awesome.py` | разбор awesome-листов |
 | `profiles.py` | валидатор профилей → docs/PROFILES.md |
 | `rust_literals.py` | — |
+| `rust_prose.py` | — |
 | `rust_strings.py` | — |
 | `sbom.py` | — |
 | `shortlist.py` | раскладка инвентаризации по доменам |

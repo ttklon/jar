@@ -257,6 +257,19 @@ pub struct Restored {
     pub bytes: u64,
 }
 
+/// Самая свежая копия, из которой действительно можно восстановиться.
+///
+/// Зачем отдельно от `listed`: `listed` — для экрана, где человек сам выбирает и
+/// видит и битые. А здесь ответ нужен в момент беды: «база повреждена, вот чем
+/// помочь». Перебирать список в интерфейсе значило бы, что экран с ошибкой
+/// зависит от ещё не загруженного списка — и в худший момент окажется пустым.
+///
+/// Возвращает первую годную по порядку «новые первыми». `None` — либо копий нет,
+/// либо все битые; в обоих случаях обещать «есть копия» нельзя.
+pub fn best_usable(dir: &Path) -> Option<Listed> {
+    listed(dir).into_iter().find(|copy| copy.usable)
+}
+
 /// Вернуть базу из копии.
 ///
 /// Порядок важен и не косметичен:
@@ -612,5 +625,48 @@ mod tests {
         // Причина названа, а не «ошибка».
         assert!(!bad.problem.is_empty());
         let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn the_newest_usable_copy_is_the_one_offered_after_a_crash() {
+        let dir = temp("best");
+        let backups = dir.join("backups");
+        let db = database(&dir);
+        // Старая годная копия и новая, но битая: «новые первыми» без проверки
+        // предложило бы человеку ровно ту, из которой не восстановиться.
+        make(&db, &backups, "000000000100", 1, KEEP).expect("старая копия");
+        std::fs::write(
+            backups.join(name("000000000900", 3)),
+            b"SQLite format 3\0garbage",
+        )
+        .expect("битая копия");
+
+        let best = best_usable(&backups).expect("годная копия есть");
+        assert!(best.usable);
+        assert_eq!(best.file, name("000000000100", 1), "{}", best.file);
+        assert!(best.problem.is_empty());
+    }
+
+    #[test]
+    fn with_only_broken_copies_nothing_is_promised() {
+        let dir = temp("best-none");
+        let backups = dir.join("backups");
+        std::fs::create_dir_all(&backups).expect("папка");
+        std::fs::write(backups.join(name("000000000900", 1)), b"not a database")
+            .expect("битая копия");
+
+        // Никакой «лучшей из плохих»: предлагать восстановление, которое не
+        // сработает, — хуже, чем честно сказать «не из чего».
+        assert!(best_usable(&backups).is_none());
+    }
+
+    #[test]
+    fn no_backups_at_all_is_not_an_error_but_nothing() {
+        let dir = temp("best-empty");
+        let backups = dir.join("backups");
+        std::fs::create_dir_all(&backups).expect("папка");
+        assert!(best_usable(&backups).is_none());
+        // И папки может не быть вовсе — первый запуск.
+        assert!(best_usable(&dir.join("нет-такой")).is_none());
     }
 }

@@ -54,6 +54,11 @@ STEPS: list[tuple[str, list[str], str]] = [
     # У валидатора есть свой --selftest: проверка на саму проверку, иначе она
     # молча перестаёт ловить и продолжает говорить «чисто».
     ("rust strings", ["tools/rust_strings.py", "--quiet"], "no char literal swallowed a line break"),
+    # Дыра в русской фразе: «ограниченным              токеном». Сборку не
+    # ломает, типами не ловится и в тестах не видна — её видит только человек,
+    # которому текст показали. Случаев было три (контейнер, заметка о базе,
+    # плюс две при правке) прежде, чем появилась эта проверка.
+    ("rust prose", ["tools/rust_prose.py", "--quiet"], "no double spaces inside Russian prose"),
     # Типы проверяются с ВЫКЛЮЧЕННЫМ кэшем: `tsc -b` дважды сказал «чисто», потому
     # что верил своему `tsbuildinfo`, а CI без кэша находил ошибку.
     ("types", ["tools/ts_typecheck.py", "--quiet"], "tsc -b with a fresh cache"),
