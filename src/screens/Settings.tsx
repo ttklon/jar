@@ -1,4 +1,7 @@
-import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
+import { useEffect, useState } from "react";
+import { Button, makeStyles, Spinner, Switch, Text, tokens } from "@fluentui/react-components";
+import { autostartDisable, autostartEnable, autostartStatus, isTauri } from "../ipc";
+import type { Autostart } from "../ipc";
 import { t } from "../i18n/ru";
 import type { ThemeChoice } from "../lib/theme";
 import { UndoCard } from "./Undo";
@@ -38,6 +41,38 @@ export function Settings({
   version: string;
 }) {
   const styles = useStyles();
+  const [autostart, setAutostart] = useState<Autostart | null>(null);
+  const [autostartBusy, setAutostartBusy] = useState(false);
+  const [autostartError, setAutostartError] = useState<string | null>(null);
+
+  // Состояние читаем из реестра, а не из своей памяти: «я включил» и «включено» —
+  // разные утверждения, и показать надо второе.
+  useEffect(() => {
+    let alive = true;
+    autostartStatus()
+      .then((value) => {
+        if (alive) setAutostart(value);
+      })
+      .catch((reason: unknown) => {
+        if (alive) setAutostartError(reason instanceof Error ? reason.message : String(reason));
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const toggleAutostart = async (wanted: boolean) => {
+    setAutostartBusy(true);
+    setAutostartError(null);
+    try {
+      const next = wanted ? await autostartEnable() : await autostartDisable();
+      setAutostart(next);
+    } catch (reason) {
+      setAutostartError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setAutostartBusy(false);
+    }
+  };
 
   return (
     <div className={styles.root}>
@@ -82,6 +117,38 @@ export function Settings({
             ))}
           </div>
         </div>
+      </div>
+
+      <div className={styles.card}>
+        <div className={styles.row}>
+          <div>
+            <Text weight="semibold">{t.settingsAutostart}</Text>
+            <Text className={styles.muted} block>
+              {autostart ? (autostart.enabled ? t.settingsAutostartOn : t.settingsAutostartOff) : t.settingsAutostartReading}
+            </Text>
+            {autostart?.note ? (
+              <Text className={styles.muted} block>
+                {autostart.note}
+              </Text>
+            ) : null}
+          </div>
+          <div className={styles.row}>
+            {autostartBusy ? <Spinner size="tiny" /> : null}
+            <Switch
+              checked={autostart?.enabled ?? false}
+              // Без прав администратора: запись идёт в HKCU. В браузере реестра
+              // нет — выключатель честно недоступен, а не «включён и не работает».
+              disabled={!isTauri() || autostartBusy || autostart === null}
+              onChange={(_, data) => void toggleAutostart(data.checked)}
+              aria-label={t.settingsAutostart}
+            />
+          </div>
+        </div>
+        {autostartError ? (
+          <Text role="alert" aria-live="polite" className={styles.muted}>
+            {t.settingsAutostartError(autostartError)}
+          </Text>
+        ) : null}
       </div>
 
       <div className={styles.card}>

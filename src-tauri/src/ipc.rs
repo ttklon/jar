@@ -12,6 +12,7 @@ use serde::Serialize;
 use tauri::{AppHandle, State};
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
+use crate::autostart;
 use crate::container;
 use crate::custom;
 use crate::download::{self, Downloaded};
@@ -387,6 +388,62 @@ pub fn data_places(state: State<'_, AppState>) -> Vec<places::Place> {
         std::path::Path::new(&state.log_file),
         &state.inner.models_dir,
     )
+}
+
+/// Автозапуск: включён ли, что именно запустится и чем это грозит.
+///
+/// Только чтение. Включение и выключение — отдельные команды, чтобы «посмотреть»
+/// нельзя было перепутать с «поменять».
+#[tauri::command]
+pub fn autostart_status(state: State<'_, AppState>) -> autostart::Autostart {
+    let target = current_exe();
+    let output = autostart::reg(&autostart::query_args());
+    let mut status = autostart::status(output, &target);
+    if status.target.is_empty() {
+        status.note = "не удалось определить путь программы: включить автозапуск нельзя".into();
+    }
+    let _ = &state;
+    status
+}
+
+/// Включить автозапуск текущего пользователя. Без прав администратора.
+#[tauri::command]
+pub fn autostart_enable() -> Result<autostart::Autostart, String> {
+    let target = current_exe();
+    if target.is_empty() {
+        return Err("не удалось определить путь программы".to_string());
+    }
+    autostart::reg(&autostart::add_args(&target))?;
+    // Возвращаем состояние, прочитанное заново: обещать «включено» по факту
+    // успешной команды — то же самое, что верить себе на слово.
+    let status = autostart::status(autostart::reg(&autostart::query_args()), &target);
+    if !status.enabled {
+        return Err("запись не появилась в реестре — включить не удалось".to_string());
+    }
+    Ok(status)
+}
+
+/// Выключить автозапуск. Отсутствие записи — не ошибка: цель уже достигнута.
+#[tauri::command]
+pub fn autostart_disable() -> Result<autostart::Autostart, String> {
+    let target = current_exe();
+    let removed = autostart::reg(&autostart::delete_args());
+    let status = autostart::status(autostart::reg(&autostart::query_args()), &target);
+    if status.enabled {
+        return Err(match removed {
+            Ok(_) => "запись всё ещё в реестре — выключить не удалось".to_string(),
+            Err(error) => error,
+        });
+    }
+    Ok(status)
+}
+
+/// Путь к запущенному исполняемому файлу. В тестовой сборке его может не быть —
+/// тогда пустая строка, и это честнее выдуманного пути.
+fn current_exe() -> String {
+    std::env::current_exe()
+        .map(|path| path.display().to_string())
+        .unwrap_or_default()
 }
 
 /// Что можно откатить за текущую сессию. Ничего не меняет: это взгляд, а не действие.

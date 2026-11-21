@@ -8,6 +8,7 @@
 
 export type {
   Action,
+  Autostart,
   DataPlace,
   SelfCheckVerdict,
   AuditEvent,
@@ -74,7 +75,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, ReadinessStatus, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, ReadinessStatus, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -187,6 +188,42 @@ export async function undoApply(): Promise<UndoReport> {
     return fromCore();
   }
   const { undoApply: fromData } = await import("./dev");
+  return fromData();
+}
+
+// ── Автозапуск ──────────────────────────────────────────────────────────────
+//
+// Три команды, а не одна «переключи»: посмотреть, включить, выключить. Так
+// «показать состояние» нельзя перепутать с «поменять», и каждая кнопка делает
+// ровно то, что написано.
+
+/** Включён ли автозапуск и что именно запустится. Ничего не меняет. */
+export async function autostartStatus(): Promise<Autostart> {
+  if (isTauri()) {
+    const { autostartStatus: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { autostartStatus: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Включить. В браузере — честный отказ, а не «сделано». */
+export async function autostartEnable(): Promise<Autostart> {
+  if (isTauri()) {
+    const { autostartEnable: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { autostartEnable: fromData } = await import("./dev");
+  return fromData();
+}
+
+/** Выключить. Отсутствие записи — не ошибка: цель уже достигнута. */
+export async function autostartDisable(): Promise<Autostart> {
+  if (isTauri()) {
+    const { autostartDisable: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { autostartDisable: fromData } = await import("./dev");
   return fromData();
 }
 

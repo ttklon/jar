@@ -13,6 +13,7 @@
 import actionsJson from "../../data/actions.json";
 import type {
   Action,
+  Autostart,
   MachineState,
   Presence,
   RegistrySnapshot,
@@ -251,6 +252,27 @@ export async function undoReport(): Promise<UndoPreview> {
     steps: [],
     note: "в браузере файлы никто не двигает — откатывать нечего",
   };
+}
+
+/**
+ * В браузере автозапуска нет — и это сказано, а не замаскировано «выключено».
+ * `target` пустой: притворяться, что мы знаем путь программы, было бы хуже пустоты.
+ */
+export async function autostartStatus(): Promise<Autostart> {
+  return {
+    enabled: false,
+    command: null,
+    target: "",
+    note: "в браузере автозапуска нет: реестр Windows меняет только приложение",
+  };
+}
+
+export async function autostartEnable(): Promise<Autostart> {
+  throw new Error("в браузере автозапуск не включается: реестр Windows меняет только приложение");
+}
+
+export async function autostartDisable(): Promise<Autostart> {
+  throw new Error("в браузере автозапуск не выключается: реестр Windows меняет только приложение");
 }
 
 export async function undoApply(): Promise<UndoReport> {

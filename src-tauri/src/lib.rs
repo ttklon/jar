@@ -33,6 +33,7 @@
 //! MCP-клиента (M4).
 
 pub mod audit;
+pub mod autostart;
 pub mod container;
 pub mod custom;
 pub mod download;
@@ -198,6 +199,9 @@ pub fn run() {
             ipc::self_check,
             ipc::undo_report,
             ipc::undo_apply,
+            ipc::autostart_status,
+            ipc::autostart_enable,
+            ipc::autostart_disable,
             ipc::ui_dump,
             ipc::ui_press,
             ipc::ui_type,

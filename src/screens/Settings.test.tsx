@@ -5,6 +5,27 @@ import { fireEvent } from "@testing-library/dom";
 import { Settings } from "./Settings";
 
 /**
+ * Настройки читают реестр при открытии. В тесте реестра нет, и это правильно:
+ * проверяем, что экран не падает и честно говорит, что автозапуска здесь нет,
+ * вместо того чтобы показывать «выключено» как факт.
+ */
+vi.mock("../ipc", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../ipc")>();
+  return {
+    ...actual,
+    isTauri: () => false,
+    autostartStatus: vi.fn().mockResolvedValue({
+      enabled: false,
+      command: null,
+      target: "",
+      note: "в браузере автозапуска нет",
+    }),
+    autostartEnable: vi.fn(),
+    autostartDisable: vi.fn(),
+  };
+});
+
+/**
  * Настройки — единственный путь обратно к знакомству. Если кнопка пропадёт, экран
  * первого запуска станет недоступным навсегда: показать его больше нечем.
  */
@@ -43,6 +64,14 @@ describe("настройки", () => {
     fireEvent.click(screen.getByRole("button", { name: "как в системе" }));
 
     expect(onThemeChange).toHaveBeenCalledWith("system");
+  });
+
+  it("автозапуск показан по факту чтения, а не по памяти приложения", async () => {
+    renderSettings();
+
+    expect(await screen.findByText("в браузере автозапуска нет")).toBeTruthy();
+    // В браузере реестра нет — выключатель недоступен, а не «включён и не работает».
+    expect((screen.getByRole("switch", { name: "Запускать при входе в Windows" }) as HTMLInputElement).disabled).toBe(true);
   });
 
   it("показывают версию и откуда данные", () => {

@@ -769,6 +769,20 @@ export interface UndoStep {
   refusal: string | null;
 }
 
+/**
+ * Автозапуск при входе в Windows.
+ *
+ * `enabled` — прочитано из реестра, а не из нашей памяти: «я включил» и «включено»
+ * разные утверждения. `note` объясняет, если что-то не так (например, под этим
+ * именем уже записана другая программа).
+ */
+export interface Autostart {
+  enabled: boolean;
+  command: string | null;
+  target: string;
+  note: string;
+}
+
 export interface UndoPreview {
   session: string;
   steps: UndoStep[];

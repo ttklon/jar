@@ -6,6 +6,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { transcribeCancellable } from "../lib/transcription";
 import type {
+  Autostart,
   MachineState,
   Presence,
   UiPress,
@@ -355,6 +356,18 @@ export function undoReport(): Promise<UndoPreview> {
 
 export function undoApply(): Promise<UndoReport> {
   return invoke<UndoReport>("undo_apply");
+}
+
+export function autostartStatus(): Promise<Autostart> {
+  return invoke<Autostart>("autostart_status");
+}
+
+export function autostartEnable(): Promise<Autostart> {
+  return invoke<Autostart>("autostart_enable");
+}
+
+export function autostartDisable(): Promise<Autostart> {
+  return invoke<Autostart>("autostart_disable");
 }
 
 export function auditTail(limit: number): Promise<AuditEvent[]> {
