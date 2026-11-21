@@ -84,7 +84,16 @@ export function load(store: Store): { items: QueueItem[]; interrupted: number } 
     if (NOT_RESUMABLE.has(item.state)) {
       interrupted += 1;
       // Дело не «продолжается»: процесса уже нет. Ставим в ожидание и говорим.
-      items.push({ ...item, state: "waiting", note: "прервано перезапуском — продолжаю заново" });
+      // Если известно, где остановились, — говорим это, а не «заново»: продолжение
+      // с шага и начало заново — разные обещания, и путать их значит врать.
+      items.push({
+        ...item,
+        state: "waiting",
+        note:
+          item.resumeAt === undefined
+            ? "прервано перезапуском — продолжаю заново"
+            : `прервано перезапуском — продолжаю с шага ${item.resumeAt}`,
+      });
       continue;
     }
     items.push(item);
@@ -109,6 +118,13 @@ function sanitize(entry: unknown): QueueItem | null {
   const note = typeof raw.note === "string" ? raw.note : "";
   const origin = typeof raw.origin === "string" && raw.origin.trim() ? raw.origin.trim() : undefined;
   const touchesScreen = typeof raw.touchesScreen === "boolean" ? raw.touchesScreen : undefined;
+  // Точка продолжения — только положительное целое. Ноль, дробь, строка и «-1» —
+  // это не «шаг 0», это мусор; принимать его за точку продолжения значит однажды
+  // продолжить с несуществующего шага.
+  const resumeAt =
+    typeof raw.resumeAt === "number" && Number.isInteger(raw.resumeAt) && raw.resumeAt > 0
+      ? raw.resumeAt
+      : undefined;
 
   return {
     id,
@@ -117,6 +133,7 @@ function sanitize(entry: unknown): QueueItem | null {
     note,
     ...(origin ? { origin } : {}),
     ...(touchesScreen === undefined ? {} : { touchesScreen }),
+    ...(resumeAt === undefined ? {} : { resumeAt }),
   };
 }
 

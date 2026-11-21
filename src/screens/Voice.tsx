@@ -74,6 +74,7 @@ import {
   replenish,
   retry,
   setState,
+  setResumeAt,
   startHour,
   stopGoal,
   stopRemaining,
@@ -591,9 +592,13 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           // Ошибку не глотаем в `null`: «ядро не ответило» и «ядро ответило отказом» —
           // разные причины, и человеку нужна настоящая. При этом исключение здесь не
           // должно оставлять дело в «идёт»: именно так очередь вставала навсегда.
+          // Точка продолжения — из самого дела: если прошлый запуск остановился на
+          // третьем шаге, начинаем с третьего. Начало заново значило бы второй раз
+          // создать папку или второй раз удалить файл.
+          const resume = queueRef.current.find((entry) => entry.id === item.id)?.resumeAt;
           let report: Awaited<ReturnType<typeof runPlan>> | null = null;
           try {
-            report = await runPlan(JSON.stringify(check.plan), []);
+            report = await runPlan(JSON.stringify(check.plan), [], resume);
           } catch (reason: unknown) {
             const message = reason instanceof Error ? reason.message : String(reason);
             mine((current) =>
@@ -616,6 +621,12 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
               stopped: null,
             };
             return;
+          }
+
+          // Остановились — запоминаем, где именно: при повторе и после перезапуска
+          // дело продолжается с этого шага, а не с начала.
+          if (report.resume_at && report.resume_at > 1) {
+            mine((current) => setResumeAt(current, item.id, report.resume_at));
           }
 
           const completed = report.steps.filter((step) => step.status === "ok").length;
@@ -2317,6 +2328,12 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
               <Text className={item.state === "held" ? styles.error : styles.note}>
                 {voice.queueLine(item.goal, item.state, item.note)}
               </Text>
+              {item.resumeAt !== undefined && item.state !== "done" ? (
+                // Видно ДО запуска, а не после: человек должен знать, что повтор
+                // начнётся с третьего шага, а не с первого — это про то, что уже
+                // сделано с его файлами.
+                <Text className={styles.note}>{voice.queueResumeAt(item.resumeAt)}</Text>
+              ) : null}
               {item.state === "held" ? (
                 // «Нужно ваше слово» — это про этот экран, а не про память человека.
                 // Забираем дело обратно в поле и разбираем заново, уже с его словом.

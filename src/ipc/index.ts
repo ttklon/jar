@@ -486,10 +486,22 @@ export async function checkPlan(json: string): Promise<PlanCheck> {
 }
 
 /** Запустить проверенный план. `approved` — номера шагов, которые человек разрешил. */
-export async function runPlan(json: string, approved: number[]): Promise<PlanReport> {
+/**
+ * Запустить план. `fromStep` — с какого шага продолжать (с единицы).
+ *
+ * Зачем параметр, а не «всегда с первого». Дело, прерванное на третьем шаге,
+ * при возврате к нему не должно начинаться заново: первые два шага уже сделаны,
+ * и повторить их — значит второй раз создать папку или второй раз удалить файл.
+ * По умолчанию поведение прежнее: с первого шага.
+ */
+export async function runPlan(
+  json: string,
+  approved: number[],
+  fromStep?: number,
+): Promise<PlanReport> {
   if (isTauri()) {
     const { runPlan: fromCore } = await import("./tauri");
-    return fromCore(json, approved);
+    return fromCore(json, approved, fromStep ?? null);
   }
   const { runPlan: fromData } = await import("./dev");
   return fromData(json, approved);

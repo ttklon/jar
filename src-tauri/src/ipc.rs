@@ -2428,6 +2428,10 @@ pub struct PlanReport {
     /// Что видно на экране после работы. Только у планов, которые трогают окно: для
     /// остальных смотреть нечего, и выдумывать «итог» было бы хуже пустоты.
     pub sight: Option<uia::Sight>,
+    /// С какого шага продолжать, если план остановился. `None` — продолжать нечего
+    /// (план дошёл до конца). Это число, а не текст причины: по тексту нельзя
+    /// надёжно продолжить, а по числу можно.
+    pub resume_at: Option<usize>,
 }
 
 /// Запускает план шаг за шагом. `approved` — номера шагов, которые человек разрешил
@@ -2442,9 +2446,25 @@ pub async fn run_plan(
     state: State<'_, AppState>,
     json: String,
     approved: Vec<usize>,
+    /// С какого шага продолжать (с единицы). `None` — с первого.
+    ///
+    /// Зачем это вообще нужно. Дело, прерванное на третьем шаге (закрыли окно,
+    /// выключили питание, упал движок), при возврате к нему не должно начинаться
+    /// заново: первые два шага уже сделаны, и повторять их значит, например,
+    /// второй раз создать папку или второй раз удалить то же самое. Продолжение
+    /// с места остановки — не удобство, а честность.
+    from_step: Option<usize>,
 ) -> Result<PlanReport, String> {
     let inner = Arc::clone(&state.inner);
     let plan = plan::parse(&json)?;
+
+    let resume_at = from_step.unwrap_or(1).max(1);
+    if resume_at > plan.steps.len() && !plan.steps.is_empty() {
+        return Err(format!(
+            "продолжать не с чего: в плане {} шагов, а просят начать с {resume_at}",
+            plan.steps.len()
+        ));
+    }
 
     let problems = plan::check(&plan, &inner.registry);
     if let Some(problem) = problems.first() {
@@ -2484,6 +2504,23 @@ pub async fn run_plan(
 
     for (index, step) in plan.steps.iter().enumerate() {
         let position = index + 1;
+
+        // Шаги до точки продолжения уже сделаны прошлым запуском. Пропускаем их,
+        // но НЕ молча: в отчёте они видны как `skipped` с причиной, потому что
+        // «сделано раньше» и «сделано сейчас» — разные факты, и склеивать их
+        // значило бы показывать человеку работу, которой не было.
+        if position < resume_at {
+            steps.push(PlanStepRun {
+                position,
+                registry: step.registry.trim().to_string(),
+                status: "skipped".to_string(),
+                reason: format!("сделано в прошлый раз: продолжаю с шага {resume_at}"),
+                evidence: "previous-run".to_string(),
+                duration_ms: 0,
+            });
+            continue;
+        }
+
         let key = step.registry.trim().to_string();
 
         // «Стоп» между шагами — тоже стоп. Долгий процесс внутри шага бросает сам
@@ -2631,12 +2668,34 @@ pub async fn run_plan(
         None
     };
 
+    // Где остановились — числом, а не догадкой по тексту причины. Это то, что
+    // вызывающий передаст в `from_step`, когда вернётся к делу.
+    let resume_at = stopped.as_ref().map(|_| {
+        steps
+            .iter()
+            .find(|step| step.status != "ok" && step.status != "skipped")
+            .map(|step| step.position)
+            // Отмена пришла между шагами: неудачного шага нет, продолжать надо
+            // со следующего после последнего сделанного.
+            .unwrap_or_else(|| {
+                steps
+                    .iter()
+                    .filter(|step| step.status == "ok")
+                    .map(|step| step.position)
+                    .max()
+                    .map(|last| last + 1)
+                    .unwrap_or(1)
+            })
+            .min(plan.steps.len().max(1))
+    });
+
     Ok(PlanReport {
         goal: plan.goal.clone(),
         steps,
         stopped,
         run_id,
         sight,
+        resume_at,
     })
 }
 

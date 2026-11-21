@@ -757,6 +757,11 @@ export const voice = {
       : `«${name}»: ${note}`,
   typeError: (reason: string) => `ввод не отправился: ${reason}`,
   queueAdd: "В очередь",
+  /**
+   * Точка продолжения — словами. Не «продолжу с шага 3», а «шаги 1–2 уже сделаны»:
+   * человеку важно, что с его файлами уже произошло, а не номер шага само по себе.
+   */
+  queueResumeAt: (step: number) => `первые ${step - 1} ${step === 2 ? "шаг" : "шага"} уже сделаны: продолжу с шага ${step}`,
   queueRun: "Работать без меня",
   queueStop: "Стоп",
   queueTitle: (waiting: number, done: number) =>

@@ -326,8 +326,12 @@ export function checkPlan(json: string): Promise<PlanCheck> {
   return invoke<PlanCheck>("check_plan", { json });
 }
 
-export function runPlan(json: string, approved: number[]): Promise<PlanReport> {
-  return invoke<PlanReport>("run_plan", { json, approved });
+export function runPlan(
+  json: string,
+  approved: number[],
+  fromStep?: number | null,
+): Promise<PlanReport> {
+  return invoke<PlanReport>("run_plan", { json, approved, fromStep: fromStep ?? null });
 }
 
 export function savePlan(json: string): Promise<PlanCheck> {

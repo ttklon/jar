@@ -240,6 +240,54 @@ pub fn stopped_before(position: usize, cancelled: bool) -> Option<String> {
     Some(format!("отменено человеком: шаг {position} не начинался"))
 }
 
+/// С какого шага продолжать после остановки — числом, а не догадкой.
+///
+/// Вход — статусы шагов этого запуска (`ok`, `failed`, `cancelled`, `skipped`) и
+/// всего шагов в плане. Выход — номер шага, с которого продолжать, или `None`,
+/// если продолжать нечего (всё сделано).
+///
+/// Почему отдельной функцией. Это единственное место, где решается «с чего
+/// продолжить», и ошибка здесь стоит дорого: продолжить с начала — значит
+/// второй раз создать папку или второй раз удалить файл; продолжить с шага
+/// после неудачного — значит делать следующий шаг на неверных данных. Поэтому
+/// правило записано и проверено само по себе, без ядра, окон и сети.
+///
+/// Правило:
+///  * был шаг, который не сделался, — продолжаем **с него** (он не выполнен,
+///    его надо повторить);
+///  * не было такого (отмена пришла между шагами) — **со следующего** после
+///    последнего сделанного;
+///  * всё сделано — `None`: продолжать нечего, и притворяться иначе незачем.
+///    `skipped` считается сделанным: это «сделано в прошлый раз».
+pub fn resume_from(statuses: &[&str], total: usize) -> Option<usize> {
+    if total == 0 {
+        return None;
+    }
+
+    // Позиции считаются с единицы: так их видит человек и так их передают обратно.
+    let broken = statuses
+        .iter()
+        .enumerate()
+        .find(|(_, status)| **status != "ok" && **status != "skipped")
+        .map(|(index, _)| index + 1);
+
+    if let Some(position) = broken {
+        return Some(position.min(total));
+    }
+
+    // Сделанным считается и `ok`, и `skipped`: второе значит «сделано в прошлый
+    // раз». Считать его несделанным — значит предлагать повторить уже сделанное.
+    let done = statuses
+        .iter()
+        .filter(|status| **status == "ok" || **status == "skipped")
+        .count();
+    if done >= total {
+        return None;
+    }
+
+    Some((done + 1).min(total))
+}
+
 /// Разбирает JSON плана. Ошибка — человеческая строка: её увидит и модель, и человек.
 pub fn parse(json: &str) -> Result<Plan, String> {
     if json.trim().is_empty() {
@@ -956,5 +1004,39 @@ mod tests {
         )
         .expect_err("пустой ответ");
         assert!(error.contains("пустой"), "{error}");
+    }
+
+    #[test]
+    fn resume_points_at_the_step_that_did_not_finish() {
+        // Три шага, третий не сделался — продолжаем с третьего, а не с начала.
+        assert_eq!(resume_from(&["ok", "ok", "failed"], 3), Some(3));
+        // Первый не сделался — с первого.
+        assert_eq!(resume_from(&["failed"], 1), Some(1));
+        // Отмена между шагами: сделано два, продолжаем с третьего.
+        assert_eq!(resume_from(&["ok", "ok"], 3), Some(3));
+    }
+
+    #[test]
+    fn resume_is_none_only_when_there_is_nothing_left() {
+        // Всё сделано — продолжать нечего. Выдумывать «ещё шаг» было бы работой ради отчёта.
+        assert_eq!(resume_from(&["ok", "ok", "ok"], 3), None);
+        // Пустой план — тоже нечего продолжать.
+        assert_eq!(resume_from(&[], 0), None);
+    }
+
+    #[test]
+    fn skipped_steps_do_not_count_as_unfinished() {
+        // `skipped` — это «сделано в прошлый раз». Считать его провалом значило бы
+        // вечно продолжать с одного и того же места.
+        assert_eq!(resume_from(&["skipped", "skipped", "failed"], 3), Some(3));
+        assert_eq!(resume_from(&["skipped", "ok", "ok"], 3), None);
+    }
+
+    #[test]
+    fn resume_never_points_past_the_last_step() {
+        // Отчёт может прийти короче плана (например, прервался посреди записи).
+        // Указатель за последний шаг был бы отказом «продолжать не с чего».
+        assert_eq!(resume_from(&["ok"], 3), Some(2));
+        assert_eq!(resume_from(&["ok", "ok", "ok"], 5), Some(4));
     }
 }
