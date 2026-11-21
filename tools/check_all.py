@@ -49,6 +49,9 @@ STEPS: list[tuple[str, list[str], str]] = [
     # Rust, не документы: без этого `b"чужой"` доезжает до CI и валит clippy
     # (non_ascii_literal). Случилось трижды, каждый раз — круг ожидания.
     ("rust literals", ["tools/rust_literals.py", "--quiet"], "no non-ASCII inside Rust byte strings"),
+    # Типы проверяются с ВЫКЛЮЧЕННЫМ кэшем: `tsc -b` дважды сказал «чисто», потому
+    # что верил своему `tsbuildinfo`, а CI без кэша находил ошибку.
+    ("types", ["tools/ts_typecheck.py", "--quiet"], "tsc -b with a fresh cache"),
 ]
 
 # Files whose staleness means "you forgot to run a generator". Kept in sync with

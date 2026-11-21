@@ -116,6 +116,7 @@
 | `skills.py` | валидатор скиллов → docs/SKILLS.md |
 | `status.py` | блок состояния в AGENTS.md |
 | `tools_actions_titles.py` | русские названия доменов для генераторов |
+| `ts_typecheck.py` | — |
 | `uia_probe.py` | снятие и черновик профиля из UIA-дампа (Windows) |
 | `wiring.py` | каждая рука подключена к исполнению, каждый вид доказательства назван |
 
