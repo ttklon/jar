@@ -34,6 +34,7 @@
 
 pub mod audit;
 pub mod autostart;
+pub mod backup;
 pub mod container;
 pub mod custom;
 pub mod download;
@@ -131,7 +132,29 @@ pub fn run() {
     // должен узнать, что память пуста не «сама по себе», а потому что файл битый.
     // Раньше приложение тихо переезжало на временную базу, и это была настоящая
     // тихая потеря: прошлые параметры исчезали без единого слова.
+    // Копия делается ДО открытия: если открыть битую базу и копировать после,
+    // копия будет битой. Пять копий — предел, чтобы папка данных не стала складом.
     let mut memory_note: Option<String> = None;
+    let seconds = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|value| value.as_secs())
+        .unwrap_or(0);
+    // Метка в секундах, а не в человеческом виде: у нас нет календаря в зависимостях,
+    // а придумывать свой — значит ошибиться в високосном году. Секунды сортируются
+    // по имени так же честно, и их видно в `backups/` без разбора.
+    let stamp = format!("{seconds:012}");
+    if let Err(error) = backup::make(
+        &base.join("memory.db"),
+        &backup::dir(&base),
+        &stamp,
+        (seconds % u32::MAX as u64) as u32,
+        backup::KEEP,
+    ) {
+        // Не беда, если копии не будет: приложение всё равно должно запуститься.
+        // Но и молча глотать нельзя — это единственная страховка памяти.
+        tracing::warn!(%error, "резервная копия памяти не сделана");
+    }
+
     let memory = match Memory::open(base.join("memory.db")) {
         Ok(memory) => memory,
         Err(error) => {
@@ -189,6 +212,8 @@ pub fn run() {
             ipc::remove_model,
             ipc::think_stream,
             ipc::say,
+            ipc::memory_backups,
+            ipc::memory_restore,
             ipc::engine_status,
             ipc::start_engine,
             ipc::stop_engine,

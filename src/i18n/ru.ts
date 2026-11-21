@@ -112,6 +112,16 @@ export const t = {
   settingsWelcome: "Знакомство",
   settingsWelcomeHint:
     "экран первого запуска; кнопка открывает его снова — например, чтобы показать другому человеку",
+  settingsBackups: "Резервные копии памяти",
+  settingsBackupsHint:
+    "Копия делается при каждом запуске. Вернуть можно любую целую — прежняя база откладывается рядом.",
+  settingsBackupsEmpty: "Копий пока нет: они появятся после следующего запуска.",
+  settingsBackupsRestore: "Вернуть",
+  settingsBackupsConfirm: "Заменить память этой копией?",
+  settingsBackupsYes: "Да, вернуть",
+  settingsBackupsNo: "Отмена",
+  settingsBackupsBroken: "не годится",
+  settingsBackupsDone: "Память возвращена из {file}.",
   settingsMemoryNote: "База памяти не открылась",
   settingsWelcomeShow: "Показать знакомство",
   settingsData: "Данные",

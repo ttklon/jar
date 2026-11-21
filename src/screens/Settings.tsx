@@ -8,6 +8,7 @@ import { UndoCard } from "./Undo";
 import { DataPlaces } from "./DataPlaces";
 import { SelfCheckCard } from "./SelfCheck";
 import { MemoryNote } from "../components/MemoryNote";
+import { MemoryBackups } from "../components/MemoryBackups";
 
 const useStyles = makeStyles({
   root: { display: "flex", flexDirection: "column", gap: "20px", maxWidth: "760px" },
@@ -195,6 +196,7 @@ export function Settings({
       </div>
 
       <MemoryNote />
+        <MemoryBackups />
 
       <DataPlaces />
 

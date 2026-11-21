@@ -12,6 +12,7 @@ use serde::Serialize;
 use tauri::{AppHandle, Emitter, State};
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
+use crate::backup;
 use crate::autostart;
 use crate::container;
 use crate::custom;
@@ -793,6 +794,37 @@ pub async fn think_stream(
     }
 
     Ok(answered)
+}
+
+/// Список резервных копий памяти: что можно вернуть.
+///
+/// Только чтение. Каждая копия проверяется на целостность: показывать в списке
+/// «годные» и «есть, но битая» одним списком — значит предложить человеку
+/// восстановление, которое не сработает.
+#[tauri::command]
+pub fn memory_backups(state: State<'_, AppState>) -> Vec<backup::Listed> {
+    backup::listed(&backup::dir(&state.inner.base_dir))
+}
+
+/// Вернуть память из копии.
+///
+/// Это замена файла, поэтому команда требует явного `confirm` со стороны
+/// интерфейса: без него возвращается отказ, а не «ну ладно, раз нажали».
+/// Текущая база перед заменой тоже копируется — откат должен быть обратим.
+#[tauri::command]
+pub async fn memory_restore(
+    state: State<'_, AppState>,
+    file: String,
+    confirm: bool,
+) -> Result<backup::Restored, String> {
+    if !confirm {
+        return Err("восстановление заменяет файл памяти: нужно явное подтверждение".to_string());
+    }
+
+    let base = state.inner.base_dir.clone();
+    tauri::async_runtime::spawn_blocking(move || backup::restore(&base, &file))
+        .await
+        .map_err(|error| format!("восстановление не выполнилось: {error}"))?
 }
 
 /// Сказать человеку словами — без JSON, без плана, без действий.

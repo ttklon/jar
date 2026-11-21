@@ -421,3 +421,29 @@ export function downloadRuntime(
 export function removeRuntime(kind: import("./types").RuntimeKind): Promise<void> {
   return invoke("remove_runtime", { kind });
 }
+
+/** Резервные копии памяти: что можно вернуть (шаг 147 плана). */
+export type MemoryBackup = {
+  file: string;
+  bytes: number;
+  usable: boolean;
+  problem: string;
+};
+
+export type MemoryRestored = {
+  file: string;
+  previous: string | null;
+  bytes: number;
+};
+
+export async function memoryBackups(): Promise<MemoryBackup[]> {
+  return invoke<MemoryBackup[]>("memory_backups");
+}
+
+/**
+ * Вернуть память из копии. `confirm` передаётся намеренно: команда заменяет
+ * файл, и «нажали случайно» не должно становиться потерей данных.
+ */
+export async function memoryRestore(file: string, confirm: boolean): Promise<MemoryRestored> {
+  return invoke<MemoryRestored>("memory_restore", { file, confirm });
+}

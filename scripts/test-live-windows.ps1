@@ -161,6 +161,15 @@ if ($installer) {
         if ($count -gt 1) { throw "второй запуск оставил $count процессов вместо одного" }
         Say "  один экземпляр: процессов после второго запуска — $count"
 
+        # Копия памяти (шаг 147): после запуска на диске должна лежать настоящая
+        # база, а не пустой файл. Проверяем не «папка есть», а «файл не пустой».
+        $backups = Get-ChildItem -Path $env:APPDATA, $env:LOCALAPPDATA -Recurse -Directory -Filter 'backups' -ErrorAction SilentlyContinue |
+            Where-Object { Test-Path (Join-Path $_.FullName 'memory-*.db') } | Select-Object -First 1
+        if (-not $backups) { throw 'после запуска нет резервной копии памяти' }
+        $copy = Get-ChildItem -Path $backups.FullName -Filter 'memory-*.db' | Sort-Object Name -Descending | Select-Object -First 1
+        if ($copy.Length -le 0) { throw 'резервная копия памяти пустая' }
+        Say ("  копия памяти: {0} ({1} Б)" -f $copy.Name, $copy.Length)
+
         # Удаление: программа уходит.
         $uninstaller = Get-ChildItem -Path $target -Filter '*uninstall*.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
         if (-not $uninstaller) { throw 'в установленной папке нет удаления' }
