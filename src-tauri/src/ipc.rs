@@ -63,6 +63,12 @@ pub struct Inner {
     pub cancel: AtomicBool,
     /// Слово человека о себе: «я ухожу» или «я работаю». `None` — не говорил, решает таймер.
     pub presence: std::sync::Mutex<Option<machine::Presence>>,
+    /// Что случилось с настоящей базой на старте. Пусто — всё в порядке.
+    ///
+    /// Без этого поля повреждённая база выглядела бы как «память просто пустая»:
+    /// приложение переезжает на временную и молчит, а человек теряет прошлые
+    /// параметры и не знает почему. Молчание тут — худший вариант из трёх.
+    pub memory_note: Option<String>,
 }
 
 pub struct AppState {
@@ -81,6 +87,9 @@ pub struct AppStatus {
     pub tools: usize,
     pub flows: usize,
     pub profiles: usize,
+    /// Проблема с базой памяти, если она была: база повреждена, работаем на
+    /// временной. Пусто — всё хорошо.
+    pub memory_note: Option<String>,
 }
 
 /// Инструмент для экрана «Руки»: строка реестра + параметры + решение политики.
@@ -362,6 +371,7 @@ pub fn app_status(state: State<'_, AppState>) -> AppStatus {
         tools: tools::all().len(),
         flows: flows::all().len(),
         profiles: profiles::all().len(),
+        memory_note: state.inner.memory_note.clone(),
     }
 }
 

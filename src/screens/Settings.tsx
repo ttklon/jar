@@ -7,6 +7,7 @@ import type { ThemeChoice } from "../lib/theme";
 import { UndoCard } from "./Undo";
 import { DataPlaces } from "./DataPlaces";
 import { SelfCheckCard } from "./SelfCheck";
+import { MemoryNote } from "../components/MemoryNote";
 
 const useStyles = makeStyles({
   root: { display: "flex", flexDirection: "column", gap: "20px", maxWidth: "760px" },
@@ -192,6 +193,8 @@ export function Settings({
           </Button>
         </div>
       </div>
+
+      <MemoryNote />
 
       <DataPlaces />
 

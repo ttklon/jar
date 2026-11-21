@@ -112,6 +112,7 @@ export const t = {
   settingsWelcome: "Знакомство",
   settingsWelcomeHint:
     "экран первого запуска; кнопка открывает его снова — например, чтобы показать другому человеку",
+  settingsMemoryNote: "База памяти не открылась",
   settingsWelcomeShow: "Показать знакомство",
   settingsData: "Данные",
   settingsDataLead:

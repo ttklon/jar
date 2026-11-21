@@ -59,6 +59,8 @@ export interface AppStatus {
   tools: number;
   flows: number;
   profiles: number;
+  /** Проблема с базой памяти на старте. Пусто или `null` — всё хорошо. */
+  memory_note: string | null;
 }
 
 export function registrySnapshot(): Promise<RegistrySnapshot> {

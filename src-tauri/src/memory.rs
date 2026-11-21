@@ -28,6 +28,10 @@ pub enum MemoryError {
     Open(#[from] rusqlite::Error),
     #[error("путь базы не создан: {0}")]
     Path(String),
+    /// Файл открылся, но база внутри битая. Отдельная ошибка, потому что действие
+    /// человека другое: не «проверьте путь», а «база повреждена, вот копия».
+    #[error("база повреждена: {0}")]
+    Corrupt(String),
 }
 
 /// Один шаг запуска: что сделали, чем кончилось, чем это подтверждено.
@@ -83,6 +87,11 @@ impl Memory {
         }
 
         let conn = Connection::open(&path)?;
+        // Целостность проверяется до миграций: `ALTER` по битой базе превращает
+        // «повреждён один индекс» в «файл не открывается вовсе». Проверка
+        // быстрая (`quick_check`), а не `integrity_check`: полный проход по
+        // гигабайтной базе задерживал бы запуск на секунды.
+        check_integrity(&conn)?;
         conn.execute_batch("PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;")?;
         migrate(&conn)?;
 
@@ -302,6 +311,29 @@ impl Memory {
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner())
     }
+}
+
+/// Проверить целостность базы и сказать о повреждении по-человечески.
+///
+/// `quick_check` возвращает одну строку `ok`, если всё цело, и список проблем
+/// иначе. Отсутствие строки (пустой результат) — тоже проблема: молча продолжать
+/// с базой, о которой ничего не известно, значит потерять данные тихо.
+///
+/// `PRAGMA` не может параметризоваться, поэтому строка запроса — константа, а не
+/// собранная из чего-либо: подстановки здесь нет и быть не может.
+pub fn check_integrity(conn: &Connection) -> Result<(), MemoryError> {
+    let answer: String = conn
+        .query_row("PRAGMA quick_check", [], |row| row.get(0))
+        .map_err(|error| MemoryError::Corrupt(error.to_string()))?;
+
+    if answer.trim().eq_ignore_ascii_case("ok") {
+        return Ok(());
+    }
+
+    Err(MemoryError::Corrupt(format!(
+        "проверка целостности не прошла: {}",
+        answer.trim()
+    )))
 }
 
 /// Шаги одного запуска по порядку.
@@ -640,5 +672,44 @@ mod tests {
         assert_eq!(memory.search("папка", 2).expect("поиск").len(), 2);
 
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_healthy_database_passes_the_integrity_check() {
+        let (memory, dir) = temp_memory("healthy");
+        // Факт записан — база не пустая, проверка идёт по настоящим страницам.
+        memory.remember("проверка", "значение").expect("запись");
+        check_integrity(&memory.lock()).expect("целая база проходит");
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn a_broken_file_is_named_corrupt_not_silently_opened() {
+        // Файл есть, но это не база: ровно то, что остаётся после обрыва записи.
+        let dir = std::env::temp_dir().join(format!("zshelper-broken-{}", now_ms()));
+        std::fs::create_dir_all(&dir).expect("папка");
+        let path = dir.join("memory.db");
+        std::fs::write(&path, b"SQLite format 3\0 но дальше мусор").expect("запись");
+
+        let error = Memory::open(path).expect_err("битая база не открывается как здоровая");
+        let text = error.to_string();
+        // Действие человека другое: не «проверьте путь», а «база повреждена».
+        assert!(text.contains("повреждена") || text.contains("не открылась"), "{text}");
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    #[test]
+    fn an_empty_file_still_becomes_a_working_database() {
+        // Пустой файл — это не повреждение: так выглядит база, созданная нулевым
+        // размером при первом запуске.
+        let dir = std::env::temp_dir().join(format!("zshelper-empty-{}", now_ms()));
+        std::fs::create_dir_all(&dir).expect("папка");
+        let path = dir.join("memory.db");
+        std::fs::write(&path, b"").expect("пустой файл");
+
+        let memory = Memory::open(path).expect("пустой файл открывается");
+        memory.remember("ключ", "значение").expect("запись работает");
+        assert_eq!(memory.fact("ключ").as_deref(), Some("значение"));
+        let _ = std::fs::remove_dir_all(dir);
     }
 }
