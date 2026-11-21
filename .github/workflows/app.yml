@@ -263,18 +263,27 @@ jobs:
         if: steps.bundle.outcome == 'success'
         shell: powershell
         run: |
-          # Скрипт пишет свой лог сам (`Say` в `live-windows.log`). Через конвейер
-          # и `exit` внутри него лог оставался пустым — доказательств не было.
+          # Скрипт пишет свой `live-windows.log` сам; здесь — копия шага для
+          # артефакта, потому что логи джобов недоступны через API.
+          # `powershell` (5.1) не переключает вывод на UTF-8 сам: русский текст
+          # может стать мусором — включаем кодировку явно.
           # Код возврата не глотаем: он и есть вердикт.
-          ./scripts/test-live-windows.ps1
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          [Console]::OutputEncoding = [Text.Encoding]::UTF8
+          $OutputEncoding = [Text.Encoding]::UTF8
+          $ErrorActionPreference = 'Continue'
+          ./scripts/test-live-windows.ps1 2>&1 | Out-File -FilePath live-windows-step.log -Encoding utf8
+          $code = $LASTEXITCODE
+          Get-Content -LiteralPath live-windows-step.log | Write-Host
+          if ($code -ne 0) { exit $code }
 
       - name: Upload live Windows evidence
         if: always() && steps.bundle.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: live-windows-evidence
-          path: live-windows.log
+          path: |
+            live-windows.log
+            live-windows-step.log
           if-no-files-found: warn
           retention-days: 14
 
