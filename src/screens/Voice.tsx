@@ -54,6 +54,7 @@ import { consentCanRun, consentPositions, isSpokenConsent, keepsPendingPlan } fr
 import { installedEngine, isEngineDown } from "../lib/engineReady";
 import { followUpQuery, isFollowUp } from "../lib/followUp";
 import { isSpokenStop } from "../lib/spoken";
+import { createSpeechQueue } from "../lib/speechQueue";
 import { speak, stopSpeaking } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
 import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
@@ -1587,6 +1588,53 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       });
   }, [draft, approved, answers]);
   executeRef.current = execute;
+
+  /**
+   * Поток ответа: первая фраза звучит, пока модель пишет вторую.
+   *
+   * Очередь обязательна: `speak()` начинает с отмены предыдущей реплики, и без неё
+   * человек услышал бы только последний кусок. Подписка живёт всё время экрана, а
+   * куски приходят только тогда, когда модель их реально прислала.
+   */
+  const speechRef = useRef<ReturnType<typeof createSpeechQueue> | null>(null);
+  if (speechRef.current === null) {
+    speechRef.current = createSpeechQueue(
+      (text) => speak(text, "ru-RU", () => speechRef.current?.done()),
+      (why) => {
+        // Без синтеза речи сказать нечем — это надо назвать, а не проглотить.
+        // Уже есть честная фраза для этого случая: «проговорить не могу».
+        if (why === "no-voice") setSpoken(voice.silent);
+      },
+    );
+  }
+
+  useEffect(() => {
+    let alive = true;
+    let unlisten: (() => void) | null = null;
+
+    // Подписка через модуль ядра: в браузере события нет, и это не ошибка экрана.
+    void import("../ipc/tauri")
+      .then((ipc) => ipc.onThinkPiece((piece) => speechRef.current?.push(piece)))
+      .then((stop) => {
+        if (alive) unlisten = stop;
+        else stop();
+      })
+      .catch(() => undefined);
+
+    return () => {
+      alive = false;
+      unlisten?.();
+    };
+  }, []);
+
+  // Перебили или ушли с экрана — договаривать очередь невежливо.
+  useEffect(
+    () => () => {
+      speechRef.current?.clear();
+      stopSpeaking();
+    },
+    [],
+  );
 
   askModelRef.current = (requestedText: string) => {
     const request = ++thoughtRequestRef.current;
