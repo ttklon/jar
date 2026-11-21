@@ -262,7 +262,30 @@ export function App() {
             : { gridTemplateColumns: `${layout.sidebarWidth}px 1fr` }
         }
       >
-        <aside className={styles.sidebar}>
+        <aside
+          className={styles.sidebar}
+          style={
+            layout.narrow
+              ? {
+                  // Колонки больше нет; рамка справа осталась бы полосой вдоль
+                  // всего экрана, будто там что-то есть. Полоса теперь снизу —
+                  // она и отделяет ленту навигации от содержимого.
+                  // `0`, а не `none`: jsdom и браузер выбрасывают «значение по
+                  // умолчанию» из сериализованного стиля, и проверить `none`
+                  // в тесте невозможно — он «не применяется» и тогда, когда
+                  // применён.
+                  borderRight: 0,
+                  borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+                  // `overflow: hidden` был нужен, чтобы длинная навигация не
+                  // растягивала колонку. В ленте он режет перенос: кнопки
+                  // уезжают за край, и на узком экране их не достать.
+                  overflow: "visible",
+                  padding: "10px 14px",
+                  gap: "10px",
+                }
+              : undefined
+          }
+        >
           <div className={styles.brand}>
             <span className={styles.brandName}>{t.appName}</span>
             <span className={styles.tagline}>{t.appTagline}</span>
@@ -292,7 +315,9 @@ export function App() {
 
           {layout.narrow ? null : <div className={styles.paletteHint}>{t.paletteHint}</div>}
 
-          <div className={styles.spacer} />
+          {/* Распорка нужна, чтобы подпись прилипла к низу колонки. В ленте
+              она съедает высоту экрана и выталкивает подпись за край. */}
+          {layout.narrow ? null : <div className={styles.spacer} />}
 
           <div className={styles.sourceBox}>
             <span>

@@ -170,6 +170,57 @@ describe("App", () => {
     fireEvent(window, new Event("resize"));
   });
 
+  it("на узком экране полоска не остаётся сбоку, а навигация не обрезается", async () => {
+    // Три дефекта одного и того же решения «колонка стала лентой»:
+    //
+    //  * `border-right` остался — полоса вдоль всего экрана, будто колонка есть;
+    //  * `overflow: hidden` на ленте режет перенос кнопок: на 200% масштабе
+    //    часть навигации недоступна;
+    //  * распорка `flex: 1` съедала высоту и выталкивала подпись за край.
+    //
+    // Проверяются именно эти три свойства, а не «стало красивее»: всё
+    // остальное о вёрстке глазами не проверишь.
+    const original = globalThis.innerWidth;
+    Object.defineProperty(globalThis, "innerWidth", { value: 640, configurable: true });
+    fireEvent(window, new Event("resize"));
+
+    render(<App />);
+    await loaded();
+
+    const aside = document.querySelector("aside");
+    expect(aside).toBeTruthy();
+    const style = (aside as HTMLElement).style;
+    // `0px`, а не пусто: пустое значит «не задали», и полоса осталась бы.
+    expect(style.borderRight).toBe("0px");
+    // Полоса снизу — она отделяет ленту от содержимого.
+    expect(style.borderBottom).toContain("1px");
+    // Лента растёт вниз вместе с переносом, а не обрезает кнопки.
+    expect(style.overflow).toBe("visible");
+
+    Object.defineProperty(globalThis, "innerWidth", { value: original, configurable: true });
+    fireEvent(window, new Event("resize"));
+  });
+
+  it("на широком экране колонка остаётся колонкой", async () => {
+    // Обратная сторона: правка для узкого окна не должна сломать широкое.
+    const original = globalThis.innerWidth;
+    Object.defineProperty(globalThis, "innerWidth", { value: 1600, configurable: true });
+    fireEvent(window, new Event("resize"));
+
+    render(<App />);
+    await loaded();
+
+    const aside = document.querySelector("aside") as HTMLElement;
+    // На широком экране рамка задаётся классом, инлайн-стиля нет вовсе.
+    expect(aside.style.borderRight).toBe("");
+    expect(aside.style.overflow).toBe("");
+    // И навигация по-прежнему столбиком.
+    expect(screen.getByRole("navigation").style.flexDirection).toBe("");
+
+    Object.defineProperty(globalThis, "innerWidth", { value: original, configurable: true });
+    fireEvent(window, new Event("resize"));
+  });
+
   it("при первом запуске сначала знакомит, а потом открывает голос", async () => {
     globalThis.localStorage?.clear?.();
     render(<App />);
