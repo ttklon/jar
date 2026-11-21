@@ -333,6 +333,16 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
    */
   const draftRef = useRef(draft);
   draftRef.current = draft;
+  /**
+   * Ждёт ли план именно ответа: есть вопросы и хоть один пустой.
+   *
+   * Подпись поля и кнопки должна совпадать с тем, что произойдёт. Когда все поля
+   * заполнены, «Ответить» — ложь: ответить некуда, это новый поиск.
+   */
+  const draftWaitingAnswer =
+    draft !== null &&
+    draft.questions.length > 0 &&
+    firstOpenQuestion(draft.questions, answers) !== null;
   const runningRef = useRef(running);
   runningRef.current = running;
   const executeRef = useRef<(granted?: number[], answerOverride?: Record<string, string>) => void>(
@@ -1854,7 +1864,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           value={text}
           aria-label={voice.heard}
           placeholder={
-            draft && draft.questions.length > 0 ? voice.answerPlaceholder : voice.heardPlaceholder
+            draftWaitingAnswer ? voice.answerPlaceholder : voice.heardPlaceholder
           }
           onChange={(_, data) => {
             // Набор «да» — разрешение. Пока вопрос открыт, набор — ответ, не новая задача.
@@ -1881,7 +1891,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           }}
         />
         <Button type="submit" disabled={busy}>
-          {draft && draft.questions.length > 0 ? voice.answerSubmit : voice.find}
+          {draftWaitingAnswer ? voice.answerSubmit : voice.find}
         </Button>
       </form>
 

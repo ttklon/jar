@@ -625,9 +625,11 @@ describe("локальное распознавание на экране", () =
     fireEvent.change(await screen.findByLabelText("Путь"), { target: { value: "C:\\tmp\\a" } });
     fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "отчёты" } });
 
+    // Кнопка и подсказка говорят правду: ответить некуда, значит это снова «Найти».
+    expect(screen.queryByRole("button", { name: "Ответить" })).toBeNull();
     vi.mocked(draftPlan).mockClear();
     fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сколько места на диске" } });
-    fireEvent.click(screen.getByRole("button", { name: "Ответить" }));
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
 
     // Ответить некуда: все поля заполнены, значит это новая задача.
     await waitFor(() =>
