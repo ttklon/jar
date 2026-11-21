@@ -286,7 +286,11 @@ jobs:
             exit 2
           }
 
-          ./scripts/test-live-windows.ps1 2>&1 | Out-File -FilePath live-windows-step.log -Encoding utf8
+          # Отдельным процессом, а не `./script.ps1`: `exit` внутри вызываемого
+          # скрипта завершает весь хост PowerShell, и тогда код возврата и разбор
+          # причины теряются — ровно это и случилось в предыдущем прогоне.
+          & powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/test-live-windows.ps1 2>&1 |
+            Out-File -FilePath live-windows-step.log -Encoding utf8
           $code = $LASTEXITCODE
           Get-Content -LiteralPath live-windows-step.log | Write-Host
           if ($code -ne 0) {
