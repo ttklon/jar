@@ -1,8 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createSpeechQueue } from "./speechQueue";
 
-describe("очередь произнесения потока", () => {
-  it("второй кусок не обрывает первый, а ждёт его", () => {
+describe("очередь произнесения", () => {
+  it("вторая фраза ждёт первую, а не обрывает её", () => {
     const said: string[] = [];
     const queue = createSpeechQueue((text) => {
       said.push(text);
@@ -11,7 +11,7 @@ describe("очередь произнесения потока", () => {
 
     queue.push("Сделал.");
     queue.push(" Сейчас проверю.");
-    // Второй кусок не начат, пока первый не договорён: иначе `speak()` отменил бы его.
+    // Без очереди `speak()` отменил бы первую фразу ради второй.
     expect(said).toEqual(["Сделал."]);
     expect(queue.pending()).toBe(1);
 
@@ -20,7 +20,23 @@ describe("очередь произнесения потока", () => {
     expect(queue.pending()).toBe(0);
   });
 
-  it("пустой кусок не занимает очередь", () => {
+  it("«договорил» синхронно не съедает следующую фразу", () => {
+    // Синтез может сообщить об окончании мгновенно. Если флаг «говорю»
+    // выставляется после `say`, очередь сбрасывает его на пустоту и следующая
+    // фраза не начинается вовсе — эта ошибка была настоящей.
+    const said: string[] = [];
+    const queue: ReturnType<typeof createSpeechQueue> = createSpeechQueue((text) => {
+      said.push(text);
+      queue.done();
+      return true;
+    });
+
+    queue.push("Первое.");
+    queue.push("Второе.");
+    expect(said).toEqual(["Первое.", "Второе."]);
+  });
+
+  it("пустая фраза не занимает очередь", () => {
     const said: string[] = [];
     const queue = createSpeechQueue((text) => {
       said.push(text);
@@ -32,13 +48,11 @@ describe("очередь произнесения потока", () => {
     queue.push("");
     expect(queue.pending()).toBe(0);
     queue.done();
-    // Пустое не стало «фразой», после которой очередь ждала бы события.
     expect(said).toEqual(["Первое."]);
   });
 
-  it("перебивание забывает всё, что ещё не сказано", () => {
+  it("перебивание забывает всё несказанное", () => {
     const said: string[] = [];
-    const stop = vi.fn();
     const queue = createSpeechQueue((text) => {
       said.push(text);
       return true;
@@ -48,16 +62,13 @@ describe("очередь произнесения потока", () => {
     queue.push("Второе.");
     queue.push("Третье.");
     queue.clear();
-    stop();
 
     expect(queue.pending()).toBe(0);
-    // Договорить «Второе» после «стоп» — невежливо.
     queue.done();
     expect(said).toEqual(["Первое."]);
-    expect(stop).toHaveBeenCalled();
   });
 
-  it("без синтеза речи очередь называет причину, а не молчит", () => {
+  it("без синтеза речи причина называется один раз", () => {
     const problems: string[] = [];
     const queue = createSpeechQueue(
       () => false,
@@ -68,7 +79,6 @@ describe("очередь произнесения потока", () => {
     queue.push("Второе.");
 
     expect(problems).toEqual(["no-voice"]);
-    // Очередь не копится: «договорить» нечем, и притворяться поздно.
     expect(queue.pending()).toBe(0);
   });
 

@@ -233,6 +233,16 @@ export async function onThinkPiece(
   return unlisten;
 }
 
+/**
+ * Сказать человеку словами: без JSON, без плана, без действий.
+ *
+ * Отдельно от `think` нарочно: `think` просит намерение, а его произносить вслух
+ * нельзя. Здесь модель отвечает обычным текстом.
+ */
+export function say(question: string): Promise<string> {
+  return invoke<string>("say", { question });
+}
+
 /** Что мы спросим у модели. Вопрос собирает ядро: в браузере его не собрать. */
 export function modelPrompt(
   query: string,

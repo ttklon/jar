@@ -785,6 +785,42 @@ pub async fn think_stream(
     Ok(answered)
 }
 
+/// Сказать человеку словами — без JSON, без плана, без действий.
+///
+/// Отдельная команда, потому что это **другой разговор**: `think` просит у модели
+/// намерение (`{"kind":…}`), и произносить его вслух нельзя. Здесь промпт требует
+/// обычный текст. Модуль ничего не выполняет: результат — фраза для голоса.
+///
+/// Ошибки разделены, как и везде: «движок не запущен» — это не «модель молчит».
+#[tauri::command]
+pub async fn say(
+    state: State<'_, AppState>,
+    question: String,
+) -> Result<String, String> {
+    let inner = state.inner.clone();
+
+    let port = match inner.engine.lock() {
+        Ok(guard) => match guard.as_ref() {
+            Some(server) => server.port(),
+            None => {
+                return Err("движок не запущен: сказать словами некому. Фраза на экране «Голос» запустит движок сама, если файлы уже на диске".to_string())
+            }
+        },
+        Err(_) => return Err("движок не под контролем приложения: перезапустите его".to_string()),
+    };
+
+    let prompt = crate::reply::prompt(&question);
+    let body = llm::chat_body(&prompt, "local");
+    let answered =
+        tauri::async_runtime::spawn_blocking(move || llm::ask(port, &body, llm::TIMEOUT))
+            .await
+            .map_err(|error| format!("разговор с моделью не выполнился: {error}"))??;
+
+    // Модель, которую просили «не пиши JSON», иногда всё равно его пишет. Такой
+    // ответ не произносится: ошибка честнее, чем «фигурная скобка kind».
+    crate::reply::speakable(&answered)
+}
+
 /// Спросить модель, что делать. Ничего не выполняет.
 ///
 /// Ошибки разделены: «движок не запущен» (надо запустить), «движок не отвечает» (умер),

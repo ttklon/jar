@@ -63,6 +63,7 @@ pub mod restricted;
 pub mod roles;
 pub mod runtime;
 pub mod sandbox;
+pub mod reply;
 pub mod selfcheck;
 pub mod server;
 pub mod services;
@@ -178,6 +179,7 @@ pub fn run() {
             ipc::smoke_check,
             ipc::remove_model,
             ipc::think_stream,
+            ipc::say,
             ipc::engine_status,
             ipc::start_engine,
             ipc::stop_engine,

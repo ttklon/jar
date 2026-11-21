@@ -11,6 +11,7 @@ import {
   foregroundWindow,
   modelPrompt,
   planFor,
+  say,
   think,
   trialHand,
   rememberFact,
@@ -1590,21 +1591,18 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   executeRef.current = execute;
 
   /**
-   * Поток ответа: первая фраза звучит, пока модель пишет вторую.
+   * Очередь произнесения и владелец потока.
    *
-   * Очередь обязательна: `speak()` начинает с отмены предыдущей реплики, и без неё
-   * человек услышал бы только последний кусок. Подписка живёт всё время экрана, а
-   * куски приходят только тогда, когда модель их реально прислала.
+   * Поток озвучивается только через `say`: на пути `think` модель отвечает JSON,
+   * и произносить его нельзя (это была настоящая ошибка — тест её поймал).
+   * `say` просит обычный текст, поэтому куски здесь — речь.
    */
   const speechRef = useRef<ReturnType<typeof createSpeechQueue> | null>(null);
+  const streamOwnerRef = useRef(0);
   if (speechRef.current === null) {
     speechRef.current = createSpeechQueue(
       (text) => speak(text, "ru-RU", () => speechRef.current?.done()),
-      (why) => {
-        // Без синтеза речи сказать нечем — это надо назвать, а не проглотить.
-        // Уже есть честная фраза для этого случая: «проговорить не могу».
-        if (why === "no-voice") setSpoken(voice.silent);
-      },
+      () => setSpoken(voice.silent),
     );
   }
 
@@ -1612,9 +1610,15 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     let alive = true;
     let unlisten: (() => void) | null = null;
 
-    // Подписка через модуль ядра: в браузере события нет, и это не ошибка экрана.
-    void import("../ipc/tauri")
-      .then((ipc) => ipc.onThinkPiece((piece) => speechRef.current?.push(piece)))
+    // В браузере ядра нет — тогда подписка ничего не делает, и это не ошибка экрана.
+    void import("../ipc")
+      .then((ipc) =>
+        ipc.onThinkPiece((piece) => {
+          // `0` — поток не запрошен: событие чужое и звучать не должно.
+          if (streamOwnerRef.current === 0) return;
+          speechRef.current?.push(piece);
+        }),
+      )
       .then((stop) => {
         if (alive) unlisten = stop;
         else stop();
@@ -1627,7 +1631,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     };
   }, []);
 
-  // Перебили или ушли с экрана — договаривать очередь невежливо.
+  // Ушли с экрана — договаривать очередь невежливо.
   useEffect(
     () => () => {
       speechRef.current?.clear();
@@ -1635,6 +1639,47 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
     },
     [],
   );
+
+  /**
+   * Ответить словами: спросить модель обычным текстом и поставить в очередь.
+   *
+   * Это и есть путь «пока модель пишет, человек слышит». Отдельно от `think`
+   * нарочно: `think` получает JSON-намерение, а его произносить нельзя.
+   * Куски приходят событием `think://piece` и звучат по очереди.
+   */
+  const sayRef = useRef<(question: string) => void>(() => {});
+  sayRef.current = (question: string) => {
+    const request = ++thoughtRequestRef.current;
+    streamOwnerRef.current = request;
+    speechRef.current?.clear();
+    setThinking(true);
+    setThinkError(null);
+
+    say(question)
+      .then((answer) => {
+        if (request !== thoughtRequestRef.current) return;
+        // Модель ответила целиком, а кусков не было (или они уже отзвучали):
+        // сказать ответ надо в любом случае — иначе человек не услышит ничего.
+        if (speechRef.current?.pending() === 0) speechRef.current?.push(answer);
+      })
+      .catch((reason: unknown) => {
+        if (request !== thoughtRequestRef.current) return;
+        const message = reason instanceof Error ? reason.message : String(reason);
+        if (isEngineDown(message)) {
+          void wakeEngine(
+            question,
+            () => request === thoughtRequestRef.current,
+            () => sayRef.current(question),
+          );
+          return;
+        }
+        streamOwnerRef.current = 0;
+        setThinkError(message);
+      })
+      .finally(() => {
+        if (request === thoughtRequestRef.current) setThinking(false);
+      });
+  };
 
   askModelRef.current = (requestedText: string) => {
     const request = ++thoughtRequestRef.current;
@@ -2000,6 +2045,18 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
             }}
           >
             {thinking ? voice.thinkThinking : voice.thinkShow}
+          </Button>
+          <Button
+            size="small"
+            appearance="subtle"
+            disabled={thinking || text.trim().length === 0}
+            // Ответ — обычный текст, а не намерение: его можно слушать.
+            title={voice.thinkSayHint}
+            onClick={() => {
+              sayRef.current(text.trim());
+            }}
+          >
+            {voice.thinkSay}
           </Button>
           <Button
             size="small"

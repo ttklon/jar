@@ -680,6 +680,36 @@ export async function think(
   return fromData();
 }
 
+/**
+ * Подписка на куски ответа, пока он ещё пишется.
+ *
+ * В браузере ядра нет и потока нет: возвращается функция, которая ничего не
+ * делает. Это честнее, чем притворяться, что подписка есть, и тише, чем падать.
+ */
+export async function onThinkPiece(
+  handler: (piece: string) => void,
+): Promise<() => void> {
+  if (isTauri()) {
+    const { onThinkPiece: fromCore } = await import("./tauri");
+    return fromCore(handler);
+  }
+  return () => undefined;
+}
+
+/**
+ * Сказать человеку словами.
+ *
+ * В браузере модели нет — и это называется, а не изображается: подставить сюда
+ * заранее написанную фразу значило бы выдать шаблон за ответ.
+ */
+export async function say(question: string): Promise<string> {
+  if (isTauri()) {
+    const { say: fromCore } = await import("./tauri");
+    return fromCore(question);
+  }
+  throw new Error("сказать словами можно только в приложении: в браузере модели нет");
+}
+
 /** Что мы спросим у модели по этой фразе: задача, окно, память и найденные руки. */
 export async function modelPrompt(
   query: string,
