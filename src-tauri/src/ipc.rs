@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use serde::Serialize;
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Emitter, State};
 
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::autostart;
@@ -525,7 +525,7 @@ pub async fn draft_hand(state: State<'_, AppState>, key: String) -> Result<hand:
     let answered =
         tauri::async_runtime::spawn_blocking(move || llm::ask(port, &body, llm::TIMEOUT))
             .await
-            .map_err(|error| format!("разговор с моделью не выполнился: {error}"))??;
+            .map_err(|error| format!("разговор с моделью не выполнился: {error}"))?;
 
     // Рука не в реестре — значит `call` тут невозможен; принимаем только `hand`.
     match intent::parse(&answered, &[]) {
@@ -701,6 +701,82 @@ pub struct Thought {
     /// остаются на местах.
     pub deeds: Option<Vec<String>>,
     pub problem: Option<String>,
+}
+
+/// Сколько кусков ответа уходит интерфейсу. Первые предложения нужны раньше всех,
+/// а хвост длинного рассказа — не нужен: человек ждёт действие, а не лекцию.
+const STREAM_PIECES: usize = 40;
+
+/// Сказать ответ по кускам, пока он ещё пишется.
+///
+/// Почему отдельной командой, а не флагом `think`: это **нарочно** другой разговор.
+/// Здесь движок просят говорить потоком и отдают интерфейсу границы фраз по мере
+/// прихода. Разбор в намерение остаётся за `think`: он ждёт закрывающую скобку JSON,
+/// то есть весь ответ. Отсюда два шага — «сказать раньше» и «понять целиком», — и
+/// первый звук приходит от первого.
+///
+/// Границы, за которые команда не выходит: она ничего не выполняет, не планирует и
+/// не пишет в память. Её результат — тот же текст, что вернул бы `think`, плюс
+/// события `think://piece` по границам фраз.
+#[tauri::command]
+pub async fn think_stream(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    query: String,
+) -> Result<String, String> {
+    let inner = state.inner.clone();
+
+    let port = match inner.engine.lock() {
+        Ok(guard) => match guard.as_ref() {
+            Some(server) => server.port(),
+            None => {
+                return Err("движок не запущен: если файлы уже на диске, фраза запустит движок сама. Скачивание само не начинается — кнопка на карточке готовности. Экран «Модели» не нужен".to_string())
+            }
+        },
+        Err(_) => return Err("движок не под контролем приложения: перезапустите его".to_string()),
+    };
+
+    let body = llm::chat_body_with(&query, "local", true);
+    let sent = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+
+    let sender = app.clone();
+    let answered = tauri::async_runtime::spawn_blocking(move || {
+        let count = sent;
+        llm::post_lines(port, llm::CHAT_PATH, &body, llm::TIMEOUT, |line| {
+            let (delta, error) = llm::stream_delta(line);
+
+            if let Some(delta) = delta {
+                // Событие на каждый токен — тысячи событий в секунду, и это не
+                // «плавность», а лишняя работа. Отдаём по границам фраз.
+                let piece = delta.trim().to_string();
+                let ends_phrase = delta.trim_end().ends_with(['.', '!', '?', '…']);
+                if ends_phrase
+                    && !piece.is_empty()
+                    && count.fetch_add(1, std::sync::atomic::Ordering::Relaxed) < STREAM_PIECES
+                {
+                    let _ = sender.emit("think://piece", piece);
+                }
+            }
+
+            // Отказ посреди потока — причина, а не «пустой кусок»: пусть человек
+            // узнает её сразу, а не решит, что приложение зависло.
+            match error {
+                Some(error) => Err(error),
+                None => Ok(()),
+            }
+        })
+    })
+    .await
+    .map_err(|error| format!("разговор с моделью не выполнился: {error}"))??;
+
+    // `post_lines` отдаёт тело как есть, строками SSE. Склеиваем его теми же
+    // кусками, что ушли человеку: иначе «сказанное» и «возвращённое» разойдутся.
+    let answered = llm::stream_text(&answered).0;
+    if answered.trim().is_empty() {
+        return Err("модель закрыла поток, не сказав ни слова".to_string());
+    }
+
+    Ok(answered)
 }
 
 /// Спросить модель, что делать. Ничего не выполняет.

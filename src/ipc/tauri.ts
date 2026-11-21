@@ -214,6 +214,25 @@ export function think(
   return invoke<Thought>("think", { query, around });
 }
 
+/**
+ * Сказать ответ по кускам, пока он ещё пишется.
+ *
+ * Отдельно от `think` нарочно: понять намерение можно только по всему JSON, а
+ * сказать первую фразу — сразу. Возвращается тот же текст, что ушёл кусками.
+ */
+export function thinkStream(query: string): Promise<string> {
+  return invoke<string>("think_stream", { query });
+}
+
+/** Подписка на куски ответа. Отдельно от `thinkStream`, чтобы её можно было отменить. */
+export async function onThinkPiece(
+  handler: (piece: string) => void,
+): Promise<() => void> {
+  const { listen } = await import("@tauri-apps/api/event");
+  const unlisten = await listen<string>("think://piece", (event) => handler(event.payload));
+  return unlisten;
+}
+
 /** Что мы спросим у модели. Вопрос собирает ядро: в браузере его не собрать. */
 export function modelPrompt(
   query: string,

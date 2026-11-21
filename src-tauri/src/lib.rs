@@ -177,6 +177,7 @@ pub fn run() {
             ipc::remove_runtime,
             ipc::smoke_check,
             ipc::remove_model,
+            ipc::think_stream,
             ipc::engine_status,
             ipc::start_engine,
             ipc::stop_engine,

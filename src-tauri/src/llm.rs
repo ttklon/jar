@@ -33,12 +33,21 @@ const SNIPPET: usize = 300;
 /// История не отправляется намеренно: у нас нет диалога, а лишний контекст — это лишние
 /// токены и лишние поводы соврать. `temperature` низкая: нужен выбор действия, а не рассказ.
 pub fn chat_body(prompt: &str, model: &str) -> String {
+    chat_body_with(prompt, model, false)
+}
+
+/// То же тело, но с выбором: просить ответ целиком или по кускам.
+///
+/// `stream` не выключается навсегда, потому что для разбора намерения нужен **весь**
+/// JSON: `intent::parse` ждёт закрывающую скобку. А вот черновик руки — текст
+/// свободной формы, и его можно собирать из кусков: там первый кусок полезен сразу.
+pub fn chat_body_with(prompt: &str, model: &str, stream: bool) -> String {
     let body = serde_json::json!({
         "model": model,
         "messages": [{ "role": "user", "content": prompt }],
         "temperature": 0.0,
         "max_tokens": 400,
-        "stream": false,
+        "stream": stream,
     });
     body.to_string()
 }
@@ -105,6 +114,270 @@ pub fn post(port: u16, path: &str, body: &str, timeout: Duration) -> Result<Stri
 
     if !(200..300).contains(&status) {
         return Err(format!("движок ответил {status}: {}", snippet(text.trim())));
+    }
+
+    Ok(text)
+}
+
+/// Один POST на петлю, но тело отдаётся по мере прихода, а не целиком.
+///
+/// Зачем отдельная функция, а не `post` + разбор: «поток», прочитанный до конца, —
+/// это не поток. Первый кусок должен уйти человеку тогда, когда его прислали.
+/// `on_chunk` вызывается на каждую **законченную строку** тела: разрезанная пополам
+/// строка JSON — ещё не строка, и показывать человеку половину слова нельзя.
+///
+/// Возвращается тело целиком (уже раскодированное из `chunked`), чтобы вызывающий
+/// мог склеить ответ из тех же строк, что видел по пути.
+pub fn post_lines<F>(
+    port: u16,
+    path: &str,
+    body: &str,
+    timeout: Duration,
+    mut on_chunk: F,
+) -> Result<String, String>
+where
+    F: FnMut(&str) -> Result<(), String>,
+{
+    let address = ("127.0.0.1", port)
+        .to_socket_addrs()
+        .map_err(|error| format!("адрес движка не разобрался: {error}"))?
+        .next()
+        .ok_or_else(|| "адрес движка не разобрался".to_string())?;
+
+    let mut stream = TcpStream::connect_timeout(&address, timeout)
+        .map_err(|_| format!("движок не отвечает на 127.0.0.1:{port}"))?;
+    stream.set_read_timeout(Some(timeout)).ok();
+    stream.set_write_timeout(Some(timeout)).ok();
+
+    stream
+        .write_all(&request(path, body))
+        .map_err(|error| format!("запрос не отправился: {error}"))?;
+    stream.flush().ok();
+
+    // Заголовки читаются по байту: иначе тело уже началось, а границу мы не знаем.
+    let mut head = Vec::new();
+    let mut byte = [0u8; 1];
+    while head.len() < 64 * 1024 {
+        match stream.read(&mut byte) {
+            Ok(0) => break,
+            Ok(_) => {
+                head.push(byte[0]);
+                if head.ends_with(b"\r\n\r\n") {
+                    break;
+                }
+            }
+            Err(error) => return Err(format!("ответ модели не прочитался: {error}")),
+        }
+    }
+
+    if head.is_empty() {
+        return Err("движок закрыл соединение, ничего не ответив".to_string());
+    }
+
+    let (status, headers, _) = split(&head)?;
+    let chunked = headers.contains("transfer-encoding: chunked");
+
+    let mut raw = Vec::new();
+    let mut decoded = Vec::new();
+    let mut chunked_state = ChunkedState::default();
+    let mut pending: Vec<u8> = Vec::new();
+    let mut buffer = [0u8; 8192];
+
+    loop {
+        let read = match stream.read(&mut buffer) {
+            Ok(0) => break,
+            Ok(read) => read,
+            Err(error) => return Err(format!("ответ модели не прочитался: {error}")),
+        };
+
+        raw.extend_from_slice(&buffer[..read]);
+
+        if chunked {
+            for piece in chunked_state.feed(&buffer[..read]) {
+                decoded.extend_from_slice(&piece);
+                pending.extend_from_slice(&piece);
+            }
+        } else {
+            decoded.extend_from_slice(&buffer[..read]);
+            pending.extend_from_slice(&buffer[..read]);
+        }
+
+        // Строки собираются из байт: символ UTF-8 тоже может разрезаться пополам.
+        while let Some(at) = pending.iter().position(|byte| *byte == b'\n') {
+            let line = pending.drain(..at + 1).collect::<Vec<u8>>();
+            let text = String::from_utf8_lossy(&line).to_string();
+            on_chunk(text.trim_end())?;
+        }
+    }
+
+    if !pending.is_empty() {
+        let text = String::from_utf8_lossy(&pending).to_string();
+        if !text.trim().is_empty() {
+            on_chunk(text.trim_end())?;
+        }
+    }
+
+    if !(200..300).contains(&status) {
+        let text = String::from_utf8_lossy(&decoded).to_string();
+        return Err(format!("движок ответил {status}: {}", snippet(text.trim())));
+    }
+
+    Ok(String::from_utf8_lossy(&decoded).to_string())
+}
+
+/// Разбор `chunked` по мере прихода: `размер` `CRLF` `данные` `CRLF` … `0` `CRLF`.
+///
+/// Отдельный тип, а не `unchunk` на всём буфере: `unchunk` умеет только законченный
+/// ответ, а нам нужен первый кусок задолго до последнего токена.
+#[derive(Default)]
+struct ChunkedState {
+    /// Байты, ещё не разобранные на размер и данные.
+    buffer: Vec<u8>,
+    /// Сколько байт данных текущего куска ещё ждём.
+    need: Option<usize>,
+    /// После данных идёт свой `CRLF`, его надо пропустить.
+    after_data: bool,
+}
+
+impl ChunkedState {
+    fn feed(&mut self, bytes: &[u8]) -> Vec<Vec<u8>> {
+        let mut out = Vec::new();
+        self.buffer.extend_from_slice(bytes);
+
+        loop {
+            if self.after_data {
+                if self.buffer.len() < 2 {
+                    break;
+                }
+                self.buffer.drain(..2);
+                self.after_data = false;
+            }
+
+            match self.need {
+                None => {
+                    let Some(at) = self.buffer.windows(2).position(|window| window == b"\r\n") else {
+                        break;
+                    };
+                    let header = String::from_utf8_lossy(&self.buffer[..at]).to_string();
+                    let size_text = header.split(';').next().unwrap_or("").trim().to_string();
+                    let Ok(size) = usize::from_str_radix(&size_text, 16) else {
+                        break;
+                    };
+                    self.buffer.drain(..at + 2);
+                    if size == 0 {
+                        // Конец потока: дальше только пустая строка.
+                        break;
+                    }
+                    self.need = Some(size);
+                }
+                Some(need) => {
+                    if self.buffer.is_empty() {
+                        break;
+                    }
+                    let take = need.min(self.buffer.len());
+                    out.push(self.buffer.drain(..take).collect());
+                    self.need = if need > take { Some(need - take) } else { None };
+                    if self.need.is_none() {
+                        self.after_data = true;
+                    }
+                }
+            }
+        }
+
+        out
+    }
+}
+
+/// Потоковый разбор ответа: одна строка SSE → кусок текста.
+///
+/// Протокол тот же, что на стороне интерфейса (`src/lib/llmStream.ts`), и это не
+/// дублирование ради красоты: ядру тоже нужен ответ по частям, иначе первый звук
+/// ждёт последний токен. Правила простые и проверяемые без сервера:
+///
+/// * `data: [DONE]` — конец потока, а не текст;
+/// * пустая строка и прочие поля SSE (`event:`, `id:`) — не текст;
+/// * битый JSON не убивает уже сказанное, но и не глотается молча: причина уходит
+///   в `error`, а текст продолжает собираться.
+pub fn stream_delta(line: &str) -> (Option<String>, Option<String>) {
+    let trimmed = line.trim();
+    if trimmed.is_empty() || !trimmed.starts_with("data:") {
+        return (None, None);
+    }
+
+    let payload = trimmed["data:".len()..].trim();
+    if payload == "[DONE]" {
+        return (None, None);
+    }
+
+    match serde_json::from_str::<serde_json::Value>(payload) {
+        Ok(parsed) => {
+            // Отказ посреди потока приходит как `{"error":{...}}` — его нельзя
+            // принять за пустой кусок: человек должен увидеть причину.
+            if let Some(error) = parsed.get("error") {
+                let message = error
+                    .get("message")
+                    .and_then(|value| value.as_str())
+                    .map(str::to_string)
+                    .unwrap_or_else(|| error.to_string());
+                return (None, Some(format!("движок ответил отказом: {}", snippet(&message))));
+            }
+
+            let delta = parsed
+                .get("choices")
+                .and_then(|choices| choices.get(0))
+                .and_then(|choice| choice.get("delta"))
+                .and_then(|delta| delta.get("content"))
+                .and_then(|content| content.as_str());
+
+            match delta {
+                Some(text) if !text.is_empty() => (Some(text.to_string()), None),
+                _ => (None, None),
+            }
+        }
+        Err(error) => (
+            None,
+            Some(format!("кусок потока не разобрался: {error}")),
+        ),
+    }
+}
+
+/// Собрать текст из потока целиком: строки SSE на входе, текст и первая причина на выходе.
+///
+/// Причина возвращается отдельно, а не вместо текста: один непонятный кусок не должен
+/// отменять весь ответ, но и врать «всё хорошо» нельзя.
+pub fn stream_text(lines: &str) -> (String, Option<String>) {
+    let mut text = String::new();
+    let mut problem = None;
+
+    for line in lines.lines() {
+        let (delta, error) = stream_delta(line);
+        if let Some(delta) = delta {
+            text.push_str(&delta);
+        }
+        if let Some(error) = error {
+            if problem.is_none() {
+                problem = Some(error);
+            }
+        }
+    }
+
+    (text.trim().to_string(), problem)
+}
+
+/// Спросить модель потоком и вернуть уже склеенный текст.
+///
+/// Зачем это ядру, если интерфейс умеет поток сам: черновик руки и проверка движка
+/// тоже хотят ответ, не дожидаясь последнего токена. Склейка здесь — один проход по
+/// строкам, без промежуточных структур.
+pub fn ask_stream(port: u16, body: &str, timeout: Duration) -> Result<String, String> {
+    let raw = post(port, CHAT_PATH, body, timeout)?;
+    let (text, problem) = stream_text(&raw);
+
+    if text.is_empty() {
+        return Err(match problem {
+            Some(problem) => problem,
+            None => "модель закрыла поток, не сказав ни слова".to_string(),
+        });
     }
 
     Ok(text)
@@ -322,6 +595,94 @@ mod tests {
         assert!(error.contains("failed to load model"), "{error}");
     }
 
+    /// Сервер, который отвечает по кускам и **ждёт**, пока клиент прочитает первый.
+    ///
+    /// Так проверяется именно «раньше»: если клиент ждёт закрытия соединения,
+    /// второй кусок придёт только по таймауту, и тест это увидит.
+    fn serve_stream(first: &str, second: &str, seen: std::sync::mpsc::Sender<Vec<String>>) -> u16 {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("порт");
+        let port = listener.local_addr().expect("адрес").port();
+
+        let first = first.to_string();
+        let second = second.to_string();
+        thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("соединение");
+            let mut buffer = [0u8; 4096];
+            let _ = stream.read(&mut buffer);
+
+            let head = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nConnection: close\r\n\r\n";
+            let _ = stream.write_all(head.as_bytes());
+            let _ = stream.write_all(first.as_bytes());
+            let _ = stream.flush();
+
+            // Пауза: здесь клиент обязан уже отдать первый кусок. Если он не умеет
+            // читать по частям, он придёт сюда же, но с пустым списком.
+            thread::sleep(Duration::from_millis(150));
+            let _ = stream.write_all(second.as_bytes());
+            let _ = stream.flush();
+
+            let _ = seen.send(Vec::new());
+        });
+
+        port
+    }
+
+    #[test]
+    fn lines_arrive_before_the_answer_is_finished() {
+        let (sender, _receiver) = std::sync::mpsc::channel();
+        let port = serve_stream(
+            "data: {\"choices\":[{\"delta\":{\"content\":\"Первое.\"}}]}\n",
+            "data: {\"choices\":[{\"delta\":{\"content\":\"Второе.\"}}]}\ndata: [DONE]\n",
+            sender,
+        );
+
+        let started = std::time::Instant::now();
+        let mut seen: Vec<String> = Vec::new();
+        let mut first_at: Option<Duration> = None;
+
+        let whole = post_lines(port, CHAT_PATH, "{}", Duration::from_secs(5), |line| {
+            seen.push(line.to_string());
+            if first_at.is_none() && line.contains("Первое") {
+                first_at = Some(started.elapsed());
+            }
+            Ok(())
+        })
+        .expect("поток прочитан");
+
+        assert!(whole.contains("Первое") && whole.contains("Второе"), "{whole}");
+        // Первая строка пришла до того, как сервер отправил вторую.
+        let first_at = first_at.expect("первая строка увидана");
+        assert!(
+            first_at < Duration::from_millis(150),
+            "первая строка пришла через {first_at:?} — значит ждали конца ответа"
+        );
+        assert_eq!(seen.len(), 3, "{seen:?}");
+    }
+
+    #[test]
+    fn chunked_stream_is_decoded_piece_by_piece() {
+        // Реальный `llama-server` отвечает `Transfer-Encoding: chunked`. Кусок
+        // разрезан по границе строки, чтобы проверить инкрементальный разбор.
+        let first = "data: {\"choices\":[{\"delta\":{\"content\":\"А\"}}]}\n";
+        let second = "data: {\"choices\":[{\"delta\":{\"content\":\"Б\"}}]}\n";
+
+        let mut state = ChunkedState::default();
+        let body_first = format!("{:X}\r\n{}\r\n", first.len(), first);
+        let body_second = format!(
+            "{:X}\r\n{}\r\n0\r\n\r\n",
+            second.len(),
+            second
+        );
+
+        let mut out = state.feed(body_first.as_bytes());
+        // Разбор по частям: данные первого куска на месте, второй ещё не пришёл.
+        assert_eq!(out.concat(), first.as_bytes());
+        assert!(!out.is_empty());
+
+        out = state.feed(body_second.as_bytes());
+        assert_eq!(out.concat(), second.as_bytes());
+    }
+
     #[test]
     fn a_dead_engine_says_it_is_not_answering() {
         // Заняли и сразу освободили порт: соединение никто не примет.
@@ -332,6 +693,80 @@ mod tests {
 
         let error = ask(port, "{}", Duration::from_millis(300)).expect_err("движка нет");
         assert!(error.contains("не отвечает"), "{error}");
+    }
+
+    #[test]
+    fn a_streamed_answer_is_glued_from_pieces() {
+        // Ровно то, что присылает llama-server при `stream: true`: по строке на кусок.
+        let lines = concat!(
+            "data: {\"choices\":[{\"delta\":{\"content\":\"Гото\"}}]}\n\n",
+            "data: {\"choices\":[{\"delta\":{\"content\":\"во.\"}}]}\n\n",
+            ": keep-alive\n\n",
+            "data: [DONE]\n\n",
+        );
+
+        let (text, problem) = stream_text(lines);
+        assert_eq!(text, "Готово.");
+        assert!(problem.is_none(), "{problem:?}");
+    }
+
+    #[test]
+    fn stream_pieces_never_leak_protocol_lines_into_speech() {
+        // Служебная строка и пустое поле — не текст: иначе человек услышит «DONE».
+        let (none, _) = stream_delta("data: [DONE]");
+        assert!(none.is_none());
+        let (empty, _) = stream_delta("data: {\"choices\":[{\"delta\":{\"content\":\"\"}}]}");
+        assert!(empty.is_none());
+        let (other, _) = stream_delta("event: message");
+        assert!(other.is_none());
+        // А обычный кусок — текст, вместе с пробелом внутри.
+        let (word, _) = stream_delta("data: {\"choices\":[{\"delta\":{\"content\":\"ок \"}}]}");
+        assert_eq!(word.expect("кусок"), "ок ");
+    }
+
+    #[test]
+    fn one_broken_piece_does_not_erase_what_was_already_said() {
+        let lines = concat!(
+            "data: {\"choices\":[{\"delta\":{\"content\":\"Первое предложение. \"}}]}\n",
+            "data: {это не json\n",
+            "data: {\"choices\":[{\"delta\":{\"content\":\"Второе.\"}}]}\n",
+        );
+
+        let (text, problem) = stream_text(lines);
+        assert_eq!(text, "Первое предложение. Второе.");
+        // Битая строка не проглочена: причина названа.
+        assert!(problem.expect("причина").contains("не разобрался"));
+    }
+
+    #[test]
+    fn an_error_in_the_middle_of_a_stream_keeps_its_words() {
+        let (delta, error) = stream_delta(
+            "data: {\"error\":{\"message\":\"context full\"}}",
+        );
+        assert!(delta.is_none());
+        let error = error.expect("причина");
+        assert!(error.contains("context full"), "{error}");
+    }
+
+    #[test]
+    fn a_silent_stream_is_an_error_not_an_empty_answer() {
+        let (sender, _receiver) = std::sync::mpsc::channel();
+        let port = serve(b"".to_vec(), sender);
+        let error = ask_stream(port, "{}", Duration::from_secs(5)).expect_err("пусто");
+        assert!(error.contains("ничего") || error.contains("ничего не ответив"), "{error}");
+    }
+
+    #[test]
+    fn the_body_can_ask_for_a_stream_and_still_defaults_to_whole() {
+        let whole: serde_json::Value = serde_json::from_str(&chat_body("привет", "m")).expect("json");
+        assert_eq!(whole["stream"], false);
+
+        let streamed: serde_json::Value =
+            serde_json::from_str(&chat_body_with("привет", "m", true)).expect("json");
+        assert_eq!(streamed["stream"], true);
+        // Всё остальное не изменилось: без истории, низкая температура.
+        assert_eq!(streamed["messages"][0]["content"], "привет");
+        assert_eq!(streamed["temperature"], 0.0);
     }
 
     #[test]
