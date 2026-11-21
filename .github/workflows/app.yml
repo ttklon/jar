@@ -255,6 +255,28 @@ jobs:
             dist/zshelper-portable.zip
             dist/zshelper-release.json
 
+      # Живой прогон на настоящей Windows: реестр, файловая система, WebView2 и —
+      # если установщик собрался — установка, запуск без администратора, удаление.
+      # Это не приёмка пользователем: микрофон, голос, OUTLOOK и сторонние
+      # приложения сюда не входят, и скрипт об этом говорит сам.
+      - name: Live Windows checks (registry, filesystem, installer)
+        if: steps.bundle.outcome == 'success'
+        shell: powershell
+        run: |
+          # Один прогон: и вердикт, и доказательство. Повторять проверку ради
+          # второго лога — значит делать установку дважды без причины.
+          ./scripts/test-live-windows.ps1 2>&1 | Tee-Object -FilePath live-windows.log
+          exit $LASTEXITCODE
+
+      - name: Upload live Windows evidence
+        if: always() && steps.bundle.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-windows-evidence
+          path: live-windows.log
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Upload installers and portable
         if: steps.bundle.outcome == 'success'
         uses: actions/upload-artifact@v4

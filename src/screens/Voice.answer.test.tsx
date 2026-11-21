@@ -23,6 +23,7 @@ vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 // `vi.mock` поднимается наверх файла, поэтому всё общее живёт в `vi.hoisted`.
 const mocks = vi.hoisted(() => ({
   speak: vi.fn((_phrase: string) => true),
+  stopSpeaking: vi.fn(),
   start: vi.fn(),
   stop: vi.fn(),
   options: null as VoiceOptions | null,
@@ -44,7 +45,7 @@ vi.mock("../lib/useVoice", () => ({
 
 vi.mock("../lib/voice", async () => {
   const actual = await vi.importActual<typeof import("../lib/voice")>("../lib/voice");
-  return { ...actual, speak: mocks.speak };
+  return { ...actual, speak: mocks.speak, stopSpeaking: mocks.stopSpeaking };
 });
 
 beforeEach(() => {
@@ -52,6 +53,7 @@ beforeEach(() => {
   mocks.start.mockClear();
   mocks.stop.mockClear();
   mocks.speak.mockClear();
+  mocks.stopSpeaking.mockClear();
 });
 
 afterEach(cleanup);
@@ -119,6 +121,20 @@ describe("ответ голосом", () => {
     // «Да» — разрешение, а не значение: поле вопроса остаётся пустым.
     await waitFor(() => expect(mocks.speak).toHaveBeenCalled());
     expect((path as HTMLInputElement).value).toBe("");
+  });
+
+  it("человек заговорил — приложение замолчало, а не говорит поверх", async () => {
+    // Перебивание — не вежливость, а условие разговора. Раньше речь останавливал
+    // только «стоп»: если человек начинал говорить, пока приложение ещё говорило,
+    // получалось перекрикивание.
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "создай папку" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    await screen.findByLabelText("Путь");
+
+    fireEvent.pointerDown(screen.getByRole("button", { name: /Сказать ответ: Путь/ }));
+
+    expect(mocks.stopSpeaking).toHaveBeenCalled();
   });
 
   it("когда ответов нет, приложение не притворяется, что услышало", async () => {

@@ -1688,6 +1688,11 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
         aria-label={always ? voice.always : voice.hold}
         onPointerDown={(event) => {
           event.preventDefault();
+          // Человек заговорил — приложение обязано замолчать. Иначе оно говорит
+          // поверх него, и разговор превращается в перекрикивание: перебивание
+          // должно останавливать речь сразу, а не после того, как человек дождётся
+          // конца абзаца. Это и есть «не мешать» в действии, а не в подсказке.
+          stopSpeaking();
           setCancelled(false);
           // Новая попытка — новая ошибка: старая не должна пугать до разбора.
           setVoiceError(null);
@@ -2386,6 +2391,10 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
                       aria-label={`${voice.answerSay}: ${question.label}`}
                       onPointerDown={(event) => {
                         event.preventDefault();
+                        // Тот же человек, та же причина: заговорил — приложение
+                        // молчит. Здесь это отдельная кнопка у поля вопроса, и
+                        // забыть её было бы легко: речь шла бы поверх ответа.
+                        stopSpeaking();
                         setAnswerTarget({ position: question.position, name: question.name });
                         mic.start();
                       }}
