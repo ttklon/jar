@@ -595,4 +595,20 @@ describe("ошибки восстановления не подменяются 
       unmount();
     } finally { vi.useRealTimers(); }
   });
+
+  it("при выключенной сети объясняет, а не обвиняет", async () => {
+    // Шаг 210: нарочно выключенная сеть — не сбой. Без этой проверки человек
+    // видел бы «скачивание не удалось» и решил, что приложение сломалось.
+    mocks.desktop = true;
+    Object.defineProperty(globalThis.navigator, "onLine", { value: false, configurable: true });
+    render(<ReadinessCard status={status()} error={null} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Скачать модель" }));
+
+    await waitFor(() => expect(screen.getByText(/без сети не получится/)).toBeTruthy());
+    // И ни одного сетевого вызова: узнали заранее, а не после таймаута.
+    expect(mocks.download).not.toHaveBeenCalled();
+
+    Object.defineProperty(globalThis.navigator, "onLine", { value: true, configurable: true });
+  });
 });

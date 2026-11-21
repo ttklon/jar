@@ -13,6 +13,7 @@ import {
   stopEngine,
 } from "../ipc";
 import type { ReadinessStatus, SmokeResult } from "../ipc";
+import { offlineNote, onlineState } from "../lib/offline";
 import { assessReadiness, formatSize, hasRoom, planPrepare } from "../lib/readiness";
 import { readiness as text } from "../i18n/ru";
 import { ErrorLine } from "./ErrorLine";
@@ -193,6 +194,16 @@ export function ReadinessCard({
   const download = useCallback(
     async (kind: "model" | "runtime" | "speech-model" | "speech-runtime") => {
       if (!status || actionLock.current) return;
+
+      // Сеть выключена — говорим об этом до попытки, а не после таймаута.
+      // Одна и та же проверка на обоих путях (кнопка и «подготовить всё»):
+      // два пути к одному действию не должны вести себя по-разному.
+      const note = offlineNote(onlineState(globalThis.navigator), "скачать модель");
+      if (note !== null) {
+        setActionError(note);
+        return;
+      }
+
       actionLock.current = true;
       setBusy(kind);
       setProgress(null);
@@ -322,6 +333,17 @@ export function ReadinessCard({
     const speechWanted = includeSpeech && (!status.speech_found || status.speech_model === null);
     const plan = planPrepare(status, speechWanted);
     if (plan.block || plan.steps.length === 0) return;
+
+    // Сеть выключена — это не сбой, а факт, и о нём говорится до попытки.
+    // Без этой проверки человек видел бы «скачивание не удалось» на нарочно
+    // выключенной сети: приложение обвиняло бы его в том, что он сделал сам.
+    if (plan.steps.some((step) => step !== "smoke")) {
+      const note = offlineNote(onlineState(globalThis.navigator), "скачать модель");
+      if (note !== null) {
+        setActionError(note);
+        return;
+      }
+    }
     actionLock.current = true;
     stopPrepare.current = false;
     setActionError(null);
