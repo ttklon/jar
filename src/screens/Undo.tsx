@@ -126,10 +126,12 @@ export function UndoCard() {
       {possible > 0 ? (
         <div className={styles.actions}>
           {running ? (
-            <>
+            // Отмена идёт — и это длинная операция, о которой человеку надо
+            // знать, а не только видеть кружок.
+            <span role="status" aria-live="polite">
               <Spinner size="tiny" />
-              <Text className={styles.muted}>{undo.running}</Text>
-            </>
+              <Text className={styles.muted}> {undo.running}</Text>
+            </span>
           ) : armed ? (
             <>
               <Button appearance="primary" onClick={run}>

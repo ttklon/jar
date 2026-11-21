@@ -466,8 +466,11 @@ export function Models() {
           {text.loadError}: {error}
         </Text>
       ) : view === null ? (
-        <div className={styles.center}>
+        // Был спиннер без единого слова: зрячий понимал «идёт работа», диктор
+        // не получал ничего, а человек без зрения не знал даже, что ждать.
+        <div className={styles.center} role="status" aria-live="polite">
           <Spinner size="tiny" />
+          <Text className={styles.note}>{text.loading}</Text>
         </div>
       ) : (
         <>

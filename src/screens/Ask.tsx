@@ -481,7 +481,7 @@ export function Ask() {
           {ask.loadError}: {error}
         </Text>
       ) : busy ? (
-        <div className={styles.center}>
+        <div className={styles.center} role="status" aria-live="polite">
           <Spinner size="tiny" />
           <Text>{ask.searching}</Text>
         </div>

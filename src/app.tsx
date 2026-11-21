@@ -389,7 +389,9 @@ export function App() {
               <Text>{error}</Text>
             </div>
           ) : snapshot === null ? (
-            <div className={styles.center}>
+            // Словами «Читаю реестр…» — и как `status`: диктор узнаёт о
+            // загрузке, а не остаётся в тишине перед внезапным экраном.
+            <div className={styles.center} role="status" aria-live="polite">
               <Spinner size="small" />
               <Text>{t.loading}</Text>
             </div>

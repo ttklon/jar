@@ -135,6 +135,38 @@ export function silentErrorLines(source: string): { line: number; text: string }
   return found;
 }
 
+/**
+ * Спиннеры, о которых диктор не узнает.
+ *
+ * `Spinner` — картинка: он крутится и этим говорит «идёт работа». Для зрения
+ * этого достаточно, для слуха — нет: диктор молчит, и человек не знает, ждать
+ * ему или приложение повисло.
+ *
+ * Два законных случая пропускаются:
+ *
+ *  * **спиннер внутри кнопки** (`icon={<Spinner …/>}`). У кнопки есть текст
+ *    («Запускаю…»), и он меняется вместе со спиннером — объявлять нечего;
+ *  * **рядом есть `role="status"` или `aria-live`** на контейнере.
+ *
+ * Всё остальное — молчание.
+ */
+export function silentSpinners(source: string): { line: number; text: string }[] {
+  const lines = source.split("\n");
+  const found: { line: number; text: string }[] = [];
+  const announced = announcedLines(source);
+
+  lines.forEach((line, index) => {
+    if (!/<Spinner/.test(line)) return;
+    // Внутри кнопки: иконка, у которой есть подпись рядом.
+    const window = lines.slice(Math.max(0, index - 3), index + 4).join(" ");
+    if (/icon=\{/.test(window)) return;
+    if (announced[index]) return;
+    found.push({ line: index + 1, text: line.trim() });
+  });
+
+  return found;
+}
+
 describe("ошибки объявляются экранному диктору", () => {
   it("ни одна ошибка на экране не появляется молча", () => {
     const offenders: string[] = [];
@@ -147,6 +179,36 @@ describe("ошибки объявляются экранному диктору"
     }
 
     expect(offenders).toEqual([]);
+  });
+
+  it("ни один спиннер не крутится молча", () => {
+    const offenders: string[] = [];
+    for (const path of files(SRC)) {
+      const source = readFileSync(path, "utf8");
+      for (const hit of silentSpinners(source)) {
+        offenders.push(`${relative(SRC, path)}:${hit.line} ${hit.text}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("сторож спиннеров видит поломку", () => {
+    // В обе стороны: иначе проверка «проходит» всегда.
+    const silent = ["        <div className={styles.center}>", '          <Spinner size="tiny" />', "        </div>"].join(
+      "\n",
+    );
+    expect(silentSpinners(silent)).toHaveLength(1);
+
+    const declared = [
+      '        <div className={styles.center} role="status" aria-live="polite">',
+      '          <Spinner size="tiny" />',
+      "        </div>",
+    ].join("\n");
+    expect(silentSpinners(declared)).toHaveLength(0);
+
+    // Внутри кнопки — законно: текст кнопки меняется вместе со спиннером.
+    const button = '          icon={busy ? <Spinner size="tiny" /> : <PlayRegular />}';
+    expect(silentSpinners(button)).toHaveLength(0);
   });
 
   it("сторож видит поломку: строка без объявления ловится", () => {

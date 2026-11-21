@@ -390,7 +390,7 @@ export function ReadinessCard({
   if (status === null && error === null) {
     return (
       <section className={styles.card} aria-label={text.title}>
-        <div className={styles.row}>
+        <div className={styles.row} role="status" aria-live="polite">
           <Spinner size="tiny" />
           <Text className={styles.note}>{text.loading}</Text>
         </div>

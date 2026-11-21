@@ -136,7 +136,14 @@ export function Settings({
             ) : null}
           </div>
           <div className={styles.row}>
-            {autostartBusy ? <Spinner size="tiny" /> : null}
+            {/* Спиннер без слов был понятен только зрению. Строка «читаю
+                состояние из реестра…» уже была в словаре — её и объявляем. */}
+            {autostartBusy ? (
+              <span role="status" aria-live="polite">
+                <Spinner size="tiny" />
+                <Text className={styles.muted}> {t.settingsAutostartReading}</Text>
+              </span>
+            ) : null}
             <Switch
               checked={autostart?.enabled ?? false}
               // Без прав администратора: запись идёт в HKCU. В браузере реестра

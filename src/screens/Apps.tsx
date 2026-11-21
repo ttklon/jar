@@ -70,7 +70,7 @@ export function Apps() {
       {error ? <Text className={styles.error} role="alert" aria-live="polite">{`${apps.loadError}: ${error}`}</Text> : null}
 
       {profiles === null && !error ? (
-        <div className={styles.center}>
+        <div className={styles.center} role="status" aria-live="polite">
           <Spinner size="tiny" />
           <Text>{apps.count(0)}</Text>
         </div>
