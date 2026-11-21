@@ -56,6 +56,7 @@ import { installedEngine, isEngineDown } from "../lib/engineReady";
 import { followUpQuery, isFollowUp } from "../lib/followUp";
 import { isSpokenStop } from "../lib/spoken";
 import { createSpeechQueue } from "../lib/speechQueue";
+import { createAudioMachine } from "../lib/audio";
 import { speak, stopSpeaking } from "../lib/voice";
 import { aroundPhrase, rankForWindow } from "../lib/context";
 import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
@@ -888,6 +889,10 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       answersRef.current = {};
       setRemembered([]);
       setApproved([]);
+      // «Стоп» — это и есть перебивание: динамик замолкает, микрофон закрывается
+      // до следующей фразы. Машина не должна остаться в «говорю».
+      soundRef.current?.send("reset");
+      speechRef.current?.clear();
       stopSpeaking();
       micStopRef.current();
       void cancelTool().catch(() => undefined);
@@ -1599,6 +1604,18 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
    */
   const speechRef = useRef<ReturnType<typeof createSpeechQueue> | null>(null);
   const streamOwnerRef = useRef(0);
+
+  /**
+   * Машина звука: один рот и одни уши.
+   *
+   * Здесь важно не «красиво», а правило: пока приложение говорит, микрофон закрыт.
+   * Иначе распознавание поймает собственную речь и приложение ответит самому себе.
+   * Человек заговорил поверх (`bargeIn`) — микрофон открывается, речь замолкает.
+   * Состояние нигде не рисуется как главный элемент: это внутренняя дисциплина,
+   * проверяемая без микрофона и динамика (`src/lib/audio.ts`).
+   */
+  const soundRef = useRef<ReturnType<typeof createAudioMachine> | null>(null);
+  if (soundRef.current === null) soundRef.current = createAudioMachine();
   if (speechRef.current === null) {
     speechRef.current = createSpeechQueue(
       (text) => speak(text, "ru-RU", () => speechRef.current?.done()),
@@ -1785,6 +1802,10 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           // поверх него, и разговор превращается в перекрикивание: перебивание
           // должно останавливать речь сразу, а не после того, как человек дождётся
           // конца абзаца. Это и есть «не мешать» в действии, а не в подсказке.
+          // Перебивание в машине звука: из «говорю» — в «слушаю», а не в готовность.
+          // Иначе приложение считало бы, что ещё говорит, и не открыло бы микрофон.
+          soundRef.current?.send("bargeIn");
+          speechRef.current?.clear();
           stopSpeaking();
           setCancelled(false);
           // Новая попытка — новая ошибка: старая не должна пугать до разбора.
