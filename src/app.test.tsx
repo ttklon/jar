@@ -148,6 +148,28 @@ describe("App", () => {
     );
   });
 
+  it("при узком окне и крупном масштабе навигация уходит наверх, а не сжимает содержимое", async () => {
+    // 640 логических пикселей — это экран 1280 при масштабе 200%. Раньше колонка
+    // была жёстко 236 px и отнимала больше трети ширины.
+    const original = globalThis.innerWidth;
+    Object.defineProperty(globalThis, "innerWidth", { value: 640, configurable: true });
+    fireEvent(window, new Event("resize"));
+
+    render(<App />);
+    await loaded();
+
+    const shell = document.querySelector("main")?.parentElement;
+    expect(shell).toBeTruthy();
+    // Одна колонка: боковая панель не занимает 236 px.
+    expect((shell as HTMLElement).style.gridTemplateColumns).toBe("1fr");
+    // Навигация лентой сверху: элементы идут в строку, а не в столбик.
+    const nav = screen.getByRole("navigation");
+    expect(nav.style.flexDirection).toBe("row");
+
+    Object.defineProperty(globalThis, "innerWidth", { value: original, configurable: true });
+    fireEvent(window, new Event("resize"));
+  });
+
   it("при первом запуске сначала знакомит, а потом открывает голос", async () => {
     globalThis.localStorage?.clear?.();
     render(<App />);

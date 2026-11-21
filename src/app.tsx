@@ -42,6 +42,7 @@ import { Settings } from "./screens/Settings";
 import { Welcome } from "./screens/Welcome";
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { filterCommands, type Command } from "./lib/commands";
+import { layoutFor } from "./lib/layout";
 import {
   DEFAULT_CHOICE,
   THEME_KEY,
@@ -195,6 +196,15 @@ export function App() {
     return () => mql.removeEventListener("change", onChange);
   }, []);
   const dark = resolveTheme(choice, systemDark) === "dark";
+  // Ширина окна: при 200% масштабе или маленьком окне колонка уходит наверх,
+  // иначе содержимое сжимается в полоску. Правило — в `layout.ts`, здесь только подписка.
+  const [width, setWidth] = useState(() => globalThis.innerWidth || 1200);
+  useEffect(() => {
+    const onResize = () => setWidth(globalThis.innerWidth || 1200);
+    globalThis.addEventListener("resize", onResize);
+    return () => globalThis.removeEventListener("resize", onResize);
+  }, []);
+  const layout = layoutFor(width);
   // Палитра: открывается с клавиатуры, ведёт на любой экран по первым буквам.
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -244,14 +254,28 @@ export function App() {
 
   return (
     <FluentProvider theme={dark ? webDarkTheme : webLightTheme} style={{ height: "100vh" }}>
-      <div className={styles.shell}>
+      <div
+        className={styles.shell}
+        style={
+          layout.narrow
+            ? { gridTemplateColumns: "1fr", gridTemplateRows: "auto 1fr" }
+            : { gridTemplateColumns: `${layout.sidebarWidth}px 1fr` }
+        }
+      >
         <aside className={styles.sidebar}>
           <div className={styles.brand}>
             <span className={styles.brandName}>{t.appName}</span>
             <span className={styles.tagline}>{t.appTagline}</span>
           </div>
 
-          <nav className={styles.nav}>
+          <nav
+            className={styles.nav}
+            style={
+              layout.narrow
+                ? { flexDirection: "row", flexWrap: "wrap", gap: "4px" }
+                : undefined
+            }
+          >
             {NAV.map((item) => (
               <button
                 key={item.id}
@@ -266,7 +290,7 @@ export function App() {
             ))}
           </nav>
 
-          <div className={styles.paletteHint}>{t.paletteHint}</div>
+          {layout.narrow ? null : <div className={styles.paletteHint}>{t.paletteHint}</div>}
 
           <div className={styles.spacer} />
 
@@ -280,7 +304,7 @@ export function App() {
           </div>
         </aside>
 
-        <main className={styles.main}>
+        <main className={styles.main} style={layout.narrow ? { padding: "16px 14px 40px" } : undefined}>
           {!error && snapshot && !welcome ? (
             <div
               style={{ display: screen === "voice" ? "contents" : "none" }}
