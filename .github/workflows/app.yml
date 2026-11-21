@@ -261,60 +261,27 @@ jobs:
       # приложения сюда не входят, и скрипт об этом говорит сам.
       - name: Live Windows checks (registry, filesystem, installer)
         if: steps.bundle.outcome == 'success'
-        shell: powershell
+        shell: pwsh
         run: |
-          # Скрипт пишет свой `live-windows.log` сам; здесь — копия шага для
-          # артефакта, потому что логи джобов недоступны через API.
-          # `powershell` (5.1) не переключает вывод на UTF-8 сам: русский текст
-          # может стать мусором — включаем кодировку явно.
-          # Код возврата не глотаем: он и есть вердикт.
-          [Console]::OutputEncoding = [Text.Encoding]::UTF8
-          $OutputEncoding = [Text.Encoding]::UTF8
+          # ASCII ONLY in this block, on purpose.
+          # Six runs proved that a non-ASCII `run:` block can die before its first
+          # line on Windows PowerShell 5.1 -- no log, no artefact, no reason.
+          # All Russian text lives in scripts/test-live-windows.ps1 (UTF-8 + BOM),
+          # which is run as a child process so its `exit` cannot kill this host.
           $ErrorActionPreference = 'Continue'
           'STEP-STARTED' | Out-File -FilePath live-windows-step.log -Encoding utf8
-
-          # Сначала разбор без выполнения: синтаксическая ошибка иначе убивает
-          # скрипт до первой строки, и от прогона не остаётся ни лога, ни причины.
-          # Ошибку печатаем аннотацией: аннотации читаются через API, а логи и
-          # артефакты недоступны.
-          $tokens = $null; $errors = $null
-          [void][System.Management.Automation.Language.Parser]::ParseFile(
-            (Resolve-Path ./scripts/test-live-windows.ps1), [ref]$tokens, [ref]$errors)
-          if ($errors -and $errors.Count -gt 0) {
-            "SYNTAX-ERRORS: $($errors.Count)" | Out-File -FilePath live-windows-step.log -Encoding utf8
-            foreach ($e in $errors) {
-              ("  line {0}: {1}" -f $e.Extent.StartLineNumber, $e.Message) |
-                Out-File -FilePath live-windows-step.log -Append -Encoding utf8
-            }
-            foreach ($e in $errors) {
-              Write-Host ("::error file=scripts/test-live-windows.ps1,line={0}::{1}" -f $e.Extent.StartLineNumber, ($e.Message -replace "`r?`n", ' '))
-            }
-            exit 2
-          }
-
-          # Отдельным процессом, а не `./script.ps1`: `exit` внутри вызываемого
-          # скрипта завершает весь хост PowerShell, и тогда код возврата и разбор
-          # причины теряются — ровно это и случилось в предыдущем прогоне.
-          & powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/test-live-windows.ps1 2>&1 |
-            Out-File -FilePath live-windows-step.log -Encoding utf8
+          & powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/test-live-windows.ps1 *>&1 |
+            Out-File -FilePath live-windows-step.log -Append -Encoding utf8
           $code = $LASTEXITCODE
-          if (-not (Test-Path live-windows-step.log)) {
-            # Процесс мог умереть, не сказав ни слова: тогда причина — сам факт
-            # молчания, и это тоже надо записать, а не потерять.
-            ("NO-OUTPUT code={0}" -f $code) | Out-File -FilePath live-windows-step.log -Encoding utf8
-          }
           Get-Content -LiteralPath live-windows-step.log | Write-Host
           if ($code -ne 0) {
-            # Последние строки — аннотацией: так причина видна без доступа к файлам.
-            # Только ASCII-маркеры: русские подписи в потоке могут прийти в другой
-            # кодировке, и тогда причина падения станет нечитаемой.
             $marks = Select-String -LiteralPath live-windows.log -Pattern '^(PASS|FAIL|SKIP)' -ErrorAction SilentlyContinue |
               ForEach-Object { $_.Line }
-            $summary = if ($marks) { $marks -join ' ; ' } else { 'нет строк PASS/FAIL — скрипт упал до проверок' }
-            Write-Host ("::error::live windows failed code={0}: {1}" -f $code, $summary)
+            $summary = if ($marks) { $marks -join ' ; ' } else { 'no PASS/FAIL lines in live-windows.log' }
+            Write-Host ("::error::live windows failed code={0} :: {1}" -f $code, $summary)
             exit $code
           }
-
+          Write-Host 'live windows: all checks passed'
       - name: Upload live Windows evidence
         if: always() && steps.bundle.outcome == 'success'
         uses: actions/upload-artifact@v4
