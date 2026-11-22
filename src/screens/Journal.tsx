@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
 import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
+import { groupReasons } from "../lib/journal";
 import type { AuditEvent, Episode, RunRecord } from "../ipc";
 import { journal } from "../i18n/ru";
 
@@ -37,6 +38,17 @@ const useStyles = makeStyles({
     verticalAlign: "top",
   },
   denied: { color: tokens.colorPaletteRedForeground2 },
+  pains: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+    padding: "12px 14px",
+    borderRadius: tokens.borderRadiusLarge,
+    backgroundColor: tokens.colorNeutralBackground2,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  painsList: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "8px" },
+  painRow: { display: "flex", flexDirection: "column", gap: "2px" },
   ok: { color: tokens.colorPaletteGreenForeground2 },
   runs: { display: "flex", flexDirection: "column", gap: "10px", maxWidth: "110ch" },
   run: {
@@ -135,6 +147,9 @@ function RunCard({ run, styles }: { run: RunRecord; styles: Styles }) {
 export function Journal() {
   const styles = useStyles();
   const [events, setEvents] = useState<AuditEvent[] | null>(null);
+  // «Что болит» — по причинам, а не по времени: журнал уже есть, но человеку
+  // с повторяющейся ошибкой нужно число, а не двадцать одинаковых строк.
+  const groups = groupReasons(events ?? []);
   const [runs, setRuns] = useState<RunRecord[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -266,6 +281,28 @@ export function Journal() {
         <Text className={styles.note} block>
           {journal.empty}
         </Text>
+      ) : null}
+
+      {groups.length > 0 ? (
+        <section className={styles.pains} aria-label={journal.painsTitle}>
+          <Text weight="semibold">{journal.painsTitle}</Text>
+          <Text className={styles.note} block>
+            {journal.painsLead}
+          </Text>
+          <ul className={styles.painsList}>
+            {groups.map((group) => (
+              <li key={group.reason} className={styles.painRow}>
+                <Text weight="semibold">{group.reason}</Text>
+                {/* Число раз и время — не украшение: одна и та же ошибка
+                    двадцать раз подряд читается как двадцать разных. */}
+                <Text className={styles.note}>
+                  {`${journal.painsTimes(group.times)} · ${journal.painsLast(time(group.lastMs))}`}
+                </Text>
+                <Text className={styles.note}>{group.sample}</Text>
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
 
       {events && events.length > 0 ? (
