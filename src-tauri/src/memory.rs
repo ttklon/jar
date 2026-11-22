@@ -437,8 +437,14 @@ pub fn rebuild(base_dir: &Path) -> Result<String, String> {
     let path = base_dir.join("memory.db");
     let copies = crate::backup::dir(base_dir);
     let stamp = format!("{}-rebuild", now_ms());
-    let made = crate::backup::make(&path, &copies, &stamp, SCHEMA_VERSION as u32, crate::backup::KEEP)
-        .map_err(|error| format!("копию сделать не удалось: {error}"))?;
+    let made = crate::backup::make(
+        &path,
+        &copies,
+        &stamp,
+        SCHEMA_VERSION as u32,
+        crate::backup::KEEP,
+    )
+    .map_err(|error| format!("копию сделать не удалось: {error}"))?;
     // Годность копии проверяется ДО удаления оригинала: «наверное, целая» —
     // не страховка, а надежда.
     crate::backup::verify(&made.path).map_err(|error| {

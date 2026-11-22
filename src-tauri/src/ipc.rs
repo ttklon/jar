@@ -399,10 +399,7 @@ pub async fn self_check() -> Vec<evals::Verdict> {
 /// Возвращает то, что сделано, словами, — не «ok»: после ремонта человеку
 /// нужно знать, что именно изменилось.
 #[tauri::command]
-pub async fn repair(
-    state: State<'_, AppState>,
-    repair: String,
-) -> Result<String, String> {
+pub async fn repair(state: State<'_, AppState>, repair: String) -> Result<String, String> {
     let inner = state.inner.clone();
     tauri::async_runtime::spawn_blocking(move || match repair.as_str() {
         "reset-data" => {
