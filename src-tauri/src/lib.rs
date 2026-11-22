@@ -87,6 +87,7 @@ pub mod trial;
 pub mod uia;
 pub mod undo;
 pub mod verifier;
+pub mod weak;
 pub mod window;
 
 use std::sync::atomic::AtomicBool;
