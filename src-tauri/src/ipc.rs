@@ -529,11 +529,9 @@ pub async fn data_totals(state: State<'_, AppState>) -> Result<places::Totals, S
     let base = state.inner.base_dir.clone();
     let models = state.inner.models_dir.clone();
     let program = std::env::current_exe().ok();
-    tauri::async_runtime::spawn_blocking(move || {
-        places::totals(&base, &models, program.as_deref())
-    })
-    .await
-    .map_err(|error| format!("размер установки не посчитался: {error}"))
+    tauri::async_runtime::spawn_blocking(move || places::totals(&base, &models, program.as_deref()))
+        .await
+        .map_err(|error| format!("размер установки не посчитался: {error}"))
 }
 
 /// Автозапуск: включён ли, что именно запустится и чем это грозит.
