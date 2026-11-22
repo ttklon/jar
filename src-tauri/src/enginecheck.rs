@@ -126,22 +126,25 @@ mod tests {
         let _ = std::fs::remove_dir_all(&base);
         let dir = crate::runtime::directory(&base, Kind::Llama);
         std::fs::create_dir_all(&dir).unwrap();
-        std::fs::write(dir.join(Kind::Llama.spec().program), b"portable").unwrap();
-        let sha = crate::models::sha256_file(&dir.join(Kind::Llama.spec().program)).unwrap();
+        // `spec()` — ссылка, а `program` и `sha256` — `String`: их нельзя
+        // вынести из ссылки, только взять по ней.
+        let spec = Kind::Llama.spec();
+        std::fs::write(dir.join(&spec.program), b"portable").unwrap();
+        let sha = crate::models::sha256_file(&dir.join(&spec.program)).unwrap();
         let meta = serde_json::json!({
-            "archive_sha256": Kind::Llama.spec().sha256,
-            "program": Kind::Llama.spec().program,
-            "files": [{"path": Kind::Llama.spec().program, "sha256": sha}]
+            "archive_sha256": &spec.sha256,
+            "program": &spec.program,
+            "files": [{"path": &spec.program, "sha256": sha}]
         });
         std::fs::write(dir.join("installed.json"), serde_json::to_vec(&meta).unwrap()).unwrap();
-        std::fs::write(dir.join(".zshelper-owner"), Kind::Llama.spec().sha256.as_bytes()).unwrap();
+        std::fs::write(dir.join(".zshelper-owner"), spec.sha256.as_bytes()).unwrap();
 
         // До порчи — исправен.
         assert!(crate::runtime::installed(&base, Kind::Llama));
         assert!(crate::runtime::verify(&base, Kind::Llama).is_ok());
 
         // Антивирус или недокачанный архив: файл стал другим.
-        std::fs::write(dir.join(Kind::Llama.spec().program), b"portable-but-wrong").unwrap();
+        std::fs::write(dir.join(&spec.program), b"portable-but-wrong").unwrap();
 
         let inspected = inspect(&base, Kind::Llama).unwrap();
         let (kind, state) = inspected;
