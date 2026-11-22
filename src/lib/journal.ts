@@ -23,6 +23,8 @@
 export interface JournalLine {
   outcome: string;
   at_ms: number;
+  /** Что делали: ключ `domain|verb|object`. Необязателен — в тестах не нужен. */
+  subject?: string;
 }
 
 export interface ReasonGroup {
@@ -91,4 +93,71 @@ export function groupReasons(lines: JournalLine[]): ReasonGroup[] {
   // Сначала то, что болит чаще. При равенстве — то, что случилось позже:
   // свежая ошибка важнее вчерашней.
   return [...groups.values()].sort((a, b) => b.times - a.times || b.lastMs - a.lastMs);
+}
+
+/** Отказ «в одну строку»: что случилось, почему и что с этим делать. */
+export interface Failure {
+  /** Когда (Unix-мс). */
+  atMs: number;
+  /** Что делали — ключ `domain|verb|object`. */
+  subject: string;
+  /** По-человечески: «нет сети», а не текст ошибки целиком. */
+  reason: string;
+  /** Исходная строка — для подробностей, без неё «почему» можно оспорить. */
+  detail: string;
+  /** Что делать. Пусто — совет уже не наш: показываем причину и молчим. */
+  advice: string;
+}
+
+/**
+ * Что посоветовать при причине. Отдельно от `reasonOf`: причина — про текст,
+ * совет — про дело, и смешивать их значило бы обещать действие по слову.
+ */
+export function adviceForReason(reason: string): string {
+  switch (reason) {
+    case "нет сети":
+      return "Проверьте сеть и повторите — всё остальное работает без неё.";
+    case "не хватает прав":
+      return "Запустите ещё раз от администратора или выберите другую папку.";
+    case "файл занят":
+      return "Закройте программу, которая держит файл, и повторите.";
+    case "не хватает места":
+      return "Освободите место на диске: «Модели» → «Удалить всё скачанное».";
+    case "скачивание не удалось":
+      return "Скачайте заново: хеш проверяется, битый файл не останется.";
+    case "модель не подошла":
+      return "Откройте «Модели»: там видно, какой файл подходит.";
+    case "движок не запустился":
+      return "Настройки → «Проверка себя» → «Переустановить движок».";
+    case "не дождались ответа":
+      return "Повторите: если повторится — посмотрите «Что болит» в «Истории».";
+    case "отменено человеком":
+      return "";
+    default:
+      // Неизвестная причина: совет выдумывать нельзя, но и молчать о том,
+      // что было, нельзя. Показываем текст и предлагаем «Историю».
+      return "Подробности — в «Истории»: там весь журнал построчно.";
+  }
+}
+
+/**
+ * Последние отказы — свежими вперёд, не больше `limit`.
+ *
+ * Настройки не должны заставлять читать логи: пять строк с причиной и советом
+ * отвечают на вопрос «почему это не сработало» без файлов и путей.
+ */
+export function lastFailures(lines: JournalLine[], limit = 5): Failure[] {
+  const failures: Failure[] = [];
+  for (const line of lines) {
+    const reason = reasonOf(line.outcome);
+    if (!reason) continue;
+    failures.push({
+      atMs: line.at_ms,
+      subject: line.subject ?? "",
+      reason,
+      detail: line.outcome,
+      advice: adviceForReason(reason),
+    });
+  }
+  return failures.sort((a, b) => b.atMs - a.atMs).slice(0, limit);
 }

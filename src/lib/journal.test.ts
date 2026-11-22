@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { groupReasons, reasonOf } from "./journal";
+import { adviceForReason, groupReasons, lastFailures, reasonOf } from "./journal";
 
 /**
  * Шаг 343: журнал ошибок сгруппирован по причинам, а не по времени.
@@ -106,5 +106,69 @@ describe("группировка журнала", () => {
     const groups = groupReasons(lines);
     expect(groups[0]!.times).toBe(3);
     expect(groups[1]!.times).toBe(1);
+  });
+
+  describe("последние отказы для настроек (шаг 345)", () => {
+    it("показывает не больше пяти и свежими вперёд", () => {
+      // Человек не должен читать логи: пять строк отвечают на вопрос «почему
+      // это не сработало» без файлов.
+      const lines = Array.from({ length: 9 }, (_, i) => ({
+        outcome: "error: нет сети",
+        at_ms: (i + 1) * 1000,
+      }));
+      const failures = lastFailures(lines);
+      expect(failures).toHaveLength(5);
+      expect(failures[0]!.atMs).toBe(9000);
+      expect(failures[4]!.atMs).toBe(5000);
+    });
+
+    it("успехи не попадают в отказы", () => {
+      const failures = lastFailures([
+        { outcome: "ok", at_ms: 1000 },
+        { outcome: "error: файл занят", at_ms: 2000 },
+      ]);
+      expect(failures).toHaveLength(1);
+      expect(failures[0]!.reason).toBe("файл занят");
+    });
+
+    it("у каждой причины есть совет — про действие, а не «попробуйте ещё раз»", () => {
+      for (const text of [
+        "error: нет сети",
+        "error: доступ запрещён",
+        "error: файл занят",
+        "error: не хватает места на диске",
+        "error: хеш не совпал",
+        "error: модель не подошла",
+        "error: движок не запустился",
+        "error: timeout",
+      ]) {
+        const [failure] = lastFailures([{ outcome: text, at_ms: 1 }]);
+        expect(failure!.advice.length, text).toBeGreaterThan(10);
+        expect(failure!.advice.toLowerCase(), text).not.toBe("попробуйте ещё раз");
+      }
+    });
+
+    it("отмену человеком не лечат советом", () => {
+      // Совет «повторите» после своего же «стоп» — это не помощь.
+      expect(adviceForReason("отменено человеком")).toBe("");
+    });
+
+    it("неизвестной причине даётся путь к подробностям, а не выдуманное действие", () => {
+      const advice = adviceForReason("другое");
+      // Падеж в тексте — «в Истории»: проверяем корень, а не форму, которую
+      // я придумал, когда писал ожидание.
+      expect(advice).toContain("Истори");
+    });
+
+    it("подробность остаётся рядом с причиной: «почему» можно оспорить", () => {
+      // Причина — это вывод. Без исходной строки человек не может проверить,
+      // правильно ли приложение её поняло.
+      const [failure] = lastFailures([
+        { outcome: "error: could not resolve host: huggingface.co", at_ms: 5, subject: "files|download|модель" },
+      ]);
+      expect(failure!.reason).toBe("нет сети");
+      expect(failure!.detail).toContain("huggingface.co");
+      expect(failure!.subject).toBe("files|download|модель");
+    });
   });
 });
