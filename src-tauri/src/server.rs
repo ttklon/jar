@@ -15,7 +15,7 @@
 //! PowerShell с `HttpListener` — контракт тот же: процесс + ответ на `/health`.
 
 use std::io::{Read, Write};
-use std::net::{SocketAddr, TcpListener, TcpStream};
+use std::net::{TcpListener, TcpStream};
 use std::path::Path;
 use std::process::{Child, Command, Stdio};
 use std::time::{Duration, Instant};
@@ -38,10 +38,6 @@ impl ServerSpec {
             port,
             health_path: health_path.to_string(),
         }
-    }
-
-    fn address(&self) -> SocketAddr {
-        SocketAddr::from(([127, 0, 0, 1], self.port))
     }
 }
 
