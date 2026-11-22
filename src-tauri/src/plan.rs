@@ -329,7 +329,9 @@ pub fn repeat_of(risk: &str) -> Repeat {
         "read" => Repeat::Quietly,
         "write-local" => Repeat::Ask("повтор изменит то, что уже на диске"),
         "destructive" => Repeat::Ask("повтор может удалить не то, что в прошлый раз"),
-        "external" | "identity" | "money" => Repeat::Ask("такое и в первый раз без человека не идёт"),
+        "external" | "identity" | "money" => {
+            Repeat::Ask("такое и в первый раз без человека не идёт")
+        }
         _ => Repeat::Ask("риск действия неизвестен — повторять молча нельзя"),
     }
 }
