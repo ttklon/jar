@@ -382,6 +382,22 @@ fn extract(
 }
 
 /// Only our versioned directory, never manual sidecars or PATH files. Caller stops engine first.
+/// Сколько занимает каталог движка. Ноль — каталога нет.
+///
+/// Нужен до удаления: после `remove` посчитать уже нечего, и «освободилось 0
+/// байт» стало бы ложью в самой неприятной форме — человек решил бы, что
+/// удаление не сработало.
+pub fn dir_size(base: &Path, kind: Kind) -> Option<u64> {
+    let dir = directory(base, kind);
+    let mut total = 0u64;
+    for entry in std::fs::read_dir(dir).ok()? {
+        let entry = entry.ok()?;
+        let meta = entry.metadata().ok()?;
+        total += meta.len();
+    }
+    Some(total)
+}
+
 pub fn remove(base: &Path, kind: Kind) -> Result<(), String> {
     let _guard = download::acquire()?;
     let dir = directory(base, kind);
@@ -731,5 +747,52 @@ mod tests {
             "runtime removal must preserve model"
         );
         println!("RUNTIME_SMOKE process stopped; managed runtime removed; model preserved");
+    }
+
+    #[test]
+    fn the_size_is_counted_before_removal_and_is_zero_after() {
+        // Почему это важно именно так. После `remove` посчитать нечего, и
+        // «освободилось 0 байт» человек прочитает как «удаление не сработало».
+        // Поэтому размер считается ДО, и тест проверяет оба конца: до — больше
+        // нуля, после — ноль, а не «папки нет» с падением.
+        let base = std::env::temp_dir().join(format!(
+            "zshelper-size-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let dir = directory(&base, Kind::Llama);
+        std::fs::create_dir_all(&dir).expect("папка");
+        std::fs::write(dir.join("llama-server.exe"), vec![7u8; 4096]).expect("файл");
+        std::fs::write(dir.join("readme.txt"), b"x").expect("второй файл");
+        // Метка владения — файл с sha256 движка: без неё `remove` откажется,
+        // и это правильно (чужое не трогаем).
+        std::fs::write(dir.join(OWNER), Kind::Llama.spec().sha256.as_bytes()).expect("метка");
+
+        let before = dir_size(&base, Kind::Llama).expect("каталог есть");
+        assert_eq!(before, 4097, "размер считается по всем файлам каталога");
+
+        remove(&base, Kind::Llama).expect("удаление");
+        // Каталога больше нет — `None`, а не паника и не случайный ноль.
+        assert_eq!(dir_size(&base, Kind::Llama), None);
+        let _ = std::fs::remove_dir_all(&base);
+    }
+
+    #[test]
+    fn a_directory_that_is_not_ours_is_never_deleted() {
+        // Человек мог положить движок сам. Удалять чужое — хуже, чем не удалить
+        // своё: вернуть чужой файл нельзя, а свой человек скачает снова.
+        let base = std::env::temp_dir().join(format!(
+            "zshelper-foreign-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let dir = directory(&base, Kind::Llama);
+        std::fs::create_dir_all(&dir).expect("папка");
+        std::fs::write(dir.join("llama-server.exe"), b"not ours").expect("файл");
+
+        let error = remove(&base, Kind::Llama).expect_err("чужое не удаляется");
+        assert!(error.contains("не имеет корректной метки"), "{error}");
+        assert!(dir.join("llama-server.exe").exists(), "файл на месте");
+        let _ = std::fs::remove_dir_all(&base);
     }
 }

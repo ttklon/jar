@@ -847,3 +847,16 @@ export interface NetworkAddress {
   needed: boolean;
   reason: string;
 }
+
+/**
+ * Итог «удалить всё скачанное».
+ *
+ * Три поля, а не одно: удаление пяти вещей — пять разных исходов. Движок может
+ * работать, распознавание — быть занято, файл — открыт. Одна строка ошибки
+ * заставила бы человека догадываться, что осталось на диске.
+ */
+export interface RemovedAll {
+  freed_bytes: number;
+  removed: string[];
+  kept: string[];
+}

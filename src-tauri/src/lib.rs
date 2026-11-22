@@ -254,6 +254,7 @@ pub fn run() {
             ipc::remove_runtime,
             ipc::smoke_check,
             ipc::remove_model,
+            ipc::remove_everything,
             ipc::think_stream,
             ipc::say,
             ipc::memory_backups,

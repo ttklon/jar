@@ -75,7 +75,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { Autostart, AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, ReadinessStatus, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -388,6 +388,20 @@ export async function networkAddresses(): Promise<NetworkAddress[]> {
   }
   const { networkAddresses: fromData } = await import("./dev");
   return fromData();
+}
+
+/**
+ * Удалить всё скачанное: модели и движки — одной командой.
+ *
+ * В браузере удалять нечего (файлов нет), и это не ошибка: возвращается пустой
+ * итог. Врать «удалено» там было бы хуже, чем не удалить.
+ */
+export async function removeEverything(): Promise<RemovedAll> {
+  if (isTauri()) {
+    const { removeEverything: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  return { freed_bytes: 0, removed: [], kept: [] };
 }
 
 export async function readinessStatus(): Promise<ReadinessStatus> {

@@ -33,6 +33,7 @@ import type {
   ProfileView,
   NetworkAddress,
   ReadinessStatus,
+  RemovedAll,
   RegistrySnapshot,
   RoleView,
   RunRecord,
@@ -111,6 +112,11 @@ export function downloadProgress(name: string): Promise<number | null> {
 }
 
 /** Готовность к первому разговору. Только чтение: ничего не скачивает и не запускает. */
+/** Удалить всё скачанное — одной командой. */
+export function removeEverything(): Promise<RemovedAll> {
+  return invoke<RemovedAll>("remove_everything");
+}
+
 /** Все сетевые адреса — из ядра, списком. */
 export function networkAddresses(): Promise<NetworkAddress[]> {
   return invoke<NetworkAddress[]>("network_addresses");

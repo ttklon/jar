@@ -38,6 +38,7 @@ import type {
 import catalog from "../../data/readiness.json";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { NetworkCard } from "../components/NetworkCard";
+import { RemoveEverything } from "../components/RemoveEverything";
 import { models as text } from "../i18n/ru";
 
 const useStyles = makeStyles({
@@ -300,6 +301,10 @@ export function Models() {
       {/* Список сетевых адресов — рядом с готовностью: человек решает «скачивать
           или нет» именно здесь, и здесь же должен видеть, куда это пойдёт. */}
       <NetworkCard />
+
+      {/* Одна кнопка на все гигабайты — рядом со списком файлов, где видно,
+          сколько их. */}
+      <RemoveEverything />
 
       <section className={styles.download}>
         <Text as="h2" size={500}>

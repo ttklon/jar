@@ -118,6 +118,34 @@ def scan_text(text: str) -> list[tuple[int, str]]:
     return found
 
 
+# Чужая письменность внутри русской фразы. Появилась на деле: в комментарий
+# попал китайский иероглиф «硬盘» вместо «диск», и никакая проверка этого не
+# увидела — код собрался, тесты прошли, прочитал это человек.
+FOREIGN = re.compile(
+    "["
+    "\u4e00-\u9fff"  # китайские иероглифы
+    "\u3040-\u30ff"  # хирагана и катакана
+    "\uac00-\ud7af"  # хангыль
+    "\u0600-\u06ff"  # арабский
+    "\u0590-\u05ff"  # иврит
+    "\u0e00-\u0e7f"  # тайский
+    "]"
+)
+
+
+def foreign_in_prose(text: str) -> bool:
+    """Есть ли чужая письменность в строке, где есть кириллица."""
+    return bool(CYRILLIC.search(text)) and bool(FOREIGN.search(text))
+
+
+def scan_foreign(text: str) -> list[tuple[int, str]]:
+    found: list[tuple[int, str]] = []
+    for number, line in enumerate(text.splitlines(), 1):
+        if foreign_in_prose(line):
+            found.append((number, line.strip()[:120]))
+    return found
+
+
 CASES: list[tuple[str, bool]] = [
     # (строка, должно ли ловиться)
     ('"ограниченным              токеном"', True),
@@ -154,12 +182,39 @@ def selftest() -> int:
     return 0
 
 
+FOREIGN_CASES: list[tuple[str, bool]] = [
+    ("// на硬盘 у кого-то 1.2 ГБ", True),  # настоящий случай
+    ("«Скачать модель»", False),
+    ("let x = \"硬盘\";", False),  # без кириллицы — это данные, а не проза
+    ("// Tokyo — 東京", False),  # комментарий без кириллицы
+]
+
+
+def selftest_foreign() -> int:
+    failures = 0
+    for line, expected in FOREIGN_CASES:
+        got = foreign_in_prose(line)
+        if got != expected:
+            failures += 1
+            print(f"  САМОТЕСТ (чужая письменность): {line!r} — ждали {expected}, получили {got}", file=sys.stderr)
+    if failures:
+        print(f"самотест чужой письменности провален: {failures} из {len(FOREIGN_CASES)}", file=sys.stderr)
+        return 1
+    print(f"самотест чужой письменности: {len(FOREIGN_CASES)}/{len(FOREIGN_CASES)}")
+    return 0
+
+
 def main() -> int:
     if "--selftest" in sys.argv:
-        return selftest()
+        first = selftest()
+        return first or selftest_foreign()
 
     files = sorted(SRC.rglob("*.rs"))
     total = 0
+    for path in files:
+        for number, line in scan_foreign(path.read_text(encoding="utf-8")):
+            print(f"{path.relative_to(ROOT)}:{number}: {line}")
+            total += 1
     for path in files:
         found = scan_text(path.read_text(encoding="utf-8"))
         for number, line in found:

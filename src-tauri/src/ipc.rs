@@ -1286,6 +1286,115 @@ pub async fn remove_runtime(state: State<'_, AppState>, kind: String) -> Result<
         .map_err(|e| e.to_string())?
 }
 
+/// Итог «удалить всё скачанное»: что удалено, что не удалось и сколько освободилось.
+///
+/// Почему не `Result<(), String>`. Удаление пяти вещей — это пять разных исходов:
+/// движок может работать (его трогать нельзя), распознавание может быть занято,
+/// файл модели может быть открыт. Одна строка ошибки заставила бы человека
+/// догадываться, что именно осталось на диске.
+#[derive(Debug, Serialize)]
+pub struct RemovedAll {
+    /// Сколько байт освободилось на самом деле.
+    pub freed_bytes: u64,
+    /// Что удалено — именами, а не «модели».
+    pub removed: Vec<String>,
+    /// Что осталось и почему. Пусто — удалилось всё.
+    pub kept: Vec<String>,
+}
+
+/// Удалить всё скачанное: модели и движки — одной командой.
+///
+/// Человек владеет своими гигабайтами, и «удалить» должно быть одним действием, а
+/// не пятью: у кого-то это 1.2 ГБ на диске, и убирать их по файлу — издевательство.
+///
+/// Три правила:
+///
+///  * **сначала считаем, потом удаляем.** Иначе «0 байт» читалось бы как «ничего
+///    не было», даже когда освободилось полтора гигабайта;
+///  * **работающий движок не трогаем.** Удалить запущенный exe нельзя, а главное
+///    — незачем: человек сам решит, когда остановить;
+///  * **чужое не удаляем.** `runtime::remove` проверяет метку владения, и если
+///    каталог положен человеком, он останется — с причиной, а не молча.
+#[tauri::command]
+pub async fn remove_everything(state: State<'_, AppState>) -> Result<RemovedAll, String> {
+    use std::sync::atomic::Ordering;
+
+    // Движок запущен — это не повод отказывать целиком: удаляем то, что можно.
+    let engine_running = state
+        .inner
+        .engine
+        .lock()
+        .map_err(|e| e.to_string())?
+        .is_some();
+
+    // Клонируем `Arc<Inner>`, а не пути: память в нём уже открыта. Второе
+    // соединение к той же базе ради `forget()` ждало бы блокировку, которую
+    // держит первое, — и удаление файла зависело бы от порядка операций.
+    let inner = state.inner.clone();
+    let asr_busy = inner.asr.busy();
+
+    if ENGINE_STARTING
+        .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
+        .is_err()
+    {
+        return Err("движок запускается; дождитесь завершения".into());
+    }
+    let _guard = EngineStartGuard;
+
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut removed = Vec::new();
+        let mut kept = Vec::new();
+        let mut freed = 0u64;
+
+        let base = inner.base_dir.clone();
+        let models_dir = inner.models_dir.clone();
+
+        // Модели: обычные файлы в папке моделей, чужого там нет.
+        let files = crate::models::scan(&models_dir).unwrap_or_default();
+        for file in files {
+            match crate::models::remove(&models_dir, &file.name, &inner.memory) {
+                Ok(()) => {
+                    freed += file.size_bytes;
+                    removed.push(file.name);
+                }
+                Err(error) => kept.push(format!("{}: {error}", file.name)),
+            }
+        }
+
+        // Движки: каталоги под управлением приложения.
+        for kind in [crate::runtime::Kind::Llama, crate::runtime::Kind::Whisper] {
+            let name = match kind {
+                crate::runtime::Kind::Llama => "движок llama.cpp",
+                crate::runtime::Kind::Whisper => "движок распознавания",
+            };
+            let running_this = match kind {
+                crate::runtime::Kind::Llama => engine_running,
+                crate::runtime::Kind::Whisper => asr_busy,
+            };
+            if running_this {
+                kept.push(format!("{name}: сейчас работает"));
+                continue;
+            }
+            let bytes = crate::runtime::dir_size(&base, kind).unwrap_or(0);
+            match crate::runtime::remove(&base, kind) {
+                Ok(()) => {
+                    freed += bytes;
+                    removed.push(name.to_string());
+                }
+                Err(error) => kept.push(format!("{name}: {error}")),
+            }
+        }
+
+        Ok(RemovedAll {
+            freed_bytes: freed,
+            removed,
+            kept,
+        })
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
 /// Итог проверки разговора: движок запущен (или уже был запущен) и ответил на
 /// безопасный вопрос. `ok` — это «модель ответила непустым текстом», а не «всё хорошо».
 #[derive(Debug, Serialize)]
