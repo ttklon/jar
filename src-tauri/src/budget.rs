@@ -39,13 +39,7 @@ pub struct Metric {
 impl Metric {
     /// Измерение с порогом. Сравнение — здесь, а не на экране: правило одно,
     /// и в двух местах оно разъедется.
-    pub fn with_budget(
-        name: &str,
-        value: f64,
-        unit: &str,
-        budget: f64,
-        how: &str,
-    ) -> Metric {
+    pub fn with_budget(name: &str, value: f64, unit: &str, budget: f64, how: &str) -> Metric {
         Metric {
             name: name.to_string(),
             value: Some(value),
@@ -102,7 +96,10 @@ pub fn report(metrics: Vec<Metric>) -> BudgetReport {
         .iter()
         .filter(|metric| metric.within == Some(false))
         .count();
-    let unknown = metrics.iter().filter(|metric| metric.value.is_none()).count();
+    let unknown = metrics
+        .iter()
+        .filter(|metric| metric.value.is_none())
+        .count();
 
     let summary = if over > 0 {
         let worst = metrics
@@ -117,9 +114,7 @@ pub fn report(metrics: Vec<Metric>) -> BudgetReport {
     } else if unknown == metrics.len() {
         "измерений нет: считать нечем, и это честнее выдуманных цифр".to_string()
     } else if unknown > 0 {
-        format!(
-            "в пределах обещанного, кроме {unknown} неизмеренных — они названы отдельно"
-        )
+        format!("в пределах обещанного, кроме {unknown} неизмеренных — они названы отдельно")
     } else {
         "всё в пределах обещанного порога".to_string()
     };
@@ -210,13 +205,21 @@ mod tests {
             Metric::with_budget("память в простое", 214.0, "МБ", 150.0, "tasklist"),
         ]);
         assert_eq!(report.over, 1);
-        assert!(report.summary.contains("память в простое"), "{}", report.summary);
+        assert!(
+            report.summary.contains("память в простое"),
+            "{}",
+            report.summary
+        );
         // Текст говорит «это не поломка» — и это именно то, что нужно.
         assert!(report.summary.contains("не поломка"), "{}", report.summary);
         // А слов, которыми обозначают поломку, в нём нет.
         assert!(!report.summary.contains("ошибк"), "{}", report.summary);
         assert!(!report.summary.contains("сломал"), "{}", report.summary);
-        assert!(report.summary.contains("стало тяжелее"), "{}", report.summary);
+        assert!(
+            report.summary.contains("стало тяжелее"),
+            "{}",
+            report.summary
+        );
     }
 
     #[test]
@@ -242,7 +245,11 @@ mod tests {
         )]);
         assert_eq!(report.unknown, 1);
         assert_eq!(report.over, 0);
-        assert!(report.summary.contains("измерений нет"), "{}", report.summary);
+        assert!(
+            report.summary.contains("измерений нет"),
+            "{}",
+            report.summary
+        );
     }
 
     #[test]
