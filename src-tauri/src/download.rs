@@ -220,7 +220,9 @@ fn check_url(url: &str) -> Result<(), String> {
 pub(crate) fn fetch(url: &str, part: &Path, max_bytes: u64) -> Result<(), String> {
     // Докачка — только если в `.part` уже что-то есть и это не мусор: пустой
     // файл продолжать не с чего, а гигабайт — есть с чего.
-    let resume = std::fs::metadata(part).map(|m| m.len() > 0).unwrap_or(false);
+    let resume = std::fs::metadata(part)
+        .map(|m| m.len() > 0)
+        .unwrap_or(false);
     let mut child = Command::new("curl")
         .arg("--disable")
         .args(["--max-filesize", &max_bytes.to_string()])
@@ -1006,7 +1008,10 @@ mod resume_tests {
         assert!(part.exists(), "файл остаётся для продолжения");
         // И об этом сказано: иначе человек удалит то, с чего можно продолжить.
         assert!(message.contains("5000"), "размер назван: {message}");
-        assert!(message.contains("продолжит"), "обещание продолжения: {message}");
+        assert!(
+            message.contains("продолжит"),
+            "обещание продолжения: {message}"
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -1021,7 +1026,10 @@ mod resume_tests {
 
         let message = cleanup_error(&part, "хеш не совпал: ожидали a, получили b".into());
         assert!(!part.exists(), "чужой файл удаляется");
-        assert!(!message.contains("продолжит"), "продолжать нечего: {message}");
+        assert!(
+            !message.contains("продолжит"),
+            "продолжать нечего: {message}"
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -1035,12 +1043,18 @@ mod resume_tests {
         let part = dir.join("model.gguf.part");
         std::fs::write(&part, vec![7u8; 5000]).unwrap();
 
-        assert!(!keep_partial(&part, Some(1000)).unwrap(), "больше ожидаемого — заново");
+        assert!(
+            !keep_partial(&part, Some(1000)).unwrap(),
+            "больше ожидаемого — заново"
+        );
         assert!(!part.exists(), "огрызок убран");
 
         // А огрызок меньше ожидаемого — годится для продолжения.
         std::fs::write(&part, vec![7u8; 500]).unwrap();
-        assert!(keep_partial(&part, Some(5000)).unwrap(), "меньше — продолжить");
+        assert!(
+            keep_partial(&part, Some(5000)).unwrap(),
+            "меньше — продолжить"
+        );
         assert!(part.exists(), "и он остаётся на месте");
 
         let _ = std::fs::remove_dir_all(&dir);
@@ -1069,9 +1083,15 @@ mod resume_tests {
         let part = dir.join("model.gguf.part");
         std::fs::write(&part, vec![7u8; 5000]).unwrap();
 
-        assert!(already_complete(&part, Some(5000)), "ровно размер — качать нечего");
+        assert!(
+            already_complete(&part, Some(5000)),
+            "ровно размер — качать нечего"
+        );
         assert!(!already_complete(&part, Some(6000)), "меньше — докачивать");
-        assert!(!already_complete(&part, None), "размер неизвестен — догадок нет");
+        assert!(
+            !already_complete(&part, None),
+            "размер неизвестен — догадок нет"
+        );
         assert!(!already_complete(&dir.join("нет-такого.part"), Some(5000)));
 
         let _ = std::fs::remove_dir_all(&dir);
@@ -1082,11 +1102,20 @@ mod resume_tests {
     #[test]
     fn resume_is_asked_for_explicitly_in_the_arguments() {
         let fresh = curl_args_with("https://x/y.gguf", Path::new("/tmp/y.part"), false);
-        assert!(!fresh.iter().any(|a| a == "--continue-at"), "новая загрузка — без докачки");
+        assert!(
+            !fresh.iter().any(|a| a == "--continue-at"),
+            "новая загрузка — без докачки"
+        );
 
         let resumed = curl_args_with("https://x/y.gguf", Path::new("/tmp/y.part"), true);
-        assert!(resumed.iter().any(|a| a == "--continue-at"), "докачка просится явно");
-        assert!(resumed.iter().any(|a| a == "-"), "и именно с текущего места");
+        assert!(
+            resumed.iter().any(|a| a == "--continue-at"),
+            "докачка просится явно"
+        );
+        assert!(
+            resumed.iter().any(|a| a == "-"),
+            "и именно с текущего места"
+        );
         // Адрес остаётся последним аргументом в обоих случаях.
         assert_eq!(resumed.last().map(String::as_str), Some("https://x/y.gguf"));
         assert_eq!(fresh.last().map(String::as_str), Some("https://x/y.gguf"));

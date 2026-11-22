@@ -644,7 +644,10 @@ mod tests {
 
         // Снимаем управляемую установку ровно так, как это делает reinstall
         // до скачивания: чужое остаётся, модели остаются.
-        assert!(installed(&base, Kind::Llama), "до переустановки движок есть");
+        assert!(
+            installed(&base, Kind::Llama),
+            "до переустановки движок есть"
+        );
         remove(&base, Kind::Llama).unwrap();
         assert!(!installed(&base, Kind::Llama), "своя установка снята");
         assert!(!directory(&base, Kind::Llama).exists());
