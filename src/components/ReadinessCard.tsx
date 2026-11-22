@@ -121,6 +121,10 @@ export function ReadinessCard({
   const [smoke, setSmoke] = useState<SmokeResult | null>(null);
   const [includeSpeech, setIncludeSpeech] = useState(true);
   const [sequence, setSequence] = useState<string | null>(null);
+  // Идёт ли скачивание прямо сейчас. Отдельно от `sequence`: та строка есть только
+  // у «подготовить всё», а одиночная кнопка «Скачать модель» её не ставит — и без
+  // этого признака объяснение не появлялось бы там, где нужнее всего (шаг 23).
+  const downloading = busy !== null || !!status?.download_name;
   const stopPrepare = useRef(false);
 
   const requestRef = useRef(0);
@@ -510,6 +514,12 @@ export function ReadinessCard({
             ) : null}
           </div>
           {sequence ? <Text className={styles.progress}>{sequence}</Text> : null}
+          {/* Шаг 23: полоса загрузки без объяснения читается как «пока не
+              скачается — делать нечего». Называем, что уже работает, и даём
+              кнопку туда — чтобы это была не утешительная фраза, а выход. */}
+          {downloading && !browser ? (
+            <Text className={styles.note}>{text.whileDownloading(status.download_name ?? status.model_spec.file)}</Text>
+          ) : null}
         </div>
       ) : null}
       {!browser && plan.block === "no-room" ? <ErrorLine className={styles.error} text={text.prepareNoRoom} /> : null}

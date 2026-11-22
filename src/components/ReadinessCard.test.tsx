@@ -229,6 +229,21 @@ describe("явные действия desktop-карточки", () => {
     expect(screen.queryByRole("button", { name: /Открыть «Модели»/ })).toBeNull();
   });
 
+  it("пока модель качается — сказано, что остальное уже работает (шаг 23)", async () => {
+    mocks.desktop = true;
+    // Загрузка не завершается: нас интересует именно состояние «качается».
+    mocks.download.mockImplementation(() => new Promise<void>(() => undefined));
+    render(<ReadinessCard status={status()} error={null} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Скачать модель" }));
+    await waitFor(() => expect(screen.getByText(/Качаю /)).toBeTruthy());
+
+    // Не «подождите», а что именно доступно прямо сейчас.
+    const line = screen.getByText(/Качаю /).textContent ?? "";
+    expect(line).toMatch(/не блокирует/);
+    expect(line).toMatch(/реестр дел работает без модели/);
+  });
+
   it("позволяет отменить ожидающую загрузку", async () => {
     mocks.desktop = true;
     let reject!: (reason: Error) => void;
