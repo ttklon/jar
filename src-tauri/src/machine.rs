@@ -341,6 +341,12 @@ pub struct State {
     pub note: String,
     /// Что человек сказал про себя. `None` — не говорил, и тогда решает таймер.
     pub declared: Option<Presence>,
+    /// Слабая ли машина по нашим порогам (шаг 389).
+    ///
+    /// Отдельным полем, а не «человек догадается по числу дел»: «одно дело» — это
+    /// ответ, а не причина. Слабой машине нужен честный текст «я работаю поменьше,
+    /// потому что здесь мало памяти», иначе упрощение выглядит как лень.
+    pub weak: bool,
 }
 
 /// Измерить машину и решить, сколько можно. Отказ измерения — не отказ приложения:
@@ -355,6 +361,15 @@ pub fn state_with(said: Option<Presence>) -> State {
     match sample() {
         Ok(sample) => State {
             budget: decide_with(&sample, said),
+            weak: crate::weak::WeakMachine {
+                ram_total_mb: sample.ram_total_mb,
+                ram_free_mb: sample.ram_free_mb,
+                cpu_percent: sample.cpu_percent,
+                // Ядра сюда не передаём вовсе: в замере их нет, а выдумывать число
+                // ради флага значило бы врать. Слабость здесь решает память.
+                cores: 0,
+            }
+            .is_weak(),
             sample: Some(sample),
             available: available(),
             note,
@@ -363,6 +378,8 @@ pub fn state_with(said: Option<Presence>) -> State {
         Err(reason) => State {
             budget: unmeasured(said, &reason),
             sample: None,
+            // Без измерения слабость не объявляется: это была бы догадка.
+            weak: false,
             available: available(),
             note,
             declared: said,

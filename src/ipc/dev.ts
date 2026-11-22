@@ -847,6 +847,8 @@ export async function machineState(): Promise<MachineState> {
     available: false,
     note: "машина измеряется в приложении: здесь её загрузку не видно",
     declared: null,
+    // В браузере железа не видно: слабость не объявляем — это была бы догадка.
+    weak: false,
   };
 }
 

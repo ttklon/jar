@@ -52,7 +52,7 @@ vi.mock("../ipc", () => ({
     budget: { parallel: 1, mode: "near", reason: "в браузере машину не измерить", may_start: true },
     available: false,
     note: "машина измеряется в приложении",
-    declared: null,
+    declared: null, weak: false,
   }),
   draftHand: vi.fn(),
   trialHand: vi.fn(),
@@ -108,7 +108,7 @@ afterEach(() => {
     budget: { parallel: 1, mode: "near", reason: "в браузере машину не измерить", may_start: true },
     available: false,
     note: "машина измеряется в приложении",
-    declared: null,
+    declared: null, weak: false,
   });
   vi.mocked(requestLearning).mockReset().mockResolvedValue(null);
   vi.mocked(declarePresence).mockReset();
@@ -1112,7 +1112,7 @@ describe("локальное распознавание на экране", () =
       },
       available: true,
       note: "машина измеряется честно: простой ввода, загрузка процессора, свободная память",
-      declared: null,
+      declared: null, weak: false,
     });
 
     render(<Voice onOpen={() => {}} />);
@@ -1129,6 +1129,35 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/простой ввода/)).toBeTruthy();
   });
 
+  it("слабая машина называет себя словами, а не только числом дел", async () => {
+    // Шаг 389: «одно дело» — это ответ, а не причина. Без этой строки человек ищет
+    // настройку, которой нет, и думает, что приложение просто ленится.
+    vi.mocked(machineState).mockResolvedValueOnce({
+      sample: { cpu_percent: 55, ram_free_mb: 900, ram_total_mb: 3_072, idle_seconds: 900 },
+      budget: {
+        parallel: 1,
+        mode: "away",
+        reason: "человек отошёл, но свободной памяти 900 МБ — беру одно дело",
+        may_start: true,
+      },
+      available: true,
+      note: "машина измеряется честно",
+      declared: null,
+      weak: true,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "что с машиной" } });
+    fireEvent.click(screen.getByText("Найти"));
+    fireEvent.click(screen.getByText("Что с машиной"));
+
+    await waitFor(() => expect(screen.getByText("Машина")).toBeTruthy());
+    expect(screen.getByText(/машина слабая: памяти мало/)).toBeTruthy();
+    // И причина от машины остаётся рядом: одна строка не заменяет другую.
+    expect(screen.getByText(/беру одно дело/)).toBeTruthy();
+  });
+
   it("памяти на исходе — это «нет», а не «помедленнее»", async () => {
     vi.mocked(machineState).mockResolvedValueOnce({
       sample: { cpu_percent: 20, ram_free_mb: 300, ram_total_mb: 16_384, idle_seconds: 20 },
@@ -1140,7 +1169,7 @@ describe("локальное распознавание на экране", () =
       },
       available: true,
       note: "машина измеряется честно",
-      declared: null,
+      declared: null, weak: false,
     });
 
     render(<Voice onOpen={() => {}} />);
@@ -1166,7 +1195,7 @@ describe("локальное распознавание на экране", () =
       },
       available: true,
       note: "машина измеряется честно",
-      declared: "away",
+      declared: "away", weak: false,
     });
 
     render(<Voice onOpen={() => {}} />);
@@ -1192,7 +1221,7 @@ describe("локальное распознавание на экране", () =
       },
       available: true,
       note: "машина измеряется честно",
-      declared: "near",
+      declared: "near", weak: false,
     });
 
     render(<Voice onOpen={() => {}} />);

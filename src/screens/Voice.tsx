@@ -2405,6 +2405,9 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
               )}
             </Text>
           ) : null}
+          {machine?.weak ? (
+            <Text className={styles.note}>{voice.machineWeak}</Text>
+          ) : null}
           {machine?.sample ? (
             <Text className={styles.note}>
               {voice.machineNumbers(

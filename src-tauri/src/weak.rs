@@ -66,8 +66,21 @@ impl WeakMachine {
     }
 
     /// Слаба ли она по нашим меркам.
+    ///
+    /// Решает память, и только она. Ядра — подсказка для профиля в тестах, но
+    /// настоящее приложение их через этот замер не получает (в `Sample` их нет), и
+    /// выдумывать число ядер ради флага значило бы врать в единственном месте,
+    /// которое создано, чтобы не врать.
     pub fn is_weak(&self) -> bool {
-        self.ram_total_mb <= WEAK_RAM_TOTAL_MB || self.cores <= WEAK_CORES
+        self.ram_total_mb <= WEAK_RAM_TOTAL_MB
+    }
+
+    /// Машина, у которой мало ядер, — тоже повод работа́ть скромнее.
+    ///
+    /// Отдельным вопросом: ядра известны профилю, но не измерению, и смешивать
+    /// «что мы знаем о железе» с «что мы можем измерить» нельзя.
+    pub fn few_cores(&self) -> bool {
+        self.cores <= WEAK_CORES
     }
 
     /// Что приложение из этого профиля видит.
@@ -123,7 +136,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn a_weak_machine_is_recognised_by_its_own_numbers() {
+    fn a_weak_machine_is_recognised_by_its_memory() {
         assert!(WeakMachine::typical().is_weak());
         assert!(WeakMachine::starved().is_weak());
         // Нормальная машина слабой не считается: иначе профиль был бы ловушкой.
@@ -134,6 +147,22 @@ mod tests {
             cores: 8,
         };
         assert!(!normal.is_weak());
+        assert!(!normal.few_cores());
+    }
+
+    #[test]
+    fn few_cores_are_a_separate_question_from_little_memory() {
+        // Много памяти и два ядра: слабой по памяти такая машина не считается, но
+        // работать скромнее всё равно стоит — и это сказано отдельно, а не спрятано.
+        let narrow = WeakMachine {
+            ram_total_mb: 16 * 1024,
+            ram_free_mb: 9 * 1024,
+            cpu_percent: 12,
+            cores: 2,
+        };
+
+        assert!(!narrow.is_weak());
+        assert!(narrow.few_cores());
     }
 
     #[test]
