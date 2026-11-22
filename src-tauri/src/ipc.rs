@@ -14,6 +14,7 @@ use tauri::{AppHandle, Emitter, State};
 use crate::audit::{now_ms, Audit, AuditEvent, AuditKind};
 use crate::autostart;
 use crate::backup;
+use crate::budget;
 use crate::container;
 use crate::custom;
 use crate::diagnostics;
