@@ -2939,6 +2939,21 @@ pub struct PlanReport {
 /// уже сделаны, и повторять их значит, например, второй раз создать папку или
 /// второй раз удалить то же самое. Продолжение с места остановки — не удобство, а
 /// честность.
+/// Где остановился прерванный запуск этой цели (шаг 141).
+///
+/// Нужна потому, что `run_plan` отдаёт `resume_at` только когда план
+/// **остановился сам**. Убитый процесс отчёта не отдаёт, а шаги после каждого
+/// шага уже записаны на диск — значит, ответ есть, его просто никто не
+/// спрашивал. `total` приходит от экрана: план у него на руках.
+#[tauri::command]
+pub async fn plan_checkpoint(
+    state: State<'_, AppState>,
+    goal: String,
+    total: usize,
+) -> Result<Option<usize>, String> {
+    Ok(state.inner.memory.checkpoint_for(&goal, total))
+}
+
 #[tauri::command]
 pub async fn run_plan(
     state: State<'_, AppState>,

@@ -346,6 +346,14 @@ export function checkPlan(json: string): Promise<PlanCheck> {
   return invoke<PlanCheck>("check_plan", { json });
 }
 
+/**
+ * Где остановился прерванный запуск этой цели (шаг 141). `null` — запуск
+ * закончился сам или его не было: продолжать нечего.
+ */
+export function planCheckpoint(goal: string, total: number): Promise<number | null> {
+  return invoke<number | null>("plan_checkpoint", { goal, total });
+}
+
 export function runPlan(
   json: string,
   approved: number[],

@@ -576,6 +576,21 @@ export async function checkPlan(json: string): Promise<PlanCheck> {
  * и повторить их — значит второй раз создать папку или второй раз удалить файл.
  * По умолчанию поведение прежнее: с первого шага.
  */
+/**
+ * Где остановился прерванный запуск этой цели (шаг 141).
+ *
+ * `null` — либо запуска не было, либо он закончился сам, либо спросить не у
+ * кого (браузер). Все три случая означают «продолжать нечего», и притворяться,
+ * что они разные, экрану незачем.
+ */
+export async function planCheckpoint(goal: string, total: number): Promise<number | null> {
+  if (isTauri()) {
+    const { planCheckpoint: fromCore } = await import("./tauri");
+    return fromCore(goal, total).catch(() => null);
+  }
+  return null;
+}
+
 export async function runPlan(
   json: string,
   approved: number[],

@@ -50,6 +50,9 @@ vi.mock("../ipc", () => ({
   modelPrompt: vi.fn().mockResolvedValue(""),
   rememberFact: vi.fn().mockResolvedValue(undefined),
   runPlan: vi.fn(),
+  // Шаг 141: экран спрашивает чекпойнт перед запуском. В этих тестах прошлых
+  // прерванных запусков нет — «продолжать нечего».
+  planCheckpoint: vi.fn().mockResolvedValue(null),
   setVoiceTrayStatus: vi.fn().mockResolvedValue(undefined),
   speechStatus: vi.fn().mockResolvedValue({
     found: false,

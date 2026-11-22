@@ -287,6 +287,7 @@ pub fn run() {
             ipc::request_learning,
             ipc::learning_requests,
             ipc::search_episodes,
+            ipc::plan_checkpoint,
             ipc::run_plan,
             ipc::speech_status,
             ipc::set_voice_tray_status,

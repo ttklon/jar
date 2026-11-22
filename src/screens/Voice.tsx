@@ -19,6 +19,7 @@ import {
   runPlan,
   cancelTool,
   isolationStatus,
+  planCheckpoint,
   readinessStatus,
   smokeCheck,
   speechStatus,
@@ -623,7 +624,14 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           // Точка продолжения — из самого дела: если прошлый запуск остановился на
           // третьем шаге, начинаем с третьего. Начало заново значило бы второй раз
           // создать папку или второй раз удалить файл.
-          const resume = queueRef.current.find((entry) => entry.id === item.id)?.resumeAt;
+          // Точка продолжения: сначала из самого дела, а если её там нет —
+          // из памяти (шаг 141). Дело может быть новым, но с той же целью:
+          // прошлый запуск убийством процесса остановился на шаге 3 и отчёта не
+          // отдал, зато шаги уже лежали на диске. Без этого вопроса дело
+          // начиналось бы заново — то есть второй раз создавало папку.
+          const fromPlan = queueRef.current.find((entry) => entry.id === item.id)?.resumeAt;
+          const resume =
+            fromPlan ?? (await planCheckpoint(item.goal, check.plan.steps.length).catch(() => null)) ?? undefined;
           let report: Awaited<ReturnType<typeof runPlan>> | null = null;
           try {
             report = await runPlan(JSON.stringify(check.plan), [], resume);
