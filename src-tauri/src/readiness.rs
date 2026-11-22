@@ -702,7 +702,10 @@ mod probe_tests {
 
     #[test]
     fn a_missing_file_is_named_as_a_problem_not_as_zero_bytes() {
-        let probe = parse_probe("https://github.com/gone.zip", "HTTP/1.1 404 Not Found\r\nZSHELPER-CODE 404\r\n");
+        let probe = parse_probe(
+            "https://github.com/gone.zip",
+            "HTTP/1.1 404 Not Found\r\nZSHELPER-CODE 404\r\n",
+        );
         assert_eq!(probe.status, 404);
         assert_eq!(probe.bytes, None);
         assert!(probe.problem.is_some(), "404 — это провал проверки");
@@ -721,7 +724,10 @@ mod probe_tests {
 
     #[test]
     fn a_page_instead_of_a_file_is_reported_before_the_button() {
-        let probe = parse_probe("https://huggingface.co/x", "HTTP/1.1 200 OK\r\nZSHELPER-CODE 200\r\n");
+        let probe = parse_probe(
+            "https://huggingface.co/x",
+            "HTTP/1.1 200 OK\r\nZSHELPER-CODE 200\r\n",
+        );
         assert_eq!(probe.status, 200);
         assert_eq!(probe.bytes, None);
         assert!(probe.problem.unwrap().contains("размер"));
@@ -730,10 +736,19 @@ mod probe_tests {
     #[test]
     fn the_probe_asks_for_headers_only_and_never_writes_a_file() {
         let args = probe_args("https://huggingface.co/x.gguf");
-        assert!(args.iter().any(|a| a == "--head"), "только заголовки, без тела");
-        assert!(!args.iter().any(|a| a == "-o" || a == "--output"), "ничего не сохраняем на диск");
+        assert!(
+            args.iter().any(|a| a == "--head"),
+            "только заголовки, без тела"
+        );
+        assert!(
+            !args.iter().any(|a| a == "-o" || a == "--output"),
+            "ничего не сохраняем на диск"
+        );
         assert!(args.iter().any(|a| a == "--proto-redir"));
-        assert_eq!(args.last().map(String::as_str), Some("https://huggingface.co/x.gguf"));
+        assert_eq!(
+            args.last().map(String::as_str),
+            Some("https://huggingface.co/x.gguf")
+        );
     }
 
     /// Живой прогон: каждый адрес каталога проверяется сетью, и сверяется не
@@ -750,7 +765,11 @@ mod probe_tests {
         );
         let probes = probe_all();
         let addresses = network_addresses();
-        assert_eq!(probes.len(), addresses.len(), "проверен каждый адрес, а не первый");
+        assert_eq!(
+            probes.len(),
+            addresses.len(),
+            "проверен каждый адрес, а не первый"
+        );
         let mut failures = Vec::new();
         for (probe, address) in probes.iter().zip(addresses.iter()) {
             match &probe.problem {
