@@ -1906,9 +1906,18 @@ pub async fn after_wake(state: State<'_, AppState>) -> Result<WakeReport, String
     // спросившая статус, ждала бы секунды. Поэтому из замка выходим и проверяем
     // по снятой копии.
     let snapshot = match state.inner.engine.lock() {
+        // Не в guard'е: `alive()` чистит зомби и потому берёт `&mut`, а pattern
+        // guard держит заимствование неизменяемым — компилятор справедливо
+        // отказывает. Плюс в guard'е побочное действие выглядело бы как
+        // «просто проверка условия», хотя оно убирает процесс.
         Ok(mut guard) => match guard.as_mut() {
-            Some(server) if !server.alive() => None,
-            Some(server) => Some((server.port(), server.health_path().to_string())),
+            Some(server) => {
+                if server.alive() {
+                    Some((server.port(), server.health_path().to_string()))
+                } else {
+                    None
+                }
+            }
             None => None,
         },
         Err(_) => None,
