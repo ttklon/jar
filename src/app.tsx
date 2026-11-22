@@ -45,6 +45,7 @@ const Journal = lazy(() => import("./screens/Journal").then((m) => ({ default: m
 const Apps = lazy(() => import("./screens/Apps").then((m) => ({ default: m.Apps })));
 const Settings = lazy(() => import("./screens/Settings").then((m) => ({ default: m.Settings })));
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
+import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
 import { filterCommands, type Command } from "./lib/commands";
 import { layoutFor } from "./lib/layout";
 import {
@@ -190,6 +191,8 @@ export function App() {
   // Знакомство показывается один раз. Решение — в `firstRun`, чтобы его проверяли тесты,
   // а не глаза: «один раз» слишком легко превращается в «каждый раз».
   const [welcome, setWelcome] = useState(() => shouldShowWelcome());
+  // Опрос идёт только пока есть загрузка; без неё таймера нет (шаг 384).
+  const progress = useDownloadProgress();
   // Тема — не украшение: раньше она была зашита тёмной и системная настройка
   // Windows не значила ничего. «Как в системе» — третий выбор рядом с двумя явными.
   const [choice, setChoice] = useState<ThemeChoice>(() => {
@@ -381,6 +384,13 @@ export function App() {
             <span>v{APP_VERSION}</span>
           </div>
         </aside>
+
+          {/*
+            Шаг 33: загрузка видна с любого экрана. Стоит в `main`, а не в
+            карточке готовности: карточка живёт на знакомстве, и ушедший в
+            «Историю» человек полчаса не знал бы, идёт ли скачивание.
+          */}
+          <DownloadBar progress={progress} />
 
         <main className={styles.main} style={layout.narrow ? { padding: "16px 14px 40px" } : undefined}>
           {!error && snapshot && !welcome ? (
