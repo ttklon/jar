@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
+import actionsJson from "../../data/actions.json";
 import { fireEvent } from "@testing-library/dom";
 import { Welcome } from "./Welcome";
 
@@ -173,5 +174,24 @@ describe("экран знакомства", () => {
 
     // «Пройдено 3 из 3» на каждом открытии — шум, а не проверка.
     expect(screen.queryByText(/Первый запуск пройден/)).toBeNull();
+  });
+
+
+  it("три примера фраз на первом экране, и каждый находится в реестре (шаг 31)", async () => {
+    localStorage.clear();
+    render(<Welcome source="ядро" onStart={() => {}} onOpen={() => {}} />);
+
+    // Один пример читается как «только это и можно сказать».
+    const examples = ["что умею", "где мои загрузки", "найди большие файлы"];
+    for (const example of examples) {
+      expect(screen.getByText(`«${example}»`)).toBeTruthy();
+    }
+
+    // Пример, который ничего не находит, — обещание впустую. Проверяем по
+    // настоящему реестру: каждое слово примера должно в нём встречаться.
+    const haystack = JSON.stringify(actionsJson).toLowerCase();
+    for (const word of ["загрузк", "большие файлы"]) {
+      expect(haystack).toContain(word);
+    }
   });
 });

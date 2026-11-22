@@ -307,6 +307,25 @@ describe("локальное распознавание на экране", () =
     expect(localStorage.getItem("zshelper.mic.explained")).toBe("1");
   });
 
+  it("первый разговор заканчивается результатом, а не туром по экранам (шаг 28)", async () => {
+    // «Второй друг» начинается с первого дела: человек сказал — и получил
+    // ответ здесь же. Ни один экран не должен подменять этот ответ собой.
+    vi.mocked(speechStatus).mockResolvedValue(null as never);
+    const onOpen = vi.fn();
+    render(<Voice onOpen={onOpen} />);
+
+    const field = screen.getByLabelText("Услышал") as HTMLInputElement;
+    fireEvent.change(field, { target: { value: "что умею" } });
+    const form = field.closest("form");
+    if (!form) throw new Error("форма голосового поиска не найдена");
+    fireEvent.submit(form);
+
+    // Ответ пришёл на экране разговора, и это ответ реестра.
+    await waitFor(() => expect(vi.mocked(planFor)).toHaveBeenCalled());
+    // Перехода по экранам не случилось: тур по продукту — не результат.
+    expect(onOpen).not.toHaveBeenCalled();
+  });
+
   it("без микрофона остаётся путь текстом, и он работает (шаг 36)", async () => {
     // Машина без гарнитуры: отказ настоящий, но это не приговор.
     vi.mocked(speechStatus).mockResolvedValue(FOUND);

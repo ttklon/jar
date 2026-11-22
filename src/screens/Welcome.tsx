@@ -103,7 +103,12 @@ export function Welcome({
         <Text weight="semibold">{welcome.firstPhraseTitle}</Text>
         {/* Пример фразы, а не вторая кнопка «начать»: два входа в одно действие
             заставляли выбором там, где его быть не должно (шаги 21/29). */}
-        <Text className={styles.phrase}>«{welcome.firstPhraseExample}»</Text>
+        {/* Шаг 31: три примера вместо одного — вопрос, дело, поиск. Пустое
+            поле без примеров человек читает как «надо знать, что говорить». */}
+        <Text className={styles.note}>{welcome.firstPhraseHint}</Text>
+        {welcome.firstPhraseExamples.map((example) => (
+          <Text key={example} className={styles.phrase}>«{example}»</Text>
+        ))}
       </div>
 
       <div className={styles.rules}>
