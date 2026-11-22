@@ -1236,6 +1236,14 @@ export const readiness = {
   removeRuntimeDone: "движок удалён",
   removeRuntimeError: (reason: string) => `движок не удалился: ${reason}`,
   progress: (got: string, total: string) => `скачано ${got} из ${total}`,
+  /**
+   * Шаг 22: одна честная строка прогресса. Имя файла обязательно: без него
+   * «скачано 40 из 100 МБ» — цифры, по которым нельзя решить, ждать или нет.
+   * `got === null` не значит ноль: это «размер ещё не прочитан», и говорить
+   * «0 из 100» было бы враньём о прогрессе.
+   */
+  progressLine: (name: string, got: string | null, total: string) =>
+    got === null ? `качаю ${name}, ${total}` : `качаю ${name}: ${got} из ${total}`,
   cancelled: "скачивание отменено, недокачанный файл убран",
 } as const;
 

@@ -251,7 +251,11 @@ describe("явные действия desktop-карточки", () => {
     mocks.cancel.mockImplementationOnce(async () => { reject(new Error("скачивание отменено человеком")); });
     render(<ReadinessCard status={status()} error={null} />);
     fireEvent.click(screen.getByRole("button", { name: "Скачать модель" }));
-    fireEvent.click(screen.getByRole("button", { name: "Отменить" }));
+    // Одна «Отменить» на экран и имя файла рядом (шаг 22): человек должен знать,
+    // что именно остановит, а не нажимать наугад.
+    const cancel = screen.getByRole("button", { name: "Отменить" });
+    expect(cancel.parentElement?.textContent).toContain("Qwen2.5-1.5B-Instruct");
+    fireEvent.click(cancel);
     await waitFor(() => expect(screen.getByText(/скачивание отменено, недокачанный файл убран/)).toBeTruthy());
     expect(mocks.cancel).toHaveBeenCalledOnce();
   });

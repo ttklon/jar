@@ -459,6 +459,27 @@ export function ReadinessCard({
   const runtimeTotal = formatSize(status.runtime_spec.bytes);
   const speechModelTotal = formatSize(status.speech_model_spec.bytes);
   const speechRuntimeTotal = formatSize(status.speech_runtime_spec.bytes);
+  // Что именно сейчас качается — по тому же признаку, что и опрос прогресса.
+  // Имя нужно в строке прогресса: «скачано 40 из 100» без имени файла
+  // заставляет догадываться, что это за 100 мегабайт (шаг 22).
+  const downloadingName =
+    busy === "model"
+      ? status.model_spec.file
+      : busy === "runtime"
+        ? status.runtime_spec.asset
+        : busy === "speech-model"
+          ? status.speech_model_spec.file
+          : busy === "speech-runtime"
+            ? status.speech_runtime_spec.asset
+            : (status.download_name ?? "");
+  const downloadingTotal =
+    busy === "model"
+      ? modelTotal
+      : busy === "runtime"
+        ? runtimeTotal
+        : busy === "speech-model"
+          ? speechModelTotal
+          : speechRuntimeTotal;
   const speechNeeded =
     status.speech_model_spec.bytes + status.speech_runtime_spec.bytes;
   const speechRoom = hasRoom(status.free_bytes, speechNeeded);
@@ -546,7 +567,8 @@ export function ReadinessCard({
                   <Button size="small" appearance="primary" disabled={busy !== null || !!status.download_name} onClick={() => void download("runtime")}>
                     {busy === "runtime" ? text.installing : text.downloadRuntime}
                   </Button>
-                  {busy === "runtime" ? <Button size="small" onClick={cancel}>{text.cancel}</Button> : null}
+                  {/* Отмена живёт в общей строке прогресса, а не рядом с каждой
+                      кнопкой: иначе при загрузке видно две «Отменить» (шаг 22). */}
                 </div>
               ) : null}
               {!browser && !status.runtime_supported ? <ErrorLine className={styles.error} text={text.runtimeUnsupported} /> : null}
@@ -573,11 +595,9 @@ export function ReadinessCard({
                   >
                     {busy === "model" ? text.downloading : text.downloadModel}
                   </Button>
-                  {busy === "model" ? (
-                    <Button size="small" appearance="subtle" onClick={cancel}>
-                      {text.cancel}
-                    </Button>
-                  ) : null}
+                  {/* Отмена — в общей строке прогресса: она одна на экран и
+                      называет файл, тогда как кнопка рядом этого не делает
+                      (шаг 22). */}
                 </div>
               ) : null}
             </div>
@@ -673,21 +693,33 @@ export function ReadinessCard({
         </div>
       ) : null}
 
-      {status.download_name && busy !== "model" && busy !== "runtime" && busy !== "speech-model" && busy !== "speech-runtime" ? <div className={styles.row}>
+      {/* Загрузка, начатая не этой карточкой (например, из экрана «Модели»),
+          тоже видна и тоже отменяется — но одной строкой, а не второй копией:
+          две кнопки «Отменить» на экране — это выбор, которого не должно быть. */}
+      {status.download_name && busy === null ? <div className={styles.row}>
         <Text>{text.ongoing(status.download_name, progress === null ? null : formatSize(progress))}</Text>
         {!browser ? <Button onClick={cancel}>{text.cancel}</Button> : null}
       </div> : null}
-      {busy === "model" && progress !== null ? (
-        <Text className={styles.progress}>{text.progress(formatSize(progress), modelTotal)}</Text>
-      ) : null}
-      {busy === "runtime" && progress !== null ? (
-        <Text className={styles.progress}>{text.progress(formatSize(progress), runtimeTotal)}</Text>
-      ) : null}
-      {busy === "speech-model" && progress !== null ? (
-        <Text className={styles.progress}>{text.progress(formatSize(progress), speechModelTotal)}</Text>
-      ) : null}
-      {busy === "speech-runtime" && progress !== null ? (
-        <Text className={styles.progress}>{text.progress(formatSize(progress), speechRuntimeTotal)}</Text>
+      {/*
+        Шаг 22: одна строка прогресса — имя файла и сколько уже есть — и отмена
+        рядом. Раньше здесь были только «скачано N из M», без имени и без
+        кнопки: человек не знал, что именно качается, и не мог это остановить,
+        если решил, что 1 ГБ ему сейчас не нужен. Столбик цифр без выхода —
+        это модальное окно, только без рамки.
+      */}
+      {downloading && busy !== null ? (
+        <div className={styles.row}>
+          <Text className={styles.progress}>
+            {text.progressLine(
+              status.download_name ?? downloadingName,
+              progress === null ? null : formatSize(progress),
+              downloadingTotal,
+            )}
+          </Text>
+          {/* Одна «Отменить» на экран: при «подготовить всё» она уже стоит у
+              кнопки подготовки и отменяет всю цепочку — вторую не добавляем. */}
+          {!browser && !sequence ? <Button size="small" onClick={cancel}>{text.cancel}</Button> : null}
+        </div>
       ) : null}
       {status.runtime_managed && !browser ? (
         <div className={styles.row}>
