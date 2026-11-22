@@ -47,6 +47,7 @@ const useStyles = makeStyles({
   ruleText: { color: tokens.colorNeutralForeground2 },
   actions: { display: "flex", flexWrap: "wrap", gap: "8px" },
   note: { color: tokens.colorNeutralForeground3, fontSize: tokens.fontSizeBase200 },
+  sideways: { display: "flex", flexWrap: "wrap", gap: "4px", alignItems: "center" },
 });
 
 export type WelcomeTarget = "ask" | "catalog" | "journal" | "models";
@@ -80,10 +81,9 @@ export function Welcome({
       */}
       <div className={styles.firstPhrase}>
         <Text weight="semibold">{welcome.firstPhraseTitle}</Text>
+        {/* Пример фразы, а не вторая кнопка «начать»: два входа в одно действие
+            заставляли выбором там, где его быть не должно (шаги 21/29). */}
         <Text className={styles.phrase}>«{welcome.firstPhraseExample}»</Text>
-        <Button appearance="primary" onClick={onStart}>
-          {welcome.firstPhraseGo}
-        </Button>
       </div>
 
       <div className={styles.rules}>
@@ -100,22 +100,31 @@ export function Welcome({
         onToModels={() => onOpen("models")}
       />
 
+      {/*
+        Один путь, а не меню (шаги 21/29). До правки здесь было пять кнопок, и три
+        из них делали одно и то же — вели в разговор. Человек, впервые открывший
+        приложение, видел выбор, которого не просил, и должен был решать, чем
+        «К разговору» отличается от «Спросить словами» и «Сказать первое дело».
+        Разница была только в словах: действия одинаковые. Осталось одно действие
+        и три тихих ссылки вбок — не потому, что они не нужны, а потому, что они
+        не первый шаг.
+      */}
       <div className={styles.actions}>
-        <Button appearance="primary" onClick={onStart}>
+        <Button appearance="primary" size="large" onClick={onStart}>
           {welcome.start}
         </Button>
-        <Button appearance="secondary" onClick={() => onOpen("models")}>
-          {welcome.setupAI}
-        </Button>
-        <Button appearance="secondary" onClick={() => onOpen("ask")}>
-          {welcome.openAsk}
-        </Button>
-        <Button appearance="secondary" onClick={() => onOpen("catalog")}>
-          {welcome.openCatalog}
-        </Button>
-        <Button appearance="secondary" onClick={() => onOpen("journal")}>
-          {welcome.openJournal}
-        </Button>
+        <Text className={styles.note}>{welcome.sideways}</Text>
+        <div className={styles.sideways}>
+          <Button appearance="transparent" size="small" onClick={() => onOpen("models")}>
+            {welcome.setupAI}
+          </Button>
+          <Button appearance="transparent" size="small" onClick={() => onOpen("catalog")}>
+            {welcome.openCatalog}
+          </Button>
+          <Button appearance="transparent" size="small" onClick={() => onOpen("journal")}>
+            {welcome.openJournal}
+          </Button>
+        </div>
       </div>
 
       <Text className={styles.note} block>

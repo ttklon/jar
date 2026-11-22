@@ -40,7 +40,16 @@ describe("экран знакомства", () => {
 
     expect(screen.getByText("Можно сразу, без настройки:")).toBeTruthy();
     expect(screen.getByText("«что умею»")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Сказать первое дело" }));
+    // Главное действие — «К разговору», и оно выше карточки готовности: первый
+    // ответ не должен ждать настройки (шаги 21/28).
+    // Главное действие стоит раньше карточки готовности: карточка — про то, чего
+    // не хватает, а разговор начинается без неё.
+    const start = screen.getByRole("button", { name: "К разговору" });
+    const sideLinks = screen.getByText("если нужно сначала посмотреть:");
+    expect(
+      start.compareDocumentPosition(sideLinks) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    fireEvent.click(start);
     expect(onStart).toHaveBeenCalledTimes(1);
   });
 
@@ -55,15 +64,34 @@ describe("экран знакомства", () => {
     expect(onOpen).not.toHaveBeenCalled();
   });
 
-  it("три перехода ведут туда, где можно посмотреть", () => {
+  it("переходы вбок работают и ведут каждый в своё", () => {
     const onOpen = vi.fn();
     render(<Welcome source="ядро" onStart={() => {}} onOpen={onOpen} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Спросить словами" }));
     fireEvent.click(screen.getByRole("button", { name: "Что умею" }));
     fireEvent.click(screen.getByRole("button", { name: "История" }));
+    fireEvent.click(screen.getByRole("button", { name: "Экран моделей" }));
 
-    expect(onOpen.mock.calls).toEqual([["ask"], ["catalog"], ["journal"]]);
+    expect(onOpen.mock.calls).toEqual([["catalog"], ["journal"], ["models"]]);
+  });
+
+  it("путь в разговор один, а не три (шаги 21/29)", () => {
+    // Пять кнопок, из которых три делают одно и то же, — это выбор, которого
+    // человек не просил. На первом экране должно быть одно главное действие.
+    const onStart = vi.fn();
+    render(<Welcome source="ядро" onStart={onStart} onOpen={() => {}} />);
+
+    const buttons = screen.getAllByRole("button");
+    const starts = buttons.filter((button) =>
+      /К разговору|Спросить словами|Сказать первое дело/.test(button.textContent ?? ""),
+    );
+
+    // Осталось ровно одно действие, ведущее в разговор, — и это главная кнопка.
+    expect(starts).toHaveLength(1);
+    expect(starts[0]?.textContent).toBe("К разговору");
+
+    fireEvent.click(starts[0] as HTMLElement);
+    expect(onStart).toHaveBeenCalledTimes(1);
   });
 
   it("говорит, откуда данные и что в браузере ничего не выполняется", () => {
