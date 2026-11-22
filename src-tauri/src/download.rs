@@ -524,7 +524,10 @@ mod space_tests {
         match models::free_space(&dir) {
             Some(free) => {
                 if free > reserve {
-                    assert!(check_free_space(&dir, reserve).is_ok(), "запас должен проходить");
+                    assert!(
+                        check_free_space(&dir, reserve).is_ok(),
+                        "запас должен проходить"
+                    );
                 }
                 assert!(
                     check_free_space(&dir, free.saturating_add(1)).is_err(),
