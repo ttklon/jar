@@ -50,4 +50,33 @@ describe("строка ошибки", () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(screen.getByRole("alert").textContent).toContain("база повреждена");
   });
+
+  it("рядом с ошибкой есть «что сделать» — и оно слышно диктору", async () => {
+    // Шаг 351. Ошибка без совета — тупик: «не удалось» и дальше ничего.
+    // Совет живёт в том же объявлении, чтобы диктор прочитал его сразу, а не
+    // оставил человека искать глазами.
+    render(<ErrorLine text="не хватило места на диске" />);
+
+    const alert = screen.getByRole("alert");
+    expect(alert.textContent).toContain("Освободите место");
+    // И прежнее поведение цело: ошибка названа.
+    expect(alert.textContent).toContain("не хватило места");
+  });
+
+  it("совет не обещает того, чего приложение не сделает", async () => {
+    // Для «файл занят» совет — закрыть программу, а не «подождите»: ждать
+    // можно бесконечно и без результата.
+    render(<ErrorLine text="файл занят другим процессом" />);
+    const text = screen.getByRole("alert").textContent ?? "";
+    expect(text).toContain("Закройте программу");
+    expect(text.toLowerCase()).not.toContain("подождите");
+  });
+
+  it("совет можно отключить там, где он уже написан рядом", async () => {
+    // Иначе один совет прозвучит дважды и превратится в шум.
+    render(<ErrorLine text="нет сети" withHint={false} />);
+    const text = screen.getByRole("alert").textContent ?? "";
+    expect(text).toContain("нет сети");
+    expect(text).not.toContain("Всё остальное работает без сети");
+  });
 });

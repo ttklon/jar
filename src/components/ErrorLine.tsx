@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { Text } from "@fluentui/react-components";
 import { t } from "../i18n/ru";
+import { hintFor } from "../lib/hint";
 
 /**
  * Строка ошибки, которую слышит экранный диктор.
@@ -21,18 +22,28 @@ import { t } from "../i18n/ru";
  *  * **пустой текст ничего не объявляет.** `""` — это «ошибки нет», а не
  *    «неизвестная ошибка»: объявлять пустоту значит пугать человека;
  *  * **ошибка не исчезает сама.** У неё нет таймера: сообщение, которое
- *    пропало, пока человек читал, — это сообщение, которого не было.
+ *    пропало, пока человек читал, — это сообщение, которого не было;
+ *  * **рядом «что сделать»** (шаг 351): ошибка без совета — тупик, а совет,
+ *    написанный руками на сорока местах, разойдётся с ними через месяц.
+ *    Совет идёт из правила `src/lib/hint.ts` по тексту ошибки.
  */
 export function ErrorLine({
   text,
   className,
+  withHint = true,
 }: {
   /** Текст ошибки. Пусто — компонент не рендерится вовсе. */
   text: string | null | undefined;
   /** Класс оформления: цвет и размер задаёт вызывающий экран. */
   className?: string;
+  /**
+   * Добавить «что сделать». По умолчанию да; `false` — только для тех мест,
+   * где совет уже написан рядом своим текстом, иначе он прозвучит дважды.
+   */
+  withHint?: boolean;
 }): ReactElement | null {
   if (!text) return null;
+  const hint = withHint ? hintFor(text) : null;
 
   return (
     <Text className={className} role="alert" aria-live="assertive">
@@ -40,6 +51,14 @@ export function ErrorLine({
           «что случилось», даже если на экране это понятно из контекста. */}
       <span className="screen-reader-only">{t.errorPrefix} </span>
       {text}
+      {/* Совет — отдельной фразой, а не в скобках: диктор читает его целиком,
+          и человек слышит «что сделать», а не хвост сообщения. */}
+      {hint ? (
+        <>
+          {" "}
+          <span className="error-hint">{hint.advice}</span>
+        </>
+      ) : null}
     </Text>
   );
 }
