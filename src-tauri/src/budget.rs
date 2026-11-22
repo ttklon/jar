@@ -211,7 +211,11 @@ mod tests {
         ]);
         assert_eq!(report.over, 1);
         assert!(report.summary.contains("память в простое"), "{}", report.summary);
-        assert!(!report.summary.contains("поломк"), "{}", report.summary);
+        // Текст говорит «это не поломка» — и это именно то, что нужно.
+        assert!(report.summary.contains("не поломка"), "{}", report.summary);
+        // А слов, которыми обозначают поломку, в нём нет.
+        assert!(!report.summary.contains("ошибк"), "{}", report.summary);
+        assert!(!report.summary.contains("сломал"), "{}", report.summary);
         assert!(report.summary.contains("стало тяжелее"), "{}", report.summary);
     }
 
