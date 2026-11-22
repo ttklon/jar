@@ -69,6 +69,7 @@ pub mod sandbox;
 pub mod selfcheck;
 pub mod server;
 pub mod services;
+pub mod schedule;
 pub mod step;
 pub mod stt;
 pub mod stt_audio;
