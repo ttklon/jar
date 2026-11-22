@@ -446,10 +446,17 @@ mod tests {
         // Чужой эталон — отказ, и в причине есть действие, а не только числа.
         let refused = check_hash(&path, Some(&"0".repeat(64))).unwrap_err();
         assert!(refused.contains("повреждён"), "причина названа: {refused}");
-        assert!(refused.contains("Скачайте модель заново"), "есть что сделать: {refused}");
+        assert!(
+            refused.contains("Скачайте модель заново"),
+            "есть что сделать: {refused}"
+        );
 
         // Эталона нет — честное «неизвестно», а не выдуманное «хорошо».
-        assert_eq!(check_hash(&path, None).unwrap(), None, "без эталона — не проверено");
+        assert_eq!(
+            check_hash(&path, None).unwrap(),
+            None,
+            "без эталона — не проверено"
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -458,10 +465,8 @@ mod tests {
     /// пропускает: начало цело, а `llama-server` упадёт на середине.
     #[test]
     fn a_truncated_model_is_caught_even_though_its_header_is_intact() {
-        let dir = std::env::temp_dir().join(format!(
-            "zshelper-model-truncated-{}",
-            std::process::id()
-        ));
+        let dir =
+            std::env::temp_dir().join(format!("zshelper-model-truncated-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("model.gguf");
@@ -472,7 +477,10 @@ mod tests {
         // Обрезаем половину хвоста: заголовок цел, файл — нет.
         std::fs::write(&path, &full[..full.len() / 2]).unwrap();
         let refused = check_hash(&path, Some(&whole)).unwrap_err();
-        assert!(refused.contains("повреждён"), "обрезанный файл назван: {refused}");
+        assert!(
+            refused.contains("повреждён"),
+            "обрезанный файл назван: {refused}"
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
