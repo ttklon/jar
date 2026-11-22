@@ -432,7 +432,10 @@ export function App() {
           ) : screen === "models" ? (
             <Models />
           ) : screen === "journal" ? (
-            <Journal onOpenSettings={() => setScreen("settings")} />
+            <Journal
+              onOpenSettings={() => setScreen("settings")}
+              onOpenAsk={() => setScreen("ask")}
+            />
           ) : (
             <Settings
               theme={choice}

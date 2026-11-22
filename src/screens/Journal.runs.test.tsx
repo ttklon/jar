@@ -84,6 +84,32 @@ describe("экран «История»: запуски из памяти", () =
     expect(screen.getByText(/без шагов/)).toBeTruthy();
   });
 
+  it("пустой экран дел — приглашение, а не тупик", async () => {
+    // Шаг 366: «Пока пусто» без продолжения оставляет человека без выхода.
+    vi.mocked(auditTail).mockResolvedValue([]);
+    vi.mocked(memoryRuns).mockResolvedValue([]);
+    const onOpenAsk = vi.fn();
+
+    render(<Journal onOpenAsk={onOpenAsk} />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Пока пусто — запусков ещё не было/)).toBeTruthy();
+    });
+    // Сказано и что это за место, и что делать дальше, и как это звучит.
+    // Все три нужны: без первого непонятно, куда попал; без второго —
+    // тупик; без третьего — неясно, какой фразой начинать.
+    expect(screen.getByText(/Здесь появятся дела/)).toBeTruthy();
+    expect(screen.getByText(/Скажите первое дело словами/)).toBeTruthy();
+    expect(screen.getByLabelText("Разбери «Загрузки» по папкам")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Открыть «Спросить»" }));
+    expect(onOpenAsk).toHaveBeenCalledTimes(1);
+
+    // Поле — пример, а не форма: нажатие тоже ведёт туда, где работает.
+    fireEvent.click(screen.getByLabelText("Разбери «Загрузки» по папкам"));
+    expect(onOpenAsk).toHaveBeenCalledTimes(2);
+  });
+
   it("лента из нескольких дел — строки, а подробности по нажатию", async () => {
     // Шаг 362: развёрнутые карточки превращают ленту в простыню, в которой
     // «что было вчера про диск» не найти.

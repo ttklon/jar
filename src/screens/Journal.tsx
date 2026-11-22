@@ -75,6 +75,17 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase100,
     color: tokens.colorNeutralForeground3,
   },
+  empty: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+    alignItems: "flex-start",
+    padding: "14px 16px",
+    borderRadius: tokens.borderRadiusLarge,
+    border: `1px dashed ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground2,
+  },
+  emptyInput: { maxWidth: "360px", width: "100%" },
   steps: {
     margin: 0,
     paddingLeft: "18px",
@@ -149,7 +160,14 @@ function RunCard({
   );
 }
 
-export function Journal({ onOpenSettings }: { onOpenSettings?: () => void } = {}) {
+export function Journal({
+  onOpenSettings,
+  onOpenAsk,
+}: {
+  onOpenSettings?: () => void;
+  /** Перейти туда, где дело можно сказать словами (шаг 366). */
+  onOpenAsk?: () => void;
+} = {}) {
   const styles = useStyles();
   const [events, setEvents] = useState<AuditEvent[] | null>(null);
   // «Что болит» — по причинам, а не по времени: журнал уже есть, но человеку
@@ -263,7 +281,27 @@ export function Journal({ onOpenSettings }: { onOpenSettings?: () => void } = {}
         <Text className={styles.note}>{journal.runsLead}</Text>
         {!isTauri() ? <Text className={styles.note}>{journal.runsBrowserNote}</Text> : null}
         {runs !== null && runs.length === 0 ? (
-          <Text className={styles.note}>{journal.runsEmpty}</Text>
+          <div className={styles.empty}>
+            <Text weight="semibold">{journal.runsEmpty}</Text>
+            <Text className={styles.note}>{journal.emptyLead}</Text>
+            <Text className={styles.note}>{journal.emptyPrompt}</Text>
+            {/* Поле ввода здесь — пример того, как звучит дело, а не форма:
+                нажатие переносит в «Спросить», где фраза действительно
+                разбирается. Мёртвое поле, которое «вроде бы» должно
+                работать, хуже подсказки. */}
+            <Input
+              className={styles.emptyInput}
+              placeholder={journal.emptyPlaceholder}
+              aria-label={journal.emptyPlaceholder}
+              readOnly
+              onClick={() => onOpenAsk?.()}
+              disabled={!isTauri()}
+            />
+            <Button onClick={() => onOpenAsk?.()} disabled={!onOpenAsk}>
+              {journal.emptyGo}
+            </Button>
+            {!isTauri() ? <Text className={styles.note}>{journal.emptyBrowser}</Text> : null}
+          </div>
         ) : null}
         {runs !== null && runs.length > 0
           ? runs.map((run) => (

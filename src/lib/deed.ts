@@ -184,6 +184,10 @@ export function deedText(deed: Deed): string {
   const verdict = judge(deed);
   const lines: string[] = [];
   lines.push(`Дело: ${deed.subject}`);
+  // Дата и время нужны тому, кому пересылают: без них «вчера что-то не
+  // работало» проверить нечем.
+  lines.push(`Когда: ${new Date(deed.startedMs).toLocaleString("ru-RU")}`);
+  lines.push(`Вид: ${deed.kind}`);
   lines.push(`Чем кончилось: ${verdict.verdict}`);
   if (verdict.total > 0) {
     lines.push(`Шагов прошло: ${verdict.done} из ${verdict.total}`);

@@ -116,6 +116,15 @@ describe("карточка дела", () => {
     expect(text).toContain("не проверено");
   });
 
+  it("в отчёте есть дата и вид дела: без них пересланный текст не проверить", () => {
+    // Шаг 365. Отчёт пересылают другому человеку; «вчера что-то не работало»
+    // без даты и вида дела проверить нечем.
+    const text = deedText(deed());
+    expect(text).toMatch(/Когда: \d{2}\.\d{2}\.\d{4}/);
+    expect(text).toContain("Вид: plan");
+    expect(text).toContain("Чем кончилось: готово");
+  });
+
   it("отчёт о деле без шагов не притворяется, что шаги были", () => {
     const text = deedText(deed({ kind: "download", steps: [], subject: "модель" }));
     expect(text).toContain("Шагов не было");
