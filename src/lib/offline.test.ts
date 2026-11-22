@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { NEEDS_NETWORK, offlineNote, onlineState, worksOffline } from "./offline";
+import {
+  NEEDS_NETWORK,
+  NEED_NETWORK_MIXED,
+  needsNetworkFor,
+  offlineNote,
+  onlineState,
+  worksOffline,
+} from "./offline";
 
 /**
  * Сеть выключена — режим, а не поломка.
@@ -44,6 +51,36 @@ describe("режим без сети", () => {
       expect(item.startsWith("скачать")).toBe(true);
     }
     expect(NEEDS_NETWORK).toHaveLength(3);
+  });
+
+  it("отказ называет то действие, которое человек нажал", () => {
+    // Найденный дефект: в экране готовности на все четыре вида скачивания стояла
+    // одна фраза «скачать модель». Человек жал «Скачать движок распознавания», а
+    // ему отвечали про модель — и он шёл искать, при чём тут модель, вместо
+    // того чтобы узнать, что нужна сеть.
+    const kinds = ["model", "runtime", "speech-model", "speech-runtime"] as const;
+    const said = kinds.map((kind) => offlineNote(false, needsNetworkFor(kind)));
+
+    // Три разных обещания на четыре кнопки: движок распознавания и его модель
+    // без сети недоступны одинаково, и один текст на них — правда, а не лень.
+    // А вот модель, движок и распознавание — три разных действия, и текст у них
+    // обязан различаться, иначе человек читает про чужое.
+    expect(new Set(said).size).toBe(3);
+    expect(needsNetworkFor("speech-model")).toBe(needsNetworkFor("speech-runtime"));
+    // И каждое слово — из списка недоступного: назвать действие, которое на самом
+    // деле работает без сети, значит соврать в самую дорогую сторону.
+    for (const kind of kinds) {
+      expect(NEEDS_NETWORK).toContain(needsNetworkFor(kind));
+    }
+  });
+
+  it("общий отказ для плана из разного не притворяется одним из пунктов", () => {
+    // План из движка и распознавания сразу: подставить «скачать модель» было бы
+    // неправдой, а первый пункт списка — ответом наугад.
+    expect(NEEDS_NETWORK).not.toContain(NEED_NETWORK_MIXED);
+    const note = offlineNote(false, NEED_NETWORK_MIXED);
+    expect(note).toContain(NEED_NETWORK_MIXED);
+    expect(note).toContain("без сети не получится");
   });
 
   it("список «работает без сети» не пустой и про дело", () => {

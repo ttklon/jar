@@ -13,7 +13,7 @@ import {
   stopEngine,
 } from "../ipc";
 import type { ReadinessStatus, SmokeResult } from "../ipc";
-import { offlineNote, onlineState } from "../lib/offline";
+import { NEED_NETWORK_MIXED, needsNetworkFor, offlineNote, onlineState } from "../lib/offline";
 import { assessReadiness, formatSize, hasRoom, planPrepare } from "../lib/readiness";
 import { readiness as text } from "../i18n/ru";
 import { ErrorLine } from "./ErrorLine";
@@ -211,7 +211,12 @@ export function ReadinessCard({
       // Сеть выключена — говорим об этом до попытки, а не после таймаута.
       // Одна и та же проверка на обоих путях (кнопка и «подготовить всё»):
       // два пути к одному действию не должны вести себя по-разному.
-      const note = offlineNote(onlineState(globalThis.navigator), "скачать модель");
+      //
+      // Что именно недоступно, называется по виду скачивания. Раньше здесь была
+      // одна фраза «скачать модель» на все четыре вида: человек жал «скачать
+      // движок», а ему отвечали про модель — и он шёл искать, при чём тут
+      // модель, вместо того чтобы узнать, что нужна сеть.
+      const note = offlineNote(onlineState(globalThis.navigator), needsNetworkFor(kind));
       if (note !== null) {
         setActionError(note);
         return;
@@ -377,7 +382,20 @@ export function ReadinessCard({
     // Без этой проверки человек видел бы «скачивание не удалось» на нарочно
     // выключенной сети: приложение обвиняло бы его в том, что он сделал сам.
     if (plan.steps.some((step) => step !== "smoke")) {
-      const note = offlineNote(onlineState(globalThis.navigator), "скачать модель");
+      // Называем то, что этот план действительно собирается скачивать. План из
+      // одного движка не должен получать отказ про модель: человек пойдёт
+      // искать, при чём тут модель. Если в плане разное — говорим общим словом.
+      const downloads = plan.steps.filter(
+        (step): step is "model" | "runtime" | "speech-model" | "speech-runtime" => step !== "smoke",
+      );
+      const kinds = [...new Set(downloads.map(needsNetworkFor))];
+      // `kinds[0]` без проверки не годится: при `noUncheckedIndexedAccess` он
+      // может быть `undefined`, а тип отказа не допускает «ничего».
+      const only = kinds.length === 1 ? kinds[0] : undefined;
+      const note = offlineNote(
+        onlineState(globalThis.navigator),
+        only ?? NEED_NETWORK_MIXED,
+      );
       if (note !== null) {
         setActionError(note);
         return;

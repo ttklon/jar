@@ -699,4 +699,25 @@ describe("ошибки восстановления не подменяются 
 
     Object.defineProperty(globalThis.navigator, "onLine", { value: true, configurable: true });
   });
+
+  it("отказ без сети называет ту кнопку, которую нажали", async () => {
+    // Найденный дефект (шаг 143): на все четыре вида скачивания стоял один текст
+    // «скачать модель». Человек жал «Скачать движок распознавания», а читал про
+    // модель — и шёл искать, при чём тут модель, вместо «нужна сеть».
+    mocks.desktop = true;
+    Object.defineProperty(globalThis.navigator, "onLine", { value: false, configurable: true });
+    render(<ReadinessCard status={status({ speech_found: false })} error={null} />);
+
+    const button = screen.getByRole("button", { name: "Скачать движок распознавания" });
+    fireEvent.click(button);
+
+    await waitFor(() => expect(screen.getByText(/скачать распознавание речи/)).toBeTruthy());
+    // Именно про распознавание: текст про модель здесь был бы ответом на другое
+    // действие, и человек искал бы несуществующую связь.
+    expect(screen.queryByText(/скачать модель: без сети/)).toBeNull();
+    // И до скачивания не дошло: узнали заранее, а не после таймаута.
+    expect(mocks.runtime).not.toHaveBeenCalled();
+
+    Object.defineProperty(globalThis.navigator, "onLine", { value: true, configurable: true });
+  });
 });

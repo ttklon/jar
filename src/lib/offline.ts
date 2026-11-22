@@ -45,9 +45,45 @@ export function onlineState(nav: { onLine?: boolean } | undefined): boolean | nu
  * `null` — сказать нечего, действуй. Иначе — одна фраза, и она объясняет, что
  * именно недоступно, а не «ошибка сети».
  */
-export function offlineNote(online: boolean | null, what: NeedsNetwork): string | null {
+export function offlineNote(
+  online: boolean | null,
+  // Не только `NeedsNetwork`: у плана из разного сразу своего пункта в списке
+  // нет, и подставлять первый значило бы назвать не то действие.
+  what: NeedsNetwork | typeof NEED_NETWORK_MIXED,
+): string | null {
   if (online !== false) return null;
   return `${what}: без сети не получится. Всё остальное работает — модель и движок уже на диске.`;
+}
+
+/**
+ * Что сказать, когда план собирается скачивать разное сразу.
+ *
+ * Не один из пунктов `NEEDS_NETWORK`: «скачать модель» на плане из движка и
+ * распознавания было бы неправдой, а первый пункт списка — это ответ наугад.
+ * Общее слово должно быть общим честно.
+ */
+export const NEED_NETWORK_MIXED = "скачать всё нужное";
+
+/**
+ * Какое из действий без сети недоступно — по виду скачивания.
+ *
+ * Отдельной функцией, потому что вид скачивания и текст отказа — разные вещи:
+ * в коде это `runtime` / `speech-model`, а человеку нужно «скачать движок».
+ * Держать это соответствие рядом с самим списком, а не в экране: иначе вторая
+ * кнопка однажды получит первый текст, и отказ будет про чужое действие.
+ */
+export function needsNetworkFor(
+  kind: "model" | "runtime" | "speech-model" | "speech-runtime",
+): NeedsNetwork {
+  switch (kind) {
+    case "model":
+      return "скачать модель";
+    case "runtime":
+      return "скачать движок";
+    case "speech-model":
+    case "speech-runtime":
+      return "скачать распознавание речи";
+  }
 }
 
 /** Что работает без сети — чтобы «недоступно» не читалось как «ничего нельзя». */
