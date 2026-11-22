@@ -500,16 +500,19 @@ pub fn resource_report() -> budget::BudgetReport {
 /// Только чтение: пути, размеры и честная отметка «файла ещё нет». Ничего не удаляет
 /// и не «чистит» — уборка это отдельное дело с подтверждением.
 #[tauri::command]
-pub async fn data_places(state: State<'_, AppState>) -> Vec<places::Place> {
+pub async fn data_places(state: State<'_, AppState>) -> Result<Vec<places::Place>, String> {
     // Обход каталогов и `metadata` — это диск, а не память: на сетевой папке
     // или при большом каталоге моделей вызов висел бы на потоке окна, и окно
     // бы не перерисовывалось (шаги 388/397).
     let base = state.inner.base_dir.clone();
     let log = std::path::PathBuf::from(&state.log_file);
     let models = state.inner.models_dir.clone();
+    // Асинхронная команда с заимствованным состоянием обязана вернуть `Result`
+    // (иначе Tauri не может доказать, что заимствование живёт до конца ответа).
+    // Это кстати: сорвавшийся поток больше не выдаёт себя за «мест нет».
     tauri::async_runtime::spawn_blocking(move || places::all(&base, &log, &models))
         .await
-        .unwrap_or_default()
+        .map_err(|error| format!("места на диске не посчитались: {error}"))
 }
 
 /// Автозапуск: включён ли, что именно запустится и чем это грозит.
