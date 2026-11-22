@@ -89,6 +89,9 @@ pub fn set_voice_hold(app: &AppHandle, active: bool) {
 }
 
 fn show_main_window(app: &AppHandle) {
+    // Засечка возврата до `show`: человек ждёт с того момента, как нажал, а не с
+    // момента, когда окно уже на экране (шаг 399: тёплый старт ≤ 1.5 с).
+    crate::timing::mark_resumed();
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.show();
         let _ = window.unminimize();

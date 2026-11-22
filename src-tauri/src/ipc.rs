@@ -481,6 +481,23 @@ pub fn resource_report() -> budget::BudgetReport {
         )),
     }
 
+    // Тёплый старт (шаг 399): возврат из трея — свой порог, потому что это другая
+    // работа. Холодный читает модель и строит окно; здесь окно уже есть.
+    match crate::timing::since_resume() {
+        Some(elapsed) => metrics.push(budget::Metric::with_budget(
+            "возврат из трея",
+            elapsed.as_secs_f64(),
+            "с",
+            crate::timing::RESUME_BUDGET_S,
+            "от нажатия в трее до показа окна",
+        )),
+        None => metrics.push(budget::Metric::unknown(
+            "возврат из трея",
+            "с",
+            "ещё не возвращались: окно открыто с запуска",
+        )),
+    }
+
     match memory {
         Some(mb) => metrics.push(budget::Metric::with_budget(
             "память в простое",

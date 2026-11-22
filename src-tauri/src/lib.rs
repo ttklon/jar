@@ -340,6 +340,18 @@ pub fn run() {
             }
             Ok(())
         })
+        // Готовность окна — это загруженная страница, а не созданное окно: пустое
+        // окно на экране ещё ничего не показывает, и считать старт по нему значит
+        // хвалить себя за то, чего человек не видел (шаги 381/399).
+        .on_page_load(|webview, payload| {
+            // Обработчик получает `Webview`, а не `Window`: параметр назван по типу,
+            // чтобы это не приходилось выяснять по компилятору.
+            if webview.label() == "main"
+                && matches!(payload.event(), tauri::webview::PageLoadEvent::Finished)
+            {
+                timing::mark_window_ready();
+            }
+        })
         .on_window_event(|window, event| {
             if window.label() != "main" {
                 return;
