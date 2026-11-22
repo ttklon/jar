@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Input, makeStyles, Switch, Text, tokens } from "@fluentui/react-components";
 import { MicRegular } from "@fluentui/react-icons";
 import {
@@ -1812,13 +1812,30 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   };
 
   // Цели, которые человек сам разложил на дела: по ним и показывается счёт.
-  const goals = [
-    ...new Set(
-      queue
-        .map((item) => item.origin)
-        .filter((origin): origin is string => typeof origin === "string" && origin.length > 0),
-    ),
-  ];
+  //
+  // `useMemo`, а не пересчёт на каждый рендер: этот экран перерисовывается на каждом
+  // слове разговора, а очередь и цели меняются куда реже. Без мемоизации каждый
+  // рендер заново собирал бы Set по всей очереди и потом ещё раз проходил её на
+  // каждую цель — работа, результат которой не изменился.
+  const goals = useMemo(
+    () => [
+      ...new Set(
+        queue
+          .map((item) => item.origin)
+          .filter((origin): origin is string => typeof origin === "string" && origin.length > 0),
+      ),
+    ],
+    [queue],
+  );
+
+  // Счётчики по целям и итог очереди — одним проходом на очередь, а не `progress`
+  // внутри разметки для каждой цели: «Голос» рисуется часто, а очередь меняется
+  // только когда дело началось или кончилось.
+  const goalProgress = useMemo(
+    () => new Map(goals.map((goal) => [goal, progress(queue, goal)])),
+    [goals, queue],
+  );
+  const queueSummary = useMemo(() => summary(queue), [queue]);
 
   return (
     <div className={styles.root}>
@@ -2181,7 +2198,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           <Button
             size="small"
             appearance="subtle"
-            disabled={queueOn || summary(queue).waiting === 0}
+            disabled={queueOn || queueSummary.waiting === 0}
             onClick={() => {
               void startQueue();
             }}
@@ -2191,7 +2208,7 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           <Button
             size="small"
             appearance="subtle"
-            disabled={!queueOn && summary(queue).waiting === 0 && !running && !busy && !thinking && !engineBusy}
+            disabled={!queueOn && queueSummary.waiting === 0 && !running && !busy && !thinking && !engineBusy}
             onClick={() => halt("стоп")}
           >
             {voice.queueStop}
@@ -2299,9 +2316,12 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
 
       {queue.length > 0 || queueIdle ? (
         <div className={styles.section}>
-          <Text className={styles.title}>{voice.queueTitle(summary(queue).waiting, summary(queue).done)}</Text>
+          <Text className={styles.title}>{voice.queueTitle(queueSummary.waiting, queueSummary.done)}</Text>
           {goals.map((goal) => {
-            const done = progress(queue, goal);
+            // Счётчик уже посчитан выше, на изменение очереди. Второго расчёта
+            // здесь нет намеренно: разметка не считает.
+            const done = goalProgress.get(goal);
+            if (!done) return null;
             const stopped = stoppedGoals.includes(goal);
             return (
               <div key={`goal-${goal}`} className={styles.bar}>
