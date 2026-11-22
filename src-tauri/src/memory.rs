@@ -139,6 +139,11 @@ impl Memory {
             "UPDATE runs SET finished_ms = ?2, outcome = ?3 WHERE id = ?1",
             params![run_id, now_ms(), outcome],
         )?;
+        // Уборка — в тот момент, когда база закрывает дело, а не по таймеру:
+        // таймер будил бы приложение в простое, а дело и так закрывается.
+        // Ошибку уборки не возвращаем: дело записано, и терять из-за уборки
+        // его итог было бы хуже, чем прожить с лишней строкой.
+        prune(&conn, MAX_RUNS)?;
         Ok(())
     }
 
@@ -391,6 +396,37 @@ fn steps_for(conn: &Connection, run_id: i64) -> Result<Vec<RunStep>, MemoryError
     Ok(rows.filter_map(Result::ok).collect())
 }
 
+/// Сколько запусков помнить. Дальше — уборка (шаг 386).
+///
+/// Почему предел, а не «пока не кончится диск». Память запусков растёт на
+/// каждом деле, и через год в ней десятки тысяч строк, из которых человек не
+/// найдёт ничего: поиск по ним всё равно смотрит последние. Предел — не
+/// экономия места, а обещание, что база не растёт бесконечно.
+///
+/// Почему тысяча. Столько дел — это месяцы работы; всё, что старше, человек
+/// всё равно не найдёт словами, а журнал (отдельный файл) хранит больше.
+pub const MAX_RUNS: i64 = 1000;
+
+/// Убрать старые запуски вместе с их шагами.
+///
+/// Шаги удаляются отдельно, а не каскадом: внешний ключ без `ON DELETE CASCADE`
+/// оставил бы шаги без запусков — мусор, которого не видно, но который растёт.
+fn prune(conn: &rusqlite::Connection, keep: i64) -> Result<usize, rusqlite::Error> {
+    let removed = conn.execute(
+        "DELETE FROM steps WHERE run_id IN (
+           SELECT id FROM runs ORDER BY id DESC LIMIT -1 OFFSET ?1
+         )",
+        params![keep],
+    )?;
+    conn.execute(
+        "DELETE FROM runs WHERE id IN (
+           SELECT id FROM runs ORDER BY id DESC LIMIT -1 OFFSET ?1
+         )",
+        params![keep],
+    )?;
+    Ok(removed)
+}
+
 /// Миграции. `user_version` — единственный источник правды о том, что уже применено.
 fn migrate(conn: &Connection) -> Result<(), rusqlite::Error> {
     let version: i64 = conn.query_row("PRAGMA user_version", [], |row| row.get(0))?;
@@ -624,6 +660,53 @@ mod tests {
         memory.finish_run(plain, "ok").expect("итог");
         let runs = memory.recent_runs(10).expect("чтение");
         assert_eq!(runs[0].session, "");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Шаг 386: база не растёт бесконечно.
+    ///
+    /// Память запусков росла на каждом деле, и через год в ней десятки тысяч
+    /// строк, из которых поиск всё равно смотрит последние. Предел — обещание,
+    /// что база не растёт вечно.
+    #[test]
+    fn the_oldest_runs_are_pruned_and_their_steps_go_with_them() {
+        let (memory, dir) = temp_memory("prune");
+
+        // Больше предела не создаём (это тысяча вставок), а проверяем само
+        // правило на маленьком числе: та же функция, тот же SQL.
+        for index in 0..6 {
+            let run = memory
+                .start_run("tool", &format!("дело {index}"))
+                .expect("запуск");
+            memory
+                .add_step(run, 1, "files|создать|папку", true, "", "ok")
+                .expect("шаг");
+            memory.finish_run(run, "ok").expect("итог");
+        }
+
+        {
+            let conn = memory.lock();
+            prune(&conn, 3).expect("уборка");
+        }
+
+        let runs = memory.recent_runs(100).expect("чтение");
+        assert_eq!(runs.len(), 3, "осталось три");
+        assert_eq!(runs[0].subject, "дело 5", "новые остались");
+        assert_eq!(runs[2].subject, "дело 3");
+        // Шаги ушли вместе с запусками: без этого внешние ключи оставили бы
+        // мусор, которого не видно, но который растёт.
+        assert_eq!(runs[0].steps.len(), 1, "шаг нового дела на месте");
+        let orphans: i64 = {
+            let conn = memory.lock();
+            conn.query_row(
+                "SELECT COUNT(*) FROM steps WHERE run_id NOT IN (SELECT id FROM runs)",
+                [],
+                |row| row.get(0),
+            )
+            .expect("счёт")
+        };
+        assert_eq!(orphans, 0, "шагов без запусков не осталось");
 
         let _ = std::fs::remove_dir_all(&dir);
     }
