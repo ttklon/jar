@@ -146,6 +146,13 @@ describe("карточка готовности", () => {
 
     expect(screen.getByText("Компоненты найдены")).toBeTruthy();
     expect(screen.queryByText("Чтобы начать разговор, нужно…")).toBeNull();
+    // Шаг 34: на готовой машине о модели не говорится вовсе. Не отвлекать тем,
+    // что сделано, — иначе человек ищет, зачем ему снова качать гигабайт.
+    const screenText = document.body.textContent ?? "";
+    expect(screenText).not.toMatch(/скачать/i);
+    expect(screenText).not.toContain("Qwen2.5 1.5B Instruct");
+    // И ни одной кнопки, ведущей к модели: искать нечего.
+    expect(screen.queryByRole("button", { name: /скачать|модел/i })).toBeNull();
   });
 
   it("частичная установка называет только недостающее", () => {
