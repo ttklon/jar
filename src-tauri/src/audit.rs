@@ -284,7 +284,10 @@ mod tests {
         let lines = std::fs::read_to_string(&path)
             .map(|text| text.lines().count())
             .unwrap_or(0);
-        assert!(lines < 40, "в журнале {lines} строк — ротация не срабатывала");
+        assert!(
+            lines < 40,
+            "в журнале {lines} строк — ротация не срабатывала"
+        );
         // Одна резервная копия, а не десять: архив не растёт вместо журнала.
         let backup = dir.join("audit.jsonl.1");
         assert!(backup.exists(), "старый журнал должен уехать в копию");
@@ -301,7 +304,10 @@ mod tests {
         // Новое читается, старое не потеряно целиком.
         assert!(!audit.recent(5).is_empty());
         let archive = std::fs::read_to_string(&backup).unwrap_or_default();
-        assert!(!archive.trim().is_empty(), "в копии должны остаться события");
+        assert!(
+            !archive.trim().is_empty(),
+            "в копии должны остаться события"
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -313,7 +319,10 @@ mod tests {
         let audit = small(path.clone(), MAX_BYTES);
         audit.write(event(AuditKind::Started, "started"));
 
-        assert!(!dir.join("audit.jsonl.1").exists(), "молодой журнал не трогаем");
+        assert!(
+            !dir.join("audit.jsonl.1").exists(),
+            "молодой журнал не трогаем"
+        );
         assert_eq!(audit.tail(10).len(), 1);
 
         let _ = std::fs::remove_dir_all(&dir);

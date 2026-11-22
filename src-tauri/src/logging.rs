@@ -132,10 +132,7 @@ mod tests {
     use super::*;
 
     fn temp_path(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!(
-            "zshelper-log-{name}-{}",
-            std::process::id()
-        ));
+        let dir = std::env::temp_dir().join(format!("zshelper-log-{name}-{}", std::process::id()));
         let _ = std::fs::create_dir_all(&dir);
         dir.join("zshelper.log")
     }
@@ -148,7 +145,10 @@ mod tests {
 
         rotate_at(&path, 10);
 
-        assert!(!path.exists(), "старый лог должен уехать в копию, а не остаться");
+        assert!(
+            !path.exists(),
+            "старый лог должен уехать в копию, а не остаться"
+        );
         let backup = path.with_file_name("zshelper.log.1");
         assert!(backup.exists(), "копия должна быть рядом с логом");
         let moved = std::fs::read_to_string(&backup).unwrap_or_default();
