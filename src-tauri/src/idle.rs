@@ -89,7 +89,10 @@ mod tests {
     fn a_fresh_engine_is_not_released() {
         let idle = Idle::default();
 
-        assert!(!idle.expired(), "только что запущенный движок отпускать нечего");
+        assert!(
+            !idle.expired(),
+            "только что запущенный движок отпускать нечего"
+        );
         assert!(
             idle.left().is_some_and(|left| left > Duration::ZERO),
             "время до выгрузки должно быть положительным"
@@ -137,7 +140,10 @@ mod tests {
 
         idle.touch();
         let left = idle.left().unwrap_or_default();
-        assert!(left >= Duration::from_secs(59), "после запуска ждать почти весь срок");
+        assert!(
+            left >= Duration::from_secs(59),
+            "после запуска ждать почти весь срок"
+        );
     }
 
     #[test]
