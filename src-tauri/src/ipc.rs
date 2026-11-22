@@ -1632,6 +1632,33 @@ pub async fn start_engine(
         )
     })?;
 
+    // Хеш модели — до запуска, а не после падения движка. Заголовок GGUF
+    // читается с начала файла и пропустит файл, обрезанный посередине; хеш
+    // его поймает. Сверяем с тем, что помним о файле: запись из скачивания
+    // или из каталога. Хеша нет — так и говорим в отчёте, а не делаем вид,
+    // что проверили.
+    let expected = inner
+        .memory
+        .fact(&crate::models::hash_key(&name))
+        .or_else(|| {
+            let catalog = crate::readiness::catalog();
+            if catalog.model.file == name {
+                Some(catalog.model.sha256.clone())
+            } else {
+                None
+            }
+        });
+    let checked = tauri::async_runtime::spawn_blocking({
+        let model = model.clone();
+        let expected = expected.clone();
+        move || crate::models::check_hash(&model, expected.as_deref())
+    })
+    .await
+    .map_err(|error| format!("проверка модели не выполнилась: {error}"))??;
+    if checked.is_none() {
+        tracing::warn!(%name, "хеш модели неизвестен: запускаю без сверки");
+    }
+
     let port = server::free_port()?;
     let log = inner.base_dir.join(format!("llama-server-{port}.log"));
     let spec = llama::spec(&program, &model, port);

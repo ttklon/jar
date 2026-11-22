@@ -52,6 +52,29 @@ pub fn hash_key(name: &str) -> String {
     format!("model.sha256:{name}")
 }
 
+/// Проверка модели перед запуском: тот ли это файл, что скачали.
+///
+/// Зачем это отдельно от разбора заголовка. Заголовок GGUF читается с начала
+/// файла и отвечает «файл похож на модель». Хеш отвечает «это та модель»:
+/// обрезанный, дописанный или повреждённый в середине файл заголовок пройдёт,
+/// а движок на нём упадёт — загадкой, потому что llama-server пишет в лог
+/// что угодно, только не «модель повреждена».
+///
+/// `expected` — что мы помним о файле: хеш из скачивания или из каталога.
+/// `None` — сравнивать не с чем, и это тоже ответ: «хеш неизвестен», а не
+/// «всё хорошо» и не «файл битый».
+pub fn check_hash(path: &Path, expected: Option<&str>) -> Result<Option<String>, String> {
+    let actual = sha256_file(path)?;
+    match expected {
+        Some(expected) if !expected.eq_ignore_ascii_case(&actual) => Err(format!(
+            "файл модели повреждён или подменён: ожидали {expected}, получили {actual}. \
+             Скачайте модель заново: «Модели» → «Скачать модель»"
+        )),
+        Some(_) => Ok(Some(actual)),
+        None => Ok(None),
+    }
+}
+
 /// Считает sha256 потоком по 64 КиБ: модель на много гигабайт не должна целиком
 /// попадать в память, иначе проверка станет причиной её отсутствия.
 pub fn sha256_file(path: &Path) -> Result<String, String> {
@@ -398,6 +421,61 @@ fn quant_name(file_type: u32) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Шаг 348: хеш модели проверяется до запуска движка.
+    ///
+    /// Три исхода, и все три важны: совпал — запускаем; не совпал — отказ
+    /// с объяснением и действием; сравнивать не с чем — «неизвестно», а не
+    /// «хорошо» и не «битый».
+    #[test]
+    fn a_damaged_model_is_caught_by_hash_and_named_with_an_action() {
+        let dir = std::env::temp_dir().join(format!("zshelper-model-hash-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("model.gguf");
+        std::fs::write(&path, b"GGUF-not-really-a-model").unwrap();
+
+        // Свой хеш файла — правильный эталон, сверка проходит.
+        let own = sha256_file(&path).unwrap();
+        assert_eq!(
+            check_hash(&path, Some(&own)).unwrap(),
+            Some(own.clone()),
+            "свой хеш проходит сверку"
+        );
+
+        // Чужой эталон — отказ, и в причине есть действие, а не только числа.
+        let refused = check_hash(&path, Some(&"0".repeat(64))).unwrap_err();
+        assert!(refused.contains("повреждён"), "причина названа: {refused}");
+        assert!(refused.contains("Скачайте модель заново"), "есть что сделать: {refused}");
+
+        // Эталона нет — честное «неизвестно», а не выдуманное «хорошо».
+        assert_eq!(check_hash(&path, None).unwrap(), None, "без эталона — не проверено");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Обрезанный посередине файл — тот самый случай, который заголовок
+    /// пропускает: начало цело, а `llama-server` упадёт на середине.
+    #[test]
+    fn a_truncated_model_is_caught_even_though_its_header_is_intact() {
+        let dir = std::env::temp_dir().join(format!(
+            "zshelper-model-truncated-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("model.gguf");
+        let full = gguf("llama", 2);
+        std::fs::write(&path, &full).unwrap();
+        let whole = sha256_file(&path).unwrap();
+
+        // Обрезаем половину хвоста: заголовок цел, файл — нет.
+        std::fs::write(&path, &full[..full.len() / 2]).unwrap();
+        let refused = check_hash(&path, Some(&whole)).unwrap_err();
+        assert!(refused.contains("повреждён"), "обрезанный файл назван: {refused}");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     /// Собирает минимальный GGUF v3 с двумя ключами метаданных.
     fn gguf(architecture: &str, file_type: u32) -> Vec<u8> {
