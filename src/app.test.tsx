@@ -382,4 +382,46 @@ describe("App", () => {
     const found = await screen.findByText(new RegExp(`Найдено: ${TOTAL} из ${TOTAL}`));
     expect(found).toBeTruthy();
   });
+
+  it("один вход: фраза с любого экрана доходит до разговора", async () => {
+    // Шаг 181. До этого поле было только на экране «Голос»: ушёл в «Историю» — и
+    // чтобы что-то сказать, надо было вспомнить, что говорить надо не здесь.
+    render(<App />);
+    await loaded();
+
+    nav().getByRole("button", { name: "История" }).click();
+    // Заголовок экрана, а не «Что болит»: второе появляется, лишь когда пришли
+    // данные журнала, и ждать его — значит проверять чужую загрузку.
+    await screen.findByRole("heading", { name: "История", level: 2 }, { timeout: 5000 });
+
+    // Вход на виду и на чужом экране.
+    const entry = screen.getByRole("textbox", { name: /скажи или напиши/ });
+    fireEvent.change(entry, { target: { value: "создай папку на рабочем столе" } });
+    fireEvent.submit(entry.closest("form")!);
+
+    // Фраза не отправилась за человека — она лежит в поле разговора, и её видно.
+    // Поле разговора называется «Услышал»: вход обещает «не ищи экран», а не
+    // «действуй без тебя», и последний взгляд перед действием остаётся человеку.
+    const field = await screen.findByRole("textbox", { name: "Услышал" }, { timeout: 5000 });
+    await waitFor(() =>
+      expect((field as HTMLInputElement).value).toBe("создай папку на рабочем столе"),
+    );
+    // А из единого входа фраза ушла: иначе она отправилась бы дважды.
+    expect((entry as HTMLInputElement).value).toBe("");
+  });
+
+  it("один вход: название экрана ведёт на экран, а не в разговор", async () => {
+    render(<App />);
+    await loaded();
+
+    const entry = screen.getByRole("textbox", { name: /скажи или напиши/ });
+    fireEvent.change(entry, { target: { value: "история" } });
+    fireEvent.submit(entry.closest("form")!);
+
+    // Увели на «Историю», а не оставили фразу «история» в поле разговора.
+    // Заголовок экрана, а не «Что болит»: второе появляется, лишь когда пришли
+    // данные журнала, и ждать его — значит проверять чужую загрузку.
+    await screen.findByRole("heading", { name: "История", level: 2 }, { timeout: 5000 });
+    expect((entry as HTMLInputElement).value).toBe("");
+  });
 });

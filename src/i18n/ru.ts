@@ -105,6 +105,7 @@ export const t = {
   settingsAutostartOff: "выключено: приложение запускается, когда вы его откроете",
   settingsAutostartReading: "читаю состояние из реестра…",
   settingsAutostartError: (reason: string) => `не получилось: ${reason}`, 
+  entryPlaceholder: "скажи или напиши — или назови экран",
   paletteTitle: "Куда перейти",
   paletteSearch: "Поиск экрана",
   palettePlaceholder: "начните печатать: голос, руки, журнал…",

@@ -200,6 +200,13 @@ export interface VoiceScreenProps {
   active?: boolean;
   /** Переход к доказательству: реестр, руки, сценарии, история. */
   onOpen?: (screen: string) => void;
+  /**
+   * Фраза, набранная в едином входе (шаг 181). Не «отправить» — а «положить в
+   * поле»: человек видит её, может поправить и отправляет сам. Отправка за него
+   * отняла бы у него последний взгляд перед действием, а вход обещает только
+   * «не ищи экран», не «действуй без тебя».
+   */
+  handed?: { text: string; at: number } | null;
 }
 
 type EngineStart =
@@ -208,12 +215,21 @@ type EngineStart =
   | { kind: "failed"; note: string }
   | { kind: "unknown" };
 
-export function Voice({ onOpen, active = true }: VoiceScreenProps) {
+export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps) {
   const styles = useStyles();
   // Шаг 26: то, что человек набрал или сказал, но не отправил, переживает
   // закрытие окна. Восстанавливаем при открытии экрана — один раз, лениво, чтобы
   // не читать хранилище на каждый рендер.
   const [text, setText] = useState(() => readDraft());
+  // Что пришло из единого входа (шаг 181). Запоминаем по времени, а не по тексту:
+  // одну и ту же фразу можно сказать дважды, и второй раз её тоже надо положить
+  // в поле, если человек успел его очистить.
+  const handedAt = useRef<number | null>(null);
+  useEffect(() => {
+    if (!handed || handedAt.current === handed.at) return;
+    handedAt.current = handed.at;
+    setText(handed.text);
+  }, [handed]);
   const [items, setItems] = useState<PlanItem[] | null>(null);
   const [busy, setBusy] = useState(false);
   const searchRequestRef = useRef(0);

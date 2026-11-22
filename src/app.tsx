@@ -48,6 +48,7 @@ const Settings = lazy(() => import("./screens/Settings").then((m) => ({ default:
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
 import { filterCommands, type Command } from "./lib/commands";
+import { readEntry } from "./lib/entry";
 import { layoutFor } from "./lib/layout";
 import {
   DEFAULT_CHOICE,
@@ -166,6 +167,14 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground2,
   },
   error: { display: "flex", flexDirection: "column", gap: "10px", maxWidth: "60ch" },
+  // Поле единого входа: над содержимым, во всю ширину, но не во всю высоту —
+  // это вход, а не экран. Высота 44 px: та же мера, что у кнопок (шаг 196).
+  entry: {
+    gridColumn: "2",
+    display: "flex",
+    padding: "10px 20px 0",
+  },
+  entryField: { width: "100%", minHeight: "44px" },
 });
 
 // Голос первым и по умолчанию: приложение открывается для задачи, а не для осмотра.
@@ -183,12 +192,24 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement; keywords: read
   { id: "settings", label: t.navSettings, icon: <SettingsRegular />, keywords: ["настройки", "тема", "settings"] },
 ];
 
-/** Что палитра знает о навигации: имя экрана плюс слова, по которым его ищут. */
-const NAV_COMMANDS: Command[] = NAV.map(({ id, label, keywords }) => ({ id, label, keywords }));
+/**
+ * Что знают о навигации палитра и единый вход: имя экрана плюс слова, по которым
+ * его ищут.
+ *
+ * Экспортируется, потому что в приложении теперь **два** поля, ведущих по экранам
+ * (шаг 181: «скажи или напиши» и `Ctrl+K`), и знать разные имена экранов они не
+ * должны: однажды разошлись бы, и «журнал» нашёлся бы в одном поле и не нашёлся
+ * в другом.
+ */
+export const NAV_COMMANDS: Command[] = NAV.map(({ id, label, keywords }) => ({ id, label, keywords }));
 
 export function App() {
   const styles = useStyles();
   const [screen, setScreen] = useState<Screen>("voice");
+  // Единый вход (шаг 181): что набрано в поле «скажи или напиши» и что из него
+  // передано на экран разговора.
+  const [entry, setEntry] = useState("");
+  const [handed, setHanded] = useState<{ text: string; at: number } | null>(null);
   // Знакомство показывается один раз. Решение — в `firstRun`, чтобы его проверяли тесты,
   // а не глаза: «один раз» слишком легко превращается в «каждый раз».
   const [welcome, setWelcome] = useState(() => shouldShowWelcome());
@@ -414,13 +435,49 @@ export function App() {
           */}
           <DownloadBar progress={progress} />
 
+        {/*
+          Шаг 181: один вход, всегда на виду. До этого поле было только на экране
+          «Голос»: ушёл в «Историю» — и чтобы что-то сказать, надо вспомнить, что
+          говорить надо не здесь, и вернуться. Два поля, которые ведут по экранам
+          (это и Ctrl+K), берут имена из одного списка `NAV_COMMANDS`.
+        */}
+        <form
+          className={styles.entry}
+          onSubmit={(event) => {
+            event.preventDefault();
+            const outcome = readEntry(NAV_COMMANDS, entry);
+            if (outcome.kind === "empty") return;
+            if (outcome.kind === "screen") {
+              setScreen(outcome.id as Screen);
+            } else {
+              // Не отправляем за человека: кладём фразу в поле разговора, чтобы
+              // он её видел, мог поправить и отправил сам.
+              setHanded({ text: outcome.text, at: Date.now() });
+              setScreen("voice");
+            }
+            setEntry("");
+          }}
+        >
+          <Input
+            className={styles.entryField}
+            value={entry}
+            onChange={(_, data) => setEntry(data.value)}
+            placeholder={t.entryPlaceholder}
+            aria-label={t.entryPlaceholder}
+          />
+        </form>
+
         <main className={styles.main} style={layout.narrow ? { padding: "16px 14px 40px" } : undefined}>
           {!error && snapshot && !welcome ? (
             <div
               style={{ display: screen === "voice" ? "contents" : "none" }}
               aria-hidden={screen !== "voice"}
             >
-              <Voice active={screen === "voice"} onOpen={(next) => setScreen(next as Screen)} />
+              <Voice
+                active={screen === "voice"}
+                handed={handed}
+                onOpen={(next) => setScreen(next as Screen)}
+              />
             </div>
           ) : null}
           {error ? (
