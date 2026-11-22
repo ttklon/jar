@@ -62,6 +62,13 @@ STEPS: list[tuple[str, list[str], str]] = [
     # «Никакой телеметрии» ломается тихо: одна зависимость — и приложение
     # начинает куда-то ходить. Ни сборка, ни тесты этого не заметят.
     ("no telemetry", ["tools/no_telemetry.py", "--quiet"], "no analytics in deps or code"),
+    # «Бесплатно» ломается одной строкой: ключ API, адрес облака, поле
+    # `api_key` в каталоге. Сборка этого не замечает — путь по умолчанию
+    # уводит к чужому счёту, и узнаётся об этом по счёту.
+    ("free path", ["tools/free_path.py", "--quiet"], "only free sources on the default path"),
+    # «Скачивания только явные» ломается второй дверью: `reqwest` в зависимостях
+    # или `fetch` в интерфейсе — и приложение уходит в сеть само.
+    ("one door", ["tools/one_door.py", "--quiet"], "network only in download.rs, and only on a button"),
     # Типы проверяются с ВЫКЛЮЧЕННЫМ кэшем: `tsc -b` дважды сказал «чисто», потому
     # что верил своему `tsbuildinfo`, а CI без кэша находил ошибку.
     ("types", ["tools/ts_typecheck.py", "--quiet"], "tsc -b with a fresh cache"),

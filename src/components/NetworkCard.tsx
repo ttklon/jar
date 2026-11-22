@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { makeStyles, Text, tokens } from "@fluentui/react-components";
-import { networkAddresses } from "../ipc";
-import type { NetworkAddress } from "../ipc/types";
+import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
+import { networkAddresses, probeNetwork } from "../ipc";
+import type { AddressProbe, NetworkAddress } from "../ipc/types";
 import { models } from "../i18n/ru";
 
 /**
@@ -52,6 +52,8 @@ const useStyles = makeStyles({
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorBrandForeground1,
   },
+  probe: { display: "flex", flexDirection: "column", gap: "6px", alignItems: "flex-start" },
+  probeList: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "4px" },
 });
 
 /** Вес в человеческих единицах: 986048768 → «940 МБ». */
@@ -67,6 +69,10 @@ export function NetworkCard() {
   const styles = useStyles();
   const [addresses, setAddresses] = useState<NetworkAddress[] | null>(null);
   const [failed, setFailed] = useState(false);
+  // Проверка: «не делали», «идёт», «вот что ответили», «не вышло».
+  const [probes, setProbes] = useState<AddressProbe[] | null>(null);
+  const [probing, setProbing] = useState(false);
+  const [probeError, setProbeError] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -81,6 +87,23 @@ export function NetworkCard() {
       alive = false;
     };
   }, []);
+
+  const check = async () => {
+    setProbing(true);
+    setProbeError(null);
+    try {
+      const list = await probeNetwork();
+      setProbes(list);
+    } catch (error) {
+      setProbeError(String(error));
+    } finally {
+      setProbing(false);
+    }
+  };
+
+  // Пустой список — это не «все живы»: так выглядит браузерная сборка, где
+  // ядра нет. Успехом считается только ответ по каждому адресу.
+  const answered = probes?.filter((probe) => probe.problem === null).length ?? 0;
 
   return (
     <section className={styles.card} aria-label={models.networkTitle}>
@@ -119,6 +142,47 @@ export function NetworkCard() {
           ))}
         </ul>
       )}
+
+      {/*
+        Проверка кнопкой, а не при открытии экрана: каждый адрес — настоящий
+        запрос. При открытии это было бы «тихое скачивание» в миниатюре, а по
+        кнопке — проверка, о которой человек знает.
+      */}
+      <div className={styles.probe}>
+        <Button appearance="secondary" onClick={check} disabled={probing}>
+          {probing ? models.probeBusy : models.probeAsk}
+        </Button>
+        {probeError ? (
+          <Text role="alert" aria-live="polite">
+            {models.probeFailed(probeError)}
+          </Text>
+        ) : probes === null ? null : (
+          <>
+            <Text role="status" aria-live="polite">
+              {models.probeDone(answered, probes.length)}
+            </Text>
+            <ul className={styles.probeList}>
+              {probes.map((probe) => {
+                const address = addresses?.find((item) => item.url === probe.url);
+                return probe.problem === null ? (
+                  <li key={probe.url}>
+                    <Text className={styles.optional}>
+                      {address ? `${address.purpose}: ответил` : `${probe.url}: ответил`}
+                      {` · ${weight(probe.bytes ?? 0)}`}
+                    </Text>
+                  </li>
+                ) : (
+                  <li key={probe.url}>
+                    <Text className={styles.optional}>
+                      {models.probeProblemFor(address?.purpose ?? probe.url, probe.problem)}
+                    </Text>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+      </div>
     </section>
   );
 }

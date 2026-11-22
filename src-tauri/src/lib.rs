@@ -250,6 +250,7 @@ pub fn run() {
             ipc::download_progress,
             ipc::readiness_status,
             ipc::network_addresses,
+            ipc::probe_network,
             ipc::download_runtime,
             ipc::remove_runtime,
             ipc::smoke_check,

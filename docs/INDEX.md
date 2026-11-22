@@ -106,10 +106,12 @@
 | `ecosystem.py` | валидатор экосистемы → docs/ECOSYSTEM.md |
 | `evals.py` | план проверок → docs/EVALS.md, data/evals.json |
 | `flows.py` | валидатор сценариев: шаги из реальных рук, риск не занижен |
+| `free_path.py` | — |
 | `hands.py` | валидатор рук: реальные строки реестра, допустимый риск |
 | `links.py` | проверка относительных ссылок в документах |
 | `mine_awesome.py` | разбор awesome-листов |
 | `no_telemetry.py` | — |
+| `one_door.py` | — |
 | `profiles.py` | валидатор профилей → docs/PROFILES.md |
 | `rust_literals.py` | — |
 | `rust_prose.py` | — |

@@ -16,6 +16,11 @@ on:
         type: boolean
         required: false
         default: false
+      network_probe:
+        description: Ask GitHub/Hugging Face what each catalog address answers (headers only, no download)
+        type: boolean
+        required: false
+        default: false
       release_tag:
         description: Release tag (must match the app version, for example v0.1.0)
         type: string
@@ -486,6 +491,40 @@ jobs:
 
       - name: Runtime smoke gate
         if: steps.runtime_smoke.outputs.status != '' && steps.runtime_smoke.outputs.status != '0'
+        shell: bash
+        run: exit 1
+
+      # Живой прогон сети: каждый адрес каталога спрашивается по-настоящему —
+      # код ответа, размер, ETag. Ничего не скачивается (`--head`), поэтому шаг
+      # стоит секунды и годится для обычной проверки, а не только для ручной.
+      - name: Live network probe (headers only, explicit consent)
+        if: steps.tests.outputs.status == '0' && ((github.event_name == 'workflow_dispatch' && inputs.network_probe) || github.event_name == 'push')
+        id: network_probe
+        shell: bash
+        env:
+          ZSHELPER_NETWORK_PROBE: "1"
+        run: |
+          set +e
+          cargo test --manifest-path src-tauri/Cargo.toml every_catalog_address_really_answers -- --ignored --nocapture > network-probe.log 2>&1
+          code=$?
+          # Фильтр, не нашедший ни одного теста, тоже даёт 0 — требуем финальную
+          # строку, которая печатается только после проверки всех четырёх адресов.
+          if [ "$code" = 0 ] && ! grep -Fq "NETWORK_PROBE all four catalog addresses answered with the pinned size" network-probe.log; then
+            echo "NETWORK_PROBE did not reach the final milestone" >> network-probe.log
+            code=1
+          fi
+          echo "status=$code" >> "$GITHUB_OUTPUT"
+          grep "NETWORK_PROBE" network-probe.log >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Network probe failure report
+        if: always() && steps.network_probe.outputs.status != '' && steps.network_probe.outputs.status != '0'
+        shell: bash
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/ci_log_annotate.py network-probe.log --title "live network probe" --grep "NETWORK_PROBE|panicked|адрес|размер|error" --after 3 --max 20
+
+      - name: Network probe gate
+        if: steps.network_probe.outputs.status != '' && steps.network_probe.outputs.status != '0'
         shell: bash
         run: exit 1
 

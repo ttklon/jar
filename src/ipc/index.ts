@@ -75,7 +75,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { Autostart, AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -388,6 +388,21 @@ export async function networkAddresses(): Promise<NetworkAddress[]> {
   }
   const { networkAddresses: fromData } = await import("./dev");
   return fromData();
+}
+
+/**
+ * Проверить адреса живьём: что серверы отвечают на самом деле.
+ *
+ * В браузере нечего проверять: `probe_network` — команда ядра, а браузерная
+ * сборка ядра не имеет. Пустой список читается как «проверка не делалась», и
+ * карточка говорит это словами, а не показывает пустоту как успех.
+ */
+export async function probeNetwork(): Promise<AddressProbe[]> {
+  if (isTauri()) {
+    const { probeNetwork: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  return [];
 }
 
 /**

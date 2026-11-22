@@ -1185,6 +1185,20 @@ pub fn network_addresses() -> Vec<readiness::NetworkAddress> {
     readiness::network_addresses()
 }
 
+/// Что сеть на самом деле отвечает про каждый адрес каталога.
+///
+/// Проверка стоит несколько байт: `curl --head`, без тела и без записи файла.
+/// Нужна на экране «Модели» — чтобы человек видел «адреса живые» фактом, а не
+/// обещанием, и чтобы переехавший релиз обнаруживался до кнопки «Скачать», а
+/// не после трёх минут ожидания.
+#[tauri::command]
+pub async fn probe_network() -> Result<Vec<readiness::AddressProbe>, String> {
+    // `curl` — процесс: в асинхронной команде он не должен держать рантайм.
+    tauri::async_runtime::spawn_blocking(readiness::probe_all)
+        .await
+        .map_err(|error| error.to_string())
+}
+
 /// Готовность к первому разговору: движок, модель, локальное распознавание, место.
 /// Только чтение — ничего не скачивает и не запускает.
 #[tauri::command]

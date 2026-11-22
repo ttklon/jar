@@ -539,3 +539,239 @@ mod tests {
         assert_eq!(needed, 2, "для разговора нужны ровно движок и модель");
     }
 }
+
+/// Что сеть на самом деле отвечает про каждый адрес из каталога.
+///
+/// Считается **до** скачивания и без скачивания: `curl --head` (или `--range 0-0`
+/// для серверов, которые HEAD не любят) отвечает кодом, размером и ETag.
+/// Это единственный способ проверить обещание «адреса живые» не словами, а
+/// прогоном: каталог может пережить переезд релиза, и узнать об этом лучше до
+/// того, как человек нажал «Скачать».
+#[derive(Debug, Clone, Serialize)]
+pub struct AddressProbe {
+    /// Адрес, который проверяли.
+    pub url: String,
+    /// HTTP-код ответа. Ноль — ответа не было (сеть, DNS, таймаут).
+    pub status: u16,
+    /// Размер, который назвал сервер. `None` — не назвал.
+    pub bytes: Option<u64>,
+    /// ETag или последний изменённый — чтобы было видно, тот ли это файл.
+    pub tag: Option<String>,
+    /// Человеческая причина, если проверка не удалась.
+    pub problem: Option<String>,
+}
+
+/// Разбирает вывод `curl --head --write-out` в факт об адресе.
+///
+/// Вывод — это заголовки, затем строка вида `HTTPCODE 200` / `SIZE 123` / `TAG "abc"`.
+/// Разбор отдельно от запуска: он проверяется тестами без сети, и именно он
+/// определяет, что мы считаем «отвечает».
+pub fn parse_probe(url: &str, output: &str) -> AddressProbe {
+    let mut status = 0u16;
+    let mut bytes = None;
+    let mut tag = None;
+    // Заголовки разбираются из самого ответа, а не через `%header{}`: этот
+    // спецификатор появился в curl 7.84, а в Windows 10 живёт 7.55, и проверка
+    // молча возвращала бы «размер неизвестен» на целой системе.
+    //
+    // При `--location` блоков заголовков несколько; верен последний — тот,
+    // что относится к конечному адресу после редиректа.
+    for line in output.lines() {
+        let line = line.trim();
+        let lower = line.to_ascii_lowercase();
+        if let Some(rest) = line.strip_prefix("ZSHELPER-CODE ") {
+            status = rest.trim().parse().unwrap_or(0);
+        } else if let Some(rest) = lower.strip_prefix("content-length:") {
+            // Байты — из последнего блока: значение редиректа бывает нулевым.
+            if let Ok(value) = rest.trim().parse::<u64>() {
+                bytes = if value > 0 { Some(value) } else { None };
+            }
+        } else if lower.starts_with("etag:") {
+            let value = line[5..].trim();
+            if !value.is_empty() {
+                tag = Some(value.to_string());
+            }
+        }
+    }
+    let problem = if status == 0 {
+        Some("адрес не ответил: сеть, DNS или таймаут".to_string())
+    } else if !(200..400).contains(&status) {
+        Some(format!("адрес ответил кодом {status}"))
+    } else if bytes.is_none() {
+        // Ответ 200 без размера — это страница, а не файл. Для скачивания
+        // такой адрес бесполезен, и лучше узнать это до кнопки.
+        Some("сервер не назвал размер файла".to_string())
+    } else {
+        None
+    };
+    AddressProbe {
+        url: url.to_string(),
+        status,
+        bytes,
+        tag,
+        problem,
+    }
+}
+
+/// Команда `curl` для проверки адреса без скачивания файла.
+///
+/// `--head` не скачивает тело: проверка стоит несколько байт трафика, а не
+/// гигабайт. Именно поэтому её можно делать перед кнопкой, а не после.
+pub fn probe_args(url: &str) -> Vec<String> {
+    vec![
+        "--proto".into(),
+        "=http,https".into(),
+        "--proto-redir".into(),
+        "=https".into(),
+        "--connect-timeout".into(),
+        "20".into(),
+        "--max-time".into(),
+        "60".into(),
+        "--max-redirs".into(),
+        "5".into(),
+        "--location".into(),
+        "--silent".into(),
+        "--show-error".into(),
+        "--head".into(),
+        "--write-out".into(),
+        "ZSHELPER-CODE %{http_code}\n".into(),
+        url.into(),
+    ]
+}
+
+/// Прогон по всем адресам каталога: что реально открывается и когда.
+///
+/// Отдельная функция, а не тест: приложению она тоже нужна — экран «Модели»
+/// спрашивает то же самое, и два разных способа проверять сеть разошлись бы.
+pub fn probe_all() -> Vec<AddressProbe> {
+    network_addresses()
+        .into_iter()
+        .map(|address| {
+            let output = std::process::Command::new("curl")
+                .args(probe_args(&address.url))
+                .output();
+            match output {
+                Ok(result) if result.status.success() || result.status.code() == Some(22) => {
+                    parse_probe(&address.url, &String::from_utf8_lossy(&result.stdout))
+                }
+                Ok(result) => {
+                    let stderr = String::from_utf8_lossy(&result.stderr).trim().to_string();
+                    AddressProbe {
+                        url: address.url.clone(),
+                        status: 0,
+                        bytes: None,
+                        tag: None,
+                        problem: Some(if stderr.is_empty() {
+                            format!("curl вышел с кодом {:?}", result.status.code())
+                        } else {
+                            stderr
+                        }),
+                    }
+                }
+                Err(error) => AddressProbe {
+                    url: address.url.clone(),
+                    status: 0,
+                    bytes: None,
+                    tag: None,
+                    problem: Some(format!("curl не запустился: {error}")),
+                },
+            }
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod probe_tests {
+    use super::*;
+
+    /// Настоящий ответ GitHub Releases после редиректа: два блока заголовков,
+    /// размер во втором. Взят из прогона, а не придуман, — иначе тест проверял
+    /// бы мою фантазию о HTTP.
+    const GITHUB: &str = "HTTP/1.1 302 Found\r\nContent-Length: 0\r\nLocation: https://objects.githubusercontent.com/x\r\n\r\nHTTP/1.1 200 OK\r\nContent-Length: 25696689\r\nETag: \"abc123\"\r\n\r\nZSHELPER-CODE 200\r\n";
+
+    #[test]
+    fn a_live_answer_is_read_as_status_size_and_tag() {
+        let probe = parse_probe("https://github.com/x.zip", GITHUB);
+        assert_eq!(probe.status, 200);
+        // Размер — из последнего блока: у редиректа он нулевой, и брать первый
+        // значило бы «размер неизвестен» на живом адресе.
+        assert_eq!(probe.bytes, Some(25696689));
+        assert_eq!(probe.tag.as_deref(), Some("\"abc123\""));
+        assert_eq!(probe.problem, None, "живой адрес — не проблема");
+    }
+
+    #[test]
+    fn a_missing_file_is_named_as_a_problem_not_as_zero_bytes() {
+        let probe = parse_probe("https://github.com/gone.zip", "HTTP/1.1 404 Not Found\r\nZSHELPER-CODE 404\r\n");
+        assert_eq!(probe.status, 404);
+        assert_eq!(probe.bytes, None);
+        assert!(probe.problem.is_some(), "404 — это провал проверки");
+        assert!(probe.problem.unwrap().contains("404"));
+    }
+
+    #[test]
+    fn an_empty_answer_is_not_a_working_address() {
+        let probe = parse_probe("https://x/y", "");
+        assert_eq!(probe.status, 0);
+        // Ноль байт не должен выглядеть как «файл есть, но пустой»: это
+        // отсутствие ответа, и человеку так и говорят.
+        assert!(probe.problem.is_some());
+        assert!(probe.problem.unwrap().contains("не ответил"));
+    }
+
+    #[test]
+    fn a_page_instead_of_a_file_is_reported_before_the_button() {
+        let probe = parse_probe("https://huggingface.co/x", "HTTP/1.1 200 OK\r\nZSHELPER-CODE 200\r\n");
+        assert_eq!(probe.status, 200);
+        assert_eq!(probe.bytes, None);
+        assert!(probe.problem.unwrap().contains("размер"));
+    }
+
+    #[test]
+    fn the_probe_asks_for_headers_only_and_never_writes_a_file() {
+        let args = probe_args("https://huggingface.co/x.gguf");
+        assert!(args.iter().any(|a| a == "--head"), "только заголовки, без тела");
+        assert!(!args.iter().any(|a| a == "-o" || a == "--output"), "ничего не сохраняем на диск");
+        assert!(args.iter().any(|a| a == "--proto-redir"));
+        assert_eq!(args.last().map(String::as_str), Some("https://huggingface.co/x.gguf"));
+    }
+
+    /// Живой прогон: каждый адрес каталога проверяется сетью, и сверяется не
+    /// только код, но и размер — тот, что записан в каталоге.
+    ///
+    /// Под `#[ignore]`, как и разговорный smoke: обычные тесты в сеть не ходят
+    /// никогда. Запускается в CI отдельным шагом по явному согласию.
+    #[test]
+    #[ignore = "opens network connections; explicit consent required"]
+    fn every_catalog_address_really_answers_with_the_pinned_size() {
+        assert!(
+            std::env::var("ZSHELPER_NETWORK_PROBE").is_ok_and(|v| v == "1"),
+            "explicit ZSHELPER_NETWORK_PROBE=1 consent required"
+        );
+        let probes = probe_all();
+        let addresses = network_addresses();
+        assert_eq!(probes.len(), addresses.len(), "проверен каждый адрес, а не первый");
+        let mut failures = Vec::new();
+        for (probe, address) in probes.iter().zip(addresses.iter()) {
+            match &probe.problem {
+                Some(problem) => failures.push(format!("{}: {problem}", address.purpose)),
+                None => {
+                    let got = probe.bytes.expect("у живого адреса есть размер");
+                    if got != address.bytes {
+                        failures.push(format!(
+                            "{}: размер не тот — в каталоге {}, сервер говорит {got}",
+                            address.purpose, address.bytes
+                        ));
+                    } else {
+                        println!(
+                            "NETWORK_PROBE {} {} байт — совпало с каталогом",
+                            address.purpose, got
+                        );
+                    }
+                }
+            }
+        }
+        assert!(failures.is_empty(), "адреса из каталога: {failures:?}");
+        println!("NETWORK_PROBE all four catalog addresses answered with the pinned size");
+    }
+}

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NetworkCard, weight } from "./NetworkCard";
 import { models } from "../i18n/ru";
 
@@ -21,6 +21,9 @@ import { models } from "../i18n/ru";
 const list = vi.hoisted(() => ({
   addresses: [] as unknown[],
   fail: false,
+  probes: [] as unknown[],
+  probeFail: false,
+  probeCalls: 0,
 }));
 
 vi.mock("../ipc", () => ({
@@ -28,12 +31,20 @@ vi.mock("../ipc", () => ({
     if (list.fail) throw new Error("ядро не ответило");
     return list.addresses;
   },
+  probeNetwork: async () => {
+    list.probeCalls += 1;
+    if (list.probeFail) throw new Error("проверка не запустилась");
+    return list.probes;
+  },
 }));
 
 afterEach(() => {
   cleanup();
   list.addresses = [];
   list.fail = false;
+  list.probes = [];
+  list.probeFail = false;
+  list.probeCalls = 0;
 });
 
 function four() {
@@ -133,5 +144,63 @@ describe("сетевой след приложения", () => {
     expect(screen.getByText(/0 ₽/)).toBeTruthy();
     // Причина названа: платить некому.
     expect(screen.getByText(/Платить некому/)).toBeTruthy();
+  });
+
+  it("проверяет адреса только по кнопке, а не при открытии экрана", async () => {
+    // При открытии экрана каждый адрес — настоящий запрос. Это было бы «тихое
+    // скачивание» в миниатюре: человек не просил, а приложение сходило в сеть.
+    list.addresses = four();
+    render(<NetworkCard />);
+    await screen.findAllByRole("listitem");
+
+    expect(list.probeCalls).toBe(0);
+
+    fireEvent.click(screen.getByRole("button", { name: models.probeAsk }));
+
+    // Ядро ответило пустым списком — это и есть признак, что вызов дошёл:
+    // строка итога появляется только после ответа `probe_network`.
+    await screen.findByText(/Проверять нечего/);
+    expect(list.probeCalls).toBe(1);
+  });
+
+  it("говорит, сколько адресов ответило, и называет остальные поимённо", async () => {
+    const addresses = four();
+    list.addresses = addresses;
+    list.probes = [
+      { url: addresses[0]!.url, status: 200, bytes: 986048768, tag: "\"a\"", problem: null },
+      { url: addresses[1]!.url, status: 404, bytes: null, tag: null, problem: "адрес ответил кодом 404" },
+    ];
+    render(<NetworkCard />);
+    await screen.findAllByRole("listitem");
+
+    fireEvent.click(screen.getByRole("button", { name: models.probeAsk }));
+
+    // Один из двух — это не «всё хорошо»: число названо числом.
+    const status = await screen.findByText(/Ответили 1 из 2/);
+    expect(status.textContent).toContain("1 из 2");
+    expect(screen.getByText(/движок llama\.cpp: адрес ответил кодом 404/)).toBeTruthy();
+  });
+
+  it("пустой ответ ядра не выдаёт за «все адреса живы»", async () => {
+    // Так выглядит браузерная сборка: ядра нет, проверять нечего. «Все 0
+    // адресов ответили» было бы успехом, которого не было.
+    list.addresses = four();
+    list.probes = [];
+    render(<NetworkCard />);
+    await screen.findAllByRole("listitem");
+
+    fireEvent.click(screen.getByRole("button", { name: models.probeAsk }));
+    expect(await screen.findByText(/Проверять нечего/)).toBeTruthy();
+  });
+
+  it("ошибку проверки называет, а не прячет за кнопкой", async () => {
+    list.addresses = four();
+    list.probeFail = true;
+    render(<NetworkCard />);
+    await screen.findAllByRole("listitem");
+
+    fireEvent.click(screen.getByRole("button", { name: models.probeAsk }));
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain("проверка не выполнена");
   });
 });

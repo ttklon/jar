@@ -849,6 +849,21 @@ export interface NetworkAddress {
 }
 
 /**
+ * Что сеть на самом деле ответила про адрес.
+ *
+ * `status` — HTTP-код, ноль означает «ответа не было» (сеть, DNS, таймаут).
+ * `problem` — человеческая причина, если проверка не удалась; тогда `status`,
+ * `bytes` и `tag` ничего не обещают.
+ */
+export interface AddressProbe {
+  url: string;
+  status: number;
+  bytes: number | null;
+  tag: string | null;
+  problem: string | null;
+}
+
+/**
  * Итог «удалить всё скачанное».
  *
  * Три поля, а не одно: удаление пяти вещей — пять разных исходов. Движок может

@@ -6,6 +6,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { transcribeCancellable } from "../lib/transcription";
 import type {
+  AddressProbe,
   Autostart,
   MachineState,
   Presence,
@@ -120,6 +121,11 @@ export function removeEverything(): Promise<RemovedAll> {
 /** Все сетевые адреса — из ядра, списком. */
 export function networkAddresses(): Promise<NetworkAddress[]> {
   return invoke<NetworkAddress[]>("network_addresses");
+}
+
+/** Живая проверка адресов: заголовки вместо файла, несколько байт трафика. */
+export function probeNetwork(): Promise<AddressProbe[]> {
+  return invoke<AddressProbe[]>("probe_network");
 }
 
 export function readinessStatus(): Promise<ReadinessStatus> {
