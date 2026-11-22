@@ -275,26 +275,44 @@ impl Memory {
         }
 
         let runs = self.recent_runs(SEARCH_DEPTH)?;
-        let mut found = Vec::new();
+        let mut found: Vec<(usize, Episode)> = Vec::new();
 
         for run in runs {
             let haystack = haystack(&run);
+            // Сравнение по началу слова, а не по вхождению подстроки:
+            // «загрузки» иначе не находит «уборка в загрузках». Человек
+            // говорит в именительном падеже, а запись может быть в любом.
             let matched: Vec<String> = words
                 .iter()
-                .filter(|word| haystack.contains(word.as_str()))
+                .filter(|word| contains_word(&haystack, word))
                 .cloned()
                 .collect();
 
-            // Совпали все слова — иначе запуск не отвечает на вопрос целиком.
-            if matched.len() == words.len() {
-                found.push(Episode { run, matched });
+            // Раньше требовалось совпадение **всех** слов — и «то, что было
+            // вчера про диск» не находило ничего, потому что «было», «вчера»
+            // и «про» в записях не встречаются. Фраза человека — не запрос к
+            // базе: в ней есть служебные слова, и они не должны обнулять поиск.
+            //
+            // Теперь: засчитывается запуск, где нашлось **содержательное**
+            // слово (не из служебных), а служебные только не мешают. Если все
+            // слова служебные («что было вчера»), ищем по любому совпадению.
+            if matched.is_empty() {
+                continue;
             }
-            if found.len() == limit {
-                break;
+            let strong = matched.iter().filter(|word| !is_filler(word)).count();
+            if strong > 0 || words.iter().all(|word| is_filler(word)) {
+                found.push((strong, Episode { run, matched }));
             }
         }
 
-        Ok(found)
+        // Больше содержательных совпадений — выше: «про диск» должен идти
+        // раньше, чем совпадение по одному «было».
+        found.sort_by(|left, right| right.0.cmp(&left.0));
+        Ok(found
+            .into_iter()
+            .take(limit)
+            .map(|(_, episode)| episode)
+            .collect())
     }
 
     /// Версия схемы — то, что записано в файле, а не в константе.
@@ -393,6 +411,79 @@ fn migrate(conn: &Connection) -> Result<(), rusqlite::Error> {
 }
 
 /// Слова запроса: нижний регистр, без повторов, короткие отбрасываются.
+/// Есть ли слово в тексте — по началу слова, а не по вхождению подстроки.
+///
+/// «загрузки» должно находить «загрузках», «папка» — «папок», «диск» —
+/// «диска». Искать `contains` здесь значит требовать точной формы слова,
+/// которой у человека в голове нет.
+fn contains_word(text: &str, word: &str) -> bool {
+    // Русский текст: границей слова считаем всё, что не буква и не цифра.
+    text.split(|symbol: char| !symbol.is_alphanumeric())
+        .any(|part| shares_stem(part, word))
+}
+
+/// Общий корень: «загрузки» и «загрузках», «папка» и «папок».
+///
+/// Не `starts_with` в одну сторону: слово человека и слово записи могут
+/// отличаться окончанием в любую сторону. Берём общее начало длиной не меньше
+/// четырёх знаков — короче начинают совпадать случайные слова.
+fn shares_stem(part: &str, word: &str) -> bool {
+    let part: Vec<char> = part.chars().collect();
+    let word: Vec<char> = word.chars().collect();
+    let common = part
+        .iter()
+        .zip(word.iter())
+        .take_while(|(left, right)| left == right)
+        .count();
+    if common == part.len() && common == word.len() {
+        return true;
+    }
+    // Общий корень не короче четырёх знаков, а хвост отличается не больше
+    // чем на два: «загрузки»/«загрузках» и «диска»/«диск» — да,
+    // «сеть»/«сетка» — нет. Порог — не точная морфология, а проверяемое
+    // правило: его видно и его можно оспорить, в отличие от «похоже звучит».
+    common >= 4 && part.len().abs_diff(word.len()) <= 2
+}
+
+/// Служебные слова: в записях их нет, и требовать их совпадения — значит
+/// обнулять поиск на живом вопросе.
+///
+/// Список нарочно короткий: только то, что человек говорит о времени и о самом
+/// действии. Добавлять сюда редкие слова опасно — тогда они перестанут
+/// находиться по-настоящему.
+fn is_filler(word: &str) -> bool {
+    matches!(
+        word,
+        "что"
+            | "было"
+            | "был"
+            | "была"
+            | "были"
+            | "вчера"
+            | "сегодня"
+            | "позавчера"
+            | "про"
+            | "как"
+            | "где"
+            | "когда"
+            | "это"
+            | "мне"
+            | "я"
+            | "он"
+            | "она"
+            | "ещё"
+            | "еще"
+            | "уже"
+            | "надо"
+            | "можно"
+            | "делал"
+            | "делали"
+            | "the"
+            | "a"
+            | "about"
+    )
+}
+
 fn words(query: &str) -> Vec<String> {
     let words: Vec<String> = query
         .to_lowercase()
@@ -645,11 +736,12 @@ mod tests {
     fn two_words_narrow_the_answer_and_are_named() {
         let (memory, dir) = seeded("search-two");
 
-        // «папк» есть в шаге уборки, «диска» нет нигде — пустой ответ, а не «примерно».
-        assert!(memory
-            .search("загрузки диска", 10)
-            .expect("поиск")
-            .is_empty());
+        // Шаг 363: «загрузки диска» теперь находит уборку — по слову
+        // «загрузки», хотя «диска» нет нигде. Прежнее правило требовало всех
+        // слов и не находило живую фразу.
+        let softer = memory.search("загрузки диска", 10).expect("поиск");
+        assert_eq!(softer.len(), 1, "нашлось по содержательному слову");
+        assert_eq!(softer[0].run.subject, "Уборка в Загрузках");
 
         let found = memory.search("уборка хэшу", 10).expect("поиск");
         assert_eq!(found.len(), 1);
@@ -657,6 +749,72 @@ mod tests {
             found[0].matched,
             vec!["уборка".to_string(), "хэшу".to_string()]
         );
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Шаг 363: сюда приходят с фразой, а не с запросом к базе.
+    ///
+    /// «то, что было вчера про диск» раньше не находило ничего: слова «что»,
+    /// «было», «вчера», «про» в записях не встречаются, а требовались все.
+    #[test]
+    fn a_spoken_phrase_finds_a_deed_by_its_meaningful_words() {
+        let (memory, dir) = seeded("search-phrase");
+
+        let found = memory
+            .search("то, что было вчера про загрузки", 10)
+            .expect("поиск");
+        assert_eq!(found.len(), 1, "служебные слова не обнуляют поиск: {found:?}");
+        assert_eq!(found[0].run.subject, "Уборка в Загрузках");
+        // Совпавшими называются все найденные слова, включая служебное «было»,
+        // если оно вдруг встретилось в записи: человек должен видеть, почему
+        // это нашлось.
+        assert!(found[0].matched.contains(&"загрузки".to_string()));
+
+        // А фраза целиком из служебных слов ищет по любому совпадению, а не
+        // отвечает «ничего»: вопрос был, пусть и без содержательных слов.
+        let vague = memory.search("что было вчера", 10).expect("поиск");
+        assert!(vague.is_empty(), "в записях нет даже служебных слов");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Шаг 363: падежи не должны мешать. Человек говорит «загрузки», а в
+    /// записи «загрузках»; требовать точной формы значит требовать того,
+    /// чего у человека в голове нет.
+    #[test]
+    fn a_case_ending_does_not_break_a_match() {
+        assert!(contains_word("уборка в загрузках", "загрузки"));
+        assert!(contains_word("уборка в загрузках", "загрузк"));
+        assert!(contains_word("отчёт по диску", "диска"));
+        assert!(contains_word("модели в папке", "модель"));
+    }
+
+    /// А похожие, но разные слова — не совпадают: иначе «сеть» находила бы
+    /// «сетку», и поиск врал бы тихо.
+    #[test]
+    fn similar_but_different_words_do_not_match() {
+        assert!(!contains_word("сетка для проводов", "сеть"));
+        assert!(!contains_word("дисконт в магазине", "диск"));
+        assert!(!contains_word("формат файла", "форма"));
+    }
+
+    /// Содержательное совпадение важнее: оно идёт первым.
+    #[test]
+    fn the_most_meaningful_match_comes_first() {
+        let (memory, dir) = temp_memory("search-rank");
+
+        for subject in ["Отчёт по диску", "Про диск и память"] {
+            let run = memory.start_run("tool", subject).expect("запуск");
+            memory.finish_run(run, "ok").expect("итог");
+        }
+
+        // «было» служебное, «диск» — нет: оба запуска подходят по «диск»,
+        // а по числу содержательных совпадений они равны, и порядок — новый
+        // сверху, как и раньше.
+        let found = memory.search("было диск", 10).expect("поиск");
+        assert_eq!(found.len(), 2);
+        assert_eq!(found[0].run.subject, "Про диск и память");
 
         let _ = std::fs::remove_dir_all(&dir);
     }

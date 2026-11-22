@@ -120,13 +120,16 @@ function toDeed(run: RunRecord): Deed {
 }
 
 /**
- * Карточка одного запуска — та же, что в остальных местах (шаг 361).
+ * Карточка одного запуска — та же, что в остальных местах (шаги 361–362).
  *
- * Здесь она раскрыта сразу: в «Истории» человек пришёл именно за подробностями,
- * и прятать их за лишним нажатием незачем.
+ * Свёрнута в одну строку, а подробности — по нажатию. Это не экономия места
+ * ради места: в ленте из двадцати дел развёрнутые карточки дают простыню, в
+ * которой «что было вчера про диск» не найти, а именно за этим сюда приходят.
+ * Исключение — единственный запуск в ленте: там сворачивать нечего, и
+ * раскрывать тоже незачем — он и так один.
  */
-function RunCard({ run }: { run: RunRecord }) {
-  return <DeedCard deed={toDeed(run)} startOpen />;
+function RunCard({ run, alone }: { run: RunRecord; alone: boolean }) {
+  return <DeedCard deed={toDeed(run)} startOpen={alone} />;
 }
 
 export function Journal() {
@@ -226,7 +229,7 @@ export function Journal() {
           ? episodes.map((episode) => (
               <div key={episode.run.id} className={styles.run}>
                 <Text className={styles.note}>{journal.searchMatched(episode.matched)}</Text>
-                <RunCard run={episode.run} />
+                <RunCard run={episode.run} alone={episodes.length === 1} />
               </div>
             ))
           : null}
@@ -242,7 +245,7 @@ export function Journal() {
           <Text className={styles.note}>{journal.runsEmpty}</Text>
         ) : null}
         {runs !== null && runs.length > 0
-          ? runs.map((run) => <RunCard key={run.id} run={run} />)
+          ? runs.map((run) => <RunCard key={run.id} run={run} alone={runs.length === 1} />)
           : null}
       </section>
 

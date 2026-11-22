@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { auditTail, memoryRuns } from "../ipc";
 import type { RunRecord } from "../ipc";
 import { Journal } from "./Journal";
@@ -82,6 +82,32 @@ describe("экран «История»: запуски из памяти", () =
       expect(screen.getAllByText(/идёт/).length).toBeGreaterThan(0);
     });
     expect(screen.getByText(/без шагов/)).toBeTruthy();
+  });
+
+  it("лента из нескольких дел — строки, а подробности по нажатию", async () => {
+    // Шаг 362: развёрнутые карточки превращают ленту в простыню, в которой
+    // «что было вчера про диск» не найти.
+    vi.mocked(auditTail).mockResolvedValue([]);
+    vi.mocked(memoryRuns).mockResolvedValue([
+      run({ id: 1, subject: "Уборка в Загрузках" }),
+      run({ id: 2, subject: "Собрать отчёт за неделю", steps: [] }),
+    ]);
+
+    render(<Journal />);
+
+    await waitFor(() => {
+      // В свёрнутой строке тема внутри кнопки — берём её как имя кнопки.
+      expect(screen.getByRole("button", { name: /Уборка в Загрузках/ })).toBeTruthy();
+    });
+    // Подробностей в ленте нет, пока не нажали.
+    expect(screen.queryByText("files|создать|папку")).toBeNull();
+    expect(screen.queryByText(/Вид дела/)).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /Уборка в Загрузках/ }));
+    expect(screen.getByText("files|создать|папку")).toBeTruthy();
+    expect(screen.getByText(/Вид дела/)).toBeTruthy();
+    // Второе дело при этом остаётся свёрнутым: раскрытие — по одному.
+    expect(screen.getByRole("button", { name: /Собрать отчёт за неделю/ })).toBeTruthy();
   });
 
   it("сломанная память не скрывает журнал", async () => {
