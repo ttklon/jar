@@ -34,7 +34,14 @@ vi.mock("../ipc", async (importOriginal) => ({
   stopEngine: mocks.stop,
   downloadProgress: mocks.progress,
 }));
-afterEach(() => { cleanup(); mocks.desktop = false; vi.clearAllMocks(); });
+afterEach(() => {
+  cleanup();
+  mocks.desktop = false;
+  vi.clearAllMocks();
+  // Журнал первого запуска переживает окно — значит, и тест. Между тестами
+  // убираем явно, иначе «скачано» из прошлого теста видно в следующем.
+  localStorage.clear();
+});
 
 function status(partial: Partial<ReadinessStatus> = {}): ReadinessStatus {
   return {
@@ -242,6 +249,33 @@ describe("явные действия desktop-карточки", () => {
     const line = screen.getByText(/Качаю /).textContent ?? "";
     expect(line).toMatch(/не блокирует/);
     expect(line).toMatch(/реестр дел работает без модели/);
+  });
+
+  it("после скачивания журнал говорит, что было при первом запуске (шаг 40)", async () => {
+    mocks.desktop = true;
+    mocks.download.mockResolvedValueOnce(undefined);
+    render(<ReadinessCard status={status()} error={null} />);
+
+    // До скачивания журнала нет: пустая карточка выглядела бы потерянным отчётом.
+    expect(screen.queryByText("что было при первом запуске")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Скачать модель" }));
+    await waitFor(() => expect(screen.getByText("что было при первом запуске")).toBeTruthy());
+    expect(screen.getByText(/скачано: модель разговора/)).toBeTruthy();
+  });
+
+  it("журнал переживает перезапуск — иначе он не нужен", () => {
+    // Прошлый запуск оставил след, карточка уже молчит: всё на месте.
+    localStorage.setItem(
+      "zshelper.firstRun.log",
+      JSON.stringify([{ what: "deferred", item: "модель распознавания", why: "не хватает места" }]),
+    );
+    render(<ReadinessCard status={status({ engine_found: true, model_present: true })} error={null} />);
+
+    // Именно ради этого случая журнал и существует: карточка говорит «готово»,
+    // а человек помнит, что что-то откладывал, и хочет проверить.
+    expect(screen.getByText("что было при первом запуске")).toBeTruthy();
+    expect(screen.getByText(/отложено: модель распознавания/)).toBeTruthy();
   });
 
   it("позволяет отменить ожидающую загрузку", async () => {

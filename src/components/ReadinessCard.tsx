@@ -17,6 +17,7 @@ import { offlineNote, onlineState } from "../lib/offline";
 import { assessReadiness, formatSize, hasRoom, planPrepare } from "../lib/readiness";
 import { readiness as text } from "../i18n/ru";
 import { ErrorLine } from "./ErrorLine";
+import { appendEvent, isEmpty, readLog, summarize } from "../lib/firstRunLog";
 
 const useStyles = makeStyles({
   card: {
@@ -48,6 +49,14 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
   },
   progress: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },
+  logCard: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+    padding: "10px 12px",
+    borderRadius: tokens.borderRadiusMedium,
+    backgroundColor: tokens.colorNeutralBackground3,
+  },
 });
 
 interface ReadinessCardProps {
@@ -215,23 +224,30 @@ export function ReadinessCard({
       setDone(null);
       setSmoke(null);
       try {
+        // Шаг 40: каждое скачивание оставляет след в журнале первого запуска.
+        // Пишем при успехе, а не при нажатии: журнал говорит, что **произошло**,
+        // а не что человек собирался сделать.
         if (kind === "model") {
           const spec = status.model_spec;
           await downloadModel(spec.url, spec.file, spec.sha256);
           if (!alive.current) return;
+          remember({ what: "downloaded", item: text.prepareStep.model });
           setDone(text.downloaded(spec.file));
         } else if (kind === "speech-model") {
           const spec = status.speech_model_spec;
           await downloadModel(spec.url, spec.file, spec.sha256);
           if (!alive.current) return;
+          remember({ what: "downloaded", item: text.prepareStep["speech-model"] });
           setDone(text.downloaded(spec.file));
         } else if (kind === "runtime") {
           const installed = await downloadRuntime("llama");
           if (!alive.current) return;
+          remember({ what: "downloaded", item: text.prepareStep.runtime });
           setDone(text.downloaded(installed.program));
         } else {
           const installed = await downloadRuntime("whisper");
           if (!alive.current) return;
+          remember({ what: "downloaded", item: text.prepareStep["speech-runtime"] });
           setDone(text.downloaded(installed.program));
         }
         refresh();
@@ -254,6 +270,12 @@ export function ReadinessCard({
 
   // Куда ведёт кнопка в отказе: в «Модели». Ошибку снимаем — человек ушёл
   // разбираться, и старый текст, оставшийся на экране, читался бы как новый сбой.
+  // Записать событие и сразу показать его: журнал на экране должен обновляться
+  // после скачивания, а не после перезапуска.
+  const remember = useCallback((event: Parameters<typeof appendEvent>[0]) => {
+    if (appendEvent(event)) setLog(readLog());
+  }, []);
+
   const actToModels = useMemo(
     () =>
       onToModels
@@ -426,6 +448,16 @@ export function ReadinessCard({
     }
   }, [status, includeSpeech, statusProp, refresh, onToVoice]);
 
+  // Шаг 40: журнал читается до **любых** ранних `return`. Хук ниже первого
+  // выхода вызывался бы не на каждом рендере, и React падал бы с «change in the
+  // order of Hooks» — экран навсегда застревал на «Смотрю, что уже есть». Это
+  // и случилось с первой попыткой; тест «читает статус сама» поймал сразу.
+  // Перечитываем не на каждый рендер: только когда в журнал что-то записали
+  // (см. `remember` ниже) или при монтировании. Иначе чтение хранилища шло бы
+  // на каждое движение статуса.
+  const [log, setLog] = useState(() => readLog());
+  const logSummary = useMemo(() => summarize(log), [log]);
+
   if (status === null && error === null) {
     return (
       <section className={styles.card} aria-label={text.title}>
@@ -462,6 +494,9 @@ export function ReadinessCard({
   // Что именно сейчас качается — по тому же признаку, что и опрос прогресса.
   // Имя нужно в строке прогресса: «скачано 40 из 100» без имени файла
   // заставляет догадываться, что это за 100 мегабайт (шаг 22).
+  // Журнал читается при монтировании и после каждого скачивания — не на каждый
+  // рендер: хранилище читает диск, и делать это на каждое движение статуса
+  // незачем. `done` меняется ровно тогда, когда в журнале появилась запись.
   const downloadingName =
     busy === "model"
       ? status.model_spec.file
@@ -548,6 +583,29 @@ export function ReadinessCard({
         <ErrorLine className={styles.error} text={text.prepareUnsupported} />
       ) : null}
       {!browser && plan.block === "runtime-owned" ? <ErrorLine className={styles.error} text={text.prepareOwned} /> : null}
+
+      {/*
+        Шаг 40: журнал первого запуска. Стоит ниже действий и выше итога: это
+        не то, что надо делать, а то, что уже случилось. Пустой журнал не
+        рисуется вовсе — пустая карточка выглядит как потерянный отчёт.
+      */}
+      {!isEmpty(log) ? (
+        <div className={styles.logCard}>
+          <Text weight="semibold">{text.firstRunLogTitle}</Text>
+          {logSummary.downloaded.length > 0 ? (
+            <Text className={styles.note}>{text.firstRunLogDownloaded(logSummary.downloaded.join(", "))}</Text>
+          ) : null}
+          {logSummary.verified.length > 0 ? (
+            <Text className={styles.note}>{text.firstRunLogVerified(logSummary.verified.join(", "))}</Text>
+          ) : null}
+          {logSummary.deferred.length > 0 ? (
+            <Text className={styles.note}>{text.firstRunLogDeferred(logSummary.deferred.join(", "))}</Text>
+          ) : null}
+          {logSummary.checked.length > 0 ? (
+            <Text className={styles.note}>{text.firstRunLogChecked(logSummary.checked.join(", "))}</Text>
+          ) : null}
+        </div>
+      ) : null}
 
       {assessment.ready ? (
         <Text className={styles.ok}>{text.readyText}</Text>
