@@ -100,6 +100,7 @@ import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
 import { describePlanParams } from "../lib/planPreview";
 import { ActionList } from "../components/ActionList";
+import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { voice, microphoneCheck as micTestText } from "../i18n/ru";
 
 /**
@@ -198,7 +199,10 @@ type EngineStart =
 
 export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const styles = useStyles();
-  const [text, setText] = useState("");
+  // Шаг 26: то, что человек набрал или сказал, но не отправил, переживает
+  // закрытие окна. Восстанавливаем при открытии экрана — один раз, лениво, чтобы
+  // не читать хранилище на каждый рендер.
+  const [text, setText] = useState(() => readDraft());
   const [items, setItems] = useState<PlanItem[] | null>(null);
   const [busy, setBusy] = useState(false);
   const searchRequestRef = useRef(0);
@@ -1189,6 +1193,9 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
       return;
     }
 
+    // Фраза стала делом — черновик убран (шаг 26). Иначе на следующем запуске
+    // человек видит свой же прошлый вопрос и решает, что он не ушёл.
+    clearDraft();
     setBusy(true);
     setError(null);
     planFor(asked, LIMIT)
@@ -2070,6 +2077,9 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
             draftWaitingAnswer ? voice.answerPlaceholder : voice.heardPlaceholder
           }
           onChange={(_, data) => {
+            // Шаг 26: пишем черновик на каждое изменение. Момент закрытия окна
+            // выбрать нельзя, поэтому «сохранить при уходе» — не вариант.
+            saveDraft(data.value);
             // Набор «да» — разрешение. Пока вопрос открыт, набор — ответ, не новая задача.
             const pendingDraft = draftRef.current;
             if (

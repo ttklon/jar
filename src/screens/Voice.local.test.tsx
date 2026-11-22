@@ -92,6 +92,10 @@ vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
 afterEach(() => {
   cleanup();
+  // Черновик переживает окно — и в тестах тоже, как в жизни. Значит, между
+  // тестами его надо убирать явно: иначе «что набрал в прошлом тесте» всплывает
+  // в следующем, и проверяется порядок тестов, а не поведение экрана.
+  localStorage.clear();
   // Моки сбрасываем целиком: «очередные» ответы не должны перетекать в следующий тест —
   // иначе проверяется не поведение экрана, а порядок тестов.
   vi.mocked(planFor).mockReset().mockResolvedValue([]);
@@ -2041,6 +2045,30 @@ describe("локальное распознавание на экране", () =
     });
     // Сырой ответ модели виден целиком: человек должен видеть, что она сказала на самом деле.
     expect(screen.getAllByText(/выдуманная\|рука/).length).toBeGreaterThan(0);
+  });
+
+  it("неотправленная фраза возвращается в поле после закрытия окна (шаг 26)", async () => {
+    vi.mocked(speechStatus).mockResolvedValue(null as never);
+    // Прошлый запуск: человек набрал и не отправил.
+    localStorage.setItem("zshelper.draft.phrase", "убери старые отчёты");
+
+    render(<Voice />);
+
+    // Фраза на месте — её не надо набирать заново.
+    expect((screen.getByLabelText("Услышал") as HTMLInputElement).value).toBe(
+      "убери старые отчёты",
+    );
+  });
+
+  it("набранное сохраняется сразу, а не при отправке", async () => {
+    vi.mocked(speechStatus).mockResolvedValue(null as never);
+    render(<Voice />);
+
+    const field = screen.getByLabelText("Услышал") as HTMLInputElement;
+    fireEvent.change(field, { target: { value: "удали временные файлы" } });
+
+    // «Сохранить при уходе» не работает: момент закрытия окна выбрать нельзя.
+    expect(localStorage.getItem("zshelper.draft.phrase")).toBe("удали временные файлы");
   });
 
   it("отмена во время записи выбрасывает сказанное и говорит об этом", async () => {
