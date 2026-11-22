@@ -37,6 +37,7 @@ function verdict(patch: Partial<SelfCheckVerdict> = {}): SelfCheckVerdict {
     passed: true,
     detail: "первое сработало, второе отклонено",
     ms: 3,
+    risk: "несогласованное действие выполнится дважды",
     ...patch,
   };
 }
@@ -177,5 +178,21 @@ describe("карточка «Проверка себя»", () => {
     await screen.findByText(/проверок прошло: 1 из 1/);
     expect(screen.queryByText(/Что можно сделать/)).toBeNull();
     await waitFor(() => expect(screen.getAllByRole("button")).toHaveLength(1));
+  });
+
+  it("у провала названо, чем это грозит, а у прошедшей проверки — нет", async () => {
+    // Шаг 353. Человек решает, чинить сейчас или потом, — для этого нужна
+    // цена отказа. У зелёной проверки «чем грозит» звучало бы как угроза на
+    // ровном месте.
+    vi.mocked(selfCheck).mockResolvedValue([
+      verdict({ name: "память", passed: false, risk: "журнал останется на временной базе" }),
+      verdict({ name: "версия", passed: true, risk: "версия не чинится" }),
+    ]);
+    render(<SelfCheckCard />);
+    fireEvent.click(screen.getByRole("button", { name: /Прогнать проверки/ }));
+
+    expect(await screen.findByText(/Если не пройдёт: журнал останется на временной базе/)).toBeTruthy();
+    // У прошедшей — нет, хотя риск в данных есть.
+    expect(screen.queryByText(/Если не пройдёт: версия не чинится/)).toBeNull();
   });
 });

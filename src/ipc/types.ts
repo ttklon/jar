@@ -829,6 +829,11 @@ export interface SelfCheckVerdict {
   passed: boolean;
   detail: string;
   ms: number;
+  /**
+   * Чем грозит провал, словами человека. Не то же, что `promise`: обещание
+   * говорит, что проверяли, риск — что случится без этого.
+   */
+  risk: string;
 }
 
 export interface Installed { program: string }

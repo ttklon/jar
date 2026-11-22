@@ -139,6 +139,11 @@ export function SelfCheckCard() {
                 </div>
                 <Text className={styles.muted}>{verdict.promise}</Text>
                 <Text className={styles.muted}>{verdict.detail}</Text>
+                {/* Риск — только у провала: у зелёной проверки «чем грозит»
+                    звучало бы как угроза на ровном месте. */}
+                {!verdict.passed && verdict.risk ? (
+                  <Text className={styles.muted}>{text.risk(verdict.risk)}</Text>
+                ) : null}
                 {(() => {
                   const advice = adviceForVerdict(verdict);
                   if (!advice) return null;

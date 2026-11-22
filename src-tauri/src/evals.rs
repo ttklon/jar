@@ -33,6 +33,12 @@ pub struct Verdict {
     pub detail: String,
     /// Сколько это заняло.
     pub ms: u64,
+    /// Чем это грозит, если не пройдено, — словами человека.
+    ///
+    /// Зачем отдельно от `promise`. Обещание говорит, что проверяли; риск
+    /// говорит, что случится без него. Человек решает, чинить сейчас или
+    /// потом, — и для решения нужна цена, а не формулировка.
+    pub risk: String,
 }
 
 /// Прогнать все проверки. Порядок — от быстрых к медленным.
@@ -50,6 +56,7 @@ pub fn run_all() -> Vec<Verdict> {
 fn verdict(
     name: &str,
     promise: &str,
+    risk: &str,
     started: Instant,
     outcome: Result<String, String>,
 ) -> Verdict {
@@ -58,6 +65,7 @@ fn verdict(
         Ok(detail) => Verdict {
             name: name.to_string(),
             promise: promise.to_string(),
+            risk: risk.to_string(),
             passed: true,
             detail,
             ms,
@@ -65,6 +73,7 @@ fn verdict(
         Err(detail) => Verdict {
             name: name.to_string(),
             promise: promise.to_string(),
+            risk: risk.to_string(),
             passed: false,
             detail,
             ms,
@@ -87,6 +96,7 @@ fn check_confirm_is_one_shot() -> Verdict {
     verdict(
         "Подтверждение одноразовое",
         "одно подтверждение — одно действие; повторный щелчок ничего не выполнит",
+        "несогласованное действие выполнится дважды, хотя человек нажал один раз",
         started,
         outcome,
     )
@@ -99,6 +109,7 @@ fn check_confirm_cannot_be_swapped() -> Verdict {
     verdict(
         "Подтверждение не подменить",
         "согласие даётся на конкретные аргументы: другой путь пройдёт только с новым подтверждением",
+        "согласие на одно действие выполнит другое, подменённое после нажатия",
         started,
         outcome,
     )
@@ -111,6 +122,7 @@ fn check_destructive_wants_a_confirm() -> Verdict {
     verdict(
         "Разрушительное — только с подтверждением",
         "действие риска destructive не выполняется без подтверждения человека",
+        "действие, которое нельзя отменить, выполнится без согласия",
         started,
         outcome,
     )
@@ -123,6 +135,7 @@ fn check_nothing_found_is_an_answer() -> Verdict {
     verdict(
         "Пустой поиск — ответ, а не сбой",
         "«ничего не нашлось» это ok, и рядом число просмотренных",
+        "«ничего не найдено» превратится в ошибку, и человек перестанет искать",
         started,
         outcome,
     )
@@ -135,6 +148,7 @@ fn check_twins_touch_nothing() -> Verdict {
     verdict(
         "Двойники ничего не трогают",
         "поиск двойников только читает: ни удаления, ни переноса",
+        "поиск двойников изменит файлы, которые искал только посмотреть",
         started,
         outcome,
     )
@@ -145,7 +159,13 @@ fn check_stop_stops() -> Verdict {
     let started = Instant::now();
     let promise = "нажатие «стоп» прекращает работу за секунды, а не после её окончания";
     let outcome = stop_stops();
-    verdict("«Стоп» останавливает", promise, started, outcome)
+    verdict(
+        "«Стоп» останавливает",
+        promise,
+        "работа продолжится после «стоп», и человек будет ждать то, что отменил",
+        started,
+        outcome,
+    )
 }
 
 /// Тело проверки: отдельная функция, а не замыкание — так читается и линтер не спорит.
@@ -304,6 +324,25 @@ mod tests {
                 verdict.name, verdict.detail
             );
             assert!(!verdict.detail.is_empty(), "нет итога у «{}»", verdict.name);
+            // Шаг 353: человек решает, чинить сейчас или потом. Для этого ему
+            // нужна цена отказа, а не только формулировка обещания.
+            assert!(
+                !verdict.risk.is_empty(),
+                "у проверки «{}» нет ответа, чем грозит провал",
+                verdict.name
+            );
+            assert!(
+                verdict.risk.len() > 20,
+                "риск «{}» слишком короткий, чтобы что-то объяснять",
+                verdict.risk
+            );
+            // Риск и обещание — разные утверждения: если они совпали, значит
+            // одно из них написано не про то.
+            assert_ne!(
+                verdict.risk, verdict.promise,
+                "риск и обещание у «{}» совпали",
+                verdict.name
+            );
         }
     }
 }

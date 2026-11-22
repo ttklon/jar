@@ -194,6 +194,8 @@ export const selfCheck = {
    * действие или честное «кнопкой не чинится».
    */
   fix: "Что можно сделать",
+  /** Шаг 353: цена отказа — рядом с причиной, до решения чинить. */
+  risk: (text: string) => `Если не пройдёт: ${text}`,
   repairRunning: "Чиню…",
   repairDone: (what: string) => `Готово: ${what}.`,
   repairFailed: (reason: string) => `ремонт не выполнен: ${reason}`,
