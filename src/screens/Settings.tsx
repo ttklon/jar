@@ -5,6 +5,7 @@ import type { Autostart } from "../ipc";
 import { t } from "../i18n/ru";
 import type { ThemeChoice } from "../lib/theme";
 import { UndoCard } from "./Undo";
+import { ResourceReportCard } from "../components/ResourceReport";
 import { DataPlaces } from "./DataPlaces";
 import { SelfCheckCard } from "./SelfCheck";
 import { RecentFailures } from "../components/RecentFailures";
@@ -237,6 +238,7 @@ export function Settings({
       {/* Откат — часть настроек, а не отдельный экран: это редкое дело на случай
           «переложил не туда», и искать его должны там же, где всё про поведение. */}
       <UndoCard />
+      <ResourceReportCard />
 
       <div className={styles.card}>
         <Text weight="semibold">{t.settingsData}</Text>

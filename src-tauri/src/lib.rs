@@ -35,6 +35,7 @@
 pub mod audit;
 pub mod autostart;
 pub mod backup;
+pub mod budget;
 pub mod container;
 pub mod custom;
 pub mod diagnostics;
@@ -77,6 +78,7 @@ pub mod stt;
 pub mod stt_audio;
 pub mod stt_http;
 pub mod stt_session;
+pub mod timing;
 pub mod tools;
 pub mod tray;
 pub mod trial;
@@ -97,6 +99,9 @@ use policy::PolicyState;
 use registry::Registry;
 
 pub fn run() {
+    // Засечка до всего остального: «старт» — это от входа в main до окна,
+    // и всё, что мы успели сделать, должно в него попасть (шаг 381).
+    timing::mark_start();
     let log_file = logging::init();
     tracing::info!(
         version = env!("CARGO_PKG_VERSION"),
@@ -284,6 +289,7 @@ pub fn run() {
             ipc::isolation_status,
             ipc::foreground_window,
             ipc::data_places,
+            ipc::resource_report,
             ipc::self_check,
             ipc::repair,
             ipc::repair_memory,

@@ -450,6 +450,50 @@ pub async fn repair(state: State<'_, AppState>, repair: String) -> Result<String
     .map_err(|error| error.to_string())?
 }
 
+/// Где приложение тратит ресурсы — своими числами и с порогами (шаг 400).
+///
+/// Почему это нужно: «лёгкое приложение» нельзя проверить глазами. Пока всё
+/// быстро, не видно, стало ли медленнее месяц назад, — поэтому число идёт
+/// рядом с обещанным порогом, а «не измерили» пишется, а не прячется.
+#[tauri::command]
+pub fn resource_report() -> budget::BudgetReport {
+    let memory = budget::memory_mb();
+    let mut metrics = Vec::new();
+
+    // Холодный старт — из засечки процесса, а не «показалось».
+    match crate::timing::since_start() {
+        Some(elapsed) => metrics.push(budget::Metric::with_budget(
+            "старт до окна",
+            elapsed.as_secs_f64(),
+            "с",
+            3.0,
+            "засечка от запуска процесса до первого ответа окна",
+        )),
+        None => metrics.push(budget::Metric::unknown(
+            "старт до окна",
+            "с",
+            "засечки нет: это сборка без замера",
+        )),
+    }
+
+    match memory {
+        Some(mb) => metrics.push(budget::Metric::with_budget(
+            "память в простое",
+            mb,
+            "МБ",
+            150.0,
+            "tasklist: рабочий набор процесса, не пиковый",
+        )),
+        None => metrics.push(budget::Metric::unknown(
+            "память в простое",
+            "МБ",
+            "не Windows: счётчик памяти недоступен",
+        )),
+    }
+
+    budget::report(metrics)
+}
+
 /// Где приложение держит свои файлы и сколько они занимают.
 ///
 /// Только чтение: пути, размеры и честная отметка «файла ещё нет». Ничего не удаляет

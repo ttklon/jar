@@ -10,6 +10,7 @@ export type {
   Action,
   Autostart,
   DataPlace,
+  ResourceReport,
   SelfCheckVerdict,
   AuditEvent,
   AuditKind,
@@ -75,7 +76,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { Autostart, AuditEvent, DataPlace, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -174,6 +175,15 @@ export async function repair(what: string): Promise<string> {
 }
 
 /** Где приложение держит файлы и сколько они занимают. В браузере — пусто. */
+/** Где приложение тратит ресурсы (шаг 400). В браузере — пустая сводка. */
+export async function resourceReport(): Promise<ResourceReport> {
+  if (!isTauri()) {
+    return { metrics: [], over: 0, unknown: 0, summary: "в браузере ядра нет: измерять нечего" };
+  }
+  const { resourceReport: fromCore } = await import("./tauri");
+  return fromCore();
+}
+
 export async function dataPlaces(): Promise<DataPlace[]> {
   if (isTauri()) {
     const { dataPlaces: fromCore } = await import("./tauri");

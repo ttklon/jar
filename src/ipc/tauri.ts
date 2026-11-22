@@ -7,6 +7,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { transcribeCancellable } from "../lib/transcription";
 import type {
   AddressProbe,
+  ResourceReport,
   Autostart,
   MachineState,
   Presence,
@@ -402,6 +403,10 @@ export function selfCheck(): Promise<SelfCheckVerdict[]> {
 /** Починить одну вещь, названную проверкой: по частям, а не переустановкой. */
 export function repair(what: string): Promise<string> {
   return invoke<string>("repair", { repair: what });
+}
+
+export function resourceReport(): Promise<ResourceReport> {
+  return invoke<ResourceReport>("resource_report");
 }
 
 export function dataPlaces(): Promise<DataPlace[]> {

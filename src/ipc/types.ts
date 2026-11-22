@@ -811,6 +811,28 @@ export interface UndoReport {
  * `exists: false` — «файла ещё нет», а не «занимает 0 КБ»: это разные утверждения, и
  * путать их в интерфейсе значит врать про состояние.
  */
+/**
+ * Сколько чего приложение тратит — и сколько обещало (шаг 400).
+ *
+ * `value: null` — не измерили. Это не «хорошо»: пустая зелёная строка
+ * приучает не смотреть, поэтому неизмеренное названо словами.
+ */
+export interface ResourceMetric {
+  name: string;
+  value: number | null;
+  unit: string;
+  budget: number | null;
+  within: boolean | null;
+  how: string;
+}
+
+export interface ResourceReport {
+  metrics: ResourceMetric[];
+  over: number;
+  unknown: number;
+  summary: string;
+}
+
 export interface DataPlace {
   title: string;
   path: string;
