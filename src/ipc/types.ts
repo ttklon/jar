@@ -582,6 +582,21 @@ export interface ReadinessStatus {
 export type RuntimeKind = "llama" | "whisper";
 
 /** Итог проверки разговора: движок запущен и ответил (или нет) на тестовый вопрос. */
+/**
+ * Что произошло с движком после сна машины.
+ *
+ * `action` — что сделали, `note` — почему, словами. Фраза человека при этом не
+ * теряется: она живёт в поле экрана и в черновике, а не в движке.
+ */
+export interface WakeReport {
+  /** `nothing` — отвечал; `restart` — был и умер, подняли; `leave` — не было, не трогали; `restart-stuck` — завис, сняли и подняли. */
+  action: "nothing" | "restart" | "leave" | "restart-stuck";
+  /** Что именно проверено и чем кончилось — для журнала и для человека. */
+  note: string;
+  /** Движок под управлением приложения после всего этого. */
+  running: boolean;
+}
+
 export interface SmokeResult {
   ok: boolean;
   answer: string | null;

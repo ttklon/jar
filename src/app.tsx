@@ -27,7 +27,8 @@ import {
   SearchRegular,
   SettingsRegular,
 } from "@fluentui/react-icons";
-import { isTauri, registrySnapshot } from "./ipc";
+import { afterWake, isTauri, registrySnapshot } from "./ipc";
+import { watchWake } from "./lib/wakeWatch";
 import type { RegistrySnapshot } from "./ipc";
 import { Voice } from "./screens/Voice";
 import { Welcome } from "./screens/Welcome";
@@ -289,6 +290,27 @@ export function App() {
       // Запомнить негде — тема всё равно применилась; это не повод падать.
     }
   };
+  // Сон машины (шаг 142). После долгого отсутствия окна проверяем движок: он
+  // мог не пережить сон, и тогда разговор начался бы с мёртвым движком, сделав
+  // вид, что всё в порядке. Проверяем только на экране разговора — на остальных
+  // движок никому не нужен, и поднимать его там значило бы тратить память на
+  // работу, которую не просили.
+  const screenRef = useRef(screen);
+  screenRef.current = screen;
+  useEffect(() => {
+    if (!isTauri()) return;
+    return watchWake(
+      () => {
+        void afterWake().catch(() => {
+          // Молча: не удалось проверить — разговор сам скажет об этом, когда
+          // человек попробует говорить. Писать «сон не проверен» на экран
+          // значило бы пугать тем, чего человек не просил.
+        });
+      },
+      { talking: () => screenRef.current === "voice" },
+    );
+  }, []);
+
   const [snapshot, setSnapshot] = useState<RegistrySnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
 

@@ -40,6 +40,7 @@ import type {
   RoleView,
   RunRecord,
   SmokeResult,
+  WakeReport,
   SpeechStatus,
   StepResult,
   Thought,
@@ -144,6 +145,16 @@ export function readinessStatus(): Promise<ReadinessStatus> {
  */
 export function smokeCheck(): Promise<SmokeResult> {
   return invoke<SmokeResult>("smoke_check");
+}
+
+/**
+ * Машина проснулась: проверить движок и, если он умер, поднять.
+ *
+ * Не скачивает и не запускает движок, которого не было: человек мог выключить
+ * его намеренно.
+ */
+export function afterWake(): Promise<WakeReport> {
+  return invoke<WakeReport>("after_wake");
 }
 
 export function engineStatus(): Promise<EngineStatus> {

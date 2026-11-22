@@ -124,6 +124,25 @@ impl Server {
     }
 
     /// Остановка. Уже завершившийся процесс — не ошибка: цель достигнута.
+    /// Путь проверки здоровья — чтобы проверить ответ, не держа замок.
+    pub fn health_path(&self) -> &str {
+        &self.spec.health_path
+    }
+
+    /// Процесс ещё жив.
+    ///
+    /// Нужно после сна: Windows при пробуждении может не убить процесс, но
+    /// «процесс есть» и «процесс отвечает» — разные вещи, и решать по одному
+    /// признаку значило бы гадать. Здесь проверяется самое дешёвое — существует
+    /// ли процесс, — а ответ на `/health` проверяет вызывающий: он и так идёт
+    /// по сети, и дублировать это внутрь значило бы удваивать ожидание.
+    ///
+    /// `try_wait` не блокирует и попутно убирает зомби: если процесс уже
+    /// кончился, повторный вызов это увидит.
+    pub fn alive(&mut self) -> bool {
+        matches!(self.child.try_wait(), Ok(None))
+    }
+
     pub fn stop(&mut self) -> Result<(), String> {
         match self.child.try_wait() {
             Ok(Some(_)) => Ok(()),
@@ -141,30 +160,36 @@ impl Server {
     }
 }
 
-/// Отвечает ли процесс по проверке здоровья.
-pub fn answers(spec: &ServerSpec, timeout: Duration) -> bool {
-    let Ok(mut stream) = TcpStream::connect_timeout(&spec.address(), timeout) else {
+/// Отвечает ли что-то на этом порту по этому пути проверки здоровья.
+///
+/// Отдельно от `answers` тем, что не требует `ServerSpec` — и значит, не требует
+/// держать замок движка, пока идёт сетевой запрос.
+pub fn answers_at(port: u16, path: &str, timeout: Duration) -> bool {
+    let Some(address) = crate::llm::loopback(port).ok() else {
+        return false;
+    };
+    let Ok(mut stream) = TcpStream::connect_timeout(&address, timeout) else {
         return false;
     };
     let _ = stream.set_read_timeout(Some(timeout));
 
-    let request = format!(
-        "GET {} HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n",
-        spec.health_path
-    );
+    let request = format!("GET {path} HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n");
     if stream.write_all(request.as_bytes()).is_err() {
         return false;
     }
-
     let mut head = [0u8; 64];
     match stream.read(&mut head) {
-        // Смотрим только строку статуса: тело ответа нам не нужно.
         Ok(read) if read > 0 => {
             let line = String::from_utf8_lossy(&head[..read]);
             line.starts_with("HTTP/") && line.contains(" 200")
         }
         _ => false,
     }
+}
+
+/// Отвечает ли процесс по проверке здоровья.
+pub fn answers(spec: &ServerSpec, timeout: Duration) -> bool {
+    answers_at(spec.port, &spec.health_path, timeout)
 }
 
 /// Свободный порт на `127.0.0.1`. Порт освобождается сразу после ответа — между

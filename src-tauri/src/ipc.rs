@@ -1679,8 +1679,15 @@ pub struct SmokeResult {
 /// оба файла уже лежат на диске. Нет модели — отказ, без установки.
 #[tauri::command]
 pub async fn smoke_check(state: State<'_, AppState>) -> Result<SmokeResult, String> {
+    smoke_check_in(&state).await
+}
+
+/// То же, но от `&AppState`: после сна команду зовут изнутри, где `State`
+/// взять неоткуда, а второй способ проверки разговора завёл бы второй ответ на
+/// вопрос «движок работает?».
+pub async fn smoke_check_in(state: &AppState) -> Result<SmokeResult, String> {
     // Clear an exited process, without starting anything.
-    let _ = read_engine_status(&state);
+    let _ = read_engine_status(state);
     let running_port = match state.inner.engine.lock() {
         Ok(guard) => guard.as_ref().map(|server| server.port()),
         Err(_) => return Err("движок не под контролем приложения: перезапустите его".to_string()),
@@ -1694,7 +1701,7 @@ pub async fn smoke_check(state: State<'_, AppState>) -> Result<SmokeResult, Stri
             .find(|file| file.ok)
             .map(|file| file.name)
             .ok_or_else(|| "нет модели с читаемым заголовком: на карточке готовности нажмите «Скачать недостающее и открыть разговор»".to_string())?;
-        let status = start_engine(state, name.clone()).await?;
+        let status = start_engine_in(state, name.clone()).await?;
         let port = status.port.ok_or_else(|| "движок не запущен".to_string())?;
         (port, Some(name))
     };
@@ -1855,18 +1862,140 @@ impl Drop for EngineStartGuard {
 /// Ошибки разные и говорят разное: «движка нет» (положите файл), «модели нет»
 /// (скачайте) и «не ответил за 60 с» (смотрите лог). Смешивать их в одно «не удалось»
 /// значит отнять у человека единственную подсказку.
+/// Что случилось с движком после сна и что с ним сделали.
+///
+/// Шаг 142. Возвращается числом и словами: экран показывает факт, а не
+/// догадку, а журнал — что именно произошло.
+#[derive(serde::Serialize, Clone, Debug)]
+pub struct WakeReport {
+    /// Действие: `nothing`, `restart`, `leave`, `restart-stuck`.
+    pub action: String,
+    /// Словами: что случилось.
+    pub note: String,
+    /// Движок запущен после разбора.
+    pub running: bool,
+}
+
+/// Разобраться с движком после пробуждения.
+///
+/// Почему это здесь, а не в подписке на событие. Само событие приходит из
+/// `lib.rs`, а разбираться нужно с тем же `AppState`, что и у команд; делать
+/// это отдельным путём значит завести второй способ управлять движком — и
+/// однажды получить два ответа на один вопрос «он запущен?».
+///
+/// Фраза человека при этом не теряется не потому, что мы её спасаем: она живёт
+/// в поле экрана и в черновике (шаг 26), а не в движке. Здесь важно другое —
+/// не начать разговор с мёртвым движком, сделав вид, что всё в порядке.
+#[tauri::command]
+pub async fn after_wake(state: State<'_, AppState>) -> Result<WakeReport, String> {
+    // Что было до сна: движок под нашим управлением или нет.
+    let before = if state
+        .inner
+        .engine
+        .lock()
+        .map(|guard| guard.is_some())
+        .unwrap_or(false)
+    {
+        crate::wake::Before::Running
+    } else {
+        crate::wake::Before::Stopped
+    };
+
+    // Живость и здоровье — два факта, снятые по отдельности. Проверка здоровья
+    // ходит по сети, и держать на это время замок движка нельзя: любая команда,
+    // спросившая статус, ждала бы секунды. Поэтому из замка выходим и проверяем
+    // по снятой копии.
+    let snapshot = match state.inner.engine.lock() {
+        Ok(mut guard) => match guard.as_mut() {
+            Some(server) if !server.alive() => None,
+            Some(server) => Some((server.port(), server.health_path().to_string())),
+            None => None,
+        },
+        Err(_) => None,
+    };
+
+    let after = match snapshot {
+        None => crate::wake::After::Dead,
+        // Тот же путь, по которому движок проверяется при запуске: «отвечает» и
+        // «есть» не должны проверяться разными способами.
+        Some((port, path)) => {
+            let budget = std::time::Duration::from_millis(crate::idle::WAKE_BUDGET_MS);
+            if crate::server::answers_at(port, &path, budget) {
+                crate::wake::After::Alive
+            } else {
+                crate::wake::After::Silent
+            }
+        }
+    };
+
+    let action = crate::wake::after_wake(before, after);
+    let mut note = crate::wake::explain(action).to_string();
+
+    match action {
+        // Отвечает — не трогаем. Не было — не запускаем: после сна человек мог
+        // закрыть движок намеренно, и поднимать его без просьбы значило бы
+        // тратить гигабайты памяти на работу, которую не просили.
+        crate::wake::WakeAction::Nothing | crate::wake::WakeAction::Leave => {}
+        crate::wake::WakeAction::Restart | crate::wake::WakeAction::RestartStuck => {
+            // Зависший сначала убираем: иначе порт занят и новый движок не встанет.
+            if action == crate::wake::WakeAction::RestartStuck {
+                if let Ok(mut guard) = state.inner.engine.lock() {
+                    if let Some(mut server) = guard.take() {
+                        let _ = server.stop();
+                    }
+                }
+            }
+            // Поднимаем тем же путём, что и обычная проверка разговора: он уже
+            // умеет выбрать модель, запустить движок и убедиться, что тот
+            // ответил. Второй способ запуска значил бы второй ответ на вопрос
+            // «движок запущен?», и однажды они разошлись бы.
+            match smoke_check_in(&state).await {
+                Ok(result) if result.ok => note.push_str("; разговор проверен"),
+                Ok(result) => {
+                    note.push_str(&format!("; но разговор не подтвердился: {}", result.note))
+                }
+                Err(error) => note.push_str(&format!("; поднять не удалось: {error}")),
+            }
+        }
+    }
+
+    let running = state
+        .inner
+        .engine
+        .lock()
+        .map(|guard| guard.is_some())
+        .unwrap_or(false);
+
+    Ok(WakeReport {
+        action: match action {
+            crate::wake::WakeAction::Nothing => "nothing",
+            crate::wake::WakeAction::Restart => "restart",
+            crate::wake::WakeAction::Leave => "leave",
+            crate::wake::WakeAction::RestartStuck => "restart-stuck",
+        }
+        .to_string(),
+        note,
+        running,
+    })
+}
+
 #[tauri::command]
 pub async fn start_engine(
     state: State<'_, AppState>,
     name: String,
 ) -> Result<EngineStatus, String> {
+    start_engine_in(&state, name).await
+}
+
+/// Запуск движка без `State`: нужен тому, кто уже держит `&AppState`.
+pub async fn start_engine_in(state: &AppState, name: String) -> Result<EngineStatus, String> {
     use std::sync::atomic::Ordering;
     let stop_epoch = ENGINE_STOP_EPOCH.load(Ordering::SeqCst);
     ENGINE_STARTING
         .compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst)
         .map_err(|_| "движок уже запускается".to_string())?;
     let _start_guard = EngineStartGuard;
-    let _ = read_engine_status(&state);
+    let _ = read_engine_status(state);
     if state
         .inner
         .engine
@@ -1949,7 +2078,7 @@ pub async fn start_engine(
                 // Новый движок не «простоял» ни секунды: без этой отметки первый же
                 // опрос статуса мог бы выгрузить только что поднятый движок — таймер
                 // простоя тикал всё время, пока его запускали.
-                touch_engine(&state);
+                touch_engine(state);
                 Ok(())
             }
             _ => {
@@ -1965,7 +2094,7 @@ pub async fn start_engine(
         let _ = state.inner.memory.finish_run(run, outcome);
     }
 
-    result.map(|()| read_engine_status(&state))
+    result.map(|()| read_engine_status(state))
 }
 
 /// Останавливает движок. Не запущен — не ошибка: цель достигнута.

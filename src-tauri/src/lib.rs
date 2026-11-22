@@ -61,6 +61,7 @@ pub mod osupdate;
 pub mod perf;
 pub mod places;
 pub mod plan;
+pub mod wake;
 pub mod planner;
 pub mod policy;
 pub mod profiles;
@@ -266,6 +267,7 @@ pub fn run() {
             ipc::download_runtime,
             ipc::remove_runtime,
             ipc::smoke_check,
+            ipc::after_wake,
             ipc::remove_model,
             ipc::remove_everything,
             ipc::think_stream,

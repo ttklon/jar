@@ -88,7 +88,7 @@ pub fn ask(port: u16, body: &str, timeout: Duration) -> Result<String, String> {
 ///
 /// Петля — это константа. Разрешать её через резолвер — значит ставить локальное в
 /// зависимость от сетевого, то есть ровно наоборот.
-fn loopback(port: u16) -> Result<SocketAddr, String> {
+pub(crate) fn loopback(port: u16) -> Result<SocketAddr, String> {
     Ok(SocketAddr::from((Ipv4Addr::LOCALHOST, port)))
 }
 

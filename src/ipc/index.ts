@@ -77,7 +77,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, WakeReport, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -483,6 +483,24 @@ export async function smokeCheck(): Promise<SmokeResult> {
   }
   const { smokeCheck: fromData } = await import("./dev");
   return fromData();
+}
+
+/**
+ * Машина проснулась: проверить движок и, если он умер, поднять.
+ *
+ * В браузере (без Tauri) спящей машины нет — отвечаем «нечего делать», честно
+ * назвав причину, вместо выдуманного перезапуска.
+ */
+export async function afterWake(): Promise<WakeReport> {
+  if (isTauri()) {
+    const { afterWake: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  return {
+    action: "nothing",
+    note: "в браузере нет движка, который мог бы не пережить сон",
+    running: false,
+  };
 }
 
 // ── Движок моделей ──────────────────────────────────────────────────────────
