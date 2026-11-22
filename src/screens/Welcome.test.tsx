@@ -100,4 +100,22 @@ describe("экран знакомства", () => {
     expect(screen.getByText(/Данные: браузер/)).toBeTruthy();
     expect(screen.getByText(/в браузере ничего не выполняется/i)).toBeTruthy();
   });
+
+
+  it("спрашивает имя один раз и сразу показывает, что запомнил (шаг 37)", () => {
+    localStorage.clear();
+    render(<Welcome source="ядро" onStart={() => {}} onOpen={() => {}} />);
+
+    // Один вопрос — и он про человека, а не про настройку.
+    const field = screen.getByLabelText("как тебя называть?") as HTMLInputElement;
+    expect(field.value).toBe("");
+    // Отказ назван, а не спрятан (шаг 38).
+    expect(screen.getByText("можно не отвечать")).toBeTruthy();
+
+    fireEvent.change(field, { target: { value: "Аня" } });
+
+    // Запомнилось сразу, а не по кнопке: человек может уйти с экрана.
+    expect(localStorage.getItem("zshelper.person.name")).toBe("Аня");
+    expect(screen.getByText("запомнил: Аня")).toBeTruthy();
+  });
 });

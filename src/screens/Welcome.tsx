@@ -1,6 +1,8 @@
-import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
+import { useState } from "react";
+import { Button, Input, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { welcome } from "../i18n/ru";
+import { cleanName, readName, saveName } from "../lib/person";
 
 /**
  * Экран знакомства — то, что человек видит при первом запуске.
@@ -48,6 +50,15 @@ const useStyles = makeStyles({
   actions: { display: "flex", flexWrap: "wrap", gap: "8px" },
   note: { color: tokens.colorNeutralForeground3, fontSize: tokens.fontSizeBase200 },
   sideways: { display: "flex", flexWrap: "wrap", gap: "4px", alignItems: "center" },
+  nameCard: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+    maxWidth: "320px",
+    padding: "14px 16px",
+    borderRadius: tokens.borderRadiusLarge,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
 });
 
 export type WelcomeTarget = "ask" | "catalog" | "journal" | "models";
@@ -62,6 +73,9 @@ export function Welcome({
   onOpen: (target: WelcomeTarget) => void;
 }) {
   const styles = useStyles();
+  // Имя читается один раз при открытии: это первый запуск, и здесь оно ещё не
+  // записано. В состоянии — чтобы подпись «запомнил: …» менялась сразу.
+  const [name, setName] = useState(() => readName());
 
   return (
     <div className={styles.root}>
@@ -93,6 +107,27 @@ export function Welcome({
             <Text className={styles.ruleText}>{rule.text}</Text>
           </div>
         ))}
+      </div>
+
+      {/* Шаг 37: один вопрос за весь первый запуск. Стоит выше карточки, потому
+          что это про человека, а не про железо, — и потому что ответ на него
+          ничего не блокирует. */}
+      <div className={styles.nameCard}>
+        <Text weight="semibold">{welcome.nameAsk}</Text>
+        <Input
+          value={name}
+          aria-label={welcome.nameAsk}
+          placeholder={welcome.namePlaceholder}
+          onChange={(_, data) => {
+            // Как только человек ответил — запоминаем сразу: он может уйти
+            // с этого экрана, не нажимая ничего больше (шаг 37).
+            setName(data.value);
+            saveName(data.value);
+          }}
+        />
+        <Text className={styles.note}>
+          {name.trim() === "" ? welcome.nameSkip : welcome.nameKept(cleanName(name))}
+        </Text>
       </div>
 
       <ReadinessCard
