@@ -283,6 +283,7 @@ pub fn run() {
             ipc::foreground_window,
             ipc::data_places,
             ipc::self_check,
+            ipc::repair,
             ipc::undo_report,
             ipc::undo_apply,
             ipc::autostart_status,

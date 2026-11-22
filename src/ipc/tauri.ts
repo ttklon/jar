@@ -399,6 +399,11 @@ export function selfCheck(): Promise<SelfCheckVerdict[]> {
   return invoke<SelfCheckVerdict[]>("self_check");
 }
 
+/** Починить одну вещь, названную проверкой: по частям, а не переустановкой. */
+export function repair(what: string): Promise<string> {
+  return invoke<string>("repair", { repair: what });
+}
+
 export function dataPlaces(): Promise<DataPlace[]> {
   return invoke<DataPlace[]>("data_places");
 }

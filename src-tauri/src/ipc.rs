@@ -389,6 +389,48 @@ pub async fn self_check() -> Vec<evals::Verdict> {
         .unwrap_or_default()
 }
 
+/// Починить то, что назвала проверка себя, — по частям, а не переустановкой.
+///
+/// `repair` — имя действия, а не свобода: «перекачать модель», «переустановить
+/// движок», «сбросить кеш», «пересоздать базу памяти». Всё остальное — отказ
+/// со списком того, что можно: человек, набравший действие руками, должен
+/// получить ответ, а не молчание.
+///
+/// Возвращает то, что сделано, словами, — не «ok»: после ремонта человеку
+/// нужно знать, что именно изменилось.
+#[tauri::command]
+pub async fn repair(
+    state: State<'_, AppState>,
+    repair: String,
+) -> Result<String, String> {
+    let inner = state.inner.clone();
+    tauri::async_runtime::spawn_blocking(move || match repair.as_str() {
+        "reset-data" => {
+            // Кеш — временные файлы рядом с данными, а не сама папка данных:
+            // журнал, память и модели остаются на месте.
+            let cache = inner.base_dir.join("cache");
+            match std::fs::remove_dir_all(&cache) {
+                Ok(()) => Ok("кеш сброшен; журнал, память и модели не тронуты".to_string()),
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                    Ok("кеша не было — и это не поломка".to_string())
+                }
+                Err(error) => Err(format!("кеш не удалился: {error}")),
+            }
+        }
+        "rewrite-memory" => crate::memory::rebuild(&inner.base_dir)
+            .map(|backup| format!("база памяти пересоздана; старая сохранена: {backup}")),
+        "download-model" | "reinstall-engine" => Err(
+            "это делает сам экран «Модели»: там видно размер и ход скачивания —              чинить вслепую, без процентов, было бы хуже"
+                .to_string(),
+        ),
+        other => Err(format!(
+            "неизвестный ремонт «{other}»; есть: reset-data, rewrite-memory, download-model, reinstall-engine"
+        )),
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
 /// Где приложение держит свои файлы и сколько они занимают.
 ///
 /// Только чтение: пути, размеры и честная отметка «файла ещё нет». Ничего не удаляет

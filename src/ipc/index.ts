@@ -159,6 +159,20 @@ export async function selfCheck(): Promise<SelfCheckVerdict[]> {
   return fromData();
 }
 
+/**
+ * Ремонт одной вещи, названной проверкой себя.
+ *
+ * В браузере чинить нечего: файлов и базы здесь нет. Это не ошибка, а пустой
+ * ответ — экран скажет «в браузере чинить нечего», а не покажет успех.
+ */
+export async function repair(what: string): Promise<string> {
+  if (isTauri()) {
+    const { repair: fromCore } = await import("./tauri");
+    return fromCore(what);
+  }
+  return "";
+}
+
 /** Где приложение держит файлы и сколько они занимают. В браузере — пусто. */
 export async function dataPlaces(): Promise<DataPlace[]> {
   if (isTauri()) {

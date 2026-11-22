@@ -423,6 +423,36 @@ fn haystack(run: &RunRecord) -> String {
     text
 }
 
+/// Пересоздать базу памяти: старую — копией рядом, новую — пустой рабочей.
+///
+/// Зачем это вообще нужно. Битый файл базы — единственное, что нельзя починить
+/// кнопкой «скачать заново»: журнал в нём, и потерять его страшнее, чем
+/// расстаться с фактами. Поэтому старая база не удаляется, а становится
+/// копией в `backups/`, годность копии проверяется тем же `backup::verify`,
+/// что и при старте, — и только потом на месте базы создаётся новая.
+///
+/// Возвращает путь копии: человеку нужно знать, куда смотреть, если он захочет
+/// вернуть журнал.
+pub fn rebuild(base_dir: &Path) -> Result<String, String> {
+    let path = base_dir.join("memory.db");
+    let copies = crate::backup::dir(base_dir);
+    let stamp = format!("{}-rebuild", now_ms());
+    let made = crate::backup::make(&path, &copies, &stamp, SCHEMA_VERSION as u32, crate::backup::KEEP)
+        .map_err(|error| format!("копию сделать не удалось: {error}"))?;
+    // Годность копии проверяется ДО удаления оригинала: «наверное, целая» —
+    // не страховка, а надежда.
+    crate::backup::verify(&made.path).map_err(|error| {
+        format!(
+            "копия не проходит проверку ({error}); база оставлена как есть, чтобы не потерять её"
+        )
+    })?;
+    std::fs::remove_file(&path).map_err(|error| format!("старая база не удалилась: {error}"))?;
+    // Новая создаётся тем же путём, что и при обычном старте: схема, миграции
+    // и проверки не должны расходиться между «первым запуском» и «ремонтом».
+    Memory::open(path.clone()).map_err(|error| format!("новая база не создалась: {error}"))?;
+    Ok(made.path.display().to_string())
+}
+
 fn now_ms() -> u64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)

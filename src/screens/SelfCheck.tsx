@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
-import { selfCheck } from "../ipc";
+import { repair, selfCheck } from "../ipc";
 import type { SelfCheckVerdict } from "../ipc";
 import { selfCheck as text } from "../i18n/ru";
+import { adviceForVerdict } from "../lib/repair";
 
 /**
  * Проверка себя — карточка в настройках.
@@ -33,6 +34,8 @@ const useStyles = makeStyles({
   head: { display: "flex", gap: "8px", alignItems: "baseline" },
   pass: { color: tokens.colorPaletteGreenForeground1 },
   fail: { color: tokens.colorPaletteRedForeground1 },
+  advice: { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", marginTop: "4px" },
+  fixLead: { color: tokens.colorNeutralForeground2, fontSize: tokens.fontSizeBase200 },
 });
 
 export function SelfCheckCard() {
@@ -40,6 +43,27 @@ export function SelfCheckCard() {
   const [verdicts, setVerdicts] = useState<SelfCheckVerdict[] | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Ремонт: что делаем сейчас, что вышло и что не вышло. Один за раз —
+  // два ремонта сразу спорят за одни и те же файлы.
+  const [fixing, setFixing] = useState<string | null>(null);
+  const [fixed, setFixed] = useState<string | null>(null);
+  const [fixError, setFixError] = useState<string | null>(null);
+
+  const fix = (what: string) => {
+    setFixing(what);
+    setFixed(null);
+    setFixError(null);
+    repair(what)
+      .then((result) => {
+        // Пустой ответ — это браузер: ядра нет, чинить нечего. Говорим прямо,
+        // а не показываем «Готово» без подробностей.
+        setFixed(result === "" ? text.repairNothingHere : result);
+      })
+      .catch((reason: unknown) =>
+        setFixError(reason instanceof Error ? reason.message : String(reason)),
+      )
+      .finally(() => setFixing(null));
+  };
 
   const run = () => {
     setRunning(true);
@@ -76,6 +100,17 @@ export function SelfCheckCard() {
         </Text>
       ) : null}
 
+      {fixed ? (
+        <Text role="status" aria-live="polite" block>
+          {text.repairDone(fixed)}
+        </Text>
+      ) : null}
+      {fixError ? (
+        <Text role="alert" aria-live="polite" className={styles.fail} block>
+          {text.repairFailed(fixError)}
+        </Text>
+      ) : null}
+
       {verdicts === null ? (
         <Text className={styles.muted} block>
           {text.idle}
@@ -104,6 +139,27 @@ export function SelfCheckCard() {
                 </div>
                 <Text className={styles.muted}>{verdict.promise}</Text>
                 <Text className={styles.muted}>{verdict.detail}</Text>
+                {(() => {
+                  const advice = adviceForVerdict(verdict);
+                  if (!advice) return null;
+                  return (
+                    <div className={styles.advice}>
+                      <Text className={styles.fixLead}>
+                        {`${text.fix}: ${advice.why}`}
+                      </Text>
+                      {advice.action ? (
+                        <Button
+                          size="small"
+                          appearance="secondary"
+                          onClick={() => fix(advice.repair)}
+                          disabled={fixing !== null}
+                        >
+                          {fixing === advice.repair ? text.repairRunning : advice.action}
+                        </Button>
+                      ) : null}
+                    </div>
+                  );
+                })()}
               </li>
             ))}
           </ul>
