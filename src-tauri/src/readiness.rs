@@ -613,68 +613,29 @@ pub fn parse_probe(url: &str, output: &str) -> AddressProbe {
     }
 }
 
-/// Команда `curl` для проверки адреса без скачивания файла.
-///
-/// `--head` не скачивает тело: проверка стоит несколько байт трафика, а не
-/// гигабайт. Именно поэтому её можно делать перед кнопкой, а не после.
-pub fn probe_args(url: &str) -> Vec<String> {
-    vec![
-        "--proto".into(),
-        "=http,https".into(),
-        "--proto-redir".into(),
-        "=https".into(),
-        "--connect-timeout".into(),
-        "20".into(),
-        "--max-time".into(),
-        "60".into(),
-        "--max-redirs".into(),
-        "5".into(),
-        "--location".into(),
-        "--silent".into(),
-        "--show-error".into(),
-        "--head".into(),
-        "--write-out".into(),
-        "ZSHELPER-CODE %{http_code}\n".into(),
-        url.into(),
-    ]
-}
-
 /// Прогон по всем адресам каталога: что реально открывается и когда.
 ///
-/// Отдельная функция, а не тест: приложению она тоже нужна — экран «Модели»
-/// спрашивает то же самое, и два разных способа проверять сеть разошлись бы.
+/// Запуск `curl` живёт в `download.rs`, а не здесь: сеть — одна дверь, и это
+/// проверяется сборкой (`tools/one_door.py`). Разбор ответа остаётся здесь:
+/// он про каталог, а не про процесс.
 pub fn probe_all() -> Vec<AddressProbe> {
     network_addresses()
         .into_iter()
         .map(|address| {
-            let output = std::process::Command::new("curl")
-                .args(probe_args(&address.url))
-                .output();
-            match output {
-                Ok(result) if result.status.success() || result.status.code() == Some(22) => {
-                    parse_probe(&address.url, &String::from_utf8_lossy(&result.stdout))
-                }
-                Ok(result) => {
-                    let stderr = String::from_utf8_lossy(&result.stderr).trim().to_string();
-                    AddressProbe {
-                        url: address.url.clone(),
-                        status: 0,
-                        bytes: None,
-                        tag: None,
-                        problem: Some(if stderr.is_empty() {
-                            format!("curl вышел с кодом {:?}", result.status.code())
-                        } else {
-                            stderr
-                        }),
-                    }
-                }
-                Err(error) => AddressProbe {
-                    url: address.url.clone(),
-                    status: 0,
-                    bytes: None,
-                    tag: None,
-                    problem: Some(format!("curl не запустился: {error}")),
-                },
+            let (code, stdout, stderr) = crate::download::head(&address.url);
+            if code == Some(0) {
+                return parse_probe(&address.url, &stdout);
+            }
+            AddressProbe {
+                url: address.url.clone(),
+                status: 0,
+                bytes: None,
+                tag: None,
+                problem: Some(if stderr.is_empty() {
+                    format!("curl вышел с кодом {code:?}")
+                } else {
+                    stderr
+                }),
             }
         })
         .collect()
@@ -731,24 +692,6 @@ mod probe_tests {
         assert_eq!(probe.status, 200);
         assert_eq!(probe.bytes, None);
         assert!(probe.problem.unwrap().contains("размер"));
-    }
-
-    #[test]
-    fn the_probe_asks_for_headers_only_and_never_writes_a_file() {
-        let args = probe_args("https://huggingface.co/x.gguf");
-        assert!(
-            args.iter().any(|a| a == "--head"),
-            "только заголовки, без тела"
-        );
-        assert!(
-            !args.iter().any(|a| a == "-o" || a == "--output"),
-            "ничего не сохраняем на диск"
-        );
-        assert!(args.iter().any(|a| a == "--proto-redir"));
-        assert_eq!(
-            args.last().map(String::as_str),
-            Some("https://huggingface.co/x.gguf")
-        );
     }
 
     /// Живой прогон: каждый адрес каталога проверяется сетью, и сверяется не

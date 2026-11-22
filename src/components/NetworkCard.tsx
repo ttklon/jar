@@ -116,6 +116,9 @@ export function NetworkCard() {
       <Text className={styles.price}>{models.networkPrice}</Text>
       <Text className={styles.lead}>{models.networkWhyFree}</Text>
       <Text className={styles.lead}>{models.networkLead}</Text>
+      {/* Шаг 205: об офлайне и обновлениях — фразой, которая не приглашает
+          «проверить обновления» там, где проверки нет по устройству. */}
+      <Text className={styles.lead}>{models.networkUpdates}</Text>
 
       {failed ? (
         <Text role="alert" aria-live="polite">

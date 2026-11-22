@@ -702,3 +702,70 @@ mod tests {
         std::fs::remove_dir_all(dir).unwrap();
     }
 }
+
+/// Проверка адреса заголовками: что сервер отвечает, не скачивая файл.
+///
+/// Живёт рядом с `fetch`, потому что это та же дверь в сеть: процессы `curl`
+/// в приложении запускаются только здесь. Возвращает код выхода, stdout и
+/// stderr — разбор ответа делает `readiness::parse_probe`, чтобы он проверялся
+/// тестами без сети.
+pub(crate) fn head(url: &str) -> (Option<i32>, String, String) {
+    let result = Command::new("curl").args(probe_args(url)).output();
+    match result {
+        Ok(output) => (
+            output.status.code(),
+            String::from_utf8_lossy(&output.stdout).to_string(),
+            String::from_utf8_lossy(&output.stderr).trim().to_string(),
+        ),
+        Err(error) => (None, String::new(), format!("curl не запустился: {error}")),
+    }
+}
+
+/// Команда `curl` для проверки адреса без скачивания файла.
+///
+/// `--head` не скачивает тело: проверка стоит несколько байт трафика, а не
+/// гигабайт. Именно поэтому её можно делать перед кнопкой, а не после.
+pub fn probe_args(url: &str) -> Vec<String> {
+    vec![
+        "--proto".into(),
+        "=http,https".into(),
+        "--proto-redir".into(),
+        "=https".into(),
+        "--connect-timeout".into(),
+        "20".into(),
+        "--max-time".into(),
+        "60".into(),
+        "--max-redirs".into(),
+        "5".into(),
+        "--location".into(),
+        "--silent".into(),
+        "--show-error".into(),
+        "--head".into(),
+        "--write-out".into(),
+        "ZSHELPER-CODE %{http_code}\n".into(),
+        url.into(),
+    ]
+}
+
+#[cfg(test)]
+mod probe_args_tests {
+    use super::*;
+
+    #[test]
+    fn the_probe_asks_for_headers_only_and_never_writes_a_file() {
+        let args = probe_args("https://huggingface.co/x.gguf");
+        assert!(
+            args.iter().any(|a| a == "--head"),
+            "только заголовки, без тела"
+        );
+        assert!(
+            !args.iter().any(|a| a == "-o" || a == "--output"),
+            "ничего не сохраняем на диск"
+        );
+        assert!(args.iter().any(|a| a == "--proto-redir"));
+        assert_eq!(
+            args.last().map(String::as_str),
+            Some("https://huggingface.co/x.gguf")
+        );
+    }
+}

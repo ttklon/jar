@@ -49,6 +49,11 @@ LOCAL_ONLY = {"llm.rs", "server.rs", "stt.rs", "ipc.rs", "machine.rs", "models.r
 NET_IN_RUST = re.compile(
     r"\b(TcpStream|TcpListener|UdpSocket|reqwest|ureq|hyper|isahc|attohttpc)\b"
     r"|::(get|post|send)\s*\("
+    # `curl` — тоже дверь: процесс ходит в сеть не хуже библиотеки. Правило
+    # появилось после того, как сам шаг 203 добавил `curl --head` в
+    # `readiness.rs` в обход «единственной двери» — и проверка этого не
+    # заметила, потому что искала только имена типов.
+    r"|Command::new\(\s*\"curl\"\s*\)"
 )
 
 # Файлы, где `::get(` — это чтение из состояния (`state.get(...)`), а не
@@ -147,6 +152,7 @@ CASES: list[tuple[str, bool]] = [
     ("let client = reqwest::Client::new();", True),
     ("let body = ureq::get(url).call()?;", True),  # `::get(` у не-http типа — нет
     ("let v = map.get(&key);", False),
+    ('Command::new("curl").arg("--head").output()?;', True),  # процесс — тоже дверь
     ("let answer = response.body;", False),
     ("download::fetch(url, &part, MAX)?;", False),
     ("let answer = llm::ask(port, &body, timeout)?;", False),

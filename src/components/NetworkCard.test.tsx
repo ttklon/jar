@@ -203,4 +203,18 @@ describe("сетевой след приложения", () => {
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("проверка не выполнена");
   });
+
+  it("говорит про обновления так, что офлайн не выглядит поломкой", () => {
+    // Шаг 205. «Не удалось проверить обновления» в офлайне — отказ, которого
+    // не должно быть: проверки нет вовсе, и это сказано до того, как человек
+    // выключит сеть. Заодно проверяем, что фраза не обещает фоновую проверку,
+    // которой в ядре нет: обещание обновиться само — тоже обещание.
+    list.addresses = four();
+    render(<NetworkCard />);
+
+    const text = screen.getByText(new RegExp(models.networkUpdates.slice(0, 30)));
+    expect(text.textContent).toContain("Обновлений в фоне нет вовсе");
+    // Слово «ошибка» здесь запрещено: офлайн — режим, а не сбой.
+    expect(text.textContent?.toLowerCase()).not.toContain("ошибк");
+  });
 });
