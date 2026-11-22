@@ -463,6 +463,40 @@ jobs:
           echo "::error::cargo test упал — подробности в аннотациях выше"
           exit 1
 
+      # Замер старта и памяти на подставном профиле (шаги 390/391). Отдельным шагом,
+      # потому что `cargo test` без `--nocapture` прячет `println!`: замер, которого
+      # никто не видит, — это не замер. Цифры идут в сводку рядом со своими порогами.
+      - name: Start and memory numbers
+        id: numbers
+        if: steps.tests.outputs.status == '0'
+        shell: bash
+        run: |
+          set +e
+          cargo test --manifest-path src-tauri/Cargo.toml perf:: -- --nocapture > perf.log 2>&1
+          code=$?
+          if grep -q "PERF " perf.log; then
+            {
+              echo "### Старт и память (подставной профиль, шаги 390/391)"
+              grep "PERF " perf.log
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "PERF замер не напечатал ни одной строки" >> perf.log
+            code=1
+          fi
+          echo "status=$code" >> "$GITHUB_OUTPUT"
+
+      - name: Numbers failure report
+        if: always() && steps.numbers.outputs.status != '' && steps.numbers.outputs.status != '0'
+        shell: bash
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python scripts/ci_log_annotate.py perf.log --title "замер старта и памяти" --grep "PERF |FAILED|panicked|assertion" --after 3 --max 20
+
+      - name: Numbers gate
+        if: steps.numbers.outputs.status != '' && steps.numbers.outputs.status != '0'
+        shell: bash
+        run: exit 1
+
       - name: Pinned runtime conversation smoke (explicit network/execution consent)
         if: steps.tests.outputs.status == '0' && ((github.event_name == 'workflow_dispatch' && inputs.runtime_smoke) || (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/arena/') && contains(github.event.head_commit.message, '[runtime-smoke]')))
         id: runtime_smoke

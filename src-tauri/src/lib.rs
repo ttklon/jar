@@ -58,6 +58,7 @@ pub mod machine;
 pub mod memory;
 pub mod models;
 pub mod osupdate;
+pub mod perf;
 pub mod places;
 pub mod plan;
 pub mod planner;
