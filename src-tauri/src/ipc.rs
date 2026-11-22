@@ -2175,7 +2175,10 @@ pub fn last_plan(state: State<'_, AppState>) -> Option<Plan> {
 /// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это
 /// структура: запуск, шаг, итог — то, что нужно планировщику и экрану истории.
 #[tauri::command]
-pub async fn memory_runs(state: State<'_, AppState>, limit: usize) -> Result<Vec<RunRecord>, String> {
+pub async fn memory_runs(
+    state: State<'_, AppState>,
+    limit: usize,
+) -> Result<Vec<RunRecord>, String> {
     // Чтение базы — это диск и разбор строк, а экран истории спрашивает часто.
     // На потоке окна это задерживало бы ввод в поиске (шаг 394).
     let inner = state.inner.clone();
