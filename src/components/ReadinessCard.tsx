@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
 import {
@@ -246,6 +246,19 @@ export function ReadinessCard({
       }
     },
     [status, refresh],
+  );
+
+  // Куда ведёт кнопка в отказе: в «Модели». Ошибку снимаем — человек ушёл
+  // разбираться, и старый текст, оставшийся на экране, читался бы как новый сбой.
+  const actToModels = useMemo(
+    () =>
+      onToModels
+        ? () => {
+            setActionError(null);
+            onToModels();
+          }
+        : undefined,
+    [onToModels],
   );
 
   const runSmoke = useCallback(async () => {
@@ -677,7 +690,10 @@ export function ReadinessCard({
         </div>
       ) : null}
       {error ? <ErrorLine className={styles.error} text={text.loadError(error)} /> : null}
-      {actionError ? <ErrorLine className={styles.error} text={actionError} /> : null}
+      {/* Шаг 25: в отказе есть кнопка, а не только текст. Кнопку рисует сам
+          `ErrorLine` — и только когда причина известна и экран умеет отвести
+          туда, где проблему видно (шаг 29: пустая кнопка хуже её отсутствия). */}
+      {actionError ? <ErrorLine className={styles.error} text={actionError} onAct={actToModels} /> : null}
       {done ? <Text className={styles.ok}>{done}</Text> : null}
 
       {assessment.ready ? <Text className={styles.note}>{text.detected(status.engine_program, status.model_name, status.engine_running)}</Text> : null}

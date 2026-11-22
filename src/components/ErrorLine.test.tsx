@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { ErrorLine } from "./ErrorLine";
 import { t } from "../i18n/ru";
 
@@ -78,5 +78,35 @@ describe("строка ошибки", () => {
     const text = screen.getByRole("alert").textContent ?? "";
     expect(text).toContain("нет сети");
     expect(text).not.toContain("Всё остальное работает без сети");
+  });
+
+
+  it("отказ с известным местом даёт кнопку, и она ведёт туда, что написано", () => {
+    const onAct = vi.fn();
+    render(
+      <ErrorLine
+        text="не хватает места на диске"
+        className="x"
+        onAct={onAct}
+      />,
+    );
+
+    // Подпись кнопки называет место, а не «действие»: человек знает, куда попадёт.
+    const button = screen.getByRole("button", { name: "Открыть «Модели»" });
+    fireEvent.click(button);
+    expect(onAct).toHaveBeenCalledTimes(1);
+  });
+
+  it("без известного места кнопки нет — текста довольно", () => {
+    const onAct = vi.fn();
+    render(<ErrorLine text="что-то пошло не так" className="x" onAct={onAct} />);
+
+    // Причина неизвестна — вести некуда. Пустая кнопка обещала бы действие.
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("без обработчика кнопки нет, даже если причина известна", () => {
+    render(<ErrorLine text="не хватает места на диске" className="x" />);
+    expect(screen.queryByRole("button")).toBeNull();
   });
 });

@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { Text } from "@fluentui/react-components";
+import { Button, Text } from "@fluentui/react-components";
 import { t } from "../i18n/ru";
 import { hintFor } from "../lib/hint";
 
@@ -31,6 +31,7 @@ export function ErrorLine({
   text,
   className,
   withHint = true,
+  onAct,
 }: {
   /** Текст ошибки. Пусто — компонент не рендерится вовсе. */
   text: string | null | undefined;
@@ -41,24 +42,44 @@ export function ErrorLine({
    * где совет уже написан рядом своим текстом, иначе он прозвучит дважды.
    */
   withHint?: boolean;
+  /**
+   * Куда ведёт кнопка «что сделать», если экран умеет туда отвести.
+   *
+   * Шаг 25: в отказе должна быть кнопка, а не только текст. Совет «откройте
+   * „Модели“» без кнопки заставляет искать этот экран самому — то есть
+   * повторять ту работу, ради которой написан совет. Но кнопка появляется не
+   * всегда: если экран не знает, куда вести, честнее оставить текст, чем
+   * показать кнопку, которая ничего не сделает (шаг 29 — обещание, которое
+   * ломает доверие).
+   */
+  onAct?: () => void;
 }): ReactElement | null {
   if (!text) return null;
   const hint = withHint ? hintFor(text) : null;
+  // Кнопка — только там, где совет называет экран, который экран умеет открыть.
+  const act = onAct !== undefined && hint !== null && hint.cause !== "unknown" ? onAct : undefined;
 
   return (
-    <Text className={className} role="alert" aria-live="assertive">
-      {/* Ошибка без подписи читается как случайная фраза: диктор начинает с
-          «что случилось», даже если на экране это понятно из контекста. */}
-      <span className="screen-reader-only">{t.errorPrefix} </span>
-      {text}
-      {/* Совет — отдельной фразой, а не в скобках: диктор читает его целиком,
-          и человек слышит «что сделать», а не хвост сообщения. */}
-      {hint ? (
-        <>
-          {" "}
-          <span className="error-hint">{hint.advice}</span>
-        </>
+    <div className="error-line">
+      <Text className={className} role="alert" aria-live="assertive">
+        {/* Ошибка без подписи читается как случайная фраза: диктор начинает с
+            «что случилось», даже если на экране это понятно из контекста. */}
+        <span className="screen-reader-only">{t.errorPrefix} </span>
+        {text}
+        {/* Совет — отдельной фразой, а не в скобках: диктор читает его целиком,
+            и человек слышит «что сделать», а не хвост сообщения. */}
+        {hint ? (
+          <>
+            {" "}
+            <span className="error-hint">{hint.advice}</span>
+          </>
+        ) : null}
+      </Text>
+      {act ? (
+        <Button size="small" appearance="subtle" onClick={act}>
+          {t.errorAct(hint?.cause ?? "")}
+        </Button>
       ) : null}
-    </Text>
+    </div>
   );
 }

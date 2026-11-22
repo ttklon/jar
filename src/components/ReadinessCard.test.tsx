@@ -201,6 +201,34 @@ describe("явные действия desktop-карточки", () => {
     expect((screen.getByRole("button", { name: "Скачать модель" }) as HTMLButtonElement).disabled).toBe(false);
   });
 
+  it("в отказе есть кнопка, и она ведёт туда, где видно причину (шаг 25)", async () => {
+    mocks.desktop = true;
+    mocks.download.mockRejectedValueOnce(new Error("не хватает места на диске"));
+    const onToModels = vi.fn();
+    render(<ReadinessCard status={status()} error={null} onToModels={onToModels} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Скачать модель" }));
+    await waitFor(() => expect(screen.getByText(/скачивание не удалось/)).toBeTruthy());
+
+    // Совет был и раньше, но искать «Модели» приходилось самому. Теперь — кнопка,
+    // и подпись называет место, куда она ведёт.
+    const act = screen.getByRole("button", { name: "Открыть «Модели»" });
+    fireEvent.click(act);
+    expect(onToModels).toHaveBeenCalledTimes(1);
+    // Ушли разбираться — старый отказ снят, а не висит новым сбоем.
+    expect(screen.queryByText(/скачивание не удалось/)).toBeNull();
+  });
+
+  it("без пути к «Моделям» кнопки нет: обещать переход некуда", async () => {
+    mocks.desktop = true;
+    mocks.download.mockRejectedValueOnce(new Error("не хватает места на диске"));
+    render(<ReadinessCard status={status()} error={null} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Скачать модель" }));
+    await waitFor(() => expect(screen.getByText(/скачивание не удалось/)).toBeTruthy());
+    expect(screen.queryByRole("button", { name: /Открыть «Модели»/ })).toBeNull();
+  });
+
   it("позволяет отменить ожидающую загрузку", async () => {
     mocks.desktop = true;
     let reject!: (reason: Error) => void;
