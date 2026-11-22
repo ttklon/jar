@@ -288,6 +288,66 @@ pub fn resume_from(statuses: &[&str], total: usize) -> Option<usize> {
     Some((done + 1).min(total))
 }
 
+/// Как повторить шаг, который не сделался. Шаг 144.
+///
+/// `resume_from` (шаг 141) отвечает на вопрос «с какого шага продолжать». Этот —
+/// на другой, и путать их дорого: продолжение с неудачного шага значит **сделать
+/// его ещё раз**, а «ещё раз» для разных действий значит разное.
+///
+/// Правило, и почему именно такое:
+///  * `read` — повторяется молча. Чтение дважды не меняет мир: худшее, что
+///    случится, — файл прочитан два раза.
+///  * `write-local` — спрашивает. Создать папку, которая уже есть, — ошибка;
+///    записать файл поверх — потерять то, что в нём было. Человек один раз
+///    подтвердил **одно** действие, а повтор — это второе действие, и решать
+///    ему. Это не перестраховка: именно на повторе «создать папку» и падает
+///    первый запуск.
+///  * `destructive` — спрашивает, и вопрос другой. Двойное удаление хуже отказа:
+///    после неудачи человек не знает, удалилось ли что-нибудь. Молчаливый повтор
+///    мог бы унести то, чего он не собирался трогать (шаблон, совпавший шире).
+///  * `external`, `identity`, `money` — спрашивает всегда: у них и первый-то раз
+///    без человека не идёт (см. `policy::decide`), и повтор не исключение.
+///
+/// Почему не «повторять всё, кроме destructive». Так было бы соблазнительно, и
+/// это ровно та ошибка, от которой шаг защищает: «создать папку» выглядит
+/// безопасным, а второй раз не работает.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Repeat {
+    /// Ничего не спрашивать: повторить.
+    Quietly,
+    /// Спросить человека перед повтором: причина — словами.
+    Ask(&'static str),
+}
+
+/// Что делать с шагом, который не сделался, при продолжении дела.
+///
+/// `risk` — риск строки реестра (`read`, `write-local`, `external`,
+/// `destructive`, `identity`, `money`); неизвестное считается опасным, как и в
+/// `gate_plan`: строка, которой нет в реестре, не повторяется молча.
+pub fn repeat_of(risk: &str) -> Repeat {
+    match risk {
+        "read" => Repeat::Quietly,
+        "write-local" => Repeat::Ask("повтор изменит то, что уже на диске"),
+        "destructive" => Repeat::Ask("повтор может удалить не то, что в прошлый раз"),
+        "external" | "identity" | "money" => Repeat::Ask("такое и в первый раз без человека не идёт"),
+        _ => Repeat::Ask("риск действия неизвестен — повторять молча нельзя"),
+    }
+}
+
+/// Номер шага, который при продолжении надо спросить, а не повторить молча.
+///
+/// Отдельно от `repeat_of`, потому что вопрос про весь план: продолжая с шага
+/// `resume_at`, человек должен увидеть, что именно его ждёт вопрос, **до**
+/// запуска, а не посередине. Иначе он нажимает «продолжить» и упирается в окно
+/// на четвёртом шаге, не понимая, почему.
+pub fn asked_on_resume(gates: &[StepGate], resume_at: usize) -> Option<usize> {
+    gates
+        .iter()
+        .filter(|gate| gate.position >= resume_at)
+        .find(|gate| repeat_of(&gate.risk) != Repeat::Quietly)
+        .map(|gate| gate.position)
+}
+
 /// Разбирает JSON плана. Ошибка — человеческая строка: её увидит и модель, и человек.
 pub fn parse(json: &str) -> Result<Plan, String> {
     if json.trim().is_empty() {
@@ -1038,5 +1098,70 @@ mod tests {
         // Указатель за последний шаг был бы отказом «продолжать не с чего».
         assert_eq!(resume_from(&["ok"], 3), Some(2));
         assert_eq!(resume_from(&["ok", "ok", "ok"], 5), Some(4));
+    }
+
+    /// Шаг 144. Главное: «безопасно повторить» — это не «выглядит безобидно».
+    #[test]
+    fn only_reading_repeats_without_asking() {
+        assert_eq!(repeat_of("read"), Repeat::Quietly);
+        // «Создать папку» выглядит безопасным, а второй раз не работает: папка
+        // уже есть. Поэтому write-local спрашивает, а не повторяется молча.
+        assert_ne!(repeat_of("write-local"), Repeat::Quietly);
+    }
+
+    /// Двойное удаление хуже отказа — значит, и вопрос про него отдельный: после
+    /// неудачи человек не знает, удалилось ли что-нибудь, и молчаливый повтор мог
+    /// бы унести лишнее.
+    #[test]
+    fn destructive_repeat_says_why_it_is_dangerous() {
+        match repeat_of("destructive") {
+            Repeat::Ask(why) => {
+                assert!(why.contains("удалить"), "причина называет удаление: {why}")
+            }
+            Repeat::Quietly => panic!("удаление не повторяется молча"),
+        }
+    }
+
+    /// Неизвестный риск — не «наверное, безопасно». Строка, которой нет в реестре,
+    /// молча не повторяется: угадывать про неё нечем.
+    #[test]
+    fn an_unknown_risk_is_not_assumed_safe() {
+        assert_ne!(repeat_of("unknown"), Repeat::Quietly);
+        assert_ne!(repeat_of(""), Repeat::Quietly);
+        assert_ne!(repeat_of("чтение"), Repeat::Quietly);
+    }
+
+    /// Вопрос о повторе виден **до** запуска, а не посередине: шаги до точки
+    /// продолжения уже сделаны, и спрашивать про них нечего.
+    #[test]
+    fn the_question_is_about_the_step_we_will_really_repeat() {
+        let gates = vec![
+            StepGate {
+                position: 1,
+                registry: "folder.create".into(),
+                decision: "confirm".into(),
+                risk: "write-local".into(),
+                wants_approval: false,
+            },
+            StepGate {
+                position: 2,
+                registry: "file.read".into(),
+                decision: "allow".into(),
+                risk: "read".into(),
+                wants_approval: false,
+            },
+            StepGate {
+                position: 3,
+                registry: "clipboard.get".into(),
+                decision: "allow".into(),
+                risk: "read".into(),
+                wants_approval: false,
+            },
+        ];
+
+        // Продолжаем с шага 2: шаг 1 уже сделан, и его риск к повторам не относится.
+        assert_eq!(asked_on_resume(&gates, 2), None);
+        // А с самого начала — первый же шаг требует вопроса.
+        assert_eq!(asked_on_resume(&gates, 1), Some(1));
     }
 }
