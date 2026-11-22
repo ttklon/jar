@@ -181,7 +181,10 @@ mod tests {
 
         let places = all(&base, &base.join("zshelper.log"), &base.join("models"));
 
-        assert_eq!(places.len(), 5);
+        // Шесть, а не пять: «Движки» — отдельная строка, и её размер раньше
+        // не был виден нигде. Число держим точным: новый файл без строки на экране —
+        // это файл, о котором человек не узнает.
+        assert_eq!(places.len(), 6);
         for place in &places {
             assert!(
                 !place.exists,
