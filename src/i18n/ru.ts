@@ -652,6 +652,23 @@ export const ask = {
 /**
  * Последние отказы в настройках: пять строк вместо чтения логов.
  */
+/** Карточка дела: свёрнутая строка и подробности (шаг 361). */
+export const deed = {
+  expand: "подробнее",
+  collapse: "свернуть",
+  kindLabel: (kind: string) => `Вид дела: ${kind}`,
+  noSteps: "без шагов: дело сделано одной операцией.",
+  proof: (what: string) => `доказательство: ${what}`,
+  noProof: "не проверено",
+  cancel: "Отменить",
+  repeat: "Повторить",
+  cannotRepeat: (why: string) => `Повторить нельзя: ${why}`,
+  copy: "Скопировать отчёт",
+  copied: "отчёт скопирован — его можно переслать текстом",
+  copyUnavailable: "буфер обмена недоступен: выделите текст и скопируйте вручную",
+  copyFailed: (reason: string) => `скопировать не удалось: ${reason}`,
+};
+
 export const recentFailures = {
   title: "Последние отказы",
   lead:

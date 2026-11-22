@@ -3,7 +3,9 @@ import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/reac
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
 import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
 import { groupReasons } from "../lib/journal";
+import { DeedCard } from "../components/DeedCard";
 import type { AuditEvent, Episode, RunRecord } from "../ipc";
+import type { Deed } from "../lib/deed";
 import { journal } from "../i18n/ru";
 
 const LIMIT = 100;
@@ -90,12 +92,6 @@ function time(ms: number): string {
   return at.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-/** Длительность запуска: пока он идёт, времени ещё нет — так и говорим. */
-function runDuration(run: RunRecord): string {
-  if (run.finished_ms === null) return journal.runRunning;
-  return journal.duration(run.finished_ms - run.started_ms);
-}
-
 function outcomeClass(styles: ReturnType<typeof useStyles>, outcome: string): string {
   if (outcome.startsWith("ok")) return `${styles.cell} ${styles.ok}`;
   if (outcome.startsWith("denied") || outcome.startsWith("error")) {
@@ -104,44 +100,33 @@ function outcomeClass(styles: ReturnType<typeof useStyles>, outcome: string): st
   return styles.cell;
 }
 
-type Styles = ReturnType<typeof useStyles>;
+/** Запуск из памяти в форму дела: одна карточка на всё, что знает приложение. */
+function toDeed(run: RunRecord): Deed {
+  return {
+    id: run.id,
+    subject: run.subject,
+    kind: run.kind,
+    startedMs: run.started_ms,
+    finishedMs: run.finished_ms,
+    outcome: run.outcome,
+    steps: run.steps.map((step) => ({
+      position: step.position,
+      tool: step.tool,
+      ok: step.ok,
+      reason: step.reason,
+      evidence: step.evidence,
+    })),
+  };
+}
 
-/** Карточка одного запуска: то же лицо и в списке, и в результатах поиска. */
-function RunCard({ run, styles }: { run: RunRecord; styles: Styles }) {
-  return (
-    <div className={styles.run}>
-      <div className={styles.runHead}>
-        <Text weight="semibold">{run.subject}</Text>
-        <span className={styles.runKind}>{journal.runKind[run.kind] ?? run.kind}</span>
-        <span className={styles.mono}>{time(run.started_ms)}</span>
-        <span className={styles.mono}>{runDuration(run)}</span>
-        <span
-          className={
-            run.outcome === "ok"
-              ? styles.ok
-              : run.outcome === "running"
-                ? styles.mono
-                : styles.denied
-          }
-        >
-          {run.outcome}
-        </span>
-      </div>
-      {run.steps.length === 0 ? (
-        <Text className={styles.note}>{journal.noSteps}</Text>
-      ) : (
-        <ul className={styles.steps}>
-          {run.steps.map((step) => (
-            <li key={step.position}>
-              {step.tool} · {step.ok ? journal.runStepOk : journal.runStepFailed}
-              {step.reason ? ` · ${step.reason}` : ""}
-              {step.evidence ? ` · ${step.evidence}` : ""}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+/**
+ * Карточка одного запуска — та же, что в остальных местах (шаг 361).
+ *
+ * Здесь она раскрыта сразу: в «Истории» человек пришёл именно за подробностями,
+ * и прятать их за лишним нажатием незачем.
+ */
+function RunCard({ run }: { run: RunRecord }) {
+  return <DeedCard deed={toDeed(run)} startOpen />;
 }
 
 export function Journal() {
@@ -241,7 +226,7 @@ export function Journal() {
           ? episodes.map((episode) => (
               <div key={episode.run.id} className={styles.run}>
                 <Text className={styles.note}>{journal.searchMatched(episode.matched)}</Text>
-                <RunCard run={episode.run} styles={styles} />
+                <RunCard run={episode.run} />
               </div>
             ))
           : null}
@@ -257,7 +242,7 @@ export function Journal() {
           <Text className={styles.note}>{journal.runsEmpty}</Text>
         ) : null}
         {runs !== null && runs.length > 0
-          ? runs.map((run) => <RunCard key={run.id} run={run} styles={styles} />)
+          ? runs.map((run) => <RunCard key={run.id} run={run} />)
           : null}
       </section>
 

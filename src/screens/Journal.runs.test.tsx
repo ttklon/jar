@@ -35,7 +35,9 @@ function run(patch: Partial<RunRecord> = {}): RunRecord {
   return {
     id: 7,
     kind: "tool",
-    subject: "files|создать|папку",
+    // Тема — словами человека, а не ключом инструмента: иначе она совпадает
+    // с именем шага, и по экрану не понять, где что.
+    subject: "Собрать папку под отчёты",
     started_ms: Date.UTC(2026, 10, 8, 9, 0, 0),
     finished_ms: Date.UTC(2026, 10, 8, 9, 0, 2),
     outcome: "ok",
@@ -76,7 +78,8 @@ describe("экран «История»: запуски из памяти", () =
     render(<Journal />);
 
     await waitFor(() => {
-      expect(screen.getByText(/идёт/)).toBeTruthy();
+      // «Идёт» звучит и в строке дела, и в причине «повторить нельзя».
+      expect(screen.getAllByText(/идёт/).length).toBeGreaterThan(0);
     });
     expect(screen.getByText(/без шагов/)).toBeTruthy();
   });
