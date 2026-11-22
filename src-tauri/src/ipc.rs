@@ -500,12 +500,16 @@ pub fn resource_report() -> budget::BudgetReport {
 /// Только чтение: пути, размеры и честная отметка «файла ещё нет». Ничего не удаляет
 /// и не «чистит» — уборка это отдельное дело с подтверждением.
 #[tauri::command]
-pub fn data_places(state: State<'_, AppState>) -> Vec<places::Place> {
-    places::all(
-        &state.inner.base_dir,
-        std::path::Path::new(&state.log_file),
-        &state.inner.models_dir,
-    )
+pub async fn data_places(state: State<'_, AppState>) -> Vec<places::Place> {
+    // Обход каталогов и `metadata` — это диск, а не память: на сетевой папке
+    // или при большом каталоге моделей вызов висел бы на потоке окна, и окно
+    // бы не перерисовывалось (шаги 388/397).
+    let base = state.inner.base_dir.clone();
+    let log = std::path::PathBuf::from(&state.log_file);
+    let models = state.inner.models_dir.clone();
+    tauri::async_runtime::spawn_blocking(move || places::all(&base, &log, &models))
+        .await
+        .unwrap_or_default()
 }
 
 /// Автозапуск: включён ли, что именно запустится и чем это грозит.
@@ -924,17 +928,38 @@ fn tail_of(path: std::path::PathBuf, want: usize) -> Vec<String> {
 /// и человек сначала читает, что именно уедет. Возвращается и то, что вычищено, —
 /// иначе «мы всё почистили» пришлось бы принимать на веру.
 #[tauri::command]
-pub fn diagnostics_pack(state: State<'_, AppState>, lines: Option<usize>) -> diagnostics::Pack {
+pub async fn diagnostics_pack(
+    state: State<'_, AppState>,
+    lines: Option<usize>,
+) -> Result<diagnostics::Pack, String> {
+    // Чтение хвоста журнала — диск: до двух тысяч строк, и на медленном диске
+    // это заметно. Поток окна на это время не занимаем (шаги 388/397).
+    let log_file = std::path::PathBuf::from(&state.log_file);
+    let actions = state.inner.registry.stats().actions;
+    // Пустой пакет вместо отказа был бы хуже: человек решил бы, что в журнале
+    // ничего нет, а не что сборка не удалась.
+    tauri::async_runtime::spawn_blocking(move || diagnostics_pack_now(log_file, actions, lines))
+        .await
+        .map_err(|error| format!("пакет диагностики не собрался: {error}"))
+}
+
+/// Сборка пакета диагностики — без потока окна, чтобы её можно было позвать
+/// из `spawn_blocking` и проверить тестом.
+fn diagnostics_pack_now(
+    log_file: std::path::PathBuf,
+    actions: usize,
+    lines: Option<usize>,
+) -> diagnostics::Pack {
     // Предел по умолчанию: 300 строк журнала — это обычно последние несколько
     // минут, то есть ровно то, что нужно для разбора. Весь журнал за неделю
     // человек не прочитает, а отправит.
     let want = lines.unwrap_or(300).min(2000);
-    let log = tail_of(crate::logging::log_file(), want);
+    let log = tail_of(log_file, want);
 
     let head = vec![
         format!("приложение: {}", env!("CARGO_PKG_VERSION")),
         format!("система: {}", diagnostics::platform()),
-        format!("инструментов: {}", state.inner.registry.stats().actions),
+        format!("инструментов: {actions}"),
     ];
 
     diagnostics::pack(&head, &log)
@@ -1347,10 +1372,27 @@ pub async fn probe_network() -> Result<Vec<readiness::AddressProbe>, String> {
 /// Готовность к первому разговору: движок, модель, локальное распознавание, место.
 /// Только чтение — ничего не скачивает и не запускает.
 #[tauri::command]
-pub fn readiness_status(state: State<'_, AppState>) -> Result<readiness::ReadinessStatus, String> {
+pub async fn readiness_status(
+    state: State<'_, AppState>,
+) -> Result<readiness::ReadinessStatus, String> {
+    // Обход папки моделей, `metadata` и проверка движков — диск. На потоке
+    // окна это заморозило бы первый экран ровно тогда, когда он нужен
+    // (шаги 388/397). `Inner` за `Arc`, поэтому побочному потоку нужен только
+    // он и имя журнала, а не всё состояние.
+    let inner = state.inner.clone();
+    let log_file = state.log_file.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        readiness_status_now(&AppState { inner, log_file })
+    })
+    .await
+    .map_err(|error| format!("готовность не посчиталась: {error}"))?
+}
+
+/// Готовность без потока окна: её зовёт `spawn_blocking`, а не человек.
+fn readiness_status_now(state: &AppState) -> Result<readiness::ReadinessStatus, String> {
     let inner = &state.inner;
-    let engine = read_engine_status(&state);
-    let speech = read_speech_status(&state);
+    let engine = read_engine_status(state);
+    let speech = read_speech_status(state);
 
     let files = match std::fs::metadata(&inner.models_dir) {
         Ok(_) => models::scan(&inner.models_dir)?,
