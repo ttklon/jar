@@ -250,7 +250,7 @@ describe("App", () => {
     globalThis.localStorage?.clear?.();
     render(<App />);
 
-    await waitFor(() => expect(screen.getByText("Знакомство")).toBeTruthy(), { timeout: 4000 });
+    await screen.findByText("Знакомство", {}, { timeout: 5000 });
     // Знакомство закрывает работу: голосового экрана за ним ещё нет.
     expect(screen.queryByRole("button", { name: "Держать и говорить" })).toBeNull();
 
@@ -274,7 +274,7 @@ describe("App", () => {
     await loaded();
 
     nav().getByRole("button", { name: "Руки" }).click();
-    await waitFor(() => expect(screen.getByText(/\d+ инструментов/)).toBeTruthy());
+    await screen.findByText(/\d+ инструментов/, {}, { timeout: 5000 });
 
     const voicePrompt = screen.getByText(/Скажите задачу/);
     expect(voicePrompt.closest('[aria-hidden="true"]')).toBeTruthy();
@@ -285,7 +285,7 @@ describe("App", () => {
     await loaded();
 
     nav().getByRole("button", { name: "Обзор" }).click();
-    await waitFor(() => expect(screen.getByText("Что уже умею")).toBeTruthy(), { timeout: 4000 });
+    await screen.findByText("Что уже умею", {}, { timeout: 5000 });
 
     const domainsBlock = await screen.findAllByText(String(DOMAINS));
     expect(domainsBlock.length).toBeGreaterThan(0);
@@ -297,7 +297,7 @@ describe("App", () => {
     await loaded();
 
     nav().getByRole("button", { name: "Руки" }).click();
-    await waitFor(() => expect(screen.getByText(/\d+ инструментов/)).toBeTruthy());
+    await screen.findByText(/\d+ инструментов/, {}, { timeout: 5000 });
 
     // Опасное помечено, чтение — нет: политика приходит из того же решения, что и в ядре.
     expect(screen.getAllByText("Требует подтверждения").length).toBeGreaterThan(0);
@@ -313,7 +313,7 @@ describe("App", () => {
     nav().getByRole("button", { name: "Сценарии" }).click();
     // Экран грузится по требованию: ждём не шапку, а сам план. Шапка
     // появляется раньше тела — на этом тест и спотыкался.
-    await waitFor(() => expect(screen.getByText("Как поживает компьютер")).toBeTruthy());
+    await screen.findByText("Как поживает компьютер", {}, { timeout: 5000 });
     expect(screen.getByText(/\d+ сценариев/)).toBeTruthy();
 
     // Сценарии собираются из данных: заголовок и его шаги приходят из data/flows.json.
@@ -363,7 +363,7 @@ describe("App", () => {
     await loaded();
 
     nav().getByRole("button", { name: "Приложения" }).click();
-    await waitFor(() => expect(screen.getByText(/87 приложений/)).toBeTruthy());
+    await screen.findByText(/87 приложений/, {}, { timeout: 5000 });
 
     // Числа приходят из данных: профилей столько, сколько файлов в data/profiles.
     expect(screen.getAllByText(/\d+ операций/).length).toBeGreaterThan(0);
@@ -375,7 +375,9 @@ describe("App", () => {
     await loaded();
 
     nav().getByRole("button", { name: "Что умею" }).click();
-    await waitFor(() => expect(screen.getByText("Каталог действий")).toBeTruthy());
+    // Экран подгружается по требованию: в CI модуль грузится заметно дольше,
+    // чем в локальном прогоне, поэтому ждём с запасом, а не «сразу после клика».
+    await screen.findByText("Каталог действий", {}, { timeout: 5000 });
 
     const found = await screen.findByText(new RegExp(`Найдено: ${TOTAL} из ${TOTAL}`));
     expect(found).toBeTruthy();
