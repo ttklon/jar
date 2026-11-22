@@ -101,7 +101,9 @@ pub fn parse_build(text: &str) -> Option<String> {
     let mut numbers = version.split('.');
     let _major = numbers.next()?;
     let _minor = numbers.next()?;
-    let build = numbers.next()?.trim_end_matches(|c: char| !c.is_ascii_digit());
+    let build = numbers
+        .next()?
+        .trim_end_matches(|c: char| !c.is_ascii_digit());
     if build.is_empty() || !build.chars().all(|c| c.is_ascii_digit()) {
         return None;
     }
@@ -140,7 +142,10 @@ mod tests {
     fn a_rollback_is_not_called_an_update() {
         let note = update_note(Some("19046"), "19045").unwrap();
         assert!(note.contains("другой версией"), "честно названо: {note}");
-        assert!(!note.contains("обновилась"), "не выдаётся за обновление: {note}");
+        assert!(
+            !note.contains("обновилась"),
+            "не выдаётся за обновление: {note}"
+        );
     }
 
     #[test]
@@ -169,7 +174,10 @@ mod tests {
 
         // Первый запуск: сравнивать не с чем, но номер уже записан.
         let first = notice_and_remember(&dir).unwrap();
-        assert!(first.contains("сборка") || first.contains("не Windows"), "{first}");
+        assert!(
+            first.contains("сборка") || first.contains("не Windows"),
+            "{first}"
+        );
         let written = std::fs::read_to_string(dir.join(FILE)).ok();
         if build_number().is_some() {
             assert_eq!(written, build_number(), "номер лёг в файл");
@@ -188,6 +196,9 @@ mod tests {
         let two = parse_build("Microsoft Windows [Version 10.0.19045.4000]").unwrap();
         assert_eq!(one, "19045");
         assert_eq!(two, "19045");
-        assert!(update_note(Some(&one), &two).is_none(), "тот же номер сборки");
+        assert!(
+            update_note(Some(&one), &two).is_none(),
+            "тот же номер сборки"
+        );
     }
 }

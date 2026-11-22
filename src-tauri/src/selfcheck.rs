@@ -129,10 +129,12 @@ fn os_update_check() -> Result<String, String> {
     let _ = memory.remember("os-build", &current);
     drop(memory);
     let _ = std::fs::remove_file(base.join("self-check.db"));
-    Ok(match crate::osupdate::update_note(previous.as_deref(), &current) {
-        Some(note) => format!("сборка {current}; {note}"),
-        None => format!("сборка {current}; с прошлым запуском сравнивать нечего"),
-    })
+    Ok(
+        match crate::osupdate::update_note(previous.as_deref(), &current) {
+            Some(note) => format!("сборка {current}; {note}"),
+            None => format!("сборка {current}; с прошлым запуском сравнивать нечего"),
+        },
+    )
 }
 
 fn autostart_check() -> Result<String, String> {
