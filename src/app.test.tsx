@@ -311,12 +311,39 @@ describe("App", () => {
     await loaded();
 
     nav().getByRole("button", { name: "Сценарии" }).click();
-    await waitFor(() => expect(screen.getByText(/\d+ сценариев/)).toBeTruthy());
+    // Экран грузится по требованию: ждём не шапку, а сам план. Шапка
+    // появляется раньше тела — на этом тест и спотыкался.
+    await waitFor(() => expect(screen.getByText("Как поживает компьютер")).toBeTruthy());
+    expect(screen.getByText(/\d+ сценариев/)).toBeTruthy();
 
     // Сценарии собираются из данных: заголовок и его шаги приходят из data/flows.json.
-    expect(screen.getByText("Как поживает компьютер")).toBeTruthy();
     expect(screen.getAllByText(/В браузере сценарии не выполняются/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/\d+ шагов/).length).toBeGreaterThan(0);
+  });
+
+  it("экраны подключены по требованию, а не все сразу", async () => {
+    // Шаги 387/393. Статический импорт одиннадцати экранов кладёт их все в
+    // первый бандл: человек ждёт разбора мегабайтов ради одного экрана.
+    // Проверяется на уровне исходника, потому что в jsdom модуль грузится в
+    // том же такте и заглушку не увидеть, — а вернуть статический импорт
+    // легко и незаметно.
+    // Читаем с диска от корня репозитория: `import.meta.url` в jsdom — не
+    // file-схема, и `URL` по нему не открывается.
+    const source = (await import("node:fs")).readFileSync(
+      `${process.cwd()}/src/app.tsx`,
+      "utf8",
+    );
+    const lazyScreens = [...source.matchAll(/lazy\(\(\) => import\("\.\/screens\/(\w+)"\)/g)].map(
+      (match) => match[1],
+    );
+    // Все экраны, кроме тех, что нужны на первом кадре.
+    for (const name of ["Overview", "Catalog", "Hands", "Flows", "Ask", "Models", "Journal", "Apps", "Settings"]) {
+      expect(lazyScreens, `${name} грузится по требованию`).toContain(name);
+      expect(source).not.toMatch(new RegExp(`^import \\{ ${name} \\} from "\\./screens/${name}";`, "m"));
+    }
+    // Voice и Welcome остаются статическими: первый кадр не ждёт сети.
+    expect(source).toMatch(/^import \{ Voice \} from "\.\/screens\/Voice";/m);
+    expect(source).toMatch(/^import \{ Welcome \} from "\.\/screens\/Welcome";/m);
   });
 
   it("экран «История» честно говорит, что журнала в браузере нет", async () => {

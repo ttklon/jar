@@ -31,6 +31,7 @@ export const TIER_LABEL: Record<Tier, string> = {
 };
 
 export const t = {
+  screenLoading: "Загружаю экран…",
   appName: "ZShelper",
   appTagline: "локальный агент-оператор для Windows",
   navOverview: "Обзор",

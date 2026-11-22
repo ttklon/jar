@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogBody,
@@ -29,17 +29,21 @@ import {
 } from "@fluentui/react-icons";
 import { isTauri, registrySnapshot } from "./ipc";
 import type { RegistrySnapshot } from "./ipc";
-import { Overview } from "./screens/Overview";
 import { Voice } from "./screens/Voice";
-import { Catalog } from "./screens/Catalog";
-import { Hands } from "./screens/Hands";
-import { Flows } from "./screens/Flows";
-import { Ask } from "./screens/Ask";
-import { Models } from "./screens/Models";
-import { Journal } from "./screens/Journal";
-import { Apps } from "./screens/Apps";
-import { Settings } from "./screens/Settings";
 import { Welcome } from "./screens/Welcome";
+// Экраны грузятся по требованию (шаги 387/393). Зачем: все одиннадцать в
+// первом бандле — это мегабайты разбора до первого кадра, хотя человеку при
+// запуске нужен один экран. `Voice` и `Welcome` остаются статическими: они
+// показываются сразу, и откладывать их значило бы откладывать первый кадр.
+const Overview = lazy(() => import("./screens/Overview").then((m) => ({ default: m.Overview })));
+const Catalog = lazy(() => import("./screens/Catalog").then((m) => ({ default: m.Catalog })));
+const Hands = lazy(() => import("./screens/Hands").then((m) => ({ default: m.Hands })));
+const Flows = lazy(() => import("./screens/Flows").then((m) => ({ default: m.Flows })));
+const Ask = lazy(() => import("./screens/Ask").then((m) => ({ default: m.Ask })));
+const Models = lazy(() => import("./screens/Models").then((m) => ({ default: m.Models })));
+const Journal = lazy(() => import("./screens/Journal").then((m) => ({ default: m.Journal })));
+const Apps = lazy(() => import("./screens/Apps").then((m) => ({ default: m.Apps })));
+const Settings = lazy(() => import("./screens/Settings").then((m) => ({ default: m.Settings })));
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { filterCommands, type Command } from "./lib/commands";
 import { layoutFor } from "./lib/layout";
@@ -417,34 +421,48 @@ export function App() {
                 setScreen(target);
               }}
             />
-          ) : screen === "voice" ? null : screen === "overview" ? (
-            <Overview snapshot={snapshot} />
-          ) : screen === "catalog" ? (
-            <Catalog snapshot={snapshot} />
-          ) : screen === "ask" ? (
-            <Ask />
-          ) : screen === "hands" ? (
-            <Hands />
-          ) : screen === "flows" ? (
-            <Flows />
-          ) : screen === "apps" ? (
-            <Apps />
-          ) : screen === "models" ? (
-            <Models />
-          ) : screen === "journal" ? (
-            <Journal
-              onOpenSettings={() => setScreen("settings")}
-              onOpenAsk={() => setScreen("ask")}
-            />
-          ) : (
-            <Settings
-              theme={choice}
-              dark={dark}
-              onThemeChange={onThemeChange}
-              onShowWelcome={() => setWelcome(true)}
-              source={source}
-              version={APP_VERSION}
-            />
+          ) : screen === "voice" ? null : (
+            // Пока экран грузится, говорим, что грузится: пустое место на
+            // месте экрана читается как «сломалось».
+            <Suspense
+              fallback={
+                // Заглушка объявляет себя: диктор должен сказать «загружаю
+                // экран», а не оставить человека в тишине перед подменой.
+                <div role="status" aria-live="polite" aria-label={t.screenLoading}>
+                  <Spinner size="small" label={t.screenLoading} />
+                </div>
+              }
+            >
+              {screen === "overview" ? (
+                <Overview snapshot={snapshot} />
+              ) : screen === "catalog" ? (
+                <Catalog snapshot={snapshot} />
+              ) : screen === "ask" ? (
+                <Ask />
+              ) : screen === "hands" ? (
+                <Hands />
+              ) : screen === "flows" ? (
+                <Flows />
+              ) : screen === "apps" ? (
+                <Apps />
+              ) : screen === "models" ? (
+                <Models />
+              ) : screen === "journal" ? (
+                <Journal
+                  onOpenSettings={() => setScreen("settings")}
+                  onOpenAsk={() => setScreen("ask")}
+                />
+              ) : (
+                <Settings
+                  theme={choice}
+                  dark={dark}
+                  onThemeChange={onThemeChange}
+                  onShowWelcome={() => setWelcome(true)}
+                  source={source}
+                  version={APP_VERSION}
+                />
+              )}
+            </Suspense>
           )}
         </main>
       </div>
