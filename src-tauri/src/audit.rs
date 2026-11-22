@@ -43,8 +43,19 @@ pub enum AuditKind {
     Denied,
 }
 
+/// Сколько журнал занимает до ротации.
+///
+/// Почему предел вообще нужен: журнал дописывается на каждое действие и не
+/// переписывается, поэтому растёт вечно. Через год работы это десятки мегабайт, а
+/// читается он целиком — `recent` и `tail` открывают файл как строку, чтобы взять
+/// последние двадцать событий. Диск и память упирались бы в историю, которую никто
+/// не читает. Два мегабайта — это десятки тысяч событий: с лихвой хватает, чтобы
+/// разобраться в «что случилось вчера».
+pub const MAX_BYTES: u64 = 2 * 1024 * 1024;
+
 pub struct Audit {
     path: PathBuf,
+    max_bytes: u64,
 }
 
 impl Audit {
@@ -52,11 +63,49 @@ impl Audit {
         if let Some(parent) = path.parent() {
             let _ = std::fs::create_dir_all(parent);
         }
-        Self { path }
+        Self {
+            path,
+            max_bytes: MAX_BYTES,
+        }
     }
 
     pub fn path(&self) -> &Path {
         &self.path
+    }
+
+    /// Ротация: перерос журнал предел — старый уезжает в `audit.1.jsonl`, новый
+    /// начинается с нуля.
+    ///
+    /// Одна копия, а не десять: журнал нужен, чтобы понять недавнее, а не вести
+    /// архив. Копия перезаписывается — иначе «ротация» была бы тем же бесконечным
+    /// ростом, только с другим именем. Ошибка не возвращается: журнал важен, но
+    /// действие важнее, и падать из-за него нельзя — то же правило, что у `write`.
+    fn rotate_if_needed(&self) {
+        let size = match std::fs::metadata(&self.path) {
+            Ok(meta) => meta.len(),
+            // Файла ещё нет — ротировать нечего.
+            Err(_) => return,
+        };
+        if size < self.max_bytes {
+            return;
+        }
+
+        let backup = match self.path.file_name() {
+            Some(name) => {
+                let mut name = name.to_os_string();
+                name.push(".1");
+                self.path.with_file_name(name)
+            }
+            None => return,
+        };
+
+        // Копия заменяется целиком: `rename` на Windows не перезапишет занятый файл,
+        // поэтому старую копию убираем заранее, а не надеемся на удачу.
+        let _ = std::fs::remove_file(&backup);
+        if let Err(error) = std::fs::rename(&self.path, &backup) {
+            // Не удалось — журнал продолжает расти, но приложение работает.
+            tracing::warn!(%error, path = %self.path.display(), "журнал не ротируется");
+        }
     }
 
     /// Дописывает событие. Ошибки записи не должны ломать действие: журнал важен,
@@ -69,6 +118,9 @@ impl Audit {
                 return;
             }
         };
+
+        // Ротация — до открытия: иначе новый файл открылся бы уже старым размером.
+        self.rotate_if_needed();
 
         match std::fs::OpenOptions::new()
             .create(true)
@@ -196,6 +248,68 @@ mod tests {
         assert_eq!(recent[1].outcome, "requested");
 
         assert_eq!(audit.recent(1).len(), 1);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Журнал с маленьким пределом: настоящие два мегабайта в тесте не наберёшь без
+    /// тысяч событий, а проверять надо саму ротацию, а не терпение.
+    fn small(path: PathBuf, max_bytes: u64) -> Audit {
+        Audit { path, max_bytes }
+    }
+
+    #[test]
+    fn the_journal_does_not_grow_without_limit() {
+        let dir = std::env::temp_dir().join(format!("zshelper-audit-rotate-{}", now_ms()));
+        let path = dir.join("audit.jsonl");
+        let audit = small(path.clone(), 900);
+        for index in 0..40 {
+            audit.write(event(AuditKind::Finished, &format!("ok-{index}")));
+        }
+
+        // Журнал ограничен, а не просто «стал поменьше». Запас в одну запись честный:
+        // ротация смотрит на размер перед записью, поэтому последняя строка может
+        // переступить предел — но не больше чем на себя саму.
+        let size = std::fs::metadata(&path).map(|meta| meta.len()).unwrap_or(0);
+        assert!(
+            size < 900 + 400,
+            "журнал дорос до {size} байт при пределе 900: ротация не работает"
+        );
+        // Сорок событий целиком в журнале не лежат: иначе предела нет вовсе.
+        let lines = std::fs::read_to_string(&path)
+            .map(|text| text.lines().count())
+            .unwrap_or(0);
+        assert!(lines < 40, "в журнале {lines} строк — ротация не срабатывала");
+        // Одна резервная копия, а не десять: архив не растёт вместо журнала.
+        let backup = dir.join("audit.jsonl.1");
+        assert!(backup.exists(), "старый журнал должен уехать в копию");
+        let copies = std::fs::read_dir(&dir)
+            .map(|entries| {
+                entries
+                    .filter_map(Result::ok)
+                    .filter(|entry| entry.file_name().to_string_lossy().contains(".jsonl"))
+                    .count()
+            })
+            .unwrap_or(0);
+        assert_eq!(copies, 2, "журнал и ровно одна копия");
+
+        // Новое читается, старое не потеряно целиком.
+        assert!(!audit.recent(5).is_empty());
+        let archive = std::fs::read_to_string(&backup).unwrap_or_default();
+        assert!(!archive.trim().is_empty(), "в копии должны остаться события");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_young_journal_is_not_rotated() {
+        let dir = std::env::temp_dir().join(format!("zshelper-audit-young-{}", now_ms()));
+        let path = dir.join("audit.jsonl");
+        let audit = small(path.clone(), MAX_BYTES);
+        audit.write(event(AuditKind::Started, "started"));
+
+        assert!(!dir.join("audit.jsonl.1").exists(), "молодой журнал не трогаем");
+        assert_eq!(audit.tail(10).len(), 1);
 
         let _ = std::fs::remove_dir_all(&dir);
     }
