@@ -177,6 +177,9 @@ mod tests {
 
         assert_eq!(plan.parallel, machine::PARALLEL_CEILING);
         assert_ne!(plan.mode, Mode::Crowded);
-        assert!(plan.explains_itself(), "и тут причина названа — иначе это молчание");
+        assert!(
+            plan.explains_itself(),
+            "и тут причина названа — иначе это молчание"
+        );
     }
 }
