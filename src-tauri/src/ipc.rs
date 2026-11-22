@@ -498,13 +498,30 @@ pub fn resource_report() -> budget::BudgetReport {
         )),
     }
 
+    // Движок — отдельный процесс. Пока он запущен, «память в простое» у приложения
+    // не отвечает на вопрос «сколько занято»: модель весит гигабайты, и человек,
+    // увидевший 90 МБ, решил бы, что всё легко (шаг 382).
+    match budget::process_mb("llama-server.exe") {
+        Some(mb) => metrics.push(budget::Metric::observed(
+            "движок (отдельный процесс)",
+            mb,
+            "МБ",
+            "tasklist по имени: llama-server, не наш процесс",
+        )),
+        None => metrics.push(budget::Metric::unknown(
+            "движок (отдельный процесс)",
+            "МБ",
+            "движок не запущен — и это хорошо для памяти",
+        )),
+    }
+
     match memory {
         Some(mb) => metrics.push(budget::Metric::with_budget(
             "память в простое",
             mb,
             "МБ",
             150.0,
-            "tasklist: рабочий набор процесса, не пиковый",
+            "tasklist: рабочий набор нашего процесса, без движка",
         )),
         None => metrics.push(budget::Metric::unknown(
             "память в простое",

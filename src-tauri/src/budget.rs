@@ -152,6 +152,32 @@ pub fn memory_mb() -> Option<f64> {
     None
 }
 
+/// Память дочернего процесса по имени, мегабайты. `None` — процесса нет или не Windows.
+///
+/// Зачем отдельно от `memory_mb`. `memory_mb` — это наше приложение. Движок
+/// `llama-server` — **другой процесс**, и когда он запущен, память приложения
+/// (150 МБ по обещанию, шаг 382) ничего не говорит о том, сколько занято на машине:
+/// модель весит гигабайты. Показывать только своё число — значит отвечать на вопрос
+/// «сколько я занимаю», когда человек спрашивал «сколько занято».
+#[cfg(windows)]
+pub fn process_mb(name: &str) -> Option<f64> {
+    use std::os::windows::process::CommandExt;
+    // Без `PID eq`: имя движка одно, а PID меняется каждый запуск.
+    let output = std::process::Command::new("tasklist")
+        .args(["/FI", &format!("IMAGENAME eq {name}"), "/FO", "CSV", "/NH"])
+        .creation_flags(0x0800_0000)
+        .output()
+        .ok()?;
+    let text = String::from_utf8_lossy(&output.stdout);
+    // Нет процесса — `tasklist` печатает «INFO: No tasks…», и это не ошибка.
+    parse_tasklist_kb(&text).map(|kb| kb / 1024.0)
+}
+
+#[cfg(not(windows))]
+pub fn process_mb(_name: &str) -> Option<f64> {
+    None
+}
+
 /// Память из строки `tasklist /FO CSV`: четвёртое поле, «12 345 КБ».
 ///
 /// Отдельной функцией: формат чужой, и проверять разбор надо без Windows.
@@ -272,5 +298,12 @@ mod tests {
         // Пустой ответ — не ноль, а «не прочитали».
         assert_eq!(parse_tasklist_kb(""), None);
         assert_eq!(parse_tasklist_kb("СВЕДЕНИЯ: нет задач"), None);
+
+        // Ответ «нет задач» на английском — тот же случай: движок не запущен, и это
+        // не «ноль мегабайт», а «считать нечего» (шаг 382).
+        assert_eq!(
+            parse_tasklist_kb("INFO: No tasks are running which match the specified criteria."),
+            None
+        );
     }
 }
