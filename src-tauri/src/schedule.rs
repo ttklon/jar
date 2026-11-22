@@ -232,35 +232,6 @@ mod tests {
         assert_eq!(schedule.stamp(now), format!("run:утренний отчёт:{now}"));
         assert_ne!(schedule.stamp(now), schedule.stamp(now + 1));
     }
-}
-
-/// Проверка и запуск через настоящую память.
-///
-/// `decide` проверяется без базы; здесь — то, чем приложение пользуется:
-/// метка «уже сработало» живёт фактом в памяти и переживает перезапуск
-/// (шаг 328: иначе расписание срабатывало бы заново при каждом старте).
-///
-/// Метки старше суток забываются: иначе факты копились бы по штуке в минуту
-/// на каждое расписание. Чистка идёт здесь, а не по таймеру, — в тот момент,
-/// когда метка всё равно нужна.
-pub fn take(memory: &crate::memory::Memory, schedule: &Schedule, now: u64) -> Decision {
-    let prefix = format!("run:{}:", schedule.id);
-    // Старые метки этого расписания — вон: память помнит «сработало ли в эту
-    // минуту», а не «срабатывало ли когда-нибудь».
-    for (key, _) in memory.facts_with_prefix(&prefix) {
-        let minute = key.rsplit(':').next().and_then(|m| m.parse::<u64>().ok());
-        if minute.is_none_or(|minute| now.saturating_sub(minute) > 1440) {
-            let _ = memory.forget(&key);
-        }
-    }
-    let decision = decide(schedule, now, |stamp| memory.fact(stamp).is_some());
-    if decision.run {
-        // Метка пишется ДО дела, а не после: падение посреди работы не должно
-        // приводить к повторному запуску в ту же минуту — иначе ошибка в деле
-        // превращается в петлю повторов.
-        let _ = memory.remember(&schedule.stamp(now), "запущено");
-    }
-    decision
 
     /// Метка в настоящей памяти: то же расписание, та же минута, два вызова —
     /// один запуск. И память переживает «перезапуск»: новый объект `Memory` на
@@ -325,4 +296,33 @@ pub fn take(memory: &crate::memory::Memory, schedule: &Schedule, now: u64) -> De
         drop(memory);
         let _ = std::fs::remove_dir_all(&dir);
     }
+}
+
+/// Проверка и запуск через настоящую память.
+///
+/// `decide` проверяется без базы; здесь — то, чем приложение пользуется:
+/// метка «уже сработало» живёт фактом в памяти и переживает перезапуск
+/// (шаг 328: иначе расписание срабатывало бы заново при каждом старте).
+///
+/// Метки старше суток забываются: иначе факты копились бы по штуке в минуту
+/// на каждое расписание. Чистка идёт здесь, а не по таймеру, — в тот момент,
+/// когда метка всё равно нужна.
+pub fn take(memory: &crate::memory::Memory, schedule: &Schedule, now: u64) -> Decision {
+    let prefix = format!("run:{}:", schedule.id);
+    // Старые метки этого расписания — вон: память помнит «сработало ли в эту
+    // минуту», а не «срабатывало ли когда-нибудь».
+    for (key, _) in memory.facts_with_prefix(&prefix) {
+        let minute = key.rsplit(':').next().and_then(|m| m.parse::<u64>().ok());
+        if minute.is_none_or(|minute| now.saturating_sub(minute) > 1440) {
+            let _ = memory.forget(&key);
+        }
+    }
+    let decision = decide(schedule, now, |stamp| memory.fact(stamp).is_some());
+    if decision.run {
+        // Метка пишется ДО дела, а не после: падение посреди работы не должно
+        // приводить к повторному запуску в ту же минуту — иначе ошибка в деле
+        // превращается в петлю повторов.
+        let _ = memory.remember(&schedule.stamp(now), "запущено");
+    }
+    decision
 }
