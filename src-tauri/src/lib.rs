@@ -61,7 +61,6 @@ pub mod osupdate;
 pub mod perf;
 pub mod places;
 pub mod plan;
-pub mod wake;
 pub mod planner;
 pub mod policy;
 pub mod profiles;
@@ -88,6 +87,7 @@ pub mod trial;
 pub mod uia;
 pub mod undo;
 pub mod verifier;
+pub mod wake;
 pub mod weak;
 pub mod window;
 

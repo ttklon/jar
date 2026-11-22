@@ -86,7 +86,10 @@ mod tests {
     /// Главное обещание шага: включённый движок переживает сон.
     #[test]
     fn an_engine_that_died_during_sleep_comes_back_by_itself() {
-        assert_eq!(after_wake(Before::Running, After::Dead), WakeAction::Restart);
+        assert_eq!(
+            after_wake(Before::Running, After::Dead),
+            WakeAction::Restart
+        );
     }
 
     /// А тот, который выключен, — не включается. «Сам» относится к тому, что
@@ -95,16 +98,25 @@ mod tests {
     fn an_engine_that_was_off_stays_off() {
         assert_eq!(after_wake(Before::Stopped, After::Dead), WakeAction::Leave);
         // Даже если процесс висит, но его не включали, — не наше дело.
-        assert_eq!(after_wake(Before::Stopped, After::Silent), WakeAction::Leave);
+        assert_eq!(
+            after_wake(Before::Stopped, After::Silent),
+            WakeAction::Leave
+        );
     }
 
     /// Живой движок не перезапускается: это выбросило бы модель из памяти и
     /// заставило человека ждать её снова.
     #[test]
     fn a_working_engine_is_left_alone() {
-        assert_eq!(after_wake(Before::Running, After::Alive), WakeAction::Nothing);
+        assert_eq!(
+            after_wake(Before::Running, After::Alive),
+            WakeAction::Nothing
+        );
         // И даже если до сна он «не было» — раз отвечает, значит, работает.
-        assert_eq!(after_wake(Before::Stopped, After::Alive), WakeAction::Nothing);
+        assert_eq!(
+            after_wake(Before::Stopped, After::Alive),
+            WakeAction::Nothing
+        );
     }
 
     /// Зависший — отдельный случай: порт занят, и без остановки новый не встанет.
