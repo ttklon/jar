@@ -66,6 +66,10 @@ pub struct Inner {
     pub cancel: AtomicBool,
     /// Слово человека о себе: «я ухожу» или «я работаю». `None` — не говорил, решает таймер.
     pub presence: std::sync::Mutex<Option<machine::Presence>>,
+    /// Когда движок трогали в последний раз: по этому простою он выгружается
+    /// (шаги 385/398). Отдельно от `engine`, потому что вопрос «пора отпускать»
+    /// задаётся, даже когда движка нет.
+    pub engine_idle: std::sync::Mutex<crate::idle::Idle>,
     /// Что случилось с настоящей базой на старте. Пусто — всё в порядке.
     ///
     /// Без этого поля повреждённая база выглядела бы как «память просто пустая»:
@@ -635,6 +639,9 @@ pub async fn draft_hand(state: State<'_, AppState>, key: String) -> Result<hand:
     let example = action.example.clone();
     let implementation = action.implementation.join(", ");
 
+    // Обращение к движку — это и есть жизнь: простой, на который мы смотрим,
+    // должен считаться от него, а не от запуска.
+    touch_engine(&state);
     let port = match inner.engine.lock() {
         Ok(guard) => match guard.as_ref() {
             Some(server) => server.port(),
@@ -851,6 +858,7 @@ pub async fn think_stream(
 ) -> Result<String, String> {
     let inner = state.inner.clone();
 
+    touch_engine(&state);
     let port = match inner.engine.lock() {
         Ok(guard) => match guard.as_ref() {
             Some(server) => server.port(),
@@ -1010,6 +1018,7 @@ pub async fn memory_restore(
 pub async fn say(state: State<'_, AppState>, question: String) -> Result<String, String> {
     let inner = state.inner.clone();
 
+    touch_engine(&state);
     let port = match inner.engine.lock() {
         Ok(guard) => match guard.as_ref() {
             Some(server) => server.port(),
@@ -1045,6 +1054,7 @@ pub async fn think(
 ) -> Result<Thought, String> {
     let inner = state.inner.clone();
 
+    touch_engine(&state);
     let port = match inner.engine.lock() {
         Ok(guard) => match guard.as_ref() {
             Some(server) => server.port(),
@@ -1722,9 +1732,63 @@ fn read_engine_status(state: &AppState) -> EngineStatus {
     }
 }
 
+/// Отпустить движок, если он простоял дольше положенного.
+///
+/// Возвращает причину, если отпустил: её пишем в журнал, чтобы «куда делся движок»
+/// имело ответ, а не выглядело пропажей. Ошибка самого `stop` не возвращается —
+/// движок всё равно уже отвязан от состояния, и повторять остановку бессмысленно.
+fn release_if_idle(state: &AppState) -> Option<String> {
+    let idle_for = {
+        let idle = match state.inner.engine_idle.lock() {
+            Ok(idle) => idle,
+            Err(poisoned) => poisoned.into_inner(),
+        };
+        if !idle.expired() {
+            return None;
+        }
+        idle.idle_for()
+    };
+
+    let taken = state
+        .inner
+        .engine
+        .lock()
+        .ok()
+        .and_then(|mut guard| guard.take());
+    let mut server = taken?;
+
+    // Счётчик остановок: запуск, начатый до этого момента, не должен «воскреснуть»
+    // после выгрузки — то же правило, что у кнопки «Остановить».
+    ENGINE_STOP_EPOCH.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    if let Err(error) = server.stop() {
+        tracing::warn!(%error, "движок не остановился при выгрузке по простою");
+    }
+
+    Some(format!(
+        "движок выгружен: простоем {} мин",
+        idle_for.as_secs() / 60
+    ))
+}
+
+/// Отметить обращение к движку: он нужен сейчас и ещё немного поживёт.
+fn touch_engine(state: &AppState) {
+    let mut idle = match state.inner.engine_idle.lock() {
+        Ok(idle) => idle,
+        Err(poisoned) => poisoned.into_inner(),
+    };
+    idle.touch();
+}
+
 /// Состояние движка. Ничего не запускает — просто отвечает, что есть.
+///
+/// Заодно выгружает движок, если он простоял дольше порога: это единственное
+/// место, куда интерфейс заглядывает регулярно, и будить приложение ради таймера
+/// незачем. Найденный при таком обходе движок отпускается — и об этом сказано.
 #[tauri::command]
 pub fn engine_status(state: State<'_, AppState>) -> EngineStatus {
+    if let Some(reason) = release_if_idle(&state) {
+        tracing::info!(%reason);
+    }
     read_engine_status(&state)
 }
 
@@ -1833,6 +1897,10 @@ pub async fn start_engine(
         Ok(mut server) => match state.inner.engine.lock() {
             Ok(mut guard) if ENGINE_STOP_EPOCH.load(Ordering::SeqCst) == stop_epoch => {
                 *guard = Some(server);
+                // Новый движок не «простоял» ни секунды: без этой отметки первый же
+                // опрос статуса мог бы выгрузить только что поднятый движок — таймер
+                // простоя тикал всё время, пока его запускали.
+                touch_engine(&state);
                 Ok(())
             }
             _ => {

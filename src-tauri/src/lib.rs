@@ -46,6 +46,7 @@ pub mod executor;
 pub mod flows;
 pub mod hand;
 pub mod hotkey;
+pub mod idle;
 pub mod intent;
 pub mod ipc;
 pub mod isolation;
@@ -230,6 +231,7 @@ pub fn run() {
             policy: PolicyState::new(),
             cancel: AtomicBool::new(false),
             presence: std::sync::Mutex::new(None),
+            engine_idle: std::sync::Mutex::new(crate::idle::Idle::default()),
             memory_note,
         }),
         log_file: log_file.display().to_string(),
