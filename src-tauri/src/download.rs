@@ -100,6 +100,23 @@ pub fn check_free_space(dir: &Path, needed: u64) -> Result<(), String> {
     Ok(())
 }
 
+/// Стоит ли продолжать с этого места, а не начинать заново.
+///
+/// Ошибка сети и отмена — «продолжить»; несовпадение размера, хеша или
+/// превышение лимита — «начать заново». Смешать их значит либо наказывать за
+/// плохую сеть повтором, либо докачивать чужой файл.
+pub(crate) fn resumable(reason: &str) -> bool {
+    let text = reason.to_lowercase();
+    // Отмена — тоже: человек остановил сам, и продолжение с того же места —
+    // ровно то, чего он ждёт от следующей попытки.
+    text.contains("отмен")
+        || text.contains("curl вышел с кодом")
+        || text.contains("сет")
+        || text.contains("таймаут")
+        || text.contains("timeout")
+        || text.contains("не ответил")
+}
+
 /// Сколько байт уже скачано в `<имя>.part` в папке `dir`. `None` — скачивания нет.
 /// Интерфейс опрашивает это для прогресса: события Tauri ради прогресса не заводим.
 pub fn progress(dir: &Path, name: &str) -> Option<u64> {
@@ -130,7 +147,16 @@ pub fn part_path(target: &Path) -> PathBuf {
 /// `--fail` обязателен: без него ответ 404 записывается как «успешный» файл с HTML
 /// внутри. `--location` нужен, потому что HuggingFace отдаёт редирект на CDN.
 pub fn curl_args(url: &str, part: &Path) -> Vec<String> {
-    vec![
+    curl_args_with(url, part, false)
+}
+
+/// Аргументы `curl` с явным решением про докачку.
+///
+/// `resume` — продолжать с того места, где оборвалось. `-C -` просит curl
+/// дописать в файл, а не начинать его заново: для гигабайтной модели это
+/// разница между «ещё минуту» и «ещё двадцать минут».
+pub fn curl_args_with(url: &str, part: &Path, resume: bool) -> Vec<String> {
+    let mut args = vec![
         "--proto".into(),
         "=http,https".into(),
         "--proto-redir".into(),
@@ -147,8 +173,15 @@ pub fn curl_args(url: &str, part: &Path) -> Vec<String> {
         "--show-error".to_string(),
         "--output".to_string(),
         part.display().to_string(),
-        url.to_string(),
-    ]
+    ];
+    if resume {
+        // Именно `-`: curl сам возьмёт текущий размер файла. Число, посчитанное
+        // заранее, разошлось бы с файлом на гонке.
+        args.push("--continue-at".to_string());
+        args.push("-".to_string());
+    }
+    args.push(url.to_string());
+    args
 }
 
 /// Имя файла, а не путь: папку выбирает приложение, и выйти из неё запросом нельзя.
@@ -180,10 +213,13 @@ fn check_url(url: &str) -> Result<(), String> {
 }
 
 pub(crate) fn fetch(url: &str, part: &Path, max_bytes: u64) -> Result<(), String> {
+    // Докачка — только если в `.part` уже что-то есть и это не мусор: пустой
+    // файл продолжать не с чего, а гигабайт — есть с чего.
+    let resume = std::fs::metadata(part).map(|m| m.len() > 0).unwrap_or(false);
     let mut child = Command::new("curl")
         .arg("--disable")
         .args(["--max-filesize", &max_bytes.to_string()])
-        .args(curl_args(url, part))
+        .args(curl_args_with(url, part, resume))
         .stdout(Stdio::null())
         .stderr(Stdio::piped())
         .spawn()
@@ -290,9 +326,20 @@ pub fn download_sized(
     }
 
     let part = part_path(&target);
-    remove_stale_part(&part)?;
+    // Не удалять недокачанное, а решить, годится ли оно для продолжения:
+    // сеть рвётся у всех, и начинать гигабайт заново каждый раз — это
+    // наказание за плохой Wi-Fi.
+    let _resume = keep_partial(&part, expected_bytes)?;
 
-    let result = fetch(url, &part, max_bytes).and_then(|()| {
+    // Уже полный `.part` не качаем: `-C -` попросил бы у сервера байты за
+    // концом файла и получил отказ, а файл так и остался бы непроверенным.
+    let fetched = if already_complete(&part, expected_bytes) {
+        Ok(())
+    } else {
+        fetch(url, &part, max_bytes)
+    };
+
+    let result = fetched.and_then(|()| {
         let bytes = std::fs::metadata(&part).map_err(|e| e.to_string())?.len();
         if bytes > max_bytes || expected_bytes.is_some_and(|expected| expected != bytes) {
             return Err("размер скачанного файла не совпал с ожидаемым".into());
@@ -304,12 +351,63 @@ pub fn download_sized(
 }
 
 /// A failed cleanup is not a successful cancellation: keep the reason and recovery path.
+/// Оставить недокачанное или убрать — и почему.
+///
+/// Два разных исхода одной ошибки:
+///
+///  * **сеть, таймаут, отмена** — оставить `.part`: следующая попытка
+///    продолжит с этого места. Удалять здесь значит наказывать человека за
+///    плохой Wi-Fi двадцатью минутами повторной загрузки;
+///  * **не тот файл** (хеш не сошёлся, размер не тот, превышен лимит) —
+///    удалить: докачивать чужое бессмысленно, а хранить мусор в папке
+///    моделей — это ложь на экране.
 pub(crate) fn cleanup_error(part: &Path, reason: String) -> String {
+    if resumable(&reason) {
+        // Файл остаётся, и об этом сказано: иначе человек, увидев ошибку,
+        // решит, что всё пропало, и удалит то, с чего можно продолжить.
+        let kept = std::fs::metadata(part).map(|m| m.len()).unwrap_or(0);
+        if kept > 0 {
+            return format!(
+                "{reason}; скачано {kept} байт — они сохранены, следующая попытка продолжит с этого места"
+            );
+        }
+        return reason;
+    }
     match std::fs::remove_file(part) {
         Ok(()) => reason,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => reason,
         Err(error) => format!("{reason}; временный файл не убран: {} ({error}). Проверьте права и удалите только этот временный файл перед повтором", part.display()),
     }
+}
+
+/// Всё уже скачано — осталось проверить, а не качать заново.
+///
+/// Только когда ожидаемый размер известен: иначе «полный» — догадка, и
+/// отказываться от скачивания по догадке нельзя.
+pub(crate) fn already_complete(part: &Path, expected_bytes: Option<u64>) -> bool {
+    match (expected_bytes, std::fs::metadata(part)) {
+        (Some(expected), Ok(meta)) => expected > 0 && meta.len() == expected,
+        _ => false,
+    }
+}
+
+/// Можно ли продолжать этот `.part`.
+///
+/// Продолжать можно, если он хотя бы не больше ожидаемого: файл больше —
+/// значит это не наша модель или прошлое скачивание было другого файла.
+/// Удаление здесь было ошибкой: оно гарантировало, что оборванное на 99%
+/// скачивание начнётся с нуля.
+pub(crate) fn keep_partial(part: &Path, expected_bytes: Option<u64>) -> Result<bool, String> {
+    let Ok(meta) = std::fs::metadata(part) else {
+        return Ok(false);
+    };
+    if meta.len() > expected_bytes.unwrap_or(u64::MAX) {
+        // Чужой или битый огрызок: докачивать к нему — значит получить
+        // гарантированно не тот файл.
+        remove_stale_part(part)?;
+        return Ok(false);
+    }
+    Ok(meta.len() > 0)
 }
 
 pub(crate) fn remove_stale_part(part: &Path) -> Result<(), String> {
@@ -856,5 +954,133 @@ mod tests {
         assert!(active_name().is_none());
         drop(memory);
         std::fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[cfg(test)]
+mod resume_tests {
+    use super::*;
+
+    /// Шаг 355: докачивается только битое, а не всё подряд.
+    ///
+    /// Два разных исхода одной ошибки: сеть и отмена — оставить и продолжить;
+    /// не тот файл — удалить. Смешать их значит либо наказывать за плохой
+    /// Wi-Fi повтором гигабайта, либо докачивать чужое.
+    #[test]
+    fn a_network_failure_keeps_what_is_already_downloaded() {
+        for reason in [
+            "curl вышел с кодом 56: Recv failure",
+            "скачивание отменено человеком",
+            "нет сети",
+            "не ответил за 60 с",
+            "timeout",
+        ] {
+            assert!(resumable(reason), "продолжать после: {reason}");
+        }
+        for reason in [
+            "размер скачанного файла не совпал с ожидаемым",
+            "хеш не совпал: ожидали a, получили b",
+            "скачивание превысило лимит размера",
+        ] {
+            assert!(!resumable(reason), "начинать заново после: {reason}");
+        }
+    }
+
+    #[test]
+    fn a_partial_file_is_kept_with_its_size_named() {
+        let dir = std::env::temp_dir().join(format!("zshelper-partial-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let part = dir.join("model.gguf.part");
+        std::fs::write(&part, vec![7u8; 5000]).unwrap();
+
+        let message = cleanup_error(&part, "curl вышел с кодом 56".into());
+        assert!(part.exists(), "файл остаётся для продолжения");
+        // И об этом сказано: иначе человек удалит то, с чего можно продолжить.
+        assert!(message.contains("5000"), "размер назван: {message}");
+        assert!(message.contains("продолжит"), "обещание продолжения: {message}");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_wrong_file_is_removed_and_not_kept_for_resuming() {
+        let dir = std::env::temp_dir().join(format!("zshelper-wrong-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let part = dir.join("model.gguf.part");
+        std::fs::write(&part, vec![7u8; 5000]).unwrap();
+
+        let message = cleanup_error(&part, "хеш не совпал: ожидали a, получили b".into());
+        assert!(!part.exists(), "чужой файл удаляется");
+        assert!(!message.contains("продолжит"), "продолжать нечего: {message}");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// `.part` больше ожидаемого — чужой огрызок: удаляется, продолжать нельзя.
+    #[test]
+    fn a_part_bigger_than_expected_is_not_resumed() {
+        let dir = std::env::temp_dir().join(format!("zshelper-big-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let part = dir.join("model.gguf.part");
+        std::fs::write(&part, vec![7u8; 5000]).unwrap();
+
+        assert!(!keep_partial(&part, Some(1000)).unwrap(), "больше ожидаемого — заново");
+        assert!(!part.exists(), "огрызок убран");
+
+        // А огрызок меньше ожидаемого — годится для продолжения.
+        std::fs::write(&part, vec![7u8; 500]).unwrap();
+        assert!(keep_partial(&part, Some(5000)).unwrap(), "меньше — продолжить");
+        assert!(part.exists(), "и он остаётся на месте");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Пустой `.part` продолжать не с чего: curl иначе попросит у сервера
+    /// диапазон с нуля, и это работает случайно.
+    #[test]
+    fn an_empty_part_file_is_not_worth_resuming() {
+        let dir = std::env::temp_dir().join(format!("zshelper-empty-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let part = dir.join("x.part");
+        std::fs::write(&part, b"").unwrap();
+        assert!(!keep_partial(&part, None).unwrap());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Полный `.part` проверяется, а не докачивается: `-C -` на конце файла
+    /// упёрся бы в «диапазон за концом» и повторялся бы вечно.
+    #[test]
+    fn a_complete_part_is_verified_instead_of_refetched() {
+        let dir = std::env::temp_dir().join(format!("zshelper-done-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let part = dir.join("model.gguf.part");
+        std::fs::write(&part, vec![7u8; 5000]).unwrap();
+
+        assert!(already_complete(&part, Some(5000)), "ровно размер — качать нечего");
+        assert!(!already_complete(&part, Some(6000)), "меньше — докачивать");
+        assert!(!already_complete(&part, None), "размер неизвестен — догадок нет");
+        assert!(!already_complete(&dir.join("нет-такого.part"), Some(5000)));
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// `-C -` появляется только при докачке: иначе curl начал бы файл заново
+    /// молча, и «продолжение» стало бы ложью в аргументах.
+    #[test]
+    fn resume_is_asked_for_explicitly_in_the_arguments() {
+        let fresh = curl_args_with("https://x/y.gguf", Path::new("/tmp/y.part"), false);
+        assert!(!fresh.iter().any(|a| a == "--continue-at"), "новая загрузка — без докачки");
+
+        let resumed = curl_args_with("https://x/y.gguf", Path::new("/tmp/y.part"), true);
+        assert!(resumed.iter().any(|a| a == "--continue-at"), "докачка просится явно");
+        assert!(resumed.iter().any(|a| a == "-"), "и именно с текущего места");
+        // Адрес остаётся последним аргументом в обоих случаях.
+        assert_eq!(resumed.last().map(String::as_str), Some("https://x/y.gguf"));
+        assert_eq!(fresh.last().map(String::as_str), Some("https://x/y.gguf"));
     }
 }

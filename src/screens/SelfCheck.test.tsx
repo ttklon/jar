@@ -146,6 +146,23 @@ describe("карточка «Проверка себя»", () => {
     expect(repair).toHaveBeenCalledWith("rewrite-memory");
   });
 
+  it("переустановка движка чинится кнопкой, а не отправкой на другой экран", async () => {
+    // Шаг 354. Раньше «Переустановить движок» отвечало «это делает экран
+    // Модели» — то есть совет был, а кнопка отправляла искать другой экран.
+    vi.mocked(selfCheck).mockResolvedValue([verdict({ name: "движок", passed: false })]);
+    vi.mocked(repair).mockResolvedValue("движок llama.cpp: переустановлен; модели и память не тронуты");
+    render(<SelfCheckCard />);
+    fireEvent.click(screen.getByRole("button", { name: /Прогнать проверки/ }));
+
+    const button = await screen.findByRole("button", { name: "Переустановить движок" });
+    fireEvent.click(button);
+
+    const done = await screen.findByText(/движок llama\.cpp: переустановлен/);
+    // Отчёт называет модели: иначе человек не знает, уцелело ли главное.
+    expect(done.textContent).toContain("модели и память не тронуты");
+    expect(repair).toHaveBeenCalledWith("reinstall-engine");
+  });
+
   it("пустой ответ ремонта не выдаётся за успех", async () => {
     // Браузерная сборка: ядра нет. «Готово:» с пустотой читалось бы как
     // «починилось неизвестно что».

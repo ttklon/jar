@@ -416,12 +416,34 @@ pub async fn repair(state: State<'_, AppState>, repair: String) -> Result<String
         }
         "rewrite-memory" => crate::memory::rebuild(&inner.base_dir)
             .map(|backup| format!("база памяти пересоздана; старая сохранена: {backup}")),
-        "download-model" | "reinstall-engine" => Err(
+        "reinstall-engine" => {
+            // Оба движка, а не «первый»: проверка себя называет движок вообще,
+            // и переустановить не тот, что сломан, значит не починить ничего.
+            let mut done = Vec::new();
+            for kind in [crate::runtime::Kind::Llama, crate::runtime::Kind::Whisper] {
+                if !crate::runtime::installed(&inner.base_dir, kind) {
+                    // Ставить то, чего у человека не было, — это не ремонт.
+                    continue;
+                }
+                match crate::runtime::reinstall(&inner.base_dir, kind) {
+                    Ok(_) => done.push(format!("{}: переустановлен", kind.name())),
+                    Err(error) => return Err(error),
+                }
+            }
+            if done.is_empty() {
+                return Err(
+                    "движка нет: ставить его без спроса — это установка, а не ремонт. Откройте «Модели» и скачайте движок"
+                        .to_string(),
+                );
+            }
+            Ok(format!("{}; модели и память не тронуты", done.join(", ")))
+        }
+        "download-model" => Err(
             "это делает сам экран «Модели»: там видно размер и ход скачивания —              чинить вслепую, без процентов, было бы хуже"
                 .to_string(),
         ),
         other => Err(format!(
-            "неизвестный ремонт «{other}»; есть: reset-data, rewrite-memory, download-model, reinstall-engine"
+            "неизвестный ремонт «{other}»; есть: reinstall-engine, rewrite-memory, reset-data, download-model"
         )),
     })
     .await

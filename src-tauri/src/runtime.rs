@@ -28,6 +28,26 @@ impl Kind {
             Kind::Whisper => &readiness::catalog().whisper_runtime,
         }
     }
+
+    /// Имя движка словами человека — для отчёта после ремонта.
+    ///
+    /// `id` вроде `llama-cpp-b12535` — это метка установки, а не то, что
+    /// человек узнает на экране.
+    pub fn name(self) -> &'static str {
+        match self {
+            Kind::Llama => "движок llama.cpp",
+            Kind::Whisper => "движок whisper.cpp",
+        }
+    }
+}
+
+/// Движок установлен приложением и его файлы на месте.
+///
+/// Отличается от `find`: `find` отвечает «что запускать», а здесь вопрос
+/// «есть ли что переустанавливать». Без метки владения — нет: чужую
+/// установку переустановка не трогает.
+pub fn installed(base: &Path, kind: Kind) -> bool {
+    find(base, kind).is_some()
 }
 
 #[derive(Debug, Serialize)]
@@ -312,6 +332,40 @@ pub fn install(base: &Path, kind: Kind) -> Result<Installed, String> {
     }
 }
 
+/// Переустановка: снять свою установку и поставить заново, не трогая модели.
+///
+/// Зачем отдельная функция, а не «удалить, потом установить» в вызывающем коде.
+/// Между этими двумя шагами человек остаётся без движка, и если второй шаг
+/// упадёт, он должен узнать не «ошибка установки», а **что у него теперь нет
+/// движка и что модель цела**. Модели лежат в другой папке (`models`), а не в
+/// `sidecars/<id>`, поэтому переустановка их не касается — это проверяется
+/// тестом, а не обещается комментарием.
+///
+/// Чужую установку не трогаем: `remove` откажется без метки владения, и
+/// отказ дойдёт до человека раньше, чем начнётся скачивание.
+pub fn reinstall(base: &Path, kind: Kind) -> Result<Installed, String> {
+    // Один замер «до»: после установки каталог другой, и сравнивать было бы не с чем.
+    let had = is_managed(base, kind);
+    remove(base, kind).map_err(|error| {
+        format!("движок не переустановлен: {error}. Модели и память не тронуты")
+    })?;
+    install(base, kind).map_err(|error| format!("{error}. {}", reinstall_failure(had)))
+}
+
+/// Что осталось после неудачной переустановки — словами, которые дойдут до человека.
+///
+/// Отдельной функцией, потому что проверить это на живом провале нельзя: чтобы
+/// довести установку до отказа, нужен Windows x64 и сеть. А знать, что человеку
+/// скажут, нужно на всех платформах.
+pub fn reinstall_failure(had_install: bool) -> String {
+    let lost = if had_install {
+        "Прежняя установка движка удалена — сейчас его нет"
+    } else {
+        "Движка нет, и поставить его не удалось"
+    };
+    format!("{lost}; модели и память на месте")
+}
+
 /// Оба движка приходят только из своих официальных релизов: никакого URL из IPC.
 fn allowed_source(spec: &readiness::RuntimeSpec) -> bool {
     let prefix = match spec.id.as_str() {
@@ -571,6 +625,60 @@ mod tests {
             assert_eq!(std::fs::read(base.join("model.gguf")).unwrap(), b"weights");
             std::fs::remove_dir_all(base).unwrap();
         }
+    }
+
+    /// Шаг 354. Переустановка снимает только свою установку движка.
+    ///
+    /// Тут проверяется та часть, которую можно проверить без сети: что именно
+    /// снимается и что остаётся. Само скачивание проверяет CI на Windows —
+    /// здесь важно, что модели и чужая установка не попадают под нож.
+    #[test]
+    fn a_reinstall_removes_only_the_managed_runtime() {
+        let base = fixture("reinstall", Kind::Llama);
+        // Модели — в отдельной папке, и они не должны исчезнуть.
+        let models = base.join("models");
+        std::fs::create_dir_all(&models).unwrap();
+        std::fs::write(models.join("model.gguf"), b"weights").unwrap();
+        // Ручной движок рядом тоже не наш.
+        std::fs::write(base.join("sidecars/llama-server.exe"), b"manual").unwrap();
+
+        // Снимаем управляемую установку ровно так, как это делает reinstall
+        // до скачивания: чужое остаётся, модели остаются.
+        assert!(installed(&base, Kind::Llama), "до переустановки движок есть");
+        remove(&base, Kind::Llama).unwrap();
+        assert!(!installed(&base, Kind::Llama), "своя установка снята");
+        assert!(!directory(&base, Kind::Llama).exists());
+        assert_eq!(
+            std::fs::read(models.join("model.gguf")).unwrap(),
+            b"weights",
+            "модель цела: она лежит не в папке движка"
+        );
+        assert_eq!(
+            std::fs::read(base.join("sidecars/llama-server.exe")).unwrap(),
+            b"manual",
+            "ручной движок не наш и не удаляется"
+        );
+
+        let _ = std::fs::remove_dir_all(&base);
+    }
+
+    /// Отказ переустановки называет последствие: движка нет, модели целы.
+    ///
+    /// Без этого человек читает «ошибка установки» и не знает, остался ли он
+    /// вообще с чем-то рабочим.
+    #[test]
+    fn a_reinstall_failure_says_what_was_lost_and_what_was_not() {
+        // Два разных исхода, и оба не оставляют человека в догадках.
+        let removed = reinstall_failure(true);
+        assert!(removed.contains("удалена"), "движок снят: {removed}");
+        assert!(removed.contains("модели"), "и модели целы: {removed}");
+
+        let never = reinstall_failure(false);
+        assert!(never.contains("Движка нет"), "и не было: {never}");
+        assert!(never.contains("модели"), "модели целы: {never}");
+        // Ни в одном исходе нет «попробуйте ещё раз»: это не ответ.
+        assert!(!never.to_lowercase().contains("попробуйте"));
+        assert!(!removed.to_lowercase().contains("попробуйте"));
     }
 
     #[test]
