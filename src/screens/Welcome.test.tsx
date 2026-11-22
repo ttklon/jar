@@ -148,4 +148,30 @@ describe("экран знакомства", () => {
     ua.mockRestore();
     platform.mockRestore();
   });
+
+
+  it("второй запуск называет, чего не хватает до пройденного пути (шаг 27)", () => {
+    localStorage.clear();
+    localStorage.setItem("zshelper.welcome.seen", "1");
+    render(<Welcome source="ядро" onStart={() => {}} onOpen={() => {}} />);
+
+    // Число, а не «всё хорошо»: пройдено 1 из 3, и названо, чего нет.
+    expect(screen.getByText(/Первый запуск пройден: 1 из 3/)).toBeTruthy();
+    expect(screen.getByText(/Не хватает: объяснения про микрофон, вопроса про имя/)).toBeTruthy();
+  });
+
+  it("когда всё пройдено, проверка молчит", () => {
+    localStorage.clear();
+    for (const key of [
+      "zshelper.welcome.seen",
+      "zshelper.mic.explained",
+      "zshelper.person.asked",
+    ]) {
+      localStorage.setItem(key, "1");
+    }
+    render(<Welcome source="ядро" onStart={() => {}} onOpen={() => {}} />);
+
+    // «Пройдено 3 из 3» на каждом открытии — шум, а не проверка.
+    expect(screen.queryByText(/Первый запуск пройден/)).toBeNull();
+  });
 });

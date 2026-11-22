@@ -4,6 +4,7 @@ import { ReadinessCard } from "../components/ReadinessCard";
 import { welcome } from "../i18n/ru";
 import { cleanName, readName, saveName } from "../lib/person";
 import { decide, readFacts } from "../lib/platform";
+import { checkFirstRun, summarizeFirstRun } from "../lib/firstRunCheck";
 
 /**
  * Экран знакомства — то, что человек видит при первом запуске.
@@ -79,6 +80,8 @@ export function Welcome({
   const [name, setName] = useState(() => readName());
   // Проверка читается один раз: версия системы и движка за сеанс не меняются.
   const verdict = useMemo(() => decide(readFacts(globalThis.navigator)), []);
+  // Проверка пути первого запуска (шаг 27): что осталось непройденным.
+  const firstRun = useMemo(() => summarizeFirstRun(checkFirstRun()), []);
 
   return (
     <div className={styles.root}>
@@ -148,6 +151,21 @@ export function Welcome({
           {name.trim() === "" ? welcome.nameSkip : welcome.nameKept(cleanName(name))}
         </Text>
       </div>
+
+      {/*
+        Шаг 27: видно, что путь первого запуска остался пройденным. Строка стоит
+        над карточкой готовности, потому что говорит о человеке и его настройке,
+        а карточка — о железе. Показывается, только если есть чего не хватает:
+        «пройдено 3 из 3» на каждом открытии — это шум, а не проверка.
+      */}
+      {firstRun.missing.length > 0 ? (
+        <Text className={styles.note} block>
+          {welcome.firstRunCheck(firstRun.done, firstRun.total)}{" "}
+          {welcome.firstRunCheckMissing(
+            firstRun.missing.map((item) => welcome.firstRunStep[item.step] ?? item.step).join(", "),
+          )}
+        </Text>
+      ) : null}
 
       <ReadinessCard
         onToVoice={onStart}

@@ -371,6 +371,19 @@ export const welcome = {
    * умеет. Поэтому здесь то, что человек может сделать сам, и это видно.
    */
   platformWhere: "Скачать: aka.ms/webview2 (Microsoft Edge WebView2 Runtime).",
+  /**
+   * Шаг 27: второй запуск проверяет, что путь первого остался пройденным.
+   * Строка про **число**, а не «всё хорошо»: «вроде работало» — это и есть та
+   * фраза, после которой человек перестаёт верить приложению.
+   */
+  firstRunCheck: (done: number, total: number) =>
+    `Первый запуск пройден: ${done} из ${total}.`,
+  firstRunCheckMissing: (what: string) => `Не хватает: ${what}.`,
+  firstRunStep: {
+    welcome: "отметки знакомства",
+    mic: "объяснения про микрофон",
+    name: "вопроса про имя",
+  } as Record<string, string>,
   sourceNote: (source: string) =>
     `Данные: ${source}. В браузере ничего не выполняется — интерфейс показывает состав и политику.`,
 };
