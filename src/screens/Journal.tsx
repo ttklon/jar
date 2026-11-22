@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
 import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
@@ -178,6 +178,8 @@ export function Journal({
   const [query, setQuery] = useState("");
   const [episodes, setEpisodes] = useState<Episode[] | null>(null);
   const [searchBusy, setSearchBusy] = useState(false);
+  /** Номер последнего поиска: старый ответ не вправе переписать новый. */
+  const lastSearch = useRef(0);
 
   const load = useCallback(() => {
     setError(null);
@@ -201,12 +203,23 @@ export function Journal({
       return;
     }
 
+    // Ответ на старый запрос не должен затирать новый. Поиск идёт в побочном
+    // потоке (шаг 394), ответы приходят с разной задержкой, и «загрузки хэшу»,
+    // отправленный раньше «загрузок», мог прийти позже — тогда человек видел бы
+    // выдачу не по тому, что напечатал. Номер запроса решает это без гонки.
+    const request = ++lastSearch.current;
     setSearchBusy(true);
     searchEpisodes(text)
-      .then(setEpisodes)
+      .then((found) => {
+        if (request === lastSearch.current) setEpisodes(found);
+      })
       // Сломанный поиск — это не «ничего не нашлось», но экран не должен падать.
-      .catch(() => setEpisodes([]))
-      .finally(() => setSearchBusy(false));
+      .catch(() => {
+        if (request === lastSearch.current) setEpisodes([]);
+      })
+      .finally(() => {
+        if (request === lastSearch.current) setSearchBusy(false);
+      });
   }, [query]);
 
   return (
@@ -248,9 +261,12 @@ export function Journal({
             aria-label={journal.searchTitle}
             onChange={(_, data) => setQuery(data.value)}
           />
-          <Button type="submit" disabled={searchBusy}>
-            {journal.searchButton}
-          </Button>
+          {/* Кнопка не гаснет на время поиска: поиск идёт в побочном потоке (шаг
+              394), и запрещать человеку уточнить запрос, пока считается старый, —
+              значит заставлять его ждать чужую работу. Номер запроса сам отбросит
+              устаревший ответ, а «ищу…» рядом говорит, что работа идёт. */}
+          <Button type="submit">{journal.searchButton}</Button>
+          {searchBusy ? <Text className={styles.note}>{journal.searchBusy}</Text> : null}
           {episodes !== null ? (
             <Text className={styles.note}>{journal.searchFound(episodes.length)}</Text>
           ) : null}

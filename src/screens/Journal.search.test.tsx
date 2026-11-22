@@ -86,6 +86,36 @@ describe("поиск по памяти", () => {
     expect(screen.getByText(/найдено запусков: 0/)).toBeTruthy();
   });
 
+  it("ответ на старый запрос не затирает новый", async () => {
+    // Поиск идёт в побочном потоке, и ответы приходят вразнобой: «загрузки хэшу»,
+    // отправленный раньше, может прийти позже. Тогда человек видел бы выдачу не по
+    // тому, что напечатал. Номер запроса это решает без гонки.
+    let slow: (value: Episode[]) => void = () => {};
+    vi.mocked(searchEpisodes)
+      .mockImplementationOnce(
+        () => new Promise<Episode[]>((resolve) => {
+          slow = resolve;
+        }),
+      )
+      .mockResolvedValueOnce([]);
+
+    render(<Journal />);
+    const field = screen.getByLabelText("Что я уже делал?");
+
+    fireEvent.change(field, { target: { value: "загрузки хэшу" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+    fireEvent.change(field, { target: { value: "телепорт" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    // Новый ответ пришёл, старый — только сейчас.
+    await waitFor(() => expect(screen.getByText(/ничего не нашлось/)).toBeTruthy());
+    slow([EPISODE]);
+
+    // Старая выдача не появляется: она уже не про этот запрос.
+    await waitFor(() => expect(screen.queryByText("совпало: загрузки, хэшу")).toBeNull());
+    expect(screen.getByText(/найдено запусков: 0/)).toBeTruthy();
+  });
+
   it("пустой запрос не ходит в память", async () => {
     render(<Journal />);
 

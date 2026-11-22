@@ -2175,25 +2175,42 @@ pub fn last_plan(state: State<'_, AppState>) -> Option<Plan> {
 /// Последние запуски из памяти (SQLite), новые сверху. В отличие от журнала это
 /// структура: запуск, шаг, итог — то, что нужно планировщику и экрану истории.
 #[tauri::command]
-pub fn memory_runs(state: State<'_, AppState>, limit: usize) -> Vec<RunRecord> {
-    state
-        .inner
-        .memory
-        .recent_runs(limit.clamp(1, 200))
-        .unwrap_or_default()
+pub async fn memory_runs(state: State<'_, AppState>, limit: usize) -> Result<Vec<RunRecord>, String> {
+    // Чтение базы — это диск и разбор строк, а экран истории спрашивает часто.
+    // На потоке окна это задерживало бы ввод в поиске (шаг 394).
+    let inner = state.inner.clone();
+    let limit = limit.clamp(1, 200);
+    tauri::async_runtime::spawn_blocking(move || {
+        inner.memory.recent_runs(limit).unwrap_or_default()
+    })
+    .await
+    .map_err(|error| format!("память запусков не прочиталась: {error}"))
 }
 
 /// Поиск по памяти: «что я делал с этой папкой?». Каждое слово запроса обязано
 /// найтись, и ответ говорит, какие слова совпали — иначе поиск по памяти выглядит
 /// как гадание.
 #[tauri::command]
-pub fn search_episodes(
+pub async fn search_episodes(
     state: State<'_, AppState>,
     query: String,
     limit: Option<usize>,
-) -> Vec<Episode> {
+) -> Result<Vec<Episode>, String> {
+    // Поиск идёт по сотням дел и сравнивает слова в каждом: это работа, а не
+    // «взять строку». Поиск запускается на каждое нажатие клавиши, и на потоке
+    // окна он задерживал бы сам ввод — то есть мешал бы человеку печатать в
+    // собственном поиске (шаг 394). Результат, в отличие от прежнего «при
+    // ошибке — пусто», больше не выдаёт сбой за «ничего не нашлось».
+    let inner = state.inner.clone();
     let limit = limit.unwrap_or(20).clamp(1, 100);
-    state.inner.memory.search(&query, limit).unwrap_or_default()
+    tauri::async_runtime::spawn_blocking(move || {
+        inner
+            .memory
+            .search(&query, limit)
+            .map_err(|error| format!("поиск по памяти не выполнился: {error}"))
+    })
+    .await
+    .map_err(|error| format!("поиск по памяти не выполнился: {error}"))?
 }
 
 /// Что известно о локальном распознавании речи.

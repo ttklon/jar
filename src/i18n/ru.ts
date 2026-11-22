@@ -761,6 +761,7 @@ export const journal = {
     "найдёт «в загрузках». Рядом видно, какие слова совпали.",
   searchPlaceholder: "например: загрузки",
   searchButton: "Найти",
+  searchBusy: "ищу…",
   searchNothing: "ничего не нашлось — это ответ, а не пустой экран",
   searchFound: (n: number) => `найдено запусков: ${n}`,
   searchMatched: (words: string[]) => `совпало: ${words.join(", ")}`,
