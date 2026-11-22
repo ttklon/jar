@@ -635,6 +635,8 @@ mod tests {
     #[test]
     fn the_session_column_is_added_without_losing_old_runs() {
         let dir = std::env::temp_dir().join(format!("zshelper-migrate-{}", now_ms()));
+        // Папку создаём сами: sqlite не создаёт её, а падает «unable to open».
+        std::fs::create_dir_all(&dir).expect("временная папка");
         let path = dir.join("memory.db");
         {
             // База «как в старой версии»: схема v1 и один запуск.
