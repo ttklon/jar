@@ -228,6 +228,18 @@ export const places = {
   copyHint: "путь можно скопировать целиком",
   browser: "в браузере папки приложения нет — файлы появляются только в приложении",
   error: (reason: string) => `список не прочитался: ${reason}`,
+  /** Итог установки (шаг 395): части отдельными числами, а не одним «12 ГБ». */
+  totalsTitle: "Сколько занимает установка",
+  totalsTotal: (value: string) => `всего ${value}`,
+  totalsLine: (part: string, value: string) => `${part}: ${value}`,
+  parts: {
+    data: "данные приложения",
+    models: "модели",
+    runtimes: "движки",
+    program: "программа",
+  },
+  totalsBrowser: "в браузере установки нет — считать нечего",
+  totalsError: (reason: string) => `размер установки не посчитался: ${reason}`,
 };
 
 /**

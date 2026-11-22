@@ -47,6 +47,7 @@ import type {
   TrialReport,
   UiDump,
   DataPlace,
+  DataTotals,
   SelfCheckVerdict,
   UndoPreview,
   UndoReport,
@@ -411,6 +412,10 @@ export function resourceReport(): Promise<ResourceReport> {
 
 export function dataPlaces(): Promise<DataPlace[]> {
   return invoke<DataPlace[]>("data_places");
+}
+
+export function dataTotals(): Promise<DataTotals> {
+  return invoke<DataTotals>("data_totals");
 }
 
 export function undoReport(): Promise<UndoPreview> {

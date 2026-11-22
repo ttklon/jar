@@ -133,6 +133,7 @@ import type {
   UndoPreview,
   UndoReport,
   DataPlace,
+  DataTotals,
   Decision,
   Downloaded,
   EngineStatus,
@@ -245,6 +246,12 @@ export async function selfCheck(): Promise<SelfCheckVerdict[]> {
 export async function dataPlaces(): Promise<DataPlace[]> {
   // В браузере папки приложения нет: файлы появляются только у приложения на машине.
   return [];
+}
+
+export async function dataTotals(): Promise<DataTotals | null> {
+  // `null`, а не нули: «занимает 0 Б» — это утверждение, и оно было бы ложью.
+  // В браузере установки нет вовсе, и экран так и скажет.
+  return null;
 }
 
 export async function undoReport(): Promise<UndoPreview> {

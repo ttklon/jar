@@ -519,6 +519,23 @@ pub async fn data_places(state: State<'_, AppState>) -> Result<Vec<places::Place
         .map_err(|error| format!("места на диске не посчитались: {error}"))
 }
 
+/// Сколько занимает установка целиком: данные, модели, движки, программа (шаг 395).
+///
+/// Части — отдельными числами, потому что «12 ГБ» без разбивки ничего не говорит:
+/// почти всё это модели, и именно их человек может убрать сам. Программа берётся
+/// из текущего процесса, а не из «где-то рядом»: где лежит бинарник, знает система.
+#[tauri::command]
+pub async fn data_totals(state: State<'_, AppState>) -> Result<places::Totals, String> {
+    let base = state.inner.base_dir.clone();
+    let models = state.inner.models_dir.clone();
+    let program = std::env::current_exe().ok();
+    tauri::async_runtime::spawn_blocking(move || {
+        places::totals(&base, &models, program.as_deref())
+    })
+    .await
+    .map_err(|error| format!("размер установки не посчитался: {error}"))
+}
+
 /// Автозапуск: включён ли, что именно запустится и чем это грозит.
 ///
 /// Только чтение. Включение и выключение — отдельные команды, чтобы «посмотреть»

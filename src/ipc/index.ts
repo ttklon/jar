@@ -10,6 +10,7 @@ export type {
   Action,
   Autostart,
   DataPlace,
+  DataTotals,
   ResourceReport,
   SelfCheckVerdict,
   AuditEvent,
@@ -76,7 +77,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { Autostart, AuditEvent, DataPlace, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -190,6 +191,21 @@ export async function dataPlaces(): Promise<DataPlace[]> {
     return fromCore();
   }
   const { dataPlaces: fromData } = await import("./dev");
+  return fromData();
+}
+
+/**
+ * Сколько занимает установка целиком.
+ *
+ * `null` — не «ноль байт», а «посчитать нечего»: в браузере установки нет. Экран
+ * обязан различать эти два ответа, иначе он соврёт про размер.
+ */
+export async function dataTotals(): Promise<DataTotals | null> {
+  if (isTauri()) {
+    const { dataTotals: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { dataTotals: fromData } = await import("./dev");
   return fromData();
 }
 

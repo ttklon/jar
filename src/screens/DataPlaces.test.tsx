@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
-import { dataPlaces } from "../ipc";
-import type { DataPlace } from "../ipc";
+import { dataPlaces, dataTotals } from "../ipc";
+import type { DataPlace, DataTotals } from "../ipc";
 import { DataPlaces, formatBytes } from "./DataPlaces";
 
 /**
@@ -12,6 +12,7 @@ import { DataPlaces, formatBytes } from "./DataPlaces";
 
 vi.mock("../ipc", () => ({
   dataPlaces: vi.fn(),
+  dataTotals: vi.fn(),
 }));
 
 class ResizeObserverStub {
@@ -22,10 +23,30 @@ class ResizeObserverStub {
 
 vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
+beforeEach(() => {
+  // Умолчание для тестов, которым итог не важен: без него мок отдаёт `undefined`,
+  // и карточка падает не на своём утверждении, а на чужом отсутствии.
+  vi.mocked(dataTotals).mockResolvedValue(null);
+});
+
 afterEach(() => {
   cleanup();
   vi.mocked(dataPlaces).mockReset();
+  vi.mocked(dataTotals).mockReset();
 });
+
+const GB = 1024 * 1024 * 1024;
+
+function totals(patch: Partial<DataTotals> = {}): DataTotals {
+  return {
+    dataBytes: 512 * 1024 * 1024,
+    modelsBytes: 3 * GB,
+    runtimesBytes: 1 * GB,
+    programBytes: 20 * 1024 * 1024,
+    totalBytes: 512 * 1024 * 1024 + 3 * GB + 1 * GB + 20 * 1024 * 1024,
+    ...patch,
+  };
+}
 
 function place(patch: Partial<DataPlace> = {}): DataPlace {
   return {
@@ -96,5 +117,45 @@ describe("карточка «Где данные»", () => {
     expect(formatBytes(900)).toBe("900 Б");
     expect(formatBytes(2048)).toBe("2.0 КБ");
     expect(formatBytes(5 * 1024 * 1024)).toBe("5.0 МБ");
+    // Модель весит гигабайты: «3072.0 МБ» вместо «3.0 ГБ» — это способ ничего не сказать.
+    expect(formatBytes(3 * 1024 * 1024 * 1024)).toBe("3.0 ГБ");
+  });
+
+  it("итог установки назван по частям, а не одним числом", async () => {
+    vi.mocked(dataPlaces).mockResolvedValue([place()]);
+    vi.mocked(dataTotals).mockResolvedValue(totals());
+
+    render(<DataPlaces />);
+
+    await waitFor(() => expect(screen.getByText("Сколько занимает установка")).toBeTruthy());
+    expect(screen.getByText("всего 4.5 ГБ")).toBeTruthy();
+    expect(screen.getByText("данные приложения: 512.0 МБ")).toBeTruthy();
+    expect(screen.getByText("модели: 3.0 ГБ")).toBeTruthy();
+    expect(screen.getByText("движки: 1.0 ГБ")).toBeTruthy();
+    expect(screen.getByText("программа: 20.0 МБ")).toBeTruthy();
+  });
+
+  it("«не посчитано» не выдаётся за ноль байт", async () => {
+    vi.mocked(dataPlaces).mockResolvedValue([place()]);
+    vi.mocked(dataTotals).mockResolvedValue(null);
+
+    render(<DataPlaces />);
+
+    // Ноль байт — это утверждение, и оно было бы ложью: в браузере установки нет.
+    await waitFor(() =>
+      expect(screen.getByText(/в браузере установки нет — считать нечего/)).toBeTruthy(),
+    );
+    expect(screen.queryByText(/всего 0 Б/)).toBeNull();
+  });
+
+  it("ошибка счёта называется, а не превращается в ноль", async () => {
+    vi.mocked(dataPlaces).mockResolvedValue([place()]);
+    vi.mocked(dataTotals).mockRejectedValue(new Error("папка недоступна"));
+
+    render(<DataPlaces />);
+
+    await waitFor(() =>
+      expect(screen.getByText(/размер установки не посчитался: папка недоступна/)).toBeTruthy(),
+    );
   });
 });

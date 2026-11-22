@@ -292,6 +292,7 @@ pub fn run() {
             ipc::isolation_status,
             ipc::foreground_window,
             ipc::data_places,
+            ipc::data_totals,
             ipc::resource_report,
             ipc::self_check,
             ipc::repair,

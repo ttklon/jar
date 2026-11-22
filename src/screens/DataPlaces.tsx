@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { makeStyles, Text, tokens } from "@fluentui/react-components";
-import { dataPlaces } from "../ipc";
-import type { DataPlace } from "../ipc";
+import { dataPlaces, dataTotals } from "../ipc";
+import type { DataPlace, DataTotals } from "../ipc";
 import { places } from "../i18n/ru";
 
 /**
@@ -33,12 +33,35 @@ const useStyles = makeStyles({
   row: { display: "flex", flexDirection: "column", gap: "2px", listStyle: "none" },
   head: { display: "flex", gap: "8px", alignItems: "baseline", flexWrap: "wrap" },
   path: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },
+  totals: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+    paddingTop: "10px",
+    borderTop: `1px solid ${tokens.colorNeutralStroke3}`,
+  },
 });
 
 export function DataPlaces() {
   const styles = useStyles();
   const [items, setItems] = useState<DataPlace[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [totals, setTotals] = useState<DataTotals | null>(null);
+  const [totalsError, setTotalsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    dataTotals()
+      .then((value) => {
+        if (alive) setTotals(value);
+      })
+      .catch((reason: unknown) => {
+        if (alive) setTotalsError(reason instanceof Error ? reason.message : String(reason));
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -97,6 +120,39 @@ export function DataPlaces() {
           {places.copyHint}
         </Text>
       ) : null}
+
+      {/* Итог отдельно от списка: «12 ГБ» без разбивки ничего не говорит, а почти всё
+          это модели — их человек может убрать сам (шаг 395). */}
+      <div className={styles.totals}>
+        <Text weight="semibold">{places.totalsTitle}</Text>
+        {totalsError ? (
+          <Text className={styles.muted} block>
+            {places.totalsError(totalsError)}
+          </Text>
+        ) : totals === null ? (
+          <Text className={styles.muted} block>
+            {places.totalsBrowser}
+          </Text>
+        ) : (
+          <>
+            <Text className={styles.muted} block>
+              {places.totalsTotal(formatBytes(totals.totalBytes))}
+            </Text>
+            {(
+              [
+                ["data", totals.dataBytes],
+                ["models", totals.modelsBytes],
+                ["runtimes", totals.runtimesBytes],
+                ["program", totals.programBytes],
+              ] as const
+            ).map(([part, bytes]) => (
+              <Text key={part} className={styles.muted} block>
+                {places.totalsLine(places.parts[part], formatBytes(bytes))}
+              </Text>
+            ))}
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -106,5 +162,8 @@ export function formatBytes(bytes: number): string {
   const kb = 1024;
   if (bytes < kb) return `${bytes} Б`;
   if (bytes < kb * kb) return `${(bytes / kb).toFixed(1)} КБ`;
-  return `${(bytes / (kb * kb)).toFixed(1)} МБ`;
+  // Гигабайты — не украшение: модель весит гигабайты, и «3072.0 МБ» человек читает
+  // как «три тысячи каких-то мегабайт», а не как «три гигабайта» (шаг 395).
+  if (bytes < kb * kb * kb) return `${(bytes / (kb * kb)).toFixed(1)} МБ`;
+  return `${(bytes / (kb * kb * kb)).toFixed(1)} ГБ`;
 }
