@@ -25,11 +25,13 @@ use std::time::Instant;
 /// Вердикт про движки для «Проверки себя».
 pub fn runtime_verdict() -> Verdict {
     let started = Instant::now();
-    let base = crate::logging::ensure_app_dir();
-    let outcome = base.map_or_else(
-        || Err("папка приложения недоступна".to_string()),
-        |base| inspect(&base, Kind::Llama).and_then(|llama| inspect(&base, Kind::Whisper).map(|whisper| (llama, whisper))).map(|(llama, whisper)| report(&llama, &whisper)),
-    );
+    let outcome: Result<String, String> = match crate::logging::ensure_app_dir() {
+        None => Err("папка приложения недоступна".to_string()),
+        Some(base) => match (inspect(&base, Kind::Llama), inspect(&base, Kind::Whisper)) {
+            (Ok(llama), Ok(whisper)) => report(llama, whisper),
+            (Err(reason), _) | (_, Err(reason)) => Err(reason),
+        },
+    };
     crate::evals::verdict_for(
         "движок",
         "установленный движок на месте и его файлы совпадают с описью",
@@ -60,14 +62,19 @@ fn inspect(base: &std::path::Path, kind: Kind) -> Result<(Kind, State), String> 
 }
 
 /// Строка для человека: что с движками и есть ли поломка.
-fn report(llama: &(Kind, State), whisper: &(Kind, State)) -> Result<String, String> {
-    let broken: Vec<String> = [llama, whisper]
-        .into_iter()
-        .filter_map(|(kind, state)| match state {
-            State::Broken(reason) => Some(format!("{}: {reason}", kind.name())),
-            _ => None,
-        })
-        .collect();
+///
+/// Один проход, а не два: `[llama, whisper].into_iter()` отдаёт значения,
+/// и второй такой массив уже не собрать — первая версия так и падала.
+fn report(llama: (Kind, State), whisper: (Kind, State)) -> Result<String, String> {
+    let mut broken = Vec::new();
+    let mut present = Vec::new();
+    for (kind, state) in [llama, whisper] {
+        match state {
+            State::Broken(reason) => broken.push(format!("{}: {reason}", kind.name())),
+            State::Sound => present.push(kind.name()),
+            State::Absent => {}
+        }
+    }
     if !broken.is_empty() {
         // Ошибка — потому что это поломка, а не отсутствие.
         return Err(format!(
@@ -75,10 +82,6 @@ fn report(llama: &(Kind, State), whisper: &(Kind, State)) -> Result<String, Stri
             broken.join("; ")
         ));
     }
-    let present: Vec<&str> = [llama, whisper]
-        .into_iter()
-        .filter_map(|(kind, state)| matches!(state, State::Sound).then_some(kind.name()))
-        .collect();
     Ok(if present.is_empty() {
         "движки не установлены — это не поломка: приложение работает и без них".to_string()
     } else {
@@ -96,16 +99,12 @@ mod tests {
     /// так), «движок испорчен» — поломка, которую надо чинить.
     #[test]
     fn an_absent_engine_is_not_a_failure_but_a_broken_one_is() {
-        let absent = report(
-            &(Kind::Llama, State::Absent),
-            &(Kind::Whisper, State::Absent),
-        )
-        .unwrap();
+        let absent = report((Kind::Llama, State::Absent), (Kind::Whisper, State::Absent)).unwrap();
         assert!(absent.contains("не поломка"), "{absent}");
 
         let broken = report(
-            &(Kind::Llama, State::Broken("файл не совпал".into())),
-            &(Kind::Whisper, State::Absent),
+            (Kind::Llama, State::Broken("файл не совпал".into())),
+            (Kind::Whisper, State::Absent),
         )
         .expect_err("испорченный движок — провал");
         assert!(broken.contains("файл не совпал"), "причина названа: {broken}");
@@ -153,8 +152,8 @@ mod tests {
         }
 
         let outcome = report(
-            &(Kind::Llama, State::Broken("файл движка изменился".into())),
-            &(Kind::Whisper, State::Absent),
+            (Kind::Llama, State::Broken("файл движка изменился".into())),
+            (Kind::Whisper, State::Absent),
         );
         assert!(outcome.is_err(), "провал");
 
@@ -163,11 +162,7 @@ mod tests {
 
     #[test]
     fn a_sound_engine_is_named() {
-        let sound = report(
-            &(Kind::Llama, State::Sound),
-            &(Kind::Whisper, State::Absent),
-        )
-        .unwrap();
+        let sound = report((Kind::Llama, State::Sound), (Kind::Whisper, State::Absent)).unwrap();
         assert!(sound.contains("llama.cpp"), "{sound}");
         assert!(!sound.contains("whisper"), "отсутствующий не хвалят: {sound}");
     }
