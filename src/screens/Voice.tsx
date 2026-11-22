@@ -101,6 +101,7 @@ import { useVoice } from "../lib/useVoice";
 import { describePlanParams } from "../lib/planPreview";
 import { ActionList } from "../components/ActionList";
 import { clearDraft, readDraft, saveDraft } from "../lib/draft";
+import { markMicExplained, micExplained } from "../lib/firstRun";
 import { voice, microphoneCheck as micTestText } from "../i18n/ru";
 
 /**
@@ -124,6 +125,15 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     fontSize: tokens.fontSizeBase200,
     maxWidth: "78ch",
+  },
+  micIntro: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    maxWidth: "560px",
+    padding: "14px 16px",
+    borderRadius: tokens.borderRadiusLarge,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
   },
   mic: {
     minHeight: "92px",
@@ -224,6 +234,9 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
   const [cancelled, setCancelled] = useState(false);
   const [cancelledAsr, setCancelledAsr] = useState(false);
   const [micCheckBusy, setMicCheckBusy] = useState(false);
+  // Показано ли объяснение про микрофон (шаг 24). Не хранится в настройках:
+  // это состояние экрана, а «уже объясняли» — в хранилище.
+  const [micIntro, setMicIntro] = useState(false);
   const [speech, setSpeech] = useState<SpeechStatus | null>(null);
   const speechRequest = useRef(0);
   const aliveRef = useRef(true);
@@ -1882,6 +1895,47 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
 
       {cancelled ? <Text className={styles.note}>{cancelledAsr ? voice.asrCancelled : voice.cancelled}</Text> : null}
 
+      {/*
+        Шаг 24: согласие в момент разговора, а не клик вслепую. Блок стоит на
+        месте кнопки микрофона и отвечает на три вопроса: что слушают, куда это
+        уходит и что будет с разрешением. Два выхода — оба настоящие: «включить»
+        ведёт к разговору, «пока без голоса» оставляет человека в приложении с
+        полем текста. Отказаться — тоже законный выбор (шаг 36).
+      */}
+      {micIntro ? (
+        <div className={styles.micIntro} role="dialog" aria-label={voice.micBefore.title}>
+          <Text weight="semibold">{voice.micBefore.title}</Text>
+          <Text className={styles.note}>{voice.micBefore.what}</Text>
+          <Text className={styles.note}>{voice.micBefore.permission}</Text>
+          <Text className={styles.note}>{voice.micBefore.typed}</Text>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <Button
+              appearance="primary"
+              onClick={() => {
+                // Понятно — значит понятно. Дальше микрофон включается как обычно,
+                // и повторного объяснения не будет.
+                markMicExplained();
+                setMicIntro(false);
+                if (always) mic.start();
+              }}
+            >
+              {voice.micBefore.go}
+            </Button>
+            <Button
+              appearance="subtle"
+              onClick={() => {
+                // «Пока без голоса» тоже запоминаем: человек выбрал текст, и
+                // спрашивать снова при каждом нажатии — это анкета.
+                markMicExplained();
+                setMicIntro(false);
+              }}
+            >
+              {voice.micBefore.dismiss}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <Button
         className={mic.listening ? styles.micListening : styles.mic}
         appearance="primary"
@@ -1901,6 +1955,15 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
           setCancelled(false);
           // Новая попытка — новая ошибка: старая не должна пугать до разбора.
           setVoiceError(null);
+          // Шаг 24: первый раз объясняем, что услышит микрофон, — **до** того,
+          // как он включится. Системный запрос разрешения приходит от Windows и
+          // ничего не объясняет; человек, увидевший его без подготовки, нажимает
+          // вслепую. Объяснение одно на всё время (шаг 39): повторять его при
+          // каждом разговоре — значит мешать тому, кто уже согласился.
+          if (!micExplained()) {
+            setMicIntro(true);
+            return;
+          }
           // В режиме «слушаю всегда» нажатие — это переключатель, а не «держать».
           if (always) {
             if (mic.listening) mic.stop();

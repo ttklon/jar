@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { Voice } from "./Voice";
 
@@ -16,9 +16,20 @@ class ResizeObserverStub {
 
 vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+});
 
 describe("голосовой экран", () => {
+  // Эти тесты — про поведение экрана, а не про первый разговор: считаем, что
+  // объяснение про микрофон человек уже видел (шаг 24 проверяется отдельно, в
+  // `Voice.local.test.tsx`). Иначе первое нажатие показывало бы объяснение, и
+  // проверялось бы не то.
+  beforeEach(() => {
+    localStorage.setItem("zshelper.mic.explained", "1");
+  });
+
   it("сказанное можно поправить руками и отправить — ответ тот же", async () => {
     render(<Voice />);
 

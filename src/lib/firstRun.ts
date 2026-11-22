@@ -76,3 +76,35 @@ export function markWelcomeSeen(storage: StorageLike | null = availableStorage()
     return false;
   }
 }
+
+/**
+ * Шаг 24: объяснение про микрофон показывается **до** первого нажатия, а не
+ * вместе с системным запросом разрешения.
+ *
+ * Почему отдельно от `welcome`: знакомство бывает и в браузере, и без микрофона,
+ * а это объяснение нужно ровно тогда, когда человек впервые собирается говорить.
+ * Почему отдельный ключ, а не флаг в памяти экрана: перезапуск не должен
+ * повторять объяснение, а новый день — тем более.
+ */
+export const MIC_EXPLAINED_KEY = "zshelper.mic.explained";
+
+/** Сказали ли уже, что услышит микрофон. */
+export function micExplained(storage: StorageLike | null = availableStorage()): boolean {
+  if (!storage) return true;
+  try {
+    return storage.getItem(MIC_EXPLAINED_KEY) === "1";
+  } catch {
+    return true;
+  }
+}
+
+/** Отметить, что объяснили. Возвращает, удалось ли запомнить. */
+export function markMicExplained(storage: StorageLike | null = availableStorage()): boolean {
+  if (!storage) return false;
+  try {
+    storage.setItem(MIC_EXPLAINED_KEY, "1");
+    return true;
+  } catch {
+    return false;
+  }
+}

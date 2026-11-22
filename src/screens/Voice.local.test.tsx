@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   cancelTool,
@@ -90,6 +90,23 @@ class ResizeObserverStub {
 }
 
 vi.stubGlobal("ResizeObserver", ResizeObserverStub);
+
+/**
+ * Отметка «про микрофон уже объясняли» (шаг 24).
+ *
+ * Большинство тестов проверяют не первый разговор, а поведение экрана, и им
+ * нужно, чтобы нажатие сразу включало микрофон. Ставить отметку — это не
+ * обход: так выглядит возвращение человека, который объяснение уже видел.
+ * Сам первый разговор проверяется отдельным тестом ниже, и он эту отметку
+ * **не** ставит.
+ */
+function micExplainedBefore() {
+  localStorage.setItem("zshelper.mic.explained", "1");
+}
+
+beforeEach(() => {
+  micExplainedBefore();
+});
 
 afterEach(() => {
   cleanup();
@@ -229,6 +246,65 @@ describe("локальное распознавание на экране", () =
     fireEvent.click(screen.getByRole("button", { name: "Запустить движок и разобрать эту фразу" }));
     await waitFor(() => expect(vi.mocked(smokeCheck)).toHaveBeenCalledOnce());
     await waitFor(() => expect(vi.mocked(think)).toHaveBeenCalledTimes(2));
+  });
+
+  it("в первый раз объясняет, что услышит микрофон, до его включения (шаг 24)", async () => {
+    // Это именно первый разговор: объяснения ещё не было.
+    localStorage.removeItem("zshelper.mic.explained");
+    vi.mocked(speechStatus).mockResolvedValue(FOUND);
+
+    render(<Voice />);
+    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
+
+    // Микрофон ещё НЕ включён: сначала объяснение, а не системный запрос вслепую.
+    expect(vi.mocked(startRecording)).not.toHaveBeenCalled();
+
+    expect(await screen.findByText("первый раз с микрофоном")).toBeTruthy();
+    // Три вещи, которые важны человеку: что слушают, где и куда не уходит.
+    expect(screen.getByText(/распознаётся здесь же, на этом компьютере/)).toBeTruthy();
+    expect(screen.getByText(/Ничего не отправляется/)).toBeTruthy();
+    expect(screen.getByText(/Windows спросит разрешение/)).toBeTruthy();
+    // И путь без голоса назван здесь же.
+    expect(screen.getByText(/напечатайте фразу/)).toBeTruthy();
+  });
+
+  it("после «понятно» микрофон включается и больше не спрашивает", async () => {
+    localStorage.removeItem("zshelper.mic.explained");
+    vi.mocked(speechStatus).mockResolvedValue(FOUND);
+    vi.mocked(startRecording).mockResolvedValue({
+      stop: vi.fn().mockResolvedValue({ wav: new Uint8Array([1]), seconds: 1, sampleRate: 16_000 }),
+    });
+
+    render(<Voice />);
+    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
+    await screen.findByText("первый раз с микрофоном");
+
+    fireEvent.click(screen.getByRole("button", { name: "Понятно, включить микрофон" }));
+
+    // Объяснение убрано и запомнено: при следующем запуске его не будет (шаг 39).
+    expect(screen.queryByText("первый раз с микрофоном")).toBeNull();
+    expect(localStorage.getItem("zshelper.mic.explained")).toBe("1");
+  });
+
+  it("«пока без голоса» — законный выбор, и он тоже запоминается", async () => {
+    localStorage.removeItem("zshelper.mic.explained");
+    vi.mocked(speechStatus).mockResolvedValue(FOUND);
+
+    render(<Voice />);
+    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
+    await screen.findByText("первый раз с микрофоном");
+
+    fireEvent.click(screen.getByRole("button", { name: "Пока без голоса" }));
+
+    // Микрофон не включился, но и наказывать за отказ нечем: поле текста на месте.
+    expect(vi.mocked(startRecording)).not.toHaveBeenCalled();
+    expect(screen.queryByText("первый раз с микрофоном")).toBeNull();
+    expect((screen.getByLabelText("Услышал") as HTMLInputElement).disabled).toBe(false);
+    expect(localStorage.getItem("zshelper.mic.explained")).toBe("1");
   });
 
   it("без микрофона остаётся путь текстом, и он работает (шаг 36)", async () => {
