@@ -80,6 +80,45 @@ export interface QueueBudget {
 }
 
 /**
+ * Сколько готовых дел очередь помнит.
+ *
+ * Зачем предел. Готовое дело остаётся в списке, чтобы отчёт о нём было где прочитать,
+ * и это правильно. Неправильно — что их число не ограничено: «работать без меня»
+ * придумывает дела по кругу, и за долгую смену список рос бы без конца. Растёт при
+ * этом не только он сам: каждое новое дело заново тащит за собой все прежние —
+ * в память, в `localStorage` и в вопрос модели про продолжение (там склеивается
+ * летопись цели по всем её делам). Полсотни готовых хватает, чтобы помнить, что
+ * было сделано сегодня; больше — уже не отчёт, а балласт.
+ */
+export const MAX_ITEMS = 50;
+
+/**
+ * Убрать лишнее, оставив последние `keep`.
+ *
+ * Убираются только готовые: дело в работе и ждущее своей очереди — не балласт, их
+ * число ограничивает бюджет машины, а не этот предел. Если готовых меньше, чем
+ * `keep`, ничего не меняется — порядок дел сохраняется.
+ */
+export function trim(items: readonly QueueItem[], keep = MAX_ITEMS): QueueItem[] {
+  if (items.length <= keep) return items as QueueItem[];
+  const finished = (item: QueueItem) => item.state === "done" || item.state === "failed";
+  const ready = items.filter(finished).length;
+  if (ready <= keep) return items as QueueItem[];
+  // Сколько готовых ещё можно оставить: те, что уже готовы, минус лишние.
+  let toDrop = ready - keep;
+  const kept: QueueItem[] = [];
+  for (const item of items) {
+    if (toDrop > 0 && finished(item)) {
+      toDrop -= 1;
+      continue;
+    }
+    kept.push(item);
+  }
+  // Порядок тот же, что был: уборка не переставляет дела.
+  return kept;
+}
+
+/**
  * Добавить дело в конец. Пустое — не дело, и в очередь не попадает.
  *
  * `origin` передаётся только для дел из разложения: без него у дела нет цели, а значит
@@ -94,10 +133,12 @@ export function add(
   const text = goal.trim();
   if (text.length === 0) return [...items];
   const source = origin?.trim();
-  return [
+  // Уборка здесь, а не где-то в экране: новое дело — единственный способ, которым
+  // очередь растёт, и единственное место, где балласт может появиться.
+  return trim([
     ...items,
     { id, goal: text, state: "waiting", note: "", ...(source ? { origin: source } : {}) },
-  ];
+  ]);
 }
 
 /** Поставить состояние делу по номеру. Номер не найден — очередь не меняется. */
@@ -107,7 +148,10 @@ export function setState(
   state: QueueState,
   note: string,
 ): QueueItem[] {
-  return items.map((item) => (item.id === id ? { ...item, state, note } : item));
+  // Уборка и здесь: дело становится готовым именно тут, и именно тут летопись
+  // прибавляется. В `add` её недостаточно — новое дело приходит ещё ждущим, и
+  // предел переступался бы на единицу на каждом круге.
+  return trim(items.map((item) => (item.id === id ? { ...item, state, note } : item)));
 }
 
 /**
