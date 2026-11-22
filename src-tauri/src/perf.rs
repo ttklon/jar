@@ -53,7 +53,11 @@ impl Measured {
             self.unit,
             self.budget,
             self.unit,
-            if self.within() { "в пределах" } else { "за порогом" }
+            if self.within() {
+                "в пределах"
+            } else {
+                "за порогом"
+            }
         )
     }
 }
@@ -159,7 +163,10 @@ mod tests {
     fn a_number_always_stands_next_to_its_threshold() {
         let check = start_check(Duration::from_millis(10));
 
-        assert!(check.line().contains("при пороге"), "порог назван в той же строке");
+        assert!(
+            check.line().contains("при пороге"),
+            "порог назван в той же строке"
+        );
         assert!(check.line().contains("в пределах"));
         // Превышение называется превышением, а не «ошибкой»: это факт, не поломка.
         let over = start_check(Duration::from_secs(10));
