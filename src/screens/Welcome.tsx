@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button, Input, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { welcome } from "../i18n/ru";
 import { cleanName, readName, saveName } from "../lib/person";
+import { decide, readFacts } from "../lib/platform";
 
 /**
  * Экран знакомства — то, что человек видит при первом запуске.
@@ -76,6 +77,8 @@ export function Welcome({
   // Имя читается один раз при открытии: это первый запуск, и здесь оно ещё не
   // записано. В состоянии — чтобы подпись «запомнил: …» менялась сразу.
   const [name, setName] = useState(() => readName());
+  // Проверка читается один раз: версия системы и движка за сеанс не меняются.
+  const verdict = useMemo(() => decide(readFacts(globalThis.navigator)), []);
 
   return (
     <div className={styles.root}>
@@ -108,6 +111,22 @@ export function Welcome({
           </div>
         ))}
       </div>
+
+      {/*
+        Шаг 35: проверка Windows и WebView2 — **до** первого разговора. Самая
+        частая причина «белого окна» узнаётся человеком уже после того, как
+        экрана нет; здесь она названа заранее и с действием. «Не прочитал» —
+        отдельная строка, не «подходит»: обещать проверенное там, где не
+        проверял, — это ровно тот самообман, из-за которого такие проверки и
+        перестают делать.
+      */}
+      <Text className={styles.note} block>
+        {verdict.state === "ok"
+          ? welcome.platformOk(`Windows ${verdict.facts.osVersion}`, verdict.facts.engineMajor ?? 0)
+          : verdict.state === "unknown"
+            ? welcome.platformUnknown
+            : `${welcome.platformProblem(verdict.reason)} ${welcome.platformWhere}`}
+      </Text>
 
       {/* Шаг 37: один вопрос за весь первый запуск. Стоит выше карточки, потому
           что это про человека, а не про железо, — и потому что ответ на него

@@ -118,4 +118,34 @@ describe("экран знакомства", () => {
     expect(localStorage.getItem("zshelper.person.name")).toBe("Аня");
     expect(screen.getByText("запомнил: Аня")).toBeTruthy();
   });
+
+
+  it("неподходящая система названа до разговора и с действием (шаг 35)", () => {
+    // Старый WebView2 — причина «белого окна». Узнать о ней надо здесь, а не
+    // тогда, когда экрана разговора уже нет.
+    const ua = vi
+      .spyOn(globalThis.navigator, "userAgent", "get")
+      .mockReturnValue(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36 Edg/91.0.864.71",
+      );
+
+    render(<Welcome source="ядро" onStart={() => {}} onOpen={() => {}} />);
+
+    expect(screen.getByText(/Устарел WebView2/)).toBeTruthy();
+    // Действие, а не только диагноз: адрес, по которому обновляют.
+    expect(screen.getByText(/aka\.ms\/webview2/)).toBeTruthy();
+    ua.mockRestore();
+  });
+
+  it("«не прочитал» — отдельная строка, а не «подходит»", () => {
+    const ua = vi.spyOn(globalThis.navigator, "userAgent", "get").mockReturnValue("");
+    const platform = vi.spyOn(globalThis.navigator, "platform", "get").mockReturnValue("");
+
+    render(<Welcome source="ядро" onStart={() => {}} onOpen={() => {}} />);
+
+    expect(screen.getByText(/Проверить версию Windows и WebView2 не удалось/)).toBeTruthy();
+    expect(screen.queryByText(/Система подходит/)).toBeNull();
+    ua.mockRestore();
+    platform.mockRestore();
+  });
 });
