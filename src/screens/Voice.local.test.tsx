@@ -307,6 +307,40 @@ describe("локальное распознавание на экране", () =
     expect(localStorage.getItem("zshelper.mic.explained")).toBe("1");
   });
 
+  it("прошлый запуск, прервавший дело, назван, и решает человек (шаг 159)", async () => {
+    vi.mocked(speechStatus).mockResolvedValue(null as never);
+    // Так выглядит очередь после падения: дело вернулось в ожидание с пометкой.
+    localStorage.setItem(
+      "zshelper.queue.v1",
+      JSON.stringify([
+        {
+          id: "d-9",
+          goal: "разбери загрузки",
+          state: "running",
+          tries: 0,
+          resumeAt: 2,
+        },
+      ]),
+    );
+
+    render(<Voice />);
+
+    // Человек узнаёт о прерванном деле сразу, а не по тишине.
+    expect(await screen.findByText(/Прошлый запуск прервал одно дело/)).toBeTruthy();
+    expect(screen.getByText(/продолжается с того шага/)).toBeTruthy();
+    // И решает сам: оба выхода настоящие, ни один не происходит молча.
+    expect(screen.getByRole("button", { name: "Продолжить" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Убрать из очереди" })).toBeTruthy();
+  });
+
+  it("без прерванных дел блок восстановления не появляется", async () => {
+    vi.mocked(speechStatus).mockResolvedValue(null as never);
+    render(<Voice />);
+
+    // Пустой блок на месте очереди читался бы как «что-то было и потерялось».
+    expect(screen.queryByText(/Прошлый запуск прервал/)).toBeNull();
+  });
+
   it("первый разговор заканчивается результатом, а не туром по экранам (шаг 28)", async () => {
     // «Второй друг» начинается с первого дела: человек сказал — и получил
     // ответ здесь же. Ни один экран не должен подменять этот ответ собой.

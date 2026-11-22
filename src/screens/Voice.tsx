@@ -276,11 +276,22 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
    * момент закрытия шли, возвращаются в ожидание с честной пометкой — процесса
    * уже нет, и делать вид, что работа продолжается, нельзя.
    */
-  const [queue, setQueue] = useState<QueueItem[]>(() => {
+  /**
+   * Сколько дел прервал прошлый перезапуск. Считается **здесь же**, при чтении:
+   * `loadQueue` возвращает это число, но раньше оно терялось (брали только
+   * `.items`), и человек не узнавал, что его дело прервалось (шаг 159).
+   * Читается один раз при монтировании: это факт про прошлый запуск, а не про
+   * текущий, и пересчитывать его на каждый рендер нечего.
+   */
+  // Одно чтение на два состояния: хранилище читает диск, и дважды подряд
+  // читать его ради одного и того же — работа без пользы.
+  const [restored] = useState(() => {
     const store = globalThis.localStorage;
-    if (!store) return [];
-    return loadQueue(store).items;
+    if (!store) return { items: [] as QueueItem[], interrupted: 0 };
+    return loadQueue(store);
   });
+  const [interrupted, setInterrupted] = useState(restored.interrupted);
+  const [queue, setQueue] = useState<QueueItem[]>(restored.items);
   const [queueOn, setQueueOn] = useState(false);
   /** Почему очередь стоит — словами, а не пустым местом. */
   const [queueIdle, setQueueIdle] = useState<string | null>(null);
@@ -2384,6 +2395,49 @@ export function Voice({ onOpen, active = true }: VoiceScreenProps) {
               <pre className={styles.prompt}>{thought.answer}</pre>
             </>
           ) : null}
+        </div>
+      ) : null}
+
+      {/*
+        Шаг 159: экран восстановления. Число прерванных дел раньше считалось и
+        выбрасывалось — человек не узнавал, что дело прервалось, пока не
+        заглядывал в очередь. Блок стоит выше очереди: он про прошлый запуск, и
+        сначала надо решить, что с ним, а потом смотреть на новые дела.
+        Кнопки — оба настоящих выхода: продолжать и убрать. Ни один не
+        происходит сам: дело уже потеряло процесс, и молча начать его заново
+        значит решать за человека.
+      */}
+      {interrupted > 0 ? (
+        <div className={styles.section} role="status">
+          <Text className={styles.title}>{voice.interruptedTitle(interrupted)}</Text>
+          <Text className={styles.note}>{voice.interruptedLead}</Text>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <Button
+              size="small"
+              appearance="primary"
+              onClick={() => {
+                // Продолжить — значит вернуть прерванные дела в работу. Дела
+                // сами не начнутся, поэтому здесь только разрешение; очередь
+                // берёт их по обычным правилам, с точки продолжения.
+                setInterrupted(0);
+                setQueueOn(true);
+              }}
+            >
+              {voice.interruptedGo}
+            </Button>
+            <Button
+              size="small"
+              appearance="subtle"
+              onClick={() => {
+                setInterrupted(0);
+                // Убрать — убрать именно прерванные: остальные дела человека не
+                // трогаем, они его, а не наши.
+                setQueue((current) => current.filter((item) => !item.note?.startsWith("прервано перезапуском")));
+              }}
+            >
+              {voice.interruptedDrop}
+            </Button>
+          </div>
         </div>
       ) : null}
 
