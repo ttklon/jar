@@ -24,6 +24,7 @@ import {
   uiType,
 } from "../ipc";
 import { startRecording } from "../lib/recorder";
+import { audioCapture } from "../i18n/ru";
 import { readinessFacts } from "./readinessFixture";
 import { Voice } from "./Voice";
 
@@ -228,6 +229,32 @@ describe("локальное распознавание на экране", () =
     fireEvent.click(screen.getByRole("button", { name: "Запустить движок и разобрать эту фразу" }));
     await waitFor(() => expect(vi.mocked(smokeCheck)).toHaveBeenCalledOnce());
     await waitFor(() => expect(vi.mocked(think)).toHaveBeenCalledTimes(2));
+  });
+
+  it("без микрофона остаётся путь текстом, и он работает (шаг 36)", async () => {
+    // Машина без гарнитуры: отказ настоящий, но это не приговор.
+    vi.mocked(speechStatus).mockResolvedValue(FOUND);
+    vi.mocked(startRecording).mockRejectedValue(
+      new Error(audioCapture.missing),
+    );
+
+    render(<Voice />);
+    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
+    fireEvent.pointerUp(screen.getByRole("button", { name: "Держать и говорить" }));
+
+    // Отказ не только называет причину, но и говорит, что делать вместо голоса.
+    const refusal = await screen.findByText(/микрофон не найден/);
+    expect(refusal.textContent).toContain("напечатать");
+
+    // И путь действительно работает: поле доступно и фраза уходит в дело.
+    const field = screen.getByLabelText("Услышал") as HTMLInputElement;
+    expect(field.disabled).toBe(false);
+    fireEvent.change(field, { target: { value: "открой блокнот" } });
+    const form = field.closest("form");
+    if (!form) throw new Error("форма голосового поиска не найдена");
+    fireEvent.submit(form);
+    await waitFor(() => expect(vi.mocked(draftPlan)).toHaveBeenCalledWith("открой блокнот"));
   });
 
   it("ошибка микрофона гаснет при новой попытке и по кнопке «Понятно»", async () => {
