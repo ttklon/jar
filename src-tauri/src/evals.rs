@@ -339,8 +339,21 @@ mod tests {
     fn every_check_returns_a_named_verdict() {
         let verdicts = run_all();
 
-        assert_eq!(verdicts.len(), 6);
+        // Число проверок — не обещание: их становится больше, и тест,
+        // закрепляющий «ровно шесть», запрещал бы добавлять седьмую. Держим
+        // другое: проверки есть, имена не повторяются, и каждая отвечает.
+        assert!(
+            verdicts.len() >= 6,
+            "проверок стало меньше шести: {}",
+            verdicts.len()
+        );
+        let mut names = std::collections::HashSet::new();
         for verdict in &verdicts {
+            assert!(
+                names.insert(verdict.name.clone()),
+                "две проверки с одним именем: {}",
+                verdict.name
+            );
             assert!(!verdict.name.is_empty(), "у проверки нет имени");
             assert!(!verdict.promise.is_empty(), "у проверки нет обещания");
             assert!(
