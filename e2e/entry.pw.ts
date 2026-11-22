@@ -9,6 +9,23 @@ import { test, expect, type Page } from "@playwright/test";
  * настоящий, и путь проходит целиком: клавиши, слово, Enter, фраза в разговоре.
  */
 
+/**
+ * Причина падения — в отчёт, а не в тишину.
+ *
+ * Первый прогон этого теста упал без причины: лог задания и артефакт были
+ * недоступны, и оставалось гадать. Поэтому теперь любая ошибка страницы
+ * прикладывается к тесту текстом: `App` в симуляции живёт на подставных данных,
+ * и «какая-то команда не ответила» — самая вероятная причина.
+ */
+async function collectErrors(page: Page): Promise<string[]> {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(`console: ${message.text()}`);
+  });
+  return errors;
+}
+
 async function loaded(page: Page) {
   await page.goto("/e2e/entry.html");
   // Приложение открывается голосом: это и есть «загрузилось».
@@ -20,7 +37,10 @@ test("Tab доходит до входа, слово и Enter — и оно в �
     const url = new URL(route.request().url());
     return url.hostname === "127.0.0.1" ? route.continue() : route.abort("blockedbyclient");
   });
+  const errors = await collectErrors(page);
   await loaded(page);
+  // Если вход не появился — тест падает ниже, но без причины. Прикладываем её.
+  await expect(page.getByRole("textbox", { name: /скажи или напиши/ }), errors.join("; ") || "вход не отрисовался").toBeVisible({ timeout: 15_000 });
 
   // Считаем нажатия Tab, а не «сколько получится»: число шагов — это и есть
   // проверка. Если вход окажется за краем порядка фокуса, тест упадёт на

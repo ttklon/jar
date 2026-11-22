@@ -41,13 +41,28 @@ mockIPC((command) => {
         speech_runtime_spec: { id: "w", title: "whisper", asset: "w.zip", url: "", sha256: "", bytes: 1, license: "MIT", source: "test", program: "whisper-server.exe", description: "test" },
         speech_model_spec: { id: "wm", title: "whisper model", file: "ggml-base.bin", url: "", sha256: "", bytes: 1, license: "MIT", source: "test", min_ram_gb: 1, description: "test" },
       };
+    case "app_status":
+      return { version: "test", started_ms: 0, window_ready_ms: 0, engine: null };
     case "registry_snapshot":
       return { stats: { actions: 1, domains: 1 }, actions, generated: "test", source: "test" };
     case "autostart_status":
       return { enabled: false, supported: false, note: "тест" };
+    case "set_voice_tray_status":
+      return undefined;
+    case "voice_tray_status":
+      return { hotkey: "Ctrl+Alt+Space", listening: false, note: "тест" };
+    case "plan_checkpoint":
+      return null;
+    case "list_models":
+      return { models: [], role: null, roles: [], dir: "models", free_bytes: 1_000_000_000, note: "тест" };
     default:
-      // Всё остальное — пусто, а не падение: сценарий про клавиатуру, а не про
-      // данные. Неизвестная команда не должна валить страницу до первого кадра.
+      // Всё остальное — `null`, а не падение: сценарий про клавиатуру, а не про
+      // данные, и неизвестная команда не должна валить страницу до первого кадра.
+      //
+      // Но `null` — не «пустой объект»: экран, который ждёт `status.engine_found`,
+      // на `null` падает, и падает **до** первого кадра. Поэтому всё, что зовётся
+      // при запуске, названо выше поимённо; `default` остаётся только для
+      // редких путей (журнал, настройки), до которых сценарий не доходит.
       return null;
   }
 }, { shouldMockEvents: true });

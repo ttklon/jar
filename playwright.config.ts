@@ -23,7 +23,15 @@ export default defineConfig({
   retries: 0,
   forbidOnly: !!process.env.CI,
   outputDir: "artifacts/voice-simulation",
-  reporter: [["list"], ["html", { outputFolder: "artifacts/voice-report", open: "never" }]],
+  // `github` — не украшение: без него причина падения видна только в логе
+  // задания, а лог GitHub иногда не отдаёт (EOF от хранилища). Аннотация
+  // остаётся в самом прогоне и читается через API, когда больше ничего не
+  // доступно. Строка в списке — затем, чтобы локально было видно сразу.
+  reporter: [
+    ["list"],
+    ["github"],
+    ["html", { outputFolder: "artifacts/voice-report", open: "never" }],
+  ],
   use: {
     baseURL: "http://127.0.0.1:5173",
     headless: true,
