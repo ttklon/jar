@@ -211,6 +211,54 @@ describe("карточка «Проверка себя»", () => {
     expect(screen.getByText(/Что-то осталось сломанным/)).toBeTruthy();
   });
 
+  it("диктор слышит статус проверки словами, а не «галочку»", async () => {
+    // Шаг 359. «✓»/«✗» диктор читает как «галочка» или пропускает вовсе, а
+    // «3 мс» в списке — цифры без пользы. Статус должен быть словами.
+    vi.mocked(selfCheck).mockResolvedValue([
+      verdict({ name: "Память", passed: true }),
+      verdict({ name: "Реестр", passed: false, detail: "ключ потерян" }),
+    ]);
+    render(<SelfCheckCard />);
+    fireEvent.click(screen.getByRole("button", { name: /Прогнать проверки/ }));
+
+    await screen.findByText("Реестр");
+    expect(screen.getAllByText("проверка пройдена").length).toBe(1);
+    expect(screen.getAllByText("проверка не пройдена").length).toBe(1);
+    // Значки и миллисекунды спрятаны от диктора, а не только отглажены стилем.
+    const check = screen.getByText("✓");
+    expect(check.getAttribute("aria-hidden")).toBe("true");
+    for (const ms of screen.getAllByText(/3 мс/)) {
+      expect(ms.getAttribute("aria-hidden")).toBe("true");
+    }
+  });
+
+  it("список проверок назван словами: сколько прошло", async () => {
+    vi.mocked(selfCheck).mockResolvedValue([
+      verdict({ name: "Память", passed: true }),
+      verdict({ name: "Реестр", passed: false }),
+    ]);
+    render(<SelfCheckCard />);
+    fireEvent.click(screen.getByRole("button", { name: /Прогнать проверки/ }));
+
+    const list = await screen.findByRole("list");
+    expect(list.getAttribute("aria-label")).toMatch(/1 из 2/);
+  });
+
+  it("кнопка ремонта говорит диктору, к какой проверке относится", async () => {
+    // Без этого при пяти провалах диктор читает пять кнопок подряд и не
+    // говорит, какая из них к чему.
+    vi.mocked(selfCheck).mockResolvedValue([
+      verdict({ name: "память", passed: false, detail: "база повреждена" }),
+    ]);
+    render(<SelfCheckCard />);
+    fireEvent.click(screen.getByRole("button", { name: /Прогнать проверки/ }));
+
+    const button = await screen.findByRole("button", { name: "Пересоздать базу памяти" });
+    const described = button.getAttribute("aria-describedby");
+    expect(described).toBeTruthy();
+    expect(document.getElementById(described!)?.textContent).toContain("Что можно сделать");
+  });
+
   it("пустой ответ ремонта не выдаётся за успех", async () => {
     // Браузерная сборка: ядра нет. «Готово:» с пустотой читалось бы как
     // «починилось неизвестно что».

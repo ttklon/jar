@@ -50,6 +50,7 @@ pub fn run_all() -> Vec<Verdict> {
         check_nothing_found_is_an_answer(),
         check_twins_touch_nothing(),
         check_stop_stops(),
+        check_windows_update_noticed(),
     ]
 }
 
@@ -87,6 +88,30 @@ fn scratch(tag: &str) -> std::path::PathBuf {
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir).expect("временная папка");
     dir
+}
+
+/// Windows обновилась с прошлого запуска — замечено и названо. Шаг 358.
+///
+/// Почему это проверка, а не сообщение: обновление системы — частая причина
+/// поломок, и человек связывает их с программой, а не с ночным обновлением.
+/// Здесь номер сборки запоминается и при следующем запуске сравнивается —
+/// «было 19045, стало 19046» человек может сверить сам.
+///
+/// Не-Windows — это **не провал**: сравнивать нечего, и притворяться, что
+/// проверили, нельзя. Провал — только когда номер есть, а запомнить его не
+/// удалось: тогда следующее обновление пройдёт незамеченным.
+fn check_windows_update_noticed() -> Verdict {
+    let started = Instant::now();
+    let outcome = crate::logging::ensure_app_dir()
+        .ok_or_else(|| "папка приложения недоступна: обновление не запомнить".to_string())
+        .and_then(|base| crate::osupdate::notice_and_remember(&base));
+    verdict(
+        "обновление Windows",
+        "обновление системы замечено и названо",
+        "обновление Windows пройдёт незамеченным, и поломку спишут на программу",
+        started,
+        outcome,
+    )
 }
 
 /// Подтверждение одноразовое: вторым щелчком то же действие уже не пройдёт.

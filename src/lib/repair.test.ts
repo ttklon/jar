@@ -22,6 +22,15 @@ describe("что делать при отказе", () => {
     expect(advice.why).toContain("SHA-256");
   });
 
+  it("обновление Windows не обещает кнопки, которой нет", () => {
+    // Шаг 358: обновление не откатить. Пустое действие — лучше кнопки,
+    // которая ничего не делает, но выглядит как решение.
+    const advice = adviceFor("обновление Windows");
+    expect(advice.repair).toBe("none");
+    expect(advice.action).toBe("");
+    expect(advice.why).toContain("не откатить");
+  });
+
   it("у отказа по движку — переустановка отдельно от модели", () => {
     const advice = adviceFor("движок llama.cpp");
     expect(advice.action).toBe("Переустановить движок");

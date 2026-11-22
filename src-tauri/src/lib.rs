@@ -54,6 +54,7 @@ pub mod logging;
 pub mod machine;
 pub mod memory;
 pub mod models;
+pub mod osupdate;
 pub mod places;
 pub mod plan;
 pub mod planner;

@@ -32,6 +32,8 @@ pub fn run() -> i32 {
     failed += report("папка данных", data_dir_check);
     failed += report("память", memory_check);
     failed += report("автозапуск", autostart_check);
+    // Не ошибка, когда сведений нет: на не-Windows номера сборки просто нет.
+    failed += report("обновление Windows", os_update_check);
 
     // Итог — латиницей и одной строкой. Причина не в любви к английскому:
     // приёмочный скрипт на Windows может прочитать файл в другой кодировке, и
@@ -107,6 +109,30 @@ fn memory_check() -> Result<String, String> {
     drop(memory);
     let _ = std::fs::remove_file(base.join("self-check.db"));
     result
+}
+
+/// Обновилась ли Windows с прошлого запуска. Шаг 358.
+///
+/// Отдельная строка в проверке себя, потому что обновление системы часто
+/// меняет то, что приложение уже проверило год назад, — а человек связывает
+/// поломку с программой, а не с ночным обновлением.
+fn os_update_check() -> Result<String, String> {
+    let current = crate::osupdate::build_number()
+        .ok_or_else(|| "номер сборки Windows не прочитался".to_string())?;
+    let base = crate::logging::ensure_app_dir()
+        .ok_or_else(|| "папка приложения недоступна".to_string())?;
+    let memory = crate::memory::Memory::open(base.join("self-check.db"))
+        .map_err(|error| format!("база не открылась: {error}"))?;
+    let previous = memory.fact("os-build");
+    // Запоминаем номер здесь же: следующий запуск сравнит с ним. Ошибка записи
+    // не должна валить проверку — она про систему, а не про базу.
+    let _ = memory.remember("os-build", &current);
+    drop(memory);
+    let _ = std::fs::remove_file(base.join("self-check.db"));
+    Ok(match crate::osupdate::update_note(previous.as_deref(), &current) {
+        Some(note) => format!("сборка {current}; {note}"),
+        None => format!("сборка {current}; с прошлым запуском сравнивать нечего"),
+    })
 }
 
 fn autostart_check() -> Result<String, String> {

@@ -198,6 +198,8 @@ export const selfCheck = {
   risk: (text: string) => `Если не пройдёт: ${text}`,
   repairRunning: "Чиню…",
   repairDone: (what: string) => `Готово: ${what}.`,
+  spokenPassed: "проверка пройдена",
+  spokenFailed: "проверка не пройдена",
   repairReport: "Что было и что стало",
   repairWas: (detail: string) => `Было: ${detail}`,
   repairDid: (what: string) => `Сделали: ${what}`,

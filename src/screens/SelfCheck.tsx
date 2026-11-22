@@ -53,6 +53,14 @@ const useStyles = makeStyles({
   fail: { color: tokens.colorPaletteRedForeground1 },
   advice: { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", marginTop: "4px" },
   fixLead: { color: tokens.colorNeutralForeground2, fontSize: tokens.fontSizeBase200 },
+  srOnly: {
+    position: "absolute",
+    width: "1px",
+    height: "1px",
+    overflow: "hidden",
+    clip: "rect(0 0 0 0)",
+    whiteSpace: "nowrap",
+  },
   report: {
     display: "flex",
     flexDirection: "column",
@@ -194,15 +202,23 @@ export function SelfCheckCard() {
           <Text weight={allPassed ? "semibold" : "regular"} block>
             {text.summary(passed, verdicts.length)}
           </Text>
-          <ul className={styles.list}>
+          <ul className={styles.list} aria-label={text.summary(passed, verdicts.length)}>
             {verdicts.map((verdict) => (
               <li key={verdict.name} className={styles.row}>
                 <div className={styles.head}>
-                  <Text className={verdict.passed ? styles.pass : styles.fail}>
+                  {/* Значок — украшение: диктор читает «✓» как «галочка» или
+                      молчит про «✗». Статус ему говорит скрытый текст. */}
+                  <Text aria-hidden className={verdict.passed ? styles.pass : styles.fail}>
                     {verdict.passed ? "✓" : "✗"}
                   </Text>
                   <Text weight="semibold">{verdict.name}</Text>
-                  <Text className={styles.muted}>{verdict.ms} мс</Text>
+                  <Text className={styles.srOnly}>
+                    {verdict.passed ? text.spokenPassed : text.spokenFailed}
+                  </Text>
+                  {/* «3 мс» в список для слуха — шум: цифры без пользы. */}
+                  <Text aria-hidden className={styles.muted}>
+                    {verdict.ms} мс
+                  </Text>
                   {verdict.passed ? null : (
                     <Text className={styles.fail}>{text.failed}</Text>
                   )}
@@ -217,9 +233,12 @@ export function SelfCheckCard() {
                 {(() => {
                   const advice = adviceForVerdict(verdict);
                   if (!advice) return null;
+                  // Свой id на проверку: по нему кнопка говорит диктору,
+                  // к чему она относится, не теряя собственного текста.
+                  const id = `selfcheck-advice-${verdict.name.replace(/\s+/g, "-")}`;
                   return (
                     <div className={styles.advice}>
-                      <Text className={styles.fixLead}>
+                      <Text id={id} className={styles.fixLead}>
                         {`${text.fix}: ${advice.why}`}
                       </Text>
                       {advice.action ? (
@@ -228,6 +247,10 @@ export function SelfCheckCard() {
                           appearance="secondary"
                           onClick={() => fix(advice.repair, verdict.detail)}
                           disabled={fixing !== null}
+                          // Не `aria-label`: он перебил бы текст кнопки, и
+                          // диктор перестал бы читать то, что на ней написано.
+                          // Имя проверки приходит из `aria-describedby`.
+                          aria-describedby={id}
                         >
                           {fixing === advice.repair ? text.repairRunning : advice.action}
                         </Button>
