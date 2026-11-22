@@ -128,11 +128,28 @@ function toDeed(run: RunRecord): Deed {
  * Исключение — единственный запуск в ленте: там сворачивать нечего, и
  * раскрывать тоже незачем — он и так один.
  */
-function RunCard({ run, alone }: { run: RunRecord; alone: boolean }) {
-  return <DeedCard deed={toDeed(run)} startOpen={alone} />;
+function RunCard({
+  run,
+  alone,
+  onOpenUndo,
+}: {
+  run: RunRecord;
+  alone: boolean;
+  onOpenUndo?: () => void;
+}) {
+  const deed = toDeed(run);
+  return (
+    <DeedCard
+      deed={deed}
+      startOpen={alone}
+      // Откат — в настройках, и он откатывает **свою** сессию: вести туда
+      // честно только у дела, которое шло в текущей сессии (шаг 364).
+      onOpenUndo={onOpenUndo}
+    />
+  );
 }
 
-export function Journal() {
+export function Journal({ onOpenSettings }: { onOpenSettings?: () => void } = {}) {
   const styles = useStyles();
   const [events, setEvents] = useState<AuditEvent[] | null>(null);
   // «Что болит» — по причинам, а не по времени: журнал уже есть, но человеку
@@ -229,7 +246,11 @@ export function Journal() {
           ? episodes.map((episode) => (
               <div key={episode.run.id} className={styles.run}>
                 <Text className={styles.note}>{journal.searchMatched(episode.matched)}</Text>
-                <RunCard run={episode.run} alone={episodes.length === 1} />
+                <RunCard
+                  run={episode.run}
+                  alone={episodes.length === 1}
+                  onOpenUndo={onOpenSettings}
+                />
               </div>
             ))
           : null}
@@ -245,7 +266,14 @@ export function Journal() {
           <Text className={styles.note}>{journal.runsEmpty}</Text>
         ) : null}
         {runs !== null && runs.length > 0
-          ? runs.map((run) => <RunCard key={run.id} run={run} alone={runs.length === 1} />)
+          ? runs.map((run) => (
+              <RunCard
+                key={run.id}
+                run={run}
+                alone={runs.length === 1}
+                onOpenUndo={onOpenSettings}
+              />
+            ))
           : null}
       </section>
 

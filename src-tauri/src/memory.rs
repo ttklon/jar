@@ -20,7 +20,7 @@ use rusqlite::{params, Connection};
 use serde::Serialize;
 
 /// Версия схемы. Поднимается вместе с новой миграцией в `migrate`.
-pub const SCHEMA_VERSION: i64 = 1;
+pub const SCHEMA_VERSION: i64 = 2;
 
 #[derive(Debug, thiserror::Error)]
 pub enum MemoryError {
@@ -55,6 +55,9 @@ pub struct RunRecord {
     pub outcome: String,
     /// Шаги по порядку. Пусто у запусков без шагов (например, скачивания).
     pub steps: Vec<RunStep>,
+    /// Сессия, в которой шло дело. По ней откат знает, что отменять; пусто у
+    /// запусков, записанных до этой возможности.
+    pub session: String,
 }
 
 /// Найденный эпизод: запуск и слова запроса, которые в нём действительно есть.
@@ -107,10 +110,24 @@ impl Memory {
 
     /// Начинает запуск. Возвращает его номер для шагов и завершения.
     pub fn start_run(&self, kind: &str, subject: &str) -> Result<i64, MemoryError> {
+        self.start_run_in(kind, subject, "")
+    }
+
+    /// Запуск с сессией — шаг 364.
+    ///
+    /// Зачем: из дела нужен переход к откату **того, что оно сделало**. Откат
+    /// живёт по сессиям, и без сессии в запуске связать их нечем — остаётся
+    /// только «время», а по времени откат берёт чужое.
+    pub fn start_run_in(
+        &self,
+        kind: &str,
+        subject: &str,
+        session: &str,
+    ) -> Result<i64, MemoryError> {
         let conn = self.lock();
         conn.execute(
-            "INSERT INTO runs (kind, subject, started_ms, outcome) VALUES (?1, ?2, ?3, 'running')",
-            params![kind, subject, now_ms()],
+            "INSERT INTO runs (kind, subject, started_ms, outcome, session) VALUES (?1, ?2, ?3, 'running', ?4)",
+            params![kind, subject, now_ms(), session],
         )?;
         Ok(conn.last_insert_rowid())
     }
@@ -239,7 +256,7 @@ impl Memory {
         let conn = self.lock();
         let mut runs: Vec<RunRecord> = {
             let mut statement = conn.prepare(
-                "SELECT id, kind, subject, started_ms, finished_ms, outcome
+                "SELECT id, kind, subject, started_ms, finished_ms, outcome, session
                  FROM runs ORDER BY id DESC LIMIT ?1",
             )?;
             let rows = statement.query_map(params![limit as i64], |row| {
@@ -250,6 +267,7 @@ impl Memory {
                     started_ms: row.get(3)?,
                     finished_ms: row.get(4)?,
                     outcome: row.get(5)?,
+                    session: row.get(6)?,
                     steps: Vec::new(),
                 })
             })?;
@@ -404,6 +422,20 @@ fn migrate(conn: &Connection) -> Result<(), rusqlite::Error> {
                updated_ms INTEGER NOT NULL
              );
              PRAGMA user_version = 1;
+             COMMIT;",
+        )?;
+    }
+
+    // v2 (шаг 364): у запуска появляется сессия — чтобы из дела был переход
+    // к откату **именно того**, что это дело сделало, а не «всего за сегодня».
+    // Откат в журнале тоже хранится по сессиям, и связать их можно только этим.
+    if version < 2 {
+        // Версия поднимается в той же транзакции, что и колонка: иначе падение
+        // между ними повторит `ALTER`, и база не откроется вовсе.
+        conn.execute_batch(
+            "BEGIN;
+             ALTER TABLE runs ADD COLUMN session TEXT NOT NULL DEFAULT '';
+             PRAGMA user_version = 2;
              COMMIT;",
         )?;
     }
@@ -567,6 +599,86 @@ mod tests {
         let path = dir.join("memory.db");
         let memory = Memory::open(path.clone()).expect("база открывается");
         (memory, dir)
+    }
+
+    /// Шаг 364: сессия у запуска нужна для перехода к откату.
+    ///
+    /// Проверяется и запись, и чтение: без чтения сессия есть в базе, но не
+    /// доходит до экрана, и переход вести некуда.
+    #[test]
+    fn a_run_remembers_the_session_it_belonged_to() {
+        let (memory, dir) = temp_memory("run-session");
+
+        let run = memory
+            .start_run_in("plan", "Уборка", "сессия-2026-11-20")
+            .expect("запуск");
+        memory.finish_run(run, "ok").expect("итог");
+
+        let runs = memory.recent_runs(10).expect("чтение");
+        assert_eq!(runs.len(), 1);
+        assert_eq!(runs[0].session, "сессия-2026-11-20");
+
+        // Старый способ записи тоже работает: сессия просто пустая, и это
+        // честно — откатывать у такого дела нечего.
+        let plain = memory.start_run("tool", "без сессии").expect("запуск");
+        memory.finish_run(plain, "ok").expect("итог");
+        let runs = memory.recent_runs(10).expect("чтение");
+        assert_eq!(runs[0].session, "");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Миграция v2 на живой базе v1: старые запуски не теряются.
+    ///
+    /// Без этого обновление приложения стирало бы историю — а она и есть то,
+    /// ради чего память существует.
+    #[test]
+    fn the_session_column_is_added_without_losing_old_runs() {
+        let dir = std::env::temp_dir().join(format!("zshelper-migrate-{}", now_ms()));
+        let path = dir.join("memory.db");
+        {
+            // База «как в старой версии»: схема v1 и один запуск.
+            let conn = rusqlite::Connection::open(&path).expect("база");
+            conn.execute_batch(
+                "BEGIN;
+                 CREATE TABLE runs (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   kind TEXT NOT NULL,
+                   subject TEXT NOT NULL,
+                   started_ms INTEGER NOT NULL,
+                   finished_ms INTEGER,
+                   outcome TEXT NOT NULL DEFAULT 'running'
+                 );
+                 CREATE TABLE steps (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   run_id INTEGER NOT NULL REFERENCES runs(id),
+                   position INTEGER NOT NULL,
+                   tool TEXT NOT NULL,
+                   ok INTEGER NOT NULL,
+                   reason TEXT NOT NULL DEFAULT '',
+                   evidence TEXT NOT NULL DEFAULT ''
+                 );
+                 CREATE TABLE facts (
+                   key TEXT PRIMARY KEY,
+                   value TEXT NOT NULL,
+                   updated_ms INTEGER NOT NULL
+                 );
+                 INSERT INTO runs (kind, subject, started_ms, outcome)
+                   VALUES ('tool', 'Старое дело', 1000, 'ok');
+                 PRAGMA user_version = 1;
+                 COMMIT;",
+            )
+            .expect("старая схема");
+        }
+
+        let memory = Memory::open(path).expect("база открывается и мигрирует");
+        assert_eq!(memory.schema_version(), 2, "схема поднята");
+        let runs = memory.recent_runs(10).expect("чтение");
+        assert_eq!(runs.len(), 1, "старый запуск на месте");
+        assert_eq!(runs[0].subject, "Старое дело");
+        assert_eq!(runs[0].session, "", "у старого запуска сессии нет");
+
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
@@ -765,11 +877,7 @@ mod tests {
         let found = memory
             .search("то, что было вчера про загрузки", 10)
             .expect("поиск");
-        assert_eq!(
-            found.len(),
-            1,
-            "служебные слова не обнуляют поиск: {found:?}"
-        );
+        assert_eq!(found.len(), 1, "служебные слова не обнуляют поиск: {found:?}");
         assert_eq!(found[0].run.subject, "Уборка в Загрузках");
         // Совпавшими называются все найденные слова, включая служебное «было»,
         // если оно вдруг встретилось в записи: человек должен видеть, почему

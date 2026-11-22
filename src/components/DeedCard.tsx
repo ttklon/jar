@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { deed as text, journal } from "../i18n/ru";
-import { deedText, evidenceText, judge, oneLine } from "../lib/deed";
+import { deedText, evidenceText, judge, links, oneLine } from "../lib/deed";
 import type { Deed } from "../lib/deed";
 
 /**
@@ -74,13 +74,25 @@ export interface DeedCardProps {
   onRepeat?: (deed: Deed) => void | Promise<void>;
   /** Открыта ли карточка сразу. По умолчанию — свёрнута. */
   startOpen?: boolean;
+  /** Перейти к журналу этого дела. Нет обработчика — ссылки нет. */
+  onOpenJournal?: (deed: Deed) => void;
+  /** Перейти к откату той сессии, в которой шло дело. */
+  onOpenUndo?: (deed: Deed) => void;
 }
 
-export function DeedCard({ deed, onCancel, onRepeat, startOpen = false }: DeedCardProps) {
+export function DeedCard({
+  deed,
+  onCancel,
+  onRepeat,
+  startOpen = false,
+  onOpenJournal,
+  onOpenUndo,
+}: DeedCardProps) {
   const styles = useStyles();
   const [open, setOpen] = useState(startOpen);
   const [copied, setCopied] = useState<string | null>(null);
   const verdict = judge(deed);
+  const reach = links(deed);
 
   const copy = () => {
     const payload = deedText(deed);
@@ -165,6 +177,17 @@ export function DeedCard({ deed, onCancel, onRepeat, startOpen = false }: DeedCa
             ) : null}
             {!verdict.canRepeat && verdict.repeatWhy ? (
               <Text className={styles.why}>{text.cannotRepeat(verdict.repeatWhy)}</Text>
+            ) : null}
+            {/* Ссылки на журнал и откат — только когда вести есть куда. */}
+            {onOpenJournal && reach.journal ? (
+              <Button size="small" appearance="subtle" onClick={() => onOpenJournal(deed)}>
+                {text.openJournal}
+              </Button>
+            ) : null}
+            {onOpenUndo && reach.undo ? (
+              <Button size="small" appearance="subtle" onClick={() => onOpenUndo(deed)}>
+                {text.openUndo}
+              </Button>
             ) : null}
             <Button size="small" appearance="subtle" onClick={copy}>
               {text.copy}

@@ -136,6 +136,31 @@ describe("карточка дела", () => {
     expect(await screen.findByText(/отчёт скопирован/)).toBeTruthy();
   });
 
+  it("из дела есть переход к откату — но только у дела со сессией", () => {
+    // Шаг 364. Откат отменяет работу сессии; у дела без сессии вести некуда,
+    // и кнопка, которая приведёт к чужому, хуже её отсутствия.
+    const onOpenUndo = vi.fn();
+    render(
+      <DeedCard
+        deed={deed({ session: "2026-11-20T12:34" })}
+        onOpenUndo={onOpenUndo}
+        startOpen
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Откатить эту сессию" }));
+    expect(onOpenUndo).toHaveBeenCalledTimes(1);
+    cleanup();
+
+    render(<DeedCard deed={deed()} onOpenUndo={onOpenUndo} startOpen />);
+    expect(screen.queryByRole("button", { name: "Откатить эту сессию" })).toBeNull();
+  });
+
+  it("без обработчика ссылок нет: обещать переход некуда", () => {
+    render(<DeedCard deed={deed({ session: "s" })} startOpen />);
+    expect(screen.queryByRole("button", { name: "Откатить эту сессию" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Показать в журнале" })).toBeNull();
+  });
+
   it("без буфера обмена не делается вид, что скопировали", async () => {
     vi.stubGlobal("navigator", {});
     render(<DeedCard deed={deed()} startOpen />);

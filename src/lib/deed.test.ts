@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deedText, evidenceText, judge, oneLine } from "./deed";
+import { deedText, evidenceText, judge, links, oneLine } from "./deed";
 import type { Deed } from "./deed";
 
 /**
@@ -120,6 +120,20 @@ describe("карточка дела", () => {
     const text = deedText(deed({ kind: "download", steps: [], subject: "модель" }));
     expect(text).toContain("Шагов не было");
     expect(text).not.toContain("из 0");
+  });
+
+  it("на откат ведут только у дела со сессией", () => {
+    // Шаг 364: откат живёт по сессиям. Дело без сессии (старая запись,
+    // скачивание) не имеет куда вести — ложная ссылка покажет чужое.
+    expect(links(deed({ session: "2026-11-20T12:00" })).undo).toBe(true);
+    expect(links(deed({ session: "" })).undo).toBe(false);
+    expect(links(deed({ session: "   " })).undo).toBe(false);
+    expect(links(deed()).undo).toBe(false);
+  });
+
+  it("в журнал ведёт любое дело: у него есть время, а по нему ищутся строки", () => {
+    expect(links(deed()).journal).toBe(true);
+    expect(links(deed({ startedMs: 0 })).journal).toBe(false);
   });
 
   it("отказ политики называется отказом, а не общим провалом", () => {

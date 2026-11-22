@@ -2613,7 +2613,9 @@ pub async fn run_tool(
 
     // Память пишется до запуска и после него: если приложение упадёт посреди работы,
     // в базе останется запуск со статусом `running` — это видно, а не потеряно.
-    let run_id = inner.memory.start_run("tool", &registry).ok();
+    // Сессия — чтобы из дела был переход к откату именно его работы (шаг 364).
+    let session = undo::current().map(|j| j.session().to_string()).unwrap_or_default();
+    let run_id = inner.memory.start_run_in("tool", &registry, &session).ok();
 
     let worker = Arc::clone(&inner);
     let key = registry.clone();
@@ -2740,7 +2742,8 @@ pub async fn run_plan(
     // история, которую ведёт журнал и память запусков.
     let _ = plan::remember(&inner.memory, &plan);
 
-    let run_id = inner.memory.start_run("plan", &plan.goal).ok();
+    let session = undo::current().map(|j| j.session().to_string()).unwrap_or_default();
+    let run_id = inner.memory.start_run_in("plan", &plan.goal, &session).ok();
     inner.cancel.store(false, Ordering::Relaxed);
 
     // Если план трогает чужое окно, снимаем экран до работы: иначе после работы не с чем

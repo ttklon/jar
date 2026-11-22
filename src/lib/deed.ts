@@ -48,6 +48,8 @@ export interface Deed {
   /** `running` | `ok` | `failed` | `denied` | `cancelled`. */
   outcome: string;
   steps: DeedStep[];
+  /** Сессия, в которой шло дело; пусто у старых записей и у скачиваний. */
+  session?: string;
 }
 
 /** Кнопки, которые у карточки есть. */
@@ -154,6 +156,27 @@ export function evidenceText(step: DeedStep): string | null {
   // Служебные метки ядра — не доказательства для человека.
   if (text === "previous-run") return null;
   return text;
+}
+
+/**
+ * Куда из дела есть переход.
+ *
+ * Оба — не всегда: откат привязан к сессии, и у дела без сессии (старая запись,
+ * скачивание) вести некуда. Ложная ссылка хуже её отсутствия: человек нажмёт
+ * и увидит чужое.
+ */
+export interface DeedLinks {
+  /** Есть ли что смотреть в журнале: у дела всегда есть строки по времени. */
+  journal: boolean;
+  /** Есть ли сессия, по которой откат знает своё. */
+  undo: boolean;
+}
+
+export function links(deed: Deed): DeedLinks {
+  return {
+    journal: deed.startedMs > 0,
+    undo: Boolean(deed.session && deed.session.trim()),
+  };
 }
 
 /** Отчёт о деле текстом — чтобы человек мог переслать его, а не скриншот. */
