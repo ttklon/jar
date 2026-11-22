@@ -51,10 +51,13 @@ pub fn run_all() -> Vec<Verdict> {
         check_twins_touch_nothing(),
         check_stop_stops(),
         check_windows_update_noticed(),
+        crate::enginecheck::runtime_verdict(),
     ]
 }
 
-fn verdict(
+/// Собрать вердикт из исхода. Открыт для `enginecheck`: проверка движка —
+/// такая же проверка себя, но её код живёт рядом с движком, а не здесь.
+pub fn verdict_for(
     name: &str,
     promise: &str,
     risk: &str,
@@ -105,7 +108,7 @@ fn check_windows_update_noticed() -> Verdict {
     let outcome = crate::logging::ensure_app_dir()
         .ok_or_else(|| "папка приложения недоступна: обновление не запомнить".to_string())
         .and_then(|base| crate::osupdate::notice_and_remember(&base));
-    verdict(
+    verdict_for(
         "обновление Windows",
         "обновление системы замечено и названо",
         "обновление Windows пройдёт незамеченным, и поломку спишут на программу",
@@ -118,7 +121,7 @@ fn check_windows_update_noticed() -> Verdict {
 fn check_confirm_is_one_shot() -> Verdict {
     let started = Instant::now();
     let outcome = confirm_is_one_shot();
-    verdict(
+    verdict_for(
         "Подтверждение одноразовое",
         "одно подтверждение — одно действие; повторный щелчок ничего не выполнит",
         "несогласованное действие выполнится дважды, хотя человек нажал один раз",
@@ -131,7 +134,7 @@ fn check_confirm_is_one_shot() -> Verdict {
 fn check_confirm_cannot_be_swapped() -> Verdict {
     let started = Instant::now();
     let outcome = confirm_cannot_be_swapped();
-    verdict(
+    verdict_for(
         "Подтверждение не подменить",
         "согласие даётся на конкретные аргументы: другой путь пройдёт только с новым подтверждением",
         "согласие на одно действие выполнит другое, подменённое после нажатия",
@@ -144,7 +147,7 @@ fn check_confirm_cannot_be_swapped() -> Verdict {
 fn check_destructive_wants_a_confirm() -> Verdict {
     let started = Instant::now();
     let outcome = destructive_wants_a_confirm();
-    verdict(
+    verdict_for(
         "Разрушительное — только с подтверждением",
         "действие риска destructive не выполняется без подтверждения человека",
         "действие, которое нельзя отменить, выполнится без согласия",
@@ -157,7 +160,7 @@ fn check_destructive_wants_a_confirm() -> Verdict {
 fn check_nothing_found_is_an_answer() -> Verdict {
     let started = Instant::now();
     let outcome = nothing_found_is_an_answer();
-    verdict(
+    verdict_for(
         "Пустой поиск — ответ, а не сбой",
         "«ничего не нашлось» это ok, и рядом число просмотренных",
         "«ничего не найдено» превратится в ошибку, и человек перестанет искать",
@@ -170,7 +173,7 @@ fn check_nothing_found_is_an_answer() -> Verdict {
 fn check_twins_touch_nothing() -> Verdict {
     let started = Instant::now();
     let outcome = twins_touch_nothing();
-    verdict(
+    verdict_for(
         "Двойники ничего не трогают",
         "поиск двойников только читает: ни удаления, ни переноса",
         "поиск двойников изменит файлы, которые искал только посмотреть",
@@ -184,7 +187,7 @@ fn check_stop_stops() -> Verdict {
     let started = Instant::now();
     let promise = "нажатие «стоп» прекращает работу за секунды, а не после её окончания";
     let outcome = stop_stops();
-    verdict(
+    verdict_for(
         "«Стоп» останавливает",
         promise,
         "работа продолжится после «стоп», и человек будет ждать то, что отменил",

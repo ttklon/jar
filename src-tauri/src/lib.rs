@@ -39,6 +39,7 @@ pub mod container;
 pub mod custom;
 pub mod diagnostics;
 pub mod download;
+pub mod enginecheck;
 pub mod evals;
 pub mod executor;
 pub mod flows;
