@@ -107,7 +107,10 @@ mod tests {
             (Kind::Whisper, State::Absent),
         )
         .expect_err("испорченный движок — провал");
-        assert!(broken.contains("файл не совпал"), "причина названа: {broken}");
+        assert!(
+            broken.contains("файл не совпал"),
+            "причина названа: {broken}"
+        );
         // И сразу сказано, чем чинить, не отправляя искать экран.
         assert!(broken.contains("Переустановить движок"), "{broken}");
         // И что модели при этом целы — иначе человек боится нажимать.
@@ -136,7 +139,11 @@ mod tests {
             "program": &spec.program,
             "files": [{"path": &spec.program, "sha256": sha}]
         });
-        std::fs::write(dir.join("installed.json"), serde_json::to_vec(&meta).unwrap()).unwrap();
+        std::fs::write(
+            dir.join("installed.json"),
+            serde_json::to_vec(&meta).unwrap(),
+        )
+        .unwrap();
         std::fs::write(dir.join(".zshelper-owner"), spec.sha256.as_bytes()).unwrap();
 
         // До порчи — исправен.
@@ -167,6 +174,9 @@ mod tests {
     fn a_sound_engine_is_named() {
         let sound = report((Kind::Llama, State::Sound), (Kind::Whisper, State::Absent)).unwrap();
         assert!(sound.contains("llama.cpp"), "{sound}");
-        assert!(!sound.contains("whisper"), "отсутствующий не хвалят: {sound}");
+        assert!(
+            !sound.contains("whisper"),
+            "отсутствующий не хвалят: {sound}"
+        );
     }
 }
