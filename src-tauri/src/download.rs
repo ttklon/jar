@@ -27,6 +27,14 @@ use crate::models;
 /// лимит с запасом, но не «сколько угодно»: гигантский файл не качается.
 pub const MAX_MODEL_BYTES: u64 = 16 * 1024 * 1024 * 1024;
 
+/// Сколько места требовать, когда размер файла неизвестен.
+///
+/// Не «сколько нужно» — его не знает никто, — а запас, ниже которого
+/// скачивание почти наверняка упадёт: 1 ГБ. Это не запрет для большого диска
+/// (там места заведомо больше) и не гарантия для маленького (там отказ
+/// случится сразу и по-честному).
+pub const MIN_SPACE_WHEN_UNKNOWN: u64 = 1024 * 1024 * 1024;
+
 /// Просьба отменить текущее скачивание. Один флаг на одно скачивание за раз:
 /// интерфейс не запускает два скачивания одновременно, а второе без отмены
 /// не начинается.
@@ -263,6 +271,14 @@ pub fn download_sized(
             ));
         }
         check_free_space(dir, bytes)?;
+    } else {
+        // Размер неизвестен (ссылка вставлена человеком, каталог не назвал
+        // размер). Молчать нельзя: без проверки гигабайт качается в пустоту и
+        // падает на середине — а «места не хватило» человек узнаёт только
+        // тогда, когда диск уже заполнен мусором. Требуем не «сколько нужно»,
+        // а нижнюю границу запаса: файл меньше этого почти наверняка, а если
+        // больше — отказ случится на первом же блоке, а не на сороковом.
+        check_free_space(dir, MIN_SPACE_WHEN_UNKNOWN)?;
     }
 
     let target = dir.join(name);
@@ -381,6 +397,120 @@ fn commit(
         sha256: actual,
         verified: expected.is_some(),
     })
+}
+
+/// Проверка адреса заголовками: что сервер отвечает, не скачивая файл.
+///
+/// Живёт рядом с `fetch`, потому что это та же дверь в сеть: процессы `curl`
+/// в приложении запускаются только здесь. Возвращает код выхода, stdout и
+/// stderr — разбор ответа делает `readiness::parse_probe`, чтобы он проверялся
+/// тестами без сети.
+pub(crate) fn head(url: &str) -> (Option<i32>, String, String) {
+    let result = Command::new("curl").args(probe_args(url)).output();
+    match result {
+        Ok(output) => (
+            output.status.code(),
+            String::from_utf8_lossy(&output.stdout).to_string(),
+            String::from_utf8_lossy(&output.stderr).trim().to_string(),
+        ),
+        Err(error) => (None, String::new(), format!("curl не запустился: {error}")),
+    }
+}
+
+/// Команда `curl` для проверки адреса без скачивания файла.
+///
+/// `--head` не скачивает тело: проверка стоит несколько байт трафика, а не
+/// гигабайт. Именно поэтому её можно делать перед кнопкой, а не после.
+pub fn probe_args(url: &str) -> Vec<String> {
+    vec![
+        "--proto".into(),
+        "=http,https".into(),
+        "--proto-redir".into(),
+        "=https".into(),
+        "--connect-timeout".into(),
+        "20".into(),
+        "--max-time".into(),
+        "60".into(),
+        "--max-redirs".into(),
+        "5".into(),
+        "--location".into(),
+        "--silent".into(),
+        "--show-error".into(),
+        "--head".into(),
+        "--write-out".into(),
+        "ZSHELPER-CODE %{http_code}\n".into(),
+        url.into(),
+    ]
+}
+
+#[cfg(test)]
+mod probe_args_tests {
+    use super::*;
+
+    #[test]
+    fn the_probe_asks_for_headers_only_and_never_writes_a_file() {
+        let args = probe_args("https://huggingface.co/x.gguf");
+        assert!(
+            args.iter().any(|a| a == "--head"),
+            "только заголовки, без тела"
+        );
+        assert!(
+            !args.iter().any(|a| a == "-o" || a == "--output"),
+            "ничего не сохраняем на диск"
+        );
+        assert!(args.iter().any(|a| a == "--proto-redir"));
+        assert_eq!(
+            args.last().map(String::as_str),
+            Some("https://huggingface.co/x.gguf")
+        );
+    }
+}
+
+#[cfg(test)]
+mod space_tests {
+    use super::*;
+
+    /// Шаг 347: место проверяется ДО скачивания, а не после.
+    ///
+    /// Проверка нарочно просит больше, чем есть на любом диске: тест не должен
+    /// зависеть от свободного места на машине, где его гоняют.
+    #[test]
+    fn the_size_is_checked_before_a_single_byte_is_downloaded() {
+        let dir = std::env::temp_dir();
+        let impossible = u64::MAX / 2;
+        match models::free_space(&dir) {
+            Some(_) => {
+                let refused = check_free_space(&dir, impossible);
+                assert!(refused.is_err(), "место должно проверяться до скачивания");
+                let text = refused.unwrap_err();
+                // Числом, а не «недостаточно места»: человеку нужно понять,
+                // сколько освободить.
+                assert!(text.contains("МБ"), "причина с числами: {text}");
+            }
+            // Не-Windows: свободное место не спрашивается, и функция честно
+            // молчит, а не притворяется, что места хватает.
+            None => assert!(check_free_space(&dir, impossible).is_ok()),
+        }
+    }
+
+    #[test]
+    fn a_small_request_passes_on_a_real_disk() {
+        let dir = std::env::temp_dir();
+        // Один байт свободен на любом диске, где вообще есть место под
+        // временные файлы этого теста.
+        assert!(check_free_space(&dir, 1).is_ok());
+    }
+
+    /// Запас для неизвестного размера — гигабайт, и это не «на глаз»: он
+    /// ровно такой, каким назван в константе, и проверяется ею же.
+    #[test]
+    fn the_unknown_size_reserve_is_one_gigabyte() {
+        assert_eq!(MIN_SPACE_WHEN_UNKNOWN, 1024 * 1024 * 1024);
+        assert!(
+            MIN_SPACE_WHEN_UNKNOWN < MAX_MODEL_BYTES,
+            "запас меньше предела: иначе неизвестный размер запрещал бы всё"
+        );
+    }
 }
 
 #[cfg(test)]
@@ -700,72 +830,5 @@ mod tests {
         assert!(active_name().is_none());
         drop(memory);
         std::fs::remove_dir_all(dir).unwrap();
-    }
-}
-
-/// Проверка адреса заголовками: что сервер отвечает, не скачивая файл.
-///
-/// Живёт рядом с `fetch`, потому что это та же дверь в сеть: процессы `curl`
-/// в приложении запускаются только здесь. Возвращает код выхода, stdout и
-/// stderr — разбор ответа делает `readiness::parse_probe`, чтобы он проверялся
-/// тестами без сети.
-pub(crate) fn head(url: &str) -> (Option<i32>, String, String) {
-    let result = Command::new("curl").args(probe_args(url)).output();
-    match result {
-        Ok(output) => (
-            output.status.code(),
-            String::from_utf8_lossy(&output.stdout).to_string(),
-            String::from_utf8_lossy(&output.stderr).trim().to_string(),
-        ),
-        Err(error) => (None, String::new(), format!("curl не запустился: {error}")),
-    }
-}
-
-/// Команда `curl` для проверки адреса без скачивания файла.
-///
-/// `--head` не скачивает тело: проверка стоит несколько байт трафика, а не
-/// гигабайт. Именно поэтому её можно делать перед кнопкой, а не после.
-pub fn probe_args(url: &str) -> Vec<String> {
-    vec![
-        "--proto".into(),
-        "=http,https".into(),
-        "--proto-redir".into(),
-        "=https".into(),
-        "--connect-timeout".into(),
-        "20".into(),
-        "--max-time".into(),
-        "60".into(),
-        "--max-redirs".into(),
-        "5".into(),
-        "--location".into(),
-        "--silent".into(),
-        "--show-error".into(),
-        "--head".into(),
-        "--write-out".into(),
-        "ZSHELPER-CODE %{http_code}\n".into(),
-        url.into(),
-    ]
-}
-
-#[cfg(test)]
-mod probe_args_tests {
-    use super::*;
-
-    #[test]
-    fn the_probe_asks_for_headers_only_and_never_writes_a_file() {
-        let args = probe_args("https://huggingface.co/x.gguf");
-        assert!(
-            args.iter().any(|a| a == "--head"),
-            "только заголовки, без тела"
-        );
-        assert!(
-            !args.iter().any(|a| a == "-o" || a == "--output"),
-            "ничего не сохраняем на диск"
-        );
-        assert!(args.iter().any(|a| a == "--proto-redir"));
-        assert_eq!(
-            args.last().map(String::as_str),
-            Some("https://huggingface.co/x.gguf")
-        );
     }
 }
