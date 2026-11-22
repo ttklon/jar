@@ -284,6 +284,7 @@ pub fn run() {
             ipc::data_places,
             ipc::self_check,
             ipc::repair,
+            ipc::repair_memory,
             ipc::undo_report,
             ipc::undo_apply,
             ipc::autostart_status,

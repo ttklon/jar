@@ -471,6 +471,11 @@ export async function memoryBackups(): Promise<MemoryBackup[]> {
  * Вернуть память из копии. `confirm` передаётся намеренно: команда заменяет
  * файл, и «нажали случайно» не должно становиться потерей данных.
  */
+/** Починить память из лучшей копии — одной кнопкой, без выбора. */
+export function repairMemory(): Promise<string> {
+  return invoke<string>("repair_memory");
+}
+
 export async function memoryRestore(file: string, confirm: boolean): Promise<MemoryRestored> {
   return invoke<MemoryRestored>("memory_restore", { file, confirm });
 }

@@ -1224,6 +1224,45 @@ pub fn network_addresses() -> Vec<readiness::NetworkAddress> {
     readiness::network_addresses()
 }
 
+/// Починить повреждённую память из лучшей копии — одной кнопкой (шаг 349).
+///
+/// Отличие от `memory_restore`: там человек выбирает копию и подтверждает, тут
+/// беда уже случилась и выбора нет — «память не открылась». Поэтому копия
+/// выбирается сама: **самая свежая из годных**, и годность проверяется тем же
+/// `backup::verify`, что и при ручном восстановлении. Битые копии не
+/// предлагаются никогда: восстановить битую — значит потерять и её.
+///
+/// Ответ — словами и с путём отложенной базы: человеку нужно знать, куда
+/// смотреть, если восстановленное окажется не тем, что он ждал.
+#[tauri::command]
+pub async fn repair_memory(state: State<'_, AppState>) -> Result<String, String> {
+    let base = state.inner.base_dir.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let best = crate::backup::best_usable(&crate::backup::dir(&base)).ok_or_else(|| {
+            "годной копии нет: восстанавливать не из чего, и делать вид, что получилось, \
+             было бы хуже"
+                .to_string()
+        })?;
+        let restored = crate::backup::restore(&base, &best.file)?;
+        Ok(match restored.previous {
+            Some(previous) => format!(
+                "память восстановлена из копии {} ({}); прежняя база отложена: {previous}. \
+                 Перезапустите приложение, чтобы она открылась",
+                restored.file,
+                crate::backup::human_bytes(restored.bytes)
+            ),
+            None => format!(
+                "память восстановлена из копии {} ({}); прежней базы не было. \
+                 Перезапустите приложение, чтобы она открылась",
+                restored.file,
+                crate::backup::human_bytes(restored.bytes)
+            ),
+        })
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
 /// Что сеть на самом деле отвечает про каждый адрес каталога.
 ///
 /// Проверка стоит несколько байт: `curl --head`, без тела и без записи файла.
