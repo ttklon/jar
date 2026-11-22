@@ -17,6 +17,23 @@ import { adviceForVerdict } from "../lib/repair";
  *  * **в браузере проверять нечего** — сказано прямо, а не пустым списком.
  */
 
+/**
+ * Отчёт после ремонта: было — сделали — стало.
+ *
+ * Почему не строка «Готово: …». Первый вопрос человека после починки — «а
+ * помогло?», и ответ на него даёт повторная проверка, а не текст ремонта.
+ * Поэтому `after` — это свежие вердикты, и они показываются те же, что и
+ * обычные, а не пересказ «теперь всё хорошо».
+ */
+interface FixReport {
+  /** Что было сломано: `detail` провалившейся проверки, до ремонта. */
+  was: string;
+  /** Что сделал ремонт, его словами. */
+  done: string;
+  /** Проверки после ремонта — измерение, а не обещание. */
+  after: SelfCheckVerdict[];
+}
+
 const useStyles = makeStyles({
   card: {
     display: "flex",
@@ -36,6 +53,14 @@ const useStyles = makeStyles({
   fail: { color: tokens.colorPaletteRedForeground1 },
   advice: { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", marginTop: "4px" },
   fixLead: { color: tokens.colorNeutralForeground2, fontSize: tokens.fontSizeBase200 },
+  report: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+    padding: "10px 12px",
+    borderRadius: tokens.borderRadiusMedium,
+    backgroundColor: tokens.colorNeutralBackground3,
+  },
 });
 
 export function SelfCheckCard() {
@@ -48,16 +73,40 @@ export function SelfCheckCard() {
   const [fixing, setFixing] = useState<string | null>(null);
   const [fixed, setFixed] = useState<string | null>(null);
   const [fixError, setFixError] = useState<string | null>(null);
+  // Шаг 357: отчёт после ремонта. «Готово» без «что было» — это половина
+  // ответа: человек не помнит, что именно он чинил и стало ли иначе.
+  const [report, setReport] = useState<FixReport | null>(null);
 
-  const fix = (what: string) => {
+  const runChecks = () =>
+    selfCheck()
+      .then((result) => {
+        setVerdicts(result);
+        return result;
+      })
+      .catch((reason: unknown) => {
+        setError(reason instanceof Error ? reason.message : String(reason));
+        return null;
+      });
+
+  const fix = (what: string, wasBroken: string) => {
     setFixing(what);
     setFixed(null);
     setFixError(null);
+    setReport(null);
     repair(what)
       .then((result) => {
         // Пустой ответ — это браузер: ядра нет, чинить нечего. Говорим прямо,
         // а не показываем «Готово» без подробностей.
         setFixed(result === "" ? text.repairNothingHere : result);
+        if (result === "") return null;
+        // «Стало» — не обещание, а повторная проверка: «теперь всё хорошо»
+        // было бы верой, а список вердиктов — измерением.
+        return runChecks().then((after) =>
+          after === null ? null : { was: wasBroken, done: result, after },
+        );
+      })
+      .then((next) => {
+        if (next !== null) setReport(next);
       })
       .catch((reason: unknown) =>
         setFixError(reason instanceof Error ? reason.message : String(reason)),
@@ -68,12 +117,8 @@ export function SelfCheckCard() {
   const run = () => {
     setRunning(true);
     setError(null);
-    selfCheck()
-      .then((result) => setVerdicts(result))
-      .catch((reason: unknown) =>
-        setError(reason instanceof Error ? reason.message : String(reason)),
-      )
-      .finally(() => setRunning(false));
+    setReport(null);
+    runChecks().finally(() => setRunning(false));
   };
 
   const passed = verdicts?.filter((verdict) => verdict.passed).length ?? 0;
@@ -100,10 +145,35 @@ export function SelfCheckCard() {
         </Text>
       ) : null}
 
-      {fixed ? (
+      {/* «Готово: …» показывается, только когда отчёта нет: иначе ремонт
+          повторяется дважды — строкой и блоком «что было и что стало». */}
+      {fixed && !report ? (
         <Text role="status" aria-live="polite" block>
           {text.repairDone(fixed)}
         </Text>
+      ) : null}
+
+      {/* Шаг 357: что было сломано и что стало после ремонта. Строка «стало»
+          считается по свежим вердиктам, а не обещается текстом. */}
+      {report ? (
+        <div className={styles.report} role="status" aria-live="polite">
+          <Text weight="semibold">{text.repairReport}</Text>
+          <Text className={styles.muted}>{text.repairWas(report.was)}</Text>
+          <Text className={styles.muted}>{text.repairDid(report.done)}</Text>
+          <Text
+            className={
+              report.after.every((verdict) => verdict.passed) ? styles.pass : styles.fail
+            }
+          >
+            {text.repairBecame(
+              report.after.filter((verdict) => verdict.passed).length,
+              report.after.length,
+            )}
+          </Text>
+          {report.after.some((verdict) => !verdict.passed) ? (
+            <Text className={styles.muted}>{text.repairStillBroken}</Text>
+          ) : null}
+        </div>
       ) : null}
       {fixError ? (
         <Text role="alert" aria-live="polite" className={styles.fail} block>
@@ -156,7 +226,7 @@ export function SelfCheckCard() {
                         <Button
                           size="small"
                           appearance="secondary"
-                          onClick={() => fix(advice.repair)}
+                          onClick={() => fix(advice.repair, verdict.detail)}
                           disabled={fixing !== null}
                         >
                           {fixing === advice.repair ? text.repairRunning : advice.action}

@@ -198,6 +198,12 @@ export const selfCheck = {
   risk: (text: string) => `Если не пройдёт: ${text}`,
   repairRunning: "Чиню…",
   repairDone: (what: string) => `Готово: ${what}.`,
+  repairReport: "Что было и что стало",
+  repairWas: (detail: string) => `Было: ${detail}`,
+  repairDid: (what: string) => `Сделали: ${what}`,
+  repairBecame: (passed: number, total: number) =>
+    `Стало: проверок прошло ${passed} из ${total} — это повторный прогон, а не обещание`,
+  repairStillBroken: "Что-то осталось сломанным — причина в списке выше, с советом.",
   repairFailed: (reason: string) => `ремонт не выполнен: ${reason}`,
   repairNothingHere: "в браузере чинить нечего: файлов и базы здесь нет",
 };

@@ -132,8 +132,12 @@ describe("карточка «Проверка себя»", () => {
 
   it("ремонт называет, что именно изменилось", async () => {
     // «ok» после ремонта — это не ответ: человеку нужно знать, что стало
-    // иначе. Здесь — путь копии базы.
-    vi.mocked(selfCheck).mockResolvedValue([verdict({ name: "память", passed: false })]);
+    // иначе. Здесь — путь копии базы. С шагом 357 это строка «Сделали» в
+    // отчёте: отдельного «Готово» рядом с ней больше нет, потому что это
+    // было бы одно и то же дважды.
+    vi.mocked(selfCheck)
+      .mockResolvedValueOnce([verdict({ name: "память", passed: false })])
+      .mockResolvedValueOnce([verdict({ name: "память", passed: true })]);
     vi.mocked(repair).mockResolvedValue("C:/Data/backups/memory-2026.db");
     render(<SelfCheckCard />);
     fireEvent.click(screen.getByRole("button", { name: /Прогнать проверки/ }));
@@ -141,15 +145,19 @@ describe("карточка «Проверка себя»", () => {
     const button = await screen.findByRole("button", { name: "Пересоздать базу памяти" });
     fireEvent.click(button);
 
-    const done = await screen.findByText(/Готово: C:\/Data\/backups\/memory-2026\.db/);
-    expect(done.textContent).toContain("Готово");
+    const done = await screen.findByText(/Сделали: C:\/Data\/backups\/memory-2026\.db/);
+    expect(done.textContent).toContain("C:/Data/backups/memory-2026.db");
     expect(repair).toHaveBeenCalledWith("rewrite-memory");
   });
 
   it("переустановка движка чинится кнопкой, а не отправкой на другой экран", async () => {
     // Шаг 354. Раньше «Переустановить движок» отвечало «это делает экран
     // Модели» — то есть совет был, а кнопка отправляла искать другой экран.
-    vi.mocked(selfCheck).mockResolvedValue([verdict({ name: "движок", passed: false })]);
+    // Два прогона: до ремонта (провал) и после — отчёт о ремонте (шаг 357)
+    // спрашивает проверку заново, а не верит ремонту на слово.
+    vi.mocked(selfCheck)
+      .mockResolvedValueOnce([verdict({ name: "движок", passed: false, detail: "движок не отвечает" })])
+      .mockResolvedValueOnce([verdict({ name: "движок", passed: true })]);
     vi.mocked(repair).mockResolvedValue("движок llama.cpp: переустановлен; модели и память не тронуты");
     render(<SelfCheckCard />);
     fireEvent.click(screen.getByRole("button", { name: /Прогнать проверки/ }));
@@ -161,6 +169,46 @@ describe("карточка «Проверка себя»", () => {
     // Отчёт называет модели: иначе человек не знает, уцелело ли главное.
     expect(done.textContent).toContain("модели и память не тронуты");
     expect(repair).toHaveBeenCalledWith("reinstall-engine");
+  });
+
+  it("после ремонта видно, что было сломано и что стало", async () => {
+    // Шаг 357. «Готово» отвечает на «что сделали», но не на «помогло ли».
+    // Было: база повреждена. Стало — измерено повторным прогоном.
+    vi.mocked(selfCheck)
+      .mockResolvedValueOnce([
+        verdict({ name: "память", passed: false, detail: "база повреждена" }),
+      ])
+      .mockResolvedValueOnce([
+        verdict({ name: "память", passed: true, detail: "база читается" }),
+      ]);
+    vi.mocked(repair).mockResolvedValue("база памяти пересоздана; старая сохранена: memory-2026.db");
+    render(<SelfCheckCard />);
+    fireEvent.click(screen.getByRole("button", { name: /Прогнать проверки/ }));
+
+    fireEvent.click(await screen.findByRole("button", { name: "Пересоздать базу памяти" }));
+
+    await screen.findByText("Что было и что стало");
+    expect(screen.getByText(/Было: база повреждена/)).toBeTruthy();
+    expect(screen.getByText(/Сделали: база памяти пересоздана/)).toBeTruthy();
+    // «Стало» — из повторного прогона, и он действительно был вторым.
+    expect(screen.getByText(/Стало: проверок прошло 1 из 1/)).toBeTruthy();
+    expect(vi.mocked(selfCheck)).toHaveBeenCalledTimes(2);
+    // Всё прошло — «осталось сломанным» не показывается.
+    expect(screen.queryByText(/Что-то осталось сломанным/)).toBeNull();
+  });
+
+  it("если после ремонта проверка всё ещё падает, это сказано", async () => {
+    // Ремонт может не помочь. Отчёт не имеет права закончиться на «Готово».
+    vi.mocked(selfCheck)
+      .mockResolvedValueOnce([verdict({ name: "память", passed: false, detail: "база повреждена" })])
+      .mockResolvedValueOnce([verdict({ name: "память", passed: false, detail: "база всё ещё повреждена" })]);
+    vi.mocked(repair).mockResolvedValue("пересоздана");
+    render(<SelfCheckCard />);
+    fireEvent.click(screen.getByRole("button", { name: /Прогнать проверки/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Пересоздать базу памяти" }));
+
+    await screen.findByText(/Стало: проверок прошло 0 из 1/);
+    expect(screen.getByText(/Что-то осталось сломанным/)).toBeTruthy();
   });
 
   it("пустой ответ ремонта не выдаётся за успех", async () => {
