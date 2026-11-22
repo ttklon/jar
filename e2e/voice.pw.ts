@@ -15,6 +15,17 @@ async function hold(page: Page) {
   await page.waitForTimeout(900); // real audio frames, not a mocked recording promise
   await button.dispatchEvent("pointerup");
 }
+/**
+ * Отметка «про микрофон уже объясняли» (шаг 24).
+ *
+ * Эти тесты проверяют звук, а не первый разговор: человек, вернувшийся на
+ * экран, объяснение уже видел, и первое нажатие сразу включает микрофон. Сам
+ * первый разговор проверяется отдельным тестом ниже — он эту отметку не ставит.
+ */
+async function micExplained(page: Page) {
+  await page.evaluate(() => localStorage.setItem("zshelper.mic.explained", "1"));
+}
+
 async function released(page: Page) {
   await expect.poll(() => page.evaluate(() => window.voiceSimulation.state.streams.every(s => s.getTracks().every(t => t.readyState === "ended")))).toBe(true);
 }
@@ -27,6 +38,31 @@ test.beforeEach(async ({ page }) => {
   });
   await page.goto("/e2e/voice.html");
   await expect(page.getByText(/локальное распознавание готово/)).toBeVisible();
+  await micExplained(page);
+});
+
+test("первый разговор сначала объясняет, что услышит, и только потом слушает (шаг 24)", async ({ page }) => {
+  // Настоящий первый раз: объяснения не было. Отметку, поставленную в
+  // `beforeEach`, снимаем — это и есть состояние нового человека.
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await expect(page.getByText(/локальное распознавание готово/)).toBeVisible();
+
+  const button = page.getByRole("button", { name: "Держать и говорить", exact: true });
+  await button.dispatchEvent("pointerdown");
+
+  // Микрофон ещё не открыт: сначала объяснение, а не системный запрос вслепую.
+  await expect(page.getByText("первый раз с микрофоном")).toBeVisible();
+  expect(await page.evaluate(() => window.voiceSimulation.state.streams.length)).toBe(0);
+
+  await page.getByRole("button", { name: "Понятно, включить микрофон" }).click();
+  // Объяснение убрано и запомнено — второй раз его не будет.
+  await expect(page.getByText("первый раз с микрофоном")).toBeHidden();
+  expect(await page.evaluate(() => localStorage.getItem("zshelper.mic.explained"))).toBe("1");
+
+  // После согласия обычный путь работает как раньше: держим и говорим.
+  await hold(page);
+  await expect(page.getByLabel("Услышал", { exact: true })).toHaveValue("привет помощник");
 });
 
 test("native virtual mic → WAV → simulated ASR/LLM → spoken reply, two turns", async ({ page }) => {
