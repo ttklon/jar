@@ -168,7 +168,7 @@ mod tests {
     #[test]
     fn two_ticks_in_the_same_minute_do_not_run_the_job_twice() {
         let schedule = daily(540); // 09:00
-        // Минута 09:00 конкретного дня: 20000-е сутки с эпохи.
+                                   // Минута 09:00 конкретного дня: 20000-е сутки с эпохи.
         let now = 20_000 * 1440 + 540;
         // Метки нет — запуск.
         let first = decide(&schedule, now, |_| false);
@@ -176,7 +176,11 @@ mod tests {
         // Метка есть — второй тик молчит, и говорит почему.
         let second = decide(&schedule, now, |stamp| stamp == schedule.stamp(now));
         assert!(!second.run, "второй тик в ту же минуту не должен запускать");
-        assert!(second.why.contains("уже сработало"), "причина названа: {}", second.why);
+        assert!(
+            second.why.contains("уже сработало"),
+            "причина названа: {}",
+            second.why
+        );
     }
 
     /// Та же ошибка через сутки: вчерашняя метка не должна глушить сегодняшний
@@ -287,7 +291,10 @@ mod tests {
         // «Перезапуск»: другое соединение к тому же файлу.
         let memory = crate::memory::Memory::open(path.clone()).unwrap();
         let second = take(&memory, &schedule, now);
-        assert!(!second.run, "после перезапуска в ту же минуту — не запускать");
+        assert!(
+            !second.run,
+            "после перезапуска в ту же минуту — не запускать"
+        );
         assert!(second.why.contains("уже сработало"));
 
         drop(memory);
