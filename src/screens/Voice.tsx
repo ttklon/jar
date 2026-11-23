@@ -124,6 +124,7 @@ import { enough as amountEnough, parse as parseAmount, say as sayAmount, type Am
 import { collision as synonymCollision, intents as synonymIntents, say as saySynonym } from "../lib/synonyms";
 import { canRun as jokeCanRun, check as checkJoke, say as sayJoke, type Dangerous } from "../lib/joking";
 import { go as handGo, need as handNeed, question as handQuestion, type Option as HandOption } from "../lib/whichHand";
+import { apply as contextApply, gaps as contextGaps, parse as parseContext, say as sayContext, type Context as KeptContext } from "../lib/contextKeep";
 import {
   find as findYesterday,
   nothing as nothingYesterday,
@@ -1455,6 +1456,33 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       setSaidIntent(intentWords(parsed));
       // Шаг 91: «когда» отдельно от «что». «Завтра в девять» не исполняется
       // сейчас: сделать сегодня то, что просили на завтра, видно не сразу.
+      // Шаг 96: «а теперь то же с другой папкой». Разбор идёт по прошлому
+      // разложению; заменяется **только названное**, и опасность наследуется.
+      {
+        const result = parseContext(query, keptPhrase);
+        if (/то\s+же|так\s+же/i.test(query)) {
+          const next = contextApply(keptPhrase as KeptContext, result);
+          const missing = contextGaps(result);
+          setSameSay(
+            missing.length > 0
+              ? `нужно назвать: ${missing.join(", ")} — придумывать не буду`
+              : sayContext(keptPhrase, result),
+          );
+          setKeptPhrase(next);
+        } else {
+          // Новая фраза становится контекстом для следующего «то же».
+          const intentNow = parseIntent(query);
+          setKeptPhrase({
+            verb: intentNow.verb,
+            object: intentNow.object,
+            params: Object.fromEntries(
+              (draft?.gates ?? []).map((gate) => [`step-${gate.position}`, gate.registry]),
+            ),
+            said: query,
+            dangerous: danger?.found === true,
+          });
+        }
+      }
       // Шаг 94: опасное намерение распознаётся в любой форме, и шутка не
       // оправдывает: интонации нет, а цена необратима.
       {
@@ -1700,6 +1728,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // Шаг 95: две разные руки — один короткий вопрос вместо молчаливого выбора.
   const [handAsk, setHandAsk] = useState<string | null>(null);
   const [handBlocked, setHandBlocked] = useState(false);
+  // Шаг 96: последняя фраза хранится разложением, а не текстом: «то же с другой
+  // папкой» меняет путь, а остальное остаётся.
+  const [keptPhrase, setKeptPhrase] = useState<KeptContext | null>(null);
+  const [sameSay, setSameSay] = useState<string | null>(null);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -2887,6 +2919,17 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </>
             );
           })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 96: «то же» — по прошлому разложению, а не по прошлому тексту.
+          Иначе «с другой папкой» скопирует в ту же папку. */}
+      {sameSay !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>То же самое</Text>
+          <Text className={styles.note} role="status" aria-live="polite">
+            {sameSay}
+          </Text>
         </div>
       ) : null}
 
