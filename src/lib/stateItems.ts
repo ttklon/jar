@@ -22,6 +22,7 @@
 
 import type { ReadinessStatus } from "../ipc/types";
 import type { StateItem } from "./state";
+import { describe, type PlatformVerdict } from "./platform";
 
 /** Что известно о мире на момент показа. Всё — из существующих источников. */
 export interface StateInput {
@@ -32,6 +33,14 @@ export interface StateInput {
   risky: number | null;
   /** Автозапуск включён; `null` — не спросили или платформа не умеет. */
   autostart: boolean | null;
+  /**
+   * Что система сказала о себе (шаг 17). `null` — не спрашивали.
+   *
+   * Без этого поддержка — угадывание: на старом WebView2 приложение ведёт себя
+   * иначе, и понять это можно только зная версию. Поэтому факты системы стоят в
+   * «Состоянии» наравне с движком, а не прячутся в «О программе».
+   */
+  platform: PlatformVerdict | null;
 }
 
 /**
@@ -151,7 +160,28 @@ export function stateItems(input: StateInput): StateItem[] {
     screen: "settings",
   };
 
-  return [engine, model, speech, actions, permissions, autostart];
+  // Система: версия Windows и WebView2. `ok` — доказано здесь (прочитано с этой
+  // машины), `unsupported` — провал с причиной, `unknown` — не проверено.
+  const system: StateItem =
+    input.platform === null
+      ? notKnownYet("system", "Система", "версия Windows и движка WebView2", "settings")
+      : {
+          id: "system",
+          title: "Система",
+          hint: "версия Windows и движка WebView2",
+          condition:
+            input.platform.state === "ok"
+              ? "proven-here"
+              : input.platform.state === "unsupported"
+                ? "failed"
+                : "not-checked",
+          // Факты читаются с этой машины — значит это и есть доказательство
+          // «здесь». Строка называет версии, а не «подходит».
+          evidence: describe(input.platform),
+          screen: "settings",
+        };
+
+  return [system, engine, model, speech, actions, permissions, autostart];
 }
 
 /** Пункт, о котором ещё ничего не спросили: «не проверено», а не «нет». */

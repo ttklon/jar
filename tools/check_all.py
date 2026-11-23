@@ -73,6 +73,13 @@ STEPS: list[tuple[str, list[str], str]] = [
     # права и необратимость из поведения, а отмену и проверку оставляют
     # `null` — дырой, которую видно, а не «да» без оснований.
     ("tool receipts", ["tools/make_receipts.py", "--check", "--quiet"], "every hand has a receipt"),
+    # Расхождение списка рук — это ложь одной из сторон: кнопка, которая ничего
+    # не сделает, или обещание без записи. Шаг 19 добавляет: рука не появляется
+    # без строки реестра и тест-кейса.
+    ("hands agree", ["tools/hands_agree.py", "--quiet"], "every hand has a passport, a registry line and a case"),
+    # Автономность не должна быть незаметной: в отчёте либо пусто, либо названо.
+    # Появилось новое действие «само», которое пишет или ходит в сеть, — падаем.
+    ("autonomy", ["tools/autonomy.py", "--check", "--quiet"], "nothing happens without a person asking"),
     # Требование пользователя дословно: **не считать вызов доказательством**.
     # Рука, которая меняет мир, обязана назвать отмену — что вернётся и до
     # какого момента. Пока отмен не записано ни у кого, проверка называет дыру
@@ -105,6 +112,7 @@ GENERATED = [
     "docs/DASHBOARD.md",
     "docs/INDEX.md",
     "docs/TOOL-RECEIPTS.md",
+    "docs/AUTONOMY.md",
     "data/tools-receipts.json",
     "data/tool-receipts",
     "AGENTS.md",

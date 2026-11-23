@@ -3,6 +3,7 @@ import { StateScreen } from "./State";
 import { stateItems, riskyCount } from "../lib/stateItems";
 import type { StateItem } from "../lib/state";
 import { readinessStatus } from "../ipc";
+import { decide, readFacts, type PlatformVerdict } from "../lib/platform";
 import type { ReadinessStatus } from "../ipc/types";
 import { registrySnapshot } from "../ipc";
 
@@ -27,8 +28,10 @@ export function StateRoute({ onGo }: StateRouteProps) {
   const [actions, setActions] = useState<number | null>(null);
   const [risky, setRisky] = useState<number | null>(null);
   const [autostart, setAutostart] = useState<boolean | null>(null);
+  // Система спрашивается у неё самой, а не предполагается (шаг 17).
+  const [platform, setPlatform] = useState<PlatformVerdict | null>(null);
   const [items, setItems] = useState<StateItem[]>(() =>
-    stateItems({ readiness: null, actions: null, risky: null, autostart: null }),
+    stateItems({ readiness: null, actions: null, risky: null, autostart: null, platform: null }),
   );
 
   useEffect(() => {
@@ -52,6 +55,14 @@ export function StateRoute({ onGo }: StateRouteProps) {
         // То же: сколько умею — не знаем, так и скажем.
       }
       try {
+        // Факты читаются из движка, а не из наших догадок: `readFacts` смотрит
+        // `navigator`, `decide` применяет пороги. Ошибка чтения — `unknown`, а не
+        // «всё плохо»: незнание не приговор.
+        setPlatform(decide(readFacts(globalThis.navigator)));
+      } catch {
+        if (alive) setPlatform(null);
+      }
+      try {
         const { autostartStatus } = await import("../ipc");
         const state = await autostartStatus();
         if (alive) setAutostart(Boolean(state?.enabled));
@@ -65,8 +76,8 @@ export function StateRoute({ onGo }: StateRouteProps) {
   }, []);
 
   useEffect(() => {
-    setItems(stateItems({ readiness, actions, risky, autostart }));
-  }, [readiness, actions, risky, autostart]);
+    setItems(stateItems({ readiness, actions, risky, autostart, platform }));
+  }, [readiness, actions, risky, autostart, platform]);
 
   return <StateScreen items={items} onGo={onGo} />;
 }

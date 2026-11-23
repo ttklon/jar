@@ -20,6 +20,7 @@
 | [ACTIONS.md](ACTIONS.md) | Реестр действий ZShelper | реестр действий: что система умеет | tools/actions.py |
 | [ALPHA-IMPROVEMENT-PLAN.md](ALPHA-IMPROVEMENT-PLAN.md) | План доработки альфы: от работающего прототипа к проверяемому продукту | Цель: закрывать реальные риски и пользовательские разрывы последовательно, не наращивать число записей каталога ради видимости готовности. План не объ | руками |
 | [APP-COVERAGE.md](APP-COVERAGE.md) | Каталог приложений: что ZShelper должен уметь автоматизировать | каталог приложений Windows и их tier | tools/app_targets.py |
+| [AUTONOMY.md](AUTONOMY.md) | Что приложение делает само, без спроса | Сгенерировано tools/autonomy.py. Не править руками. | руками |
 | [COVERAGE.md](COVERAGE.md) | Покрытие: где «умеет всё» пока не всё | аудит покрытия: дырки и глубина | tools/audit_actions.py |
 | [DECISION-STACK.md](DECISION-STACK.md) | Решение по стеку: Tauri 2 + Rust-ядро + React/Fluent UI | почему Tauri 2 + Rust + React, а не Electron | руками |
 | [DEPENDENCIES.md](DEPENDENCIES.md) | Зависимости v1 — предложение и аудит лицензий | стек и лицензии зависимостей | tools/deps_report.py |
@@ -99,6 +100,7 @@
 | `actions.py` | реестр → actions.json + docs/ACTIONS.md |
 | `app_targets.py` | каталог приложений → docs/APP-COVERAGE.md |
 | `audit_actions.py` | аудит покрытия → docs/COVERAGE.md |
+| `autonomy.py` | — |
 | `build_ecosystem.py` | сборка 10 каталогов экосистемы из research/ и _curated/ |
 | `check_all.py` | все генераторы и валидаторы по порядку (+ --check против git) |
 | `collect_sources.py` | сбор источников в research/ |
@@ -110,6 +112,7 @@
 | `flows.py` | валидатор сценариев: шаги из реальных рук, риск не занижен |
 | `free_path.py` | — |
 | `hands.py` | валидатор рук: реальные строки реестра, допустимый риск |
+| `hands_agree.py` | — |
 | `links.py` | проверка относительных ссылок в документах |
 | `make_receipts.py` | — |
 | `mine_awesome.py` | разбор awesome-листов |

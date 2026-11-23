@@ -46,7 +46,7 @@ describe("экран состояния", () => {
     // «Всё работает» врёт при непроверенном; числа не врут.
     render(
       <StateScreen
-        items={stateItems({ readiness: null, actions: 12, risky: 3, autostart: false })}
+        items={stateItems({ readiness: null, actions: 12, risky: 3, autostart: false, platform: null })}
         onGo={noop}
       />,
     );
@@ -62,7 +62,7 @@ describe("экран состояния", () => {
     // «Проверено» без «чем» — то самое заблуждение, от которого уходим.
     render(
       <StateScreen
-        items={stateItems({ readiness: null, actions: null, risky: null, autostart: null })}
+        items={stateItems({ readiness: null, actions: null, risky: null, autostart: null, platform: null })}
         onGo={noop}
       />,
     );
@@ -91,5 +91,43 @@ describe("экран состояния", () => {
   it("когда проверять нечего, экран говорит это нормой, а не пустотой", () => {
     render(<StateScreen items={[]} onGo={noop} />);
     expect(screen.getByText("проверять нечего")).toBeTruthy();
+  });
+
+  it("система спрашивается у себя и стоит в состоянии (шаг 17)", () => {
+    // Без версии Windows и WebView2 поддержка — угадывание: на старом движке
+    // приложение ведёт себя иначе, и понять это можно только зная версию.
+    const unsupported = {
+      state: "unsupported" as const,
+      facts: { os: "windows", osVersion: "6.1.7601", engineMajor: 95 },
+      reason: "old-webview" as const,
+    };
+    render(
+      <StateScreen
+        items={stateItems({
+          readiness: null,
+          actions: null,
+          risky: null,
+          autostart: null,
+          platform: unsupported,
+        })}
+        onGo={noop}
+      />,
+    );
+    // Пункт назван, версии показаны фактами, состояние — провал с причиной.
+    expect(screen.getByText("Система")).toBeTruthy();
+    expect(screen.getByText(/6\.1\.7601/)).toBeTruthy();
+    expect(screen.getByText(/движок 95/)).toBeTruthy();
+    expect(screen.getAllByText("провал").length).toBeGreaterThan(0);
+  });
+
+  it("систему не спросили — «не проверено», а не «всё хорошо»", () => {
+    render(
+      <StateScreen
+        items={stateItems({ readiness: null, actions: null, risky: null, autostart: null, platform: null })}
+        onGo={noop}
+      />,
+    );
+    // Пункт есть и молчит о версиях честно: незнание не приговор, но и не успех.
+    expect(screen.getByText("Система")).toBeTruthy();
   });
 });
