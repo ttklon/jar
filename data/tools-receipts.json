@@ -1,0 +1,1521 @@
+{
+  "generated": "tools/make_receipts.py",
+  "note": "Запись руки (шаг 7). Права и необратимость выведены из поведения: глагол `registry` и параметры. `undo` и `proven` — null, пока не записаны отдельно: имя руки их не доказывает, а «да» без проверки было бы ровно тем, что запрещает шаг 5.",
+  "tools": {
+    "Создать папку": {
+      "title": "Создать папку",
+      "registry": "files|создать|папку",
+      "summary": "Создаёт папку по указанному пути вместе с недостающими родителями. Если папка уже есть — это тоже успех.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Путь",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Переместить файл или папку": {
+      "title": "Переместить файл или папку",
+      "registry": "files|переместить|файлы/папки",
+      "summary": "Переносит файл или папку на новое место. Отказывается работать, если цель уже существует: молча заменить чужой файл хуже, чем остановиться и сказать об этом.",
+      "params": [
+        {
+          "name": "from",
+          "label": "Откуда",
+          "required": true
+        },
+        {
+          "name": "to",
+          "label": "Куда",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Открыть программу": {
+      "title": "Открыть программу",
+      "registry": "apps-windows|запустить|программу",
+      "summary": "Запускает указанный .exe и подтверждает, что процесс действительно поднялся. Если файла нет или процесс сразу завершился, это провал, а не «наверное, открылось».",
+      "params": [
+        {
+          "name": "path",
+          "label": "Путь к .exe",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "apps-windows"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Что установлено": {
+      "title": "Что установлено",
+      "registry": "apps-windows|показать|установленные программы",
+      "summary": "Читает список установленных программ из реестра и версии. Только чтение: ничего не удаляет и не запускает.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "apps-windows"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Сколько занимает папка": {
+      "title": "Сколько занимает папка",
+      "registry": "files|проверить|размеры и место",
+      "summary": "Считает файлы, суммарный объём и пять самых частых расширений внутри папки.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Путь к папке",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Найти файлы по имени": {
+      "title": "Найти файлы по имени",
+      "registry": "files|найти|по имени",
+      "summary": "Ищет файлы по маске в папке и во всех вложенных, показывает до 50 совпадений.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Где искать",
+          "required": true
+        },
+        {
+          "name": "query",
+          "label": "Маска имени",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Найти дубликаты": {
+      "title": "Найти дубликаты",
+      "registry": "files|проверить|дубликаты по хэшу",
+      "summary": "Группирует файлы папки по SHA-256 и показывает группы одинаковых файлов.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Путь к папке",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Что грузит компьютер": {
+      "title": "Что грузит компьютер",
+      "registry": "processes-services|показать|топ по нагрузке",
+      "summary": "Пять процессов с наибольшим объёмом занятой памяти — и пересказ, который называет виновника: «самый тяжёлый — chrome: 812 МБ, это браузер Google Chrome (важно для работы)». Роль процесса берётся из встроенной базы служб (153 записи), поэтому рядом с именем стоит не догадка, а то, что известно. Сказано и сколько имён опознано: «опознано в базе: 4 из 5» — иначе выглядело бы, что база знает всё. Отдельно оговорено, что мерится **память, а не процессорное время**: приложение, занявшее гигабайт кэша, может при этом ничего не нагружать, и называть его «тормозом» было бы враньём с числом в руках. Пустой список — не «ничего не грузит», а «прочитать не удалось». Только чтение; потолок — 5 процессов в отчёте, 30 секунд на прогон.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "processes-services"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Убрать из автозапуска": {
+      "title": "Убрать из автозапуска",
+      "registry": "processes-services|отключить|автозапуск",
+      "summary": "Убирает программу из автозапуска двумя честными способами, смотря где она лежит. Запись в реестре (Run текущего пользователя) не удаляется, а помечается отключённой в StartupApproved — ровно так это делает Диспетчер задач, поэтому вернуть можно. Ярлык из папки «Автозагрузка» переезжает в подпапку «_Отключённый автозапуск»: файл не удаляется, а переезжает, и откат возвращает его на место. Состояние проверяется чтением обратно: сравнили байты или проверили оба пути — только это доказательство, а не слово «записалось». Ядро системы не трогается: имя, которое база знает как часть Windows (lsass, csrss), — отказ. Записи для всех пользователей (HKLM, общая папка «Автозагрузка») — тоже отказ с причиной: там нужны права администратора и точка восстановления. Если записи нет, сказано, сколько просмотрено в Run и сколько ярлыков есть; «подходит несколько» — отказ, а не выбор за человека. Что Проводник пометку действительно пропустит при входе, видно после перезагрузки, и рука этого не обещает. Потолок прогона — минута.",
+      "params": [
+        {
+          "name": "app",
+          "label": "Название в автозапуске",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "processes-services"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Отключить службу": {
+      "title": "Отключить службу",
+      "registry": "processes-services|отключить|службу",
+      "summary": "Отключает службу только вместе с точкой восстановления: Checkpoint-Computer молчит, когда защита системы выключена, сработал суточный лимит Windows или не хватает прав, поэтому факт проверяется по номеру последней точки до и после — а не по отсутствию ошибки. Точки нет — рука не меняет ничего и говорит, как включить защиту. Защита машины остаётся включённой: антивирус и брандмауэр (windefend, mpssvc, bfe, wscsvc) получают отказ — это не лишняя служба, а охрана. Ядро системы (lsass, rpcss, csrss) — тоже отказ с причиной. Состояние проверяется обратным чтением: тип запуска спрашивается у Windows после изменения. Что не удалось, то названо: если служба всё ещё работает, это сказано словами, а не спрятано за словом «отключено». Отложенный запуск (DelayedAutoStart) запоминается, и «откатить за сессию» вернёт именно его. Потолок прогона — пять минут.",
+      "params": [
+        {
+          "name": "service",
+          "label": "Имя службы",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "processes-services"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Включить службу": {
+      "title": "Включить службу",
+      "registry": "processes-services|включить|службу",
+      "summary": "Возвращает службу в строй: снимает Disabled и ставит тип запуска, который назвал человек — auto (с Windows) или manual (по требованию). Отдельная рука, а не только «откат», потому что вернуть службу может понадобиться и через неделю, когда прежнего значения уже никто не помнит: тогда человек называет желаемое сам. Служба уже включена — отказ с её текущим типом запуска, а не тихое «готово». Состояние проверяется обратным чтением. В журнал отката дело не пишется: включать обратно значит повторять его же, и «откат включения» был бы отключением — то есть тем, что человек только что передумал делать. Потолок — две минуты.",
+      "params": [
+        {
+          "name": "service",
+          "label": "Имя службы",
+          "required": true
+        },
+        {
+          "name": "start",
+          "label": "Тип запуска",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "processes-services"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Что запускается вместе с Windows": {
+      "title": "Что запускается вместе с Windows",
+      "registry": "processes-services|проанализировать|автозапуск",
+      "summary": "Перечисляет записи автозапуска — программы, скрипты и службы, которые стартуют сами. Только чтение: ничего не отключается.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "processes-services"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Свободное место на дисках": {
+      "title": "Свободное место на дисках",
+      "registry": "storage-backup|проверить|свободное место",
+      "summary": "Список дисков с занятым и свободным объёмом.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "storage-backup"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Состояние дисков (SMART)": {
+      "title": "Состояние дисков (SMART)",
+      "registry": "storage-backup|проверить|SMART диска",
+      "summary": "Модель, тип и состояние здоровья физических дисков.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "storage-backup"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Состояние батареи": {
+      "title": "Состояние батареи",
+      "registry": "system-power|проверить|батарею",
+      "summary": "Показывает заряд и состояние батареи. На настольном компьютере честно отвечает, что батареи нет, а не выдумывает проценты.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "system-power"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Что за компьютер": {
+      "title": "Что за компьютер",
+      "registry": "hardware-diag|показать|характеристики железа",
+      "summary": "Процессор, память, видеокарты, накопители и версия Windows — одним отчётом. Нужно, чтобы понимать, что эта машина потянет. Только чтение.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "hardware-diag"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Проверить подключение": {
+      "title": "Проверить подключение",
+      "registry": "network|проверить|подключение",
+      "summary": "Пингует 1.1.1.1 и проверяет DNS: отвечает ли сеть и резолвятся ли имена.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": true,
+        "reaches": [
+          "network"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Кто слушает порты": {
+      "title": "Кто слушает порты",
+      "registry": "network|проверить|открытые порты",
+      "summary": "Список портов в состоянии Listen с именами процессов.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": true,
+        "reaches": [
+          "network"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Удалить в корзину": {
+      "title": "Удалить в корзину",
+      "registry": "files|удалить|в корзину",
+      "summary": "Отправляет файл или папку в корзину: безвозвратного удаления здесь нет.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Что удалить",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Нажать кнопку по имени": {
+      "title": "Нажать кнопку по имени",
+      "registry": "apps-windows|нажать|кнопку",
+      "summary": "Находит в активном окне элемент с этим именем и нажимает его. Имя должно подходить одному элементу; если подходит нескольким — отказ со списком. После нажатия окно читается заново и сравнивается с прежним: «нажато» и «сработало» — разные вещи.",
+      "params": [
+        {
+          "name": "name",
+          "label": "Имя элемента",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "apps-windows"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Ввести текст в поле": {
+      "title": "Ввести текст в поле",
+      "registry": "apps-windows|ввести|текст",
+      "summary": "Находит в активном окне поле с этим именем, вводит текст и читает значение обратно. «Введено» — это «поле показывает то же», а не «отправили»: маска или проверка поля видны в отчёте.",
+      "params": [
+        {
+          "name": "name",
+          "label": "Имя поля",
+          "required": true
+        },
+        {
+          "name": "text",
+          "label": "Текст",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "apps-windows"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Записать текст в файл": {
+      "title": "Записать текст в файл",
+      "registry": "files|записать|текст в файл",
+      "summary": "Создаёт текстовый файл с указанным содержимым и читает его обратно. Существующий файл не трогает, пока не сказано «перезаписать»: молча затереть чужую работу — худшее из «помог».",
+      "params": [
+        {
+          "name": "path",
+          "label": "Путь",
+          "required": true
+        },
+        {
+          "name": "text",
+          "label": "Текст",
+          "required": true
+        },
+        {
+          "name": "overwrite",
+          "label": "Перезаписать",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": true,
+      "undo": null,
+      "stop_after_fact": true,
+      "proven": null,
+      "windows": []
+    },
+    "Прочитать текст из файла": {
+      "title": "Прочитать текст из файла",
+      "registry": "files|прочитать|текст файла",
+      "summary": "Читает текстовый файл и показывает его начало. Доказательство — сколько байт прочитано и из какого файла; двоичные и слишком большие файлы не читаются вовсе, и это сказано прямо.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Путь",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Заменить текст в файле": {
+      "title": "Заменить текст в файле",
+      "registry": "files|заменить|текст в файле",
+      "summary": "Находит в файле старый текст и заменяет его новым, затем читает файл обратно и сравнивает с ожидаемым. Если старое не нашлось — не делает ничего и говорит об этом; если нашлось несколько раз, просит слово «все».",
+      "params": [
+        {
+          "name": "path",
+          "label": "Путь",
+          "required": true
+        },
+        {
+          "name": "find",
+          "label": "Что найти",
+          "required": true
+        },
+        {
+          "name": "replace",
+          "label": "На что заменить",
+          "required": true
+        },
+        {
+          "name": "all",
+          "label": "Заменить все",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": true,
+      "undo": null,
+      "stop_after_fact": true,
+      "proven": null,
+      "windows": []
+    },
+    "Скачать файл по ссылке": {
+      "title": "Скачать файл по ссылке",
+      "registry": "web|скачать|файл по ссылке",
+      "summary": "Скачивает файл по ссылке и подтверждает, что на диске лежит именно файл, а не страница ошибки: качает во временное имя, проверяет размер и только потом делает файл видимым. Недокачанное удаляет.",
+      "params": [
+        {
+          "name": "url",
+          "label": "Ссылка",
+          "required": true
+        },
+        {
+          "name": "path",
+          "label": "Куда сохранить",
+          "required": true
+        },
+        {
+          "name": "overwrite",
+          "label": "Перезаписать",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": true,
+        "reaches": [
+          "web",
+          "network"
+        ]
+      },
+      "irreversible": true,
+      "undo": null,
+      "stop_after_fact": true,
+      "proven": null,
+      "windows": []
+    },
+    "Распаковать архив": {
+      "title": "Распаковать архив",
+      "registry": "files|распаковать|архив",
+      "summary": "Распаковывает zip-архив в папку и подтверждает, что внутри действительно появились файлы. В непустую папку не распаковывает: молча затереть чужие файлы хуже, чем остановиться.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Архив",
+          "required": true
+        },
+        {
+          "name": "to",
+          "label": "Куда распаковать",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Скопировать файл или папку": {
+      "title": "Скопировать файл или папку",
+      "registry": "files|скопировать|файлы/папки",
+      "summary": "Копирует файл или папку целиком и сверяет копию с источником по числу файлов и байт. В существующий путь не копирует и папку внутрь себя не копирует: и то, и другое либо затирает чужое, либо не кончается никогда.",
+      "params": [
+        {
+          "name": "from",
+          "label": "Откуда",
+          "required": true
+        },
+        {
+          "name": "to",
+          "label": "Куда",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Заархивировать в zip": {
+      "title": "Заархивировать в zip",
+      "registry": "files|сжать|в архив",
+      "summary": "Собирает файл или папку в zip-архив и проверяет, что архив не пустой. Существующий архив не перезаписывает, пустую папку не архивирует, а формат принимает только zip — rar и пароль эта рука не умеет.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Что архивировать",
+          "required": true
+        },
+        {
+          "name": "to",
+          "label": "Куда сохранить архив",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Переименовать файлы по правилу": {
+      "title": "Переименовать файлы по правилу",
+      "registry": "files|переименовать|массово по правилу",
+      "summary": "Меняет часть имени у файлов в папке: находит кусок имени и заменяет его. Вложенные папки не трогает, ничего не переименовывает, если рядом уже есть файл с таким именем или два файла получили бы одно имя. Доказательство — список папки после: старых имён нет, новые на месте.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Папка",
+          "required": true
+        },
+        {
+          "name": "find",
+          "label": "Что заменить в имени",
+          "required": true
+        },
+        {
+          "name": "replace",
+          "label": "На что заменить",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": true,
+      "undo": null,
+      "stop_after_fact": true,
+      "proven": null,
+      "windows": []
+    },
+    "Открыть сайт в браузере": {
+      "title": "Открыть сайт в браузере",
+      "registry": "web|открыть|сайт",
+      "summary": "Передаёт ссылку браузеру по умолчанию и говорит, какой обработчик её взял. Что страница загрузилась, отсюда не проверить — это видно на экране, и так и написано в отчёте. Открываются только http:// и https://: file:// и другие схемы остаются за бортом.",
+      "params": [
+        {
+          "name": "url",
+          "label": "Ссылка",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": true,
+        "reaches": [
+          "web",
+          "network"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Найти текст в файлах": {
+      "title": "Найти текст в файлах",
+      "registry": "files|найти|по содержимому",
+      "summary": "Ищет строку текста во всех файлах папки и показывает, где она встречается. Двоичные и слишком большие файлы пропускаются и считаются — обещать поиск по всему, а молча пропустить половину было бы неправдой. Потолки (файлы и строки с совпадением) названы в отчёте. «Нигде не встречается» — честный ответ, а не ошибка.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Где искать",
+          "required": true
+        },
+        {
+          "name": "query",
+          "label": "Что искать",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Открыть файл в программе": {
+      "title": "Открыть файл в программе",
+      "registry": "files|открыть|файл в программе",
+      "summary": "Передаёт файл системе: открывает его программой по умолчанию и говорит, какая программа за это отвечает. Запускаемые файлы (.exe, .bat, .lnk и подобные) не открывает — это запуск программы, у него есть своя рука и своё подтверждение. Что файл действительно открылся, отсюда не проверить: это видно на экране, и так и написано.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Файл",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Посмотреть, что внутри архива": {
+      "title": "Посмотреть, что внутри архива",
+      "registry": "files|открыть|архив без распаковки",
+      "summary": "Показывает содержимое zip-архива, ничего не распаковывая: сколько файлов, какой будет размер после распаковки и что внутри самое крупное. Отдельно ищет пути, которые нельзя распаковывать в общую папку (абсолютные и с «..») — такой архив может разложить файлы куда угодно. rar и 7z эта рука пока не читает, и говорит об этом прямо.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Архив",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Сохранить в базу знаний": {
+      "title": "Сохранить в базу знаний",
+      "registry": "learning-research|сохранить|закладку в базу знаний",
+      "summary": "Дописывает ссылку или заметку в локальную базу знаний приложения (%LOCALAPPDATA%\\ZShelper\\knowledge\\base.jsonl). Уже сохранённое не дублирует и говорит, в какой строке оно лежит. Доказательство — строка прочитана обратно и совпала, а не «запись не выдала ошибку». База локальная: никуда не отправляется.",
+      "params": [
+        {
+          "name": "text",
+          "label": "Что сохранить",
+          "required": true
+        },
+        {
+          "name": "tag",
+          "label": "Метка",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "learning-research"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Сравнить две папки": {
+      "title": "Сравнить две папки",
+      "registry": "files|сравнить|две папки",
+      "summary": "Показывает, что изменилось между двумя папками: совпало, отличается по размеру, есть только слева, есть только справа. Сравнение идёт по имени и размеру файла, а не по содержимому: одинаковый размер при разном содержимом эта рука не различит, и об этом сказано. Потолки названы в отчёте.",
+      "params": [
+        {
+          "name": "from",
+          "label": "Первая папка",
+          "required": true
+        },
+        {
+          "name": "to",
+          "label": "Вторая папка",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Замерить задержку до узла": {
+      "title": "Замерить задержку до узла",
+      "registry": "network|замерить|задержку до узла",
+      "summary": "Пингует узел четыре раза и говорит, сколько ответов пришло, какая задержка в среднем, минимум и максимум. Никаких настроек сети не меняет. Если узел не ответил ни разу — это отказ с причиной, а не «пинг прошёл успешно».",
+      "params": [
+        {
+          "name": "host",
+          "label": "Узел",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": true,
+        "reaches": [
+          "network"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Объяснить процесс или службу": {
+      "title": "Объяснить процесс или службу",
+      "registry": "processes-services|объяснить|службу/процесс",
+      "summary": "Объясняет службу или процесс: сначала факты с этой машины (путь файла, подпись, память, состояние), потом пояснение из встроенной базы — 153 записей — что это, критичность и можно ли отключать. Отключаемость называется вместе с причиной: «только с оговоркой — без него не печатает принтер» честнее, чем «можно» без последствий. Пометка «нельзя» стоит там, где остановка валит систему или оставляет машину без защиты, и это тоже сказано словами. Если имени в базе нет, так и написано — вместе с числом записей в ней, — а факты с машины остаются: «нет в базе» не значит «такого не бывает». Ищутся и процесс, и служба: «что это за wuauserv» — это служба, и ответ «не найдено» был бы неправдой. Только чтение: ничего не останавливает и не выключает.",
+      "params": [
+        {
+          "name": "name",
+          "label": "Имя процесса или службы",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "processes-services"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Проверить температуры": {
+      "title": "Проверить температуры",
+      "registry": "hardware-diag|проверить|температуры",
+      "summary": "Спрашивает у системы датчики температуры (зоны ACPI и диски). Многие машины не сообщают эти значения без сторонних драйверов — тогда рука честно говорит «машина не сообщает температуру», а не показывает ноль градусов. Ничего не устанавливает и не меняет.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "hardware-diag"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Найти подозрительные процессы": {
+      "title": "Найти подозрительные процессы",
+      "registry": "processes-services|найти|подозрительный процесс",
+      "summary": "Смотрит на запущенные процессы и называет те, у которых есть повод присмотреться: файл лежит во временной папке или в «Загрузках», либо подпись файла не в порядке. Это факты, а не приговор: «подозрительный» здесь значит «есть за что зацепиться», и рядом с каждым процессом сказано, что именно. Если ничего такого нет, рука говорит «ничего явно странного не видно» и не обещает, что всё безопасно.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "processes-services"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Проверить здоровье диска": {
+      "title": "Проверить здоровье диска",
+      "registry": "hardware-diag|проверить|здоровье диска",
+      "summary": "Спрашивает у накопителей состояние, износ и наработку в часах. Значения берутся у самих дисков: если диск их не отдаёт, так и написано — «не сообщает», а не ноль. Ничего не устанавливает и не меняет; прогноз «когда умрёт» эта рука не делает и не притворяется, что делает.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "hardware-diag"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Прогнать тесты проекта": {
+      "title": "Прогнать тесты проекта",
+      "registry": "dev-code|запустить|тесты",
+      "summary": "Смотрит, чем в этой папке запускаются тесты (package.json → npm test, Cargo.toml → cargo test, pyproject.toml/pytest.ini/setup.py → python -m pytest, go.mod → go test), запускает и говорит, чем закончилось: инструмент, код возврата, сколько ждали и последние строки вывода. Упавшие тесты — результат прогона, а не сбой руки, но шаг помечается неудачным: иначе следующие шаги плана пошли бы по красному прогону. Признаков проекта нет — отказ с перечислением того, что искали; больше пяти с половиной минут не ждёт и говорит об этом прямо. Ничего не устанавливает.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Папка проекта",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "dev-code"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Найти в коде": {
+      "title": "Найти в коде",
+      "registry": "dev-code|найти|в коде",
+      "summary": "Ищет слово или строку в файлах исходников: обходит папку проекта, пропускает node_modules, .git, target, dist, build, bin, obj, vendor и .next, смотрит только файлы кода и говорит, где нашлось — файл, строка, сам текст. Слово берётся буквально (SimpleMatch), поэтому точки, звёздочки и скобки не превращаются в шаблон. Ничего не нашлось — это ответ, а не сбой: в отчёте сказано, сколько файлов просмотрено. Потолки названы: до 20 тысяч файлов, файлы меньше 2 МБ, показываются первые 20 находок.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Папка проекта",
+          "required": true
+        },
+        {
+          "name": "text",
+          "label": "Что искать",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "dev-code"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Сжать видео": {
+      "title": "Сжать видео",
+      "registry": "video|сжать|размер",
+      "summary": "Сжимает видео через ffmpeg: по умолчанию CRF 23 — качество почти как в исходнике, файл заметно легче; с целевым размером (в мегабайтах) добавляется остановка по размеру. Исходник не трогается: рядом появляется «имя (сжатое).mp4», а если такой файл уже есть — отказ, а не молчаливая перезапись. В конце сравниваются байты: «было X МБ, стало Y МБ, легче на Z%». Не стало легче — это сказано прямо, а не выдано за успех. ffmpeg нет — рука не ставит его сама, а говорит, чем поставить и зачем он нужен. Качество по кадрам (SSIM) не проверяется — это отдельная рука.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Видеофайл",
+          "required": true
+        },
+        {
+          "name": "target",
+          "label": "Целевой размер, МБ",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "video"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Передать файл на сервер": {
+      "title": "Передать файл на сервер",
+      "registry": "virtualization-remote|передать|файл на сервер",
+      "summary": "Отправляет файл на сервер по scp — тем самым, что уже встроен в Windows 10/11 («Клиент OpenSSH»). Вход только по ключу и без вопросов в консоли (BatchMode): пароль рука не спрашивает и не ждёт, иначе шаг повис бы навсегда. После отправки размер сверяется на той стороне по ssh; не сверилось — так и сказано, вместо «наверное дошло». Знакомый ли хост, рука решает сама: незнакомый ключ она не принимает молча, это остаётся человеку. scp не установлен — подсказка, где включить, и остановка: приложение ничего не ставит само.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Файл",
+          "required": true
+        },
+        {
+          "name": "host",
+          "label": "Сервер",
+          "required": true
+        },
+        {
+          "name": "remote",
+          "label": "Папка на сервере",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": true,
+        "reaches": [
+          "virtualization-remote",
+          "network"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Найти причину тормозов": {
+      "title": "Найти причину тормозов",
+      "registry": "monitoring-triage|найти|причину тормозов",
+      "summary": "Отвечает на вопрос «почему всё лагает» числами, а не догадками: собирает процессы по процессору и по памяти, загрузку процессора, память, службы (сколько работают и сколько автоматических стоят), автозапуск, свободное место на системном диске, поднятые адаптеры и ошибки в журнале системы за окно в N часов — и называет вероятную причину, сверяя эти числа между собой. Только чтение: ничего не останавливает, не выключает и не удаляет — иначе это было бы действие, а действию нужны план и откат. Всё, что прочитать не удалось, названо словами: «журнал не открылся» и «ошибок нет» — разные утверждения. Потолки названы числом: окно журнала до 168 часов, процессов в списке до 10, событий читается не больше 200. Вердикт — это гипотеза с числами, а не диагноз: рука говорит, на что смотреть, а решает человек.",
+      "params": [
+        {
+          "name": "hours",
+          "label": "Окно журнала, часов",
+          "required": false
+        },
+        {
+          "name": "top",
+          "label": "Сколько процессов",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "monitoring-triage"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Открыть проект в DAW": {
+      "title": "Открыть проект в DAW",
+      "registry": "music-production|открыть|проект в DAW",
+      "summary": "Находит установленную цифровую студию (FL Studio, REAPER, Ableton Live, Cubase, Nuendo, Studio One, Bitwig, Reason, Renoise, LMMS) и открывает её — с проектом, если он назван. Поиск идёт по App Paths и записям установки, обе ветки реестра и обе разрядности; в причине сказано, сколько известных DAW проверено. Проект проверяется до запуска: открыть пустоту вместо проекта — худший вид «успеха». После запуска проверяется процесс, а не код возврата Start-Process: «запуск удался», а процесса нет — так бывает, и отчёт это не скрывает. Ничего не устанавливает, не сохраняет и не перезаписывает: открыть — не значит изменить проект.",
+      "params": [
+        {
+          "name": "program",
+          "label": "Программа",
+          "required": false
+        },
+        {
+          "name": "project",
+          "label": "Проект",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "music-production"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Найти файл из чата": {
+      "title": "Найти файл из чата",
+      "registry": "chat-social|найти|файл в чате",
+      "summary": "Ищет файл, который присылали в мессенджере, по папкам самих мессенджеров: Telegram, Discord, Signal, WhatsApp (включая версию из Store), Skype, Viber, VK. Смотрит только эти папки — ни весь диск, ни домашняя папка целиком не обходятся, и в причине сказано, сколько мест проверено и сколько из них вообще есть на диске. Искать можно по части имени, по тому, сколько дней назад файл приходил, или по обоим признакам сразу; без признака отказ: «покажи всё» — это не вопрос. «Ничего не нашлось» — ответ, а не сбой: рядом стоит число просмотренных файлов. Потолки названы числом: 20 000 файлов и 60 секунд на проход, 20 результатов; упёрлись в потолок — так и сказано. Только чтение: имена, размеры и время.",
+      "params": [
+        {
+          "name": "name",
+          "label": "Часть имени",
+          "required": false
+        },
+        {
+          "name": "days",
+          "label": "Дней назад",
+          "required": false
+        },
+        {
+          "name": "chat",
+          "label": "Мессенджер",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "chat-social"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Найти двойников": {
+      "title": "Найти двойников",
+      "registry": "files|найти|двойники",
+      "summary": "Ищет одинаковые файлы по содержимому и считает потерянное место. Три ступени, чтобы не читать зря: размер → первые 64 КБ → полный хэш; файлы с уникальным размером не читаются вовсе. Ничего не удаляет и не двигает — это отчёт, а не уборка: убрать двойников отдельное дело с подтверждением, и здесь его нет. Хэш SHA-256, а не blake3: он встроен в Windows, ставить ничего не надо, и на одинаковость выбор алгоритма не влияет. Фото сверяются как файлы, а не по картинке: «похожие, но не одинаковые» снимки эта рука не находит и не делает вид, что находит. «Двойников не нашлось» — ответ с числом просмотренных, а не сбой. Потолки названы числом: 20 000 файлов и 300 секунд на проход, в отчёт попадают 5 групп по 3 файла.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Папка",
+          "required": true
+        },
+        {
+          "name": "min_kb",
+          "label": "Мельче, КБ",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Убрать двойников в карантин": {
+      "title": "Убрать двойников в карантин",
+      "registry": "files|убрать|двойников в карантин",
+      "summary": "Оставляет в каждой группе одинаковых файлов один — первый по алфавиту пути — а остальные переносит в папку карантина. Ничего не удаляется: файлы переезжают, и каждый переезд пишется в журнал отката, поэтому «откатить за сессию» вернёт их на место. Карантин по умолчанию — папка «_Карантин» внутри искомой, и его содержимое из поиска исключается: иначе прошлый карантин попадал бы в новые группы. Между дисками рука не переносит: копирование с удалением исходника это уже удаление, а не карантин, и такой случай назван отказом. Потолок — 200 файлов за один проход, чтобы одна команда не перетащила пол-диска. Имена в карантине получают короткий отпечаток пути, поэтому файлы с одинаковыми именами из разных папок не сталкиваются.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Папка",
+          "required": true
+        },
+        {
+          "name": "quarantine",
+          "label": "Карантин",
+          "required": false
+        },
+        {
+          "name": "min_kb",
+          "label": "Мельче, КБ",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "files"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Замер до и после": {
+      "title": "Замер до и после",
+      "registry": "processes-services|замерить|изменение нагрузки",
+      "summary": "Сравнивает картину машины с прошлым замером и называет разницу по каждому числу: нагрузка процессора, занятая память, число процессов, работающие службы, ошибки журнала за сутки, свободное место. Первый запуск только запоминает базис и говорит это прямо: обещать «стало легче» без предыдущего замера легко и бесполезно. Второй запуск показывает «было → стало (+/−)» и обновляет базис, поэтому замер можно повторять. Неизменное число тоже названо («столько же»), а не пропущено, и «не прочиталось» не превращается в ноль. Пояснение человека сохраняется вместе с базисом: через день видно, что было между замерами. Сам замер ничего не меняет — он только читает.",
+      "params": [
+        {
+          "name": "note",
+          "label": "Что было между замерами",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "processes-services"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Склеить ролики": {
+      "title": "Склеить ролики",
+      "registry": "video|склеить|ролики",
+      "summary": "Соединяет несколько видеофайлов в один и проверяет, что длительность сошлась: сумма частей по ffprobe против длительности результата, расхождение до секунды — контейнеры округляют, больше секунды значит потерянные кадры, и тогда шаг считается неудачным. Однородность проверяется до работы: ролики разных форматов без перекодирования не склеить, а перекодировать без спроса — значит молча испортить качество, поэтому это отказ с оба названными форматами. Перезапись запрещена: файл с таким именем уже есть — отказ. Потолки числом: не больше 20 роликов за раз и 20 минут на прогон. Собранный файл попадает в журнал отката: «откатить за сессию» уберёт его в корзину, исходники останутся целы. Если у одного из роликов нет звука, склеивается только видео, и это сказано.",
+      "params": [
+        {
+          "name": "files",
+          "label": "Ролики",
+          "required": true
+        },
+        {
+          "name": "output",
+          "label": "Куда",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "video"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Извлечь кадр из видео": {
+      "title": "Извлечь кадр из видео",
+      "registry": "video|извлечь|кадр",
+      "summary": "Достаёт кадр из видео на заданном времени и сохраняет его картинкой. Время понимается так, как его пишут люди: «3:20», «1:02:03» или секунды. Время сверяется с длительностью до работы: кадр за концом видео — отказ с обоими числами, а не пустой файл. После работы проверяются файл, его размер и размеры кадра по ffprobe, а содержимое кадра рука не оценивает: «там был нужный момент» — это взгляд человека, а не байты, и рука это говорит. Перезапись запрещена, имя по умолчанию — «<видео> — кадр 3-20.jpg» рядом с исходником. Кадр попадает в журнал отката: «откатить за сессию» уберёт его в корзину.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Видео",
+          "required": true
+        },
+        {
+          "name": "at",
+          "label": "Время",
+          "required": true
+        },
+        {
+          "name": "output",
+          "label": "Куда",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "video"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Перекодировать видео": {
+      "title": "Перекодировать видео",
+      "registry": "video|конвертировать|формат/кодек",
+      "summary": "Перекодирует видео в другой кодек: h265 — меньше вес, h264 — совместимее. Тот же кодек — отказ: перекодирование h265 в h265 портит качество без пользы, и рука говорит это прямо. Кодек на выходе проверяется по ffprobe, а не предполагается: просили h265, а на выходе h264 — шаг считается неудачным. Длительность сверяется с исходником: расхождение больше секунды значит потерянные кадры. «Легче не стало» говорится вслух — перекодирование может и потяжелеть. Потолки и параметры названы числом: 30 минут на прогон, CRF 28 для h265 и 23 для h264. Перезапись запрещена. Результат пишется в журнал отката: «откатить за сессию» уберёт его в корзину, исходник останется.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Видео",
+          "required": true
+        },
+        {
+          "name": "codec",
+          "label": "Кодек",
+          "required": false
+        },
+        {
+          "name": "output",
+          "label": "Куда",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "video"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Замерить качество сжатия": {
+      "title": "Замерить качество сжатия",
+      "registry": "video|замерить|качество сжатия (SSIM)",
+      "summary": "Сравнивает исходник и сжатый файл по SSIM и называет число вместе с тем, что оно значит: 0.98 и выше — визуально без потерь, 0.95–0.98 — потери заметны на градиентах, 0.90–0.95 — артефакты, ниже 0.90 — сильная деградация. Разные разрешения — отказ: SSIM на разных размерах сравнивает не то, и выдавать такое число за качество было бы обманом. Метрику называет ffmpeg, а не мы: не назвал — так и сказано. Рядом печатаются размеры файлов и их длительности: SSIM без «сколько сэкономили» отвечает только на половину вопроса. Рука только читает — ничего не перекодирует и не удаляет. Пороги названы числом, потолок прогона — 30 минут.",
+      "params": [
+        {
+          "name": "original",
+          "label": "Исходник",
+          "required": true
+        },
+        {
+          "name": "compressed",
+          "label": "Сжатый",
+          "required": true
+        }
+      ],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "video"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Добавить субтитры": {
+      "title": "Добавить субтитры",
+      "registry": "video|добавить|субтитры",
+      "summary": "Кладёт субтитры в видео отдельной дорожкой, не перекодируя картинку: видео и звук копируются байтами, поэтому качество ровно то же, а не «почти без потерь». Дорожка проверяется по ffprobe, а не предполагается: если в результате не стало больше дорожек субтитров, файл не выдаётся за результат. Кодировка называется вслух: ffmpeg читает UTF-8, а UTF-16 он молча превратит в мусор, поэтому UTF-16 — отказ с просьбой пересохранить. Пустой файл — отказ с числом: «реплик: 0» значит, что вшивать нечего. В конце названы число реплик, сколько дорожек было и стало, кодек дорожки, сверка длительности и вес файла. Честная оговорка: субтитры надо включить в плеере, а кто этого не умеет — увидит видео без них. Потолок прогона — 10 минут, перезапись запрещена, результат пишется в журнал отката.",
+      "params": [
+        {
+          "name": "path",
+          "label": "Видео",
+          "required": true
+        },
+        {
+          "name": "subtitles",
+          "label": "Субтитры",
+          "required": true
+        },
+        {
+          "name": "output",
+          "label": "Куда",
+          "required": false
+        }
+      ],
+      "permissions": {
+        "writes": true,
+        "reads": false,
+        "network": false,
+        "reaches": [
+          "video"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    },
+    "Приложения Store": {
+      "title": "Приложения Store",
+      "registry": "apps-windows|показать|пакеты Store",
+      "summary": "Показывает до 60 Appx-пакетов текущего пользователя: имя, издателя, версию и признаки framework/ресурсного пакета; отдельно сообщает общее количество и ограничение списка. Это инвентаризация, не список ненужных программ: решение зависит от того, чем вы пользуетесь. Ничего не удаляет. Не включает пакеты других пользователей и подготовленные пакеты для новых учётных записей.",
+      "params": [],
+      "permissions": {
+        "writes": false,
+        "reads": true,
+        "network": false,
+        "reaches": [
+          "apps-windows"
+        ]
+      },
+      "irreversible": false,
+      "undo": null,
+      "stop_after_fact": false,
+      "proven": null,
+      "windows": []
+    }
+  }
+}

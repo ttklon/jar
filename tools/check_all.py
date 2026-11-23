@@ -69,6 +69,10 @@ STEPS: list[tuple[str, list[str], str]] = [
     # «Скачивания только явные» ломается второй дверью: `reqwest` в зависимостях
     # или `fetch` в интерфейсе — и приложение уходит в сеть само.
     ("one door", ["tools/one_door.py", "--quiet"], "network only in download.rs, and only on a button"),
+    # Блокер №2 аудита: без записи «умеет» — это реклама. Записи рук выводят
+    # права и необратимость из поведения, а отмену и проверку оставляют
+    # `null` — дырой, которую видно, а не «да» без оснований.
+    ("tool receipts", ["tools/make_receipts.py", "--check", "--quiet"], "every hand has a receipt"),
     # «Готово» без «где проверено» один раз уже ввело в заблуждение. Проверка
     # идёт по словарю и различает подпись к сделанному действию (результат виден
     # рядом) и утверждение о мире (обязано называть место). Иначе через месяц
@@ -95,6 +99,8 @@ GENERATED = [
     "docs/ECOSYSTEM.md",
     "docs/DASHBOARD.md",
     "docs/INDEX.md",
+    "docs/TOOL-RECEIPTS.md",
+    "data/tools-receipts.json",
     "AGENTS.md",
 ]
 
