@@ -115,6 +115,7 @@ import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import { differ as intentDiffer, missing as intentMissing, parse as parseIntent, say as intentWords } from "../lib/intent";
 import { need as askNeed, question as askQuestion, rule as askRule, type Plan as AskPlan } from "../lib/askWhen";
+import { plan as deedsPlan, says as deedsSays, split as splitDeeds, type Deed } from "../lib/twoDeeds";
 import {
   breaks as removeBreaks,
   done as removeDone,
@@ -1597,6 +1598,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // действия: человек должен поправить, если разбор ошибся.
   const [heardIntent, setHeardIntent] = useState<string | null>(null);
   const [saidIntent, setSaidIntent] = useState<string | null>(null);
+  const [deeds, setDeeds] = useState<Deed[]>([]);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -1797,6 +1799,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       // совпадение слов. «Найди большие файлы» и «найди файл по имени» —
       // разные дела, и это видно до действия.
       const parsed = parseIntent(heard);
+      // Шаг 83: два дела в одной фразе — разложить и сделать по очереди.
+      // «Найди и отправь» сегодня теряет вторую половину молча.
+      setDeeds(splitDeeds(heard));
       setHeardIntent(heard);
       setSaidIntent(
         intentMissing(parsed).length > 0
@@ -2760,6 +2765,22 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </>
             );
           })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 83: два дела из одной фразы — списком, по очереди, в порядке
+          человека. Молчаливое деление хуже: непонятно, почему делается ещё. */}
+      {deedsSays(deeds) !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Дел несколько</Text>
+          <Text className={styles.note} role="status" aria-live="polite">
+            {deedsSays(deeds)}
+          </Text>
+          {deedsPlan(deeds).map((line) => (
+            <Text key={line} className={styles.note}>
+              {line}
+            </Text>
+          ))}
         </div>
       ) : null}
 
