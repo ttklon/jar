@@ -118,6 +118,7 @@ import { need as askNeed, question as askQuestion, rule as askRule, type Plan as
 import { plan as deedsPlan, says as deedsSays, split as splitDeeds, type Deed } from "../lib/twoDeeds";
 import { canDo as canDoNegated, parse as parseNegation, say as sayNegation, type Negation } from "../lib/negation";
 import { check as checkFit, say as sayFit, stop as fitStops } from "../lib/doesItFit";
+import { worst as parseWorst, type Outcome as ParseOutcome, type Row as ParseRow } from "../lib/parseLog";
 import {
   find as findYesterday,
   nothing as nothingYesterday,
@@ -1860,15 +1861,18 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       // Шаг 60: журнал. Пока «что понято» и «что сделано» ещё неизвестны —
       // допишем их, когда разбор закончится; главное, что услышанное уже
       // записано: если разбор упадёт, останется хотя бы это.
+      // Шаг 88: строка пишется **сразу** и остаётся даже при неудаче; итог
+      // («сделано» / «отказ: причина») дописывается тем же `at`. Шаг 60.
+      const loggedAt = Date.now();
       setPhrases((current) =>
         logPush(current, {
-          at: Date.now(),
+          at: loggedAt,
           heard,
           understood: null,
           did: "разбираю…",
           stage: logStage(heard, null, "разбираю…"),
         }),
-      );
+      )
       // Шаг 58: разложим фразу на слова — человек увидит, **где** сомневались,
       // и поправит одно слово, а не всю фразу. Уверенность по словам, если
       // движок её дал; иначе считаем фразу уверенной (не выдумываем сомнение).
@@ -3147,6 +3151,26 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           <>
             <Text className={styles.note}>
               {phrases.length} фраз, из них с расхождением: {brokenLines(phrases).length}
+              {/* Шаг 88: журнал нужен, чтобы было **видно, что чинить**. Группа по
+                  причине, а не «не понимает вообще»: это разные дефекты. */}
+              {parseWorst({
+                rows: phrases.map((line) => ({
+                  at: line.at,
+                  heard: line.heard,
+                  understood: line.understood,
+                  outcome: (line.stage === "done"
+                    ? { kind: "done", did: line.did }
+                    : line.understood === null
+                      ? { kind: "not-understood" }
+                      : { kind: "refused", cause: line.did }) as ParseOutcome,
+                })) satisfies ParseRow[],
+                dropped: 0,
+              }).map((group) => (
+                <span key={group.reason}>
+                  {" "}
+                  · {group.reason}: {group.times}
+                </span>
+              ))}
             </Text>
             <div className={styles.prompt} role="log" aria-label="Журнал фраз">
               {phrases.map((line) => (
