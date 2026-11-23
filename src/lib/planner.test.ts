@@ -56,6 +56,20 @@ describe("поиск по реестру", () => {
     expect(money?.tool).toBeNull();
   });
 
+  it("формы одного глагола — одно слово (шаг 100)", () => {
+    // Настоящий дефект: «отправь» и «отправить» расходятся на седьмой букве, и
+    // сравнение по началу слова не ловило их вовсе.
+    const viaInfinitive = find("отправить заявку").map((item) => item.key);
+    const viaImperative = find("отправь заявку").map((item) => item.key);
+    expect(viaImperative.length).toBeGreaterThan(0);
+    expect(viaInfinitive.length).toBeGreaterThan(0);
+  });
+
+  it("«настроить» и «настрой» — тоже одно", () => {
+    expect(find("настрой ярлык").length).toBeGreaterThan(0);
+    expect(find("настроить ярлык").length).toBeGreaterThan(0);
+  });
+
   it("бессмысленный запрос ничего не находит", () => {
     expect(find("   ")).toEqual([]);
     expect(find("квазар")).toEqual([]);

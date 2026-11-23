@@ -41,12 +41,45 @@ function fieldScore(query: string[], text: string, weight: number): number {
   return hits * weight;
 }
 
+/** То же, но по основе слова — для глаголов (шаг 100). */
+function stemFieldScore(query: string[], text: string, weight: number): number {
+  const words = terms(text);
+  const hits = query.filter((needle) => words.some((word) => stemMatches(needle, word))).length;
+  return hits * weight;
+}
+
 /** Счёт строки реестра. Ноль — «не про это». */
+/**
+ * Совпадают ли слова по **основе** в три буквы.
+ *
+ * Шаг 100 нашёл настоящий дефект: сравнение по началу слова не ловит **формы
+ * одного глагола**, потому что русский глагол расходится после шестой буквы —
+ * «отправь» и «отправить», «настрой» и «настроить». Из 200 живых фраз 29 не
+ * находили ничего, и «отправь заявку» было среди них.
+ *
+ * Четыре буквы — не «похоже», а совпадение основы: `отпр` есть и в «отправь», и в
+ * «отправить», а `ква` (у «квазара» и «квантовать») — уже разные слова.
+ * Короче четырёх совпадение перестаёт что-то значить.
+ */
+function stemMatches(query: string, term: string): boolean {
+  if (query.startsWith(term) || term.startsWith(query)) return true;
+  let same = 0;
+  for (let index = 0; index < Math.min(query.length, term.length); index += 1) {
+    if (query[index] !== term[index]) break;
+    same += 1;
+  }
+  // Четыре буквы, а не три: «квазар» и «квантовать» дают общие три ("ква") и
+  // уже не одно слово, а «отпр» у «отправь» и «отправить» — то же самое слово.
+  return same >= 4;
+}
+
 export function score(query: string[], action: Action): number {
   if (query.length === 0) return 0;
 
   const object = fieldScore(query, action.object, WEIGHT_OBJECT);
-  const verb = fieldScore(query, action.verb, WEIGHT_VERB);
+  // Глагол — по основе: формы одного глагола должны считаться совпадением,
+  // иначе живые фразы («отправь заявку») не находят ничего вовсе.
+  const verb = stemFieldScore(query, action.verb, WEIGHT_VERB);
   const example = fieldScore(query, action.example, WEIGHT_EXAMPLE);
   const domain = fieldScore(query, action.domain, WEIGHT_DOMAIN);
 
