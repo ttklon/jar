@@ -118,6 +118,13 @@ import { need as askNeed, question as askQuestion, rule as askRule, type Plan as
 import { plan as deedsPlan, says as deedsSays, split as splitDeeds, type Deed } from "../lib/twoDeeds";
 import { canDo as canDoNegated, parse as parseNegation, say as sayNegation, type Negation } from "../lib/negation";
 import {
+  find as findYesterday,
+  nothing as nothingYesterday,
+  plan as planYesterday,
+  sayAge as sayYesterdayAge,
+  when as whenYesterday,
+} from "../lib/likeYesterday";
+import {
   breaks as removeBreaks,
   done as removeDone,
   enoughFor as removeEnough,
@@ -1602,6 +1609,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [deeds, setDeeds] = useState<Deed[]>([]);
   // Шаг 84: отрицание — часть намерения: «не удаляй» не исполняется как «удали».
   const [negation, setNegation] = useState<Negation | null>(null);
+  // Шаг 85: «как вчера» — из настоящего журнала фраз, а не из догадки.
+  const [repeatSay, setRepeatSay] = useState<string[] | null>(null);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -2773,6 +2782,45 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           })()}
         </div>
       ) : null}
+
+      {/* Шаг 85: «сделай как вчера» — память это не только факты, но и способы.
+          Хранится **сделанное**, и оно показано до повтора, а не угадано. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Повторить сделанное</Text>
+        <Button
+          appearance="subtle"
+          onClick={() => {
+            const ask = whenYesterday("как вчера") ?? "yesterday";
+            const todayStart = new Date().setHours(0, 0, 0, 0);
+            const history = phrases.map((line) => ({
+              dayStart: new Date(line.at).setHours(0, 0, 0, 0),
+              steps: line.did ? [line.did] : [],
+              params: {},
+              said: line.heard,
+            }));
+            const found = findYesterday(history, ask, todayStart);
+            const age = sayYesterdayAge(found, Date.now());
+            setRepeatSay(
+              found.done === null
+                ? [found.candidates > 0 ? found.why : nothingYesterday(ask)]
+                : [...planYesterday(found), ...(age !== null ? [age] : [])],
+            );
+          }}
+        >
+          Сделать как вчера
+        </Button>
+        {repeatSay !== null ? (
+          repeatSay.map((line) => (
+            <Text key={line} className={styles.note} role="status" aria-live="polite">
+              {line}
+            </Text>
+          ))
+        ) : (
+          <Text className={styles.note}>
+            хранится сделанное, а не сказанное: нечего повторять — скажу прямо, не сделаю похожее
+          </Text>
+        )}
+      </div>
 
       {/* Шаг 84: отрицание разобрано до исполнения. Самая дорогая ошибка —
           полярность: «не удаляй» и «удали» отличаются одним словом. */}
