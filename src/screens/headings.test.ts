@@ -33,7 +33,9 @@ function screenFiles(): string[] {
 describe("заголовки экранов", () => {
   it("у каждого экрана главный заголовок первого уровня", () => {
     // Экраны, которые не самостоятельные: рисуются внутри другого экрана.
-    const embedded = new Set(["DataPlaces.tsx", "SelfCheck.tsx", "Undo.tsx"]);
+    // `StateRoute.tsx` — обёртка: спрашивает данные и рисует `State.tsx`, у которого
+    // заголовок есть. Заголовок в обёртке был бы вторым на том же экране.
+    const embedded = new Set(["DataPlaces.tsx", "SelfCheck.tsx", "Undo.tsx", "StateRoute.tsx"]);
     const missing: string[] = [];
     for (const file of screenFiles()) {
       const name = file.split("/").pop() ?? "";
@@ -60,7 +62,9 @@ describe("заголовки экранов", () => {
     }
     // Ровно один `h1` на самостоятельном экране: два главных заголовка — та же
     // поломка структуры, только с другой стороны.
-    const embedded = new Set(["DataPlaces.tsx", "SelfCheck.tsx", "Undo.tsx"]);
+    // `StateRoute.tsx` — обёртка: спрашивает данные и рисует `State.tsx`, у которого
+    // заголовок есть. Заголовок в обёртке был бы вторым на том же экране.
+    const embedded = new Set(["DataPlaces.tsx", "SelfCheck.tsx", "Undo.tsx", "StateRoute.tsx"]);
     const doubled = [...levels.entries()]
       .filter(([name, count]) => !embedded.has(name) && count.h1 > 1)
       .map(([name]) => name);

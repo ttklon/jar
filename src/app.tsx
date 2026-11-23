@@ -26,6 +26,7 @@ import {
   MicRegular,
   SearchRegular,
   SettingsRegular,
+  InfoRegular,
 } from "@fluentui/react-icons";
 import { afterWake, isTauri, registrySnapshot } from "./ipc";
 import { watchWake } from "./lib/wakeWatch";
@@ -42,6 +43,9 @@ const Hands = lazy(() => import("./screens/Hands").then((m) => ({ default: m.Han
 const Flows = lazy(() => import("./screens/Flows").then((m) => ({ default: m.Flows })));
 const Ask = lazy(() => import("./screens/Ask").then((m) => ({ default: m.Ask })));
 const Models = lazy(() => import("./screens/Models").then((m) => ({ default: m.Models })));
+const StateRoute = lazy(() =>
+  import("./screens/StateRoute").then((m) => ({ default: m.StateRoute })),
+);
 const Journal = lazy(() => import("./screens/Journal").then((m) => ({ default: m.Journal })));
 const Apps = lazy(() => import("./screens/Apps").then((m) => ({ default: m.Apps })));
 const Settings = lazy(() => import("./screens/Settings").then((m) => ({ default: m.Settings })));
@@ -73,7 +77,8 @@ type Screen =
   | "apps"
   | "models"
   | "journal"
-  | "settings";
+  | "settings"
+  | "state";
 
 const useStyles = makeStyles({
   shell: {
@@ -191,6 +196,9 @@ const useStyles = makeStyles({
 const NAV: { id: Screen; label: string; icon: React.ReactElement; keywords: readonly string[] }[] = [
   { id: "voice", label: voice.nav, icon: <MicRegular />, keywords: ["голос", "микрофон", "voice", "сказать"] },
   { id: "overview", label: t.navOverview, icon: <HomeRegular />, keywords: ["обзор", "сводка", "overview"] },
+  // «Состояние» — рядом с «Обзором»: оба отвечают на вопрос «как дела», но
+  // обзор — про данные, а состояние — про то, что работает на этой машине.
+  { id: "state", label: "Состояние", icon: <InfoRegular />, keywords: ["состояние", "работает", "проверено", "state", "status"] },
   { id: "catalog", label: t.navCatalog, icon: <AppsListDetailRegular />, keywords: ["каталог", "действия", "catalog"] },
   { id: "ask", label: ask.nav, icon: <SearchRegular />, keywords: ["спросить", "план", "ask", "поиск"] },
   { id: "hands", label: hands.nav, icon: <HandRightRegular />, keywords: ["руки", "инструменты", "hands", "tools"] },
@@ -583,6 +591,8 @@ export function App() {
             >
               {screen === "overview" ? (
                 <Overview snapshot={snapshot} />
+              ) : screen === "state" ? (
+                <StateRoute onGo={(next) => setScreen(next as Screen)} />
               ) : screen === "catalog" ? (
                 <Catalog snapshot={snapshot} />
               ) : screen === "ask" ? (
