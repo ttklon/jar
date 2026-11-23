@@ -43,6 +43,11 @@ export default defineConfig({
     },
   },
   webServer: {
+    // Готовность сервера определяется по `voice.html`, а `entry.html` прогревается
+    // в самом тесте (`warmup`): Vite назначает зависимости при первом запросе и
+    // **перезагружает** страницу, когда находит новую. Если эта перезагрузка
+    // придёт посреди теста, Playwright будет вечно ждать «стабильный» элемент,
+    // который каждый раз пересоздаётся — «element was detached from the DOM».
     command: "npm run dev -- --host 0.0.0.0",
     url: "http://127.0.0.1:5173/e2e/voice.html",
     reuseExistingServer: false,

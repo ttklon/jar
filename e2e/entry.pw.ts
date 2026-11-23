@@ -26,17 +26,39 @@ async function collectErrors(page: Page): Promise<string[]> {
   return errors;
 }
 
+test.beforeEach(async ({ page }) => {
+  // Ничего наружу. Своё — только по петле; `ws:` не трогаем: через него Vite
+  // держит HMR, и разрыв сокета превращается в перезагрузку страницы — именно
+  // это и выглядело как «element was detached from the DOM, retrying» вечно.
+  await page.route("**/*", (route) => {
+    const url = new URL(route.request().url());
+    return url.hostname === "127.0.0.1" || url.protocol === "ws:" || url.protocol === "wss:"
+      ? route.continue()
+      : route.abort("blockedbyclient");
+  });
+});
+
+/**
+ * Открыть страницу один раз без проверок, чтобы Vite не перезагрузил её потом.
+ *
+ * Первый запрос к `entry.html` заставляет Vite досчитать зависимости и
+ * **перезагрузить** страницу. Если это случится посреди теста, элемент будет
+ * «отделён от DOM» при каждом обращении (так и падало: `element was detached
+ * from the DOM, retrying`, вечно). Поэтому первый заход — пустой.
+ */
+async function warmup(page: Page) {
+  await page.goto("/e2e/entry.html");
+  await page.waitForLoadState("networkidle");
+}
+
 async function loaded(page: Page) {
+  await warmup(page);
   await page.goto("/e2e/entry.html");
   // Приложение открывается голосом: это и есть «загрузилось».
   await expect(page.getByRole("textbox", { name: /скажи или напиши/ })).toBeVisible({ timeout: 15_000 });
 }
 
 test("Tab доходит до входа, слово и Enter — и оно в разговоре (шаг 190)", async ({ page }) => {
-  await page.route("**/*", (route) => {
-    const url = new URL(route.request().url());
-    return url.hostname === "127.0.0.1" ? route.continue() : route.abort("blockedbyclient");
-  });
   const errors = await collectErrors(page);
   await loaded(page);
   // Если вход не появился — тест падает ниже, но без причины. Прикладываем её.
@@ -65,10 +87,6 @@ test("Tab доходит до входа, слово и Enter — и оно в �
 });
 
 test("название экрана, набранное с клавиатуры, уводит на экран (шаг 181)", async ({ page }) => {
-  await page.route("**/*", (route) => {
-    const url = new URL(route.request().url());
-    return url.hostname === "127.0.0.1" ? route.continue() : route.abort("blockedbyclient");
-  });
   await loaded(page);
 
   const entry = page.getByRole("textbox", { name: /скажи или напиши/ });
