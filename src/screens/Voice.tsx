@@ -146,6 +146,7 @@ import {
   type Granted as ConsentGranted,
 } from "../lib/consentStep";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
+import { heard as previewHeard } from "../lib/secretPreview";
 import {
   create as createQuick,
   checkName as checkQuickName,
@@ -3593,8 +3594,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               {parseWorst({
                 rows: phrases.map((line) => ({
                   at: line.at,
-                  heard: line.heard,
-                  understood: line.understood,
+                  // Шаг 103: журнал получает вычищенное **до** записи — фраза
+                  // вслух бывает с паролем, и записанное уже не вычистить.
+                  heard: previewHeard(line.heard),
+                  understood: line.understood === null ? null : previewHeard(line.understood),
                   outcome: (line.stage === "done"
                     ? { kind: "done", did: line.did }
                     : line.understood === null

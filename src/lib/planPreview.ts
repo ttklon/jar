@@ -1,18 +1,12 @@
-/** Render parameters for a human review without echoing obvious secret fields. */
-export function describePlanParams(params?: Record<string, string>): string {
-  if (!params || Object.keys(params).length === 0) return "параметров нет";
-  return Object.entries(params)
-    .map(([name, value]) => {
-      const safeValue =
-        /password|passphrase|secret|token|(?:api|access|private|client)[_-]?key|credential|authorization|bearer/i.test(
-          name,
-        )
-          ? "[скрыто]"
-          : value;
-      return `${name}: ${safeValue}`;
-    })
-    .join("; ");
-}
+/**
+ * Параметры для показа человеку (шаги 101 и 103).
+ *
+ * Оставлено здесь ради экранов `Ask.tsx` и `Voice.tsx`, которые уже импортируют
+ * эту функцию, но правило теперь **одно на всё приложение**: маскировка по имени
+ * поля **и по значению** живёт в `secretPreview.ts` (шаг 103). Две копии правила
+ * разошлись бы — и разошлись бы ровно на том поле, которое забыли дописать.
+ */
+export { params as describePlanParams } from "./secretPreview";
 /**
  * План показывает цель, шаги, риск и что будет сделано — до запуска (шаг 101).
  *

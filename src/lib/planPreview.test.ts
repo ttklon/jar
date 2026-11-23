@@ -103,3 +103,19 @@ describe("пустое не сходит за успех", () => {
     expect(gaps(plan([step("переименовать")]))).toEqual([]);
   });
 });
+
+describe("параметры для показа берут правило шага 103", () => {
+  it("секрет в поле path скрыт, а не показан", async () => {
+    // Проверка на настоящей функции экрана: имя поля больше не единственный
+    // признак — иначе ключ в `path` уезжает на экран.
+    const { describePlanParams } = await import("./planPreview");
+    const shown = describePlanParams({ path: "C:\\keys\\sk-abcdefghijklmnopqrstuvwxyz" });
+    expect(shown).not.toContain("sk-abcdefghijklmnopqrstuvwxyz");
+    expect(shown).toContain("[секрет]");
+  });
+
+  it("обычный параметр виден", async () => {
+    const { describePlanParams } = await import("./planPreview");
+    expect(describePlanParams({ path: "D:\\Отчёты" })).toContain("D:\\Отчёты");
+  });
+});
