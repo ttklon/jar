@@ -117,6 +117,7 @@ import { differ as intentDiffer, missing as intentMissing, parse as parseIntent,
 import { need as askNeed, question as askQuestion, rule as askRule, type Plan as AskPlan } from "../lib/askWhen";
 import { plan as deedsPlan, says as deedsSays, split as splitDeeds, type Deed } from "../lib/twoDeeds";
 import { canDo as canDoNegated, parse as parseNegation, say as sayNegation, type Negation } from "../lib/negation";
+import { check as checkFit, say as sayFit, stop as fitStops } from "../lib/doesItFit";
 import {
   find as findYesterday,
   nothing as nothingYesterday,
@@ -1611,6 +1612,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [negation, setNegation] = useState<Negation | null>(null);
   // Шаг 85: «как вчера» — из настоящего журнала фраз, а не из догадки.
   const [repeatSay, setRepeatSay] = useState<string[] | null>(null);
+  // Шаг 86: понимание проверяется по результату, а не по факту исполнения.
+  const [fitSay, setFitSay] = useState<string | null>(null);
+  const [currentPlan, setCurrentPlan] = useState<PlanCheck["plan"] | null>(null);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -1817,6 +1821,21 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       // Шаг 84: разбор отрицания — **до** исполнения. Цена ошибки тут — стёртое,
       // поэтому сомнение не угадывается, а переспрашивается.
       setNegation(parseNegation(heard));
+      // Шаг 86: «готово» — только когда шаг сходится с фразой. Предмет сверяем
+      // с тем, что понял разбор; если планировщик ничего не нашёл — это «пусто»,
+      // а не «выполнено». План берётся из последнего результата планировщика.
+      setCurrentPlan(draft?.plan ?? null);
+      {
+        const steps = currentPlan?.steps ?? [];
+        const got = {
+          what: steps.length > 0 ? (steps[0]?.why ?? steps[0]?.registry ?? "") : parsed.object,
+          by: parsed.qualifier,
+          count: steps.length,
+        };
+        const fit = checkFit({ object: parsed.object, qualifier: parsed.qualifier }, got);
+        setFitSay(sayFit({ object: parsed.object, qualifier: parsed.qualifier }, got));
+        if (fitStops(fit)) setDeviceNotice("");
+      }
       setHeardIntent(heard);
       setSaidIntent(
         intentMissing(parsed).length > 0
@@ -2780,6 +2799,20 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </>
             );
           })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 86: понимание проверяется по результату. «Готово» говорится
+          только когда сходится — иначе слово перестаёт значить «получилось». */}
+      {fitSay !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Сходится ли с фразой</Text>
+          <Text className={styles.note} role="status" aria-live="polite">
+            {fitSay}
+          </Text>
+          <Text className={styles.note}>
+            «готово» значит «получилось», а не «выполнено»
+          </Text>
         </div>
       ) : null}
 
