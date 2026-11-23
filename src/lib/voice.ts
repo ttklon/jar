@@ -13,6 +13,7 @@
  *   реестр, политику и подтверждения.
  */
 import { NOISE_REPLY, dispose } from "./nonsense";
+import { spoken } from "./shortAnswer";
 
 
 interface SpeechAlternative {
@@ -201,7 +202,20 @@ export function speak(
   text: string,
   lang = "ru-RU",
   onStatus?: (status: "started" | "finished" | "error" | "no-voice") => void,
+  /**
+   * Сколько читать (шаг 47). По умолчанию — **коротко**: первое предложение.
+   * `more` — человек попросил подробностей, читаем целиком.
+   *
+   * Почему здесь, а не в местах вызова. Вызовов `speak` больше двадцати, и
+   * каждый писал бы своё «сколько читать»; один забыл бы, и на одном экране
+   * читался бы абзац. Правило одно, и оно срабатывает раньше синтеза: если
+   * читать нечего, дальше не идём.
+   */
+  length: "short" | "more" = "short",
 ): boolean {
+  const toSay = spoken(text, length === "more");
+  if (toSay === null) return false;
+  text = toSay;
   const scope = globals();
   const synth = scope.speechSynthesis;
   const Utterance = scope.SpeechSynthesisUtterance;
