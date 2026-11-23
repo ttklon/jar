@@ -1,0 +1,21 @@
+{
+  "title": "Свободное место на дисках",
+  "what": "Список дисков с занятым и свободным объёмом.",
+  "registry": "storage-backup|проверить|свободное место",
+  "params": [],
+  "permissions": {
+    "writes": false,
+    "reads": true,
+    "network": false,
+    "reaches": [
+      "storage-backup"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [],
+  "checked_by": null
+}

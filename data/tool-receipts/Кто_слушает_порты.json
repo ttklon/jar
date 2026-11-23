@@ -1,0 +1,21 @@
+{
+  "title": "Кто слушает порты",
+  "what": "Список портов в состоянии Listen с именами процессов.",
+  "registry": "network|проверить|открытые порты",
+  "params": [],
+  "permissions": {
+    "writes": false,
+    "reads": true,
+    "network": true,
+    "reaches": [
+      "network"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [],
+  "checked_by": null
+}

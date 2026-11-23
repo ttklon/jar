@@ -1,0 +1,29 @@
+{
+  "title": "Открыть программу",
+  "what": "Запускает указанный .exe и подтверждает, что процесс действительно поднялся. Если файла нет или процесс сразу завершился, это провал, а не «наверное, открылось».",
+  "registry": "apps-windows|запустить|программу",
+  "params": [
+    {
+      "name": "path",
+      "label": "Путь к .exe",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "writes": true,
+    "reads": false,
+    "network": false,
+    "reaches": [
+      "apps-windows"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [
+    "Если файла нет или процесс сразу завершился, это провал, а не «наверное, открылось»"
+  ],
+  "checked_by": null
+}

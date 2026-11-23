@@ -101,6 +101,7 @@ GENERATED = [
     "docs/INDEX.md",
     "docs/TOOL-RECEIPTS.md",
     "data/tools-receipts.json",
+    "data/tool-receipts",
     "AGENTS.md",
 ]
 

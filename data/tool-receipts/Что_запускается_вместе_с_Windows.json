@@ -1,0 +1,23 @@
+{
+  "title": "Что запускается вместе с Windows",
+  "what": "Перечисляет записи автозапуска — программы, скрипты и службы, которые стартуют сами. Только чтение: ничего не отключается.",
+  "registry": "processes-services|проанализировать|автозапуск",
+  "params": [],
+  "permissions": {
+    "writes": false,
+    "reads": true,
+    "network": false,
+    "reaches": [
+      "processes-services"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [
+    "Только чтение: ничего не отключается"
+  ],
+  "checked_by": null
+}

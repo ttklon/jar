@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { borderLine, complete, isProof, proofLabel, stillHolds, type Verdict } from "./proof";
+import {
+  STALE_DAYS,
+  ageDays,
+  ageLabel,
+  borderLine,
+  complete,
+  isProof,
+  proofLabel,
+  stale,
+  stillHolds,
+  type Verdict,
+} from "./proof";
 
 /**
  * Шаги 3 и 4: вердикт вместе с машиной, и граница «доказано / не доказано».
@@ -92,5 +103,52 @@ describe("граница рядом с экраном (шаг 4)", () => {
     expect(borderLine([verdict()], { os: proof.os, appVersion: "9.9.9" })).toBe(
       "на этой машине не доказано: 1 из 1 проверки",
     );
+  });
+});
+
+describe("возраст доказательства (шаг 12)", () => {
+  // «Работало месяц назад» — это не «работает». Возраст отвечает на вопрос «как
+  // давно смотрели», которого `stillHolds` не задаёт.
+  const today = new Date(2026, 10, 20); // 20 ноября 2026
+
+  it("возраст считается по календарю, а не по часам", () => {
+    // Иначе один и тот же вердикт утром и вечером назывался бы по-разному.
+    expect(ageDays("2026-11-20", today)).toBe(0);
+    expect(ageDays("2026-11-19", today)).toBe(1);
+    expect(ageDays("2026-11-13", today)).toBe(7);
+    expect(ageDays("2026-10-21", today)).toBe(30);
+  });
+
+  it("возраст называется датой, а не оценкой", () => {
+    // Порог — догадка, дата — факт. Слово «старое» только для действительно
+    // старого, иначе оно перестанет значить что-либо.
+    expect(ageLabel("2026-11-20", today)).toBe("проверено сегодня");
+    expect(ageLabel("2026-11-19", today)).toBe("проверено вчера");
+    expect(ageLabel("2026-11-17", today)).toBe("проверено 3 дня назад");
+    expect(ageLabel("2026-11-06", today)).toBe("проверено 2 недели назад");
+    expect(ageLabel("2026-08-22", today)).toBe("проверено 3 месяца назад");
+    expect(ageLabel("2024-11-20", today)).toBe("проверено 2 года назад — старое");
+  });
+
+  it("нет даты — нет и возраста", () => {
+    // Молчание не должно читаться как «свежо».
+    expect(ageDays("", today)).toBeNull();
+    expect(ageDays("не дата", today)).toBeNull();
+    expect(ageLabel("", today)).toBe("дата проверки не записана");
+  });
+
+  it("дата из будущего — ошибка записи, а не «свежо»", () => {
+    expect(ageDays("2026-12-01", today)).toBeNull();
+    expect(stale("2026-12-01", today)).toBe(true);
+  });
+
+  it("пора перепроверить — порог назван и он один", () => {
+    // 90 дней: за квартал успевает смениться и Windows, и приложение. Порог в
+    // одном месте, чтобы его можно было пересмотреть, а не искать по коду.
+    expect(STALE_DAYS).toBe(90);
+    expect(stale("2026-11-20", today)).toBe(false);
+    expect(stale("2026-08-21", today)).toBe(true); // 91 день — уже старое
+    expect(stale("2026-08-22", today)).toBe(false); // 90 дней ровно — ещё нет
+    expect(stale("2026-06-01", today)).toBe(true);
   });
 });

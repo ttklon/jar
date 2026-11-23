@@ -31,6 +31,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TOOLS = ROOT / "data" / "tools.json"
 OUT = ROOT / "data" / "tools-receipts.json"
+# Паспорт руки: один файл — одно обещание (шаг 11). Каталог пересобирается
+# целиком, чтобы удалённая рука не оставила паспорт без хозяина.
+PASSPORTS = ROOT / "data" / "tool-receipts"
 DOC = ROOT / "docs" / "TOOL-RECEIPTS.md"
 
 # Что рука делает с миром. Ключ — первое слово `registry` (домен), но опасность
@@ -175,6 +178,77 @@ def build() -> dict:
     }
 
 
+def passport_name(title: str) -> str:
+    """Имя файла паспорта: безопасное, из названия, без транслитерации.
+
+    Транслитерация сделала бы имена нечитаемыми и разошлась бы с тем, что видит
+    человек в интерфейсе. Ключ — название; файловая система позволяет кириллицу,
+    а запрещённые символы заменяются.
+    """
+    bad = '<>:"/\\|?*'
+    cleaned = "".join("_" if (char in bad or char.isspace()) else char for char in title)
+    return f"{cleaned}.json"
+
+
+def write_passports(built: dict) -> None:
+    """Один файл — одно обещание (шаг 11).
+
+    Зачем отдельные файлы, если есть общий `tools-receipts.json`. Общий отвечает
+    на вопрос «что умеет приложение». Паспорт отвечает на вопрос про **одну**
+    руку: что она делает, чего не делает, где проверено и кем. Читать паспорт
+    можно, не поднимая весь реестр, и его удобно приложить к разговору о
+    конкретной руке — а именно так и спрашивают: «что эта кнопка сделает с моим
+    файлом».
+    """
+    PASSPORTS.mkdir(parents=True, exist_ok=True)
+    wanted = {passport_name(title) for title in built["tools"]}
+    # Удалённая рука не оставляет паспорт: файл без хозяина однажды прочитают как
+    # действующее обещание.
+    for stale_file in PASSPORTS.glob("*.json"):
+        if stale_file.name not in wanted:
+            stale_file.unlink()
+    for title, item in built["tools"].items():
+        body = {
+            "title": title,
+            "what": item["summary"],
+            "registry": item["registry"],
+            "params": item["params"],
+            "permissions": item["permissions"],
+            "irreversible": item["irreversible"],
+            "stop_after_fact": item["stop_after_fact"],
+            "undo": item["undo"],
+            "proven": item["proven"],
+            "windows": item["windows"],
+            # «Чего не делает» — из описания, а не из головы: если рука сама
+            # говорит «не трогает», это и есть обещание.
+            "does_not": does_not(item),
+            # «Кем проверено» — пусто, пока не записано: имя руки этого не
+            # доказывает (шаг 5).
+            "checked_by": None,
+        }
+        path = PASSPORTS / passport_name(title)
+        path.write_text(json.dumps(body, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def does_not(item: dict) -> list[str]:
+    """Что рука обещает **не** делать — из её собственного описания.
+
+    Это не догадка: берём предложения, где она сама говорит «не». Обещание
+    «чего не делает» сильнее, чем «что делает»: именно оно отвечает на страх
+    человека перед кнопкой.
+    """
+    text = item.get("summary") or ""
+    out = []
+    for sentence in text.replace("—", ".").split("."):
+        part = sentence.strip()
+        if not part:
+            continue
+        lowered = part.lower()
+        if " не " in lowered or lowered.startswith("не "):
+            out.append(part)
+    return out[:3]
+
+
 def markdown(built: dict) -> str:
     """Документ для чтения человеком. Из тех же данных, а не пересказом."""
     tools = built["tools"]
@@ -283,12 +357,23 @@ def main() -> int:
         if unclassified:
             print(f"глаголы вне правила — допишите их, а не угадывайте: {unclassified}")
             return 1
+        # Паспорта — часть обещания: файла нет или он чужой, и «один файл — одно
+        # обещание» перестаёт быть правдой.
+        missing = [
+            title
+            for title in built["tools"]
+            if not (PASSPORTS / passport_name(title)).exists()
+        ]
+        if missing:
+            print(f"нет паспортов рук: {missing[:5]}")
+            return 1
         if not args.quiet:
             print(f"записи рук совпадают с данными: {len(built['tools'])}")
         return 0
 
     OUT.write_text(text, encoding="utf-8")
     DOC.write_text(markdown(built), encoding="utf-8")
+    write_passports(built)
     print(f"записано: {OUT.relative_to(ROOT)} и {DOC.relative_to(ROOT)} · рук {len(built['tools'])}")
     return 0
 

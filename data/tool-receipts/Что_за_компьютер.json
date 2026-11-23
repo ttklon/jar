@@ -1,0 +1,21 @@
+{
+  "title": "Что за компьютер",
+  "what": "Процессор, память, видеокарты, накопители и версия Windows — одним отчётом. Нужно, чтобы понимать, что эта машина потянет. Только чтение.",
+  "registry": "hardware-diag|показать|характеристики железа",
+  "params": [],
+  "permissions": {
+    "writes": false,
+    "reads": true,
+    "network": false,
+    "reaches": [
+      "hardware-diag"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [],
+  "checked_by": null
+}

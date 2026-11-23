@@ -1,0 +1,27 @@
+{
+  "title": "Найти дубликаты",
+  "what": "Группирует файлы папки по SHA-256 и показывает группы одинаковых файлов.",
+  "registry": "files|проверить|дубликаты по хэшу",
+  "params": [
+    {
+      "name": "path",
+      "label": "Путь к папке",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "writes": false,
+    "reads": true,
+    "network": false,
+    "reaches": [
+      "files"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [],
+  "checked_by": null
+}

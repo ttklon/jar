@@ -1,0 +1,23 @@
+{
+  "title": "Что установлено",
+  "what": "Читает список установленных программ из реестра и версии. Только чтение: ничего не удаляет и не запускает.",
+  "registry": "apps-windows|показать|установленные программы",
+  "params": [],
+  "permissions": {
+    "writes": false,
+    "reads": true,
+    "network": false,
+    "reaches": [
+      "apps-windows"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [
+    "Только чтение: ничего не удаляет и не запускает"
+  ],
+  "checked_by": null
+}

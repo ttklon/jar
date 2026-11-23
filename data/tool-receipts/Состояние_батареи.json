@@ -1,0 +1,23 @@
+{
+  "title": "Состояние батареи",
+  "what": "Показывает заряд и состояние батареи. На настольном компьютере честно отвечает, что батареи нет, а не выдумывает проценты.",
+  "registry": "system-power|проверить|батарею",
+  "params": [],
+  "permissions": {
+    "writes": false,
+    "reads": true,
+    "network": false,
+    "reaches": [
+      "system-power"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [
+    "На настольном компьютере честно отвечает, что батареи нет, а не выдумывает проценты"
+  ],
+  "checked_by": null
+}

@@ -1,0 +1,27 @@
+{
+  "title": "Удалить в корзину",
+  "what": "Отправляет файл или папку в корзину: безвозвратного удаления здесь нет.",
+  "registry": "files|удалить|в корзину",
+  "params": [
+    {
+      "name": "path",
+      "label": "Что удалить",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "writes": true,
+    "reads": false,
+    "network": false,
+    "reaches": [
+      "files"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [],
+  "checked_by": null
+}

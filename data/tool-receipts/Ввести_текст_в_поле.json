@@ -1,0 +1,34 @@
+{
+  "title": "Ввести текст в поле",
+  "what": "Находит в активном окне поле с этим именем, вводит текст и читает значение обратно. «Введено» — это «поле показывает то же», а не «отправили»: маска или проверка поля видны в отчёте.",
+  "registry": "apps-windows|ввести|текст",
+  "params": [
+    {
+      "name": "name",
+      "label": "Имя поля",
+      "required": true
+    },
+    {
+      "name": "text",
+      "label": "Текст",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "writes": true,
+    "reads": false,
+    "network": false,
+    "reaches": [
+      "apps-windows"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [
+    "это «поле показывает то же», а не «отправили»: маска или проверка поля видны в отчёте"
+  ],
+  "checked_by": null
+}

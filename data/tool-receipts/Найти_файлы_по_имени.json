@@ -1,0 +1,32 @@
+{
+  "title": "Найти файлы по имени",
+  "what": "Ищет файлы по маске в папке и во всех вложенных, показывает до 50 совпадений.",
+  "registry": "files|найти|по имени",
+  "params": [
+    {
+      "name": "path",
+      "label": "Где искать",
+      "required": true
+    },
+    {
+      "name": "query",
+      "label": "Маска имени",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "writes": false,
+    "reads": true,
+    "network": false,
+    "reaches": [
+      "files"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [],
+  "checked_by": null
+}

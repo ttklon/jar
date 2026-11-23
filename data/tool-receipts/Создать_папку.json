@@ -1,0 +1,27 @@
+{
+  "title": "Создать папку",
+  "what": "Создаёт папку по указанному пути вместе с недостающими родителями. Если папка уже есть — это тоже успех.",
+  "registry": "files|создать|папку",
+  "params": [
+    {
+      "name": "path",
+      "label": "Путь",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "writes": true,
+    "reads": false,
+    "network": false,
+    "reaches": [
+      "files"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [],
+  "checked_by": null
+}

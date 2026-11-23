@@ -1,0 +1,27 @@
+{
+  "title": "Нажать кнопку по имени",
+  "what": "Находит в активном окне элемент с этим именем и нажимает его. Имя должно подходить одному элементу; если подходит нескольким — отказ со списком. После нажатия окно читается заново и сравнивается с прежним: «нажато» и «сработало» — разные вещи.",
+  "registry": "apps-windows|нажать|кнопку",
+  "params": [
+    {
+      "name": "name",
+      "label": "Имя элемента",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "writes": true,
+    "reads": false,
+    "network": false,
+    "reaches": [
+      "apps-windows"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [],
+  "checked_by": null
+}

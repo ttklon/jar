@@ -1,0 +1,32 @@
+{
+  "title": "Переместить файл или папку",
+  "what": "Переносит файл или папку на новое место. Отказывается работать, если цель уже существует: молча заменить чужой файл хуже, чем остановиться и сказать об этом.",
+  "registry": "files|переместить|файлы/папки",
+  "params": [
+    {
+      "name": "from",
+      "label": "Откуда",
+      "required": true
+    },
+    {
+      "name": "to",
+      "label": "Куда",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "writes": true,
+    "reads": false,
+    "network": false,
+    "reaches": [
+      "files"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [],
+  "checked_by": null
+}

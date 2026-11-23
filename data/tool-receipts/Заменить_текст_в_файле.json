@@ -1,0 +1,45 @@
+{
+  "title": "Заменить текст в файле",
+  "what": "Находит в файле старый текст и заменяет его новым, затем читает файл обратно и сравнивает с ожидаемым. Если старое не нашлось — не делает ничего и говорит об этом; если нашлось несколько раз, просит слово «все».",
+  "registry": "files|заменить|текст в файле",
+  "params": [
+    {
+      "name": "path",
+      "label": "Путь",
+      "required": true
+    },
+    {
+      "name": "find",
+      "label": "Что найти",
+      "required": true
+    },
+    {
+      "name": "replace",
+      "label": "На что заменить",
+      "required": true
+    },
+    {
+      "name": "all",
+      "label": "Заменить все",
+      "required": false
+    }
+  ],
+  "permissions": {
+    "writes": true,
+    "reads": false,
+    "network": false,
+    "reaches": [
+      "files"
+    ]
+  },
+  "irreversible": true,
+  "stop_after_fact": true,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [
+    "Если старое не нашлось",
+    "не делает ничего и говорит об этом; если нашлось несколько раз, просит слово «все»"
+  ],
+  "checked_by": null
+}

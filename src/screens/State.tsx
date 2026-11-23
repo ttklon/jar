@@ -2,6 +2,7 @@ import { Badge, Button, Text } from "@fluentui/react-components";
 import { makeStyles, tokens } from "@fluentui/react-components";
 import type { StateItem } from "../lib/state";
 import { CONDITION_HINT, CONDITION_LABEL, headline, nextStep, summarize } from "../lib/state";
+import { emptyLine } from "../lib/empty";
 
 /**
  * Экран «Состояние» (шаг 1).
@@ -114,6 +115,12 @@ export function StateScreen({ items, onGo }: StateScreenProps) {
           <Text className={styles.muted}>делать нечего — всё проверено здесь</Text>
         )}
       </div>
+
+      {/* Пустой список не молчит (шаг 9): молчание читается как «всё хорошо», а
+          здесь это значило бы «ничего не проверяли» — разные вещи. */}
+      {emptyLine(items, "nothing-yet") ? (
+        <Text className={styles.muted}>{emptyLine(items, "nothing-yet")}</Text>
+      ) : null}
 
       <ul className={styles.list}>
         {items.map((item) => {

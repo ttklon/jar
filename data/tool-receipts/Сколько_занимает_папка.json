@@ -1,0 +1,27 @@
+{
+  "title": "Сколько занимает папка",
+  "what": "Считает файлы, суммарный объём и пять самых частых расширений внутри папки.",
+  "registry": "files|проверить|размеры и место",
+  "params": [
+    {
+      "name": "path",
+      "label": "Путь к папке",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "writes": false,
+    "reads": true,
+    "network": false,
+    "reaches": [
+      "files"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [],
+  "checked_by": null
+}

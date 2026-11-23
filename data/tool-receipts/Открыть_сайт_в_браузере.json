@@ -1,0 +1,30 @@
+{
+  "title": "Открыть сайт в браузере",
+  "what": "Передаёт ссылку браузеру по умолчанию и говорит, какой обработчик её взял. Что страница загрузилась, отсюда не проверить — это видно на экране, и так и написано в отчёте. Открываются только http:// и https://: file:// и другие схемы остаются за бортом.",
+  "registry": "web|открыть|сайт",
+  "params": [
+    {
+      "name": "url",
+      "label": "Ссылка",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "writes": false,
+    "reads": true,
+    "network": true,
+    "reaches": [
+      "web",
+      "network"
+    ]
+  },
+  "irreversible": false,
+  "stop_after_fact": false,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [
+    "Что страница загрузилась, отсюда не проверить"
+  ],
+  "checked_by": null
+}

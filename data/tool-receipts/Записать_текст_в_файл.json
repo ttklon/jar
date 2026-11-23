@@ -1,0 +1,39 @@
+{
+  "title": "Записать текст в файл",
+  "what": "Создаёт текстовый файл с указанным содержимым и читает его обратно. Существующий файл не трогает, пока не сказано «перезаписать»: молча затереть чужую работу — худшее из «помог».",
+  "registry": "files|записать|текст в файл",
+  "params": [
+    {
+      "name": "path",
+      "label": "Путь",
+      "required": true
+    },
+    {
+      "name": "text",
+      "label": "Текст",
+      "required": true
+    },
+    {
+      "name": "overwrite",
+      "label": "Перезаписать",
+      "required": false
+    }
+  ],
+  "permissions": {
+    "writes": true,
+    "reads": false,
+    "network": false,
+    "reaches": [
+      "files"
+    ]
+  },
+  "irreversible": true,
+  "stop_after_fact": true,
+  "undo": null,
+  "proven": null,
+  "windows": [],
+  "does_not": [
+    "Существующий файл не трогает, пока не сказано «перезаписать»: молча затереть чужую работу"
+  ],
+  "checked_by": null
+}

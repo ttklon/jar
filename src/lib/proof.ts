@@ -118,3 +118,72 @@ function plural(count: number, one: string, few: string, many: string): string {
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
   return many;
 }
+
+/**
+ * Возраст доказательства (шаг 12).
+ *
+ * «Работало месяц назад» — это не «работает». Старое доказательство опасно
+ * именно тем, что выглядит доказательством: обновилась Windows, сменился
+ * драйвер, и человек читает «доказано» там, где доказательство уже не про эту
+ * машину.
+ *
+ * Зачем возраст, если есть `stillHolds`. `stillHolds` отвечает «тот же ли это
+ * код и та же ли ОС» — это граница. Возраст отвечает на другой вопрос: **как
+ * давно смотрели**. Оба нужны: доказательство с правильной версией может быть
+ * полугодовой давности, и это стоит знать, даже если оно формально держится.
+ *
+ * Дни считаются по календарю, а не по часам: «вчера» и «сегодня» не должны
+ * зависеть от времени суток, иначе один и тот же вердикт утром и вечером
+ * называется по-разному.
+ */
+
+/** Сколько дней прошло. `null` — дату не разобрать. */
+export function ageDays(checkedAt: string, today: Date): number | null {
+  const at = new Date(checkedAt);
+  if (Number.isNaN(at.getTime())) return null;
+  const day = (date: Date) => Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  const diff = day(today) - day(at);
+  // Отрицательный возраст — дата из будущего. Это не «свежо»: это ошибка в
+  // записи, и притворяться, что всё нормально, нельзя.
+  if (diff < 0) return null;
+  return Math.round(diff / 86_400_000);
+}
+
+/**
+ * Как возраст называется человеку.
+ *
+ * Не «актуально / устарело»: порог — догадка, а **дата** — факт. Поэтому строка
+ * называет, когда смотрели, и только очень старые доказательства помечает
+ * словом «старое» — чтобы это слово значило что-то.
+ */
+export function ageLabel(checkedAt: string, today: Date): string {
+  const days = ageDays(checkedAt, today);
+  if (days === null) return "дата проверки не записана";
+  if (days === 0) return "проверено сегодня";
+  if (days === 1) return "проверено вчера";
+  if (days < 7) return `проверено ${days} ${plural(days, "день", "дня", "дней")} назад`;
+  if (days < 30) {
+    const weeks = Math.floor(days / 7);
+    return `проверено ${weeks} ${plural(weeks, "неделю", "недели", "недель")} назад`;
+  }
+  const months = Math.floor(days / 30);
+  if (months < 12) return `проверено ${months} ${plural(months, "месяц", "месяца", "месяцев")} назад`;
+  const years = Math.floor(months / 12);
+  return `проверено ${years} ${plural(years, "год", "года", "лет")} назад — старое`;
+}
+
+/**
+ * Пора ли перепроверить.
+ *
+ * Порог — не истина, а решение, и оно называется прямо: через 90 дней. Почему
+ * 90: за квартал успевает смениться версия Windows и приложение, а доказательство
+ * квартальной давности перестаёт быть про «сейчас». Порог в одном месте — его
+ * можно пересмотреть один раз, а не искать по коду.
+ */
+export const STALE_DAYS = 90;
+
+export function stale(checkedAt: string, today: Date): boolean {
+  const days = ageDays(checkedAt, today);
+  if (days === null) return true; // нет даты — не доказательство «свежести»
+  return days > STALE_DAYS;
+}
