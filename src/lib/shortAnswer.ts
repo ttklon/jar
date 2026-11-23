@@ -119,7 +119,14 @@ export function spoken(text: string, more = false): string | null {
 const GREETING = /^(здравствуйте|привет|добрый день|добрый вечер|доброе утро|рад|рада|конечно|хорошо|окей|ок|понял|поняла)[\s,!.…]*$/iu;
 
 export function answerStart(parts: readonly string[]): string[] {
-  const index = parts.findIndex((part) => !GREETING.test(part.trim()));
+  // Приветствие может стоять после префикса: «модель переспрашивает:
+  // Здравствуйте!». Смотрим на часть **после двоеточия** — префикс говорит, кто
+  // это сказал, а не что сказано.
+  const body = (part: string) => {
+    const after = part.split(":").slice(1).join(":").trim();
+    return after.length > 0 ? after : part.trim();
+  };
+  const index = parts.findIndex((part) => !GREETING.test(body(part)));
   // Всё — вежливость: произносим как есть, а не молчим.
   return index === -1 ? [...parts] : parts.slice(index);
 }
