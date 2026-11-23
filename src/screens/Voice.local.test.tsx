@@ -187,7 +187,7 @@ describe("локальное распознавание на экране", () =
     render(<Voice />);
 
     await waitFor(() => {
-      expect(screen.getByText(/локальное распознавание готово/)).toBeTruthy();
+      expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy();
     });
     expect(screen.getByText(/звук не покидает компьютер/)).toBeTruthy();
     expect(screen.getByText(/Распознавание идёт локальным whisper/)).toBeTruthy();
@@ -209,11 +209,11 @@ describe("локальное распознавание на экране", () =
       expect(screen.getByText(/локального распознавания нет/)).toBeTruthy();
     });
     expect(screen.getAllByText(/кнопкой в карточке выше/).length).toBeGreaterThan(0);
-    expect(screen.queryByText(/локальное распознавание готово/)).toBeNull();
+    expect(screen.queryByText(/локальное распознавание работает здесь/)).toBeNull();
 
     view.rerender(<Voice active />);
     await waitFor(() => {
-      expect(screen.getByText(/локальное распознавание готово/)).toBeTruthy();
+      expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy();
     });
     expect(screen.queryByText(/локального распознавания нет/)).toBeNull();
     expect(screen.getByText(/Распознавание идёт локальным whisper/)).toBeTruthy();
@@ -257,7 +257,7 @@ describe("локальное распознавание на экране", () =
     vi.mocked(speechStatus).mockResolvedValue(FOUND);
 
     render(<Voice />);
-    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
 
     fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
 
@@ -281,7 +281,7 @@ describe("локальное распознавание на экране", () =
     });
 
     render(<Voice />);
-    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
     fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
     await screen.findByText("первый раз с микрофоном");
 
@@ -297,7 +297,7 @@ describe("локальное распознавание на экране", () =
     vi.mocked(speechStatus).mockResolvedValue(FOUND);
 
     render(<Voice />);
-    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
     fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
     await screen.findByText("первый раз с микрофоном");
 
@@ -371,7 +371,7 @@ describe("локальное распознавание на экране", () =
     );
 
     render(<Voice />);
-    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
     fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
     fireEvent.pointerUp(screen.getByRole("button", { name: "Держать и говорить" }));
 
@@ -395,7 +395,7 @@ describe("локальное распознавание на экране", () =
     vi.mocked(startRecording).mockRejectedValue(new Error("микрофон занят другой программой"));
 
     render(<Voice />);
-    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
     fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
     fireEvent.pointerUp(screen.getByRole("button", { name: "Держать и говорить" }));
 
@@ -1108,7 +1108,7 @@ describe("локальное распознавание на экране", () =
       expect(screen.getByText(/движок распознавания есть, а модели нет/)).toBeTruthy();
     });
     expect(screen.getAllByText(/кнопкой в карточке выше/).length).toBeGreaterThan(0);
-    expect(screen.queryByText(/локальное распознавание готово/)).toBeNull();
+    expect(screen.queryByText(/локальное распознавание работает здесь/)).toBeNull();
   });
 
   it("показывает, где оно находится: заголовок и программа окна", async () => {
@@ -2239,7 +2239,7 @@ describe("локальное распознавание на экране", () =
     vi.mocked(transcribeLocal).mockResolvedValue("не то");
 
     render(<Voice />);
-    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
 
     const mic = screen.getByRole("button", { name: "Держать и говорить" });
     fireEvent.pointerDown(mic);
@@ -2262,7 +2262,7 @@ describe("локальное распознавание на экране", () =
     vi.mocked(transcribeLocal).mockResolvedValue("почисти диск");
 
     render(<Voice />);
-    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
 
     const mic = screen.getByRole("button", { name: "Держать и говорить" });
     fireEvent.pointerDown(mic);
@@ -2294,7 +2294,7 @@ describe("локальное распознавание на экране", () =
     );
 
     render(<Voice />);
-    await waitFor(() => expect(screen.getByText(/готово/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
 
     fireEvent.pointerDown(screen.getByRole("button", { name: "Держать и говорить" }));
     await waitFor(() => expect(startRecording).toHaveBeenCalled());
