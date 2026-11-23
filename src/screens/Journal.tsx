@@ -3,6 +3,7 @@ import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/reac
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
 import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
 import { groupReasons } from "../lib/journal";
+import { fromJournal, line as refusalLine } from "../lib/refusal";
 import { DeedCard } from "../components/DeedCard";
 import type { AuditEvent, Episode, RunRecord } from "../ipc";
 import type { Deed } from "../lib/deed";
@@ -368,6 +369,10 @@ export function Journal({
                 <Text className={styles.note}>
                   {`${journal.painsTimes(group.times)} · ${journal.painsLast(time(group.lastMs))}`}
                 </Text>
+                {/* Шаг 87: причина — по-русски и коротко, с выходом. Технический
+                    текст остаётся ниже, но вторым: человеку нужен ответ на «что
+                    теперь делать». */}
+                <Text className={styles.note}>{refusalLine(fromJournal(group.reason))}</Text>
                 <Text className={styles.note}>{group.sample}</Text>
               </li>
             ))}
