@@ -122,6 +122,7 @@ import { worst as parseWorst, type Outcome as ParseOutcome, type Row as ParseRow
 import { ambiguous as whenAmbiguous, parse as parseWhen, ready as whenReady, say as sayWhen, type When as WhenPlan } from "../lib/whenTo";
 import { enough as amountEnough, parse as parseAmount, say as sayAmount, type Amount } from "../lib/amount";
 import { collision as synonymCollision, intents as synonymIntents, say as saySynonym } from "../lib/synonyms";
+import { canRun as jokeCanRun, check as checkJoke, say as sayJoke, type Dangerous } from "../lib/joking";
 import {
   find as findYesterday,
   nothing as nothingYesterday,
@@ -1453,6 +1454,13 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       setSaidIntent(intentWords(parsed));
       // Шаг 91: «когда» отдельно от «что». «Завтра в девять» не исполняется
       // сейчас: сделать сегодня то, что просили на завтра, видно не сразу.
+      // Шаг 94: опасное намерение распознаётся в любой форме, и шутка не
+      // оправдывает: интонации нет, а цена необратима.
+      {
+        const risky = checkJoke(query);
+        setDanger(risky);
+        if (!jokeCanRun(risky)) setApproved([]);
+      }
       // Шаг 93: человек не обязан знать реестр. Намерение находится по его
       // словам, а пересечение не решается молча — его увидит человек.
       {
@@ -1672,6 +1680,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [amount, setAmount] = useState<Amount | null>(null);
   // Шаг 93: намерение своими словами — «почисти», «освободи место», «убери мусор».
   const [synonymSay, setSynonymSay] = useState<string[]>([]);
+  // Шаг 94: опасное намерение — даже в шутливой форме. Тон не влияет.
+  const [danger, setDanger] = useState<Dangerous | null>(null);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -2859,6 +2869,20 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </>
             );
           })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 94: «снеси всё нафиг» — то же намерение, что «снеси всё». Названа
+          цена, а не мораль о шутках. */}
+      {danger !== null && danger.found ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Опасное намерение</Text>
+          <Text className={styles.note} role="alert" aria-live="polite">
+            {sayJoke(danger, draft?.plan?.steps.length ?? null)}
+          </Text>
+          <Text className={styles.note}>
+            эмоции не меняют объём: шутка не оправдывает удаление
+          </Text>
         </div>
       ) : null}
 
