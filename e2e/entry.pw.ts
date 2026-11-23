@@ -110,6 +110,19 @@ test("название экрана, набранное с клавиатуры,
   expect(typed.ok, typed.why).toBe(true);
 
   await page.keyboard.type("история");
+  // Что реально в поле и где фокус — до Enter. Если буквы не дошли, причина в
+  // этом, а не в переходе.
+  const before = await page.evaluate(() => ({
+    value:
+      document.querySelector<HTMLInputElement>(
+        '[aria-label="скажи или напиши — или назови экран"]',
+      )?.value ?? "<нет поля>",
+    focused: document.activeElement?.getAttribute("aria-label") ?? document.activeElement?.tagName ?? "нет",
+  }));
+  expect(before.value, `после печати в поле «${before.value}», фокус в «${before.focused}»`).toBe(
+    "история",
+  );
+
   await page.keyboard.press("Enter");
 
   // Увели на «Историю»: виден её заголовок.
