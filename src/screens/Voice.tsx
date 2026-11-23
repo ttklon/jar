@@ -147,6 +147,7 @@ import {
 } from "../lib/consentStep";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
+import { answer as handAnswer, coverage as handCoverage, line as handLine, worst as handWorst } from "../lib/handAnswer";
 import { finished as cancelFinished, say as cancelSay, stop as cancelStop, start as cancelStart } from "../lib/cancelRun";
 import {
   create as createQuick,
@@ -3188,6 +3189,48 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           >
             Отменить выполнение
           </Button>
+        </div>
+      ) : null}
+
+      {/* Шаг 105: любая рука отвечает — что сделано, чем доказано, что не
+          отменяется. Три поля обязательны: пустое доказательство читалось как
+          «всё хорошо», а неотменяемость узнавали после нажатия «отменить». */}
+      {report !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Что сделано</Text>
+          {(() => {
+            const gates = draft?.gates ?? [];
+            const answers = report.steps.map((step) =>
+              handAnswer(
+                {
+                  did: `${step.registry} (${step.status === "ok" ? "выполнено" : step.reason})`,
+                  proof: step.evidence,
+                  risk: gates.find((gate) => gate.position === step.position)?.risk ?? null,
+                },
+                step.registry,
+              ),
+            );
+            const cover = handCoverage(answers);
+            return (
+              <>
+                <Text className={styles.note}>
+                  {`рука ответила полностью: ${cover.full} из ${cover.total}`}
+                </Text>
+                {answers.map((got, index) => (
+                  <Text key={`answer-${index}`} className={styles.note}>
+                    {`${index + 1}. ${handLine(got)}`}
+                  </Text>
+                ))}
+                {handWorst(answers).length > 0 ? (
+                  <Text className={styles.note}>
+                    {`чаще всего не хватает: ${handWorst(answers)
+                      .map((item) => `${item.gap} (${item.times})`)
+                      .join(", ")}`}
+                  </Text>
+                ) : null}
+              </>
+            );
+          })()}
         </div>
       ) : null}
 

@@ -1797,6 +1797,31 @@ describe("локальное распознавание на экране", () =
   });
 
   it("план модели становится обычным планом: с подтверждением, а не сразу делом", async () => {
+    // Шаг 105: отчёт руки — по шагам. Первый прочитал, второй стёр и необратим.
+    vi.mocked(runPlan).mockResolvedValueOnce({
+      goal: "что с диском",
+      steps: [
+        {
+          position: 1,
+          registry: "storage-backup|проверить|свободное место",
+          status: "ok",
+          reason: "",
+          evidence: "свободно 120 ГБ",
+          duration_ms: 20,
+        },
+        {
+          position: 2,
+          registry: "storage-backup|проверить|резервную копию",
+          status: "failed",
+          reason: "нет резервной копии",
+          evidence: "",
+          duration_ms: 30,
+        },
+      ],
+      stopped: null,
+      run_id: 1,
+      sight: null,
+    });
     vi.mocked(think).mockResolvedValueOnce({
       prompt: "…",
       answer: "…",
@@ -1888,6 +1913,12 @@ describe("локальное распознавание на экране", () =
     fireEvent.click(runButton);
     await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalledTimes(1));
     expect(vi.mocked(runPlan).mock.calls[0]?.[1]).toEqual([1, 2]);
+
+    // Шаг 105: отчёт руки — три поля. Второй шаг необратим, и это **видно**:
+    // человек узнаёт, что «отменить» не вернёт, до нажатия, а не после.
+    await waitFor(() => expect(screen.getByText("Что сделано")).toBeTruthy());
+    expect(screen.getByText(/сделанное не отменяется — «отменить» вернёт только то/)).toBeTruthy();
+    expect(screen.getByText(/рука ответила полностью: /)).toBeTruthy();
   });
 
   it("изменение ответа во время перепроверки отменяет запуск устаревшего плана", async () => {
