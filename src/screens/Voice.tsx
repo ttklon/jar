@@ -114,6 +114,12 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  action as idleAction,
+  sayUnload,
+  sayWaiting,
+  wouldHurt as unloadWouldHurt,
+} from "../lib/idleUnload";
+import {
   lines as cardLines,
   nothingFits,
   offered as cardOffered,
@@ -1550,6 +1556,33 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // пересчитывалось всё; кэш живёт ради скорости и ограничен.
   const [tokenCache, setTokenCache] = useState<TokenEntry[]>([]);
   const [tokensSkipped, setTokensSkipped] = useState(0);
+  // Шаг 74: выгрузка по простою. Модель, загруженная один раз, занимает 4–7 ГБ
+  // весь день, пока человек решает другие задачи: тормозят другие программы, а
+  // виноватым выглядит не оно.
+  const lastUsedRef = useRef(Date.now());
+  const [unloadSay, setUnloadSay] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const loadedRef = useRef(false);
+  loadedRef.current = loaded;
+  const touchModel = () => {
+    lastUsedRef.current = Date.now();
+    if (!loadedRef.current) {
+      // Возврат после выгрузки предупреждает **до** ответа, а не объясняет после.
+      if (unloadSay !== null) setUnloadSay(sayWaiting(hw?.disk ?? "unknown"));
+      setLoaded(true);
+    }
+  };
+  useEffect(() => {
+    const step = window.setInterval(() => {
+      const idleMs = Date.now() - lastUsedRef.current;
+      // Выгрузить посреди генерации значит оборвать работу человека.
+      if (unloadWouldHurt({ idleMs, loaded: loadedRef.current }, busyRef.current)) return;
+      if (idleAction({ idleMs, loaded: loadedRef.current }) !== "unload") return;
+      setLoaded(false);
+      setUnloadSay(sayUnload(4600, hw?.disk ?? "unknown"));
+    }, 30_000);
+    return () => window.clearInterval(step);
+  }, [hw?.disk]);
   // Шаг 69: квоты нет. Файл модели и его хеш — единственное условие работы;
   // счётчика нет не потому, что «не показываем», а потому что нечего показывать.
   const [modelFile, setModelFile] = useState<{ name: string; sha256: string; size: number } | null>(null);
@@ -1573,6 +1606,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   };
   const warmRef = useRef(false);
   /** Запомнить замер потока: пуск и скорость, с выбросом первого прогона. */
+  /** Ссылка на «идёт работа» — таймер выгрузки живёт дольше рендера (шаг 74). */
+  const busyRef = useRef(false);
+  busyRef.current = busy;
   /** Поток живёт дольше рендера — замер читаем из ссылок (шаг 65). */
   const pieceStart = useRef(0);
   const pieceCount = useRef(0);
@@ -1688,6 +1724,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       }
 
       setText(heard);
+      // Шаг 74: фраза — это работа; таймер простоя начинается заново.
+      touchModel();
       // Шаг 68: текст фразы — в кэш токенизации. Повтор и продолжение реплики
       // берут готовые токены вместо пересчёта всей истории.
       reuseTokens(heard, Array.from({ length: heard.length }, (_, index) => index));
@@ -2492,6 +2530,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           </Text>
         )}
       </div>
+
+      {/* Шаг 74: выгрузка по простою. Молчаливая выгрузка — это «приложение
+          что-то сделало с памятью»; если потом что-то пойдёт не так, виноватым
+          будет это. */}
+      {unloadSay ? (
+        <Text className={styles.note} role="status" aria-live="polite">
+          {unloadSay}
+        </Text>
+      ) : null}
 
       {/* Шаг 71: экран моделей — четыре факта, по которым выбирают. Порядок не
           случайный: сначала можно ли (лицензия), потом влезет ли, потом сколько
