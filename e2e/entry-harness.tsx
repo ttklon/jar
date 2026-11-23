@@ -21,6 +21,13 @@ mockIPC((command) => {
       return 1;
     case "engine_status":
     case "readiness_status":
+      // Полный `ReadinessStatus`, а не «что успел вспомнить». Половина полей
+      // выглядела необязательной, и первый прогон упал на них: `readiness.ts`
+      // читает `runtime_spec.bytes` и `model_spec.bytes`, а харнесс их не
+      // отдавал — `App` падал при рендере, поле входа не появлялось вовсе, и
+      // Playwright три раунда подряд говорил «element was detached from the DOM»,
+      // хотя поле просто не рождалось. Готовность здесь «всё уже есть»: сценарий
+      // про клавиатуру, и ждать скачивания ему незачем.
       return {
         download_name: null,
         runtime_managed: true,
@@ -38,8 +45,56 @@ mockIPC((command) => {
         speech_model: "ggml-base.bin",
         speech_search_dir: "sidecars",
         speech_runtime_managed: true,
-        speech_runtime_spec: { id: "w", title: "whisper", asset: "w.zip", url: "", sha256: "", bytes: 1, license: "MIT", source: "test", program: "whisper-server.exe", description: "test" },
-        speech_model_spec: { id: "wm", title: "whisper model", file: "ggml-base.bin", url: "", sha256: "", bytes: 1, license: "MIT", source: "test", min_ram_gb: 1, description: "test" },
+        ready: true,
+        missing: [],
+        model_spec: {
+          id: "m",
+          title: "тестовая модель",
+          file: "test.gguf",
+          url: "",
+          sha256: "",
+          bytes: 1,
+          license: "Apache-2.0",
+          source: "тест",
+          min_ram_gb: 1,
+          description: "тест",
+        },
+        runtime_spec: {
+          id: "r",
+          title: "тестовый движок",
+          asset: "llama.zip",
+          url: "",
+          sha256: "",
+          bytes: 1,
+          license: "MIT",
+          source: "тест",
+          program: "llama-server.exe",
+          description: "тест",
+        },
+        speech_runtime_spec: {
+          id: "w",
+          title: "тестовый whisper",
+          asset: "whisper.zip",
+          url: "",
+          sha256: "",
+          bytes: 1,
+          license: "MIT",
+          source: "тест",
+          program: "whisper-server.exe",
+          description: "тест",
+        },
+        speech_model_spec: {
+          id: "wm",
+          title: "тестовая модель распознавания",
+          file: "ggml-base.bin",
+          url: "",
+          sha256: "",
+          bytes: 1,
+          license: "MIT",
+          source: "тест",
+          min_ram_gb: 1,
+          description: "тест",
+        },
       };
     case "app_status":
       return { version: "test", started_ms: 0, window_ready_ms: 0, engine: null };
