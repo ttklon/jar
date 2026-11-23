@@ -224,4 +224,37 @@ describe("ASR session isolation", () => {
     expect(errors[0]).toContain("микрофон отключился");
     expect(errors[0]).not.toContain("NotReadableError");
   });
+
+  it("подсказка по словарю доходит до движка, а не остаётся в правилах (шаг 56)", async () => {
+    // В «открой блокнот» ошибаются именно на имени программы, и вся фраза
+    // становится другой. Подсказка должна идти в распознаватель, а не лежать
+    // рядом красивым правилом.
+    ready();
+    const transcribe = vi.fn().mockResolvedValue("открой блокнот");
+    const hints: string[] = [];
+    const { result } = renderHook(() =>
+      useVoice({
+        local: { transcribe },
+        process: "code.exe",
+        own: ["Отчёт Квартал-3"],
+        onText: vi.fn(),
+        onError: vi.fn(),
+        onHint: (said) => hints.push(said),
+      }),
+    );
+
+    act(() => result.current.start());
+    await opened();
+    act(() => result.current.stop());
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+
+    expect(transcribe).toHaveBeenCalled();
+    const terms = transcribe.mock.calls[0]?.[2] as string[] | undefined;
+    // Своё слово — первым: человек добавил его, потому что его не слышат.
+    expect(terms?.[0]).toBe("Отчёт Квартал-3");
+    expect(terms).toContain("code");
+    // И сказано, чем помогли: иначе та же фраза распознаётся иначе без причины.
+    expect(hints.length).toBeGreaterThan(0);
+    expect(hints[0]).toContain("распознаю точнее");
+  });
 });

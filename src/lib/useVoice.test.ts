@@ -184,7 +184,10 @@ describe("свой движок распознавания", () => {
 
     // Системное распознавание не трогали: звук ушёл своему движку.
     expect(vi.mocked(listen)).not.toHaveBeenCalled();
-    expect(transcribe).toHaveBeenCalledWith(WAV, expect.any(AbortSignal));
+    // Третий аргумент — подсказка по словарю реестра (шаг 56). Проверяем
+    // звук и сигнал на своих местах, а не точную длину списка: иначе каждая
+    // новая подсказка ломает тест по формальному поводу.
+    expect(transcribe).toHaveBeenCalledWith(WAV, expect.any(AbortSignal), expect.anything());
     expect(onText).toHaveBeenCalledWith("открой почту");
     expect(result.current.listening).toBe(false);
   });

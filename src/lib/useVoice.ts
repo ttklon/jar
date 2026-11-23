@@ -22,6 +22,8 @@ import { listen, speechSupported, stopSpeaking, type Voice } from "./voice";
 import { inputDevices } from "./recorder";
 import { saySwitch, switchTo } from "./micSwitch";
 import { say as sayDrop } from "./micDrop";
+import { hint as dictHint, sayHint } from "./dictHint";
+import { KNOWN } from "./context";
 
 /** Сколько ждём разбор после того, как человек отпустил кнопку. */
 export const GRACE_MS = 2500;
@@ -52,7 +54,26 @@ export interface VoiceOptions {
    * Свой движок распознавания. Есть — записываем звук и отдаём ему, звук остаётся на
    * компьютере. Нет — слушаем тем, что даёт система.
    */
-  local?: { transcribe(wav: Uint8Array, signal?: AbortSignal): Promise<string> } | null;
+  local?: {
+    transcribe(
+      wav: Uint8Array,
+      signal?: AbortSignal,
+      /**
+       * Подсказка по словарю реестра (шаг 56): имена программ, путей, свои
+       * термины. Необязательна — движок без подсказок работает как работал.
+       */
+      terms?: readonly string[],
+    ): Promise<string>;
+  } | null;
+  /**
+   * Программа перед человеком (шаг 56). Задаёт фокус подсказки: из блокнота
+   * «открой хром» должно пониматься, а не только «открой chrome».
+   */
+  process?: string | null;
+  /** Свои термины человека (шаг 57): подсказываются первыми. */
+  own?: readonly string[];
+  /** Сказать, чем распознавание помогло (шаг 56). Не ошибка — пояснение. */
+  onHint?(said: string): void;
   /**
    * Режим «слушаю всегда»: микрофон открыт, фразу вырезает `vad`, разбор запускается сам.
    * Работает только со своим движком: системное распознавание однократное, и делать вид,
@@ -109,6 +130,9 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     onText,
     onError,
     onNotice,
+    onHint,
+    process = null,
+    own = [],
     hotkey = true,
     grace = GRACE_MS,
     nothingHeard = "не разобрал — попробуйте ещё раз",
@@ -158,8 +182,19 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   ) => {
     const controller = new AbortController();
     asr.current = controller;
-    try { return await engine.transcribe(wav, controller.signal); }
-    finally { if (asr.current === controller) asr.current = null; }
+    try {
+      // Шаг 56: термины важнее остальных слов — в «открой блокнот» ошибаются
+      // именно на имени программы, и вся фраза становится другой. Подсказка
+      // идёт в движок, но не заменяет его работу.
+      const { terms, focus } = dictHint(KNOWN, callbacks.current.process ?? null, callbacks.current.own ?? []);
+      const said = sayHint({ terms, focus });
+      if (said) callbacks.current.onHint?.(said);
+      return terms.length > 0
+        ? await engine.transcribe(wav, controller.signal, terms)
+        : await engine.transcribe(wav, controller.signal);
+    } finally {
+      if (asr.current === controller) asr.current = null;
+    }
   }, []);
   /** Режим «слушаю всегда» живёт в ссылке: он меняется, не пересоздавая слушание. */
   const alwaysRef = useRef(always);
@@ -178,8 +213,8 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   const discardRef = useRef(false);
 
   // Колбэки живут в ссылке: иначе каждое изменение пропсов пересоздавало бы слушание.
-  const callbacks = useRef({ onText, onError, onNotice, nothingHeard, local });
-  callbacks.current = { onText, onError, onNotice, nothingHeard, local };
+  const callbacks = useRef({ onText, onError, onNotice, onHint, nothingHeard, local, process, own });
+  callbacks.current = { onText, onError, onNotice, onHint, nothingHeard, local, process, own };
   const permission = useRef({ enabled, disabledReason });
   permission.current = { enabled, disabledReason };
 

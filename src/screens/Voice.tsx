@@ -1439,6 +1439,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     // Шаг 54: смена микрофона — не ошибка, а новость. Сказана словами, а не
     // молчанием: иначе человек говорит в гарнитуру, не зная, слышат ли его.
     onNotice: (message) => setDeviceNotice(message),
+    // Шаг 56: сказано, чем распознавание помогло. Иначе одна и та же фраза
+    // распознаётся по-разному, и это выглядит как нестабильность.
+    onHint: (said) => setDeviceNotice(said),
+    process: frontRef.current?.process ?? null,
   });
   micStopRef.current = () => {
     mic.stop();

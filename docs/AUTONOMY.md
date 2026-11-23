@@ -40,19 +40,19 @@
 * `src/screens/Voice.tsx:438` — useEffect(() => {
 * `src/screens/Voice.tsx:442` — useEffect(
 * `src/screens/Voice.tsx:480` — useEffect(() => {
-* `src/screens/Voice.tsx:1457` — useEffect(() => {
-* `src/screens/Voice.tsx:1492` — useEffect(() => {
-* `src/screens/Voice.tsx:1513` — useEffect(() => {
-* `src/screens/Voice.tsx:1519` — useEffect(() => {
-* `src/screens/Voice.tsx:1526` — useEffect(() => {
-* `src/screens/Voice.tsx:1551` — useEffect(() => {
-* `src/screens/Voice.tsx:1566` — useEffect(() => {
-* `src/screens/Voice.tsx:1592` — useEffect(() => {
-* `src/screens/Voice.tsx:1640` — useEffect(() => {
-* `src/screens/Voice.tsx:1646` — useEffect(() => {
-* `src/screens/Voice.tsx:1662` — useEffect(() => {
-* `src/screens/Voice.tsx:1816` — useEffect(() => {
-* `src/screens/Voice.tsx:1842` — useEffect(
+* `src/screens/Voice.tsx:1461` — useEffect(() => {
+* `src/screens/Voice.tsx:1496` — useEffect(() => {
+* `src/screens/Voice.tsx:1517` — useEffect(() => {
+* `src/screens/Voice.tsx:1523` — useEffect(() => {
+* `src/screens/Voice.tsx:1530` — useEffect(() => {
+* `src/screens/Voice.tsx:1555` — useEffect(() => {
+* `src/screens/Voice.tsx:1570` — useEffect(() => {
+* `src/screens/Voice.tsx:1596` — useEffect(() => {
+* `src/screens/Voice.tsx:1644` — useEffect(() => {
+* `src/screens/Voice.tsx:1650` — useEffect(() => {
+* `src/screens/Voice.tsx:1666` — useEffect(() => {
+* `src/screens/Voice.tsx:1820` — useEffect(() => {
+* `src/screens/Voice.tsx:1846` — useEffect(
 * `src/components/DownloadBar.tsx:73` — useEffect(() => {
 * `src/components/DownloadBar.tsx:80` — useEffect(() => {
 * `src/components/MemoryBackups.tsx:80` — useEffect(() => {
@@ -69,10 +69,10 @@
 * `src/components/ReadinessCard.tsx:366` — useEffect(() => { setSmoke(null); }, [status?.engine_program, status?.model_name]);
 * `src/components/RecentFailures.tsx:58` — useEffect(() => {
 * `src/components/ResourceReport.tsx:58` — useEffect(load, []);
-* `src/lib/useVoice.ts:627` — useEffect(() => {
-* `src/lib/useVoice.ts:664` — useEffect(
-* `src/lib/useVoice.ts:677` — useEffect(() => {
-* `src/lib/useVoice.ts:684` — useEffect(() => {
+* `src/lib/useVoice.ts:662` — useEffect(() => {
+* `src/lib/useVoice.ts:699` — useEffect(
+* `src/lib/useVoice.ts:712` — useEffect(() => {
+* `src/lib/useVoice.ts:719` — useEffect(() => {
 
 ## Сетевые вызовы и запись
 

@@ -24,7 +24,7 @@ export interface Around {
  * Программы, про которые у реестра есть слова. Ключ — имя exe в нижнем регистре,
  * значения — слова, которыми человек и реестр называют эту программу.
  */
-const KNOWN: Record<string, string[]> = {
+export const KNOWN: Record<string, string[]> = {
   "chrome.exe": ["браузер", "хром", "chrome", "вкладк", "сайт"],
   "msedge.exe": ["браузер", "edge", "вкладк", "сайт"],
   "firefox.exe": ["браузер", "firefox", "вкладк", "сайт"],
