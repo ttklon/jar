@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button, Input, makeStyles, Switch, Text, tokens } from "@fluentui/react-components";
+import { Button, Input, makeStyles, Switch, Text, Textarea, tokens } from "@fluentui/react-components";
 import { MicRegular } from "@fluentui/react-icons";
 import {
   adoptHand,
@@ -113,6 +113,11 @@ import { ActionList } from "../components/ActionList";
 import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
+import {
+  PHRASES as COMPARE_PHRASES,
+  ready as compareReady,
+  say as sayCompare,
+} from "../lib/compare";
 import {
   allow as allowEngine,
   byDefault as engineDefault,
@@ -1548,6 +1553,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // модели нужны ролям по потребности, но настройкой по умолчанию они делают
   // зоопарк: память занята всеми, и непонятно, чей ответ.
   const [engines, setEngines] = useState<EngineSetup>(() => engineDefault("7B"));
+  // Шаг 76: сравнение на пяти **своих** фразах. Чужие бенчмарки меряют чужое, а
+  // придумывать фразы и произносить дважды никто не станет — потому одна кнопка.
+  const [compareText, setCompareText] = useState("");
+  const [compareSay, setCompareSay] = useState<string | null>(null);
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
   const knownCommands = ["открыть", "закрыть", "найти", "архивировать", "напечатать"];
@@ -2691,6 +2700,44 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           })()}
         </div>
       ) : null}
+
+      {/* Шаг 76: сравнение двух моделей на пяти своих фразах. Ответы рядом, а не
+          по очереди: по очереди сравнение требует памяти, а человек предыдущий
+          ответ помнит примерно никак. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Сравнить две модели</Text>
+        <Text className={styles.note}>
+          впишите пять своих фраз — по одной на строку: чужие примеры меряют чужое
+        </Text>
+        <Textarea
+          value={compareText}
+          placeholder="открой квартал-3&#10;найди отчёт за март&#10;…"
+          aria-label="Фразы для сравнения, по одной на строку"
+          resize="vertical"
+          onChange={(_, data) => setCompareText(data.value)}
+        />
+        <Button
+          appearance="subtle"
+          onClick={() => {
+            const lines = compareText.split("\n");
+            const check = compareReady(lines);
+            // Без пяти фраз сравнение — случайность или шум.
+            setCompareSay(check.ok ? sayCompare({ model: "7B", answers: [] }, { model: "1.5B", answers: [] }) : check.why);
+          }}
+        >
+          Сравнить
+        </Button>
+        {compareSay ? (
+          <Text className={styles.note} role="status" aria-live="polite">
+            {compareSay}
+          </Text>
+        ) : (
+          <Text className={styles.note}>
+            нужно {COMPARE_PHRASES} фраз: на одной можно случайно попасть, на {COMPARE_PHRASES} уже
+            видно закономерность
+          </Text>
+        )}
+      </div>
 
       {/* Шаг 75: один движок по умолчанию — проще, чем зоопарк. Своя модель на
           роль включается с причиной и по одной; назад — одним действием. */}
