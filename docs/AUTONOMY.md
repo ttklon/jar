@@ -36,24 +36,24 @@
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
 * `src/screens/Undo.tsx:68` — useEffect(load, [load]);
-* `src/screens/Voice.tsx:258` — useEffect(() => {
-* `src/screens/Voice.tsx:452` — useEffect(() => {
-* `src/screens/Voice.tsx:456` — useEffect(
-* `src/screens/Voice.tsx:494` — useEffect(() => {
-* `src/screens/Voice.tsx:1418` — useEffect(() => {
-* `src/screens/Voice.tsx:1503` — useEffect(() => {
-* `src/screens/Voice.tsx:1538` — useEffect(() => {
-* `src/screens/Voice.tsx:1559` — useEffect(() => {
-* `src/screens/Voice.tsx:1565` — useEffect(() => {
-* `src/screens/Voice.tsx:1572` — useEffect(() => {
-* `src/screens/Voice.tsx:1597` — useEffect(() => {
-* `src/screens/Voice.tsx:1612` — useEffect(() => {
+* `src/screens/Voice.tsx:267` — useEffect(() => {
+* `src/screens/Voice.tsx:461` — useEffect(() => {
+* `src/screens/Voice.tsx:465` — useEffect(
+* `src/screens/Voice.tsx:503` — useEffect(() => {
+* `src/screens/Voice.tsx:1428` — useEffect(() => {
+* `src/screens/Voice.tsx:1529` — useEffect(() => {
+* `src/screens/Voice.tsx:1564` — useEffect(() => {
+* `src/screens/Voice.tsx:1585` — useEffect(() => {
+* `src/screens/Voice.tsx:1591` — useEffect(() => {
+* `src/screens/Voice.tsx:1598` — useEffect(() => {
+* `src/screens/Voice.tsx:1623` — useEffect(() => {
 * `src/screens/Voice.tsx:1638` — useEffect(() => {
-* `src/screens/Voice.tsx:1686` — useEffect(() => {
-* `src/screens/Voice.tsx:1692` — useEffect(() => {
-* `src/screens/Voice.tsx:1708` — useEffect(() => {
-* `src/screens/Voice.tsx:1862` — useEffect(() => {
-* `src/screens/Voice.tsx:1888` — useEffect(
+* `src/screens/Voice.tsx:1664` — useEffect(() => {
+* `src/screens/Voice.tsx:1712` — useEffect(() => {
+* `src/screens/Voice.tsx:1718` — useEffect(() => {
+* `src/screens/Voice.tsx:1734` — useEffect(() => {
+* `src/screens/Voice.tsx:1896` — useEffect(() => {
+* `src/screens/Voice.tsx:1922` — useEffect(
 * `src/components/DownloadBar.tsx:73` — useEffect(() => {
 * `src/components/DownloadBar.tsx:80` — useEffect(() => {
 * `src/components/MemoryBackups.tsx:80` — useEffect(() => {

@@ -2390,4 +2390,29 @@ describe("локальное распознавание на экране", () =
     expect(await screen.findByText(/«Квартал-3» убрано/)).toBeTruthy();
     expect(screen.getByText(/свой словарь пуст/)).toBeTruthy();
   });
+
+  it("голос выключается одной кнопкой и не врёт про состояние (шаг 59)", async () => {
+    // В опенспейсе голос мешает, в наушниках — единственный способ не смотреть
+    // на экран. Настройки — место, где ищут и не находят.
+    localStorage.removeItem("zshelper.mic.explained");
+    vi.mocked(speechStatus).mockResolvedValue(FOUND);
+
+    render(<Voice />);
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
+
+    const button = screen.getByRole("button", { name: "голос включён" });
+    // Состояние — словом: значок динамика не читается ни диктором, ни дальтоником.
+    expect(button.getAttribute("aria-pressed")).toBe("true");
+
+    fireEvent.click(button);
+    // Выключенный голос назван «выключен вами» и показывает путь назад.
+    expect(
+      screen.getByRole("button", { name: "голос выключен вами — нажмите, чтобы включить" }),
+    ).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "голос выключен вами — нажмите, чтобы включить" }),
+    );
+    expect(screen.getByRole("button", { name: "голос включён" })).toBeTruthy();
+  });
 });

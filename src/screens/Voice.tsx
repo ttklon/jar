@@ -60,6 +60,15 @@ import { createSpeechQueue } from "../lib/speechQueue";
 import { createAudioMachine } from "../lib/audio";
 import { createWriter, load as loadQueue } from "../lib/queueStore";
 import { speak, stopSpeaking } from "../lib/voice";
+import {
+  canTurnOn,
+  ON as VOICE_ON,
+  sayAnyway,
+  speaks,
+  toggle as toggleVoice,
+  word as voiceWord,
+  type Voice as VoiceSwitch,
+} from "../lib/speakSwitch";
 import { aroundPhrase, rankForWindow } from "../lib/context";
 import { factKey, factsToRemember, seedAnswers } from "../lib/facts";
 import { describeThought } from "../lib/thought";
@@ -1406,6 +1415,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const answerTargetRef = useRef(answerTarget);
   answerTargetRef.current = answerTarget;
 
+
   // Шаг 57: свой словарь. Человек добавляет слова, которые распознавание не
   // знает, — иначе правка общего словаря не его дело, а повторять громче
   // бесполезно.
@@ -1422,6 +1432,16 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     setWords(next);
     saveWords(typeof window === "undefined" ? null : window.localStorage, next);
   };
+
+  // Шаг 59: ответ голосом выключается одной кнопкой, а не в настройках. И
+  // выключенный голос всё равно проговаривает подтверждение и ошибку: молча
+  // пропустить вопрос об опасном действии хуже, чем нарушить тишину.
+  const [voiceSwitch, setVoiceSwitch] = useState<VoiceSwitch>(VOICE_ON);
+  /** Очередь речи живёт дольше рендера — читаем кнопку из ссылки (шаг 59). */
+  const voiceSwitchRef = useRef(voiceSwitch);
+  voiceSwitchRef.current = voiceSwitch;
+  // Возвращает, зазвучало ли: экран на это опирается, и молча менять сигнатуру
+  // значит сломать вызывающих.
 
   const mic = useVoice({
     local: localEngine,
@@ -1452,6 +1472,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         setAnswers((current) => ({ ...current, [`${target.position}:${target.name}`]: value }));
         setApproved((current) => current.filter((position) => position !== target.position));
         speak(voice.answerHeard(value));
+      // Подтверждение — важное: при выключенном голосе всё равно звучит, и
+      // человеку сказано, почему (шаг 59).
+      {
+        const anyway = sayAnyway("confirm");
+        if (anyway) setDeviceNotice(anyway);
+      }
 
         // Следующий пустой вопрос задаём вслух: человек, который говорит, не смотрит в экран.
         const next = draft?.questions.find(
@@ -1854,7 +1880,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   if (soundRef.current === null) soundRef.current = createAudioMachine();
   if (speechRef.current === null) {
     speechRef.current = createSpeechQueue(
-      (text) => speak(text, "ru-RU", () => speechRef.current?.done()),
+            // Шаг 59: очередь спрашивает у кнопки, звучать ли обычному ответу.
+      // Читаем из ссылки: очередь создана одна и захватила бы старое значение.
+      (text) =>
+        speaks(voiceSwitchRef.current, "answer")
+          ? speak(text, "ru-RU", () => speechRef.current?.done())
+          : false,
+      // Шаг 59: важное (подтверждение, ошибка) зовут мимо обычной очереди —
+      // там `speak` звучит всегда, а `sayAnyway` объясняет человеку, почему
+      // голос зазвучал при выключенной кнопке.
       () => setSpoken(voice.silent),
     );
   }
@@ -2214,6 +2248,21 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </Text>
       ) : null}
 
+      {/* Шаг 59: ответ голосом — одной кнопкой, а не в настройках. Состояние
+          словом, а не значком динамика: значок не читается ни диктором, ни
+          дальтоником, ни тем, кто смотрит в сторону. При выключенном голосе
+          подтверждение и ошибка всё равно звучат (см. speak). */}
+      <div className={styles.answer}>
+        <Button
+          appearance="subtle"
+          // Кнопка не врёт: без движка речи нажимать бесполезно, и это сказано.
+          disabled={!canTurnOn(voiceSwitch)}
+          onClick={() => setVoiceSwitch((current) => toggleVoice(current))}
+          aria-pressed={voiceSwitch.on}
+        >
+          {voiceWord(voiceSwitch)}
+        </Button>
+      </div>
       {/* Шаг 57: свой словарь. Человек добавляет слова, которые распознавание не
           знает, — и сразу работает, без «применить»: отложенное действие не
           сделают. Сказано, сколько слов и сколько ещё поместится; удаление —
