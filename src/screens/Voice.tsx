@@ -108,7 +108,17 @@ import {
 } from "../lib/loop";
 import { subscribeGlobalTalk } from "../lib/globalTalk";
 import { useVoice } from "../lib/useVoice";
-import { describePlanParams } from "../lib/planPreview";
+import {
+  describePlanParams,
+  gaps as previewGaps,
+  lines as previewLines,
+  riskOf,
+  riskWord as previewRiskWord,
+  safe as previewSafe,
+  scope as previewScope,
+  type Preview as PlanPreviewView,
+  type Step as PreviewStep,
+} from "../lib/planPreview";
 import { ActionList } from "../components/ActionList";
 import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
@@ -3047,6 +3057,47 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           </Text>
         </div>
       ) : null}
+
+      {/* Шаг 101: до запуска видно цель, шаги, риск и что изменится. Подробности
+          за кнопкой не читают: согласие дают на то, что видно при нажатии. */}
+      {draft?.plan ? (() => {
+        const steps: PreviewStep[] = draft.plan.steps.map((step, index) => {
+          const gate = (draft.gates ?? []).find((item) => item.position === index);
+          return {
+            what: step.why ?? step.registry,
+            // Что изменит шаг — словами действия, а не параметрами: параметры
+            // уже показаны выше, и второй раз они читаются как другой факт.
+            changes: step.why ?? "изменит файлы по параметрам шага",
+            risk: riskOf(gate?.risk ?? "read"),
+            // Отмена не возвращает уже сделанное: это другой факт, чем риск.
+            undoable: gate?.risk === "read" || gate?.risk === "write-local",
+          };
+        });
+        const view: PlanPreviewView = { goal: draft.plan.goal, steps };
+        return (
+          <div className={styles.section}>
+            <Text className={styles.title}>Что будет сделано</Text>
+            {previewLines(view).map((line) => (
+              <Text key={line} className={styles.note} role={previewSafe(view) ? "status" : "alert"} aria-live="polite">
+                {line}
+              </Text>
+            ))}
+            <Text className={styles.note}>
+              {previewScope(steps.length, draft.plan.goal)}
+            </Text>
+            {previewGaps(view).length > 0 ? (
+              <Text className={styles.note}>
+                не названо: {previewGaps(view).join(", ")} — спрошу до запуска
+              </Text>
+            ) : null}
+            {previewSafe(view) ? null : (
+              <Text className={styles.note}>
+                риск: {previewRiskWord(view.steps.reduce((high, item) => (high === "read" ? item.risk : high), "read" as PreviewStep["risk"]))} — согласие на слепой запуск это не согласие
+              </Text>
+            )}
+          </div>
+        );
+      })() : null}
 
       {/* Шаг 95: две разные руки — один короткий вопрос из того, что нашлось.
           Вариант меню — не вопрос, а отказ; десять вариантов — меню, а не выбор. */}
