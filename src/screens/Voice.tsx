@@ -114,6 +114,12 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  accept as acceptIntent,
+  say as sayIntent,
+  share as intentShare,
+  worthTwo as intentWorthTwo,
+} from "../lib/intentModel";
+import {
   measure as measureSpeed,
   say as saySpeed,
   stale as speedStale,
@@ -1487,6 +1493,18 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     { name: "bge-m3", sizeMb: 560, code: false, embed: true },
   ];
   const roleChoices = rolesPlan(roleModels);
+  // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
+  // семь секунд, пока 7B разберётся, что это две команды.
+  const knownCommands = ["открыть", "закрыть", "найти", "архивировать", "напечатать"];
+  const [intentStats, setIntentStats] = useState({ cheap: 0, big: 0 });
+  const tryIntent = (command: string | null, sure: number) => {
+    const verdict = acceptIntent(command, sure, knownCommands);
+    setIntentStats((current) => ({
+      cheap: current.cheap + (verdict.ok ? 1 : 0),
+      big: current.big + (verdict.ok ? 0 : 1),
+    }));
+    return verdict;
+  };
 
   // Шаг 65: замер на этой машине. Первый прогон выбрасывается — он читает
   // модель с диска и греет кеш, и цифра была бы занижена.
@@ -1608,6 +1626,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       }
 
       setText(heard);
+      // Шаг 66: сначала дешёвый разбор. Если он уверен — большая модель не
+      // просыпается; если нет, разбирается она, и это сказано.
+      const guess = tryIntent(heard.split(/\s+/)[0] ?? null, 0.7);
+      if (!guess.ok) {
+        // Не ошибка: это нормальный путь для сложной фразы.
+      }
       // Шаг 60: журнал. Пока «что понято» и «что сделано» ещё неизвестны —
       // допишем их, когда разбор закончится; главное, что услышанное уже
       // записано: если разбор упадёт, останется хотя бы это.
@@ -2402,6 +2426,29 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             после прогрева
           </Text>
         )}
+      </div>
+
+      {/* Шаг 66: дешёвая модель разбирает намерение, большая не просыпается.
+          Сказано, сколько фраз дешёвая закрывает сама: меньше половины значит,
+          что вторая модель только занимает память. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Разбор намерения</Text>
+        <Text className={styles.note}>
+          {intentStats.cheap + intentStats.big === 0
+            ? "быстрая модель разбирает простые фразы — 7B для этого не нужна"
+            : sayIntent({ ok: true, command: "команда", sure: 1 })}
+        </Text>
+        {intentStats.cheap + intentStats.big > 0 ? (
+          <Text className={styles.note}>
+            быстро разобрано {intentStats.cheap} из {intentStats.cheap + intentStats.big} (
+            {Math.round(intentShare(intentStats) * 100)}%)
+            {intentWorthTwo(intentStats) ? "" : " — вторая модель пока больше занимает память, чем помогает"}
+          </Text>
+        ) : null}
+        <Text className={styles.note}>
+          чтобы проверить: скажите простую фразу и посмотрите, ушла ли она большой
+          модели
+        </Text>
       </div>
 
       {/* Шаг 63: лестница моделей. Предлагается самая большая из **влезающих**:
