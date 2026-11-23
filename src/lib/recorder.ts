@@ -73,6 +73,39 @@ interface StreamLike {
 
 interface MediaDevicesLike {
   getUserMedia(constraints: unknown): Promise<StreamLike>;
+  /**
+   * Список устройств (шаг 54). Необязателен: браузер может его не дать, и это
+   * не повод не работать — тогда берём системное устройство по умолчанию.
+   */
+  enumerateDevices?(): Promise<
+    { kind?: string; deviceId?: string; label?: string }[]
+  >;
+}
+
+/**
+ * Устройства ввода звука и то, какое из них сейчас по умолчанию (шаг 54).
+ *
+ * Нужно, чтобы подключённая гарнитура подхватывалась без перезапуска, а пропажа
+ * прежнего микрофона была сказана словами, а не молчанием. Ошибку чтения
+ * глотаем: список — подсказка, а не условие записи.
+ */
+export async function inputDevices(): Promise<{
+  inputs: { id: string; label: string }[];
+  defaultId: string | null;
+}> {
+  const devices = (navigator as unknown as { mediaDevices?: MediaDevicesLike }).mediaDevices;
+  if (typeof devices?.enumerateDevices !== "function") return { inputs: [], defaultId: null };
+  try {
+    const all = await devices.enumerateDevices();
+    const inputs = all
+      .filter((device) => device.kind === "audioinput" && device.deviceId)
+      .map((device) => ({ id: device.deviceId ?? "", label: device.label ?? "" }));
+    // Браузер не говорит, какое устройство по умолчанию, но **ставит его
+    // первым**. Это единственный доступный признак, и он верный.
+    return { inputs, defaultId: inputs[0]?.id ?? null };
+  } catch {
+    return { inputs: [], defaultId: null };
+  }
 }
 
 /** Есть ли микрофон, за которым можно пойти. */

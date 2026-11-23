@@ -5,7 +5,13 @@ import { startRecording, type FrameSink, type Recorder } from "./recorder";
 import { listen, type VoiceListeners } from "./voice";
 import { useVoice } from "./useVoice";
 
-vi.mock("./recorder", () => ({ microphoneAvailable: () => true, startRecording: vi.fn() }));
+vi.mock("./recorder", () => ({
+  microphoneAvailable: () => true,
+  startRecording: vi.fn(),
+  // Шаг 54: список устройств читается перед каждой фразой. Здесь устройств нет —
+  // переключаться не на что; сам разбор списка проверяется в micSwitch.test.ts.
+  inputDevices: vi.fn(async () => ({ inputs: [], defaultId: null })),
+}));
 vi.mock("./voice", () => ({ listen: vi.fn(() => ({ stop: vi.fn() })), stopSpeaking: vi.fn(), speechSupported: () => true }));
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 function deferred<T>() {

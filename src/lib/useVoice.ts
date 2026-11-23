@@ -19,6 +19,8 @@ import { microphoneAvailable, startRecording, type Recorder } from "./recorder";
 import { createVad, type Vad } from "./vad";
 import { bandEnergy, classify, createHistory } from "./voiceActivity";
 import { listen, speechSupported, stopSpeaking, type Voice } from "./voice";
+import { inputDevices } from "./recorder";
+import { saySwitch, switchTo } from "./micSwitch";
 
 /** Сколько ждём разбор после того, как человек отпустил кнопку. */
 export const GRACE_MS = 2500;
@@ -28,6 +30,13 @@ export interface VoiceOptions {
   onText(text: string): void;
   /** Почему услышать не удалось. */
   onError(message: string): void;
+  /**
+   * Не ошибка, но сказать надо (шаг 54): сменился микрофон, пропал прежний.
+   *
+   * Отдельно от `onError`: это не сбой, и говорить о нём упрёком значит
+   * напугать человека на ровном месте.
+   */
+  onNotice?(message: string): void;
   /** Включить удержание Ctrl+Space. По умолчанию да. */
   hotkey?: boolean;
   /** Разрешено ли запускать микрофон на текущем экране/маршруте. */
@@ -98,6 +107,7 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   const {
     onText,
     onError,
+    onNotice,
     hotkey = true,
     grace = GRACE_MS,
     nothingHeard = "не разобрал — попробуйте ещё раз",
@@ -116,6 +126,8 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   const graceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heardRef = useRef(false);
   const activeRef = useRef(false);
+  /** Микрофон, с которым работали в прошлый раз (шаг 54). */
+  const deviceId = useRef<string | null>(null);
   // ASR is an input trust boundary: a superseded/cancelled capture must never
   // deliver text (and therefore a task), even if the native request finishes later.
   const pending = useRef(false);
@@ -160,8 +172,8 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   const discardRef = useRef(false);
 
   // Колбэки живут в ссылке: иначе каждое изменение пропсов пересоздавало бы слушание.
-  const callbacks = useRef({ onText, onError, nothingHeard, local });
-  callbacks.current = { onText, onError, nothingHeard, local };
+  const callbacks = useRef({ onText, onError, onNotice, nothingHeard, local });
+  callbacks.current = { onText, onError, onNotice, nothingHeard, local };
   const permission = useRef({ enabled, disabledReason });
   permission.current = { enabled, disabledReason };
 
@@ -373,6 +385,20 @@ export function useVoice(options: VoiceOptions): VoiceControl {
       return;
     }
     if (activeRef.current) return;
+
+    // Шаг 54: устройство выбирается заново **перед каждой фразой**, а не один
+    // раз при запуске. Иначе подключённая гарнитура остаётся без дела, и
+    // человек говорит в неё, не понимая, почему его не слышат. Проверка идёт
+    // до записи: переключаться посреди фразы — значит склеить два голоса.
+    void inputDevices().then((list) => {
+      if (list.inputs.length === 0) return;
+      const devices = { ...list, currentId: deviceId.current };
+      const nextId = switchTo(devices);
+      if (nextId === null) return;
+      deviceId.current = nextId;
+      const said = saySwitch(devices, nextId);
+      if (said) callbacks.current.onNotice?.(said);
+    });
 
     invalidate();
     capture.current = new AbortController();

@@ -1436,6 +1436,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       search(heard);
     },
     onError: (message) => setVoiceError(message),
+    // Шаг 54: смена микрофона — не ошибка, а новость. Сказана словами, а не
+    // молчанием: иначе человек говорит в гарнитуру, не зная, слышат ли его.
+    onNotice: (message) => setDeviceNotice(message),
   });
   micStopRef.current = () => {
     mic.stop();
@@ -1449,6 +1452,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // не должно становиться «без микрофона на день»: пауза сама кончается и
   // говорит об этом, а недоговорённое не теряется.
   const [micPause, setMicPause] = useState<Pause>(PAUSE_RUNNING);
+  /** Что сменилось с микрофоном (шаг 54): говорим, а не молчим. */
+  const [deviceNotice, setDeviceNotice] = useState<string | null>(null);
   useEffect(() => {
     if (!micPause.paused) return;
     const step = window.setInterval(() => {
@@ -2155,6 +2160,11 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       {micPause.paused ? (
         <Text className={styles.note} role="status" aria-live="polite">
           {pauseSay ?? pauseWord(micPause)}
+        </Text>
+      ) : null}
+      {deviceNotice ? (
+        <Text className={styles.note} role="status" aria-live="polite">
+          {deviceNotice}
         </Text>
       ) : null}
 
