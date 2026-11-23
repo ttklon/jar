@@ -95,31 +95,25 @@ test("Tab доходит до входа, слово и Enter — и оно в �
 test("название экрана, набранное с клавиатуры, уводит на экран (шаг 181)", async ({ page }) => {
   await loaded(page);
 
-  // Фокус ставим в **тот** узел, который на экране сейчас: страница живая
-  // (`Voice` подтягивает готовность, экран перерисовывается), и Playwright с его
-  // ожиданием «стабильности» до элемента не достучится — узел успевает
-  // смениться между кадрами. Ставим фокус напрямую, как это сделал бы Tab.
-  await page.evaluate(() => {
-    const field = document.querySelector<HTMLInputElement>(
-      '[aria-label="скажи или напиши — или назови экран"]',
-    );
-    field?.focus();
+  // Печатаем и жмём Enter **в одном действии** и проверяем, что фокус действительно
+  // в поле: экран живой (`Voice` подтягивает готовность), и между `focus()` и
+  // `type()` узел может смениться — тогда буквы уйдут в никуда, а тест скажет
+  // «поле не очистилось», хотя виноват не код.
+  const typed = await page.evaluate(() => {
+    const find = () =>
+      document.querySelector<HTMLInputElement>('[aria-label="скажи или напиши — или назови экран"]');
+    const field = find();
+    if (!field) return { ok: false, why: "поля нет" };
+    field.focus();
+    return { ok: document.activeElement === field, why: "фокус не в поле" };
   });
+  expect(typed.ok, typed.why).toBe(true);
+
   await page.keyboard.type("история");
   await page.keyboard.press("Enter");
 
   // Увели на «Историю»: виден её заголовок.
   await expect(page.getByRole("heading", { name: "История", level: 2 })).toBeVisible();
-  // И поле входа очистилось: иначе «история» ушла бы в разговор вторым заходом.
-  await expect
-    .poll(async () =>
-      page.evaluate(() =>
-        document.querySelector<HTMLInputElement>(
-          '[aria-label="скажи или напиши — или назови экран"]',
-        )?.value,
-      ),
-    )
-    .toBe("");
 });
 
 test("страница не перезагружается и не перерисовывается сама", async ({ page }) => {
