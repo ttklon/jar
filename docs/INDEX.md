@@ -103,6 +103,7 @@
 | `collect_sources.py` | сбор источников в research/ |
 | `dashboard.py` | DASHBOARD.md + INDEX.md (этот индекс) |
 | `deps_report.py` | стек и лицензии → docs/DEPENDENCIES.md |
+| `done_words.py` | — |
 | `ecosystem.py` | валидатор экосистемы → docs/ECOSYSTEM.md |
 | `evals.py` | план проверок → docs/EVALS.md, data/evals.json |
 | `flows.py` | валидатор сценариев: шаги из реальных рук, риск не занижен |
