@@ -126,6 +126,7 @@ import { canRun as jokeCanRun, check as checkJoke, say as sayJoke, type Dangerou
 import { go as handGo, need as handNeed, question as handQuestion, type Option as HandOption } from "../lib/whichHand";
 import { apply as contextApply, gaps as contextGaps, parse as parseContext, say as sayContext, type Context as KeptContext } from "../lib/contextKeep";
 import { check as checkUnderstood, run as understoodRuns, say as sayUnderstood, where as whereUnderstood } from "../lib/notUnderstood";
+import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import {
   find as findYesterday,
   nothing as nothingYesterday,
@@ -1439,6 +1440,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       return;
     }
 
+    // Шаг 98: вычистка **до** отправки. Фраза уходит модели и в журнал уже без
+    // секрета; место помечено, чтобы разбор не потерял «про пароль».
+    const scrubbed = cleanSecrets(query);
+    setSecretSay(saySecrets(scrubbed) === "" ? null : saySecrets(scrubbed));
+    const safeQuery = secretsForLog(scrubbed);
+
     // Фраза стала делом — черновик убран (шаг 26). Иначе на следующем запуске
     // человек видит свой же прошлый вопрос и решает, что он не ушёл.
     clearDraft();
@@ -1450,17 +1457,17 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     // исполнения: цена ошибки тут стёртое. Разбор один на обе ветки — и голос, и
     // набранную фразу: иначе кнопка «Найти» обходила бы весь раздел «Мозг».
     {
-      const parsed = parseIntent(query);
-      setDeeds(splitDeeds(query));
-      setNegation(parseNegation(query));
-      setHeardIntent(query);
+      const parsed = parseIntent(safeQuery);
+      setDeeds(splitDeeds(safeQuery));
+      setNegation(parseNegation(safeQuery));
+      setHeardIntent(safeQuery);
       setSaidIntent(intentWords(parsed));
       // Шаг 91: «когда» отдельно от «что». «Завтра в девять» не исполняется
       // сейчас: сделать сегодня то, что просили на завтра, видно не сразу.
       // Шаг 97: не понято — **ничего не запускается**, включая похожее чтение:
       // похожее сходит за ответ и приучает не читать.
       {
-        const intentNow = parseIntent(query);
+        const intentNow = parseIntent(safeQuery);
         const lost = whereUnderstood(query) ?? checkUnderstood(intentNow);
         setLostSay(understoodRuns(lost) ? null : sayUnderstood(lost));
         if (!understoodRuns(lost)) setApproved([]);
@@ -1468,7 +1475,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       // Шаг 96: «а теперь то же с другой папкой». Разбор идёт по прошлому
       // разложению; заменяется **только названное**, и опасность наследуется.
       {
-        const result = parseContext(query, keptPhrase);
+        const result = parseContext(safeQuery, keptPhrase);
         if (/то\s+же|так\s+же/i.test(query)) {
           const next = contextApply(keptPhrase as KeptContext, result);
           const missing = contextGaps(result);
@@ -1495,15 +1502,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       // Шаг 94: опасное намерение распознаётся в любой форме, и шутка не
       // оправдывает: интонации нет, а цена необратима.
       {
-        const risky = checkJoke(query);
+        const risky = checkJoke(safeQuery);
         setDanger(risky);
         if (!jokeCanRun(risky)) setApproved([]);
       }
       // Шаг 93: человек не обязан знать реестр. Намерение находится по его
       // словам, а пересечение не решается молча — его увидит человек.
       {
-        const found = synonymIntents(query);
-        const both = synonymCollision(query);
+        const found = synonymIntents(safeQuery);
+        const both = synonymCollision(safeQuery);
         setSynonymSay(
           both.length > 1
             ? [`во фразе два намерения (${both.join(" и ")}) — скажите, какое`, ...both.map((intent) => saySynonym(intent))]
@@ -1514,10 +1521,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       }
       // Шаг 92: количество — отдельным разбором. «Несколько» не превращается в
       // число, а диапазон не схлопывается в одно.
-      const count = parseAmount(query);
+      const count = parseAmount(safeQuery);
       setAmount(count);
       if (!amountEnough(count)) setApproved([]);
-      const when = parseWhen(query, Date.now());
+      const when = parseWhen(safeQuery, Date.now());
       setWhenPlan(when);
       if (!whenReady(when, Date.now())) setApproved([]);
       // Шаг 86: «готово» — только когда шаг сходится с фразой.
@@ -1743,6 +1750,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [sameSay, setSameSay] = useState<string | null>(null);
   // Шаг 97: не понял — не запускает ничего и говорит, что не понято.
   const [lostSay, setLostSay] = useState<string | null>(null);
+  // Шаг 98: секреты вычищаются **до** отправки — после отправки уже поздно.
+  const [secretSay, setSecretSay] = useState<string | null>(null);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -2930,6 +2939,17 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </>
             );
           })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 98: секрет вычищен до отправки. Сказано, что уйдёт модели, — иначе
+          человек решит, что его не поняли. */}
+      {secretSay !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Секрет</Text>
+          <Text className={styles.note} role="alert" aria-live="polite">
+            {secretSay}
+          </Text>
         </div>
       ) : null}
 
