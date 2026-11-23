@@ -114,6 +114,13 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  fallback as codeFallback,
+  isCode,
+  load as codeLoad,
+  pick as pickModel,
+  say as sayModel,
+} from "../lib/codeModel";
+import {
   PHRASES as COMPARE_PHRASES,
   ready as compareReady,
   say as sayCompare,
@@ -1557,6 +1564,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // придумывать фразы и произносить дважды никто не станет — потому одна кнопка.
   const [compareText, setCompareText] = useState("");
   const [compareSay, setCompareSay] = useState<string | null>(null);
+  // Шаг 77: кодовая модель — отдельно и только на код. Если она загружена «на
+  // всякий случай», разговор идёт через неё же и ждётся втрое дольше.
+  const [codeTask, setCodeTask] = useState(false);
+  const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
   const knownCommands = ["открыть", "закрыть", "найти", "архивировать", "напечатать"];
@@ -1745,6 +1756,13 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       }
 
       setText(heard);
+      // Шаг 77: маршрут по задаче. Код уходит на кодовую модель, разговор —
+      // на обычную; кодовая не грузится, пока код не попросили.
+      const wantsCode = isCode(heard);
+      const route = pickModel(wantsCode ? "code" : "talk", "1.5B", codeModel);
+      setCodeTask(wantsCode);
+      setDeviceNotice(sayModel(route));
+      if (route.model === null && wantsCode) setDeviceNotice(codeFallback("1.5B"));
       // Шаг 74: фраза — это работа; таймер простоя начинается заново.
       touchModel();
       // Шаг 68: текст фразы — в кэш токенизации. Повтор и продолжение реплики
@@ -2700,6 +2718,21 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           })()}
         </div>
       ) : null}
+
+      {/* Шаг 77: код и разговор — разные модели. Сказано, какая отвечает:
+          иначе разная длина ответов выглядит как нестабильность. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Код и разговор</Text>
+        <Text className={styles.note}>
+          {sayModel(pickModel(codeTask ? "code" : "talk", "1.5B", codeModel))}
+        </Text>
+        <Text className={styles.note}>
+          кодовая модель {codeLoad(codeModel, codeTask ? "code" : "talk", false) ? "загружается" : "лежит файлом и не занимает память"}
+        </Text>
+        <Button appearance="subtle" onClick={() => setCodeTask((current) => !current)}>
+          {codeTask ? "Сейчас задача кода — переключить на разговор" : "Сейчас разговор — переключить на код"}
+        </Button>
+      </div>
 
       {/* Шаг 76: сравнение двух моделей на пяти своих фразах. Ответы рядом, а не
           по очереди: по очереди сравнение требует памяти, а человек предыдущий
