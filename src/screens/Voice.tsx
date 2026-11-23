@@ -147,6 +147,7 @@ import {
 } from "../lib/consentStep";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
+import { already as repeatAlready, decide as repeatDecide, offer as repeatOffer } from "../lib/repeatDeed";
 import { attention as reportAttention, one as oneReport, summary as reportSummary, whole as wholeReport } from "../lib/oneReport";
 import { answer as handAnswer, coverage as handCoverage, line as handLine, worst as handWorst } from "../lib/handAnswer";
 import { finished as cancelFinished, say as cancelSay, stop as cancelStop, start as cancelStart } from "../lib/cancelRun";
@@ -3407,6 +3408,48 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         >
           Сделать как вчера
         </Button>
+        {/* Шаг 107: повтор — другого дела, если данные изменились. Поэтому
+            сначала разница, и только потом **один** вопрос: второй «вы уверены»
+            обесценивает первый. */}
+        {report !== null ? (
+          (() => {
+            const steps = report.steps.length;
+            const done = report.steps.filter((step) => step.status === "ok").length;
+            // Прошлое дело — из истории, а не этот же отчёт: сравнение с самим
+            // собой всегда «ничего не изменится», и это враньё.
+            const lastDone = phrases.find((line) => line.did) ?? null;
+            const offer = repeatOffer(
+              [{ what: "шагов плана", then: lastDone === null ? null : steps, now: steps }],
+              steps > 0,
+              steps > 0 ? "" : "в прошлом деле не было шагов — повторять нечего",
+            );
+            const said = repeatAlready(done, steps, "шагов");
+
+            return (
+              <>
+                <Text className={styles.note} role="status" aria-live="polite">
+                  {offer.preview}
+                </Text>
+                {said ? <Text className={styles.note}>{said}</Text> : null}
+                <Button
+                  appearance="subtle"
+                  size="small"
+                  onClick={() => {
+                    const answer = repeatDecide(true, offer);
+                    setRepeatSay([answer.said]);
+                    // Один вопрос — один ответ: согласие дано на показанную разницу.
+                    if (answer.run) {
+                      setApproved(report.steps.map((step) => step.position));
+                    }
+                  }}
+                >
+                  {offer.question || "Повторить"}
+                </Button>
+              </>
+            );
+          })()
+        ) : null}
+
         {repeatSay !== null ? (
           repeatSay.map((line) => (
             <Text key={line} className={styles.note} role="status" aria-live="polite">
