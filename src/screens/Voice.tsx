@@ -102,6 +102,7 @@ import { useVoice } from "../lib/useVoice";
 import { describePlanParams } from "../lib/planPreview";
 import { ActionList } from "../components/ActionList";
 import { clearDraft, readDraft, saveDraft } from "../lib/draft";
+import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { markMicExplained, micExplained } from "../lib/firstRun";
 import { voice, microphoneCheck as micTestText } from "../i18n/ru";
 
@@ -1429,6 +1430,20 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     draft?.gates.some(
       (gate) => gate.decision === "confirm" && !approved.includes(gate.position),
     ) === true;
+  // Слово у микрофона всегда (шаг 49): цвет — подсказка, слово — ответ. Его
+  // видно на экране и передаётся в трей.
+  const micState: MicState = voiceError
+    ? "error"
+    : mic.processing
+      ? "parsing"
+      : mic.listening
+        ? "listening"
+        : waitingForConfirmation
+          ? "asking"
+          : busy || thinking
+            ? "thinking"
+            : "closed";
+
   const trayVoiceState = voiceError
     ? "error"
     : mic.processing
@@ -2047,6 +2062,18 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           знать, что здесь это ещё не проверяли, прежде чем нажмёт кнопку, —
           иначе первая же неудача читается как «приложение сломано», хотя
           проверено просто не было. */}
+      {/* Явный индикатор (шаг 49): слово, а не только цвет кнопки. Цвет не
+          видит дальтоник, не слышит диктор и не замечает тот, кто смотрит в
+          сторону; человек говорит в пустоту и решает, что приложение сломалось. */}
+      <Text
+        className={styles.note}
+        // Живая область: смена состояния проговаривается, а не только рисуется.
+        aria-live="polite"
+        aria-label={sayWord(micState)}
+      >
+        {MIC_WORD[micState]}
+      </Text>
+
       {/* Только граница, без повтора того, что уже сказала карточка выше: если
           распознавание готово, «работает здесь» там уже написано, и второй раз
           это шум. */}
