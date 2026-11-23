@@ -121,6 +121,7 @@ import { check as checkFit, say as sayFit, stop as fitStops } from "../lib/doesI
 import { worst as parseWorst, type Outcome as ParseOutcome, type Row as ParseRow } from "../lib/parseLog";
 import { ambiguous as whenAmbiguous, parse as parseWhen, ready as whenReady, say as sayWhen, type When as WhenPlan } from "../lib/whenTo";
 import { enough as amountEnough, parse as parseAmount, say as sayAmount, type Amount } from "../lib/amount";
+import { collision as synonymCollision, intents as synonymIntents, say as saySynonym } from "../lib/synonyms";
 import {
   find as findYesterday,
   nothing as nothingYesterday,
@@ -1452,6 +1453,19 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       setSaidIntent(intentWords(parsed));
       // Шаг 91: «когда» отдельно от «что». «Завтра в девять» не исполняется
       // сейчас: сделать сегодня то, что просили на завтра, видно не сразу.
+      // Шаг 93: человек не обязан знать реестр. Намерение находится по его
+      // словам, а пересечение не решается молча — его увидит человек.
+      {
+        const found = synonymIntents(query);
+        const both = synonymCollision(query);
+        setSynonymSay(
+          both.length > 1
+            ? [`во фразе два намерения (${both.join(" и ")}) — скажите, какое`, ...both.map((intent) => saySynonym(intent))]
+            : found[0] === "неизвестно"
+              ? []
+              : [saySynonym(found[0] as Parameters<typeof saySynonym>[0])],
+        );
+      }
       // Шаг 92: количество — отдельным разбором. «Несколько» не превращается в
       // число, а диапазон не схлопывается в одно.
       const count = parseAmount(query);
@@ -1656,6 +1670,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [whenPlan, setWhenPlan] = useState<WhenPlan | null>(null);
   // Шаг 92: «сколько» и «какие именно» — числа, диапазоны, даты.
   const [amount, setAmount] = useState<Amount | null>(null);
+  // Шаг 93: намерение своими словами — «почисти», «освободи место», «убери мусор».
+  const [synonymSay, setSynonymSay] = useState<string[]>([]);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -2843,6 +2859,19 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </>
             );
           })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 93: человек говорит своими словами — «почисти», «убери мусор»;
+          реестр знать не обязан. */}
+      {synonymSay.length > 0 ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Что вы хотели</Text>
+          {synonymSay.map((line) => (
+            <Text key={line} className={styles.note} role="status" aria-live="polite">
+              {line}
+            </Text>
+          ))}
         </div>
       ) : null}
 
