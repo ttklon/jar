@@ -2043,6 +2043,17 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             : voice.hold}
       </Button>
 
+      {/* Шаг 16: граница видна **до** нажатия, а не после. Человек имеет право
+          знать, что здесь это ещё не проверяли, прежде чем нажмёт кнопку, —
+          иначе первая же неудача читается как «приложение сломано», хотя
+          проверено просто не было. */}
+      {/* Только граница, без повтора того, что уже сказала карточка выше: если
+          распознавание готово, «работает здесь» там уже написано, и второй раз
+          это шум. */}
+      {speech?.found && speech?.model ? null : (
+        <Text className={styles.note}>{voice.notProvenHere}</Text>
+      )}
+
       <Switch
         checked={always}
         disabled={!mic.alwaysSupported}
