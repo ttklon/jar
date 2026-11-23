@@ -125,6 +125,7 @@ import { collision as synonymCollision, intents as synonymIntents, say as saySyn
 import { canRun as jokeCanRun, check as checkJoke, say as sayJoke, type Dangerous } from "../lib/joking";
 import { go as handGo, need as handNeed, question as handQuestion, type Option as HandOption } from "../lib/whichHand";
 import { apply as contextApply, gaps as contextGaps, parse as parseContext, say as sayContext, type Context as KeptContext } from "../lib/contextKeep";
+import { check as checkUnderstood, run as understoodRuns, say as sayUnderstood, where as whereUnderstood } from "../lib/notUnderstood";
 import {
   find as findYesterday,
   nothing as nothingYesterday,
@@ -1456,6 +1457,14 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       setSaidIntent(intentWords(parsed));
       // Шаг 91: «когда» отдельно от «что». «Завтра в девять» не исполняется
       // сейчас: сделать сегодня то, что просили на завтра, видно не сразу.
+      // Шаг 97: не понято — **ничего не запускается**, включая похожее чтение:
+      // похожее сходит за ответ и приучает не читать.
+      {
+        const intentNow = parseIntent(query);
+        const lost = whereUnderstood(query) ?? checkUnderstood(intentNow);
+        setLostSay(understoodRuns(lost) ? null : sayUnderstood(lost));
+        if (!understoodRuns(lost)) setApproved([]);
+      }
       // Шаг 96: «а теперь то же с другой папкой». Разбор идёт по прошлому
       // разложению; заменяется **только названное**, и опасность наследуется.
       {
@@ -1732,6 +1741,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // папкой» меняет путь, а остальное остаётся.
   const [keptPhrase, setKeptPhrase] = useState<KeptContext | null>(null);
   const [sameSay, setSameSay] = useState<string | null>(null);
+  // Шаг 97: не понял — не запускает ничего и говорит, что не понято.
+  const [lostSay, setLostSay] = useState<string | null>(null);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -2919,6 +2930,17 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </>
             );
           })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 97: «не понял» — результат, а не пустота. Сказано, что не понято,
+          и есть пример, как сказать иначе. */}
+      {lostSay !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Не понял</Text>
+          <Text className={styles.note} role="alert" aria-live="polite">
+            {lostSay}
+          </Text>
         </div>
       ) : null}
 
