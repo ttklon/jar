@@ -114,6 +114,12 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  cacheMb as windowCache,
+  say as sayWindow,
+  wasteful as windowWasteful,
+  windowFor,
+} from "../lib/contextWindow";
+import {
   accept as acceptIntent,
   say as sayIntent,
   share as intentShare,
@@ -2426,6 +2432,22 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             после прогрева
           </Text>
         )}
+      </div>
+
+      {/* Шаг 67: окно памяти по задаче. «С запасом» платит памятью и временем
+          всегда: внимание считается по всему окну, и пустое место в нём тоже. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Память контекста</Text>
+        <Text className={styles.note}>{sayWindow("voice")}</Text>
+        <Text className={styles.note}>{sayWindow("chat")}</Text>
+        <Text className={styles.note}>{sayWindow("plan")}</Text>
+        <Text className={styles.note}>{sayWindow("code")}</Text>
+        {windowWasteful("voice", windowFor("code")) ? (
+          <Text className={styles.note}>
+            одно окно на всё — это потеря: голосу хватает {windowFor("voice")} токенов
+            ({windowCache("voice")} МБ вместо {windowCache("code")} МБ)
+          </Text>
+        ) : null}
       </div>
 
       {/* Шаг 66: дешёвая модель разбирает намерение, большая не просыпается.
