@@ -114,6 +114,14 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  asFile as modelAsFile,
+  damage as hashDamage,
+  intact as hashIntact,
+  looksLikeQuota,
+  missing as modelMissing,
+  promise as noQuotaPromise,
+} from "../lib/noQuota";
+import {
   clear as clearTokens,
   put as putTokens,
   resume as resumeTokens,
@@ -550,6 +558,14 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       status = await readinessStatus();
     } catch {
       return { kind: "unknown" };
+    }
+    // Шаг 69: модель — файл с хешем; это единственное условие работы.
+    if (status?.model_present && status.model_spec) {
+      setModelFile({
+        name: status.model_spec.file,
+        sha256: status.model_spec.sha256,
+        size: status.model_spec.bytes,
+      });
     }
     const need = installedEngine(status);
     if (need === "running") return { kind: "started" };
@@ -1527,6 +1543,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // пересчитывалось всё; кэш живёт ради скорости и ограничен.
   const [tokenCache, setTokenCache] = useState<TokenEntry[]>([]);
   const [tokensSkipped, setTokensSkipped] = useState(0);
+  // Шаг 69: квоты нет. Файл модели и его хеш — единственное условие работы;
+  // счётчика нет не потому, что «не показываем», а потому что нечего показывать.
+  const [modelFile, setModelFile] = useState<{ name: string; sha256: string; size: number } | null>(null);
+  // Шаг 69: файл и его хеш берутся из **настоящего** статуса готовности, а не
+  // выдумываются. Нет файла — нечего показывать как «работает».
+  const modelReady = modelFile !== null && hashIntact(modelFile, modelFile.sha256);
   /** Токенизатор = имя выбранной модели: после смены кэш негоден. */
   const tokenizer = rolesPlan(roleModels)[0]?.model?.name ?? "none";
   const reuseTokens = (text: string, tokens: number[]) => {
@@ -2454,6 +2476,26 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             после прогрева
           </Text>
         )}
+      </div>
+
+      {/* Шаг 69: квоты и счёта нет — модели лежат файлами. Обещание через
+          отсутствие механизма сильнее, чем «мы не будем»: нечему ломаться. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Модели — файлы на этом компьютере</Text>
+        <Text className={styles.note}>{noQuotaPromise()}</Text>
+        {modelFile === null ? (
+          <Text className={styles.note}>{modelMissing("модель")}</Text>
+        ) : modelReady ? (
+          <Text className={styles.note}>{modelAsFile(modelFile)}</Text>
+        ) : (
+          // Хеш не совпал: файл повреждён или подменён — запускать нельзя.
+          <Text className={styles.note}>{hashDamage(modelFile)}</Text>
+        )}
+        <Text className={styles.note}>
+          {looksLikeQuota(noQuotaPromise())
+            ? "в обещании затесался счётчик — это ошибка"
+            : "счётчика здесь нет ни в каком виде: ни баланса, ни «осталось фраз»"}
+        </Text>
       </div>
 
       {/* Шаг 68: кэш токенизации. Экономия названа числом, а не «работает»:

@@ -2415,4 +2415,21 @@ describe("локальное распознавание на экране", () =
     );
     expect(screen.getByRole("button", { name: "голос включён" })).toBeTruthy();
   });
+
+  it("на экране нет ни квоты, ни счёта (шаг 69)", async () => {
+    // Человек, увидев счётчик, начинает считать фразы и говорить короче: он
+    // платит вниманием за то, что обещали бесплатно.
+    localStorage.removeItem("zshelper.mic.explained");
+    vi.mocked(speechStatus).mockResolvedValue(FOUND);
+
+    render(<Voice />);
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
+
+    // Обещание названо, и названы три вещи, которых нет.
+    expect(screen.getByText(/ни квоты, ни счёта, ни отправки наружу/)).toBeTruthy();
+    // А счётчика — нет: не «не показываем», а нечего показывать.
+    const page = document.body.textContent ?? "";
+    expect(page).not.toMatch(/осталось \d+ (фраз|запрос)/i);
+    expect(page).not.toMatch(/ваш баланс/i);
+  });
 });
