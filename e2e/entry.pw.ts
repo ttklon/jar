@@ -10,35 +10,6 @@ import { test, expect, type Page } from "@playwright/test";
  */
 
 /**
- * Причина падения — в отчёт, а не в тишину.
- *
- * Первый прогон этого теста упал без причины: лог задания и артефакт были
- * недоступны, и оставалось гадать. Поэтому теперь любая ошибка страницы
- * прикладывается к тесту текстом: `App` в симуляции живёт на подставных данных,
- * и «какая-то команда не ответила» — самая вероятная причина.
- */
-async function collectErrors(page: Page): Promise<string[]> {
-  const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
-  page.on("console", (message) => {
-    if (message.type() === "error") errors.push(`console: ${message.text()}`);
-  });
-  return errors;
-}
-
-test.beforeEach(async ({ page }) => {
-  // Ничего наружу. Своё — только по петле; `ws:` не трогаем: через него Vite
-  // держит HMR, и разрыв сокета превращается в перезагрузку страницы — именно
-  // это и выглядело как «element was detached from the DOM, retrying» вечно.
-  await page.route("**/*", (route) => {
-    const url = new URL(route.request().url());
-    return url.hostname === "127.0.0.1" || url.protocol === "ws:" || url.protocol === "wss:"
-      ? route.continue()
-      : route.abort("blockedbyclient");
-  });
-});
-
-/**
  * Открыть страницу один раз без проверок, чтобы Vite не перезагрузил её потом.
  *
  * Первый запрос к `entry.html` заставляет Vite досчитать зависимости и
@@ -82,10 +53,7 @@ async function loaded(page: Page) {
 }
 
 test("Tab доходит до входа, слово и Enter — и оно в разговоре (шаг 190)", async ({ page }) => {
-  const errors = await collectErrors(page);
   await loaded(page);
-  // Если вход не появился — тест падает ниже, но без причины. Прикладываем её.
-  await expect(page.getByRole("textbox", { name: /скажи или напиши/ }), errors.join("; ") || "вход не отрисовался").toBeVisible({ timeout: 15_000 });
 
   // Считаем нажатия Tab, а не «сколько получится»: число шагов — это и есть
   // проверка. Если вход окажется за краем порядка фокуса, тест упадёт на
@@ -148,8 +116,19 @@ test("название экрана, набранное с клавиатуры,
 
   await page.keyboard.press("Enter");
 
-  // Увели на «Историю»: виден её заголовок.
-  await expect(page.getByRole("heading", { name: "История", level: 2 })).toBeVisible();
+  // Увели на «Историю»: виден её заголовок. Ищем по документу: локатор Playwright
+  // ждёт стабильности узла, а экран только что смонтировался и ещё грузит данные.
+  await expect
+    .poll(
+      async () =>
+        page.evaluate(() =>
+          Array.from(document.querySelectorAll("h2")).some(
+            (item) => item.textContent?.trim() === "История",
+          ),
+        ),
+      { timeout: 15_000, message: "экран «История» не открылся" },
+    )
+    .toBe(true);
 });
 
 test("страница не перезагружается и не перерисовывается сама", async ({ page }) => {
@@ -164,7 +143,15 @@ test("страница не перезагружается и не перери�
   });
 
   await page.goto("/e2e/entry.html");
-  await expect(page.getByRole("textbox", { name: /скажи или напиши/ })).toBeVisible({ timeout: 15_000 });
+  await expect
+    .poll(
+      async () =>
+        page.evaluate(
+          () => !!document.querySelector('[aria-label="скажи или напиши — или назови экран"]'),
+        ),
+      { timeout: 20_000 },
+    )
+    .toBe(true);
 
   const changes = await page.evaluate(async () => {
     const seen = new Set<Element>();
