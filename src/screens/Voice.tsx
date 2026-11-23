@@ -114,6 +114,13 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  lines as cardLines,
+  nothingFits,
+  offered as cardOffered,
+  sizeWord as cardSize,
+  type Card as ModelCard,
+} from "../lib/modelScreen";
+import {
   asFile as modelAsFile,
   damage as hashDamage,
   intact as hashIntact,
@@ -1549,6 +1556,14 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // Шаг 69: файл и его хеш берутся из **настоящего** статуса готовности, а не
   // выдумываются. Нет файла — нечего показывать как «работает».
   const modelReady = modelFile !== null && hashIntact(modelFile, modelFile.sha256);
+  // Шаг 71: экран моделей. Лицензия стоит выше рекламы: если она запрещает,
+  // остальное неважно, а узнать это надо до загрузки четырёх гигабайт.
+  const cards: ModelCard[] = [
+    { name: "0.5B", sizeMb: 400, license: "Apache-2.0", needsMb: 1900, measuredPerSecond: null, good: "понимает фразу мгновенно" },
+    { name: "1.5B", sizeMb: 1100, license: "Apache-2.0", needsMb: 2600, measuredPerSecond: null, good: "разговор и простой план" },
+    { name: "3B", sizeMb: 2200, license: "Apache-2.0", needsMb: 3700, measuredPerSecond: null, good: "план в несколько шагов" },
+    { name: "7B", sizeMb: 4600, license: "Apache-2.0", needsMb: 6100, measuredPerSecond: null, good: "сложный код и длинные планы" },
+  ];
   /** Токенизатор = имя выбранной модели: после смены кэш негоден. */
   const tokenizer = rolesPlan(roleModels)[0]?.model?.name ?? "none";
   const reuseTokens = (text: string, tokens: number[]) => {
@@ -2477,6 +2492,29 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           </Text>
         )}
       </div>
+
+      {/* Шаг 71: экран моделей — четыре факта, по которым выбирают. Порядок не
+          случайный: сначала можно ли (лицензия), потом влезет ли, потом сколько
+          ждать, и только потом что умеет. */}
+      {hw ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Модели</Text>
+          {cards.filter((item) => cardOffered(item, hwForModel(hw))).length === 0 ? (
+            <Text className={styles.note}>{nothingFits(hwForModel(hw))}</Text>
+          ) : null}
+          {cards.map((item) => (
+            <div key={item.name} className={styles.note}>
+              {cardLines(item, hwForModel(hw)).map((line) => (
+                <div key={line}>{line}</div>
+              ))}
+            </div>
+          ))}
+          <Text className={styles.note}>
+            всего на диске: {cardSize(cards.reduce((sum, item) => sum + item.sizeMb, 0))} — но
+            ставить нужно только ту, которая помещается
+          </Text>
+        </div>
+      ) : null}
 
       {/* Шаг 69: квоты и счёта нет — модели лежат файлами. Обещание через
           отсутствие механизма сильнее, чем «мы не будем»: нечему ломаться. */}
