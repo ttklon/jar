@@ -105,6 +105,13 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  add as addWord,
+  load as loadWords,
+  remove as removeWord,
+  save as saveWords,
+  status as wordsStatus,
+} from "../lib/ownWords";
+import {
   kept,
 
   RUNNING as PAUSE_RUNNING,
@@ -1392,6 +1399,20 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const answerTargetRef = useRef(answerTarget);
   answerTargetRef.current = answerTarget;
 
+  // Шаг 57: свой словарь. Человек добавляет слова, которые распознавание не
+  // знает, — иначе правка общего словаря не его дело, а повторять громче
+  // бесполезно.
+  const [words, setWords] = useState<string[]>([]);
+  const [newWord, setNewWord] = useState("");
+  const [wordSay, setWordSay] = useState<string | null>(null);
+  useEffect(() => {
+    setWords(loadWords(typeof window === "undefined" ? null : window.localStorage));
+  }, []);
+  const keepWords = (next: string[]) => {
+    setWords(next);
+    saveWords(typeof window === "undefined" ? null : window.localStorage, next);
+  };
+
   const mic = useVoice({
     local: localEngine,
     always,
@@ -1443,6 +1464,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     // распознаётся по-разному, и это выглядит как нестабильность.
     onHint: (said) => setDeviceNotice(said),
     process: frontRef.current?.process ?? null,
+    own: words,
   });
   micStopRef.current = () => {
     mic.stop();
@@ -1458,6 +1480,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [micPause, setMicPause] = useState<Pause>(PAUSE_RUNNING);
   /** Что сменилось с микрофоном (шаг 54): говорим, а не молчим. */
   const [deviceNotice, setDeviceNotice] = useState<string | null>(null);
+
   useEffect(() => {
     if (!micPause.paused) return;
     const step = window.setInterval(() => {
@@ -2171,6 +2194,63 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           {deviceNotice}
         </Text>
       ) : null}
+
+      {/* Шаг 57: свой словарь. Человек добавляет слова, которые распознавание не
+          знает, — и сразу работает, без «применить»: отложенное действие не
+          сделают. Сказано, сколько слов и сколько ещё поместится; удаление —
+          крестиком, иначе через месяц словарь полон мусора и хуже пустого. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Свой словарь</Text>
+        <Text className={styles.note}>{wordsStatus(words)}</Text>
+        <div className={styles.answer}>
+          <Input
+            value={newWord}
+            placeholder="слово так, как произносите"
+            aria-label="Новое слово для словаря"
+            onChange={(_, data) => setNewWord(data.value)}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter") return;
+              const added = addWord(words, newWord);
+              keepWords(added.words);
+              setWordSay(added.ok ? added.said : added.why);
+              if (added.ok) setNewWord("");
+            }}
+          />
+          <Button
+            appearance="subtle"
+            onClick={() => {
+              const added = addWord(words, newWord);
+              keepWords(added.words);
+              setWordSay(added.ok ? added.said : added.why);
+              if (added.ok) setNewWord("");
+            }}
+          >
+            Добавить
+          </Button>
+        </div>
+        {words.length > 0 ? (
+          <div className={styles.answer}>
+            {words.map((word) => (
+              <Button
+                key={word}
+                appearance="subtle"
+                onClick={() => {
+                  keepWords(removeWord(words, word));
+                  setWordSay(`«${word}» убрано из словаря`);
+                }}
+                aria-label={`Убрать «${word}» из словаря`}
+              >
+                {word} ×
+              </Button>
+            ))}
+          </div>
+        ) : null}
+        {wordSay ? (
+          <Text className={styles.note} role="status" aria-live="polite">
+            {wordSay}
+          </Text>
+        ) : null}
+      </div>
 
       {/* Только граница, без повтора того, что уже сказала карточка выше: если
           распознавание готово, «работает здесь» там уже написано, и второй раз

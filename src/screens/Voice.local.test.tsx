@@ -2364,4 +2364,30 @@ describe("локальное распознавание на экране", () =
     // И снова сказано, что слушаем, а не просто исчезла строчка.
     expect(screen.getByText("не слушаю")).toBeTruthy();
   });
+
+  it("свой словарь: добавил — сразу работает, убрал — убралось (шаг 57)", async () => {
+    // «Квартал-3» распознавание не знает, и правка общего словаря не его дело.
+    localStorage.removeItem("zshelper.mic.explained");
+    localStorage.removeItem("zshelper.asr.words");
+    vi.mocked(speechStatus).mockResolvedValue(FOUND);
+
+    render(<Voice />);
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
+
+    // Пустой словарь говорит, что делать, а не молчит.
+    expect(screen.getByText(/свой словарь пуст/)).toBeTruthy();
+
+    const field = screen.getByLabelText("Новое слово для словаря");
+    fireEvent.change(field, { target: { value: "Квартал-3" } });
+    fireEvent.click(screen.getByRole("button", { name: "Добавить" }));
+
+    // Сразу работает: слово в подсказке и сохранено между запусками.
+    expect(await screen.findByText(/«Квартал-3» добавлено/)).toBeTruthy();
+    expect(screen.getByText(/1 из 50 слов/)).toBeTruthy();
+    expect(localStorage.getItem("zshelper.asr.words")).toContain("Квартал-3");
+
+    fireEvent.click(screen.getByRole("button", { name: "Убрать «Квартал-3» из словаря" }));
+    expect(await screen.findByText(/«Квартал-3» убрано/)).toBeTruthy();
+    expect(screen.getByText(/свой словарь пуст/)).toBeTruthy();
+  });
 });
