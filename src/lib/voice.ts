@@ -12,6 +12,8 @@
  * * речь — это только вход: распознанный текст дальше идёт по обычному пути, через
  *   реестр, политику и подтверждения.
  */
+import { NOISE_REPLY, dispose } from "./nonsense";
+
 
 interface SpeechAlternative {
   transcript: string;
@@ -145,12 +147,22 @@ export function listen(listeners: VoiceListeners, lang = "ru-RU"): Voice {
 
   recognition.onresult = (event) => {
     const text = transcriptOf(event);
-    if (text.length === 0) {
-      // Пустой результат — это не «услышал пустоту», а «не разобрал».
-      listeners.onError(voiceErrorText("no-speech"));
-      return;
+    // Три исхода — в одном месте (шаг 44). Тишина, шум и просьба — разные
+    // новости, и на каждую свой ответ:
+    //  * пусто — «не разобрал», это уже было;
+    //  * шум (кашель, «э», «кхм») — «не похоже на просьбу»; раньше такое
+    //    отправлялось как задача, и человек получал папку с названием «кхм»;
+    //  * просьба — отправляем.
+    switch (dispose(text)) {
+      case "silence":
+        listeners.onError(voiceErrorText("no-speech"));
+        return;
+      case "noise":
+        listeners.onError(NOISE_REPLY);
+        return;
+      case "send":
+        listeners.onText(text);
     }
-    listeners.onText(text);
   };
 
   recognition.onerror = (event) => {

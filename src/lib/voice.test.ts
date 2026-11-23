@@ -181,4 +181,38 @@ describe("голос", () => {
     expect(speakEngine).not.toHaveBeenCalled();
     expect(statuses).toEqual(["no-voice"]);
   });
+
+  it("кашель не становится задачей (шаг 44)", () => {
+    // Самая частая жалоба — «понял не то»: человек откашлялся, а приложение
+    // пошло создавать папку с названием «кхм». Ложная фраза хуже неудачи:
+    // неудачу видно сразу, ложную фразу — только после действия.
+    vi.stubGlobal("SpeechRecognition", RecognitionStub);
+    const onText = vi.fn();
+    const onError = vi.fn();
+    listen({ onText, onError });
+
+    const recognition = created[0];
+    if (!recognition) throw new Error("распознавание не создалось");
+    recognition.onresult?.({ results: { length: 1, 0: { 0: { transcript: "кхм" } } } });
+
+    // Не ушло как просьба — и сказано, что именно: это не «ничего не услышал».
+    expect(onText).not.toHaveBeenCalled();
+    expect(onError).toHaveBeenCalledWith(expect.stringContaining("не похоже на просьбу"));
+  });
+
+  it("просьба с междометием внутри — всё-таки просьба (шаг 44)", () => {
+    // Узость правила важнее строгости: отбросить настоящую просьбу хуже, чем
+    // один раз отправить «кхм».
+    vi.stubGlobal("SpeechRecognition", RecognitionStub);
+    const onText = vi.fn();
+    const onError = vi.fn();
+    listen({ onText, onError });
+
+    const recognition = created[0];
+    if (!recognition) throw new Error("распознавание не создалось");
+    recognition.onresult?.({ results: { length: 1, 0: { 0: { transcript: "мм, а тема где" } } } });
+
+    expect(onText).toHaveBeenCalledWith("мм, а тема где");
+    expect(onError).not.toHaveBeenCalled();
+  });
 });
