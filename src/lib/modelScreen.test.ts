@@ -33,7 +33,8 @@ describe("четыре факта, по которым выбирают", () => 
     const said = lines(card(), 8192).join(" | ");
     expect(said).toContain("1.1 ГБ");
     expect(said).toContain("лицензия");
-    expect(said).toContain("памяти");
+    // Требование теперь с числами и путём (шаг 73): «нужно 2.5 ГБ, есть 8 ГБ».
+    expect(said).toMatch(/нужно .*ГБ, есть/);
     expect(said).toContain("не мерили");
   });
 

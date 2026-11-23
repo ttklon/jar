@@ -24,6 +24,8 @@
  * «4.5 звезды» на сильной машине и на 4 ГБ — разные модели.
  */
 
+import { mark } from "./tooBig";
+
 /** Что известно о модели. */
 export interface Card {
   /** Имя, как его узнаёт человек. */
@@ -124,11 +126,12 @@ export function speedWord(card: Card): string {
  */
 export function lines(card: Card, availableMb: number): string[] {
   const permit = rights(card.license);
-  const fit = fitsHere(card, availableMb);
   return [
     `${card.name} — ${sizeWord(card.sizeMb)}`,
     permit.said,
-    fit ? `${needsWord(card)} — помещается` : `${needsWord(card)} — на этой машине не помещается`,
+    // Шаг 73: отметка с числами и путем, **до** скачивания. «Не влезает» без
+    // чисел и без «что делать» — это запрет, а не помощь.
+    mark({ needsMb: card.needsMb, hasMb: availableMb }),
     speedWord(card),
     card.good,
   ];
