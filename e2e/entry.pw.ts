@@ -105,3 +105,31 @@ test("название экрана, набранное с клавиатуры,
   await expect(page.getByRole("heading", { name: "История", level: 2 })).toBeVisible();
   await expect(entry).toHaveValue("");
 });
+
+test("страница не перезагружается и не перерисовывается сама", async ({ page }) => {
+  // Диагностика, а не обещание: если поле входа отделяется от DOM, значит
+  // приложение перерисовывается или страница перезагружается. Здесь это видно
+  // числом: сколько раз сменился узел поля за две секунды.
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
+  page.on("crash", () => errors.push("crash"));
+  page.on("framenavigated", (frame) => {
+    if (frame === page.mainFrame()) errors.push(`navigated: ${frame.url()}`);
+  });
+
+  await page.goto("/e2e/entry.html");
+  await expect(page.getByRole("textbox", { name: /скажи или напиши/ })).toBeVisible({ timeout: 15_000 });
+
+  const changes = await page.evaluate(async () => {
+    const seen = new Set<Element>();
+    const started = Date.now();
+    while (Date.now() - started < 2000) {
+      const el = document.querySelector('[aria-label="скажи или напиши — или назови экран"]');
+      if (el) seen.add(el);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    return seen.size;
+  });
+
+  expect(changes, `поле входа пересоздавалось; события: ${errors.join("; ")}`).toBe(1);
+});
