@@ -2433,3 +2433,37 @@ describe("локальное распознавание на экране", () =
     expect(page).not.toMatch(/ваш баланс/i);
   });
 });
+
+/**
+ * Шаг 90: стык «два дела» и «отрицание» проверяется **на экране**, а не только
+ * в модулях. Каждое правило по отдельности верно, а вместе они могут дать
+ * удаление того, о чём просили не трогать.
+ */
+describe("стык: два дела и отрицание на экране", () => {
+  it("фраза с отрицанием не доходит до исполнения", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(null);
+    vi.mocked(think).mockResolvedValue(null as never);
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "не удаляй отчёты" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    // Сказано словами, что это запрет, и почему ничего не произошло.
+    await waitFor(() => expect(screen.getByText(/не буду: во фразе запрет/)).toBeTruthy());
+    expect(screen.getByText(/действие не выполнено/)).toBeTruthy();
+  });
+
+  it("фраза из двух дел показывает оба и их порядок", async () => {
+    vi.mocked(draftPlan).mockResolvedValue(null);
+    vi.mocked(think).mockResolvedValue(null as never);
+    render(<Voice />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "открой папку и запусти программу" } });
+    fireEvent.click(screen.getByRole("button", { name: "Найти" }));
+
+    await waitFor(() => expect(screen.getByLabelText("Услышал")).toBeTruthy());
+    // eslint-disable-next-line no-console
+    await waitFor(() => expect(screen.getByText(/в фразе 2 дела/)).toBeTruthy());
+    // Порядок тот, в котором сказано: первое дело — «открой».
+    expect(screen.getByText(/^1\. открой/)).toBeTruthy();
+    expect(screen.getByText(/^2\. запусти/)).toBeTruthy();
+  });
+});

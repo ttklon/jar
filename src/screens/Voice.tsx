@@ -1437,6 +1437,30 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     clearDraft();
     setBusy(true);
     setError(null);
+    // Шаг 81: разбор намерения — глагол, объект и определение, а не совпадение
+    // слов. «Найди большие файлы» и «найди файл по имени» — разные дела, и это
+    // видно до действия. Шаг 83: два дела — разложить. Шаг 84: отрицание — до
+    // исполнения: цена ошибки тут стёртое. Разбор один на обе ветки — и голос, и
+    // набранную фразу: иначе кнопка «Найти» обходила бы весь раздел «Мозг».
+    {
+      const parsed = parseIntent(query);
+      setDeeds(splitDeeds(query));
+      setNegation(parseNegation(query));
+      setHeardIntent(query);
+      setSaidIntent(intentWords(parsed));
+      // Шаг 86: «готово» — только когда шаг сходится с фразой.
+      const steps = draftRef.current?.plan?.steps ?? [];
+      const got = {
+        what: steps.length > 0 ? (steps[0]?.why ?? steps[0]?.registry ?? "") : parsed.object,
+        by: parsed.qualifier,
+        count: steps.length,
+      };
+      const fit = checkFit({ object: parsed.object, qualifier: parsed.qualifier }, got);
+      setFitSay(sayFit({ object: parsed.object, qualifier: parsed.qualifier }, got));
+      // Не тот предмет останавливает план: следующие шаги опираются на результат
+      // этого, и продолжать значит делать не то, что просили.
+      if (fitStops(fit)) setApproved([]);
+    }
     planFor(asked, LIMIT)
       .then(async (raw) => {
         if (request !== searchRequestRef.current) return;
