@@ -21,6 +21,7 @@ import { bandEnergy, classify, createHistory } from "./voiceActivity";
 import { listen, speechSupported, stopSpeaking, type Voice } from "./voice";
 import { inputDevices } from "./recorder";
 import { saySwitch, switchTo } from "./micSwitch";
+import { say as sayDrop } from "./micDrop";
 
 /** Сколько ждём разбор после того, как человек отпустил кнопку. */
 export const GRACE_MS = 2500;
@@ -128,6 +129,11 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   const activeRef = useRef(false);
   /** Микрофон, с которым работали в прошлый раз (шаг 54). */
   const deviceId = useRef<string | null>(null);
+  /** Сколько успели записать и что уже сказано — для обрыва (шаг 55). */
+  const droppedMs = useRef(0);
+  const droppedBefore = useRef<string | undefined>(undefined);
+  /** Когда начали писать: длительность обрыва считается по часам (шаг 55). */
+  const startedAt = useRef(0);
   // ASR is an input trust boundary: a superseded/cancelled capture must never
   // deliver text (and therefore a task), even if the native request finishes later.
   const pending = useRef(false);
@@ -261,6 +267,9 @@ export function useVoice(options: VoiceOptions): VoiceControl {
             if (!wanted() || text === null) return;
             const said = text.trim();
             if (said.length > 0) {
+              // Запомним сказанное: если следующая запись оборвётся, «продолжите»
+              // должно дописывать к этой фразе (шаг 55).
+              droppedBefore.current = said;
               callbacks.current.onText(said);
               return;
             }
@@ -268,7 +277,18 @@ export function useVoice(options: VoiceOptions): VoiceControl {
             if (!forever) callbacks.current.onError(callbacks.current.nothingHeard);
           })
           .catch((error: unknown) => {
-            if (wanted()) callbacks.current.onError(error instanceof Error ? error.message : String(error));
+            if (!wanted()) return;
+            // Шаг 55: здесь и происходит настоящий обрыв — выдернули гарнитуру,
+            // система отобрала микрофон. Сказать «NotReadableError» значит
+            // отправить человека разбираться самому, хотя он говорил и ждёт,
+            // что его услышали.
+            const message = error instanceof Error ? error.message : String(error);
+            const recordedMs = startedAt.current > 0 ? Date.now() - startedAt.current : 0;
+            callbacks.current.onError(
+              /notreadable|track|ended|disconnect|device/i.test(message)
+                ? sayDrop({ recordedMs, before: droppedBefore.current })
+                : message,
+            );
           })
           .finally(() => {
             if (!valid()) return;
@@ -292,6 +312,8 @@ export function useVoice(options: VoiceOptions): VoiceControl {
       const levels = createHistory(12);
       let noiseRun = 0;
 
+      // Шаг 55: часы и «что уже сказано» — для ответа на обрыв.
+      startedAt.current = Date.now();
       startRecording(undefined, (frame, sampleRate) => {
         if (!valid() || ended) return false;
         if (!vad) {
@@ -426,6 +448,10 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     if (engine) {
       // Свой движок: пишем звук, распознаём после отпускания. Разрешение на микрофон
       // спрашивается здесь же, и отказ должен быть слышен, а не проглочен.
+      // Шаг 55: запомним, когда начали и что уже сказано, — если запись
+      // оборвётся, будет чем ответить вместо технической ошибки.
+      droppedMs.current = 0;
+      startedAt.current = Date.now();
       startRecording(undefined, undefined, { signal })
         .then((recorder) => {
           if (!valid() || !activeRef.current) {
@@ -517,10 +543,24 @@ export function useVoice(options: VoiceOptions): VoiceControl {
             callbacks.current.onError(callbacks.current.nothingHeard);
             return;
           }
+          droppedBefore.current = text.trim();
           callbacks.current.onText(text.trim());
         })
         .catch((error: unknown) => {
-          if (valid()) callbacks.current.onError(error instanceof Error ? error.message : String(error));
+          if (!valid()) return;
+          // Шаг 55: обрыв записи — не потеря. Микрофон могли выдернуть или
+          // система отобрать его; то, что человек уже сказал, принадлежит ему.
+          // Говорим, что случилось и что делать, а не показываем техническую
+          // ошибку: «NotReadableError» человеку не помогает.
+          const message = error instanceof Error ? error.message : String(error);
+          // Сколько успели — по часам, а не догадкой: человек помнит, сколько он
+          // говорил, и цифра должна совпадать с его ощущением.
+          const recordedMs = startedAt.current > 0 ? Date.now() - startedAt.current : droppedMs.current;
+          callbacks.current.onError(
+            /notreadable|track|ended|disconnect|abort|device/i.test(message)
+              ? sayDrop({ recordedMs, before: droppedBefore.current })
+              : message,
+          );
         })
         .finally(() => { if (valid()) setPending(false); });
       return;

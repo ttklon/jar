@@ -69,10 +69,10 @@
 * `src/components/ReadinessCard.tsx:366` — useEffect(() => { setSmoke(null); }, [status?.engine_program, status?.model_name]);
 * `src/components/RecentFailures.tsx:58` — useEffect(() => {
 * `src/components/ResourceReport.tsx:58` — useEffect(load, []);
-* `src/lib/useVoice.ts:587` — useEffect(() => {
-* `src/lib/useVoice.ts:624` — useEffect(
-* `src/lib/useVoice.ts:637` — useEffect(() => {
-* `src/lib/useVoice.ts:644` — useEffect(() => {
+* `src/lib/useVoice.ts:627` — useEffect(() => {
+* `src/lib/useVoice.ts:664` — useEffect(
+* `src/lib/useVoice.ts:677` — useEffect(() => {
+* `src/lib/useVoice.ts:684` — useEffect(() => {
 
 ## Сетевые вызовы и запись
 

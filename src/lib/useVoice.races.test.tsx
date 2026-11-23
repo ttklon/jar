@@ -200,4 +200,28 @@ describe("ASR session isolation", () => {
     await act(async () => answer.resolve("stale"));
     expect(onText).not.toHaveBeenCalled();
   });
+
+  it("обрыв записи объясняется словами, а не технической ошибкой (шаг 55)", async () => {
+    // Выдернули гарнитуру: recorder.stop() падает. Показать «NotReadableError»
+    // значит сказать человеку «сам разбирайся» — а он говорил и ждёт, что его
+    // услышали.
+    vi.mocked(startRecording).mockResolvedValue({
+      stop: vi.fn().mockRejectedValue(new Error("NotReadableError: track ended")),
+    });
+    const errors: string[] = [];
+    const transcribe = vi.fn();
+    const { result } = renderHook(() =>
+      useVoice({ local: { transcribe }, onText: vi.fn(), onError: (m) => errors.push(m) }),
+    );
+
+    act(() => result.current.start());
+    await opened();
+    act(() => result.current.stop());
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+
+    expect(errors.length).toBeGreaterThan(0);
+    // Сказано, что случилось и что делать; английского имени ошибки нет.
+    expect(errors[0]).toContain("микрофон отключился");
+    expect(errors[0]).not.toContain("NotReadableError");
+  });
 });
