@@ -147,6 +147,7 @@ import {
 } from "../lib/consentStep";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
+import { finished as cancelFinished, say as cancelSay, stop as cancelStop, start as cancelStart } from "../lib/cancelRun";
 import {
   create as createQuick,
   checkName as checkQuickName,
@@ -494,6 +495,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // согласия — обход, и он закрыт: отпечаток изменился, согласие снято.
   const [consents, setConsents] = useState<ConsentGranted[]>([]);
   const [consentNote, setConsentNote] = useState<string | null>(null);
+  // Шаг 104: отмена — состояние, которое читают перед каждым шагом, а не флаг,
+  // выставленный один раз.
+  const [cancel, setCancel] = useState(() => cancelStart(0));
+  const [cancelNote, setCancelNote] = useState<string | null>(null);
   const [report, setReport] = useState<PlanReport | null>(null);
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
@@ -1374,6 +1379,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     setRemembered([]);
     setApproved([]);
     setReport(null);
+    // Шаг 104: план модели — тоже прогон, и отмена его тоже касается. Новый план
+    // начинает с нуля: «хватит» из прошлого к нему не относится.
+    setCancel(cancelStart(check.plan?.steps.length ?? 0));
+    setCancelNote(null);
     if (phraseIsEnough(check)) {
       setSpoken(voice.autoRun);
       speak(voice.autoRun);
@@ -1592,10 +1601,23 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         // параметров. Снятые названы причиной, а не «снова подтвердите».
         const proposed = proposal?.plan ?? null;
         if (proposed !== null) {
-          const verdict = consentCheck(consents, proposed.steps);
-          const fresh = verdict.kept.filter((item) => !consentStale(item, Date.now()));
-          setConsents(fresh);
-          setConsentNote(verdict.lost.length > 0 || fresh.length !== verdict.kept.length ? consentSay(verdict) : null);
+          // Шаг 104: новый план — новый прогон. Прежняя отмена к нему не относится:
+          // иначе «хватит» из прошлого плана молча блокирует новый.
+          setCancel((current) =>
+            current.total === proposed.steps.length && current.done === 0 ? current : cancelStart(proposed.steps.length),
+          );
+          setCancelNote(null);
+          // Шаг 102: согласие привязано к отпечатку параметров, поэтому новая
+          // проверка плана (план мог поправиться по ответам) не должна снимать
+          // согласие на шаги, которых правка не коснулась.
+          setConsents((current) => {
+            const verdict = consentCheck(current, proposed.steps);
+            const fresh = verdict.kept.filter((item) => !consentStale(item, Date.now()));
+            setConsentNote(
+              verdict.lost.length > 0 || fresh.length !== verdict.kept.length ? consentSay(verdict) : null,
+            );
+            return fresh;
+          });
         }
         // Шаг 95: если под фразу подходит несколько разных шагов, молча выбрать
         // нельзя — спрашиваем одним коротким вопросом из того, что нашлось.
@@ -3118,6 +3140,54 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </Text>
             );
           })}
+        </div>
+      ) : null}
+
+      {/* Шаг 104: отмена обрывает текущий шаг и не запускает следующий.
+          Сделанное не отменяется молча — оно названо числом. */}
+      {draft?.plan ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Отмена</Text>
+          <Text className={styles.note} role="status" aria-live="polite">
+            {cancelNote ?? cancelSay(cancel)}
+          </Text>
+          {report !== null ? (
+            <Text className={styles.note}>
+              {`шагов отчиталось: ${report.steps.length} из ${cancel.total}`}
+              {" "}
+              <Button
+                appearance="subtle"
+                size="small"
+                onClick={() => {
+                  // Счёт — по **завершённым** шагам из отчёта, а не по нажатиям:
+                  // «сделано» должно значить «сделано».
+                  const after = report.steps.reduce((acc) => cancelFinished(acc), cancel);
+                  setCancel(after);
+                  setCancelNote(cancelSay(after));
+                }}
+              >
+                Отметить отчитавшиеся шаги
+              </Button>
+            </Text>
+          ) : null}
+          <Text className={styles.note}>
+            {"следующий шаг "}
+            {cancel.stopped || cancel.done >= cancel.total ? "не начнётся" : "начнётся"}
+            {" — проверка читается перед каждым шагом, а не один раз в начале"}
+          </Text>
+          <Button
+            appearance="subtle"
+            size="small"
+            onClick={() => {
+              // Отмена — только флаг: текущий шаг доводится до конца, обрывать его
+              // посередине значит оставить полдела, о которых не просили.
+              const stopped = cancelStop(cancel);
+              setCancel(stopped);
+              setCancelNote(cancelSay(stopped));
+            }}
+          >
+            Отменить выполнение
+          </Button>
         </div>
       ) : null}
 

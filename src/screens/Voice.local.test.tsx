@@ -1862,6 +1862,13 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/apiKey: \[скрыто\]/)).toBeTruthy();
     expect(screen.queryByText(/must-not-render/)).toBeNull();
     expect(screen.getAllByText(/нужно ваше разрешение/)).toHaveLength(2);
+    // Шаг 104: отмена названа словами до того, как на неё нажали: человек знает,
+    // что «сделано» не откатится, и что следующий шаг не начнётся.
+    expect(screen.getByText("Отмена")).toBeTruthy();
+    expect(screen.getByText("сделано 0 из 2")).toBeTruthy();
+    fireEvent.click(screen.getByText("Отменить выполнение"));
+    await waitFor(() => expect(screen.getByText(/отменено — не начинал/)).toBeTruthy());
+    expect(screen.getByText(/не начнётся — проверка читается перед каждым шагом/)).toBeTruthy();
     const approveFirst = screen.getByLabelText("разрешить шаг 1") as HTMLInputElement;
     const approveSecond = screen.getByLabelText("разрешить шаг 2") as HTMLInputElement;
     const runButton = screen.getByRole("button", { name: "Выполнить" }) as HTMLButtonElement;
