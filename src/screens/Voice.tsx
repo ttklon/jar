@@ -114,6 +114,14 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  allow as allowEngine,
+  byDefault as engineDefault,
+  differs as engineDiffers,
+  reset as resetEngine,
+  say as sayEngine,
+  type Setup as EngineSetup,
+} from "../lib/oneEngine";
+import {
   action as idleAction,
   sayUnload,
   sayWaiting,
@@ -1536,6 +1544,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     { name: "bge-m3", sizeMb: 560, code: false, embed: true },
   ];
   const roleChoices = rolesPlan(roleModels);
+  // Шаг 75: по умолчанию **один** движок, и это поправка к шагу 62. Разные
+  // модели нужны ролям по потребности, но настройкой по умолчанию они делают
+  // зоопарк: память занята всеми, и непонятно, чей ответ.
+  const [engines, setEngines] = useState<EngineSetup>(() => engineDefault("7B"));
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
   const knownCommands = ["открыть", "закрыть", "найти", "архивировать", "напечатать"];
@@ -2679,6 +2691,34 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           })()}
         </div>
       ) : null}
+
+      {/* Шаг 75: один движок по умолчанию — проще, чем зоопарк. Своя модель на
+          роль включается с причиной и по одной; назад — одним действием. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Сколько моделей работает</Text>
+        <Text className={styles.note}>{sayEngine(engines)}</Text>
+        {engineDiffers(engines) ? (
+          <Button appearance="subtle" onClick={() => setEngines(resetEngine(engines))}>
+            Вернуться к одной модели
+          </Button>
+        ) : (
+          <Text className={styles.note}>
+            одной модели хватает на все роли; отдельная на роль — по желанию и с причиной
+          </Text>
+        )}
+        <Button
+          appearance="subtle"
+          onClick={() => {
+            // По одной роли за раз: человек должен увидеть «было так / стало
+            // так», прежде чем менять следующую.
+            const result = allowEngine(engines, { role: "intent", model: "0.5B", reason: "measured" });
+            setEngines(result.setup);
+            setDeviceNotice(result.said);
+          }}
+        >
+          Понять фразу — на дешёвую модель
+        </Button>
+      </div>
 
       {/* Шаг 62: какая модель на какую роль и **почему**. Без причины разная
           скорость ответов выглядит как нестабильность. */}
