@@ -83,27 +83,43 @@ test("Tab доходит до входа, слово и Enter — и оно в �
   await page.keyboard.press("Enter");
 
   // Фраза доехала до поля разговора.
-  await expect(page.getByRole("textbox", { name: "Услышал" })).toHaveValue("первое дело");
+  await expect
+    .poll(async () =>
+      page.evaluate(() =>
+        document.querySelector<HTMLInputElement>('[aria-label="Услышал"]')?.value,
+      ),
+    )
+    .toBe("первое дело");
 });
 
 test("название экрана, набранное с клавиатуры, уводит на экран (шаг 181)", async ({ page }) => {
   await loaded(page);
 
-  const entry = page.getByRole("textbox", { name: /скажи или напиши/ });
-  // Фокус ставим прямо, а не мышью. Причина: `click()` у Playwright ждёт, что
-  // элемент «стабилен» — не пересоздаётся между кадрами. Здесь страница живая:
-  // `Voice` подтягивает готовность, экран перерисовывается, и ожидание
-  // стабильности может тянуться до таймаута, хотя поле на месте и работает.
-  // Главное в шаге — путь **клавиатурой**, поэтому и вход — клавиатурный:
-  // фокус, ввод, Enter. Мыши в этом сценарии нет вовсе, и `click()` в нём был
-  // бы единственным нажатием мышью во всём тесте.
-  await entry.focus();
+  // Фокус ставим в **тот** узел, который на экране сейчас: страница живая
+  // (`Voice` подтягивает готовность, экран перерисовывается), и Playwright с его
+  // ожиданием «стабильности» до элемента не достучится — узел успевает
+  // смениться между кадрами. Ставим фокус напрямую, как это сделал бы Tab.
+  await page.evaluate(() => {
+    const field = document.querySelector<HTMLInputElement>(
+      '[aria-label="скажи или напиши — или назови экран"]',
+    );
+    field?.focus();
+  });
   await page.keyboard.type("история");
   await page.keyboard.press("Enter");
 
-  // Увели на «Историю»: виден её заголовок, и поле входа очистилось.
+  // Увели на «Историю»: виден её заголовок.
   await expect(page.getByRole("heading", { name: "История", level: 2 })).toBeVisible();
-  await expect(entry).toHaveValue("");
+  // И поле входа очистилось: иначе «история» ушла бы в разговор вторым заходом.
+  await expect
+    .poll(async () =>
+      page.evaluate(() =>
+        document.querySelector<HTMLInputElement>(
+          '[aria-label="скажи или напиши — или назови экран"]',
+        )?.value,
+      ),
+    )
+    .toBe("");
 });
 
 test("страница не перезагружается и не перерисовывается сама", async ({ page }) => {
