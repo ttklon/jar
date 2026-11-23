@@ -44,8 +44,30 @@ export interface Progress {
   bytes: number | null;
 }
 
+/**
+ * «Загрузки нет» — одна и та же ссылка на всё приложение.
+ *
+ * Не константа ради красоты: новое `{ name: null, bytes: null }` на каждый опрос
+ * — это новое значение для `useState`, то есть перерисовка раз в секунду и
+ * пересоздание поля ввода (со потерей фокуса) даже когда ничего не качается.
+ */
+const IDLE: Progress = { name: null, bytes: null };
+
+/**
+ * Те же показания байтов — тот же факт.
+ *
+ * `null` (прогресс не прочитался) и `null` — одно и то же; а вот `{ 100 }` и
+ * `{ 100 }` — два разных объекта, и без сравнения по полям каждый опрос выглядел
+ * бы новостью.
+ */
+function sameBytes(a: Progress["bytes"], b: Progress["bytes"]): boolean {
+  if (a === b) return true;
+  if (a === null || b === null) return false;
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export function useDownloadProgress(): Progress {
-  const [progress, setProgress] = useState<Progress>({ name: null, bytes: null });
+  const [progress, setProgress] = useState<Progress>(IDLE);
   const alive = useRef(true);
 
   useEffect(() => {
@@ -67,7 +89,12 @@ export function useDownloadProgress(): Progress {
           if (!alive.current) return;
           const name = status.download_name;
           if (!name) {
-            setProgress({ name: null, bytes: null });
+            // Тот же объект, а не новый: `{ name: null, bytes: null }` — это
+            // новое значение при каждом опросе, и React считает состояние
+            // изменившимся. Экран перерисовывался бы каждую секунду без
+            // причины, а поле ввода — пересоздавалось бы, теряя фокус
+            // (поймано e2e входа: «element was detached from the DOM»).
+            setProgress(IDLE);
             // Загрузки нет — опрос больше не нужен: таймер живёт только пока
             // идёт скачивание (шаг 384: простой не должен стоить ничего).
             if (timer !== null) {
@@ -77,7 +104,15 @@ export function useDownloadProgress(): Progress {
             return;
           }
           const bytes = await downloadProgress(name).catch(() => null);
-          if (alive.current) setProgress({ name, bytes });
+          if (!alive.current) return;
+          // Опрос раз в секунду при неизменившихся показаниях — это не новое
+          // состояние, а тот же факт. Сравниваем и не трогаем экран: иначе
+          // каждая секунда перерисовки пересоздаёт поля ввода, и человек,
+          // печатающий фразу, теряет каретку (шаг 383: ввод не блокируется,
+          // но и не должен теряться).
+          setProgress((was) =>
+            was.name === name && sameBytes(was.bytes, bytes) ? was : { name, bytes },
+          );
         })
         .catch(() => undefined)
         .finally(() => {
