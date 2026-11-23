@@ -104,6 +104,15 @@ import { ActionList } from "../components/ActionList";
 import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
+import {
+  kept,
+
+  RUNNING as PAUSE_RUNNING,
+  START as PAUSE_START,
+  tick as pauseTick,
+  word as pauseWord,
+  type Pause,
+} from "../lib/micPause";
 import { markMicExplained, micExplained } from "../lib/firstRun";
 import { voice, microphoneCheck as micTestText } from "../i18n/ru";
 
@@ -1436,19 +1445,38 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     draft?.gates.some(
       (gate) => gate.decision === "confirm" && !approved.includes(gate.position),
     ) === true;
+  // Шаг 53: пауза микрофона — состояние с возвратом. «Выключил на минуту»
+  // не должно становиться «без микрофона на день»: пауза сама кончается и
+  // говорит об этом, а недоговорённое не теряется.
+  const [micPause, setMicPause] = useState<Pause>(PAUSE_RUNNING);
+  useEffect(() => {
+    if (!micPause.paused) return;
+    const step = window.setInterval(() => {
+      setMicPause((current) => {
+        const { next, say } = pauseTick(current, 1000);
+        if (say) setPauseSay(say);
+        return next;
+      });
+    }, 1000);
+    return () => window.clearInterval(step);
+  }, [micPause.paused]);
+  const [pauseSay, setPauseSay] = useState<string | null>(null);
+
   // Слово у микрофона всегда (шаг 49): цвет — подсказка, слово — ответ. Его
   // видно на экране и передаётся в трей.
-  const micState: MicState = voiceError
-    ? "error"
-    : mic.processing
-      ? "parsing"
-      : mic.listening
-        ? "listening"
-        : waitingForConfirmation
-          ? "asking"
-          : busy || thinking
-            ? "thinking"
-            : "closed";
+  const micState: MicState = micPause.paused
+    ? "closed"
+    : voiceError
+      ? "error"
+      : mic.processing
+        ? "parsing"
+        : mic.listening
+          ? "listening"
+          : waitingForConfirmation
+            ? "asking"
+            : busy || thinking
+              ? "thinking"
+              : "closed";
 
   // Шаг 52: у «слушаю» и «обрабатываю» разные звуки, а не только разные слова.
   // Тот, кто говорит и не смотрит на экран, должен слышать, его очередь или
@@ -2109,6 +2137,26 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       >
         {MIC_WORD[micState]}
       </Text>
+
+      {/* Шаг 53: пауза — одной кнопкой и с возвратом. Пока идёт, сказано, что
+          недоговорённое сохранено: человек боится потерять фразу сильнее, чем
+          забыть включить микрофон. Возврат — та же кнопка, а не в настройках. */}
+      <div className={styles.answer}>
+        <Button appearance="subtle" onClick={() => {
+            setPauseSay(null);
+            setMicPause((current) => (current.paused ? PAUSE_RUNNING : PAUSE_START));
+          }}>
+          {micPause.paused ? "Вернуть микрофон" : "Пауза микрофона"}
+        </Button>
+        <Text className={styles.note} role="status">
+          {micPause.paused && kept(micPause) ? kept(micPause) : null}
+        </Text>
+      </div>
+      {micPause.paused ? (
+        <Text className={styles.note} role="status" aria-live="polite">
+          {pauseSay ?? pauseWord(micPause)}
+        </Text>
+      ) : null}
 
       {/* Только граница, без повтора того, что уже сказала карточка выше: если
           распознавание готово, «работает здесь» там уже написано, и второй раз

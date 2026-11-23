@@ -2336,4 +2336,32 @@ describe("локальное распознавание на экране", () =
     // И у состояния словесное описание для диктора — не только цвет.
     expect(idle.getAttribute("aria-label")).toBeTruthy();
   });
+
+  it("пауза микрофона — одна кнопка туда и обратно (шаг 53)", async () => {
+    // Выключить насовсем слишком легко, вернуть — трудно: человек говорит в
+    // пустоту и решает, что приложение сломалось.
+    localStorage.removeItem("zshelper.mic.explained");
+    vi.mocked(speechStatus).mockResolvedValue(FOUND);
+
+    render(<Voice />);
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
+
+    fireEvent.click(screen.getByRole("button", { name: "Пауза микрофона" }));
+
+    // Сказано, что микрофон на паузе, что недоговорённое сохранено и как
+    // вернуть, — а не просто исчезла иконка.
+    expect(screen.getByText(/на паузе, верну через/)).toBeTruthy();
+    expect(screen.getByText(/недоговорённое сохранено/)).toBeTruthy();
+    // Пауза — это не «выключено»: слово «выключ» только пугает и уводит в
+    // настройки. Проверяем именно строку паузы: «выключено» есть в других
+    // местах экрана (автозапуск) и к паузе отношения не имеет.
+    expect(screen.getByText(/на паузе, верну через/).textContent).not.toMatch(/выключ/i);
+
+    // Возврат — той же самой кнопкой, без ожидания таймера.
+    fireEvent.click(screen.getByRole("button", { name: "Вернуть микрофон" }));
+    expect(screen.queryByText(/на паузе, верну через/)).toBeNull();
+    expect(screen.getByRole("button", { name: "Пауза микрофона" })).toBeTruthy();
+    // И снова сказано, что слушаем, а не просто исчезла строчка.
+    expect(screen.getByText("не слушаю")).toBeTruthy();
+  });
 });

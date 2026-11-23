@@ -36,22 +36,23 @@
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
 * `src/screens/Undo.tsx:68` — useEffect(load, [load]);
-* `src/screens/Voice.tsx:235` — useEffect(() => {
-* `src/screens/Voice.tsx:429` — useEffect(() => {
-* `src/screens/Voice.tsx:433` — useEffect(
-* `src/screens/Voice.tsx:471` — useEffect(() => {
-* `src/screens/Voice.tsx:1459` — useEffect(() => {
-* `src/screens/Voice.tsx:1480` — useEffect(() => {
-* `src/screens/Voice.tsx:1486` — useEffect(() => {
-* `src/screens/Voice.tsx:1493` — useEffect(() => {
-* `src/screens/Voice.tsx:1518` — useEffect(() => {
-* `src/screens/Voice.tsx:1533` — useEffect(() => {
-* `src/screens/Voice.tsx:1559` — useEffect(() => {
-* `src/screens/Voice.tsx:1607` — useEffect(() => {
-* `src/screens/Voice.tsx:1613` — useEffect(() => {
-* `src/screens/Voice.tsx:1629` — useEffect(() => {
-* `src/screens/Voice.tsx:1783` — useEffect(() => {
-* `src/screens/Voice.tsx:1809` — useEffect(
+* `src/screens/Voice.tsx:244` — useEffect(() => {
+* `src/screens/Voice.tsx:438` — useEffect(() => {
+* `src/screens/Voice.tsx:442` — useEffect(
+* `src/screens/Voice.tsx:480` — useEffect(() => {
+* `src/screens/Voice.tsx:1452` — useEffect(() => {
+* `src/screens/Voice.tsx:1487` — useEffect(() => {
+* `src/screens/Voice.tsx:1508` — useEffect(() => {
+* `src/screens/Voice.tsx:1514` — useEffect(() => {
+* `src/screens/Voice.tsx:1521` — useEffect(() => {
+* `src/screens/Voice.tsx:1546` — useEffect(() => {
+* `src/screens/Voice.tsx:1561` — useEffect(() => {
+* `src/screens/Voice.tsx:1587` — useEffect(() => {
+* `src/screens/Voice.tsx:1635` — useEffect(() => {
+* `src/screens/Voice.tsx:1641` — useEffect(() => {
+* `src/screens/Voice.tsx:1657` — useEffect(() => {
+* `src/screens/Voice.tsx:1811` — useEffect(() => {
+* `src/screens/Voice.tsx:1837` — useEffect(
 * `src/components/DownloadBar.tsx:73` — useEffect(() => {
 * `src/components/DownloadBar.tsx:80` — useEffect(() => {
 * `src/components/MemoryBackups.tsx:80` — useEffect(() => {
