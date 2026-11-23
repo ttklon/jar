@@ -128,6 +128,14 @@ import { apply as contextApply, gaps as contextGaps, parse as parseContext, say 
 import { check as checkUnderstood, run as understoodRuns, say as sayUnderstood, where as whereUnderstood } from "../lib/notUnderstood";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import {
+  create as createQuick,
+  checkName as checkQuickName,
+  needsConfirm as quickNeedsConfirm,
+  say as sayQuick,
+  suggest as suggestQuick,
+  type Quick,
+} from "../lib/quickCommands";
+import {
   find as findYesterday,
   nothing as nothingYesterday,
   plan as planYesterday,
@@ -1752,6 +1760,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [lostSay, setLostSay] = useState<string | null>(null);
   // Шаг 98: секреты вычищаются **до** отправки — после отправки уже поздно.
   const [secretSay, setSecretSay] = useState<string | null>(null);
+  // Шаг 99: частые фразы становятся быстрыми командами — без кода.
+  const [quick, setQuick] = useState<Quick[]>([]);
+  const [quickName, setQuickName] = useState("");
+  const [quickSay, setQuickSay] = useState<string | null>(null);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -2941,6 +2953,67 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           })()}
         </div>
       ) : null}
+
+      {/* Шаг 99: повтор — одно слово. Имя выбирает человек: «мойка» вспомнят,
+          «очистка диска C:» — нет. */}
+      {(() => {
+        const offers = suggestQuick(phrases, quick);
+        const first = offers[0];
+        return (
+          <div className={styles.section}>
+            <Text className={styles.title}>Быстрые команды</Text>
+            <Text className={styles.note}>{sayQuick(quick)}</Text>
+            {first ? (
+              <>
+                <Text className={styles.note}>{first.why}</Text>
+                <Text className={styles.note}>«{first.phrase}»</Text>
+                <Input
+                  value={quickName}
+                  placeholder="ваше слово"
+                  aria-label="Слово для быстрой команды"
+                  onChange={(_, data) => setQuickName(data.value)}
+                />
+                <Button
+                  appearance="subtle"
+                  onClick={() => {
+                    const check = checkQuickName(quickName, quick);
+                    if (!check.ok) {
+                      setQuickSay(check.why);
+                      return;
+                    }
+                    const made = createQuick(
+                      quickName,
+                      first,
+                      // Опасность берём у того, что уже распознано, а не выводим:
+                      // сокращение не должно становиться безопаснее.
+                      danger?.found === true,
+                      quick,
+                    );
+                    if (Array.isArray(made)) {
+                      setQuick(made);
+                      setQuickName("");
+                      setQuickSay(
+                        quickNeedsConfirm(made[made.length - 1] as Quick)
+                          ? "команда создана — подтверждение остаётся: необратимое не становится безопасным"
+                          : "команда создана",
+                      );
+                    } else {
+                      setQuickSay(made.why);
+                    }
+                  }}
+                >
+                  Назвать одним словом
+                </Button>
+              </>
+            ) : null}
+            {quickSay ? (
+              <Text className={styles.note} role="status" aria-live="polite">
+                {quickSay}
+              </Text>
+            ) : null}
+          </div>
+        );
+      })()}
 
       {/* Шаг 98: секрет вычищен до отправки. Сказано, что уйдёт модели, — иначе
           человек решит, что его не поняли. */}
