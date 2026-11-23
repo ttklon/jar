@@ -66,7 +66,13 @@ async function loaded(page: Page) {
           const field = document.querySelector<HTMLInputElement>(
             '[aria-label="скажи или напиши — или назови экран"]',
           );
-          if (!field) return "поля нет";
+          const root = document.getElementById("root");
+          if (!field) {
+            // Что вместо поля: пусто, ошибка, «читаю реестр». Без этого «поля нет»
+            // одинаково звучит для «ещё грузится», «упало» и «не смонтировалось».
+            const text = (root?.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
+            return `поля нет; в окне: «${text || "<пусто>"}»`;
+          }
           const box = field.getBoundingClientRect();
           return box.width > 0 && box.height > 0 ? "на экране" : "нулевой размер";
         }),
