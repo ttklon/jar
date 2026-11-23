@@ -114,6 +114,13 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  warning as ladderWarning,
+  nothing as ladderNothing,
+  pick as ladderPick,
+  speedWord,
+  STEPS as LADDER,
+} from "../lib/modelLadder";
+import {
   memoryMb as rolesMemory,
   plan as rolesPlan,
   say as sayRoles,
@@ -123,6 +130,7 @@ import {
   approximate as sayApprox,
   grade as machineGrade,
   measure as readMachine,
+  forModel as hwForModel,
   say as sayMachine,
   stale as machineStale,
   type Profile as MachineProfile,
@@ -2319,6 +2327,37 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         <Text className={styles.note} role="status" aria-live="polite">
           {deviceNotice}
         </Text>
+      ) : null}
+
+      {/* Шаг 63: лестница моделей. Предлагается самая большая из **влезающих**:
+          «попробуйте, может, пойдёт» — не выбор, а лотерея. Потери названы
+          заранее: выбирают не «лучшую модель», а потери, которые устраивают. */}
+      {hw ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Какая модель поместится</Text>
+          {(() => {
+            const available = hwForModel(hw);
+            const chosen = ladderPick(available);
+            if (chosen === null) {
+              return <Text className={styles.note}>{ladderNothing()}</Text>;
+            }
+            return (
+              <>
+                <Text className={styles.note}>
+                  на этой машине помещается «{chosen.name}» — {chosen.good}
+                </Text>
+                <Text className={styles.note}>{ladderWarning(chosen)}</Text>
+                <Text className={styles.note}>
+                  по паспорту: {speedWord({ step: chosen, measured: null, passport: 9 })}
+                </Text>
+                <Text className={styles.note}>
+                  ступени: {LADDER.map((step) => step.name).join(" · ")} — каждая
+                  следующая умнее и требует больше памяти
+                </Text>
+              </>
+            );
+          })()}
+        </div>
       ) : null}
 
       {/* Шаг 62: какая модель на какую роль и **почему**. Без причины разная
