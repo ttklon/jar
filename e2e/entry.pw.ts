@@ -133,13 +133,19 @@ test("страница не перезагружается и не перери�
   const changes = await page.evaluate(async () => {
     const seen = new Set<Element>();
     const started = Date.now();
+    let missing = 0;
     while (Date.now() - started < 2000) {
       const el = document.querySelector('[aria-label="скажи или напиши — или назови экран"]');
       if (el) seen.add(el);
+      else missing += 1;
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
-    return seen.size;
+    return { nodes: seen.size, missing, url: location.href, title: document.title };
   });
 
-  expect(changes, `поле входа пересоздавалось; события: ${errors.join("; ")}`).toBe(1);
+  expect(
+    changes.nodes,
+    `поле входа пересоздавалось ${changes.nodes} раз; отсутствовало ${changes.missing} раз; ` +
+      `адрес ${changes.url}; заголовок ${changes.title}; события: ${errors.join("; ")}`,
+  ).toBe(1);
 });
