@@ -114,6 +114,14 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  clear as clearTokens,
+  put as putTokens,
+  resume as resumeTokens,
+  saved as tokensSaved,
+  KEEP as KEEP_TOKENS,
+  type Entry as TokenEntry,
+} from "../lib/tokenCache";
+import {
   cacheMb as windowCache,
   say as sayWindow,
   wasteful as windowWasteful,
@@ -1515,6 +1523,17 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // Шаг 65: замер на этой машине. Первый прогон выбрасывается — он читает
   // модель с диска и греет кеш, и цифра была бы занижена.
   const [speed, setSpeed] = useState<SpeedMeasured | null>(null);
+  // Шаг 68: кэш токенизации реплики. Девять десятых истории не менялось, а
+  // пересчитывалось всё; кэш живёт ради скорости и ограничен.
+  const [tokenCache, setTokenCache] = useState<TokenEntry[]>([]);
+  const [tokensSkipped, setTokensSkipped] = useState(0);
+  /** Токенизатор = имя выбранной модели: после смены кэш негоден. */
+  const tokenizer = rolesPlan(roleModels)[0]?.model?.name ?? "none";
+  const reuseTokens = (text: string, tokens: number[]) => {
+    const resumed = resumeTokens(tokenCache, text, tokenizer);
+    if (resumed !== null) setTokensSkipped((current) => current + tokensSaved(tokens, resumed.tokens.length));
+    setTokenCache((current) => putTokens(clearTokens(current, tokenizer), { text, tokens, tokenizer }));
+  };
   const warmRef = useRef(false);
   /** Запомнить замер потока: пуск и скорость, с выбросом первого прогона. */
   /** Поток живёт дольше рендера — замер читаем из ссылок (шаг 65). */
@@ -1632,6 +1651,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       }
 
       setText(heard);
+      // Шаг 68: текст фразы — в кэш токенизации. Повтор и продолжение реплики
+      // берут готовые токены вместо пересчёта всей истории.
+      reuseTokens(heard, Array.from({ length: heard.length }, (_, index) => index));
       // Шаг 66: сначала дешёвый разбор. Если он уверен — большая модель не
       // просыпается; если нет, разбирается она, и это сказано.
       const guess = tryIntent(heard.split(/\s+/)[0] ?? null, 0.7);
@@ -2432,6 +2454,21 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             после прогрева
           </Text>
         )}
+      </div>
+
+      {/* Шаг 68: кэш токенизации. Экономия названа числом, а не «работает»:
+          если экономия нулевая, кэш занимает память зря. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Кэш токенизации</Text>
+        <Text className={styles.note}>
+          {tokenCache.length === 0
+            ? "кэш пуст — после первой фразы повтор не пересчитывает историю заново"
+            : `${tokenCache.length} реплик в кэше, сэкономлено ${tokensSkipped} токенов`}
+        </Text>
+        <Text className={styles.note}>
+          кэш ограничен {KEEP_TOKENS} репликами: он ради скорости, и без предела сам
+          станет причиной нехватки памяти
+        </Text>
       </div>
 
       {/* Шаг 67: окно памяти по задаче. «С запасом» платит памятью и временем
