@@ -114,6 +114,14 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  approximate as sayApprox,
+  grade as machineGrade,
+  measure as readMachine,
+  say as sayMachine,
+  stale as machineStale,
+  type Profile as MachineProfile,
+} from "../lib/machineProfile";
+import {
   broken as brokenLines,
   empty as logEmpty,
   push as logPush,
@@ -1437,6 +1445,32 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // Шаг 60: журнал фраз — что услышано, что понято, что сделано. Разбор без него
   // превращается в «так было же»: человек помнит смысл, но не слова.
   const [phrases, setPhrases] = useState<PhraseLine[]>([]);
+  // Шаг 61: профиль машины. Без него остаётся «попробуем 7B» — и на слабом
+  // ноутбуке она думает по тридцать секунд, а человек решает, что приложение
+  // медленное.
+  const [hw, setHw] = useState<MachineProfile | null>(null);
+  useEffect(() => {
+    const fresh = { at: Date.now() };
+    const stored = typeof window === "undefined" ? null : window.localStorage.getItem("zshelper.machine");
+    if (stored !== null) {
+      try {
+        const parsed = JSON.parse(stored) as MachineProfile;
+        if (!machineStale(parsed, fresh.at)) {
+          setHw(parsed);
+          return;
+        }
+      } catch {
+        // Профиль испорчен — просто измеряем заново.
+      }
+    }
+    const measured = readMachine(fresh.at);
+    setHw(measured);
+    try {
+      window.localStorage.setItem("zshelper.machine", JSON.stringify(measured));
+    } catch {
+      // Не сохранилось — не беда: профиль дешёвый.
+    }
+  }, []);
   useEffect(() => {
     setWords(loadWords(typeof window === "undefined" ? null : window.localStorage));
   }, []);
@@ -2270,6 +2304,18 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         <Text className={styles.note} role="status" aria-live="polite">
           {deviceNotice}
         </Text>
+      ) : null}
+
+      {/* Шаг 61: профиль машины — факты и их следствие, а не голые цифры.
+          Оценка называется оценкой: диск определён по типу, а не замером. */}
+      {hw ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Эта машина</Text>
+          <Text className={styles.note}>{sayMachine(hw)}</Text>
+          <Text className={styles.note}>
+            класс: {machineGrade(hw)} · {sayApprox()}
+          </Text>
+        </div>
       ) : null}
 
       {/* Шаг 60: журнал фраз — одна строка на фразу, в ней три факта. Слитый
