@@ -147,6 +147,7 @@ import {
 } from "../lib/consentStep";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
+import { attention as reportAttention, one as oneReport, summary as reportSummary, whole as wholeReport } from "../lib/oneReport";
 import { answer as handAnswer, coverage as handCoverage, line as handLine, worst as handWorst } from "../lib/handAnswer";
 import { finished as cancelFinished, say as cancelSay, stop as cancelStop, start as cancelStart } from "../lib/cancelRun";
 import {
@@ -3200,27 +3201,36 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           <Text className={styles.title}>Что сделано</Text>
           {(() => {
             const gates = draft?.gates ?? [];
-            const answers = report.steps.map((step) =>
+            // Шаг 106: все формы отчёта приведены к одной — экран не решает,
+            // какая у него в руках, и не показывает три правды об одном факте.
+            const reports = report.steps.map((step) => oneReport(step));
+            const total = wholeReport(reports);
+            const answers = reports.map((step) =>
               handAnswer(
                 {
-                  did: `${step.registry} (${step.status === "ok" ? "выполнено" : step.reason})`,
-                  proof: step.evidence,
+                  did: `${step.tool} (${step.ok ? "выполнено" : step.reason})`,
+                  proof: step.proof,
                   risk: gates.find((gate) => gate.position === step.position)?.risk ?? null,
                 },
-                step.registry,
+                step.tool,
               ),
             );
             const cover = handCoverage(answers);
+            const attention = reportAttention(total);
             return (
               <>
+                <Text className={styles.note}>{reportSummary(total)}</Text>
                 <Text className={styles.note}>
                   {`рука ответила полностью: ${cover.full} из ${cover.total}`}
                 </Text>
-                {answers.map((got, index) => (
-                  <Text key={`answer-${index}`} className={styles.note}>
-                    {`${index + 1}. ${handLine(got)}`}
+                {reports.map((step) => (
+                  <Text key={`answer-${step.position}`} className={styles.note}>
+                    {`${step.position + 1}. ${handLine(answers[reports.indexOf(step)] ?? answers[0]!)}`}
                   </Text>
                 ))}
+                {attention.length > 0 ? (
+                  <Text className={styles.note}>{`внимание: ${attention.join("; ")}`}</Text>
+                ) : null}
                 {handWorst(answers).length > 0 ? (
                   <Text className={styles.note}>
                     {`чаще всего не хватает: ${handWorst(answers)

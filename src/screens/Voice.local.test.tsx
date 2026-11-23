@@ -1919,6 +1919,8 @@ describe("локальное распознавание на экране", () =
     await waitFor(() => expect(screen.getByText("Что сделано")).toBeTruthy());
     expect(screen.getByText(/сделанное не отменяется — «отменить» вернёт только то/)).toBeTruthy();
     expect(screen.getByText(/рука ответила полностью: /)).toBeTruthy();
+    // Шаг 106: один итог, а не три правды. «Сделано N из M» — числом.
+    expect(screen.getByText("сделано 1 из 2, без доказательства 1")).toBeTruthy();
   });
 
   it("изменение ответа во время перепроверки отменяет запуск устаревшего плана", async () => {
