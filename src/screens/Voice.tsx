@@ -114,6 +114,15 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  broken as brokenLines,
+  empty as logEmpty,
+  push as logPush,
+  stage as logStage,
+  text as logText,
+  why as logWhy,
+  type Line as PhraseLine,
+} from "../lib/phraseLog";
+import {
   askConfirm,
   fix as fixWord,
   say as saySure,
@@ -1425,6 +1434,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // Шаг 58: «услышал так» — с правкой по словам. Человек правит одно слово, а не
   // перепечатывает фразу: иначе точность наказывается.
   const [heardWords, setHeardWords] = useState<Word[] | null>(null);
+  // Шаг 60: журнал фраз — что услышано, что понято, что сделано. Разбор без него
+  // превращается в «так было же»: человек помнит смысл, но не слова.
+  const [phrases, setPhrases] = useState<PhraseLine[]>([]);
   useEffect(() => {
     setWords(loadWords(typeof window === "undefined" ? null : window.localStorage));
   }, []);
@@ -1490,6 +1502,18 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       }
 
       setText(heard);
+      // Шаг 60: журнал. Пока «что понято» и «что сделано» ещё неизвестны —
+      // допишем их, когда разбор закончится; главное, что услышанное уже
+      // записано: если разбор упадёт, останется хотя бы это.
+      setPhrases((current) =>
+        logPush(current, {
+          at: Date.now(),
+          heard,
+          understood: null,
+          did: "разбираю…",
+          stage: logStage(heard, null, "разбираю…"),
+        }),
+      );
       // Шаг 58: разложим фразу на слова — человек увидит, **где** сомневались,
       // и поправит одно слово, а не всю фразу. Уверенность по словам, если
       // движок её дал; иначе считаем фразу уверенной (не выдумываем сомнение).
@@ -2247,6 +2271,30 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           {deviceNotice}
         </Text>
       ) : null}
+
+      {/* Шаг 60: журнал фраз — одна строка на фразу, в ней три факта. Слитый
+          текст «запрос/результат» не показал бы, **где** разошлось. Плохие строки
+          помечены: человек ищет не всё подряд, а где сломалось. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Журнал фраз</Text>
+        {phrases.length === 0 ? (
+          <Text className={styles.note}>{logEmpty()}</Text>
+        ) : (
+          <>
+            <Text className={styles.note}>
+              {phrases.length} фраз, из них с расхождением: {brokenLines(phrases).length}
+            </Text>
+            <div className={styles.prompt} role="log" aria-label="Журнал фраз">
+              {phrases.map((line) => (
+                <div key={`${line.at}:${line.heard}`}>
+                  <span>{logText(line)}</span>
+                  {line.stage !== "done" ? <span> — {logWhy(line)}</span> : null}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Шаг 59: ответ голосом — одной кнопкой, а не в настройках. Состояние
           словом, а не значком динамика: значок не читается ни диктором, ни
