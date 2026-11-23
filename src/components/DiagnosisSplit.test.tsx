@@ -26,6 +26,7 @@ vi.mock("../ipc", () => ({
       bytes: 986048768,
       needed: true,
       reason: "единственный разговорный движок",
+      pinned_sha256: "a".repeat(64),
     },
   ],
   probeNetwork: async () => [],

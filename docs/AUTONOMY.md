@@ -61,7 +61,7 @@
 * `src/components/MemoryBackups.tsx:80` — useEffect(() => {
 * `src/components/MemoryNote.tsx:65` — useEffect(() => {
 * `src/components/MicrophoneCheck.tsx:22` — useEffect(() => {
-* `src/components/NetworkCard.tsx:77` — useEffect(() => {
+* `src/components/NetworkCard.tsx:78` — useEffect(() => {
 * `src/components/ReadinessCard.tsx:99` — useEffect(() => {
 * `src/components/ReadinessCard.tsx:143` — useEffect(() => {
 * `src/components/ReadinessCard.tsx:164` — useEffect(() => {

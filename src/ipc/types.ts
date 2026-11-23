@@ -925,6 +925,11 @@ export interface NetworkAddress {
   bytes: number;
   needed: boolean;
   reason: string;
+  /**
+   * Закреплённый sha256 (шаг 72). Пустая строка — адрес не закреплён, и такой
+   * файл не скачивается: проверить его нечем.
+   */
+  pinned_sha256: string;
 }
 
 /**

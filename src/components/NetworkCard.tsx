@@ -3,6 +3,7 @@ import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { networkAddresses, probeNetwork } from "../ipc";
 import type { AddressProbe, NetworkAddress } from "../ipc/types";
 import { models } from "../i18n/ru";
+import { allow } from "../lib/pinned";
 
 /**
  * «Куда приложение ходит в сети» — весь список, а не обещание.
@@ -140,6 +141,14 @@ export function NetworkCard() {
                 <Text className={styles.optional}>{weight(address.bytes)}</Text>
               </div>
               <Text className={styles.url}>{address.url}</Text>
+              {/* Шаг 72: адрес проверяется общим правилом, а не «на глаз»: то,
+                  что не закреплено, не скачивается. Список показывает это до
+                  скачивания, а не после. */}
+              <Text className={styles.optional}>
+                {allow({ url: address.url, sha256: address.pinned_sha256, bytes: address.bytes }).ok
+                  ? "адрес закреплён, хеш проверяется после скачивания"
+                  : "адрес не закреплён — такой файл не скачиваем"}
+              </Text>
               <Text className={styles.optional}>{address.reason}</Text>
             </li>
           ))}

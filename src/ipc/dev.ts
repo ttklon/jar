@@ -569,6 +569,7 @@ export async function networkAddresses(): Promise<NetworkAddress[]> {
       bytes: c.model.bytes,
       needed: true,
       reason: "единственный разговорный движок; файл лежит у вас в папке моделей после скачивания",
+      pinned_sha256: c.model.sha256,
     },
     {
       purpose: "движок llama.cpp",
@@ -576,6 +577,7 @@ export async function networkAddresses(): Promise<NetworkAddress[]> {
       bytes: c.runtime.bytes,
       needed: true,
       reason: "pinned-релиз: версия не «последняя», а названная, и её хеш проверяется",
+      pinned_sha256: c.runtime.sha256,
     },
     {
       purpose: "движок распознавания речи",
@@ -583,6 +585,7 @@ export async function networkAddresses(): Promise<NetworkAddress[]> {
       bytes: c.whisper_runtime.bytes,
       needed: false,
       reason: "нужен только для голоса, а не для текста; без него приложение работает",
+      pinned_sha256: c.whisper_runtime.sha256,
     },
     {
       purpose: "модель распознавания речи",
@@ -590,6 +593,7 @@ export async function networkAddresses(): Promise<NetworkAddress[]> {
       bytes: c.whisper_model.bytes,
       needed: false,
       reason: "нужна только для голоса; скачивается по явному нажатию",
+      pinned_sha256: c.whisper_model.sha256,
     },
   ];
 }

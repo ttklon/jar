@@ -55,6 +55,7 @@ function four() {
       bytes: 986048768,
       needed: true,
       reason: "единственный разговорный движок",
+      pinned_sha256: "a".repeat(64),
     },
     {
       purpose: "движок llama.cpp",
@@ -62,6 +63,7 @@ function four() {
       bytes: 25696689,
       needed: true,
       reason: "pinned-релиз",
+      pinned_sha256: "b".repeat(64),
     },
     {
       purpose: "движок распознавания речи",
@@ -69,6 +71,7 @@ function four() {
       bytes: 14000000,
       needed: false,
       reason: "нужен только для голоса",
+      pinned_sha256: "c".repeat(64),
     },
     {
       purpose: "модель распознавания речи",
@@ -76,6 +79,7 @@ function four() {
       bytes: 147951465,
       needed: false,
       reason: "нужна только для голоса",
+      pinned_sha256: "d".repeat(64),
     },
   ];
 }
