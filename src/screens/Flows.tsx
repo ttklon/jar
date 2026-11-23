@@ -45,7 +45,7 @@ export function Flows() {
   return (
     <div className={styles.root}>
       <div>
-        <Text as="h2" size={700} weight="semibold">
+        <Text as="h1" size={700} weight="semibold">
           {flows.title}
         </Text>
         <Text className={styles.lead} block>

@@ -50,6 +50,7 @@ import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
 import { filterCommands, type Command } from "./lib/commands";
 import { readEntry } from "./lib/entry";
 import { readScreen, saveScreen } from "./lib/lastScreen";
+import { filterFindables, findables, kindLabel } from "./lib/find";
 import { layoutFor } from "./lib/layout";
 import {
   DEFAULT_CHOICE,
@@ -94,6 +95,13 @@ const useStyles = makeStyles({
   },
   brand: { display: "flex", flexDirection: "column", gap: "2px", padding: "0 8px" },
   paletteList: { listStyle: "none", margin: "10px 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "2px" },
+  // Подпись «экран / настройка / возможность». Мелкая и тихая: она отвечает
+  // на вопрос «куда я иду», но не спорит с названием за внимание.
+  paletteKind: {
+    fontSize: tokens.fontSizeBase200,
+    color: tokens.colorNeutralForeground3,
+    marginTop: "2px",
+  },
   paletteItem: {
     width: "100%",
     // Палитра открывается с клавиатуры, но выбирают в ней и мышью: 40 px было
@@ -264,7 +272,18 @@ export function App() {
     globalThis.addEventListener("keydown", onKey);
     return () => globalThis.removeEventListener("keydown", onKey);
   }, []);
-  const matches = filterCommands(NAV_COMMANDS, query);
+  // Одно поле ищет и экраны, и настройки, и возможности (шаг 192). Раньше
+  // палитра знала только экраны: на «где тема» она отвечала «Настройки» — то
+  // есть человек всё равно искал глазами внутри, — а «скачать модель» не
+  // находилось вовсе, потому что такого экрана нет.
+  const screenMatches = filterCommands(NAV_COMMANDS, query).map((command) => ({
+    ...command,
+    kind: "screen" as const,
+  }));
+  const otherMatches = filterFindables(findables(), query);
+  // Экраны первыми: их меньше и они — главный путь. Настройки и возможности
+  // следом: если человек искал именно их, слово всё равно выше.
+  const matches = [...screenMatches, ...otherMatches];
   const go = (id: string) => {
     setScreen(id as Screen);
     // Через `togglePalette`, а не голый `setPaletteOpen`: выбор экрана тоже
@@ -630,9 +649,21 @@ export function App() {
               ) : (
                 <ul className={styles.paletteList} data-testid="palette">
                   {matches.map((command) => (
-                    <li key={command.id}>
-                      <button type="button" className={styles.paletteItem} onClick={() => go(command.id)}>
+                    // Ключ — не `id`: на «Настройки» ведут и сама настройка, и
+                    // несколько возможностей, и одинаковый ключ заставил бы
+                    // React переиспользовать чужие строки.
+                    <li key={`${command.kind}:${command.id}:${command.label}`}>
+                      <button
+                        type="button"
+                        className={styles.paletteItem}
+                        onClick={() => go(command.id)}
+                      >
                         {command.label}
+                        {/* «Тема» и «экран» — разные вещи; человек должен видеть,
+                            куда именно он идёт, до нажатия. */}
+                        <Text className={styles.paletteKind} block>
+                          {kindLabel(command.kind)}
+                        </Text>
                       </button>
                     </li>
                   ))}

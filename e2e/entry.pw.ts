@@ -122,7 +122,7 @@ test("название экрана, набранное с клавиатуры,
     .poll(
       async () =>
         page.evaluate(() =>
-          Array.from(document.querySelectorAll("h2")).some(
+          Array.from(document.querySelectorAll("h1")).some(
             (item) => item.textContent?.trim() === "История",
           ),
         ),

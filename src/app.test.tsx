@@ -87,8 +87,10 @@ describe("App", () => {
     // настоящая — в браузере кнопка доступна; здесь мы не проверяем Fluent,
     // а проверяем, что палитра нашла экран и переход по ней закрыл палитру.
     const list = screen.getByTestId("palette");
-    const voice = Array.from(list.querySelectorAll("button")).find(
-      (button) => button.textContent?.trim() === "Голос",
+    // Кнопка теперь говорит и что это («экран»), поэтому сравниваем с началом
+    // текста, а не со всем: подпись дописана, название осталось первым.
+    const voice = Array.from(list.querySelectorAll("button")).find((button) =>
+      button.textContent?.trim().startsWith("Голос"),
     );
     expect(voice).toBeTruthy();
     fireEvent.click(voice as HTMLButtonElement);
@@ -396,7 +398,7 @@ describe("App", () => {
     nav().getByRole("button", { name: "История" }).click();
     // Заголовок экрана, а не «Что болит»: второе появляется, лишь когда пришли
     // данные журнала, и ждать его — значит проверять чужую загрузку.
-    await screen.findByRole("heading", { name: "История", level: 2 }, { timeout: 5000 });
+    await screen.findByRole("heading", { name: "История", level: 1 }, { timeout: 5000 });
 
     // Вход на виду и на чужом экране.
     const entry = screen.getByRole("textbox", { name: /скажи или напиши/ });
@@ -414,12 +416,55 @@ describe("App", () => {
     expect((entry as HTMLInputElement).value).toBe("");
   });
 
+  it("одно поле ищет настройку и ведёт в настройки (шаг 192)", async () => {
+    render(<App />);
+    await loaded();
+
+    // Ctrl+K — палитра, и в ней «тема» находит настройку, а не только «Настройки»
+    // как экран. Раньше человек получал ответ «Настройки» и искал внутри глазами.
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    const search = await screen.findByLabelText("Поиск экрана", {}, { timeout: 5000 });
+    fireEvent.change(search, { target: { value: "тёмная" } });
+
+    const palette = await screen.findByTestId("palette");
+    expect(palette.textContent).toContain("Тема");
+    expect(palette.textContent).toContain("настройка");
+
+    // Выбор ведёт на экран настроек — туда, где эта тема и живёт.
+    const item = Array.from(palette.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Тема"),
+    );
+    expect(item).toBeTruthy();
+    fireEvent.click(item!);
+    await screen.findByRole("heading", { name: "Настройки", level: 1 }, { timeout: 5000 });
+  });
+
+  it("возможность находится тем словом, которым её называют (шаг 192)", async () => {
+    render(<App />);
+    await loaded();
+
+    // «Скачать модель» — не экран и не настройка: такого пункта в ленте нет.
+    // Поиск обязан находить возможность и вести туда, где она живёт.
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    const search = await screen.findByLabelText("Поиск экрана", {}, { timeout: 5000 });
+    fireEvent.change(search, { target: { value: "скачать модель" } });
+
+    const palette = await screen.findByTestId("palette");
+    expect(palette.textContent).toContain("возможность");
+    const item = Array.from(palette.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Скачать модель"),
+    );
+    expect(item).toBeTruthy();
+    fireEvent.click(item!);
+    await screen.findByRole("heading", { name: /Модели/i, level: 1 }, { timeout: 5000 });
+  });
+
   it("место работы открывается в следующий раз (шаг 191)", async () => {
     // Первый запуск: ушли в «Историю».
     const first = render(<App />);
     await loaded();
     nav().getByRole("button", { name: "История" }).click();
-    await screen.findByRole("heading", { name: "История", level: 2 }, { timeout: 5000 });
+    await screen.findByRole("heading", { name: "История", level: 1 }, { timeout: 5000 });
     first.unmount();
 
     // Второй запуск: приложение открывается там, где человек работал, а не с
@@ -428,7 +473,7 @@ describe("App", () => {
     // Ждём не микрофон: на «Истории» его нет, и `loaded()` искал бы не то.
     // Признак загрузки здесь — лента навигации, она есть на любом экране.
     render(<App />);
-    await screen.findByRole("heading", { name: "История", level: 2 }, { timeout: 6000 });
+    await screen.findByRole("heading", { name: "История", level: 1 }, { timeout: 6000 });
   });
 
   it("стрелки двигают фокус по экранам (шаг 191)", async () => {
@@ -472,7 +517,7 @@ describe("App", () => {
     // Увели на «Историю», а не оставили фразу «история» в поле разговора.
     // Заголовок экрана, а не «Что болит»: второе появляется, лишь когда пришли
     // данные журнала, и ждать его — значит проверять чужую загрузку.
-    await screen.findByRole("heading", { name: "История", level: 2 }, { timeout: 5000 });
+    await screen.findByRole("heading", { name: "История", level: 1 }, { timeout: 5000 });
     expect((entry as HTMLInputElement).value).toBe("");
   });
 });

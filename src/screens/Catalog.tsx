@@ -108,7 +108,7 @@ export function Catalog({ snapshot }: { snapshot: RegistrySnapshot }) {
   return (
     <div className={styles.root}>
       <div>
-        <Text as="h2" size={700} weight="semibold">
+        <Text as="h1" size={700} weight="semibold">
           {t.catalogTitle}
         </Text>
         <Text className={styles.lead} block>

@@ -62,7 +62,7 @@ export function Overview({ snapshot }: { snapshot: RegistrySnapshot }) {
   return (
     <div className={styles.root}>
       <div className={styles.section}>
-        <Text as="h2" size={700} weight="semibold">
+        <Text as="h1" size={700} weight="semibold">
           {t.overviewTitle}
         </Text>
         <Text className={styles.lead}>{t.overviewLead}</Text>
