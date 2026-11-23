@@ -114,6 +114,13 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  change as whyChange,
+  lines as whyLines,
+  report as whyReport,
+  short as whyShort,
+  type Fact as WhyFact,
+} from "../lib/whyModel";
+import {
   assumed as assumedCpu,
   best as bestBuild,
   howKnown,
@@ -2727,6 +2734,49 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           })()}
         </div>
       ) : null}
+
+      {/* Шаг 79: отчёт «почему выбрана эта модель». Причина — **факт о его
+          машине**, а не «мы так решили»: иначе решение не понять, не оспорить и
+          не связать с изменениями. */}
+      {hw ? (() => {
+        const fits = hwForModel(hw);
+        const chosen = ladderPick(fits);
+        const facts: WhyFact[] = [
+          {
+            what: "память",
+            found: `${Math.round((hw.ramMb / 1024) * 10) / 10} ГБ (модели доступно ${Math.round((fits / 1024) * 10) / 10} ГБ)`,
+            means: chosen === null ? "не помещается ни одна модель — закройте программы" : `помещается «${chosen.name}»`,
+            helped: chosen !== null,
+          },
+          {
+            what: "совместимость",
+            found: hw.cores >= 4 ? `${hw.cores} ядер` : `${hw.cores} ядра — мало`,
+            means: gpuUsable(hw) ? "видеокарта подходит" : "считать будет на процессоре",
+            helped: gpuUsable(hw),
+          },
+          {
+            what: "диск",
+            found: hw.disk === "hdd" ? "HDD" : hw.disk === "ssd" ? "SSD" : "тип неизвестен",
+            means: hw.disk === "hdd" ? "первый запуск дольше" : "загрузка быстрая",
+            helped: hw.disk !== "hdd",
+          },
+        ];
+        const got = whyReport(chosen?.name ?? "нет модели", facts);
+        return (
+          <div className={styles.section}>
+            <Text className={styles.title}>Почему выбрана эта модель</Text>
+            <Text className={styles.note}>{whyShort(got)}</Text>
+            {whyLines(got).map((line) => (
+              <Text key={line} className={styles.note}>
+                {line}
+              </Text>
+            ))}
+            {whyChange(got) ? (
+              <Text className={styles.note}>{whyChange(got)}</Text>
+            ) : null}
+          </div>
+        );
+      })() : null}
 
       {/* Шаг 78: совместимость с железом — до запуска, словами. Тихая
           деградация худшая: модель работает втрое медленнее, а человек выбирает
