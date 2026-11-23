@@ -116,6 +116,7 @@ import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import { differ as intentDiffer, missing as intentMissing, parse as parseIntent, say as intentWords } from "../lib/intent";
 import { need as askNeed, question as askQuestion, rule as askRule, type Plan as AskPlan } from "../lib/askWhen";
 import { plan as deedsPlan, says as deedsSays, split as splitDeeds, type Deed } from "../lib/twoDeeds";
+import { canDo as canDoNegated, parse as parseNegation, say as sayNegation, type Negation } from "../lib/negation";
 import {
   breaks as removeBreaks,
   done as removeDone,
@@ -1599,6 +1600,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [heardIntent, setHeardIntent] = useState<string | null>(null);
   const [saidIntent, setSaidIntent] = useState<string | null>(null);
   const [deeds, setDeeds] = useState<Deed[]>([]);
+  // Шаг 84: отрицание — часть намерения: «не удаляй» не исполняется как «удали».
+  const [negation, setNegation] = useState<Negation | null>(null);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -1802,6 +1805,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       // Шаг 83: два дела в одной фразе — разложить и сделать по очереди.
       // «Найди и отправь» сегодня теряет вторую половину молча.
       setDeeds(splitDeeds(heard));
+      // Шаг 84: разбор отрицания — **до** исполнения. Цена ошибки тут — стёртое,
+      // поэтому сомнение не угадывается, а переспрашивается.
+      setNegation(parseNegation(heard));
       setHeardIntent(heard);
       setSaidIntent(
         intentMissing(parsed).length > 0
@@ -2765,6 +2771,26 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </>
             );
           })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 84: отрицание разобрано до исполнения. Самая дорогая ошибка —
+          полярность: «не удаляй» и «удали» отличаются одним словом. */}
+      {negation !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Отрицание</Text>
+          <Text
+            className={styles.note}
+            role={canDoNegated(negation) ? "status" : "alert"}
+            aria-live="polite"
+          >
+            {sayNegation(negation)}
+          </Text>
+          {canDoNegated(negation) ? null : (
+            <Text className={styles.note}>
+              действие не выполнено: сначала подтвердите, что запрет снят
+            </Text>
+          )}
         </div>
       ) : null}
 
