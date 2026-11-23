@@ -114,6 +114,15 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  measure as measureSpeed,
+  say as saySpeed,
+  stale as speedStale,
+  usable as speedUsable,
+  waitMs,
+  waitWord,
+  type Measured as SpeedMeasured,
+} from "../lib/speed";
+import {
   choose as chooseQuant,
   say as sayQuant,
   sizeMb as quantSize,
@@ -1478,6 +1487,40 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     { name: "bge-m3", sizeMb: 560, code: false, embed: true },
   ];
   const roleChoices = rolesPlan(roleModels);
+
+  // Шаг 65: замер на этой машине. Первый прогон выбрасывается — он читает
+  // модель с диска и греет кеш, и цифра была бы занижена.
+  const [speed, setSpeed] = useState<SpeedMeasured | null>(null);
+  const warmRef = useRef(false);
+  /** Запомнить замер потока: пуск и скорость, с выбросом первого прогона. */
+  /** Поток живёт дольше рендера — замер читаем из ссылок (шаг 65). */
+  const pieceStart = useRef(0);
+  const pieceCount = useRef(0);
+  const keepSpeedRef = useRef<(first: number, last: number, count: number) => void>(() => {});
+  const keepSpeed = (first: number, last: number, count: number) => {
+    const measured = speedUsable(measureSpeed(first, last, count, Date.now()), warmRef.current);
+    if (measured === null) {
+      warmRef.current = true;
+      return;
+    }
+    setSpeed(measured);
+    try {
+      window.localStorage.setItem("zshelper.speed", JSON.stringify(measured));
+    } catch {
+      // Не сохранилось — не беда: перемерим.
+    }
+  };
+  keepSpeedRef.current = keepSpeed;
+  useEffect(() => {
+    const stored = typeof window === "undefined" ? null : window.localStorage.getItem("zshelper.speed");
+    if (stored === null) return;
+    try {
+      const parsed = JSON.parse(stored) as SpeedMeasured;
+      if (!speedStale(parsed, Date.now())) setSpeed(parsed);
+    } catch {
+      // Замер испорчен — просто перемерим позже.
+    }
+  }, []);
   useEffect(() => {
     const fresh = { at: Date.now() };
     const stored = typeof window === "undefined" ? null : window.localStorage.getItem("zshelper.machine");
@@ -1990,6 +2033,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         ipc.onThinkPiece((piece) => {
           // `0` — поток не запрошен: событие чужое и звучать не должно.
           if (streamOwnerRef.current === 0) return;
+          // Шаг 65: замер **по событиям движка**, а не таймером вокруг вызова:
+          // таймер включает загрузку модели, и цифра перестаёт быть про счёт.
+          const now = performance.now();
+          if (pieceStart.current === 0) pieceStart.current = now;
+          pieceCount.current += 1;
+          keepSpeedRef.current(pieceStart.current, now, pieceCount.current);
           speechRef.current?.push(piece);
         }),
       )
@@ -2334,6 +2383,26 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           {deviceNotice}
         </Text>
       ) : null}
+
+      {/* Шаг 65: замер на этой машине, а не по паспорту. Пуск и скорость —
+          разные числа: пять секунд тишины человек считает зависанием, даже если
+          потом ответ идёт бойко. Единицы честные: слов в секунду, а не токенов. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Скорость на этой машине</Text>
+        {speed ? (
+          <>
+            <Text className={styles.note}>{saySpeed(speed, Date.now())}</Text>
+            <Text className={styles.note}>
+              ответ из 10 слов: {waitWord(waitMs(speed, 10))}
+            </Text>
+          </>
+        ) : (
+          <Text className={styles.note}>
+            ещё не мерили — первый прогон читает модель с диска, поэтому замер
+            после прогрева
+          </Text>
+        )}
+      </div>
 
       {/* Шаг 63: лестница моделей. Предлагается самая большая из **влезающих**:
           «попробуйте, может, пойдёт» — не выбор, а лотерея. Потери названы

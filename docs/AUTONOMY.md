@@ -36,25 +36,26 @@
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
 * `src/screens/Undo.tsx:68` — useEffect(load, [load]);
-* `src/screens/Voice.tsx:304` — useEffect(() => {
-* `src/screens/Voice.tsx:498` — useEffect(() => {
-* `src/screens/Voice.tsx:502` — useEffect(
-* `src/screens/Voice.tsx:540` — useEffect(() => {
-* `src/screens/Voice.tsx:1481` — useEffect(() => {
-* `src/screens/Voice.tsx:1503` — useEffect(() => {
-* `src/screens/Voice.tsx:1616` — useEffect(() => {
-* `src/screens/Voice.tsx:1651` — useEffect(() => {
-* `src/screens/Voice.tsx:1672` — useEffect(() => {
-* `src/screens/Voice.tsx:1678` — useEffect(() => {
-* `src/screens/Voice.tsx:1685` — useEffect(() => {
-* `src/screens/Voice.tsx:1710` — useEffect(() => {
-* `src/screens/Voice.tsx:1725` — useEffect(() => {
-* `src/screens/Voice.tsx:1751` — useEffect(() => {
-* `src/screens/Voice.tsx:1799` — useEffect(() => {
-* `src/screens/Voice.tsx:1805` — useEffect(() => {
-* `src/screens/Voice.tsx:1821` — useEffect(() => {
-* `src/screens/Voice.tsx:1983` — useEffect(() => {
-* `src/screens/Voice.tsx:2009` — useEffect(
+* `src/screens/Voice.tsx:313` — useEffect(() => {
+* `src/screens/Voice.tsx:507` — useEffect(() => {
+* `src/screens/Voice.tsx:511` — useEffect(
+* `src/screens/Voice.tsx:549` — useEffect(() => {
+* `src/screens/Voice.tsx:1514` — useEffect(() => {
+* `src/screens/Voice.tsx:1524` — useEffect(() => {
+* `src/screens/Voice.tsx:1546` — useEffect(() => {
+* `src/screens/Voice.tsx:1659` — useEffect(() => {
+* `src/screens/Voice.tsx:1694` — useEffect(() => {
+* `src/screens/Voice.tsx:1715` — useEffect(() => {
+* `src/screens/Voice.tsx:1721` — useEffect(() => {
+* `src/screens/Voice.tsx:1728` — useEffect(() => {
+* `src/screens/Voice.tsx:1753` — useEffect(() => {
+* `src/screens/Voice.tsx:1768` — useEffect(() => {
+* `src/screens/Voice.tsx:1794` — useEffect(() => {
+* `src/screens/Voice.tsx:1842` — useEffect(() => {
+* `src/screens/Voice.tsx:1848` — useEffect(() => {
+* `src/screens/Voice.tsx:1864` — useEffect(() => {
+* `src/screens/Voice.tsx:2026` — useEffect(() => {
+* `src/screens/Voice.tsx:2058` — useEffect(
 * `src/components/DownloadBar.tsx:73` — useEffect(() => {
 * `src/components/DownloadBar.tsx:80` — useEffect(() => {
 * `src/components/MemoryBackups.tsx:80` — useEffect(() => {
