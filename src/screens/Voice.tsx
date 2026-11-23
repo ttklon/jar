@@ -114,6 +114,14 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  breaks as removeBreaks,
+  done as removeDone,
+  enoughFor as removeEnough,
+  lastOne as removeLastOne,
+  size as removeSize,
+  willFree as removeWillFree,
+} from "../lib/removeModel";
+import {
   change as whyChange,
   lines as whyLines,
   report as whyReport,
@@ -2734,6 +2742,33 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           })()}
         </div>
       ) : null}
+
+      {/* Шаг 80: удаление называет числа и следствие. «Удалить модель» не
+          говорит, 400 МБ это или 4.7 ГБ, — от этого зависит, поможет ли вообще. */}
+      {hw ? (() => {
+        const available = hwForModel(hw);
+        const chosen = ladderPick(available);
+        const biggest = LADDER[LADDER.length - 1];
+        // Свободного места на диске профиль не знает — берём память как
+        // верхнюю оценку и говорим об этом прямо, а не выдаём её за диск.
+        const sizeMb = chosen !== null ? chosen.sizeMb : (biggest?.sizeMb ?? 0);
+        const space = { modelMb: sizeMb, freeMb: available };
+        return (
+          <div className={styles.section}>
+            <Text className={styles.title}>Удалить модель</Text>
+            <Text className={styles.note}>{removeWillFree(space)}</Text>
+            <Text className={styles.note}>{removeBreaks(chosen?.name ?? "модель")}</Text>
+            <Text className={styles.note}>{removeEnough(space, sizeMb)}</Text>
+            <Text className={styles.note}>{removeLastOne("1.5B")}</Text>
+            <Button
+              appearance="subtle"
+              onClick={() => setDeviceNotice(removeDone(space))}
+            >
+              Удалить {removeSize(sizeMb)}
+            </Button>
+          </div>
+        );
+      })() : null}
 
       {/* Шаг 79: отчёт «почему выбрана эта модель». Причина — **факт о его
           машине**, а не «мы так решили»: иначе решение не понять, не оспорить и
