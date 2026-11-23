@@ -114,6 +114,12 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  choose as chooseQuant,
+  say as sayQuant,
+  sizeMb as quantSize,
+  whyNotSmaller,
+} from "../lib/quant";
+import {
   warning as ladderWarning,
   nothing as ladderNothing,
   pick as ladderPick,
@@ -2347,6 +2353,18 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                   на этой машине помещается «{chosen.name}» — {chosen.good}
                 </Text>
                 <Text className={styles.note}>{ladderWarning(chosen)}</Text>
+                {/* Шаг 64: квантование по умолчанию — Q4_K_M, с названной ценой.
+                    Q8 — только по доказанному замеру, иначе человек платит
+                    памятью за точность, которой не увидит. */}
+                <Text className={styles.note}>
+                  {sayQuant(chooseQuant().kind, Number.parseFloat(chosen.name))}
+                </Text>
+                <Text className={styles.note}>
+                  {whyNotSmaller()}
+                </Text>
+                <Text className={styles.note}>
+                  файл: {Math.round(quantSize(Number.parseFloat(chosen.name), chooseQuant().kind) / 102.4) / 10} ГБ
+                </Text>
                 <Text className={styles.note}>
                   по паспорту: {speedWord({ step: chosen, measured: null, passport: 9 })}
                 </Text>
