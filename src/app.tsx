@@ -49,6 +49,7 @@ import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
 import { filterCommands, type Command } from "./lib/commands";
 import { readEntry } from "./lib/entry";
+import { readScreen, saveScreen } from "./lib/lastScreen";
 import { layoutFor } from "./lib/layout";
 import {
   DEFAULT_CHOICE,
@@ -205,7 +206,11 @@ export const NAV_COMMANDS: Command[] = NAV.map(({ id, label, keywords }) => ({ i
 
 export function App() {
   const styles = useStyles();
-  const [screen, setScreen] = useState<Screen>("voice");
+  // Где человек работал — там и открываем (шаг 191). Не «последний экран вообще»:
+  // знакомство не запоминается, и чужое имя не становится местом (см. `lastScreen`).
+  const [screen, setScreen] = useState<Screen>(
+    () => readScreen(globalThis.localStorage, NAV_COMMANDS.map((item) => item.id)) as Screen,
+  );
   // Единый вход (шаг 181): что набрано в поле «скажи или напиши» и что из него
   // передано на экран разговора.
   const [entry, setEntry] = useState("");
@@ -332,6 +337,13 @@ export function App() {
     );
   }, []);
 
+  // Место запоминается одним эффектом, а не `setItem` в каждой кнопке: переходов
+  // пять (лента, палитра, единый вход, «Знакомство», кнопки экранов), и забыть
+  // один из них — вопрос времени.
+  useEffect(() => {
+    saveScreen(globalThis.localStorage, screen);
+  }, [screen]);
+
   const [snapshot, setSnapshot] = useState<RegistrySnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -392,6 +404,34 @@ export function App() {
 
           <nav
             className={styles.nav}
+            // Стрелки между экранами (шаг 191). Все пункты — настоящие кнопки, и
+            // Tab по ним уже ходит; стрелки добавляются потому, что ими идут
+            // люди, привыкшие к меню, и потому, что это не отнимает у Tab
+            // ничего: вниз/вправо — следующий пункт, вверх/влево — предыдущий,
+            // Home/End — крайние. Фокус двигается явно, а не «куда-нибудь»:
+            // иначе человек не знает, где окажется.
+            onKeyDown={(event) => {
+              const keys = ["ArrowDown", "ArrowRight", "ArrowUp", "ArrowLeft", "Home", "End"];
+              if (!keys.includes(event.key)) return;
+              const buttons = Array.from(
+                (event.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>("button"),
+              );
+              if (buttons.length === 0) return;
+              const at = buttons.findIndex((button) => button === document.activeElement);
+              const forward = event.key === "ArrowDown" || event.key === "ArrowRight";
+              const backward = event.key === "ArrowUp" || event.key === "ArrowLeft";
+              if (at === -1 && !forward && !backward && event.key !== "Home" && event.key !== "End") {
+                return;
+              }
+              let next = at;
+              if (event.key === "Home") next = 0;
+              else if (event.key === "End") next = buttons.length - 1;
+              else if (forward) next = (at + 1 + buttons.length) % buttons.length;
+              else if (backward) next = (at - 1 + buttons.length) % buttons.length;
+              if (next < 0 || next >= buttons.length) return;
+              event.preventDefault();
+              buttons[next]?.focus();
+            }}
             style={
               layout.narrow
                 ? { flexDirection: "row", flexWrap: "wrap", gap: "4px" }

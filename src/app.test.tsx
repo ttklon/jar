@@ -46,6 +46,10 @@ afterEach(() => {
  * из них начинался бы с первого экрана и проверял бы не то, что задумано.
  */
 beforeEach(() => {
+  // Чистый лист: знакомство пройдено, место работы не запомнено. Без второго
+  // половина тестов начиналась бы с экрана, который оставил предыдущий тест
+  // (шаг 191 запоминает место), — и проверяла бы не то, что задумано.
+  globalThis.localStorage?.clear?.();
   globalThis.localStorage?.setItem?.(WELCOME_KEY, "1");
 });
 
@@ -408,6 +412,53 @@ describe("App", () => {
     );
     // А из единого входа фраза ушла: иначе она отправилась бы дважды.
     expect((entry as HTMLInputElement).value).toBe("");
+  });
+
+  it("место работы открывается в следующий раз (шаг 191)", async () => {
+    // Первый запуск: ушли в «Историю».
+    const first = render(<App />);
+    await loaded();
+    nav().getByRole("button", { name: "История" }).click();
+    await screen.findByRole("heading", { name: "История", level: 2 }, { timeout: 5000 });
+    first.unmount();
+
+    // Второй запуск: приложение открывается там, где человек работал, а не с
+    // начала. Иначе каждый раз надо заново искать своё место.
+    //
+    // Ждём не микрофон: на «Истории» его нет, и `loaded()` искал бы не то.
+    // Признак загрузки здесь — лента навигации, она есть на любом экране.
+    render(<App />);
+    await screen.findByRole("heading", { name: "История", level: 2 }, { timeout: 6000 });
+  });
+
+  it("стрелки двигают фокус по экранам (шаг 191)", async () => {
+    render(<App />);
+    await loaded();
+
+    const items = Array.from(
+      screen.getByRole("navigation").querySelectorAll<HTMLButtonElement>("button"),
+    );
+    expect(items.length).toBeGreaterThan(2);
+    items[0]!.focus();
+
+    // Вниз — следующий пункт, и фокус именно на нём, а не «где-нибудь».
+    fireEvent.keyDown(items[0]!, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(items[1]);
+
+    fireEvent.keyDown(items[1]!, { key: "ArrowUp" });
+    expect(document.activeElement).toBe(items[0]);
+
+    // С последнего вниз — на первый: список не обрывается в пустоту.
+    const last = items[items.length - 1]!;
+    last.focus();
+    fireEvent.keyDown(last, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(items[0]);
+
+    // Home и End — крайние, как в любом списке.
+    fireEvent.keyDown(items[0]!, { key: "End" });
+    expect(document.activeElement).toBe(last);
+    fireEvent.keyDown(last, { key: "Home" });
+    expect(document.activeElement).toBe(items[0]);
   });
 
   it("один вход: название экрана ведёт на экран, а не в разговор", async () => {
