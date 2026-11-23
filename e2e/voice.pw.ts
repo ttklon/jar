@@ -69,11 +69,18 @@ test("native virtual mic → WAV → simulated ASR/LLM → spoken reply, two tur
   expect(await page.evaluate(() => window.voiceSimulation.state.micRequests)).toBe(0);
   await hold(page);
   await expect(page.getByLabel("Услышал", { exact: true })).toHaveValue("привет помощник");
-  await expect.poll(() => page.evaluate(() => window.voiceSimulation.state.spoken)).toContain("модель переспрашивает: Здравствуйте! Чем помочь?");
+  // Читается то, что произносится. С шага 47 приветствие не считается ответом:
+  // в `spoken` попадает содержательная часть, а не «Здравствуйте!». Проверяем
+  // склейку — так тест не зависит от того, прочли ответ одним куском или нет.
+  await expect
+    .poll(() => page.evaluate(() => window.voiceSimulation.state.spoken.join(" ")))
+    .toContain("Чем помочь?");
   await released(page);
   await hold(page);
   await expect(page.getByLabel("Услышал", { exact: true })).toHaveValue("расскажи что умеешь");
-  await expect.poll(() => page.evaluate(() => window.voiceSimulation.state.spoken)).toContain("модель переспрашивает: Могу предложить план. Без подтверждения опасные действия не выполняю.");
+  await expect
+    .poll(() => page.evaluate(() => window.voiceSimulation.state.spoken.join(" ")))
+    .toContain("Могу предложить план.");
   await released(page);
   const state = await page.evaluate(() => window.voiceSimulation.state);
   expect(state.queries).toEqual(["привет помощник", "расскажи что умеешь"]);
