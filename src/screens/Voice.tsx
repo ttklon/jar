@@ -114,6 +114,12 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  memoryMb as rolesMemory,
+  plan as rolesPlan,
+  say as sayRoles,
+  type Model as RoleModel,
+} from "../lib/modelRoles";
+import {
   approximate as sayApprox,
   grade as machineGrade,
   measure as readMachine,
@@ -1449,6 +1455,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // ноутбуке она думает по тридцать секунд, а человек решает, что приложение
   // медленное.
   const [hw, setHw] = useState<MachineProfile | null>(null);
+  // Шаг 62: роль → модель. Одна модель на всё посредственна во всём: понять
+  // фразу нужно быстро, код — точно, и требования враждебные.
+  const roleModels: RoleModel[] = [
+    { name: "0.5B", sizeMb: 400, code: false, embed: false },
+    { name: "1.5B", sizeMb: 1100, code: false, embed: false },
+    { name: "7B", sizeMb: 4600, code: true, embed: false },
+    { name: "bge-m3", sizeMb: 560, code: false, embed: true },
+  ];
+  const roleChoices = rolesPlan(roleModels);
   useEffect(() => {
     const fresh = { at: Date.now() };
     const stored = typeof window === "undefined" ? null : window.localStorage.getItem("zshelper.machine");
@@ -2305,6 +2320,20 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           {deviceNotice}
         </Text>
       ) : null}
+
+      {/* Шаг 62: какая модель на какую роль и **почему**. Без причины разная
+          скорость ответов выглядит как нестабильность. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Модели по ролям</Text>
+        {sayRoles(roleChoices).map((line) => (
+          <Text key={line} className={styles.note}>
+            {line}
+          </Text>
+        ))}
+        <Text className={styles.note}>
+          всего памяти на модели: {Math.round(rolesMemory(roleChoices) / 102.4) / 10} ГБ
+        </Text>
+      </div>
 
       {/* Шаг 61: профиль машины — факты и их следствие, а не голые цифры.
           Оценка называется оценкой: диск определён по типу, а не замером. */}
