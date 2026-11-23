@@ -114,6 +114,14 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  assumed as assumedCpu,
+  best as bestBuild,
+  howKnown,
+  offered as buildOffered,
+  say as sayBuild,
+  type Cpu as CpuFeatures,
+} from "../lib/cpuFeatures";
+import {
   fallback as codeFallback,
   isCode,
   load as codeLoad,
@@ -207,6 +215,7 @@ import {
   grade as machineGrade,
   measure as readMachine,
   forModel as hwForModel,
+  gpuUsable,
   say as sayMachine,
   stale as machineStale,
   type Profile as MachineProfile,
@@ -2718,6 +2727,31 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           })()}
         </div>
       ) : null}
+
+      {/* Шаг 78: совместимость с железом — до запуска, словами. Тихая
+          деградация худшая: модель работает втрое медленнее, а человек выбирает
+          меньшую, хотя дело было не в модели. */}
+      {(() => {
+        // В приложении набор инструкций читается из системы, в браузере — нет;
+        // тогда берём безопасное предположение (AVX2 есть, AVX512 нет).
+        const features: CpuFeatures = { ...assumedCpu(), gpu: hw !== null && gpuUsable(hw) };
+        const build = bestBuild(features);
+        return (
+          <div className={styles.section}>
+            <Text className={styles.title}>Совместимость с этим компьютером</Text>
+            <Text className={styles.note}>{howKnown(false)}</Text>
+            <Text className={styles.note}>{sayBuild(features, build)}</Text>
+            <Text className={styles.note}>
+              {sayBuild(features, "gpu")}
+            </Text>
+            {buildOffered(features, "avx512") ? null : (
+              <Text className={styles.note}>
+                сборка под AVX512 не предлагается: в процессоре его нет, а не «наверное, пойдёт»
+              </Text>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Шаг 77: код и разговор — разные модели. Сказано, какая отвечает:
           иначе разная длина ответов выглядит как нестабильность. */}
