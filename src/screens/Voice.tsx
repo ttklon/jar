@@ -114,6 +114,7 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import { differ as intentDiffer, missing as intentMissing, parse as parseIntent, say as intentWords } from "../lib/intent";
+import { need as askNeed, question as askQuestion, rule as askRule, type Plan as AskPlan } from "../lib/askWhen";
 import {
   breaks as removeBreaks,
   done as removeDone,
@@ -2761,6 +2762,34 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           })()}
         </div>
       ) : null}
+
+      {/* Шаг 82: вопрос — только если необратимо **и** неоднозначно. Лишний
+          вопрос учит отвечать не читая, и тогда настоящий пропустят. */}
+      {draft?.plan ? (() => {
+        // Необратимо — риск destructive: отменить нечем. Неоднозначно — в плане
+        // больше одного шага.
+        // Риск каждого шага — в gates плана; «точно» — когда объект один.
+        const destructive = (draft.gates ?? []).some(
+          (gate) => gate.risk === "destructive" || gate.risk === "money" || gate.risk === "identity",
+        );
+        const plan: AskPlan = {
+          irreversible: destructive,
+          matches: draft.plan.steps.length,
+          exact: draft.plan.steps.length === 1,
+        };
+        const check = askNeed(plan);
+        return (
+          <div className={styles.section}>
+            <Text className={styles.title}>Спрашивать или делать</Text>
+            <Text className={styles.note} role="status" aria-live="polite">
+              {check.ask
+                ? askQuestion(plan, draft.plan.steps.map((step) => step.why ?? step.registry))
+                : check.why}
+            </Text>
+            <Text className={styles.note}>{askRule()}</Text>
+          </div>
+        );
+      })() : null}
 
       {/* Шаг 81: как понята фраза — до действия. Разбор не придумывает:
           чего во фразе нет, того нет и в намерении. */}
