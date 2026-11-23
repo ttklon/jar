@@ -37,7 +37,7 @@ test.beforeEach(async ({ page }) => {
     return url.hostname === "127.0.0.1" ? route.continue() : route.abort("blockedbyclient");
   });
   await page.goto("/e2e/voice.html");
-  await expect(page.getByText(/локальное распознавание готово/)).toBeVisible();
+  await expect(page.getByText(/локальное распознавание работает здесь/)).toBeVisible();
   await micExplained(page);
 });
 
@@ -46,7 +46,7 @@ test("первый разговор сначала объясняет, что у
   // `beforeEach`, снимаем — это и есть состояние нового человека.
   await page.evaluate(() => localStorage.clear());
   await page.reload();
-  await expect(page.getByText(/локальное распознавание готово/)).toBeVisible();
+  await expect(page.getByText(/локальное распознавание работает здесь/)).toBeVisible();
 
   const button = page.getByRole("button", { name: "Держать и говорить", exact: true });
   await button.dispatchEvent("pointerdown");
