@@ -136,6 +136,15 @@ import { canRun as jokeCanRun, check as checkJoke, say as sayJoke, type Dangerou
 import { go as handGo, need as handNeed, question as handQuestion, type Option as HandOption } from "../lib/whichHand";
 import { apply as contextApply, gaps as contextGaps, parse as parseContext, say as sayContext, type Context as KeptContext } from "../lib/contextKeep";
 import { check as checkUnderstood, run as understoodRuns, say as sayUnderstood, where as whereUnderstood } from "../lib/notUnderstood";
+import {
+  allowed as consentAllowed,
+  check as consentCheck,
+  grant as consentGrant,
+  revoke as consentRevoke,
+  say as consentSay,
+  stale as consentStale,
+  type Granted as ConsentGranted,
+} from "../lib/consentStep";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import {
   create as createQuick,
@@ -480,6 +489,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [usedAround, setUsedAround] = useState<string | null>(null);
   const [draft, setDraft] = useState<PlanCheck | null>(null);
   const [approved, setApproved] = useState<number[]>([]);
+  // Шаг 102: согласие привязано к шагу **и его параметрам**. Правка после
+  // согласия — обход, и он закрыт: отпечаток изменился, согласие снято.
+  const [consents, setConsents] = useState<ConsentGranted[]>([]);
+  const [consentNote, setConsentNote] = useState<string | null>(null);
   const [report, setReport] = useState<PlanReport | null>(null);
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
@@ -1574,6 +1587,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         const proposal = await draftPlan(asked).catch(() => null);
         if (request !== searchRequestRef.current) return;
         setDraft(proposal);
+        // Шаг 102: план мог измениться — пересчитываем согласия по отпечатку
+        // параметров. Снятые названы причиной, а не «снова подтвердите».
+        const proposed = proposal?.plan ?? null;
+        if (proposed !== null) {
+          const verdict = consentCheck(consents, proposed.steps);
+          const fresh = verdict.kept.filter((item) => !consentStale(item, Date.now()));
+          setConsents(fresh);
+          setConsentNote(verdict.lost.length > 0 || fresh.length !== verdict.kept.length ? consentSay(verdict) : null);
+        }
         // Шаг 95: если под фразу подходит несколько разных шагов, молча выбрать
         // нельзя — спрашиваем одним коротким вопросом из того, что нашлось.
         {
@@ -3055,6 +3077,46 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           <Text className={styles.note} role="status" aria-live="polite">
             {sameSay}
           </Text>
+        </div>
+      ) : null}
+
+      {/* Шаг 102: согласие — по шагу и по его параметрам. Правка после согласия
+          снимает его, и причина названа. */}
+      {draft?.plan ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Согласие по шагам</Text>
+          <Text className={styles.note} role="status" aria-live="polite">
+            {consentNote ?? consentSay(consentCheck(consents, draft.plan.steps))}
+          </Text>
+          {draft.plan.steps.map((step, index) => {
+            const ok = consentAllowed(consents, index, step.params);
+            return (
+              <Text key={`${step.registry}-${index}`} className={styles.note}>
+                // Параметры уже показаны выше; здесь важно только состояние
+                // согласия по этому шагу.
+                {`${ok ? "согласовано" : "не согласовано"}: шаг ${index + 1}`}
+                {" "}
+                <Button
+                  appearance="subtle"
+                  size="small"
+                  onClick={() => {
+                    // Отзыв по одному шагу: остальные остаются. Человек
+                    // передумал про один шаг, а не про весь план.
+                    if (ok) {
+                      setConsents((current) => consentRevoke(current, index));
+                      setApproved((current) => current.filter((position) => position !== index));
+                      setConsentNote(`согласие снято — шаг ${index + 1} отозван вами`);
+                    } else {
+                      setConsents((current) => consentGrant(current, index, step.params, Date.now()));
+                      setConsentNote(`согласовано: шаг ${index + 1} — параметры запомнены, правка снимает согласие`);
+                    }
+                  }}
+                >
+                  {ok ? "отозвать" : "согласиться"}
+                </Button>
+              </Text>
+            );
+          })}
         </div>
       ) : null}
 
