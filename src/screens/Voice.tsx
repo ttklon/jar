@@ -123,6 +123,7 @@ import { ambiguous as whenAmbiguous, parse as parseWhen, ready as whenReady, say
 import { enough as amountEnough, parse as parseAmount, say as sayAmount, type Amount } from "../lib/amount";
 import { collision as synonymCollision, intents as synonymIntents, say as saySynonym } from "../lib/synonyms";
 import { canRun as jokeCanRun, check as checkJoke, say as sayJoke, type Dangerous } from "../lib/joking";
+import { go as handGo, need as handNeed, question as handQuestion, type Option as HandOption } from "../lib/whichHand";
 import {
   find as findYesterday,
   nothing as nothingYesterday,
@@ -1511,6 +1512,20 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         const proposal = await draftPlan(asked).catch(() => null);
         if (request !== searchRequestRef.current) return;
         setDraft(proposal);
+        // Шаг 95: если под фразу подходит несколько разных шагов, молча выбрать
+        // нельзя — спрашиваем одним коротким вопросом из того, что нашлось.
+        {
+          const options: HandOption[] = (proposal?.plan?.steps ?? []).map((step, position) => ({
+            what: step.why ?? step.registry,
+            position,
+            dangerous: (proposal?.gates ?? []).some(
+              (gate) => gate.position === position && gate.risk === "destructive",
+            ),
+          }));
+          const ask = handNeed(options);
+          setHandAsk(ask.ask ? handQuestion(ask) : null);
+          setHandBlocked(!handGo(ask, null));
+        }
         setLearning(null);
         // Чтение без вопросов политика уже разрешила: отдельная кнопка здесь была бы
         // вторым «да» на то, что человек только что сказал. Запись и внешнее — нет.
@@ -1682,6 +1697,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [synonymSay, setSynonymSay] = useState<string[]>([]);
   // Шаг 94: опасное намерение — даже в шутливой форме. Тон не влияет.
   const [danger, setDanger] = useState<Dangerous | null>(null);
+  // Шаг 95: две разные руки — один короткий вопрос вместо молчаливого выбора.
+  const [handAsk, setHandAsk] = useState<string | null>(null);
+  const [handBlocked, setHandBlocked] = useState(false);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -2869,6 +2887,22 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </>
             );
           })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 95: две разные руки — один короткий вопрос из того, что нашлось.
+          Вариант меню — не вопрос, а отказ; десять вариантов — меню, а не выбор. */}
+      {handAsk !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Что именно</Text>
+          <Text className={styles.note} role="alert" aria-live="polite">
+            {handAsk}
+          </Text>
+          <Text className={styles.note}>
+            {handBlocked
+              ? "пока не выбран — ничего не делаю: молча выбранный вариант это выбор за вас"
+              : "опасный вариант назван опасным до выбора, а не после"}
+          </Text>
         </div>
       ) : null}
 
