@@ -113,6 +113,7 @@ import { ActionList } from "../components/ActionList";
 import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
+import { differ as intentDiffer, missing as intentMissing, parse as parseIntent, say as intentWords } from "../lib/intent";
 import {
   breaks as removeBreaks,
   done as removeDone,
@@ -1591,6 +1592,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // Шаг 77: кодовая модель — отдельно и только на код. Если она загружена «на
   // всякий случай», разговор идёт через неё же и ждётся втрое дольше.
   const [codeTask, setCodeTask] = useState(false);
+  // Шаг 81: разбор намерения — глагол + объект + определение. Показан **до**
+  // действия: человек должен поправить, если разбор ошибся.
+  const [heardIntent, setHeardIntent] = useState<string | null>(null);
+  const [saidIntent, setSaidIntent] = useState<string | null>(null);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -1787,6 +1792,20 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       setCodeTask(wantsCode);
       setDeviceNotice(sayModel(route));
       if (route.model === null && wantsCode) setDeviceNotice(codeFallback("1.5B"));
+      // Шаг 81: разбор намерения — глагол, объект и определение, а не
+      // совпадение слов. «Найди большие файлы» и «найди файл по имени» —
+      // разные дела, и это видно до действия.
+      const parsed = parseIntent(heard);
+      setHeardIntent(heard);
+      setSaidIntent(
+        intentMissing(parsed).length > 0
+          ? intentWords(parsed)
+          : saidIntent === null
+            ? intentWords(parsed)
+            : intentDiffer(saidIntent, heard)
+              ? `${intentWords(parsed)} (раньше вы просили другое: «${saidIntent}»)`
+              : intentWords(parsed),
+      );
       // Шаг 74: фраза — это работа; таймер простоя начинается заново.
       touchModel();
       // Шаг 68: текст фразы — в кэш токенизации. Повтор и продолжение реплики
@@ -2740,6 +2759,21 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </>
             );
           })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 81: как понята фраза — до действия. Разбор не придумывает:
+          чего во фразе нет, того нет и в намерении. */}
+      {heardIntent !== null && saidIntent !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Как я понял</Text>
+          <Text className={styles.note}>«{heardIntent}»</Text>
+          <Text className={styles.note} role="status" aria-live="polite">
+            {saidIntent}
+          </Text>
+          <Text className={styles.note}>
+            если понял не то — скажите иначе, я не угадываю
+          </Text>
         </div>
       ) : null}
 
