@@ -103,6 +103,7 @@ import { describePlanParams } from "../lib/planPreview";
 import { ActionList } from "../components/ActionList";
 import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
+import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import { markMicExplained, micExplained } from "../lib/firstRun";
 import { voice, microphoneCheck as micTestText } from "../i18n/ru";
 
@@ -128,6 +129,11 @@ const useStyles = makeStyles({
     fontSize: tokens.fontSizeBase200,
     maxWidth: "78ch",
   },
+  // Шаг 52: цвет вместе со звуком. Направление сигнала слышно, цвет — видно;
+  // по отдельности каждое можно не заметить, вместе — трудно.
+  cueListening: { color: tokens.colorPaletteGreenForeground1 },
+  cueWorking: { color: tokens.colorPaletteBlueForeground2 },
+  cueProblem: { color: tokens.colorPaletteRedForeground1 },
   micIntro: {
     display: "flex",
     flexDirection: "column",
@@ -1444,6 +1450,20 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             ? "thinking"
             : "closed";
 
+  // Шаг 52: у «слушаю» и «обрабатываю» разные звуки, а не только разные слова.
+  // Тот, кто говорит и не смотрит на экран, должен слышать, его очередь или
+  // уже нет: пока «принимаю» — можно перебить, после «разбираю» — поздно.
+  // Звук — только на **смене** состояния: повторять его на каждом кадре значит
+  // превратить подсказку в треск.
+  const lastCue = useRef<Cue | null>(null);
+  useEffect(() => {
+    const next = cueForState(micState);
+    if (next === lastCue.current) return;
+    lastCue.current = next;
+    if (next === null) return;
+    playCue(cue(next));
+  }, [micState]);
+
   const trayVoiceState = voiceError
     ? "error"
     : mic.processing
@@ -2066,10 +2086,26 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           видит дальтоник, не слышит диктор и не замечает тот, кто смотрит в
           сторону; человек говорит в пустоту и решает, что приложение сломалось. */}
       <Text
-        className={styles.note}
+        className={[
+          styles.note,
+          // Шаг 52: цвет вместе со звуком — по отдельности каждое можно не
+          // заметить. Зелёный — слушаю, синий — разбираю, красный — сбой.
+          micState === "listening"
+            ? styles.cueListening
+            : micState === "parsing" || micState === "thinking"
+              ? styles.cueWorking
+              : micState === "error"
+                ? styles.cueProblem
+                : undefined,
+        ]
+          .filter(Boolean)
+          .join(" ")}
         // Живая область: смена состояния проговаривается, а не только рисуется.
         aria-live="polite"
         aria-label={sayWord(micState)}
+        // Шаг 52: подсказка говорит, что звук значит, — иначе человек слышит
+        // сигнал и не знает, про что он. Для состояний без звука подсказки нет.
+        title={cueForState(micState) ? cueWord(cueForState(micState)!) : undefined}
       >
         {MIC_WORD[micState]}
       </Text>

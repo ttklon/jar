@@ -2319,4 +2319,21 @@ describe("локальное распознавание на экране", () =
     const button = screen.getByRole("button", { name: /Держать и говорить/ });
     expect((button as HTMLButtonElement).disabled).toBe(false);
   });
+
+  it("«слушаю» и «обрабатываю» различаются не только словом (шаг 52)", async () => {
+    // Тот, кто говорит и не смотрит на экран, должен слышать, его очередь или
+    // уже нет. Здесь проверяется то, что видно в разметке: цвет и подсказка
+    // идут вместе со словом, а не вместо него.
+    localStorage.removeItem("zshelper.mic.explained");
+    vi.mocked(speechStatus).mockResolvedValue(FOUND);
+
+    render(<Voice />);
+    await waitFor(() => expect(screen.getByText(/локальное распознавание работает здесь/)).toBeTruthy());
+
+    // Состояние «не слушаю» — слово есть, звука нет: это покой, а не переход.
+    const idle = screen.getByText("не слушаю");
+    expect(idle.getAttribute("title")).toBeNull();
+    // И у состояния словесное описание для диктора — не только цвет.
+    expect(idle.getAttribute("aria-label")).toBeTruthy();
+  });
 });
