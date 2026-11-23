@@ -120,6 +120,7 @@ import { canDo as canDoNegated, parse as parseNegation, say as sayNegation, type
 import { check as checkFit, say as sayFit, stop as fitStops } from "../lib/doesItFit";
 import { worst as parseWorst, type Outcome as ParseOutcome, type Row as ParseRow } from "../lib/parseLog";
 import { ambiguous as whenAmbiguous, parse as parseWhen, ready as whenReady, say as sayWhen, type When as WhenPlan } from "../lib/whenTo";
+import { enough as amountEnough, parse as parseAmount, say as sayAmount, type Amount } from "../lib/amount";
 import {
   find as findYesterday,
   nothing as nothingYesterday,
@@ -1451,6 +1452,11 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       setSaidIntent(intentWords(parsed));
       // Шаг 91: «когда» отдельно от «что». «Завтра в девять» не исполняется
       // сейчас: сделать сегодня то, что просили на завтра, видно не сразу.
+      // Шаг 92: количество — отдельным разбором. «Несколько» не превращается в
+      // число, а диапазон не схлопывается в одно.
+      const count = parseAmount(query);
+      setAmount(count);
+      if (!amountEnough(count)) setApproved([]);
       const when = parseWhen(query, Date.now());
       setWhenPlan(when);
       if (!whenReady(when, Date.now())) setApproved([]);
@@ -1648,6 +1654,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [currentPlan, setCurrentPlan] = useState<PlanCheck["plan"] | null>(null);
   // Шаг 91: «когда» отдельно от «что»: время, событие и условие — три разные вещи.
   const [whenPlan, setWhenPlan] = useState<WhenPlan | null>(null);
+  // Шаг 92: «сколько» и «какие именно» — числа, диапазоны, даты.
+  const [amount, setAmount] = useState<Amount | null>(null);
   const [codeModel] = useState<string | null>("7B");
   // Шаг 66: разбор намерения — дешёвая модель. «Открой блокнот» не должно ждать
   // семь секунд, пока 7B разберётся, что это две команды.
@@ -2835,6 +2843,22 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               </>
             );
           })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 92: сколько — числом, диапазоном или честным «не сказано».
+          «Несколько» для необратимого не годится: это лотерея. */}
+      {amount !== null && amount.kind !== "none" ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Сколько именно</Text>
+          <Text className={styles.note} role="status" aria-live="polite">
+            {sayAmount(amount)}
+          </Text>
+          {amountEnough(amount) ? null : (
+            <Text className={styles.note}>
+              для действия, которое не отменить, нужно точное число или диапазон
+            </Text>
+          )}
         </div>
       ) : null}
 
