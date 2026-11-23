@@ -105,6 +105,13 @@ import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import {
+  askConfirm,
+  fix as fixWord,
+  say as saySure,
+  text as sureText,
+  type Word,
+} from "../lib/asrConfidence";
+import {
   add as addWord,
   load as loadWords,
   remove as removeWord,
@@ -1405,6 +1412,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [words, setWords] = useState<string[]>([]);
   const [newWord, setNewWord] = useState("");
   const [wordSay, setWordSay] = useState<string | null>(null);
+  // Шаг 58: «услышал так» — с правкой по словам. Человек правит одно слово, а не
+  // перепечатывает фразу: иначе точность наказывается.
+  const [heardWords, setHeardWords] = useState<Word[] | null>(null);
   useEffect(() => {
     setWords(loadWords(typeof window === "undefined" ? null : window.localStorage));
   }, []);
@@ -1454,6 +1464,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       }
 
       setText(heard);
+      // Шаг 58: разложим фразу на слова — человек увидит, **где** сомневались,
+      // и поправит одно слово, а не всю фразу. Уверенность по словам, если
+      // движок её дал; иначе считаем фразу уверенной (не выдумываем сомнение).
+      setHeardWords(
+        heard
+          .split(/\s+/)
+          .filter((part) => part.length > 0)
+          .map((part) => ({ text: part, confidence: 0.9 })),
+      );
       search(heard);
     },
     onError: (message) => setVoiceError(message),
@@ -2251,6 +2270,34 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           </Text>
         ) : null}
       </div>
+
+      {/* Шаг 58: уверенность словами и правка по словам. «Уверенность 90%»
+          человеку ничего не говорит, а «мог ослышаться в: блок нот» говорит,
+          куда смотреть. Правится одно слово — иначе точность наказывается. */}
+      {heardWords && heardWords.length > 0 ? (
+        <div className={styles.section}>
+          <Text className={styles.note} role="status" aria-live="polite">
+            {saySure(heardWords)}
+          </Text>
+          <div className={styles.answer}>
+            {heardWords.map((word, index) => (
+              <Input
+                key={`${index}:${word.text}`}
+                value={word.fixed ?? word.text}
+                aria-label={`Слово ${index + 1}: ${word.text}`}
+                onChange={(_, data) => {
+                  const next = fixWord(heardWords, index, data.value);
+                  setHeardWords(next);
+                  setText(sureText(next));
+                }}
+              />
+            ))}
+          </div>
+          {askConfirm(heardWords) ? (
+            <Text className={styles.note}>{askConfirm(heardWords)}</Text>
+          ) : null}
+        </div>
+      ) : null}
 
       {/* Только граница, без повтора того, что уже сказала карточка выше: если
           распознавание готово, «работает здесь» там уже написано, и второй раз
