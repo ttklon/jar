@@ -54,8 +54,25 @@ async function warmup(page: Page) {
 async function loaded(page: Page) {
   await warmup(page);
   await page.goto("/e2e/entry.html");
-  // Приложение открывается голосом: это и есть «загрузилось».
-  await expect(page.getByRole("textbox", { name: /скажи или напиши/ })).toBeVisible({ timeout: 15_000 });
+
+  // Ждём появлением в DOM, а не локатором Playwright. Причина: живое приложение
+  // перерисовывается, пока подтягивает готовность, и `toBeVisible()` ждёт
+  // «стабильности» узла — с перерисовками это может тянуться до таймаута.
+  // Нам нужно «поле на экране», а не «узел не менялся две кадра».
+  await expect
+    .poll(
+      async () =>
+        page.evaluate(() => {
+          const field = document.querySelector<HTMLInputElement>(
+            '[aria-label="скажи или напиши — или назови экран"]',
+          );
+          if (!field) return "поля нет";
+          const box = field.getBoundingClientRect();
+          return box.width > 0 && box.height > 0 ? "на экране" : "нулевой размер";
+        }),
+      { timeout: 20_000, message: "единый вход не появился" },
+    )
+    .toBe("на экране");
 }
 
 test("Tab доходит до входа, слово и Enter — и оно в разговоре (шаг 190)", async ({ page }) => {
