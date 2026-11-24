@@ -168,3 +168,64 @@ describe("карточка дела", () => {
     expect(await screen.findByText(/буфер обмена недоступен/)).toBeTruthy();
   });
 });
+
+describe("«что дальше» в карточке дела (шаг 189)", () => {
+  it("провал называет шаг, а не советует «повторить всё»", () => {
+    // Дефект: карточка отвечала «что сделано» и «чем доказано», а на «что
+    // дальше» молчала — внизу были кнопки, но это не следующий шаг по делу.
+    render(
+      <DeedCard
+        startOpen
+        deed={{
+          id: 1,
+          subject: "разбери Загрузки",
+          kind: "plan",
+          startedMs: 0,
+          finishedMs: 10,
+          outcome: "failed",
+          steps: [
+            { position: 1, tool: "files|создать|папку", status: "ok", ok: true, evidence: "папка есть" },
+            { position: 2, tool: "files|переместить|файлы", status: "failed", ok: false, reason: "нет места" },
+          ],
+        }}
+      />,
+    );
+    expect(screen.getByText(/дальше: упало на шаге 2: files\|переместить\|файлы — остальные не выполнялись/)).toBeTruthy();
+  });
+
+  it("отказ — не сбой, и совет другой", () => {
+    render(
+      <DeedCard
+        startOpen
+        deed={{
+          id: 2,
+          subject: "оплати счёт",
+          kind: "tool",
+          startedMs: 0,
+          finishedMs: 10,
+          outcome: "denied",
+          steps: [],
+        }}
+      />,
+    );
+    expect(screen.getByText(/дальше: это отказ, а не сбой/)).toBeTruthy();
+  });
+
+  it("успешное дело не тянет за собой выдуманное «дальше»", () => {
+    render(
+      <DeedCard
+        startOpen
+        deed={{
+          id: 3,
+          subject: "проверь диск",
+          kind: "tool",
+          startedMs: 0,
+          finishedMs: 10,
+          outcome: "ok",
+          steps: [{ position: 1, tool: "system|проверить|диск", status: "ok", ok: true, evidence: "свободно 40 ГБ" }],
+        }}
+      />,
+    );
+    expect(screen.queryByText(/^дальше:/)).toBeNull();
+  });
+});

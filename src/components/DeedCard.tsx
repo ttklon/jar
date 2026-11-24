@@ -3,6 +3,7 @@ import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { deed as text, journal } from "../i18n/ru";
 import { deedText, evidenceText, judge, links, oneLine } from "../lib/deed";
 import type { Deed } from "../lib/deed";
+import { next as deedNext } from "../lib/deedNext";
 
 /**
  * Карточка дела: одна форма отчёта вместо трёх.
@@ -163,6 +164,30 @@ export function DeedCard({
               })}
             </ol>
           )}
+
+          {/*
+            Шаг 189: «что дальше» — третий вопрос, на который карточка не отвечала.
+            Кнопки «отменить» и «повторить» — действия с отчётом, а не следующий
+            шаг по делу: у провала он другой, чем у отказа, и оба — не «ещё раз».
+          */}
+          {(() => {
+            const after = deedNext({
+              subject: deed.subject,
+              outcome: deed.outcome,
+              steps: deed.steps.map((step) => ({
+                position: step.position,
+                tool: step.tool,
+                status: step.status ?? "ok",
+                proof: evidenceText(step) ?? "",
+              })),
+            });
+            if (after.said.length === 0) return null;
+            return (
+              <Text className={styles.why} role="status" aria-live="polite">
+                {`дальше: ${after.said} — ${after.how}`}
+              </Text>
+            );
+          })()}
 
           <div className={styles.actions}>
             {onCancel && verdict.canCancel ? (
