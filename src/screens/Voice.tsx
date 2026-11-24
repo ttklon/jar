@@ -58,6 +58,7 @@ import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
 import { allows as grantAllows, book as grantBook, EMPTY as EMPTY_GRANTS, give as grantGive, load as loadGrants, onRevoke as grantOnRevoke, revoke as grantRevoke, save as saveGrants, type Book as GrantBook, type Channel as GrantChannel } from "../lib/grants";
+import { allow as netAllow, askBefore as netAskBefore, say as netSay } from "../lib/networkAllow";
 import { exits as outboundExits, line as outboundLine, summary as outboundSummary } from "../lib/outbound";
 import { answer as scriptAnswer, limits as scriptLimits, limitsLine as scriptLimitsLine } from "../lib/scriptRules";
 import { allow as folderAllow, allowWith as folderAllowWith, consentTo as folderConsentTo, NOTHING as NO_FOLDERS, say as folderSay, suggest as folderSuggest, type Consent as FolderConsent, type Limits as FolderLimits } from "../lib/folderLimit";
@@ -4277,6 +4278,14 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                   const outside = folders_.filter(
                     (item) => !item.got.ok || item.got.why.startsWith("разрешено на это дело"),
                   );
+                  // Шаг 172: адреса проверяются по списку разрешённых — до запуска.
+                  // «Начинается с https» проверкой не было: `huggingface.co@evil.example`
+                  // тоже начинается с https.
+                  const links = Object.entries(step?.params ?? {})
+                    .filter(([name]) => name === "url" || name === "link" || name === "href")
+                    .map(([, value]) => ({ value, got: netAllow(value) }));
+                  const blocked = links.filter((item) => !item.got.ok);
+                  const asks = blocked.map((item) => netAskBefore(item.value).said);
                   return (
                     <Text key={`danger-${index}`} className={styles.note}>
                       {`${index + 1}. ${strongMark(danger)} · ${asked.text}`}
@@ -4285,6 +4294,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                       {trash ? ` · ${trashSay(trash, true)} · ${trashJournalNote(true, trash.where)}` : ""}
                       {outside.map((item) => (
                         <span key={`outside-${item.value}`}>{` · ${folderSay(item.got)}`}</span>
+                      ))}
+                      {blocked.map((item) => (
+                        <span key={`blocked-${item.value}`}>{` · ${netSay(item.got)}`}</span>
+                      ))}
+                      {asks.map((said) => (
+                        <span key={`ask-${said}`}>{` · ${said}`}</span>
                       ))}
                       {" "}
                       <Button

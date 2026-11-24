@@ -1963,6 +1963,59 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/удаление в корзину: вернуть можно/)).toBeTruthy();
   });
 
+  it("чужой сетевой адрес отклоняется до запуска, подделка через user@ тоже (шаг 172)", async () => {
+    // Дефект: ядро проверяло схему, а не хост. «Начинается с https» — не проверка.
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Call: { registry: "files|скачать|файл по ссылке", params: {}, why: "скачать" } },
+      plan: {
+        plan: {
+          goal: "скачать модель",
+          source: "model",
+          steps: [
+            { registry: "files|скачать|файл по ссылке", params: { url: "https://evil.example/m.gguf" }, why: "модель" },
+            { registry: "files|скачать|файл по ссылке", params: { url: "https://huggingface.co@evil.example/m.gguf" }, why: "модель" },
+          ],
+        },
+        problems: [],
+        questions: [],
+        gates: [
+          {
+            position: 1,
+            registry: "files|скачать|файл по ссылке",
+            decision: "confirm",
+            risk: "external",
+            wants_approval: true,
+          },
+          {
+            position: 2,
+            registry: "files|скачать|файл по ссылке",
+            decision: "confirm",
+            risk: "external",
+            wants_approval: true,
+          },
+        ],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "скачай модель" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Цена ошибки")).toBeTruthy());
+
+    // Чужой хост: отказ с причиной, а не «наверное, пойдёт».
+    expect(screen.getByText(/отказ: хост evil.example не в списке разрешённых/)).toBeTruthy();
+    // Подделка: начинается с https, а хост — чужой.
+    expect(screen.getByText(/отказ: в адресе есть логин/)).toBeTruthy();
+    // До разрешения видно, куда ушёл бы запрос.
+    expect(screen.getByText(/наружу уйдёт запрос на evil.example/)).toBeTruthy();
+  });
+
   it("вне списка — только с явным согласием на это дело (шаг 171)", async () => {
     // Дефект: предел был, но выйти за него на одно дело было нельзя — либо
     // правь список навсегда, либо ничего.
