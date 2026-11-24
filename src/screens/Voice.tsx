@@ -80,7 +80,9 @@ import {
   DEEDS_PER_HOUR,
   hourLeft,
   MAX_TRIES,
+  markEngine,
   markScreen,
+  usesEngine,
   pick,
   progress,
   replenish,
@@ -1530,6 +1532,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           if (queueStopRef.current) break;
           plans.set(item.id, check);
           mine((current) => markScreen(current, item.id, usesScreen(check)));
+          // Шаг 137: движок один — отмечаем дела, которым он нужен, по факту плана.
+          mine((current) => markEngine(current, item.id, usesEngine(check)));
         }
         if (queueStopRef.current) continue;
 

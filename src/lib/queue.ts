@@ -52,6 +52,12 @@ export interface QueueItem {
    */
   touchesScreen?: boolean;
   /**
+   * Нужен ли делу движок (шаг 137). `undefined` — план не собран, ещё не знаем.
+   *
+   * Движок один на машину: два дела на нём идут медленнее, чем по очереди.
+   */
+  needsEngine?: boolean;
+  /**
    * Чья это цель — слова человека, которые он разложил на дела.
    *
    * Пусто у одиночного дела: одно дело — не цель, продолжать у него нечего. Цель
@@ -188,6 +194,26 @@ export function usesScreen(check: PlanCheck | null): boolean {
   return steps.some((step) => SCREEN_STEPS.has(step.registry));
 }
 
+/**
+ * Нужен ли делу движок (шаг 137).
+ *
+ * Один движок на машину: модель, распознавание и разбор фразы делят его, и два дела на
+ * нём идут **медленнее**, чем по очереди. А «убавить громкость» и «проверить место»
+ * движок не делят вовсе — и ждать друг друга им незачем, иначе очередь ради очереди
+ * замедляет.
+ *
+ * Ответ — по факту, а не по словам: дело без движка то, **все** шаги которого уже есть
+ * в плане (план собран без модели); если хоть один шаг пришлось придумывать — движок
+ * нужен.
+ */
+export function usesEngine(check: PlanCheck | null): boolean {
+  const steps = check?.plan?.steps ?? [];
+  // Плана нет — знать нечего; считаем, что движок нужен: осторожность дешевле гонки.
+  if (steps.length === 0) return true;
+  // План пришёл от модели (`source === "model"`) — движок уже участвовал.
+  return check?.plan?.source === "model";
+}
+
 /** Что можно начать прямо сейчас: список индексов и причина, если ничего. */
 export interface Started {
   /** Индексы дел, которые можно запускать одновременно. */
@@ -266,8 +292,12 @@ export function pick(
   }
 
   let screenBusy = running.some((item) => item.touchesScreen === true);
+  // Шаг 137: движок один. Считаем занятым, только если он действительно занят:
+  // «убавить громкость» и «проверить место» его не делят и не должны ждать.
+  let engineBusy = running.some((item) => item.needsEngine !== false);
   const indices: number[] = [];
   let heldByScreen = 0;
+  let heldByEngine = 0;
 
   for (const { item, index } of waiting) {
     if (indices.length >= slots) break;
@@ -280,6 +310,15 @@ export function pick(
       screenBusy = true;
     }
 
+    // Дело, которому нужен движок, ждёт, пока он занят: вместе оба медленнее.
+    if (item.needsEngine !== false) {
+      if (engineBusy) {
+        heldByEngine += 1;
+        continue;
+      }
+      engineBusy = true;
+    }
+
     indices.push(index);
   }
 
@@ -287,9 +326,11 @@ export function pick(
     return {
       indices,
       reason:
-        heldByScreen > 0
-          ? "ждут экрана: другое дело уже работает с окном, одновременно туда нельзя"
-          : "начинать нечего: всё ждёт",
+        heldByEngine > 0 && heldByScreen === 0
+          ? "ждут движка: он один, и второе дело на нём было бы медленнее, чем по очереди"
+          : heldByScreen > 0
+            ? "ждут экрана: другое дело уже работает с окном, одновременно туда нельзя"
+            : "начинать нечего: всё ждёт",
     };
   }
 
@@ -301,8 +342,12 @@ export function pick(
     indices,
     reason:
       indices.length > 1
-        ? `беру ${indices.length} дела сразу: бюджет машины позволяет${ceiling}, окна они не трогают`
-        : `беру одно дело: так разрешает бюджет, потолок или экран${ceiling}`,
+        ? `беру ${indices.length} дела сразу: бюджет машины позволяет${ceiling}, окна и движок они не делят`
+        : heldByEngine > 0
+          ? // Шаг 137: причина — именно движок, а не «бюджет или экран»: иначе человек
+            // не знает, чего ждать.
+            `беру одно дело: движок один, второе на нём было бы медленнее, чем по очереди${ceiling}`
+          : `беру одно дело: так разрешает бюджет, потолок или экран${ceiling}`,
   };
 }
 
@@ -313,6 +358,11 @@ export function markScreen(
   touchesScreen: boolean,
 ): QueueItem[] {
   return items.map((item) => (item.id === id ? { ...item, touchesScreen } : item));
+}
+
+/** Отметить, нужен ли делу движок (шаг 137) — по факту плана, а не по словам. */
+export function markEngine(items: readonly QueueItem[], id: string, needsEngine: boolean): QueueItem[] {
+  return items.map((item) => (item.id === id ? { ...item, needsEngine } : item));
 }
 
 /** Остановить всё, что ещё не начато. Начатое не трогаем: его доводят до шага. */

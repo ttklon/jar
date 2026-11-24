@@ -102,7 +102,9 @@ describe("очередь дел", () => {
 
 describe("сколько дел идёт сразу", () => {
   it("бюджет машины задаёт верхнюю границу, и он назван", () => {
-    const items = add(add(add([], "а", "1"), "б", "2"), "в", "3");
+    // Шаг 137: движок делят только дела, которым он нужен; здесь дела без движка.
+    let raw = add(add(add([], "а", "1"), "б", "2"), "в", "3");
+    const items = raw.map((item) => ({ ...item, needsEngine: false }));
 
     const picked = pick(items, budget({ parallel: 3 }), freshHour(), NOW);
     expect(picked.indices).toEqual([0, 1, 2]);
@@ -115,6 +117,8 @@ describe("сколько дел идёт сразу", () => {
   it("два дела в одном окне одновременно — не скорость, а гонка: экранных не больше одного", () => {
     let items = add(add([], "убавить громкость", "1"), "нажать сохранить в Word", "2");
     items = markScreen(items, "2", true);
+    // Оба дела без движка (шаг 137): здесь проверяется экран, а не движок.
+    items = items.map((item) => ({ ...item, needsEngine: false }));
 
     // Первое окна не трогает — его можно, второе тоже: они не мешают друг другу.
     expect(pick(items, budget({ parallel: 3 }), freshHour(), NOW).indices).toEqual([0, 1]);
@@ -165,7 +169,8 @@ describe("сколько дел идёт сразу", () => {
   });
 
   it("потолок выбран — не начинается ничего, и причина говорит именно об этом", () => {
-    const items = add(add([], "а", "1"), "б", "2");
+    // Дела без движка: здесь проверяется потолок, а не очередь за движком (137).
+    const items = add(add([], "а", "1"), "б", "2").map((item) => ({ ...item, needsEngine: false }));
     let log = freshHour();
     for (let index = 0; index < DEEDS_PER_HOUR; index += 1) log = takeDeed(log, NOW);
 
