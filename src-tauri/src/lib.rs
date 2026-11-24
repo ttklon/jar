@@ -63,7 +63,6 @@ pub mod places;
 pub mod plan;
 // Шаг 225: проверка WebView2 до первого окна. Без неё самый частый сбой
 // установки — белое окно без причины.
-pub mod webview2;
 pub mod planner;
 pub mod policy;
 pub mod profiles;
@@ -92,6 +91,7 @@ pub mod undo;
 pub mod verifier;
 pub mod wake;
 pub mod weak;
+pub mod webview2;
 pub mod window;
 
 use std::sync::atomic::AtomicBool;
@@ -121,9 +121,7 @@ fn show_webview2_instruction() {
         // переводы строк экранируются: текст приходит из константы, но правило
         // одно для любого текста.
         let text = webview2::INSTRUCTION.replace('"', "'").replace('\n', " ");
-        let script = format!(
-            "mshta.exe javascript:alert(\"{text}\");close();"
-        );
+        let script = format!("mshta.exe javascript:alert(\"{text}\");close();");
         let _ = std::process::Command::new("cmd")
             .args(["/C", &script])
             .creation_flags(0x0800_0000) // CREATE_NO_WINDOW: без мелькающей консоли

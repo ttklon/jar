@@ -51,7 +51,9 @@ pub enum Present {
 pub fn describe(state: Present) -> &'static str {
     match state {
         Present::Yes => "WebView2: найден",
-        Present::No => "WebView2: НЕ найден — окно не откроется, нужен Microsoft Edge WebView2 Runtime",
+        Present::No => {
+            "WebView2: НЕ найден — окно не откроется, нужен Microsoft Edge WebView2 Runtime"
+        }
         Present::Unknown => "WebView2: проверить не удалось (не Windows или нет доступа к реестру)",
     }
 }
