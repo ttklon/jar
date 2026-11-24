@@ -32,6 +32,7 @@ import {
 import { afterWake, engineStatus, isTauri, registrySnapshot } from "./ipc";
 import { watchWake } from "./lib/wakeWatch";
 import { startBeat } from "./lib/idleBeat";
+import { choose } from "./lib/locale";
 import type { RegistrySnapshot } from "./ipc";
 import { Voice } from "./screens/Voice";
 import { Welcome } from "./screens/Welcome";
@@ -328,6 +329,12 @@ export function App() {
     pointerOf((query) => globalThis.matchMedia?.(query) ?? { matches: false }),
   );
   const target = touchSizes(pointer);
+  // Язык системы читается один раз за запуск: он не меняется на ходу, а
+  // пересчитывать его на каждый кадр — работа без пользы.
+  const [localeChoice] = useState(() =>
+    choose(typeof navigator === "undefined" ? null : navigator.language, null),
+  );
+  const localeNotice = () => localeChoice.notice;
   // Палитра: открывается с клавиатуры, ведёт на любой экран по первым буквам.
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -586,6 +593,11 @@ export function App() {
             {/* Шаг 223: молчаливое изменение размера читается как «сломалось».
                 Одна фраза объясняет, почему цели стали крупнее. */}
             {touchNotice(pointer) ? <span>{touchNotice(pointer)}</span> : null}
+            {/* Шаг 229: на нерусской системе человек видел русский интерфейс
+                без единого слова о том, почему. Он не отличал «перевода нет»
+                от «сломалось», а второе читается как недоверие ко всему
+                приложению. Одна строка — и причина названа. */}
+            {localeNotice() ? <span>{localeNotice()}</span> : null}
             <span>v{APP_VERSION}</span>
           </div>
         </aside>
