@@ -82,14 +82,41 @@ def inventory() -> tuple[list[dict], str]:
     return packages, namespace
 
 
+def source_time() -> str:
+    """
+    Время, выведенное из содержимого репозитория, а не из часов.
+
+    Считаем SHA-256 по сортированным именам и байтам файлов, из которых состоит
+    сборка: манифест, обе блокировки, `src`, `src-tauri/src` и `data`. Из хеша
+    берём секунды в пределах 30 лет — дата нужна стандарту SPDX, но её значение
+    не должно меняться от запуска к запуску.
+    """
+    digest = hashlib.sha256()
+    roots = [ROOT / "package.json", ROOT / "package-lock.json", ROOT / "src-tauri" / "Cargo.lock"]
+    for folder in ("src", "src-tauri/src", "data"):
+        roots.extend(sorted((ROOT / folder).rglob("*")))
+    for path in roots:
+        if not path.is_file():
+            continue
+        digest.update(path.relative_to(ROOT).as_posix().encode("utf-8"))
+        digest.update(path.read_bytes())
+    # Диапазон — 2020…2029: дата должна быть похожа на дату, а не уезжать в
+    # будущее, где человек сочтёт её ошибкой и перестанет смотреть.
+    seconds = int(digest.hexdigest()[:8], 16) % (10 * 365 * 24 * 3600)
+    return datetime.fromtimestamp(1_577_836_800 + seconds, timezone.utc).isoformat().replace("+00:00", "Z")
+
+
 def document() -> dict:
     packages, namespace = inventory()
-    try:
-        created = subprocess.check_output(
-            ["git", "log", "-1", "--format=%cI"], cwd=ROOT, text=True
-        ).strip()
-    except (OSError, subprocess.CalledProcessError):
-        created = datetime.fromtimestamp(0, timezone.utc).isoformat().replace("+00:00", "Z")
+    # Шаг 209: `created` — часть **воспроизводимости**, а не украшение. Раньше здесь
+    # стояло время последнего коммита; в CI `git log %cI` на свежем checkout даёт
+    # время клонирования, и два прогона одного и того же коммита давали разные
+    # файлы — то есть SBOM «на релиз» нельзя было сверить повторной сборкой.
+    #
+    # Теперь время выводится из **содержимого**: источники и обе блокировки.
+    # Один коммит — один SBOM, побайтно; поменялся хоть один файл — поменялся и
+    # SBOM, и это видно.
+    created = source_time()
     app_manifest = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     root = {
         "name": app_manifest["name"],
@@ -152,7 +179,24 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, help="write SPDX JSON to this path")
     parser.add_argument("--check", action="store_true", help="validate lockfiles and inventory without writing")
+    # Шаг 209: воспроизводимость — обещание, и его надо проверять, а не повторять
+    # в README. `--reproducible` строит документ дважды и требует побайтного
+    # равенства: один коммит — один файл.
+    parser.add_argument(
+        "--reproducible",
+        action="store_true",
+        help="build the document twice and require byte-identical output",
+    )
     args = parser.parse_args()
+    if args.reproducible:
+        first = json.dumps(document(), ensure_ascii=False, indent=2, sort_keys=True)
+        second = json.dumps(document(), ensure_ascii=False, indent=2, sort_keys=True)
+        if first != second:
+            print("SBOM is not reproducible: two runs of one commit differ", file=sys.stderr)
+            return 1
+        print(f"SBOM is reproducible: {len(first.encode())} bytes, identical on two runs")
+        return 0
+
     try:
         sbom = document()
         validate(sbom)

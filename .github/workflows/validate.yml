@@ -72,6 +72,11 @@ jobs:
       - name: SPDX SBOM can be built from both lockfiles
         run: python3 tools/sbom.py --check
 
+      # Шаг 209: тот же коммит — тот же набор файлов. Сборка SBOM дважды и
+      # побайтное сравнение: обещание «воспроизводимо» проверяется, а не пишется.
+      - name: SBOM is reproducible (same commit, same bytes)
+        run: python3 tools/sbom.py --reproducible
+
       - name: UIA draft generator works on a fixture dump
         run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
 
