@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
 import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
+import { audit as dangerAudit, dangerous as dangerOnly, line as dangerLine, summary as dangerSummary } from "../lib/dangerAudit";
 import { groupReasons } from "../lib/journal";
 import { fromJournal, line as refusalLine } from "../lib/refusal";
 import { DeedCard } from "../components/DeedCard";
@@ -378,6 +379,39 @@ export function Journal({
             ))}
           </ul>
         </section>
+      ) : null}
+
+      {/*
+        Шаг 166: что **реально** проверено из опасного, а не что было в журнале.
+        «Запросили и отказали» — не проверка: рука не работала, и мы о ней ничего
+        не знаем. Это отдельный ответ на отдельный вопрос, поэтому отдельная
+        секция до таблицы.
+      */}
+      {events && events.length > 0 ? (
+        (() => {
+          // Один свод: дважды читать журнал ради одного ответа — работа без пользы.
+          const rows = dangerAudit(events);
+          const hands = dangerOnly(rows);
+          const got = dangerSummary(rows);
+          return (
+            <section className={styles.pains} aria-label="Что проверено из опасного">
+              <Text weight="semibold">Что проверено из опасного</Text>
+              <Text className={styles.note} block>
+                запуск — единственное доказательство: отказ политики ничего не проверяет
+              </Text>
+              <Text className={styles.note} block role="status" aria-live="polite">
+                {got.said}
+              </Text>
+              <ul className={styles.painsList}>
+                {hands.slice(0, 12).map((row) => (
+                  <li key={row.subject} className={styles.painRow}>
+                    <Text className={styles.note}>{dangerLine(row, Date.now())}</Text>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })()
       ) : null}
 
       {events && events.length > 0 ? (
