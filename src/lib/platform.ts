@@ -32,6 +32,17 @@ export interface PlatformFacts {
   osVersion: string | null;
   /** Старшая цифра движка WebView2 (Chromium), если удалось прочитать. */
   engineMajor: number | null;
+  /**
+   * Архитектура, если её удалось прочитать: `"x86"` — 64-битная, `"arm64"`,
+   * `"arm"`, `"x86-32"`. Шаг 224.
+   *
+   * Это не любопытство. На Windows ARM64 x86-сборка не «просто работает»: она
+   * идёт через эмуляцию, и человек получает приложение, которое запускается и
+   * медленно делает вид, что работает. Честнее сказать «на ARM64 в этой сборке
+   * не поддерживается» и объяснить, чем это грозит, — тихая неработоспособность
+   * хуже отказа.
+   */
+  arch: string | null;
 }
 
 export type PlatformVerdict =
@@ -40,7 +51,20 @@ export type PlatformVerdict =
   | { state: "unknown"; facts: PlatformFacts; reason: PlatformProblem };
 
 /** Что не так. Причина — отдельно от текста: текст может меняться, решение — нет. */
-export type PlatformProblem = "not-windows" | "old-windows" | "old-webview" | "unreadable";
+export type PlatformProblem =
+  | "not-windows"
+  | "old-windows"
+  | "old-webview"
+  | "unreadable"
+  /** ARM64: сборка x86 пойдёт через эмуляцию и будет тихо тормозить. Шаг 224. */
+  | "unsupported-arch";
+
+/**
+ * Архитектуры, на которых эта сборка не поддерживается. x86-сборка под ARM64
+ * идёт через эмуляцию: запускается, но медленно и с неработающими частями
+ * (движок, голос, горячие клавиши). Лучше сказать словами.
+ */
+export const UNSUPPORTED_ARCH = new Set(["arm64", "arm"]);
 
 /** Windows 10 — минимум: WebView2 есть начиная с него, а на 7/8 его ставят руками. */
 export const MIN_WINDOWS_MAJOR = 10;
@@ -65,7 +89,7 @@ export function readFacts(nav: unknown): PlatformFacts {
   const source = (nav ?? {}) as {
     userAgent?: string;
     platform?: string;
-    userAgentData?: { platform?: string };
+    userAgentData?: { platform?: string; architecture?: string };
   };
 
   const ua = typeof source.userAgent === "string" ? source.userAgent : "";
@@ -77,8 +101,12 @@ export function readFacts(nav: unknown): PlatformFacts {
   const os = normaliseOs(rawPlatform, ua);
   const osVersion = parseWindowsVersion(ua, os);
   const engineMajor = parseEngineMajor(ua);
+  // Архитектура: `userAgentData.architecture` есть не везде; в UA она спрятана
+  // в скобках (`Win64; x64`, `ARM64`). Не прочитали — `null`, а не «x86»:
+  // догадка о железе — это ровно та тихая неработоспособность, против которой шаг.
+  const arch = parseArch(source.userAgentData?.architecture, ua);
 
-  return { os, osVersion, engineMajor };
+  return { os, osVersion, engineMajor, arch };
 }
 
 function normaliseOs(raw: string, ua: string): string {
@@ -114,6 +142,25 @@ function parseWindowsVersion(ua: string, os: string): string | null {
   return null;
 }
 
+/**
+ * Архитектура из `architecture` или UA (шаг 224).
+ *
+ * Порядок проб важен: `ARM64` в UA идёт **раньше** `x86`/`Win64`, потому что в
+ * строке ARM64-машины может встретиться и то и другое (`Windows NT 10.0;
+ * ARM64; …`), а путать ARM с x86 — значит пропустить именно отказ.
+ */
+function parseArch(arch: string | undefined, ua: string): string | null {
+  const known = typeof arch === "string" ? arch.toLowerCase() : "";
+  if (known === "arm64" || known === "arm" || known === "x86" || known === "x64") {
+    return known === "x64" ? "x86" : known;
+  }
+  if (/arm64|aarch64/i.test(ua)) return "arm64";
+  if (/\barm\b/i.test(ua)) return "arm";
+  if (/win64|x64|wow64/i.test(ua)) return "x86";
+  if (/x86/i.test(ua)) return "x86-32";
+  return null;
+}
+
 /** Старшая цифра движка: `Chrome/120.0.0.0` или `Edg/120.0.2210.91`. */
 function parseEngineMajor(ua: string): number | null {
   const edg = /Edg\/(\d+)/.exec(ua);
@@ -145,6 +192,12 @@ export function decide(facts: PlatformFacts): PlatformVerdict {
     return { state: "unsupported", facts, reason: "old-windows" };
   }
 
+  // Архитектура — **до** движка: на ARM64 движок x86-сборки покажется новым, и
+  // проверка движка сказала бы «подходит» машине, где приложение еле шевелится.
+  if (facts.arch !== null && UNSUPPORTED_ARCH.has(facts.arch)) {
+    return { state: "unsupported", facts, reason: "unsupported-arch" };
+  }
+
   if (facts.engineMajor === null) return { state: "unknown", facts, reason: "unreadable" };
   if (facts.engineMajor < MIN_ENGINE_MAJOR) {
     return { state: "unsupported", facts, reason: "old-webview" };
@@ -159,12 +212,13 @@ export function describe(verdict: PlatformVerdict): string {
   const os =
     facts.os === "" ? "система не прочитана" : facts.os === "windows" ? `Windows ${facts.osVersion ?? "версия не прочитана"}` : facts.os;
   const engine = facts.engineMajor === null ? "движок не прочитан" : `движок ${facts.engineMajor}`;
+  const arch = facts.arch === null ? "" : `, ${facts.arch}`;
   switch (verdict.state) {
     case "ok":
-      return `${os}, ${engine} — подходит`;
+      return `${os}, ${engine}${arch} — подходит`;
     case "unsupported":
-      return `${os}, ${engine} — не подходит: ${verdict.reason}`;
+      return `${os}, ${engine}${arch} — не подходит: ${verdict.reason}`;
     default:
-      return `${os}, ${engine} — проверить не удалось`;
+      return `${os}, ${engine}${arch} — проверить не удалось`;
   }
 }

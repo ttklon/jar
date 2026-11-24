@@ -365,7 +365,9 @@ export const welcome = {
   platformOk: (os: string, engine: number) => `Система подходит: ${os}, движок WebView2 ${engine}.`,
   platformUnknown:
     "Проверить версию Windows и WebView2 не удалось. Если окно открылось — разговор, скорее всего, заработает; если нет, обновите WebView2 из Microsoft Edge WebView2 Runtime.",
-  platformProblem: (reason: "not-windows" | "old-windows" | "old-webview" | "unreadable") => {
+  platformProblem: (
+    reason: "not-windows" | "old-windows" | "old-webview" | "unreadable" | "unsupported-arch",
+  ) => {
     switch (reason) {
       case "not-windows":
         return "Приложение рассчитано на Windows: на этой системе оно не сможет делать дела на компьютере.";
@@ -373,6 +375,13 @@ export const welcome = {
         return "Слишком старая версия Windows. Нужна Windows 10 или новее — на 7 и 8.1 WebView2 и голос работают ненадёжно.";
       case "old-webview":
         return "Устарел WebView2. Обновите Microsoft Edge WebView2 Runtime — без этого разговор может не открыться («белое окно»).";
+      /**
+       * Шаг 224: ARM64. Это не «не сможет вообще», а «в этой сборке будет
+       * медленно и местами не будет работать» — и сказать это надо до того, как
+       * человек решит, что приложение плохое, а не сборка не та.
+       */
+      case "unsupported-arch":
+        return "Этот компьютер на ARM64, а приложение собрано для x86: оно запустится через эмуляцию — медленно, и часть возможностей (движок, голос, горячие клавиши) работать не будет. Нужна сборка под ARM64.";
       default:
         return "Проверить систему не удалось. Если окно открылось, скорее всего всё в порядке.";
     }

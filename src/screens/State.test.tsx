@@ -98,7 +98,7 @@ describe("экран состояния", () => {
     // приложение ведёт себя иначе, и понять это можно только зная версию.
     const unsupported = {
       state: "unsupported" as const,
-      facts: { os: "windows", osVersion: "6.1.7601", engineMajor: 95 },
+      facts: { os: "windows", osVersion: "6.1.7601", engineMajor: 95, arch: "x86" },
       reason: "old-webview" as const,
     };
     render(

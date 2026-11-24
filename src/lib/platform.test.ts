@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { welcome } from "../i18n/ru";
 import {
   MIN_ENGINE_MAJOR,
   decide,
@@ -20,7 +21,10 @@ const MAC =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15";
 
 function facts(partial: Partial<PlatformFacts> = {}): PlatformFacts {
-  return { os: "windows", osVersion: "10.0", engineMajor: 120, ...partial };
+  // Шаг 224: `arch` — обязательное поле фактов. По умолчанию x86 (обычная
+  // машина), чтобы старые проверки не превращались молча в «архитектура не
+  // прочитана».
+  return { os: "windows", osVersion: "10.0", engineMajor: 120, arch: "x86", ...partial };
 }
 
 describe("проверка Windows и WebView2 до первого разговора (шаг 35)", () => {
@@ -104,5 +108,60 @@ describe("проверка Windows и WebView2 до первого разгов�
       userAgentData: { platform: "Windows" },
     });
     expect(facts.os).toBe("windows");
+  });
+});
+
+/**
+ * Шаг 224: ARM64/GPU — честное «не поддерживается» вместо тихой
+ * неработоспособности.
+ *
+ * Дефект был ровно тихим: `readFacts` читал систему и версию движка, но не
+ * архитектуру, и на Windows ARM64 x86-сборка получала вердикт «подходит» —
+ * запускалась через эмуляцию и медленно делала вид, что работает. Человек в этот
+ * момент думает, что плохое приложение, а не что сборка не та.
+ */
+describe("ARM64: отказ словами, а не тихая эмуляция (шаг 224)", () => {
+  // Реальная строка UA с Windows на ARM64: `ARM64` стоит в скобках платформы.
+  const ARM64_UA =
+    "Mozilla/5.0 (Windows NT 10.0; ARM64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.2210.91";
+
+  it("архитектура читается из UA, а не угадывается", () => {
+    expect(readFacts({ userAgent: ARM64_UA, platform: "Win32" }).arch).toBe("arm64");
+    expect(readFacts({ userAgent: WIN10_EDGE, platform: "Win32" }).arch).toBe("x86");
+  });
+
+  it("ARM64 не получает «подходит», хотя движок новый", () => {
+    // Это и был дефект: движок 120 — свежий, и проверка движка говорила «ок».
+    const verdict = decide(readFacts({ userAgent: ARM64_UA, platform: "Win32" }));
+    expect(verdict.state).toBe("unsupported");
+    if (verdict.state === "unsupported") expect(verdict.reason).toBe("unsupported-arch");
+  });
+
+  it("и это сказано словами: что будет и чего не будет", () => {
+    const verdict = decide(readFacts({ userAgent: ARM64_UA, platform: "Win32" }));
+    const reason = verdict.state === "unsupported" ? verdict.reason : "unreadable";
+    const text = welcome.platformProblem(reason);
+    expect(text).toContain("ARM64");
+    expect(text).toContain("эмуляцию");
+    // Почему это хуже отказа: человек должен понять, что дело в сборке, а не в нём.
+    expect(text).toContain("сборка под ARM64");
+  });
+
+  it("`architecture` из userAgentData важнее UA", () => {
+    // UA может врать: в WebView2 на ARM64 иногда остаётся x86-строка.
+    const nav = { userAgent: WIN10_EDGE, platform: "Win32", userAgentData: { architecture: "arm64" } };
+    expect(readFacts(nav).arch).toBe("arm64");
+    expect(decide(readFacts(nav)).state).toBe("unsupported");
+  });
+
+  it("не прочитали архитектуру — это не «x86»: вердикт остаётся честным", () => {
+    // Догадка о железе — та же тихая неработоспособность с другой стороны.
+    expect(readFacts({ userAgent: "Mozilla/5.0", platform: "Win32" }).arch).toBeNull();
+  });
+
+  it("обычная x86-машина подходит, и архитектура названа в строке журнала", () => {
+    const factsHere = readFacts({ userAgent: WIN10_EDGE, platform: "Win32" });
+    expect(decide(factsHere).state).toBe("ok");
+    expect(describeVerdict(decide(factsHere))).toContain("x86");
   });
 });
