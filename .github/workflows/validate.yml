@@ -77,6 +77,13 @@ jobs:
       - name: SBOM is reproducible (same commit, same bytes)
         run: python3 tools/sbom.py --reproducible
 
+      # Шаг 214: единственная дверь в сеть ещё не значит, что в неё не входят
+      # сами. Проверка ищет загрузку внутри `useEffect` и в таймерах.
+      - name: Downloads happen only on an explicit press
+        run: |
+          python3 tools/no_silent_download.py --selftest
+          python3 tools/no_silent_download.py --quiet
+
       - name: UIA draft generator works on a fixture dump
         run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
 

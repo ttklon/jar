@@ -116,6 +116,7 @@
 | `links.py` | проверка относительных ссылок в документах |
 | `make_receipts.py` | — |
 | `mine_awesome.py` | разбор awesome-листов |
+| `no_silent_download.py` | — |
 | `no_telemetry.py` | — |
 | `one_door.py` | — |
 | `plan_progress.py` | — |
