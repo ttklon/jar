@@ -555,3 +555,52 @@ describe("уменьшение движения доходит до докуме
     globalThis.matchMedia = origin;
   });
 });
+
+describe("сенсор: цели крупнее и это сказано (шаг 223)", () => {
+  it("при pointer: coarse пункт меню вырастает до 44 и появляется пояснение", async () => {
+    const origin = globalThis.matchMedia;
+    // Восстановление — через `finally`, а не в конце тела: упавший тест иначе
+    // протекает в следующий, и второй падает с чужим размером.
+    try {
+    globalThis.matchMedia = ((q: string) => ({
+      matches: q.includes("pointer: coarse"),
+      media: q,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof globalThis.matchMedia;
+    globalThis.localStorage?.setItem(WELCOME_KEY, "1");
+
+    render(<App />);
+    await waitFor(() => expect(screen.getByRole("navigation")).toBeTruthy());
+    // Ищем внутри навигации: кнопка «Руки» есть и на самом экране «Руки».
+    const item = within(screen.getByRole("navigation")).getByRole("button", { name: "Руки" });
+    // Палец попадает в пункт, а не мимо: высота идёт от указателя, а не от вкуса.
+    expect(item.style.minHeight).toBe("44px");
+    // И это не молча: смена размера без объяснения читается как поломка.
+    expect(screen.getByText(/сенсорный экран: цели крупнее/)).toBeTruthy();
+    } finally {
+      globalThis.matchMedia = origin;
+    }
+  });
+
+  it("на мыши пункт ниже и пояснения нет: там ничего не менялось", async () => {
+    // Мышь надо **объявить**: среда, которая молчит про указатель, считается
+    // сенсорной — ошибаться в сторону крупных целей безопаснее (правило 3).
+    const origin = globalThis.matchMedia;
+    globalThis.matchMedia = ((q: string) => ({
+      matches: q.includes("pointer: fine"),
+      media: q,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof globalThis.matchMedia;
+    try {
+      globalThis.localStorage?.setItem(WELCOME_KEY, "1");
+      render(<App />);
+      await waitFor(() => expect(screen.getByRole("navigation")).toBeTruthy());
+      expect(within(screen.getByRole("navigation")).getByRole("button", { name: "Руки" }).style.minHeight).toBe("32px");
+      expect(screen.queryByText(/сенсорный экран/)).toBeNull();
+    } finally {
+      globalThis.matchMedia = origin;
+    }
+  });
+});

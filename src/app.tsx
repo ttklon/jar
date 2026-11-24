@@ -57,7 +57,8 @@ import { filterCommands, type Command } from "./lib/commands";
 import { readEntry } from "./lib/entry";
 import { readScreen, saveScreen } from "./lib/lastScreen";
 import { filterFindables, findables, kindLabel } from "./lib/find";
-import { layoutFor } from "./lib/layout";
+import { fitWork } from "./lib/layout";
+import { notice as touchNotice, pointerOf, sizes as touchSizes } from "./lib/touch";
 import {
   DEFAULT_CHOICE,
   THEME_KEY,
@@ -314,7 +315,18 @@ export function App() {
     globalThis.addEventListener("resize", onResize);
     return () => globalThis.removeEventListener("resize", onResize);
   }, []);
-  const layout = layoutFor(width);
+  // Шаг 222: обещание «от 1024×600» проверяется `fitWork`, а не одной шириной:
+  // при экране ниже минимума колонка уходит наверх, чтобы низ не уезжал за край.
+  const fit = fitWork({ width, height: globalThis.innerHeight || 800 });
+  const layout = fit.layout;
+  // Шаг 223: размер цели — не константа, а следствие указателя. 44 px хороши для
+  // пальца и разрежают экран там, где мышь; 32 — наоборот. Спрашиваем среду один
+  // раз при запуске: тип указателя не меняется от перерисовки, а слушатель
+  // `matchMedia` на каждый рендер — это утечка.
+  const [pointer] = useState(() =>
+    pointerOf((query) => globalThis.matchMedia?.(query) ?? { matches: false }),
+  );
+  const target = touchSizes(pointer);
   // Палитра: открывается с клавиатуры, ведёт на любой экран по первым буквам.
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -523,6 +535,8 @@ export function App() {
                 type="button"
                 className={mergeClasses(styles.navItem, screen === item.id && styles.navItemActive)}
                 onClick={() => setScreen(item.id)}
+                // Палец попадает в пункт, а не мимо: высота идёт от указателя.
+                style={{ minHeight: `${target.control}px` }}
                 aria-current={screen === item.id ? "page" : undefined}
               >
                 {item.icon}
@@ -543,6 +557,9 @@ export function App() {
               {snapshot ? snapshot.stats.domains : "—"} {t.statDomains}
             </span>
             <span>{source}</span>
+            {/* Шаг 223: молчаливое изменение размера читается как «сломалось».
+                Одна фраза объясняет, почему цели стали крупнее. */}
+            {touchNotice(pointer) ? <span>{touchNotice(pointer)}</span> : null}
             <span>v{APP_VERSION}</span>
           </div>
         </aside>
