@@ -41,3 +41,28 @@ describe("экран «Спросить»", () => {
     expect(screen.getByText(/проще всего ищется/i)).toBeTruthy();
   });
 });
+
+describe("пустой поиск — с выходом, а не тупик (шаг 188)", () => {
+  /**
+   * Запрос шлётся отправкой формы, а не нажатием: `search(query)` читает
+   * состояние, и `fireEvent.change` без `await` до него не доходит — тест
+   * «проходил» бы на пустом запросе и проверял не то.
+   */
+  const ask = async (text: string) => {
+    render(<Ask />);
+    const box = screen.getByRole("textbox");
+    fireEvent.change(box, { target: { value: text } });
+    fireEvent.submit(box.closest("form")!);
+  };
+
+  it("три шага, у каждого действие, и «нет такого» не выдаётся за «не понял»", async () => {
+    // Дефект: «Ничего не нашлось. Переформулируйте…» — совет без адреса.
+    await ask("жжж ккк щщщ ъъъ");
+    // eslint-disable-next-line no-console
+    await waitFor(() => expect(screen.getByText(/ничего нет — и это ответ/)).toBeTruthy(), { timeout: 4000 });
+    // Три шага — три действия, а не три совета.
+    expect(screen.getByText(/· Скажите иначе — по действию, а не по названию программы — /)).toBeTruthy();
+    expect(screen.getByText(/· Посмотрите соседнее: каталог знает 835 действий словами/)).toBeTruthy();
+    expect(screen.getByText(/· Проверьте, что вообще возможно на этой машине/)).toBeTruthy();
+  });
+});

@@ -1,3 +1,4 @@
+import { screen as emptyScreen, usable as emptyUsable, again as emptyAgain } from "../lib/emptyWay";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
@@ -83,6 +84,12 @@ const useStyles = makeStyles({
 export function Ask() {
   const styles = useStyles();
   const [query, setQuery] = useState("");
+  /**
+   * Шаг 188: что уже искали. Второй раз тот же запрос и тот же ответ — это уже не
+   * «не нашлось», а «не меняется», и об этом надо сказать, иначе человек решит,
+   * что кнопка не сработала.
+   */
+  const [searched, setSearched] = useState<string[]>([]);
   const [items, setItems] = useState<PlanItem[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -117,7 +124,11 @@ export function Ask() {
     setError(null);
     planFor(trimmed, LIMIT)
       .then((result) => {
-        if (request === searchRequest.current) setItems(result);
+        if (request !== searchRequest.current) return;
+        setItems(result);
+        // Помним, что уже спрашивали: повтор того же запроса должен быть назван,
+        // а не выглядеть как «кнопка не сработала».
+        if (result.length === 0) setSearched((was) => (was.includes(trimmed) ? was : [...was, trimmed]));
       })
       .catch((reason: unknown) => {
         if (request === searchRequest.current) {
@@ -488,7 +499,32 @@ export function Ask() {
       ) : items === null ? (
         <Text className={styles.note}>{ask.hint}</Text>
       ) : items.length === 0 ? (
-        <Text className={styles.note}>{ask.empty}</Text>
+        /*
+          Шаг 188: пустота с выходом, а не тупик. «Ничего не нашлось» отвечает на
+          «есть ли это здесь» и молчит на «что теперь делать»; три шага — ответ
+          на второй вопрос, и у каждого есть действие, а не совет.
+        */
+        (() => {
+          const got = emptyScreen("unknown", query);
+          if (!emptyUsable(got).ok) {
+            return <Text className={styles.note}>{ask.empty}</Text>;
+          }
+          const repeat = emptyAgain("unknown", query, searched);
+          return (
+            <div role="status" aria-live="polite">
+              {repeat.length > 0 ? <Text className={styles.note}>{repeat}</Text> : null}
+              <Text weight="semibold">{got.title}</Text>
+              <Text className={styles.note} block>
+                {got.why}
+              </Text>
+              {got.steps.map((step) => (
+                <Text key={step.said} className={styles.note} block>
+                  {`· ${step.said} — ${step.act}`}
+                </Text>
+              ))}
+            </div>
+          );
+        })()
       ) : (
         <>
           <Text className={styles.count}>{ask.found(items.length)}</Text>
