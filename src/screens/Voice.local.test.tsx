@@ -1936,6 +1936,13 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/не сделано: шаг 2 «storage-backup\|проверить\|резервную копию» — нет резервной копии/)).toBeTruthy();
     expect(screen.getByText(/продолжить с шага 2: сделанное до него останется/)).toBeTruthy();
 
+    // Шаг 120: откат связан с отчётом. Первый шаг вернуть можно, второй —
+    // необратимый (`destructive`), и причина названа, а не спрятана.
+    await waitFor(() => expect(screen.getByText(/^откат: вернуть можно 1 из 2/)).toBeTruthy());
+    expect(screen.getByText(/1\. storage-backup\|проверить\|свободное место — можно вернуть/)).toBeTruthy();
+    expect(screen.getByText(/2\. storage-backup\|проверить\|резервную копию — нельзя вернуть: риск destructive/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Вернуть сделанное" })).toBeTruthy();
+
     // Шаг 107: повтор показывает разницу **до** вопроса и спрашивает один раз.
     expect(screen.getByText(/шагов плана: сравнивать не с чем — прошлого дела нет/)).toBeTruthy();
     expect(screen.getByText(/уже сделано 1 из 2 — повтор их не тронет/)).toBeTruthy();

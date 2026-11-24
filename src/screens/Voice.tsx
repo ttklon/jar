@@ -193,6 +193,14 @@ import {
   tell as failureTell,
   type StepReport as FailureStep,
 } from "../lib/failureKeeps";
+import {
+  after as undoAfter,
+  at as undoAt,
+  here as undoHere,
+  offer as undoOffer,
+  oneClick as undoOneClick,
+  type Undoable as UndoStepHere,
+} from "../lib/undoHere";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -3316,6 +3324,23 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               reason: step.reason,
             }));
             const story = failureTell(failureSteps, three);
+            // Шаг 120: отчёт и откат — рядом. У каждого шага видно, можно ли его
+            // вернуть, и причины отказа названы, а не спрятаны за серой кнопкой.
+            const undoSteps: UndoStepHere[] = report.steps.map((step) => {
+              const risk = (draft?.gates ?? []).find((gate) => gate.registry === step.registry)?.risk ?? "read";
+              const reversible = risk === "read" || risk === "write-local";
+              return {
+                position: step.position,
+                what: step.registry,
+                undoable: reversible && step.status === "ok",
+                refusal: reversible
+                  ? step.status === "ok"
+                    ? ""
+                    : "шаг не выполнялся — возвращать нечего"
+                  : `риск ${risk}: сделанное не отменяется`,
+              };
+            });
+            const undo = undoHere(undoSteps);
             return (
               <>
                 <Text className={styles.note}>{reportSummary(total)}</Text>
@@ -3343,6 +3368,38 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                 <Text className={styles.note}>
                   {`рука ответила полностью: ${cover.full} из ${cover.total}`}
                 </Text>
+                {/* Шаг 120: откат рядом с отчётом. У каждого шага видно, можно ли
+                    его вернуть, и причины отказа названы, а не спрятаны. */}
+                <Text className={styles.note} role="status" aria-live="polite">
+                  {`откат: ${undo.said}`}
+                </Text>
+                {undo.steps.map((step) => (
+                  <Text key={`undo-${step.position}`} className={styles.note}>
+                    {`${step.position}. ${step.what} — ${undoAt(step)}`}
+                  </Text>
+                ))}
+                {undoOffer(undo) ? (
+                  <Button
+                    appearance="subtle"
+                    size="small"
+                    onClick={() => {
+                      // Одним нажатием — только то, что можно вернуть, в обратном
+                      // порядке: вернуть последнее первым.
+                      const can = undoOneClick(undo);
+                      const refused = undo.steps.filter((step) => !step.undoable && step.refusal);
+                      setEditNote(
+                        undoAfter(
+                          can.map((step) => `шаг ${step.position}`),
+                          refused.map((step) => `шаг ${step.position}: ${step.refusal ?? ""}`),
+                          undo.steps.length,
+                        ),
+                      );
+                      speak("откат начат — верну то, что можно вернуть");
+                    }}
+                  >
+                    Вернуть сделанное
+                  </Button>
+                ) : null}
                 {reports.map((step) => (
                   <Text key={`answer-${step.position}`} className={styles.note}>
                     {`${step.position + 1}. ${threeAnswer(raws[reports.indexOf(step)] ?? { status: "pending" })} — ${handLine(answers[reports.indexOf(step)] ?? answers[0]!)}`}
