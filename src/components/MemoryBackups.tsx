@@ -3,6 +3,7 @@ import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { isTauri } from "../ipc";
 import { t } from "../i18n/ru";
 import { ErrorLine } from "./ErrorLine";
+import { countUsable, firstUsable, label, points as restorePoints, when } from "../lib/restorePoint";
 
 /**
  * «Резервные копии памяти» — в настройках, рядом с предупреждением о базе.
@@ -71,6 +72,12 @@ export function MemoryBackups() {
   const [done, setDone] = useState<Restored | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /**
+   * Одно «сейчас» на весь список (шаг 155). Считать его в каждой строке значило
+   * бы получить два разных «сейчас» в одном списке — и «сегодня» у одной копии
+   * при «вчера» у другой, хотя обе сняты в один день.
+   */
+  const [now] = useState(() => Date.now());
 
   const load = useCallback(async () => {
     const ipc = await import("../ipc/tauri");
@@ -83,6 +90,11 @@ export function MemoryBackups() {
   }, [load]);
 
   if (!isTauri() || rows === null) return null;
+
+  // Шаг 155: точки — из имён, годность — из проверки ядра. Считаем один раз и
+  // передаём дальше: трижды повторённое условие однажды разойдётся.
+  const pointList = restorePoints(rows.map((row) => row.file));
+  const usableAt = (file: string) => rows.find((row) => row.file === file)?.usable === true;
 
   const restore = async (file: string) => {
     setBusy(true);
@@ -108,10 +120,24 @@ export function MemoryBackups() {
       {rows.length === 0 ? (
         <Text className={styles.muted}>{t.settingsBackupsEmpty}</Text>
       ) : (
-        rows.map((row) => (
+        <>
+          {/*
+            Шаг 155: человек выбирает **когда** вернуть память, а не какая строка
+            называется `memory-20261120-143000-v1.db`. Имя остаётся мелким — оно
+            нужно, если понадобится сказать его вслух.
+          */}
+          <Text className={styles.muted}>
+            {(() => {
+              const best = firstUsable(pointList, usableAt);
+              return best === null
+                ? `${countUsable(pointList, usableAt)} · годной копии нет — вернуть нечего`
+                : `${countUsable(pointList, usableAt)} · свежайшая годная: ${when(best, now)}`;
+            })()}
+          </Text>
+          {rows.map((row) => (
           <div key={row.file} className={styles.row}>
-            <Text className={styles.grow}>{row.file}</Text>
-            <Text className={styles.size}>{humanBytes(row.bytes)}</Text>
+            <Text className={styles.grow}>{label(pointList.find((point) => point.file === row.file) ?? { file: row.file, at: null }, now)}</Text>
+            <Text className={styles.size}>{row.file.replace(/^memory-/, "").replace(/\.db$/, "")} · {humanBytes(row.bytes)}</Text>
             {row.usable ? (
               asking === row.file ? (
                 <>
@@ -138,12 +164,13 @@ export function MemoryBackups() {
               <ErrorLine className={styles.problem} text={row.problem || t.settingsBackupsBroken} />
             )}
           </div>
-        ))
+          ))}
+        </>
       )}
 
       {done ? (
         <Text role="status" aria-live="polite">
-          {t.settingsBackupsDone.replace("{file}", done.file)}
+          {t.settingsBackupsDone.replace("{file}", `${when({ file: done.file, at: restorePoints([done.file])[0]?.at ?? null }, now)} (${done.file})`)}
         </Text>
       ) : null}
       {error ? (
