@@ -60,7 +60,7 @@ export interface Ask {
  *
  * Вопрос задаётся **до** того, как ждать стало поздно, и ровно один раз.
  */
-export function ask(wait: Wait): Ask {
+export function ask(wait: Wait, thresholdMs = LONG_MS): Ask {
   if (wait.chosen) {
     // Человек уже выбрал ждать: переспрашивать значит не слушать ответ.
     return { ask: false, said: "", why: "человек сам попросил ждать — ответ уже есть" };
@@ -69,8 +69,8 @@ export function ask(wait: Wait): Ask {
     // Повторный вопрос — пила, а не выбор.
     return { ask: false, said: "", why: "уже спросили один раз" };
   }
-  if (wait.ms <= LONG_MS) {
-    return { ask: false, said: "", why: `ещё не долго: ${Math.round(wait.ms)} мс из ${LONG_MS}` };
+  if (wait.ms <= thresholdMs) {
+    return { ask: false, said: "", why: `ещё не долго: ${Math.round(wait.ms)} мс из ${thresholdMs}` };
   }
   if (!wait.stoppable) {
     // Вопрос без возможности остановить — это уведомление, а не выбор.

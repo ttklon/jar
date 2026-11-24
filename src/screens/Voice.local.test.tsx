@@ -1804,6 +1804,31 @@ describe("локальное распознавание на экране", () =
     expect(runPlan).not.toHaveBeenCalled();
   });
 
+  it("порог «слишком долго» задаёт человек, и он действует (шаг 139)", async () => {
+    // На слабой машине 4 с — норма, а не зависание; порог должен быть настраиваемым.
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+
+    // Границы названы, а не спрятаны.
+    expect(screen.getByText(/дольше 1–60 с — спрошу, ждать ли/)).toBeTruthy();
+    const field = screen.getByLabelText("порог «слишком долго», секунды");
+    fireEvent.change(field, { target: { value: "0" } });
+    fireEvent.click(screen.getByText("Сохранить порог"));
+    // Меньше минуты нельзя — вопросы на ровном месте, и сказано почему.
+    await waitFor(() => expect(screen.getByText(/меньше 1 с нельзя — ставлю 1 с/)).toBeTruthy());
+    expect(localStorage.getItem("jar.longMs")).toBe("1");
+
+    // И порог действительно действует: при 1 с вопрос приходит быстрее, чем при 4 с.
+    vi.mocked(think).mockReturnValueOnce(new Promise(() => {}));
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "переименуй фото" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(
+      () => expect(screen.getByText(/«поиск ответа» — это долго \(\d+ с\)\. Ждать\?/)).toBeTruthy(),
+      { timeout: 4000 },
+    );
+    localStorage.removeItem("jar.longMs");
+  }, 12_000);
+
   it("отмена возвращает управление сразу, даже если ядро ещё считает (шаг 138)", async () => {
     // «Стоп» не должен ждать ответа ядра: именно тогда он и нужен.
     let resolveThink!: () => void;
