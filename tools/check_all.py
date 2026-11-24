@@ -36,6 +36,9 @@ STEPS: list[tuple[str, list[str], str]] = [
     ("profiles", ["tools/profiles.py"], "every profile op maps to a registry row"),
     ("audit", ["tools/audit_actions.py"], "coverage: thin domains, family gaps"),
     ("evals", ["tools/evals.py"], "an eval plan for every action"),
+    # Шаг 251: план, который никто не прогоняет, — это документ, а не проверка.
+    # Прогон отвечает «прошло/не прошло» с причиной, без сети и без модели.
+    ("evals pass", ["tools/run_evals.py", "--quiet"], "every eval passes, with a reason when it does not"),
     ("targets", ["tools/app_targets.py"], "tier A apps have profiles"),
     ("skills", ["tools/skills.py"], "skills reference real rows, risk not lowered"),
     ("hands", ["tools/hands.py"], "data/tools.json points at real, allowed registry rows"),

@@ -125,6 +125,7 @@
 | `plan_progress.py` | — |
 | `policy_drift.py` | — |
 | `profiles.py` | валидатор профилей → docs/PROFILES.md |
+| `run_evals.py` | — |
 | `rust_literals.py` | — |
 | `rust_prose.py` | — |
 | `rust_strings.py` | — |

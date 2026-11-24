@@ -98,6 +98,12 @@ jobs:
           python3 tools/no_storefront.py --selftest
           python3 tools/no_storefront.py --quiet
 
+      # Шаг 251: evals одной командой, с отчётом «прошло/не прошло» и причиной.
+      - name: Evals pass
+        run: |
+          python3 tools/run_evals.py --selftest
+          python3 tools/run_evals.py --quiet
+
       - name: UIA draft generator works on a fixture dump
         run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
 
