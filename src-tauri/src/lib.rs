@@ -61,6 +61,9 @@ pub mod osupdate;
 pub mod perf;
 pub mod places;
 pub mod plan;
+// Шаг 225: проверка WebView2 до первого окна. Без неё самый частый сбой
+// установки — белое окно без причины.
+pub mod webview2;
 pub mod planner;
 pub mod policy;
 pub mod profiles;
@@ -102,6 +105,39 @@ use memory::Memory;
 use policy::PolicyState;
 use registry::Registry;
 
+/// Окно «нужен WebView2» — единственное, что можно показать без WebView2.
+///
+/// # Почему это не `eprintln!`
+///
+/// У релизной сборки нет консоли (`windows_subsystem = "windows"`): текст в
+/// stderr не увидит никто. Окно — единственный канал, доступный в этот момент.
+fn show_webview2_instruction() {
+    // Записываем и в лог: `--self-check` и разбор жалоб потом скажут, что было.
+    tracing::error!("WebView2 не найден — показана инструкция по установке");
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        // `mshta` умеет MessageBox без зависимостей и без консоли. Кавычки и
+        // переводы строк экранируются: текст приходит из константы, но правило
+        // одно для любого текста.
+        let text = webview2::INSTRUCTION.replace('"', "'").replace('\n', " ");
+        let script = format!(
+            "mshta.exe javascript:alert(\"{text}\");close();"
+        );
+        let _ = std::process::Command::new("cmd")
+            .args(["/C", &script])
+            .creation_flags(0x0800_0000) // CREATE_NO_WINDOW: без мелькающей консоли
+            .status();
+    }
+    // Ещё и в файл — если окно показать не удалось (нет mshta, урезанная система).
+    if let Ok(dir) = std::env::current_exe() {
+        if let Some(parent) = dir.parent() {
+            let path = parent.join("webview2-missing.txt");
+            let _ = std::fs::write(&path, webview2::INSTRUCTION);
+        }
+    }
+}
+
 pub fn run() {
     // Засечка до всего остального: «старт» — это от входа в main до окна,
     // и всё, что мы успели сделать, должно в него попасть (шаг 381).
@@ -113,6 +149,19 @@ pub fn run() {
         "ZShelper запускается"
     );
     let app_dir = logging::ensure_app_dir();
+
+    // Шаг 225: WebView2 — до `tauri::Builder`. Если движка нет, окно не откроется
+    // вообще (или откроется белым), и человек не узнает ни причины, ни действия.
+    // Проверка живёт здесь, потому что JS внутри WebView2 в этом случае не
+    // запустится ни разу: проверка платформы на JavaScript тут бессильна.
+    let webview = webview2::check();
+    tracing::info!(webview = webview2::describe(webview), "проверка WebView2");
+    if webview2::should_stop(webview) {
+        // Окно с инструкцией — обычный MessageBox: он не зависит от WebView2,
+        // поэтому в этом единственном случае и работает.
+        show_webview2_instruction();
+        std::process::exit(2);
+    }
 
     // Реестр встроен в бинарник и проверен CI. Если он не разбирается — это
     // ошибка сборки, а не пользователя: лучше явно упасть на старте.

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { welcome } from "../i18n/ru";
 import {
@@ -163,5 +164,79 @@ describe("ARM64: отказ словами, а не тихая эмуляция 
     const factsHere = readFacts({ userAgent: WIN10_EDGE, platform: "Win32" });
     expect(decide(factsHere).state).toBe("ok");
     expect(describeVerdict(decide(factsHere))).toContain("x86");
+  });
+});
+
+/**
+ * Шаг 225: WebView2 может отсутствовать **вовсе** — и тогда проверка платформы
+ * на JavaScript не запускается ни разу.
+ *
+ * Здесь проверяется то, что можно проверить без Rust: нативная проверка
+ * существует, читает **обе** ветви реестра и не паникует при отсутствии движка.
+ * Сам Rust в этой среде не собирается (`cargo` нет), поэтому текстовые проверки
+ * ниже — не замена компилятору, а хранитель решений: их нельзя тихо отменить,
+ * не заметив.
+ */
+describe("WebView2 до первого окна (шаг 225)", () => {
+  const rust = readFileSync(new URL("../../src-tauri/src/webview2.rs", import.meta.url), "utf8");
+  const lib = readFileSync(new URL("../../src-tauri/src/lib.rs", import.meta.url), "utf8");
+
+  it("проверка есть и вызывается **до** Builder, а не после", () => {
+    expect(lib).toContain("webview2::check()");
+    // Порядок в файле: проверка стоит в `run()` **до** первого `tauri::Builder`.
+    // Ищем **вызов**, а не упоминание: `tauri::Builder` встречается и в
+    // комментариях, и первое вхождение оказалось комментарием — проверка
+    // ловила бы не то, что называет.
+    const firstBuilder = lib.indexOf("tauri::Builder::default()");
+    expect(lib.indexOf("webview2::check()")).toBeLessThan(firstBuilder);
+  });
+
+  it("при отсутствии движка — выход с кодом 2, а не паника «приложение не собралось»", () => {
+    // Именно так выглядел дефект: `.expect("приложение не собралось")` — паника
+    // без окна, без причины и без действия.
+    //
+    // Проверять **наличие** трёх строк мало: первая версия теста была зелёной
+    // даже когда условие заменили на `if false` — все слова на месте, связи нет.
+    // Поэтому смотрим блок целиком: `should_stop` → окно → выход, по порядку.
+    const start = lib.indexOf("if webview2::should_stop(");
+    expect(start).toBeGreaterThan(-1);
+    const block = lib.slice(start, start + 400);
+    const instruction = block.indexOf("show_webview2_instruction()");
+    const exit = block.indexOf("std::process::exit(2)");
+    expect(instruction).toBeGreaterThan(-1);
+    expect(exit).toBeGreaterThan(instruction);
+    expect(block).not.toContain("if false");
+  });
+
+  it("читаются обе ветви реестра: иначе половина машин с WebView2 получит отказ", () => {
+    expect(rust).toContain("WOW6432Node");
+    expect(rust).toContain("EdgeUpdate");
+    expect(rust).toContain("REGISTRY_KEYS.len(), 2");
+  });
+
+  it("«не смог прочитать» — не «нет»: иначе отказ там, где всё в порядке", () => {
+    expect(rust).toContain("Present::Unknown");
+    expect(rust).toContain("matches!(state, Present::No)");
+  });
+
+  it("инструкция называет действие и адрес, а не код ошибки", () => {
+    expect(rust).toContain("developer.microsoft.com/microsoft-edge/webview2");
+    expect(rust).toContain("Bootstrapper");
+    expect(rust).toContain("права администратора");
+    // Код ошибки не в инструкции человеку (в комментариях он законен).
+    const instructionText = rust.slice(rust.indexOf("pub const INSTRUCTION"), rust.indexOf("/// Итог проверки"));
+    expect(instructionText).not.toContain("0x");
+  });
+
+  it("текст инструкции безопасен для format!: ни скобок, ни кавычек", () => {
+    // `{` в `format!` — подстановка, `"` — конец строки. Текст, который попадает
+    // в шаблон окна, обязан быть обычным текстом.
+    const instruction = rust.slice(rust.indexOf("pub const INSTRUCTION"), rust.indexOf("/// Итог проверки"));
+    expect(instruction).not.toContain("{");
+    expect(instruction).not.toContain("}");
+  });
+
+  it("без окна остаётся файл: урезанная система не оставит человека без слов", () => {
+    expect(lib).toContain("webview2-missing.txt");
   });
 });

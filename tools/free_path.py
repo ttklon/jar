@@ -147,13 +147,90 @@ def check_sources() -> list[str]:
         return problems
     for path in sorted(folder.rglob("*.rs")):
         text = production_part(path.read_text(encoding="utf-8", errors="ignore"))
-        for match in URL.finditer(text):
-            url = match.group(0)
-            problem = check_host(url)
-            if problem:
-                where = path.relative_to(ROOT)
-                problems.append(f"{where}: {problem}")
+        # Адрес в **тексте для человека** — не то же, что адрес в загрузчике.
+        #
+        # Правило этого модуля: приложение ничего не берёт с платных источников.
+        # Ссылка в инструкции («скачайте runtime отсюда») — не загрузка: её
+        # открывает человек в своём браузере, и приложение с неё не берёт ни
+        # байта. Смешивать эти случаи значило бы запретить честную инструкцию
+        # или разрешить платную загрузку — и то и другое хуже.
+        for problem in check_text(text):
+            where = path.relative_to(ROOT)
+            problems.append(f"{where}: {problem}")
     return problems
+
+
+def check_text(text: str) -> list[str]:
+    """
+    Адреса одного исходника: загрузки — по списку, инструкции — нет.
+
+    Отдельной функцией, потому что селфтест обязан звать **тот же путь**, что и
+    настоящая проверка. Первая версия проверяла `split_instructions` напрямую и
+    осталась зелёной, когда `check_sources` перестал её вызывать: тест проверял
+    функцию, которой уже никто не пользуется, — то есть ничего не проверял.
+    """
+    text = production_part(text)
+    download_part, _instruction = split_instructions(text)
+    problems: list[str] = []
+    for match in URL.finditer(download_part):
+        problem = check_host(match.group(0))
+        if problem:
+            problems.append(problem)
+    return problems
+
+
+def text_for_check(text: str) -> tuple[str, str]:
+    """Тот же путь, что и в `check_sources`: одна функция, а не две правды."""
+    return split_instructions(text)
+
+
+def split_instructions(text: str) -> tuple[str, str]:
+    """
+    Разделить код на «загрузочную» часть и **тексты для человека**.
+
+    Правило модуля: приложение ничего не берёт с платных источников. Ссылка в
+    инструкции («скачайте runtime отсюда») — не загрузка: её открывает человек в
+    своём браузере, и приложение с неё не берёт ни байта. Смешивать эти случаи
+    значило бы либо запретить честную инструкцию, либо разрешить платную
+    загрузку — и то и другое хуже.
+
+    Текст для человека — строковые литералы в константе, в имени которой есть
+    `INSTRUCTION`. Всё остальное — код, и с него адреса проверяются как раньше.
+    """
+    text_lines: list[str] = []
+    code_lines: list[str] = []
+    inside = False
+    for line in text.splitlines():
+        starts = "const" in line and "INSTRUCTION" in line
+        if starts:
+            inside = True
+        # Принадлежность решается **до** смены состояния: первая версия
+        # выключала флаг раньше, чем добавить строку, и строка с адресом
+        # («https://developer.microsoft.com/...») попадала в код — то есть
+        # ровно та, ради которой всё и делалось.
+        here = inside
+        if inside and not starts:
+            # Константа кончается на первой строке, оканчивающейся `;` без `\`
+            # в конце — многострочный литерал продолжается обратным слэшем.
+            stripped = line.rstrip()
+            ends = stripped.endswith(";")
+            continues = stripped.endswith("\\")
+            if ends or not (continues or stripped.startswith('"') or stripped):
+                inside = False
+        (text_lines if here else code_lines).append(line)
+    return "\n".join(code_lines), "\n".join(text_lines)
+
+
+INSTRUCTION_CASES: list[tuple[str, bool]] = [
+    # (текст, должен_ли_адрес считаться загрузкой)
+    ('pub const INSTRUCTION: &str = "скачайте https://developer.microsoft.com/webview2/";', False),
+    ('const DOWNLOAD: &str = "https://api.openai.com/v1";', True),
+    # Адрес в коде — загрузка независимо от хоста; но «провал» здесь означает
+    # «считается загрузкой», а не «хост плохой»: huggingface и example.com в
+    # бесплатном списке. Проверяется **разделение**, а не список.
+    ('let url = "https://api.openai.com/v1";', True),
+    ('pub const HELP: &str = "см. https://api.openai.com";', True),
+]
 
 
 CASES: list[tuple[str, bool]] = [
@@ -185,10 +262,24 @@ def selftest() -> int:
     if production_part('http://x\n#[cfg(test)]\nhttp://api.openai.com') != "http://x\n":
         failures += 1
         print("  САМОТЕСТ: тестовый модуль не отрезан", file=sys.stderr)
+    # Шаг 225: адрес в **инструкции человеку** — не загрузка. Ссылка открывается
+    # в браузере человека, приложение с неё не берёт ни байта. И наоборот: даже
+    # похожий адрес в коде остаётся загрузкой — лазейка не должна быть шире.
+    for text, is_download in INSTRUCTION_CASES:
+        found = bool(check_text(text))
+        if found != is_download:
+            failures += 1
+            print(
+                f"  САМОТЕСТ: «{text[:40]}…» — адрес "
+                f"{'в коде' if is_download else 'в инструкции'} не распознан",
+                file=sys.stderr,
+            )
+    total = len(CASES) + 2 + len(INSTRUCTION_CASES)
     if failures:
-        print(f"самотест провален: {failures} из {len(CASES) + 2}", file=sys.stderr)
+        print(f"самотест провален: {failures} из {total}", file=sys.stderr)
         return 1
-    print(f"самотест: {len(CASES) + 2}/{len(CASES) + 2} — ловит и молчит как задумано")
+    print(f"самотест: {total}/{total} — ловит и молчит как задумано")
+
     return 0
 
 
