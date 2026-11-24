@@ -29,8 +29,9 @@ import {
   InfoRegular,
   DocumentBulletListRegular,
 } from "@fluentui/react-icons";
-import { afterWake, isTauri, registrySnapshot } from "./ipc";
+import { afterWake, engineStatus, isTauri, registrySnapshot } from "./ipc";
 import { watchWake } from "./lib/wakeWatch";
+import { startBeat } from "./lib/idleBeat";
 import type { RegistrySnapshot } from "./ipc";
 import { Voice } from "./screens/Voice";
 import { Welcome } from "./screens/Welcome";
@@ -426,6 +427,31 @@ export function App() {
       },
       { talking: () => screenRef.current === "voice" },
     );
+  }, []);
+
+  // Шаг 227: движок в простое отпускается **независимо от экрана**.
+  //
+  // Дефект: `engine_status` спрашивали только из экрана «Модели», и
+  // `release_if_idle` не вызывался вовсе, пока экран закрыт. Механизм выгрузки
+  // был, а выгрузки не было: движок жил в памяти весь день, грел ноутбук и ел
+  // батарею. Здесь — редкий тик раз в минуту, и только когда окно видимо: в
+  // скрытом окне приложение не «в простое», а не работает.
+  useEffect(() => {
+    if (!isTauri()) return;
+    const visibility = () =>
+      typeof document === "undefined" ? true : document.visibilityState === "visible";
+    const stop = startBeat(() => {
+      // Скрытое окно — не простой, а «не работаем»: спрашивать незачем.
+      if (!visibility()) return;
+      // Спрашиваем ядро: оно само решит, истёк ли простой и надо ли отпускать.
+      // Порог остаётся **один** — в `idle.rs`, а не здесь: второй порог в
+      // интерфейсе разошёлся бы с первым, и никто бы не заметил.
+      void engineStatus().catch(() => {
+        // Молча: не удалось спросить — не повод шуметь. Следующий тик через
+        // минуту попробует снова.
+      });
+    });
+    return stop;
   }, []);
 
   // Место запоминается одним эффектом, а не `setItem` в каждой кнопке: переходов
