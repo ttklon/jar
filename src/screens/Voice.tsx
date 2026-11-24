@@ -59,6 +59,7 @@ import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer"
 import { mark as repeatMark } from "../lib/repeatHand";
 import { allows as grantAllows, book as grantBook, EMPTY as EMPTY_GRANTS, give as grantGive, load as loadGrants, onRevoke as grantOnRevoke, revoke as grantRevoke, save as saveGrants, type Book as GrantBook, type Channel as GrantChannel } from "../lib/grants";
 import { line as signatureLine } from "../lib/signature";
+import { items as undoItemsList, summary as undoItemsSummary } from "../lib/undoItems";
 import { executable as launchExecutable, line as launchLine, needsAsk as launchNeedsAsk, origin as launchOrigin } from "../lib/launchOrigin";
 import { allow as netAllow, askBefore as netAskBefore, say as netSay } from "../lib/networkAllow";
 import { exits as outboundExits, line as outboundLine, summary as outboundSummary } from "../lib/outbound";
@@ -951,6 +952,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
    */
   const [journal, setJournal] = useState<{ can: number; total: number; said: string } | null>(null);
   const [journalSaid, setJournalSaid] = useState<string | null>(null);
+  /** Шаг 175: предметный список «что вернётся» — до нажатия, а не после. */
+  const [undoList, setUndoList] = useState<{ lines: string[]; summary: string } | null>(null);
   /**
    * Шаг 164: выбранные папки — предел, за который шаг не выйдет. Хранится на
    * диске: это выбор человека, а не состояние кадра. Пустой список — «ничего
@@ -4471,6 +4474,25 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                 );
                 setJournal(got);
                 setJournalSaid(preview.note);
+                /*
+                  Шаг 175: «что именно вернётся» — предметами, до нажатия. Шаг 120
+                  называл **шаги**; человеку нужны **файлы**: куда вернётся и откуда
+                  уйдёт. И честно про те, что вернуть уже нельзя.
+                */
+                // «На месте» — только то, про что ядро не сказало `refusal`:
+                // проверять существование по самому журналу значило бы отвечать
+                // «да» на вопрос, на который ядро уже ответило «нет».
+                const alivePaths = new Set(
+                  preview.steps.filter((step) => step.refusal === null).map((step) => step.entry.from),
+                );
+                const listed = undoItemsList(
+                  preview.steps.map((step) => ({ kind: step.entry.kind, from: step.entry.from, to: step.entry.to })),
+                  (path) => alivePaths.has(path),
+                );
+                setUndoList({
+                  lines: listed.map((item) => item.said),
+                  summary: undoItemsSummary(listed, 0).said,
+                });
               })
               .catch((problem: unknown) => {
                 setJournal({ can: 0, total: 0, said: problem instanceof Error ? problem.message : String(problem) });
@@ -4483,6 +4505,18 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           <Text className={styles.note} role="status" aria-live="polite">
             {`${journal.said}${journalSaid ? ` · ${journalSaid}` : ""}`}
           </Text>
+        ) : null}
+        {/* Шаг 175: что именно вернётся — предметами. «Вернуть 3 из 5» без списка
+            заставляет верить на слово; список называет файлы и их пути. */}
+        {undoList !== null && undoList.lines.length > 0 ? (
+          <div className={styles.note}>
+            <Text className={styles.note}>{`что вернётся: ${undoList.summary}`}</Text>
+            {undoList.lines.slice(0, 5).map((said) => (
+              <Text key={said} className={styles.note}>
+                {`· ${said}`}
+              </Text>
+            ))}
+          </div>
         ) : null}
         {journal !== null && journal.can > 0 ? (
           <Button
