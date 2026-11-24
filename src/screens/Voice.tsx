@@ -57,6 +57,7 @@ import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
+import { allow as folderAllow, NOTHING as NO_FOLDERS, say as folderSay, suggest as folderSuggest, type Limits as FolderLimits } from "../lib/folderLimit";
 import { journalNote as trashJournalNote, restoreCount as trashRestoreCount, say as trashSay, where as trashWhere } from "../lib/trashFirst";
 import { blast as blastOf, fromParams as blastFromParams, kindOf as blastKindOf, line as blastLine, louder as blastLouder } from "../lib/blast";
 import { neverDones as rightsNever, countWords as rightsCount, RULES as rightsRules, type Row as RightsRow } from "../lib/rights";
@@ -912,6 +913,25 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
    */
   const [journal, setJournal] = useState<{ can: number; total: number; said: string } | null>(null);
   const [journalSaid, setJournalSaid] = useState<string | null>(null);
+  /**
+   * Шаг 164: выбранные папки — предел, за который шаг не выйдет. Хранится на
+   * диске: это выбор человека, а не состояние кадра. Пустой список — «ничего
+   * нельзя», а не «можно всё».
+   */
+  const [folders, setFolders] = useState<FolderLimits>(() => {
+    try {
+      const raw = globalThis.localStorage?.getItem("jar.folders");
+      if (!raw) return NO_FOLDERS;
+      const parsed = JSON.parse(raw) as { folders?: unknown; except?: unknown };
+      const list = Array.isArray(parsed.folders) ? parsed.folders.filter((item) => typeof item === "string") : [];
+      const except = Array.isArray(parsed.except) ? parsed.except.filter((item) => typeof item === "string") : [];
+      return { folders: list as string[], except: except as string[] };
+    } catch {
+      // Испорченное хранилище — «предела нет», а не «можно всё»: отказ безопаснее.
+      return NO_FOLDERS;
+    }
+  });
+  const [folderDraft, setFolderDraft] = useState("");
   const [thinking, setThinking] = useState(false);
   humanWaitingRef.current = thinking;
 
@@ -4192,12 +4212,22 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                   // Шаг 163: куда уйдёт удаление — до нажатия. «Удали» без уточнения
                   // значит корзину: ошибка в чужом деле должна быть поправима.
                   const trash = kind === "delete" || kind === "trash" ? trashWhere(step?.why ?? "") : null;
+                  // Шаг 164: путь из шага проверяется пределом **до** запуска. `..`
+                  // и соседняя папка с похожим именем — разные и обе вне предела.
+                  const paths = Object.entries(step?.params ?? {})
+                    .filter(([name]) => name === "path" || name === "from" || name === "to")
+                    .map(([, value]) => value);
+                  const folders_ = paths.map((value) => ({ value, got: folderAllow(value, folders) }));
+                  const outside = folders_.filter((item) => !item.got.ok);
                   return (
                     <Text key={`danger-${index}`} className={styles.note}>
                       {`${index + 1}. ${strongMark(danger)} · ${asked.text}`}
                       {step?.params ? ` · ${blastLine(size)}` : ""}
                       {loud.loud ? ` · ${loud.why}` : ""}
                       {trash ? ` · ${trashSay(trash, true)} · ${trashJournalNote(true, trash.where)}` : ""}
+                      {outside.map((item) => (
+                        <span key={`outside-${item.value}`}>{` · ${folderSay(item.got)}`}</span>
+                      ))}
                       {" "}
                       <Button
                         appearance="subtle"
@@ -4221,6 +4251,76 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           })()}
         </div>
       ) : null}
+
+      {/* Шаг 164: предел папок. Выбранные папки — единственное, где шаг может
+          работать; всё остальное — отказ до запуска, а не вопрос «точно?». */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Где можно работать</Text>
+        <Text className={styles.note}>
+          {folders.folders.length === 0
+            ? "папки не выбраны: предела нет, и это не разрешение — шаг не выйдет за выбранное"
+            : `выбрано папок: ${folders.folders.length} — ${folders.folders.join(", ")}`}
+        </Text>
+        {folders.except.length > 0 ? (
+          <Text className={styles.note}>{`исключения: ${folders.except.join(", ")}`}</Text>
+        ) : null}
+        <Input
+          aria-label="папка, где можно работать"
+          value={folderDraft}
+          onChange={(_, data) => setFolderDraft(data.value)}
+          placeholder="C:\\Фото"
+        />
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <Button
+            size="small"
+            onClick={() => {
+              const value = folderDraft.trim();
+              if (value.length === 0) return;
+              // Записываем как выбрано человеком: предел — его выбор, а не догадка.
+              const next: FolderLimits = { folders: [...new Set([...folders.folders, value])], except: folders.except };
+              setFolders(next);
+              globalThis.localStorage?.setItem("jar.folders", JSON.stringify(next));
+              setFolderDraft("");
+              speak(`добавил папку: ${value}`);
+            }}
+          >
+            Добавить папку
+          </Button>
+          {folders.folders.length > 0 ? (
+            <Button
+              size="small"
+              appearance="subtle"
+              onClick={() => {
+                const next: FolderLimits = { folders: [], except: folders.except };
+                setFolders(next);
+                globalThis.localStorage?.setItem("jar.folders", JSON.stringify(next));
+                speak("убрал все папки: работать негде, и это не разрешение");
+              }}
+            >
+              Убрать все
+            </Button>
+          ) : null}
+        </div>
+        {(draft?.plan?.steps ?? []).some((step) =>
+          Object.entries(step.params ?? {}).some(
+            ([name, value]) => (name === "path" || name === "from" || name === "to") && !folderAllow(value, folders).ok,
+          ),
+        ) ? (
+          <Text className={styles.note} role="status" aria-live="polite">
+            {(() => {
+              // Не «разрешить всё», а ближайшая папка из самого пути: предложение
+              // не может оказаться шире просьбы.
+              const first = (draft?.plan?.steps ?? [])
+                .flatMap((step) => Object.entries(step.params ?? {}))
+                .find(([name, value]) => (name === "path" || name === "from" || name === "to") && !folderAllow(value, folders).ok);
+              const near = first ? folderSuggest(first[1]) : null;
+              return near === null
+                ? "путь вне выбранных папок, и ближайшую папку не назвать — разрешите её сами, если это правда нужно"
+                : `путь вне выбранных папок; если это правда нужно, разрешите папку ${near}`;
+            })()}
+          </Text>
+        ) : null}
+      </div>
 
       {/* Шаг 163: корзина вместо удаления по умолчанию — и путь назад из журнала.
           Ядро пишет журнал отката само; здесь он читается числом, чтобы «вернуть

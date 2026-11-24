@@ -1963,6 +1963,57 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/удаление в корзину: вернуть можно/)).toBeTruthy();
   });
 
+  it("путь вне выбранных папок — отказ до запуска, и предлагается ближайшая папка (шаг 164)", async () => {
+    // Дефект: путь из фразы чистился от кавычек и шёл в дело. `..` в середине
+    // выводил наружу, оставаясь «похожим» на путь внутри папки.
+    localStorage.setItem("jar.folders", JSON.stringify({ folders: ["C:\\Фото"], except: [] }));
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Call: { registry: "files|удалить|в корзину", params: {}, why: "удали" } },
+      plan: {
+        plan: {
+          goal: "убрать лишнее",
+          source: "model",
+          steps: [
+            {
+              registry: "files|удалить|в корзину",
+              params: { path: "C:\\Фото\\..\\Windows\\a.dll" },
+              why: "почистить",
+            },
+          ],
+        },
+        problems: [],
+        questions: [],
+        gates: [
+          {
+            position: 1,
+            registry: "files|удалить|в корзину",
+            decision: "confirm",
+            risk: "destructive",
+            wants_approval: true,
+          },
+        ],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    expect(screen.getByText(/выбрано папок: 1 — C:\\Фото/)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "почисти фото" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Цена ошибки")).toBeTruthy());
+
+    // Отказ назван, а не спрятан: путь вне предела, и почему.
+    expect(screen.getByText(/отказ: вне выбранных папок/)).toBeTruthy();
+    // И предложение — ближайшая папка из самого пути, а не «разрешить всё».
+    expect(screen.getByText(/если это правда нужно, разрешите папку C:\\Windows/)).toBeTruthy();
+    localStorage.removeItem("jar.folders");
+  });
+
   it("удаление по умолчанию идёт в корзину, и журнал называет, сколько вернёт (шаг 163)", async () => {
     // Дефект: план мог позвать удаление мимо корзины, а фраза «удали» не уточняла,
     // что значит «удали». Человек узнавал разницу после.
