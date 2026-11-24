@@ -104,6 +104,7 @@
 | `autonomy.py` | — |
 | `build_ecosystem.py` | сборка 10 каталогов экосистемы из research/ и _curated/ |
 | `check_all.py` | все генераторы и валидаторы по порядку (+ --check против git) |
+| `code_truth.py` | — |
 | `collect_sources.py` | сбор источников в research/ |
 | `dashboard.py` | DASHBOARD.md + INDEX.md (этот индекс) |
 | `defects.py` | — |

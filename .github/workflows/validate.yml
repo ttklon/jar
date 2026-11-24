@@ -126,6 +126,12 @@ jobs:
           python3 tools/docs_truth.py --selftest
           python3 tools/docs_truth.py
 
+      # Шаг 248: обратная сверка — что код умеет, документация обязана назвать.
+      - name: Code does not promise more than the docs
+        run: |
+          python3 tools/code_truth.py --selftest
+          python3 tools/code_truth.py
+
       - name: Evals on a slow and on an empty machine
         run: |
           python3 tools/run_evals.py --env slow

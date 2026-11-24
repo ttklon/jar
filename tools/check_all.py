@@ -53,6 +53,9 @@ STEPS: list[tuple[str, list[str], str]] = [
     # Шаг 247: документация не обещает больше кода. Числа в документации сверяются
     # с данными, а не с другими документами.
     ("docs do not promise more than the code", ["tools/docs_truth.py"], "the docs and the registry agree"),
+    # Шаг 248: обратная сверка. Разрыв здесь тише: код умеет, документация молчит,
+    # и человек не узнаёт о возможности, которая есть.
+    ("code does not promise more than the docs", ["tools/code_truth.py"], "every undo kind and risk level is named in the guide"),
     ("targets", ["tools/app_targets.py"], "tier A apps have profiles"),
     ("skills", ["tools/skills.py"], "skills reference real rows, risk not lowered"),
     ("hands", ["tools/hands.py"], "data/tools.json points at real, allowed registry rows"),
