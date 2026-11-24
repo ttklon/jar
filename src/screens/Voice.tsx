@@ -163,6 +163,12 @@ import {
   summary as idemSummary,
   type Past as IdemPast,
 } from "../lib/idempotent";
+import {
+  judge as refuseJudge,
+  learn as refuseLearn,
+  say as sayRefuse,
+  type Planned as RefusePlanned,
+} from "../lib/refuseAll";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -3537,6 +3543,43 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                 >
                   Запомнить сделанное
                 </Button>
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 115: план, который нельзя собрать из рук, отказывает целиком — и
+          называет, чего не хватает. Половина плана теряет файл, который хотели
+          сохранить. */}
+      {draft?.plan ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Собирается ли план</Text>
+          {(() => {
+            const steps = draft.plan?.steps ?? [];
+            const known = new Set((items ?? []).map((item) => item.tool).filter((tool): tool is string => tool !== null));
+            const planned: RefusePlanned[] = steps.map((step) => ({
+              what: step.why ?? step.registry,
+              tool: step.registry,
+              // Рука есть, если она в реестре экрана **или** ядро уже построило из
+              // неё шаг с воротами: второе сильнее первого.
+              hand: known.has(step.registry) || (draft.gates ?? []).some((gate) => gate.registry === step.registry),
+              allowed: (draft.gates ?? []).every(
+                (gate) => gate.registry !== step.registry || gate.decision !== "deny",
+              ),
+            }));
+            const verdict = refuseJudge(planned);
+            const gaps = refuseLearn(planned);
+            return (
+              <>
+                <Text className={styles.note} role="status" aria-live="polite">
+                  {sayRefuse(verdict)}
+                </Text>
+                {!verdict.run && gaps.length > 0 ? (
+                  <Text className={styles.note}>
+                    {`в обучение: ${gaps.join("; ")}`}
+                  </Text>
+                ) : null}
               </>
             );
           })()}
