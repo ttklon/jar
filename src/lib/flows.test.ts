@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { FlowStepView, FlowView, StepResult } from "../ipc/types";
 import type { StepRecord } from "./flows";
-import { missingInputs, resolveParams, runFlow, worstRisk } from "./flows";
+import { missingInputs, report, resolveParams, runFlow, worstRisk } from "./flows";
 
 /** Запись шага по номеру: без индексной арифметики в утверждениях. */
 function at(records: StepRecord[], index: number): StepRecord {
@@ -129,6 +129,56 @@ describe("сценарий", () => {
 
     expect(run.stopped).toBe("cancelled");
     expect(run.records.every((record) => record.status === "skipped")).toBe(true);
+  });
+
+  // Шаг 110: отмена на шаге 2 из 5 не выполняет 3, 4, 5 — и это видно в отчёте.
+  it("отмена на шаге 2 из 5 не выполняет 3, 4, 5 и это видно в отчёте", async () => {
+    const five = flow({ steps: [step(), step(), step(), step(), step()] });
+    let ran = 0;
+    let cancel = false;
+    const run = await runFlow(five, {}, {
+      // Отмена пришла **во время второго шага**: начатый шаг доводится до конца,
+      // а третий уже не начинается (шаг 104: шаг атомарен).
+      shouldStop: () => cancel,
+      confirm: async () => true,
+      run: async (current) => {
+        ran += 1;
+        if (ran === 2) cancel = true;
+        return okResult(current.tool);
+      },
+    });
+
+    // Выполнились ровно два — и ни одного лишнего.
+    expect(ran).toBe(2);
+    expect(run.stopped).toBe("cancelled");
+    expect(run.ok).toBe(false);
+    // В отчёте видно, что не выполнялось: «skipped», а не «ok» и не «failed».
+    expect(at(run.records, 0).status).toBe("ok");
+    expect(at(run.records, 1).status).toBe("ok");
+    for (const index of [2, 3, 4]) {
+      expect(at(run.records, index).status).toBe("skipped");
+      // Невыполненное не имеет результата: сделанным оно не притворяется.
+      expect(at(run.records, index).result).toBeUndefined();
+      expect(at(run.records, index).reason).toBeTruthy();
+    }
+    // Числом: сделано 2, не тронуто 3 — и это в отчёте, а не в глазах читателя.
+    expect(run.count).toEqual({ done: 2, skipped: 3, failed: 0, declined: 0 });
+    expect(report(run)).toBe("сделано 2 из 5, не выполнялось 3");
+  });
+
+  it("отмена не выдаёт себя за успех даже если предыдущие шаги прошли", async () => {
+    const five = flow({ steps: [step(), step(), step(), step(), step()] });
+    let seen = 0;
+    const run = await runFlow(five, {}, {
+      shouldStop: () => seen >= 2,
+      confirm: async () => true,
+      run: async (current) => {
+        seen += 1;
+        return okResult(current.tool);
+      },
+    });
+    expect(run.records.filter((record) => record.status === "ok")).toHaveLength(2);
+    expect(run.stopped).toBe("cancelled");
   });
 
   it("подставляет входы и ругается на пустой", () => {

@@ -18,7 +18,7 @@ import { PlayRegular, StopRegular } from "@fluentui/react-icons";
 import type { FlowStepView, FlowView, StepResult } from "../ipc";
 import { cancelTool, confirmTool, isTauri, runTool } from "../ipc";
 import { evidenceText } from "../lib/evidence";
-import type { FlowRun, StepRecord } from "../lib/flows";
+import { report as flowReport, type FlowRun, type StepRecord } from "../lib/flows";
 import { missingInputs, runFlow } from "../lib/flows";
 import { RISK_LABEL, flows } from "../i18n/ru";
 import { RiskBadge } from "./RiskBadge";
@@ -119,7 +119,9 @@ function summaryText(run: FlowRun): string {
     case "declined":
       return flows.stoppedDeclined(run.records.filter((r) => r.status !== "pending").length);
     case "cancelled":
-      return flows.stoppedCancelled;
+      // Шаг 110: отмена называется числом — «сделано 2 из 5, не выполнялось 3»,
+      // а не словом «отменено», за которым не видно, что успело сделаться.
+      return `${flows.stoppedCancelled}: ${flowReport(run)}`;
   }
 }
 

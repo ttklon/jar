@@ -34,6 +34,36 @@ export interface FlowRun {
   ok: boolean;
   stopped: StopReason;
   records: StepRecord[];
+  /**
+   * Отчёт числом — чтобы отмену было **видно**, а не надо было считать глазами
+   * (шаг 110). «Сделано 2, пропущено 3» — это отчёт; «отменено» без числа —
+   * обещание.
+   */
+  count: { done: number; skipped: number; failed: number; declined: number };
+}
+
+/**
+ * Счёт по записям.
+ *
+ * `skipped` считается отдельно от `failed`: невыполненное из-за отмены — не провал,
+ * и путать их значит врать в отчёте (шаг 106).
+ */
+export function count(records: readonly StepRecord[]): FlowRun["count"] {
+  return {
+    done: records.filter((record) => record.status === "ok").length,
+    skipped: records.filter((record) => record.status === "skipped").length,
+    failed: records.filter((record) => record.status === "failed").length,
+    declined: records.filter((record) => record.status === "declined").length,
+  };
+}
+
+/** Итог словами: счёт, а не «готово». */
+export function report(run: FlowRun): string {
+  const parts = [`сделано ${run.count.done} из ${run.records.length}`];
+  if (run.count.skipped > 0) parts.push(`не выполнялось ${run.count.skipped}`);
+  if (run.count.failed > 0) parts.push(`провалено ${run.count.failed}`);
+  if (run.count.declined > 0) parts.push(`отказано ${run.count.declined}`);
+  return parts.join(", ");
 }
 
 export interface FlowDeps {
@@ -117,7 +147,7 @@ export async function runFlow(
     if (deps.shouldStop?.()) {
       stop(record.index, "сценарий отменён", "skipped");
       publish();
-      return { ok: false, stopped: "cancelled", records };
+      return { ok: false, stopped: "cancelled", records, count: count(records) };
     }
 
     record.status = "running";
@@ -131,7 +161,7 @@ export async function runFlow(
       record.reason = reason instanceof Error ? reason.message : String(reason);
       stop(record.index + 1, "шаг до этого не выполнен", "skipped");
       publish();
-      return { ok: false, stopped: "failed", records };
+      return { ok: false, stopped: "failed", records, count: count(records) };
     }
 
     record.params = params;
@@ -143,7 +173,7 @@ export async function runFlow(
         record.reason = "человек не подтвердил шаг";
         stop(record.index + 1, "сценарий остановлен на подтверждении", "skipped");
         publish();
-        return { ok: false, stopped: "declined", records };
+        return { ok: false, stopped: "declined", records, count: count(records) };
       }
     }
 
@@ -155,7 +185,7 @@ export async function runFlow(
       record.reason = reason instanceof Error ? reason.message : String(reason);
       stop(record.index + 1, "шаг до этого не выполнен", "skipped");
       publish();
-      return { ok: false, stopped: "failed", records };
+      return { ok: false, stopped: "failed", records, count: count(records) };
     }
 
     record.result = result;
@@ -170,9 +200,9 @@ export async function runFlow(
           : result.reason || "результат не подтверждён";
       stop(record.index + 1, "шаг до этого не выполнен", "skipped");
       publish();
-      return { ok: false, stopped: result.cancelled ? "cancelled" : "failed", records };
+      return { ok: false, stopped: result.cancelled ? "cancelled" : "failed", records, count: count(records) };
     }
   }
 
-  return { ok: true, stopped: "done", records };
+  return { ok: true, stopped: "done", records, count: count(records) };
 }
