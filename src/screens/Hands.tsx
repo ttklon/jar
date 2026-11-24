@@ -4,6 +4,7 @@ import { customHands, isTauri, listTools, removeCustomHand, runCustomHand } from
 import type { CustomHand, ToolView } from "../ipc";
 import { hands, voice } from "../i18n/ru";
 import { ToolCard } from "../components/ToolCard";
+import { allow as folderAllow, say as folderSay, type Limits as FolderLimits } from "../lib/folderLimit";
 
 const useStyles = makeStyles({
   root: { display: "flex", flexDirection: "column", gap: "18px" },
@@ -32,6 +33,24 @@ export function Hands() {
   const [reports, setReports] = useState<Record<string, string>>({});
   const [refusals, setRefusals] = useState<Record<string, string>>({});
   const [running, setRunning] = useState<string | null>(null);
+  /**
+   * Шаг 170: тот же предел папок, что выбрал человек на голосовом экране. Читаем
+   * из `jar.folders`, а не заводим второй список: второй список разрешений
+   * однажды разойдётся с первым, и это будет дыра, а не удобство.
+   */
+  const folders = useMemo<FolderLimits>(() => {
+    try {
+      const raw = globalThis.localStorage?.getItem("jar.folders");
+      if (!raw) return { folders: [], except: [] };
+      const parsed = JSON.parse(raw) as { folders?: unknown; except?: unknown };
+      const list = Array.isArray(parsed.folders) ? parsed.folders.filter((item) => typeof item === "string") : [];
+      const except = Array.isArray(parsed.except) ? parsed.except.filter((item) => typeof item === "string") : [];
+      return { folders: list as string[], except: except as string[] };
+    } catch {
+      // Испорченное хранилище — «предела нет», а не «можно всё».
+      return { folders: [], except: [] };
+    }
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -108,6 +127,26 @@ export function Hands() {
                   {hand.title} · {hands.riskLabel(hand.risk)}
                 </Text>
                 <pre className={styles.note}>{hand.code}</pre>
+                {/*
+                  Шаг 170: выход за папку отклоняется **с понятной причиной** и
+                  здесь, на экране рук, а не только в отказе после запуска. Путь
+                  берётся из кода руки: `C:\Фото\..\Windows` выводит наружу,
+                  оставаясь похожим на путь внутри папки.
+                */}
+                {(() => {
+                  const paths = (hand.code.match(/[A-Za-z]:\\[^"'\n;|)]*/g) ?? []).filter(
+                    (path) => path.trim().length > 2,
+                  );
+                  const outside = paths
+                    .map((path) => folderAllow(path, folders))
+                    .filter((got) => !got.ok);
+                  if (outside.length === 0) return null;
+                  return outside.map((got) => (
+                    <Text key={`outside-${got.canon}`} className={styles.error} role="alert" aria-live="polite">
+                      {folderSay(got)}
+                    </Text>
+                  ));
+                })()}
                 <button
                   type="button"
                   disabled={running === hand.key}

@@ -127,6 +127,49 @@ describe("привнесённые руки", () => {
     expect(screen.getByText(/ERROR_BAD_ENVIRONMENT/)).toBeTruthy();
   });
 
+  it("выход за разрешённую папку виден на экране рук и объяснён (шаг 170)", async () => {
+    // Дефект: `..` в пути выводил наружу, и человек узнавал об этом отказом после
+    // запуска, а не до него.
+    localStorage.setItem("jar.folders", JSON.stringify({ folders: ["C:\\Фото"], except: [] }));
+    const { customHands } = await import("../ipc");
+    vi.mocked(customHands).mockResolvedValueOnce([
+      {
+        key: "k",
+        title: "почистить фото",
+        code: "Remove-Item 'C:\\Фото\\..\\Windows\\a.dll'",
+        risk: "destructive",
+        source: "проверен в клетке",
+        created_ms: 1,
+      },
+    ]);
+
+    render(<Hands />);
+    // Причина названа словами, а не «нельзя».
+    await waitFor(() => expect(screen.getByText(/^отказ: вне выбранных папок/)).toBeTruthy());
+    expect(screen.getByText(/не внутри C:\\Фото/)).toBeTruthy();
+    localStorage.removeItem("jar.folders");
+  });
+
+  it("путь внутри разрешённой папки отказа не получает — иначе предупреждение станет шумом", async () => {
+    localStorage.setItem("jar.folders", JSON.stringify({ folders: ["C:\\Фото"], except: [] }));
+    const { customHands } = await import("../ipc");
+    vi.mocked(customHands).mockResolvedValueOnce([
+      {
+        key: "k",
+        title: "переименовать фото",
+        code: "Rename-Item 'C:\\Фото\\a.jpg' 'b.jpg'",
+        risk: "write-local",
+        source: "проверен в клетке",
+        created_ms: 1,
+      },
+    ]);
+
+    render(<Hands />);
+    await waitFor(() => expect(screen.getByText(/Rename-Item/)).toBeTruthy());
+    expect(screen.queryByText(/^отказ: вне выбранных папок/)).toBeNull();
+    localStorage.removeItem("jar.folders");
+  });
+
   it("пустой список говорит, что своих рук нет", async () => {
     const { customHands } = await import("../ipc");
     vi.mocked(customHands).mockResolvedValueOnce([]);
