@@ -147,6 +147,7 @@ import {
 } from "../lib/consentStep";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
+import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
 import { already as repeatAlready, decide as repeatDecide, offer as repeatOffer } from "../lib/repeatDeed";
 import { attention as reportAttention, one as oneReport, summary as reportSummary, whole as wholeReport } from "../lib/oneReport";
 import { answer as handAnswer, coverage as handCoverage, line as handLine, worst as handWorst } from "../lib/handAnswer";
@@ -3239,6 +3240,51 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                       .join(", ")}`}
                   </Text>
                 ) : null}
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 108: человек говорит «сделай то и то» — связка рук собирается из
+          фразы, а не из конфига. Порядок — из зависимостей, дыры названы. */}
+      {text.trim().length > 0 ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Связка рук</Text>
+          {(() => {
+            // Дела приходят из того же разбора, что и план: второй разбор здесь
+            // был бы второй правдой.
+            // Глаголы — из руки (`tool`) и из шагов плана: делить фразу можно
+            // только по глаголам, которые приложение правда умеет.
+            const verbs = Array.from(
+              new Set([
+                ...(items ?? []).map((item) => item.tool?.split("|")[1] ?? ""),
+                ...(draft?.plan?.steps.map((step) => step.registry.split("|")[1] ?? "") ?? []),
+              ]),
+            ).filter((verb) => verb.length > 0);
+            const parts = splitChain(text, verbs);
+            const steps = draft?.plan?.steps ?? [];
+            // Связь видна по делу: путь второго шага берётся из первого, если в
+            // параметрах стоит ссылка на его позицию.
+            const linked = steps.map((step, index) => ({
+              tool: step.registry,
+              params: step.params ?? {},
+              said: step.why ?? step.registry,
+              index,
+            }));
+            const chainRisks = (draft?.gates ?? []).map((gate) => gate.risk);
+            return (
+              <>
+                <Text className={styles.note}>
+                  {`дел по словам: ${parts.length} · дел в плане: ${steps.length}${
+                    chainRisky(chainRisks) ? " · в связке есть опасный шаг — согласие по нему отдельное" : ""
+                  }`}
+                </Text>
+                {linked.map((item) => (
+                  <Text key={`chain-${item.index}`} className={styles.note}>
+                    {`${item.index + 1}. ${item.said}`}
+                  </Text>
+                ))}
               </>
             );
           })()}

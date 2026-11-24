@@ -1926,6 +1926,12 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/шагов плана: сравнивать не с чем — прошлого дела нет/)).toBeTruthy();
     expect(screen.getByText(/уже сделано 1 из 2 — повтор их не тронет/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "повторить?" })).toBeTruthy();
+
+    // Шаг 108: связка рук собрана из фразы, а не из конфига. Порядок и опасность
+    // названы до запуска; опасный шаг в связке — отдельное согласие.
+    expect(screen.getByText("Связка рук")).toBeTruthy();
+    expect(screen.getByText(/дел по словам: 1 · дел в плане: 2/)).toBeTruthy();
+    expect(screen.getByText(/в связке есть опасный шаг — согласие по нему отдельное/)).toBeTruthy();
   });
 
   it("изменение ответа во время перепроверки отменяет запуск устаревшего плана", async () => {
