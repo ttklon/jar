@@ -228,6 +228,16 @@ import {
   total as latencyTotal,
   type Deed as LatencyDeed,
 } from "../lib/latencyReport";
+import {
+  blame as warmBlame,
+  confirm as warmConfirm,
+  ensure as warmEnsure,
+  initial as warmInitial,
+  lost as warmLost,
+  say as sayWarm,
+  willPay as warmWillPay,
+  type Kernel as WarmKernel,
+} from "../lib/warmStart";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -620,6 +630,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // видно каждый отрезок и самый долгий.
   const [segments, setSegments] = useState<Partial<Record<SegmentKind, number | null>>>({});
   const [segmentsTotal, setSegmentsTotal] = useState(0);
+  // Шаг 125: ядро поднимается **один раз**, и холодный старт назван числом.
+  const [kernel, setKernel] = useState<WarmKernel>(warmInitial);
+  const kernelRef = useRef<WarmKernel>(kernel);
+  kernelRef.current = kernel;
   const [report, setReport] = useState<PlanReport | null>(null);
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
@@ -789,31 +803,49 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const startInstalledEngineRef = useRef<() => Promise<EngineStart>>(async () => ({ kind: "unknown" }));
 
   const startInstalledEngine = useCallback(async (): Promise<EngineStart> => {
-    let status = null;
-    try {
-      status = await readinessStatus();
-    } catch {
-      return { kind: "unknown" };
+    // Шаг 125: подъём ядра — через `ensure`. Второй запрос берёт уже поднятое и не
+    // поднимает своё; холодный старт при этом измеряется и называется.
+    let launched: EngineStart = { kind: "unknown" };
+    await warmEnsure(kernelRef.current, async () => {
+      launched = await (async (): Promise<EngineStart> => {
+        let status = null;
+        try {
+          status = await readinessStatus();
+        } catch {
+          return { kind: "unknown" };
+        }
+        if (status?.model_present && status.model_spec) {
+          setModelFile({
+            name: status.model_spec.file,
+            sha256: status.model_spec.sha256,
+            size: status.model_spec.bytes,
+          });
+        }
+        const need = installedEngine(status);
+        if (need === "running") return { kind: "started" };
+        if (need === "missing") return { kind: "missing" };
+        if (need !== "start") return { kind: "unknown" };
+        try {
+          const result = await smokeCheck();
+          return result.ok ? { kind: "started" } : { kind: "failed", note: result.note };
+        } catch (reason: unknown) {
+          return { kind: "failed", note: reason instanceof Error ? reason.message : String(reason) };
+        }
+      })();
+      if (launched.kind === "failed") throw new Error(launched.note);
+    });
+    // Состояние ядра — в экран: холодный старт назван числом, падение — причиной.
+    if (kernelRef.current.state === "failed") {
+      // Если подъём упал, `ensure` уже перевёл ядро в `failed`, и причина там.
+      warmLost(kernelRef.current, "ядро не ответило");
+    } else if (kernelRef.current.state === "warm") {
+      // «Тёплое» подтверждается настоящим запросом, а не нашим «мы запускали».
+      warmConfirm(kernelRef.current);
     }
-    // Шаг 69: модель — файл с хешем; это единственное условие работы.
-    if (status?.model_present && status.model_spec) {
-      setModelFile({
-        name: status.model_spec.file,
-        sha256: status.model_spec.sha256,
-        size: status.model_spec.bytes,
-      });
-    }
-    const need = installedEngine(status);
-    if (need === "running") return { kind: "started" };
-    if (need === "missing") return { kind: "missing" };
-    if (need !== "start") return { kind: "unknown" };
-    try {
-      const result = await smokeCheck();
-      return result.ok ? { kind: "started" } : { kind: "failed", note: result.note };
-    } catch (reason: unknown) {
-      return { kind: "failed", note: reason instanceof Error ? reason.message : String(reason) };
-    }
+    setKernel({ ...kernelRef.current });
+    return launched;
   }, []);
+
   startInstalledEngineRef.current = startInstalledEngine;
 
   // Уже установленный движок поднимается вместе с экраном, не по первой фразе.
@@ -3936,6 +3968,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             void segmentWord;
             return (
               <>
+                {/* Шаг 125: ядро поднимается один раз, холодный старт — числом. */}
+                <Text className={styles.note} role="status" aria-live="polite">
+                  {sayWarm(kernel)}
+                </Text>
+                {warmWillPay(kernel) ? (
+                  <Text className={styles.note}>
+                    {warmBlame(kernel, toSound).said}
+                  </Text>
+                ) : null}
                 {/* Шаг 123: бюджет задержки — числом и с пометкой нарушения. */}
                 <Text className={styles.note} role="status" aria-live="polite">
                   {`${latencyScaled(latencyDefault)} · ${latency.said}`}
