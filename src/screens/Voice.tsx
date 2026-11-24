@@ -215,6 +215,13 @@ import {
   text as timingText,
   type Entry as TimingEntry,
 } from "../lib/journalTiming";
+import {
+  DEFAULT as latencyDefault,
+  check as latencyCheck,
+  say as sayLatency,
+  scaled as latencyScaled,
+  tally as latencyTally,
+} from "../lib/latencyBudget";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -3907,6 +3914,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           <Text className={styles.title}>Задержка по отрезкам</Text>
           {(() => {
             const trace: SegmentTrace = { parts: segments, total: segmentsTotal };
+            // Шаг 123: бюджет — число до первого звука, а не «быстро». Первый звук =
+            // фраза + текст + план + первый токен + первый звук; «дело» в бюджет не
+            // входит: человек судит о скорости по тому, как скоро услышал.
+            const toSound =
+              (segments.phrase ?? 0) + (segments.text ?? 0) + (segments.plan ?? 0) + (segments.token ?? 0) + (segments.sound ?? 0);
+            const latency = latencyCheck(latencyDefault, {
+              kind: (draft?.plan?.steps.length ?? 0) > 1 ? "complex" : "simple",
+              ms: toSound > 0 ? toSound : null,
+            });
             // Самый долгий отрезок называет `segmentLines` — второй такой же строки
             // на экране быть не должно: два места об одном факте читаются как два
             // разных факта (шаг 106).
@@ -3914,6 +3930,13 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             void segmentWord;
             return (
               <>
+                {/* Шаг 123: бюджет задержки — числом и с пометкой нарушения. */}
+                <Text className={styles.note} role="status" aria-live="polite">
+                  {`${latencyScaled(latencyDefault)} · ${latency.said}`}
+                </Text>
+                <Text className={styles.note}>
+                  {sayLatency(latencyTally(latencyDefault, [{ kind: (draft?.plan?.steps.length ?? 0) > 1 ? "complex" : "simple", ms: toSound > 0 ? toSound : null }]))}
+                </Text>
                 {segmentLines(trace).map((line) => (
                   <Text key={`seg-${line}`} className={styles.note}>
                     {line}
