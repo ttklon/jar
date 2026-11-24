@@ -104,6 +104,13 @@ jobs:
           python3 tools/run_evals.py --selftest
           python3 tools/run_evals.py --quiet
 
+      # Шаг 255: «что не покрыто» — списком имён и по опасности, а не процентом,
+      # по которому нельзя пойти и дописать тест.
+      - name: Dangerous code has a neighbouring test
+        run: |
+          python3 tools/test_gaps.py --selftest
+          python3 tools/test_gaps.py --quiet
+
       - name: UIA draft generator works on a fixture dump
         run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
 

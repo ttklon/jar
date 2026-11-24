@@ -138,7 +138,9 @@ export function stateItems(input: StateInput): StateItem[] {
   const permissions: StateItem = {
     id: "permissions",
     title: "Разрешённое",
-    hint: "что может изменить файлы или выйти наружу",
+    // «Или изменить файлы» сюда не подходит: подпись обещала бы риск у «создай
+    // папку», а след считается только необратимый.
+    hint: "что нельзя вернуть нажатием «отменить»: наружу, разрушение, деньги, подпись",
     condition: input.risky === null ? "not-checked" : input.risky === 0 ? "not-installed" : "proven-here",
     evidence:
       input.risky === null
@@ -197,7 +199,18 @@ function plural(count: number, one: string, few: string, many: string): string {
   return many;
 }
 
-/** Сколько действий рискованных — из реестра, а не из настроения. */
+/**
+ * Сколько действий с **необратимым** следом — из реестра, а не из настроения.
+ *
+ * Дефект (шаг 255). Сюда входило `write-local`, и на настоящем реестре число
+ * выходило **513 из 835** — 47% действий. Но «создай папку» пишет на диск и
+ * необратимым не является; человек, прочитав «513 действий с необратимым следом»,
+ * перестаёт читать это число вовсе — и не заметит настоящих 129.
+ *
+ * Необратимое — это то, что нельзя вернуть нажатием «отменить»: ходит наружу
+ * (письмо ушло), разрушает (файл стёрт), тратит деньги, ставит подпись.
+ */
 export function riskyCount(actions: readonly { risk: string }[]): number {
-  return actions.filter((action) => action.risk === "external" || action.risk === "destructive" || action.risk === "write-local").length;
+  const RISKY = new Set(["external", "destructive", "money", "identity"]);
+  return actions.filter((action) => RISKY.has(action.risk)).length;
 }

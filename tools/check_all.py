@@ -39,6 +39,9 @@ STEPS: list[tuple[str, list[str], str]] = [
     # Шаг 251: план, который никто не прогоняет, — это документ, а не проверка.
     # Прогон отвечает «прошло/не прошло» с причиной, без сети и без модели.
     ("evals pass", ["tools/run_evals.py", "--quiet"], "every eval passes, with a reason when it does not"),
+    # Шаг 255: процент покрытия не называет имён. Здесь — список файлов без теста,
+    # отсортированный по опасности: сначала то, где ошибка дороже.
+    ("test gaps", ["tools/test_gaps.py", "--quiet"], "no dangerous source file lacks a neighbouring test"),
     ("targets", ["tools/app_targets.py"], "tier A apps have profiles"),
     ("skills", ["tools/skills.py"], "skills reference real rows, risk not lowered"),
     ("hands", ["tools/hands.py"], "data/tools.json points at real, allowed registry rows"),
