@@ -59,6 +59,7 @@ import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer"
 import { mark as repeatMark } from "../lib/repeatHand";
 import { allows as grantAllows, book as grantBook, EMPTY as EMPTY_GRANTS, give as grantGive, load as loadGrants, onRevoke as grantOnRevoke, revoke as grantRevoke, save as saveGrants, type Book as GrantBook, type Channel as GrantChannel } from "../lib/grants";
 import { filled as permsFilled, sheet as permsSheet, summary as permsSummary } from "../lib/permissionsSheet";
+import { needsDryFirst as dryNeedsFirst, report as dryReport, type Step as DryStep } from "../lib/dryRun";
 import { line as signatureLine } from "../lib/signature";
 import { items as undoItemsList, summary as undoItemsSummary } from "../lib/undoItems";
 import { executable as launchExecutable, line as launchLine, needsAsk as launchNeedsAsk, origin as launchOrigin } from "../lib/launchOrigin";
@@ -4261,6 +4262,34 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                 <Text className={styles.note} role="status" aria-live="polite">
                   {strongSummary(dangers)}
                 </Text>
+                {(() => {
+                  /*
+                    Шаг 180: «что бы это сделало» — без исполнения. Предпросмотр
+                    отвечал, что будет **делаться**; согласие дают на **результат**.
+                    И «неизвестно сколько» здесь отдельный ответ, а не ноль.
+                  */
+                  const drySteps: DryStep[] = steps.map((item) => {
+                    const gate = (draft.gates ?? []).find((one) => one.registry === item.registry) ?? null;
+                    const risk = gate?.risk ?? "read";
+                    const seen = blastFromParams(item.params ?? {});
+                    return {
+                      what: item.why ?? item.registry,
+                      from: Object.values(item.params ?? {}).find((value) => value.includes("\\")) ?? "",
+                      to: "",
+                      count: seen === null ? null : seen.files.length,
+                      bytes: seen === null ? null : seen.files.reduce((sum, file) => sum + file.bytes, 0),
+                      undoable: risk === "read" || risk === "write-local",
+                    };
+                  });
+                  const dry = dryReport(drySteps);
+                  const first = dryNeedsFirst(dry);
+                  return (
+                    <>
+                      <Text className={styles.note}>{dry.said}</Text>
+                      {first.first ? <Text className={styles.note}>{first.why}</Text> : null}
+                    </>
+                  );
+                })()}
                 {dangers.map((danger, index) => {
                   const asked = strongQuestion(danger);
                   // Шаг 162: объём до нажатия. Риск говорит «что может быть», смета —

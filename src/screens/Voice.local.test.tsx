@@ -2237,6 +2237,50 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/a\.txt: C:\\Старое\\a\.txt · перемещение/)).toBeTruthy();
   });
 
+  it("сухой прогон: что станет, и «неизвестно» вместо нуля (шаг 180)", async () => {
+    // Дефект: предпросмотр отвечал «что будет делаться», а не «что станет», и
+    // неизвестный объём выглядел как обычный шаг.
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Call: { registry: "files|удалить|в корзину", params: {}, why: "убрать старое" } },
+      plan: {
+        plan: {
+          goal: "убрать старое",
+          source: "model",
+          steps: [{ registry: "files|удалить|в корзину", params: { path: "C:\\Старое" }, why: "убрать старое" }],
+        },
+        problems: [],
+        questions: [],
+        gates: [
+          {
+            position: 1,
+            registry: "files|удалить|в корзину",
+            decision: "confirm",
+            risk: "destructive",
+            wants_approval: true,
+          },
+        ],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "убери старое" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Цена ошибки")).toBeTruthy());
+
+    // Отчёт читается сам, без сверки с планом.
+    expect(screen.getByText(/сухой прогон, ничего не выполнено:/)).toBeTruthy();
+    // И «неизвестно» не выдаётся за ноль.
+    expect(screen.getByText(/не «0»: неизвестное не считалось/)).toBeTruthy();
+    // Необратимое — сначала сухо, и сказано почему.
+    expect(screen.getByText(/сначала сухо: 1 шаг необратим/)).toBeTruthy();
+  });
+
   it("«что мне разрешено» — один свод из четырёх исходов, а не пять мест (шаг 179)", async () => {
     // Дефект: граница прав была разрезана на согласия, папки, хосты, режим и
     // «чего не делаю». Ответ складывался в голове — и терялся.
