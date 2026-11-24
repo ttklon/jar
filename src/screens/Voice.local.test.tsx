@@ -1929,6 +1929,13 @@ describe("локальное распознавание на экране", () =
       expect(screen.getByText("из 2: сделано 1, не сделано 1, неизвестно 0")).toBeTruthy(),
     );
 
+    // Шаг 119: сбой не скрывает сделанного до него. Первая строка — что вышло,
+    // потом провал и что делать дальше.
+    await waitFor(() => expect(screen.getByText(/^сбой — /)).toBeTruthy());
+    expect(screen.getByText(/^сделано до сбоя: 1 — /)).toBeTruthy();
+    expect(screen.getByText(/не сделано: шаг 2 «storage-backup\|проверить\|резервную копию» — нет резервной копии/)).toBeTruthy();
+    expect(screen.getByText(/продолжить с шага 2: сделанное до него останется/)).toBeTruthy();
+
     // Шаг 107: повтор показывает разницу **до** вопроса и спрашивает один раз.
     expect(screen.getByText(/шагов плана: сравнивать не с чем — прошлого дела нет/)).toBeTruthy();
     expect(screen.getByText(/уже сделано 1 из 2 — повтор их не тронет/)).toBeTruthy();

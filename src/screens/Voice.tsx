@@ -187,6 +187,12 @@ import {
   tally as threeTally,
   type Raw as ThreeRaw,
 } from "../lib/threeWords";
+import {
+  line as failureLine,
+  resumable as failureResumable,
+  tell as failureTell,
+  type StepReport as FailureStep,
+} from "../lib/failureKeeps";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -3301,12 +3307,39 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               interrupted: step.status === "cancelled" && (step.reason ?? "").includes("время"),
             }));
             const three = threeTally(raws);
+            // Шаг 119: сбой не скрывает сделанного до него. Отчёт начинается с
+            // того, что получилось, и только потом — провал.
+            const failureSteps: FailureStep[] = report.steps.map((step, index) => ({
+              position: step.position,
+              what: step.registry,
+              answer: threeAnswer(raws[index] ?? { status: "pending" }),
+              reason: step.reason,
+            }));
+            const story = failureTell(failureSteps, three);
             return (
               <>
                 <Text className={styles.note}>{reportSummary(total)}</Text>
                 <Text className={styles.note} role="status" aria-live="polite">
                   {sayThree(three)}
                 </Text>
+                {report.stopped !== null || three.notDone > 0 ? (
+                  <>
+                    <Text className={styles.note}>{`сбой — ${failureLine(story)}`}</Text>
+                    {story.said.map((line) => (
+                      <Text key={`story-${line}`} className={styles.note}>
+                        {line}
+                      </Text>
+                    ))}
+                    {story.next.map((line) => (
+                      <Text key={`next-${line}`} className={styles.note}>
+                        {line}
+                      </Text>
+                    ))}
+                    <Text className={styles.note} role="status" aria-live="polite">
+                      {failureResumable(story).why}
+                    </Text>
+                  </>
+                ) : null}
                 <Text className={styles.note}>
                   {`рука ответила полностью: ${cover.full} из ${cover.total}`}
                 </Text>
