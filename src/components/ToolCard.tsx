@@ -18,6 +18,7 @@ import { PlayRegular, Speaker2Regular, StopRegular } from "@fluentui/react-icons
 import type { StepResult, ToolView } from "../ipc";
 import { cancelTool, confirmTool, isTauri, runTool } from "../ipc";
 import { RISK_LABEL, hands } from "../i18n/ru";
+import { id as iconHintId } from "../lib/iconHint";
 import { evidenceText } from "../lib/evidence";
 import { speak } from "../lib/voice";
 import { RiskBadge } from "./RiskBadge";
@@ -210,10 +211,20 @@ export function ToolCard({ tool }: { tool: ToolView }) {
             <div className={styles.actions}>
               <Text className={styles.muted}>{result.reason}</Text>
               {tool.registry === "processes-services|показать|топ по нагрузке" ? (
+                <>
+                {/* Шаг 193: подсказка должна появляться и с клавиатуры. `title`
+                    показывается только от мыши и молчит у диктора, если у кнопки
+                    есть имя; поэтому подсказка привязана через `aria-describedby`,
+                    а `title` оставлен как есть — для тех, кто ищет мышью. */}
                 <Button
                   appearance="subtle"
                   icon={<Speaker2Regular />}
                   aria-label="Прослушать пересказ отчёта"
+                  aria-describedby={iconHintId("Прослушать пересказ отчёта")}
+                  // Подсказка должна существовать: `aria-describedby` в пустоту
+                  // диктор молча игнорирует, и «подсказка есть» остаётся только
+                  // в коде.
+                  data-hint="Прослушать пересказ отчёта"
                   title="Озвучить браузером или службой Windows; голосовой движок может передавать текст службе системы"
                   onClick={() =>
                     {
@@ -241,6 +252,13 @@ export function ToolCard({ tool }: { tool: ToolView }) {
                 >
                   Озвучить
                 </Button>
+                {/* Подсказка живёт рядом и **постоянно**: скрытая от глаз, но не от
+                    диктора. Показывай её всплывающей — значит повторять дефект
+                    `title`: с клавиатуры её снова не увидят. */}
+                <span id={iconHintId("Прослушать пересказ отчёта")} hidden>
+                  Озвучит ответ службой Windows или браузером; текст уйдёт службе системы.
+                </span>
+                </>
               ) : null}
               {tool.registry === "processes-services|показать|топ по нагрузке" && speechStatus ? (
                 <Text role="status" className={styles.muted}>{speechStatus}</Text>
