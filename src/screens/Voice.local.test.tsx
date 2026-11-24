@@ -2076,6 +2076,35 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByRole("button", { name: "Вернуть" })).toBeTruthy();
   });
 
+  it("согласия — отдельно по каналам, с датой, и отзыв гасит канал сразу (шаги 168–169)", async () => {
+    // Дефект: согласия были «по факту пользования» — формально это не согласие,
+    // а отсутствие отказа.
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText("Согласия")).toBeTruthy());
+
+    // По умолчанию — нет, и это сказано словами.
+    expect(screen.getByText(/микрофон: не разрешён — согласия не давали/)).toBeTruthy();
+    expect(screen.getByText(/сеть: не разрешён — согласия не давали/)).toBeTruthy();
+    expect(screen.getByText(/файлы: не разрешён — согласия не давали/)).toBeTruthy();
+
+    // Разрешаем микрофон — дата появляется в строке.
+    fireEvent.click(screen.getByRole("button", { name: "Разрешить: микрофон" }));
+    await waitFor(() => expect(screen.getByText(/микрофон: разрешён \d{4}-\d{2}-\d{2}/)).toBeTruthy());
+    // Микрофон разрешён, а сеть и файлы — нет: согласие не расползлось на всё.
+    expect(screen.getByText(/сеть: не разрешён/)).toBeTruthy();
+    expect(screen.getByText(/файлы: не разрешён/)).toBeTruthy();
+    // Согласие сохранено на диск — это не состояние кадра.
+    expect(localStorage.getItem("jar.grants.v1")).toContain("mic");
+
+    // Отзыв — сразу: галочка снята, запись говорит про отзыв.
+    fireEvent.click(screen.getByRole("button", { name: "Отозвать: микрофон" }));
+    await waitFor(() => expect(screen.getByText(/микрофон: отозван \d{4}-\d{2}-\d{2}/)).toBeTruthy());
+    // Галочка на экране есть только без локального движка; сам факт отзыва
+    // проверяем по записи — она и есть источник правды для канала.
+    expect(JSON.parse(localStorage.getItem("jar.grants.v1") ?? "{}").mic.revokedAt).toBeGreaterThan(0);
+    localStorage.removeItem("jar.grants.v1");
+  });
+
   it("что уйдёт наружу видно глазами: адрес, тело, когда (шаг 167)", async () => {
     // Дефект: «всё работает локально» было обещанием, которое негде было увидеть.
     render(<Voice onOpen={() => {}} />);

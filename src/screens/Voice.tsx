@@ -57,6 +57,7 @@ import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
+import { allows as grantAllows, book as grantBook, EMPTY as EMPTY_GRANTS, give as grantGive, load as loadGrants, onRevoke as grantOnRevoke, revoke as grantRevoke, save as saveGrants, type Book as GrantBook, type Channel as GrantChannel } from "../lib/grants";
 import { exits as outboundExits, line as outboundLine, summary as outboundSummary } from "../lib/outbound";
 import { answer as scriptAnswer, limits as scriptLimits, limitsLine as scriptLimitsLine } from "../lib/scriptRules";
 import { allow as folderAllow, NOTHING as NO_FOLDERS, say as folderSay, suggest as folderSuggest, type Limits as FolderLimits } from "../lib/folderLimit";
@@ -684,7 +685,39 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [speech, setSpeech] = useState<SpeechStatus | null>(null);
   const speechRequest = useRef(0);
   const aliveRef = useRef(true);
-  const [systemSpeechConsent, setSystemSpeechConsent] = useState(false);
+  /**
+   * Шаги 168–169: согласия по каналам, отдельно и с датой. Книга читается при
+   * старте; галочка «системное распознавание» больше не просто состояние кадра —
+   * это согласие на микрофон с датой, и отзыв гасит канал немедленно.
+   */
+  const [grants, setGrants] = useState<GrantBook>(() => {
+    const store = globalThis.localStorage;
+    return store ? loadGrants(store) : EMPTY_GRANTS;
+  });
+  const grant = useCallback((channel: GrantChannel, now: number) => {
+    setGrants((current) => {
+      const next = grantGive(current, channel, now);
+      const store = globalThis.localStorage;
+      if (store) saveGrants(store, next);
+      return next;
+    });
+  }, []);
+  const unGrant = useCallback((channel: GrantChannel, now: number) => {
+    setGrants((current) => {
+      const next = grantRevoke(current, channel, now);
+      const store = globalThis.localStorage;
+      if (store) saveGrants(store, next);
+      return next;
+    });
+    // Шаг 169: отзыв **сразу** гасит канал, а не «после перезапуска». Иначе это
+    // формальность: согласие отозвано, а микрофон слушает.
+    stopSpeaking();
+    speak(grantOnRevoke(channel).said);
+  }, []);
+  const [systemSpeechConsent, setSystemSpeechConsent] = useState(() => {
+    const store = globalThis.localStorage;
+    return store ? grantAllows(loadGrants(store), "mic") : false;
+  });
   const [isolation, setIsolation] = useState<IsolationStatus | null>(null);
   /** Что перед человеком: спрашиваем в момент, когда он заговорил, а не один раз. */
   const [front, setFront] = useState<ForegroundWindow | null>(null);
@@ -4891,6 +4924,41 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </Text>
         <Text className={styles.note}>{registryReport(registryCacheRef.current)}</Text>
       </div>
+      {/*
+        Шаги 168–169: согласие отдельно по каналам, с датой, и отзыв, который
+        действует сразу. «По умолчанию» здесь значит «не разрешено»: согласие по
+        умолчанию — не согласие.
+      */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Согласия</Text>
+        <Text className={styles.note} role="status" aria-live="polite">
+          {grantBook(grants, Date.now())
+            .map((line) => line.said)
+            .join(" · ")}
+        </Text>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {(["mic", "net", "files"] as GrantChannel[]).map((channel) => (
+            <Button
+              key={`grant-${channel}`}
+              size="small"
+              appearance={grantAllows(grants, channel) ? "subtle" : "primary"}
+              onClick={() => {
+                const now = Date.now();
+                if (grantAllows(grants, channel)) {
+                  unGrant(channel, now);
+                  if (channel === "mic") setSystemSpeechConsent(false);
+                } else {
+                  grant(channel, now);
+                  if (channel === "mic") setSystemSpeechConsent(true);
+                }
+              }}
+            >
+              {`${grantAllows(grants, channel) ? "Отозвать" : "Разрешить"}: ${channel === "mic" ? "микрофон" : channel === "net" ? "сеть" : "файлы"}`}
+            </Button>
+          ))}
+        </div>
+      </div>
+
       {/*
         Шаг 167: «что уйдёт наружу» — наблюдаемое свойство, а не обещание.
         Единственная дверь в сеть — загрузка модели; локальный движок назван
