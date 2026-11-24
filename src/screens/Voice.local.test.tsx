@@ -1943,6 +1943,12 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/2\. storage-backup\|проверить\|резервную копию — нельзя вернуть: риск destructive/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Вернуть сделанное" })).toBeTruthy();
 
+    // Шаг 121: задержка замерена по отрезкам на настоящем пути, и самый долгий
+    // назван — это ответ на «что чинить».
+    await waitFor(() => expect(screen.getByText("Задержка по отрезкам")).toBeTruthy());
+    expect(screen.getByText(/дольше всего: (фраза|текст|план|дело) — \d+ мс/)).toBeTruthy();
+    expect(screen.getByText(/^всего: \d+ мс$/)).toBeTruthy();
+
     // Шаг 107: повтор показывает разницу **до** вопроса и спрашивает один раз.
     expect(screen.getByText(/шагов плана: сравнивать не с чем — прошлого дела нет/)).toBeTruthy();
     expect(screen.getByText(/уже сделано 1 из 2 — повтор их не тронет/)).toBeTruthy();

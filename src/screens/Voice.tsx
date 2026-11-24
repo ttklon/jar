@@ -201,6 +201,14 @@ import {
   oneClick as undoOneClick,
   type Undoable as UndoStepHere,
 } from "../lib/undoHere";
+import {
+  delta as segmentsDelta,
+  lines as segmentLines,
+  slowest as slowestSegment,
+  word as segmentWord,
+  type Kind as SegmentKind,
+  type Trace as SegmentTrace,
+} from "../lib/segments";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -588,6 +596,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // Шаг 117: согласие даётся на **план целиком** — состав, порядок, риск и
   // параметры. Шаг 102 закрыл параметры, здесь — остальное.
   const [planConsent, setPlanConsent] = useState<{ plan: PlanSeen[]; print: string; at: number } | null>(null);
+  // Шаг 121: отрезки замера. «Отвечает 4 секунды» не говорит, что чинить, — здесь
+  // видно каждый отрезок и самый долгий.
+  const [segments, setSegments] = useState<Partial<Record<SegmentKind, number | null>>>({});
+  const [segmentsTotal, setSegmentsTotal] = useState(0);
   const [report, setReport] = useState<PlanReport | null>(null);
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
@@ -1482,7 +1494,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     setSpoken(speak(phrase) ? voice.said(phrase) : voice.silent);
   };
 
+  // Шаг 121: точка отсчёта для отрезков. Замер идёт на настоящем пути, а не
+  // отдельным стендом: стенд меряет стенд.
+  const markRef = useRef<{ start: number; phrase: number | null }>({ start: 0, phrase: null });
+
   const search = useCallback((phrase: string) => {
+    // Отрезок «фраза → текст»: от последнего слова человека до готового текста.
+    const startedAt = markRef.current.start || Date.now();
+    markRef.current.start = startedAt;
+    setSegments((current) => ({ ...current, phrase: current.phrase ?? 0, text: Date.now() - startedAt - (current.phrase ?? 0) }));
     executeRequestRef.current += 1;
     thoughtRequestRef.current += 1;
     promptRequestRef.current += 1;
@@ -1686,6 +1706,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         const proposal = await draftPlan(asked).catch(() => null);
         if (request !== searchRequestRef.current) return;
         setDraft(proposal);
+        // Отрезок «план»: от поиска до готового черновика плана.
+        setSegments((current) => ({ ...current, plan: Date.now() - startedAt }));
         // Шаг 102: план мог измениться — пересчитываем согласия по отпечатку
         // параметров. Снятые названы причиной, а не «снова подтвердите».
         const proposed = proposal?.plan ?? null;
@@ -2420,6 +2442,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     const request = ++planRunRef.current;
     const plan = check.plan;
     if (!plan || guard !== executeRequestRef.current) return;
+    // Отрезок «дело» считается от старта разбора, а не от этого вызова: иначе
+    // замер говорит, что дело мгновенное, а ждали его с самого начала.
+    const deedStart = markRef.current.start || Date.now();
     setRunning(true);
     setError(null);
     setDraft(check);
@@ -2427,6 +2452,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       .then((result) => {
         if (request !== planRunRef.current) return;
         setReport(result);
+        // Отрезок «дело» и общий срок: от поиска до отчёта. Итог — независимый
+        // замер, и он не обязан сходиться с суммой до миллисекунды.
+        setSegments((current) => ({ ...current, deed: Date.now() - deedStart }));
+        setSegmentsTotal(Date.now() - deedStart);
         const phrase = result.stopped
           ? voice.draftSpokenStopped(result.stopped)
           : voice.planSpeech(result.steps.length);
@@ -2512,6 +2541,13 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           return;
         }
         setReport(result);
+        // Шаг 121: замер и на пути «выполнить», а не только на автозапуске —
+        // иначе отрезки есть у одного пути и нет у другого, и сравнение врёт.
+        {
+          const start = markRef.current.start || Date.now();
+          setSegments((current) => ({ ...current, deed: Date.now() - start }));
+          setSegmentsTotal(Date.now() - start);
+        }
         const phrase = result.stopped
           ? voice.draftSpokenStopped(result.stopped)
           : voice.planSpeech(result.steps.length);
@@ -3839,6 +3875,32 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                 >
                   Согласиться на план целиком
                 </Button>
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 121: замер по отрезкам — фраза, текст, план, первый токен, первый
+          звук, дело. «Дольше всего» названо, а не спрятано в таблице. */}
+      {segmentsTotal > 0 ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Задержка по отрезкам</Text>
+          {(() => {
+            const trace: SegmentTrace = { parts: segments, total: segmentsTotal };
+            // Самый долгий отрезок называет `segmentLines` — второй такой же строки
+            // на экране быть не должно: два места об одном факте читаются как два
+            // разных факта (шаг 106).
+            void slowestSegment;
+            void segmentWord;
+            return (
+              <>
+                {segmentLines(trace).map((line) => (
+                  <Text key={`seg-${line}`} className={styles.note}>
+                    {line}
+                  </Text>
+                ))}
+                <Text className={styles.note}>{segmentsDelta(trace, trace)}</Text>
               </>
             );
           })()}
@@ -5268,7 +5330,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                     !(draft.questions.length > 0 && problem.problem.includes("не хватает данных")),
                 )
               }
-              onClick={() => execute()}
+              onClick={() => {
+                // Шаг 121: точка отсчёта — здесь, на нажатии. Замер, начатый в
+                // одном пути и не начатый в другом, даёт отрезки только у одного.
+                if (markRef.current.start === 0) markRef.current.start = Date.now();
+                execute();
+              }}
             >
               {running
                 ? voice.draftRunning
