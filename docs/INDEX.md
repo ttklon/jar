@@ -118,6 +118,7 @@
 | `mine_awesome.py` | разбор awesome-листов |
 | `no_telemetry.py` | — |
 | `one_door.py` | — |
+| `policy_drift.py` | — |
 | `profiles.py` | валидатор профилей → docs/PROFILES.md |
 | `rust_literals.py` | — |
 | `rust_prose.py` | — |

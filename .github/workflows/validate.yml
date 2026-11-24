@@ -59,6 +59,11 @@ jobs:
       - name: Relative links in the documentation resolve
         run: python3 tools/links.py
 
+      # Шаг 178: политика риска живёт в Rust и расширяется одной строкой. Ни
+      # сборка, ни тесты интерфейса на это не смотрят — смотрит эта проверка.
+      - name: Risk policy did not quietly widen (deny/confirm/allow per risk)
+        run: python3 tools/policy_drift.py --quiet
+
       - name: SPDX SBOM can be built from both lockfiles
         run: python3 tools/sbom.py --check
 
