@@ -106,6 +106,7 @@
 | `check_all.py` | все генераторы и валидаторы по порядку (+ --check против git) |
 | `collect_sources.py` | сбор источников в research/ |
 | `dashboard.py` | DASHBOARD.md + INDEX.md (этот индекс) |
+| `defects.py` | — |
 | `deps_report.py` | стек и лицензии → docs/DEPENDENCIES.md |
 | `done_words.py` | — |
 | `ecosystem.py` | валидатор экосистемы → docs/ECOSYSTEM.md |

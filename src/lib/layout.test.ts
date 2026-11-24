@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { NARROW_WIDTH, layoutFor, MIN_SCREEN, fitWork } from "./layout";
 
+// Регрессия D-008: этот файл — тест, названный номером дефекта (шаг 254).
 describe("вёрстка на узком экране и при масштабе", () => {
   it("при 200% масштабе на экране 1280 окно становится одноколоночным", () => {
     // 1280 физических при масштабе 200% — это 640 логических, то есть уже.

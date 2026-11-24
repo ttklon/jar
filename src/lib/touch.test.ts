@@ -8,6 +8,7 @@ import { hoverOnly, notice, pointerOf, problems, sizes } from "./touch";
  * названо дефектом, а не отмечено как неудобство.
  */
 
+// Регрессия D-009: этот файл — тест, названный номером дефекта (шаг 254).
 describe("размер зависит от указателя", () => {
   it("палец — 44, а не «как получится»", () => {
     expect(sizes("coarse").control).toBe(44);

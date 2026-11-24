@@ -11,6 +11,7 @@ import { UNKNOWN, agrees, copyleft, elsewhere, rows, source, unknownNote, type L
 
 const data = dataJson as unknown as LicenseData;
 
+// Регрессия D-015: этот файл — тест, названный номером дефекта (шаг 254).
 describe("таблица сходится", () => {
   it("сумма по группам равна общему числу в настоящих данных", () => {
     expect(agrees(data)).toEqual({ ok: true, why: "" });

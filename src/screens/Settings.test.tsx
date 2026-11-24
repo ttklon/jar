@@ -47,6 +47,7 @@ const renderSettings = (onShowWelcome = vi.fn(), onThemeChange = vi.fn()) => {
   return onShowWelcome;
 };
 
+// Регрессия D-001: этот файл — тест, названный номером дефекта (шаг 254).
 describe("настройки", () => {
   it("умеют показать знакомство снова", () => {
     const onShowWelcome = renderSettings();

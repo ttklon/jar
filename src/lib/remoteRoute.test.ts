@@ -7,6 +7,7 @@ import { bodyLines, local, mask, place, saveable, warning } from "./remoteRoute"
  * Фраза «её маршрут настраивается отдельно» обещала настройку, которой нет.
  */
 
+// Регрессия D-005: этот файл — тест, названный номером дефекта (шаг 254).
 describe("адрес — это адрес, а не «внешний сервис»", () => {
   it("схема и хост, без пути", () => {
     expect(place("https://api.example.com/v1/chat")).toBe("https://api.example.com");

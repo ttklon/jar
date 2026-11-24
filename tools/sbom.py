@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Build a deterministic SPDX 2.3 SBOM from npm and Cargo lockfiles.
 
+Регрессия D-003: у этого инструмента есть самопроверка (`--selftest` или
+`--reproducible`), названная номером дефекта — шаг 254.
+
 The inventory includes locked direct and transitive dependencies. It makes no
 license conclusions when the lockfile does not contain a license declaration.
 """

@@ -111,6 +111,13 @@ jobs:
           python3 tools/test_gaps.py --selftest
           python3 tools/test_gaps.py --quiet
 
+      # Шаг 254: любой закрытый дефект обязан иметь тест, названный его номером —
+      # в обе стороны, иначе тест защищает то, о чём никто не знает.
+      - name: Every closed defect has a test named after it
+        run: |
+          python3 tools/defects.py --selftest
+          python3 tools/defects.py --list
+
       - name: UIA draft generator works on a fixture dump
         run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
 

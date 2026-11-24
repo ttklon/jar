@@ -18,6 +18,7 @@ const start: Attempt = { where: "https://api.example.com/v1", by: "start", resul
 const press: Attempt = { where: "https://huggingface.co/model.gguf", by: "press", result: "offline", what: "скачивание модели" };
 const local: Attempt = { where: "http://127.0.0.1:8080/health", by: "background", result: "failed", what: "проверка движка" };
 
+// Регрессия D-007: этот файл — тест, названный номером дефекта (шаг 254).
 describe("без сети приложение не стучится вовсе", () => {
   it("ноль запросов при запуске — это и есть обещание", () => {
     expect(atStart([press, local])).toBe(0);

@@ -42,6 +42,10 @@ STEPS: list[tuple[str, list[str], str]] = [
     # Шаг 255: процент покрытия не называет имён. Здесь — список файлов без теста,
     # отсортированный по опасности: сначала то, где ошибка дороже.
     ("test gaps", ["tools/test_gaps.py", "--quiet"], "no dangerous source file lacks a neighbouring test"),
+    # Шаг 254: дефект без теста — это дефект, который вернётся. Связь проверяется
+    # в обе стороны: у каждого дефекта есть тест со своим номером, и каждый номер
+    # в тесте есть в реестре.
+    ("defect <-> test", ["tools/defects.py"], "every closed defect has a test named after it"),
     ("targets", ["tools/app_targets.py"], "tier A apps have profiles"),
     ("skills", ["tools/skills.py"], "skills reference real rows, risk not lowered"),
     ("hands", ["tools/hands.py"], "data/tools.json points at real, allowed registry rows"),
