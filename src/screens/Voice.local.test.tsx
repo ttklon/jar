@@ -1804,6 +1804,34 @@ describe("локальное распознавание на экране", () =
     expect(runPlan).not.toHaveBeenCalled();
   });
 
+  it("отмена возвращает управление сразу, даже если ядро ещё считает (шаг 138)", async () => {
+    // «Стоп» не должен ждать ответа ядра: именно тогда он и нужен.
+    let resolveThink!: () => void;
+    vi.mocked(think).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveThink = () => resolve(null as never);
+      }),
+    );
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "переименуй фото" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(think).toHaveBeenCalled());
+
+    // Ядро всё ещё «считает», а стоп уже работает.
+    fireEvent.click(screen.getByRole("button", { name: "Стоп" }));
+    await waitFor(() => expect(screen.getByText("Остановлено сразу")).toBeTruthy());
+    expect(screen.getByText(/управление у вас; ядро досчитает и его ответ будет выброшен/)).toBeTruthy();
+    // И порядок назван: сначала человек свободен, потом просьба ядру.
+    expect(screen.getByText(/сначала отпускаю интерфейс, потом прошу ядро остановиться/)).toBeTruthy();
+
+    // Поздний ответ не оживает: «сейчас: свободно», а не «думаю».
+    await act(async () => {
+      resolveThink();
+    });
+    await waitFor(() => expect(screen.getByText("сейчас: свободно")).toBeTruthy());
+  });
+
   it("холодный старт и тёплый замеряются отдельно, и оба в журнале (шаг 136)", async () => {
     // «3,4 с, потом 0,4» читалось как нестабильность, а это две разные причины.
     vi.mocked(think).mockResolvedValueOnce({

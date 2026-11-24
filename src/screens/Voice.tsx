@@ -307,6 +307,13 @@ import {
   type Kind as StartKind,
   type Timed as StartTimed,
 } from "../lib/startKinds";
+import {
+  cancel as cancelRun,
+  order as cancelOrder,
+  report as cancelReport,
+  said as cancelSaid,
+  settled as cancelSettled,
+} from "../lib/instantCancel";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -821,6 +828,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // выбором («ждать» / «не ждать»), и только если остановить действительно можно.
   const [longWait, setLongWait] = useState<{ askedAt: number | null; reply: "wait" | "stop" | null; startedAt: number } | null>(null);
   const [longAskSaid, setLongAskSaid] = useState("");
+  /** Шаг 138: что остановлено и как — видно, а не «просто пропало». */
+  const [instantStop, setInstantStop] = useState<{ said: string; report: string; order: string } | null>(null);
   /** Шаг 134: сколько продлений ожидания человек уже выбрал. */
   const [extended, setExtended] = useState(0);
   // Имя нарочно не `setTimeout...`: сторож таймеров ищет `setTimeout` рядом со
@@ -1605,6 +1614,16 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
    */
   const halt = useCallback(
     (phrase: string) => {
+      // Шаг 138: отмена **сначала** меняет состояние, потом просит ядро остановиться.
+      // Ядро может считать ещё сколько угодно — человек уже свободен, а его поздний
+      // ответ выбросится по номеру запроса.
+      const wasRunning = runningRef.current || thinking;
+      const stopped = cancelRun(thoughtRequestRef.current, phrase.trim() || "разбор фразы");
+      setInstantStop({
+        said: cancelSaid(stopped.cancelled),
+        report: cancelReport(stopped.cancelled, wasRunning),
+        order: cancelOrder().said,
+      });
       executeRequestRef.current += 1;
       thoughtRequestRef.current += 1;
       promptRequestRef.current += 1;
@@ -2536,6 +2555,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         : mic.listening
           ? "listening"
           : "none";
+  // Шаг 138: «идёт» после отмены — ложь; проверка ловит забытое снятие. Поздний ответ
+  // ядра принимается только со «своим» номером запроса.
+  const cancelState = cancelSettled(reactiveBusy(job) && instantStop !== null, instantStop === null ? null : { what: "разбор", token: 0 });
   const jobStuck = reactiveStuck(job, jobSince, Date.now());
   // Начало работы — отметка времени; конец — снятие. Это то, без чего «зависло» не
   // отличить от «ещё думает».
@@ -4347,15 +4369,6 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             void segmentWord;
             return (
               <>
-                {/* Шаг 126: занятость названа словами; зависание — видно, а не «ещё думает». */}
-                <Text className={styles.note} role="status" aria-live="polite">
-                  {`сейчас: ${reactiveWord(job)}`}
-                </Text>
-                {jobStuck.stuck ? (
-                  <Text className={styles.note} role="alert">
-                    {jobStuck.said}
-                  </Text>
-                ) : null}
                 {/* Шаг 125: ядро поднимается один раз, холодный старт — числом. */}
                 <Text className={styles.note} role="status" aria-live="polite">
                   {sayWarm(kernel)}
@@ -4415,6 +4428,27 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </div>
       ) : null}
 
+      {/* Шаг 126: занятость названа словами и видна **всегда**, а не только когда есть
+          замер: «сейчас: думаю» — ответ на «почему молчит». */}
+      <Text className={styles.note} role="status" aria-live="polite">
+        {`сейчас: ${reactiveWord(job)}`}
+      </Text>
+      {jobStuck.stuck ? (
+        <Text className={styles.note} role="alert">
+          {jobStuck.said}
+        </Text>
+      ) : null}
+      {/* Шаг 138: отмена — сначала состояние, потом просьба ядру. Человек свободен,
+          ядро может считать ещё; поздний ответ будет выброшен. */}
+      {instantStop !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Остановлено сразу</Text>
+          <Text className={styles.note} role="status" aria-live="polite">{instantStop.said}</Text>
+          <Text className={styles.note}>{instantStop.report}</Text>
+          <Text className={styles.note}>{instantStop.order}</Text>
+          {cancelState.ok ? null : <Text className={styles.note} role="alert">{cancelState.said}</Text>}
+        </div>
+      ) : null}
       {/* Шаг 136: холодный и тёплый — отдельно, оба в журнале. Средняя по смеси
           нарочно не показывается: она скрывает обе причины. */}
       {startTimings.length > 0 ? (
