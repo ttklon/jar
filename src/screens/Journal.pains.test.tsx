@@ -71,7 +71,9 @@ describe("«Что болит» в истории", () => {
     vi.mocked(auditTail).mockResolvedValue([event("ok", 1_700_000_000_000)]);
     render(<Journal />);
 
-    await screen.findByText(/files\|move/);
+    // Ищем в таблице журнала: с шага 176 та же строка встречается ещё и в
+    // строке «опасное сверху», и это не «болит».
+    await screen.findByRole("cell", { name: "files|move|Загрузки" });
     expect(screen.queryByText("Что болит")).toBeNull();
   });
 

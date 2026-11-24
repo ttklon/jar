@@ -47,6 +47,35 @@ function event(over: Partial<AuditEvent>): AuditEvent {
   };
 }
 
+describe("опасное выше обычного в журнале (шаг 176)", () => {
+  it("опасное сверху, обычное ниже, и это видно по порядку строк", async () => {
+    // Дефект: плоская лента отвечает «что было позже», а спрашивают «не случилось
+    // ли чего». Старое удаление должно стоять выше свежего чтения.
+    vi.mocked(auditTail).mockResolvedValue([
+      event({ at_ms: 1_700_000_900_000, subject: "files|прочитать|файл", risk: "read", kind: "finished" }),
+      event({ at_ms: 1_700_000_100_000, subject: "files|удалить|папку", risk: "destructive", kind: "finished" }),
+    ]);
+    render(<Journal />);
+
+    // Сказано числом, сколько смотреть.
+    await screen.findByText(/опасных 1 из 2 — они сверху, остальное ниже по времени/);
+    // И первой строкой — ответ, а не загадка.
+    expect(screen.getByText(/сверху опасное: «files\|удалить\|папку» \(destructive\) — ok/)).toBeTruthy();
+
+    // Порядок в таблице: опасное раньше обычного, хотя оно старше.
+    const cells = screen.getAllByRole("cell").filter((cell) => cell.textContent?.includes("|"));
+    expect(cells[0]!.textContent).toBe("files|удалить|папку");
+    expect(cells[1]!.textContent).toBe("files|прочитать|файл");
+  });
+
+  it("опасного нет — сказано прямо, чтобы не листали зря", async () => {
+    vi.mocked(auditTail).mockResolvedValue([event({ subject: "files|прочитать|файл", risk: "read" })]);
+    render(<Journal />);
+    await screen.findByText(/опасного нет: 1 событие — все обычные, читать подряд незачем/);
+    expect(screen.getByText(/опасного не было: последнее — обычное «files\|прочитать\|файл»/)).toBeTruthy();
+  });
+});
+
 describe("аудит опасных рук в журнале", () => {
   it("называет, сколько опасного проверено запуском, а сколько нет", async () => {
     vi.mocked(auditTail).mockResolvedValue([

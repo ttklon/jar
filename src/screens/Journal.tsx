@@ -3,6 +3,7 @@ import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/reac
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
 import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
 import { audit as dangerAudit, dangerous as dangerOnly, line as dangerLine, summary as dangerSummary } from "../lib/dangerAudit";
+import { first as firstDanger, order as dangerOrder, tally as dangerTally } from "../lib/dangerFirst";
 import { groupReasons } from "../lib/journal";
 import { fromJournal, line as refusalLine } from "../lib/refusal";
 import { DeedCard } from "../components/DeedCard";
@@ -414,6 +415,27 @@ export function Journal({
         })()
       ) : null}
 
+      {/*
+        Шаг 176: журнал открывают с вопросом «не случилось ли чего», а получают
+        хронологию. Опасное поднимается выше обычного — с числами и первой строкой,
+        чтобы ответ был сверху, а не после листания.
+      */}
+      {events && events.length > 0 ? (
+        (() => {
+          const got = dangerTally(events);
+          return (
+            <section className={styles.pains} aria-label="Опасное сверху">
+              <Text weight="semibold" role="status" aria-live="polite">
+                {got.said}
+              </Text>
+              <Text className={styles.note} block>
+                {firstDanger(events)}
+              </Text>
+            </section>
+          );
+        })()
+      ) : null}
+
       {events && events.length > 0 ? (
         <table className={styles.table}>
           <thead>
@@ -428,7 +450,7 @@ export function Journal({
             </tr>
           </thead>
           <tbody>
-            {events.map((event, index) => (
+            {dangerOrder(events).map((event, index) => (
               <tr key={`${event.at_ms}-${event.kind}-${index}`}>
                 <td className={styles.cell}>{time(event.at_ms)}</td>
                 <td className={styles.cell}>{journal.kind[event.kind] ?? event.kind}</td>
