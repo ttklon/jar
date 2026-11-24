@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { broken, clock, empty, KEEP, push, stage, text, why, type Line } from "./phraseLog";
+import { broken, clock, empty, KEEP, push, stage, text, timed, why, type Line } from "./phraseLog";
 
 /**
  * Шаг 60: журнал фраз — что услышано, что понято, что сделано.
@@ -83,5 +83,21 @@ describe("журнал не растёт без предела", () => {
 
   it("пустой журнал объясняет себя", () => {
     expect(empty()).toContain("появятся");
+  });
+});
+
+describe("замер дописывается к строке, а не теряется (шаг 122)", () => {
+  it("дописывается по времени, а не по индексу", () => {
+    // Индекс съезжает, как только приходит следующая фраза.
+    const first = { at: 100, heard: "раз", understood: null, did: "разбираю…", stage: "not-done" as const };
+    const second = { at: 200, heard: "два", understood: null, did: "разбираю…", stage: "not-done" as const };
+    const after = timed([second, first], 100, 1200);
+    expect(after.find((line) => line.at === 100)?.ms).toBe(1200);
+    expect(after.find((line) => line.at === 200)?.ms).toBeUndefined();
+  });
+
+  it("чужая строка не переписывается", () => {
+    const line = { at: 5, heard: "x", understood: null, did: "y", stage: "not-done" as const };
+    expect(timed([line], 6, 900)[0]?.ms).toBeUndefined();
   });
 });

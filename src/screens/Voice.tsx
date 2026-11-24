@@ -209,6 +209,12 @@ import {
   type Kind as SegmentKind,
   type Trace as SegmentTrace,
 } from "../lib/segments";
+import {
+  say as sayTiming,
+  slowest as slowestEntry,
+  text as timingText,
+  type Entry as TimingEntry,
+} from "../lib/journalTiming";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -375,6 +381,7 @@ import {
   push as logPush,
   stage as logStage,
   text as logText,
+  timed as logTimed,
   why as logWhy,
   type Line as PhraseLine,
 } from "../lib/phraseLog";
@@ -1496,7 +1503,11 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
 
   // Шаг 121: точка отсчёта для отрезков. Замер идёт на настоящем пути, а не
   // отдельным стендом: стенд меряет стенд.
-  const markRef = useRef<{ start: number; phrase: number | null }>({ start: 0, phrase: null });
+  const markRef = useRef<{ start: number; phrase: number | null; loggedAt: number | null }>({
+    start: 0,
+    phrase: null,
+    loggedAt: null,
+  });
 
   const search = useCallback((phrase: string) => {
     // Отрезок «фраза → текст»: от последнего слова человека до готового текста.
@@ -2178,6 +2189,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       // Шаг 88: строка пишется **сразу** и остаётся даже при неудаче; итог
       // («сделано» / «отказ: причина») дописывается тем же `at`. Шаг 60.
       const loggedAt = Date.now();
+      // Шаг 122: запомним, к какой строке журнала дописывать замер.
+      markRef.current.loggedAt = loggedAt;
       setPhrases((current) =>
         logPush(current, {
           at: loggedAt,
@@ -2454,8 +2467,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         setReport(result);
         // Отрезок «дело» и общий срок: от поиска до отчёта. Итог — независимый
         // замер, и он не обязан сходиться с суммой до миллисекунды.
-        setSegments((current) => ({ ...current, deed: Date.now() - deedStart }));
-        setSegmentsTotal(Date.now() - deedStart);
+        const took = Date.now() - deedStart;
+        setSegments((current) => ({ ...current, deed: took }));
+        setSegmentsTotal(took);
+        // Шаг 122: замер дописывается к строке журнала этой фразы — по времени, а
+        // не по индексу: индекс съезжает, как только приходит следующая фраза.
+        setPhrases((current) => logTimed(current, markRef.current.loggedAt ?? 0, took));
         const phrase = result.stopped
           ? voice.draftSpokenStopped(result.stopped)
           : voice.planSpeech(result.steps.length);
@@ -2545,8 +2562,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         // иначе отрезки есть у одного пути и нет у другого, и сравнение врёт.
         {
           const start = markRef.current.start || Date.now();
-          setSegments((current) => ({ ...current, deed: Date.now() - start }));
-          setSegmentsTotal(Date.now() - start);
+          const took = Date.now() - start;
+          setSegments((current) => ({ ...current, deed: took }));
+          setSegmentsTotal(took);
+          setPhrases((current) => logTimed(current, markRef.current.loggedAt ?? 0, took));
         }
         const phrase = result.stopped
           ? voice.draftSpokenStopped(result.stopped)
@@ -4440,11 +4459,38 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                 </span>
               ))}
             </Text>
+            <Text className={styles.note} role="status" aria-live="polite">
+              {(() => {
+                // Самое медленное названо отдельно: «медленно» без фразы не к чему
+                // приложить.
+                const worst = slowestEntry(
+                  phrases.map((line: PhraseLine): TimingEntry => ({
+                    heard: previewHeard(line.heard),
+                    did: line.did,
+                    ms: line.ms ?? null,
+                  })),
+                );
+                return worst === null ? "" : `медленнее всего: «${worst.heard}» · `;
+              })()}
+              {sayTiming(
+                phrases.map((line: PhraseLine): TimingEntry => ({
+                  heard: previewHeard(line.heard),
+                  did: line.did,
+                  ms: line.ms ?? null,
+                })),
+              )}
+            </Text>
             <div className={styles.prompt} role="log" aria-label="Журнал фраз">
               {phrases.map((line) => (
                 <div key={`${line.at}:${line.heard}`}>
                   <span>{logText(line)}</span>
                   {line.stage !== "done" ? <span> — {logWhy(line)}</span> : null}
+                  {/* Шаг 122: замер рядом с делом — видно, что именно медленно на
+                      этой машине. Нет замера — «не замерено», а не «0 мс». */}
+                  <span>
+                    {" · "}
+                    {timingText({ heard: previewHeard(line.heard), did: line.did, ms: line.ms ?? null })}
+                  </span>
                 </div>
               ))}
             </div>

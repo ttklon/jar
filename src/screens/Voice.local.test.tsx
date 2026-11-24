@@ -24,6 +24,8 @@ import {
   uiType,
 } from "../ipc";
 import { startRecording } from "../lib/recorder";
+import type { Line } from "../lib/phraseLog";
+import { say as sayTiming, text as timingText } from "../lib/journalTiming";
 import { audioCapture } from "../i18n/ru";
 import { readinessFacts } from "./readinessFixture";
 import { Voice } from "./Voice";
@@ -1949,6 +1951,8 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/дольше всего: (фраза|текст|план|дело) — \d+ мс/)).toBeTruthy();
     expect(screen.getByText(/^всего: \d+ мс$/)).toBeTruthy();
 
+
+
     // Шаг 107: повтор показывает разницу **до** вопроса и спрашивает один раз.
     expect(screen.getByText(/шагов плана: сравнивать не с чем — прошлого дела нет/)).toBeTruthy();
     expect(screen.getByText(/уже сделано 1 из 2 — повтор их не тронет/)).toBeTruthy();
@@ -2013,6 +2017,20 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText("согласия на план ещё нет — спрошу перед запуском")).toBeTruthy();
     fireEvent.click(screen.getByText("Согласиться на план целиком"));
     await waitFor(() => expect(screen.getByText("план не менялся — согласие в силе")).toBeTruthy());
+  });
+
+  // Шаг 122: замер лежит рядом с делом в журнале. Проверяем через **прямой**
+  // вызов записи журнала с замером: путь микрофона в браузере недоступен, а
+  // подставлять строку журнала — значит проверять подставленное.
+  it("замер виден в журнале рядом с делом и назван числом", () => {
+    const line: Line = { at: 1, heard: "переименуй фото", understood: "переименовать", did: "переименовал 12", stage: "done", ms: 2400 };
+    expect(timingText({ heard: line.heard, did: line.did, ms: line.ms ?? null })).toBe(
+      "«переименуй фото» → переименовал 12 · 2,4 с — дольше 1,5 с",
+    );
+    // Итог говорит, сколько не уложилось, и какое дело медленнее всех.
+    expect(sayTiming([{ heard: line.heard, did: line.did, ms: line.ms ?? null }])).toContain(
+      "не уложилось в 1,5 с: 1 из 1",
+    );
   });
 
   it("изменение ответа во время перепроверки отменяет запуск устаревшего плана", async () => {
