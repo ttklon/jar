@@ -145,6 +145,11 @@ import {
   stale as consentStale,
   type Granted as ConsentGranted,
 } from "../lib/consentStep";
+import {
+  order as orderByDeps,
+  say as sayOrder,
+  type Node as DepNode,
+} from "../lib/depOrder";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -3390,6 +3395,39 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                 {report !== null ? (
                   <Text className={styles.note} role="status" aria-live="polite">
                     {`после запуска: ${report.steps.map((step, index) => proofDone(checks[index]?.proof ?? "none", step.status === "ok").said).join("; ")}`}
+                  </Text>
+                ) : null}
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 112: порядок — из зависимостей, а не из файла. Перестановка названа
+          причиной, а не применена молча. */}
+      {draft?.plan && draft.plan.steps.length > 1 ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Порядок шагов</Text>
+          {(() => {
+            // Ресурсы берутся из настоящих параметров: `path` и `to` — это то, что
+            // шаг пишет, `from` и `path` — то, что читает. Ничего не выдумывается.
+            const nodes: DepNode[] = draft.plan!.steps.map((step) => {
+              const values = Object.values(step.params ?? {});
+              const writes = /создать|перемест|скопир/.test(step.registry) ? values.map((value) => `resource:${value}`) : [];
+              const reads = /перемест|скопир|проверить|посчитать/.test(step.registry) ? values.map((value) => `resource:${value}`) : [];
+              return { what: step.why ?? step.registry, tool: step.registry, after: [], writes, reads };
+            });
+            const ordered = orderByDeps(nodes);
+            return (
+              <>
+                {sayOrder(ordered).map((line) => (
+                  <Text key={line} className={styles.note}>
+                    {line}
+                  </Text>
+                ))}
+                {ordered.errors.length > 0 ? (
+                  <Text className={styles.note} role="status" aria-live="polite">
+                    выполнять не буду: порядок не вычисляется
                   </Text>
                 ) : null}
               </>
