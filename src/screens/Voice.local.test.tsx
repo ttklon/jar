@@ -2802,6 +2802,51 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/Черновик ничего не исполняет/)).toBeTruthy();
   });
 
+  it("пределы пробы и запрещённое видно до нажатия, а не по факту отказа (шаг 165)", async () => {
+    // Дефект: правило жило в ядре и узнавалось после нажатия. «Снимается через
+    // 20 секунд» после запуска — факт; до запуска — обещание, по которому решают.
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Learn: { goal: "скачать файл", why: "" } },
+      plan: null,
+      learning: {
+        registry: "storage-backup|проверить|свободное место",
+        example: "проверить свободное место",
+        query: "сколько места",
+        implementation: ["PowerShell"],
+        risk: "read",
+        notes: "",
+        asked_ms: 1,
+        times: 1,
+        steps: [],
+      },
+      deeds: null,
+      problem: null,
+    });
+    // Черновик с запрещённым куском: показывается, но и проверка видна сразу.
+    vi.mocked(draftHand).mockResolvedValueOnce({
+      key: "storage-backup|проверить|свободное место",
+      goal: "скачать отчёт",
+      code: "Invoke-WebRequest http://example.invalid/x -OutFile x",
+      why: "",
+      created_ms: 1,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "сколько места" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Чему нужно научиться")).toBeTruthy());
+    fireEvent.click(screen.getByText("Черновик руки"));
+
+    await waitFor(() => expect(screen.getByText(/Invoke-WebRequest/)).toBeTruthy());
+    // Пределы названы числом — до нажатия «Проба».
+    expect(screen.getByText(/в клетке: до 20 с, вывод до 2000 знаков/)).toBeTruthy();
+    // И запрещённое названо с причиной, а не «нельзя».
+    expect(screen.getByText(/чего нельзя: «invoke-webrequest» — скачивание из сети/)).toBeTruthy();
+    expect(screen.getByText(/ничего не выполнялось/)).toBeTruthy();
+  });
+
   it("проба показывает отчёт из клетки и не выдаёт его за умение", async () => {
     vi.mocked(think).mockResolvedValueOnce({
       prompt: "…",

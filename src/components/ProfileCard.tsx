@@ -4,6 +4,7 @@ import { ChevronDownRegular, ChevronUpRegular } from "@fluentui/react-icons";
 import type { ProfileView } from "../ipc";
 import { apps } from "../i18n/ru";
 import { RiskBadge } from "./RiskBadge";
+import { profileAge } from "../lib/scriptRules";
 
 const useStyles = makeStyles({
   card: {
@@ -52,6 +53,18 @@ export function ProfileCard({ profile }: { profile: ProfileView }) {
           <Text className={styles.meta} block>
             {apps.kind[profile.kind] ?? profile.kind} · {apps.stack}: {profile.ui_stack} ·{" "}
             {apps.anchors(profile.anchors)} · {apps.verified(profile.verified_at)}
+            {/*
+              Шаг 165: возраст словами рядом с датой. «Проверено 2024-01-01» человек
+              не переводит в «давно» — а от этого зависит, верить ли якорям.
+            */}
+            {(() => {
+              const age = profileAge(profile.verified_at, Date.now());
+              return age.stale ? (
+                <Text className={styles.meta} block>
+                  {age.said}
+                </Text>
+              ) : null;
+            })()}
           </Text>
         </div>
         <Text className={styles.meta}>

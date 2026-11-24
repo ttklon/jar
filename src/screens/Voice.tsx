@@ -57,6 +57,7 @@ import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
+import { answer as scriptAnswer, limits as scriptLimits, limitsLine as scriptLimitsLine } from "../lib/scriptRules";
 import { allow as folderAllow, NOTHING as NO_FOLDERS, say as folderSay, suggest as folderSuggest, type Limits as FolderLimits } from "../lib/folderLimit";
 import { journalNote as trashJournalNote, restoreCount as trashRestoreCount, say as trashSay, where as trashWhere } from "../lib/trashFirst";
 import { blast as blastOf, fromParams as blastFromParams, kindOf as blastKindOf, line as blastLine, louder as blastLouder } from "../lib/blast";
@@ -6468,6 +6469,25 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               {handDraft.why.length > 0 ? (
                 <Text className={styles.note}>{handDraft.why}</Text>
               ) : null}
+              {/*
+                Шаг 165: проверка и пределы — **до** нажатия, а не после. Ядро и
+                раньше не запускало запрещённое, но человек узнавал правило только
+                по факту отказа; а «снимается через 20 с» после запуска — это факт,
+                до запуска — обещание, по которому решают, пробовать ли.
+              */}
+              {(() => {
+                const verdict = scriptAnswer(handDraft.code);
+                return (
+                  <>
+                    <Text className={styles.note}>{scriptLimitsLine(scriptLimits("cell"))}</Text>
+                    {verdict.ok ? null : (
+                      <Text className={styles.error} role="alert" aria-live="polite">
+                        {verdict.said}
+                      </Text>
+                    )}
+                  </>
+                );
+              })()}
 
               <Button
                 size="small"
