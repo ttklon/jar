@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import actionsJson from "../../data/actions.json";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
   cancelTool,
@@ -46,9 +47,18 @@ vi.mock("../ipc", () => ({
   think: vi.fn().mockResolvedValue(null),
   smokeCheck: vi.fn(),
   // Шаг 127: настоящие числа реестра, как из снапшота.
+  // Шаг 161: снапшот — настоящий реестр, а не пустышка: список прав на экране
+  // собирается из него, и заглушка «действий нет» проверяла бы выдумку.
   registrySnapshot: vi.fn().mockResolvedValue({
-    actions: [],
-    stats: { actions: 835, domains: 12, verbs: 200, byRisk: {}, byTier: {}, byStatus: {} },
+    actions: actionsJson,
+    stats: {
+      actions: 835,
+      domains: 12,
+      verbs: 200,
+      byRisk: {},
+      byTier: {},
+      byStatus: { v1: 626, v2: 198, later: 0, never: 11 },
+    },
   }),
   listTools: vi.fn().mockResolvedValue(Array.from({ length: 56 }, () => ({}))),
   cancelTool: vi.fn().mockResolvedValue(undefined),
@@ -1899,6 +1909,26 @@ describe("локальное распознавание на экране", () =
     // И средняя по смеси не выдаётся: роды считаются раздельно.
     expect(screen.getByText(/(холодный старт: \d+, всего \d+ мс|холодных стартов не было)/)).toBeTruthy();
     localStorage.removeItem("jar.startKinds");
+  });
+
+  it("список прав: что делаю и чего не делаю никогда — в одном месте (шаг 161)", async () => {
+    // Дефект: правила были верные, но разбросаны (policy.ts, реестр, refusal.ts),
+    // и ответ на «что ты вообще можешь» приходил по частям.
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    await waitFor(() =>
+      expect(screen.getByText("готово 626, в работе 198, не делаем никогда 11")).toBeTruthy(),
+    );
+
+    // Правила — строкой, и каждое называет место, где срабатывает.
+    expect(screen.getByText(/^не делаю: не двигаю деньги/)).toBeTruthy();
+    expect(screen.getByText(/не вхожу в учётные записи и не подписываю документы/)).toBeTruthy();
+
+    // «Никогда» — из настоящего реестра, с причиной и с тем, что вместо.
+    expect(screen.getByText(/^никогда: купить билет \(только навигатор\); вместо этого — /)).toBeTruthy();
+    expect(screen.getByText(/^никогда: оплатить счёт \(/)).toBeTruthy();
+    // И «вместо» — не стена, а навигатор до оплаты.
+    expect(screen.getAllByText(/доведу до оплаты и покажу сумму — платить будете вы/).length).toBe(4);
   });
 
   it("повтор спрашивает только про необратимое, и причина названа (шаг 144)", async () => {

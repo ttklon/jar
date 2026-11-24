@@ -55,6 +55,7 @@ import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
+import { neverDones as rightsNever, countWords as rightsCount, RULES as rightsRules, type Row as RightsRow } from "../lib/rights";
 import { consentCanRun, consentPositions, isSpokenConsent, keepsPendingPlan } from "../lib/consent";
 import { installedEngine, isEngineDown } from "../lib/engineReady";
 import { followUpQuery, isFollowUp } from "../lib/followUp";
@@ -895,6 +896,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // Числа реестра — состоянием, а не только ref: пока их нет, кэш молчит, и это
   // должно быть **видно**, а не выглядеть как «кэш не работает».
   const [registryCount, setRegistryCount] = useState({ actions: 0, hands: 0, version: "" });
+  /**
+   * Шаг 161: счёт прав и «никогда» — из того же снапшота, что и числа реестра.
+   * Отдельный запрос был бы второй правдой: числа могли бы разойтись.
+   */
+  const [rightsTally, setRightsTally] = useState<{ ready: number; planned: number; never: number; total: number } | null>(null);
+  const [rightsNeverList, setRightsNeverList] = useState<{ what: string; why: string; instead: string }[]>([]);
   const [thinking, setThinking] = useState(false);
   humanWaitingRef.current = thinking;
 
@@ -1051,6 +1058,24 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           .then((hands) => {
             if (!alive) return;
             const version = `${snapshot.stats.actions}:${snapshot.stats.domains}:${hands}`;
+            // Шаг 161: список прав собирается из того же снапшота, что и числа:
+            // «никогда» — это статус в реестре, а не второй перечень обещаний.
+            const byStatus = snapshot.stats.byStatus;
+            const rows: RightsRow[] = snapshot.actions.map((action) => ({
+              id: action.id,
+              verb: action.verb,
+              object: action.object,
+              risk: action.risk,
+              status: action.status,
+              notes: action.notes,
+            }));
+            setRightsTally({
+              ready: byStatus.v1 ?? 0,
+              planned: (byStatus.v2 ?? 0) + (byStatus.later ?? 0),
+              never: byStatus.never ?? 0,
+              total: snapshot.stats.actions,
+            });
+            setRightsNeverList(rightsNever(rows));
             setRegistryCount({
               actions: snapshot.stats.actions,
               hands,
@@ -4683,6 +4708,29 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             : `реестр прочитан: ${registryCount.actions} действий, рук ${registryCount.hands}`}
         </Text>
         <Text className={styles.note}>{registryReport(registryCacheRef.current)}</Text>
+      </div>
+      {/* Шаг 161: один список прав. «Что умею» и «чего не делаю никогда» — в одном
+          месте и из одного снапшота реестра: второй перечень можно забыть обновить,
+          и он разойдётся с тем, что правда. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Что делаю и чего не делаю никогда</Text>
+        {rightsTally === null ? (
+          <Text className={styles.note}>реестр ещё не прочитан: список прав появится по нему</Text>
+        ) : (
+          <Text className={styles.note} role="status" aria-live="polite">
+            {rightsCount(rightsTally)}
+          </Text>
+        )}
+        {rightsRules.map((rule) => (
+          <Text key={`right-${rule.what}`} className={styles.note}>
+            {`не делаю: ${rule.what} — ${rule.proof}`}
+          </Text>
+        ))}
+        {rightsNeverList.map((item) => (
+          <Text key={`never-${item.what}`} className={styles.note}>
+            {`никогда: ${item.what} (${item.why}); вместо этого — ${item.instead}`}
+          </Text>
+        ))}
       </div>
       {/* Шаг 101: до запуска видно цель, шаги, риск и что изменится. Подробности
           за кнопкой не читают: согласие дают на то, что видно при нажатии. */}
