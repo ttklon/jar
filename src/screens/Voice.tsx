@@ -260,6 +260,13 @@ import {
   type First as FirstWord,
 } from "../lib/firstWord";
 import { ask as longAsk, answered as longAnswered, inTime as longInTime, LONG_MS } from "../lib/longAsk";
+import {
+  cheapened as preloadCheapened,
+  fallback as preloadFallback,
+  plan as preloadPlan,
+  say as sayPreload,
+  type Start as PreloadStart,
+} from "../lib/preload";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -760,6 +767,14 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // выбором («ждать» / «не ждать»), и только если остановить действительно можно.
   const [longWait, setLongWait] = useState<{ askedAt: number | null; reply: "wait" | "stop" | null; startedAt: number } | null>(null);
   const [longAskSaid, setLongAskSaid] = useState("");
+  // Шаг 131: что происходит с фоновым подъёмом — факт, а не тайна.
+  const [preloadNote, setPreloadNote] = useState("");
+  const [preloadSaved, setPreloadSaved] = useState("");
+  /** Слабая ли машина — на решении о фоне (131). Держим в ref: эффект стартует один раз. */
+  const machineWeakRef = useRef(false);
+  machineWeakRef.current = machine?.weak === true;
+  /** Что человек уже ждёт — предзагрузке не время. */
+  const humanWaitingRef = useRef(false);
   const longWaitRef = useRef<typeof longWait>(null);
   longWaitRef.current = longWait;
   const registryCacheRef = useRef<RegistryCache>(registryCache(""));
@@ -767,6 +782,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // должно быть **видно**, а не выглядеть как «кэш не работает».
   const [registryCount, setRegistryCount] = useState({ actions: 0, hands: 0, version: "" });
   const [thinking, setThinking] = useState(false);
+  humanWaitingRef.current = thinking;
 
   /**
    * Порог «это долго» срабатывает **сам**, таймером.
@@ -933,8 +949,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     };
   }, []);
 
-  // Уже установленный движок поднимается вместе с экраном, не по первой фразе.
-  // Скачивания нет. Неуспех не кричит: следующая фраза объяснит сама.
+  // Шаг 131: уже установленный движок поднимается **в фоне при старте**, не по первой
+  // фразе. Но решение принимается, а не делается всегда: на слабой машине подъём
+  // отнял бы процессор у ответа, и тогда он ждёт своей очереди.
   useEffect(() => {
     let alive = true;
     void (async () => {
@@ -942,13 +959,37 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       try {
         status = await readinessStatus();
       } catch {
+        // Статуса нет — поднимать нечего, и это не повод молчать про фон.
+        setPreloadNote(sayPreload(preloadPlan({ installed: false, weak: false, busy: false, refused: false, done: false })));
         return;
       }
-      if (!alive || installedEngine(status) !== "start") return;
+      // Слабость машины к этому моменту может быть ещё не измерена: тогда решение
+      // ждёт одного измерения, а не считается по «наверное, сильная».
+      const weak = await Promise.resolve(machineState())
+        .then((got) => got.weak === true)
+        .catch(() => false);
+      machineWeakRef.current = weak;
+      if (!alive) return;
+      const start: PreloadStart = {
+        installed: installedEngine(status) === "start",
+        weak,
+        busy: humanWaitingRef.current,
+        refused: false,
+        done: false,
+      };
+      const decided = preloadPlan(start);
+      setPreloadNote(sayPreload(decided));
+      if (!decided.start) return;
       setEngineBusy(true);
+      const startedAt = Date.now();
       try {
         await smokeCheck();
+        if (!alive) return;
+        // Цена фона — числом: «с предзагрузкой 400 мс вместо 3400».
+        setPreloadNote(sayPreload(preloadPlan({ ...start, busy: false }), true));
+        setPreloadSaved(preloadCheapened(3100, Date.now() - startedAt).said);
       } catch {
+        if (alive) setPreloadNote(preloadFallback(true).said);
         return;
       } finally {
         if (alive) setEngineBusy(false);
@@ -4174,6 +4215,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </div>
       ) : null}
 
+      {/* Шаг 131: фоновый подъём ядра — назван, вместе с ценой: «400 мс вместо
+          3400». Иначе быстрый первый ответ выглядит чудом, а медленный — поломкой. */}
+      {preloadNote !== "" ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Ядро заранее</Text>
+          <Text className={styles.note} role="status" aria-live="polite">{preloadNote}</Text>
+          {preloadSaved !== "" ? <Text className={styles.note}>{preloadSaved}</Text> : null}
+        </div>
+      ) : null}
       {/* Шаг 129: «это долго, ждать?» — до того, как ждать стало поздно, с выбором и
           ровно один раз. Вопрос без остановки был бы уведомлением, поэтому «не ждать»
           действительно останавливает. */}

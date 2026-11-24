@@ -1804,6 +1804,18 @@ describe("локальное распознавание на экране", () =
     expect(runPlan).not.toHaveBeenCalled();
   });
 
+  it("ядро поднимается в фоне при старте и это названо, а не спрятано (шаг 131)", async () => {
+    // Первая фраза платила за старт, хотя окно было открыто давно.
+    // Движок и модель на месте — значит поднимать есть что.
+    vi.mocked(readinessStatus).mockResolvedValue(readinessFacts({ engine_found: true, model_present: true }) as never);
+    vi.mocked(smokeCheck).mockResolvedValue({ ok: true, note: "" } as never);
+    render(<Voice onOpen={() => {}} />);
+    // Фон назван фактом, а не тайной: быстрый первый ответ иначе выглядит чудом.
+    await waitFor(() => expect(screen.getByText("Ядро заранее")).toBeTruthy());
+    // И цена подъёма — числом, а не «стало быстрее».
+    await waitFor(() => expect(screen.getByText(/^первая фраза: \d+ мс вместо 3100/)).toBeTruthy());
+  });
+
   it("долгое ожидание спрашивает «ждать?» до конца, и «не ждать» останавливает (шаг 129)", async () => {
     // Долгое дело молча шло, и человек уходил, не зная, что можно не ждать.
     vi.mocked(think).mockReturnValueOnce(new Promise(() => {}));
