@@ -58,6 +58,7 @@ import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
 import { allows as grantAllows, book as grantBook, EMPTY as EMPTY_GRANTS, give as grantGive, load as loadGrants, onRevoke as grantOnRevoke, revoke as grantRevoke, save as saveGrants, type Book as GrantBook, type Channel as GrantChannel } from "../lib/grants";
+import { line as signatureLine } from "../lib/signature";
 import { executable as launchExecutable, line as launchLine, needsAsk as launchNeedsAsk, origin as launchOrigin } from "../lib/launchOrigin";
 import { allow as netAllow, askBefore as netAskBefore, say as netSay } from "../lib/networkAllow";
 import { exits as outboundExits, line as outboundLine, summary as outboundSummary } from "../lib/outbound";
@@ -4297,6 +4298,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                           source: launchOrigin(value),
                           ok: launchExecutable(value),
                           ask: launchNeedsAsk(launchOrigin(value)),
+                          // Шаг 174: подписи и хеша у файла в параметрах нет — и это
+                          // надо назвать, а не промолчать: «не проверено» ≠ «чисто».
+                          sig: signatureLine("unknown", { actual: null, expected: null }),
                         }))
                     : [];
                   const asks = blocked.map((item) => netAskBefore(item.value).said);
@@ -4319,7 +4323,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                         <span key={`launch-${item.value}`}>
                           {` · ${launchLine(item.source)}${item.ask.ask ? ` · ${item.ask.why}` : ""}${
                             item.ok.ok ? "" : ` · ${item.ok.said}`
-                          }`}
+                          } · ${item.sig}`}
                         </span>
                       ))}
                       {" "}

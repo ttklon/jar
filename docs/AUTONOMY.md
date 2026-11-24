@@ -36,30 +36,30 @@
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
 * `src/screens/Undo.tsx:68` — useEffect(load, [load]);
-* `src/screens/Voice.tsx:658` — useEffect(() => {
-* `src/screens/Voice.tsx:994` — useEffect(() => {
-* `src/screens/Voice.tsx:1059` — useEffect(() => {
-* `src/screens/Voice.tsx:1063` — useEffect(
-* `src/screens/Voice.tsx:1127` — useEffect(() => {
-* `src/screens/Voice.tsx:1188` — useEffect(() => {
-* `src/screens/Voice.tsx:2399` — useEffect(() => {
-* `src/screens/Voice.tsx:2454` — useEffect(() => {
-* `src/screens/Voice.tsx:2464` — useEffect(() => {
-* `src/screens/Voice.tsx:2486` — useEffect(() => {
-* `src/screens/Voice.tsx:2657` — useEffect(() => {
-* `src/screens/Voice.tsx:2690` — useEffect(() => {
-* `src/screens/Voice.tsx:2715` — useEffect(() => {
-* `src/screens/Voice.tsx:2736` — useEffect(() => {
-* `src/screens/Voice.tsx:2742` — useEffect(() => {
-* `src/screens/Voice.tsx:2749` — useEffect(() => {
-* `src/screens/Voice.tsx:2774` — useEffect(() => {
-* `src/screens/Voice.tsx:2789` — useEffect(() => {
-* `src/screens/Voice.tsx:2815` — useEffect(() => {
-* `src/screens/Voice.tsx:2863` — useEffect(() => {
-* `src/screens/Voice.tsx:2869` — useEffect(() => {
-* `src/screens/Voice.tsx:2885` — useEffect(() => {
-* `src/screens/Voice.tsx:3124` — useEffect(() => {
-* `src/screens/Voice.tsx:3156` — useEffect(
+* `src/screens/Voice.tsx:659` — useEffect(() => {
+* `src/screens/Voice.tsx:995` — useEffect(() => {
+* `src/screens/Voice.tsx:1060` — useEffect(() => {
+* `src/screens/Voice.tsx:1064` — useEffect(
+* `src/screens/Voice.tsx:1128` — useEffect(() => {
+* `src/screens/Voice.tsx:1189` — useEffect(() => {
+* `src/screens/Voice.tsx:2400` — useEffect(() => {
+* `src/screens/Voice.tsx:2455` — useEffect(() => {
+* `src/screens/Voice.tsx:2465` — useEffect(() => {
+* `src/screens/Voice.tsx:2487` — useEffect(() => {
+* `src/screens/Voice.tsx:2658` — useEffect(() => {
+* `src/screens/Voice.tsx:2691` — useEffect(() => {
+* `src/screens/Voice.tsx:2716` — useEffect(() => {
+* `src/screens/Voice.tsx:2737` — useEffect(() => {
+* `src/screens/Voice.tsx:2743` — useEffect(() => {
+* `src/screens/Voice.tsx:2750` — useEffect(() => {
+* `src/screens/Voice.tsx:2775` — useEffect(() => {
+* `src/screens/Voice.tsx:2790` — useEffect(() => {
+* `src/screens/Voice.tsx:2816` — useEffect(() => {
+* `src/screens/Voice.tsx:2864` — useEffect(() => {
+* `src/screens/Voice.tsx:2870` — useEffect(() => {
+* `src/screens/Voice.tsx:2886` — useEffect(() => {
+* `src/screens/Voice.tsx:3125` — useEffect(() => {
+* `src/screens/Voice.tsx:3157` — useEffect(
 * `src/components/DownloadBar.tsx:73` — useEffect(() => {
 * `src/components/DownloadBar.tsx:80` — useEffect(() => {
 * `src/components/MemoryBackups.tsx:87` — useEffect(() => {
@@ -72,8 +72,8 @@
 * `src/components/ReadinessCard.tsx:169` — useEffect(() => {
 * `src/components/ReadinessCard.tsx:176` — useEffect(() => {
 * `src/components/ReadinessCard.tsx:201` — useEffect(() => {
-* `src/components/ReadinessCard.tsx:365` — useEffect(() => { if (!status?.engine_running) setSmoke(null); }, [status?.engine_running]);
-* `src/components/ReadinessCard.tsx:366` — useEffect(() => { setSmoke(null); }, [status?.engine_program, status?.model_name]);
+* `src/components/ReadinessCard.tsx:378` — useEffect(() => { if (!status?.engine_running) setSmoke(null); }, [status?.engine_running]);
+* `src/components/ReadinessCard.tsx:379` — useEffect(() => { setSmoke(null); }, [status?.engine_program, status?.model_name]);
 * `src/components/RecentFailures.tsx:58` — useEffect(() => {
 * `src/components/ResourceReport.tsx:58` — useEffect(load, []);
 * `src/lib/useVoice.ts:662` — useEffect(() => {
@@ -85,10 +85,10 @@
 
 | Где | Строка | Как вызывается |
 | --- | --- | --- |
-| `src/components/ReadinessCard.tsx` | 643 | по нажатию |
-| `src/components/ReadinessCard.tsx` | 670 | по нажатию |
-| `src/components/ReadinessCard.tsx` | 704 | по нажатию |
-| `src/components/ReadinessCard.tsx` | 735 | по нажатию |
+| `src/components/ReadinessCard.tsx` | 656 | по нажатию |
+| `src/components/ReadinessCard.tsx` | 683 | по нажатию |
+| `src/components/ReadinessCard.tsx` | 717 | по нажатию |
+| `src/components/ReadinessCard.tsx` | 748 | по нажатию |
 
 ## Что это значит
 

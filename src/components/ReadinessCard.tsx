@@ -234,16 +234,29 @@ export function ReadinessCard({
         // а не что человек собирался сделать.
         if (kind === "model") {
           const spec = status.model_spec;
-          await downloadModel(spec.url, spec.file, spec.sha256);
+          const got = await downloadModel(spec.url, spec.file, spec.sha256);
           if (!alive.current) return;
           remember({ what: "downloaded", item: text.prepareStep.model });
-          setDone(text.downloaded(spec.file));
+          /*
+            Шаг 174: хеш — не украшение. Ядро его считает и сверяет с эталоном, а
+            экран раньше выбрасывал ответ: человек не знал, проверен файл или просто
+            лёг на диск. «Сверено с эталоном» и «эталона не было» — разные факты.
+          */
+          setDone(
+            got.verified
+              ? `${text.downloaded(spec.file)} · хеш сверен с эталоном: ${got.sha256.slice(0, 12)}…`
+              : `${text.downloaded(spec.file)} · эталона хеша не было: ${got.sha256.slice(0, 12)}… — файл не с чем сверить`,
+          );
         } else if (kind === "speech-model") {
           const spec = status.speech_model_spec;
-          await downloadModel(spec.url, spec.file, spec.sha256);
+          const got = await downloadModel(spec.url, spec.file, spec.sha256);
           if (!alive.current) return;
           remember({ what: "downloaded", item: text.prepareStep["speech-model"] });
-          setDone(text.downloaded(spec.file));
+          setDone(
+            got.verified
+              ? `${text.downloaded(spec.file)} · хеш сверен с эталоном: ${got.sha256.slice(0, 12)}…`
+              : `${text.downloaded(spec.file)} · эталона хеша не было: ${got.sha256.slice(0, 12)}… — файл не с чем сверить`,
+          );
         } else if (kind === "runtime") {
           const installed = await downloadRuntime("llama");
           if (!alive.current) return;
