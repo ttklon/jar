@@ -1804,6 +1804,63 @@ describe("локальное распознавание на экране", () =
     expect(runPlan).not.toHaveBeenCalled();
   });
 
+  it("в отчёте у каждого дела свой замер, и он хранится рядом (шаг 135)", async () => {
+    // «Шаг 2 не выполнен» без времени не говорил, упал он сразу или висел 20 секунд.
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Call: { registry: "storage-backup|проверить|свободное место", params: {}, why: "просил про диск" } },
+      plan: {
+        plan: {
+          goal: "что с диском",
+          source: "model",
+          steps: [
+            { registry: "storage-backup|проверить|свободное место", params: {}, why: "первый" },
+            { registry: "storage-backup|проверить|резервную копию", params: {}, why: "второй" },
+          ],
+        },
+        problems: [],
+        gates: [],
+        questions: [],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+    vi.mocked(runPlan).mockResolvedValueOnce({
+      goal: "что с диском",
+      steps: [
+        { position: 1, registry: "проверить место", status: "ok", reason: "", evidence: "120 ГБ", duration_ms: 1200 },
+        { position: 2, registry: "проверить копию", status: "failed", reason: "нет копии", evidence: "", duration_ms: 2400 },
+      ],
+      stopped: null,
+      run_id: 2,
+      sight: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "что с диском" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Что могу сделать")).toBeTruthy());
+
+    // Запуск плана — настоящий путь: сначала согласие на шаги, потом «Выполнить».
+    for (const box of screen.queryAllByLabelText(/^разрешить шаг \d+$/)) fireEvent.click(box);
+    fireEvent.click(screen.getByRole("button", { name: "Выполнить" }));
+
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getAllByText(/Сколько шло каждое дело|Что сделано/).length).toBeGreaterThan(0));
+    await waitFor(() => expect(screen.getByText("Сколько шло каждое дело")).toBeTruthy());
+    // Число шага — из настоящего `duration_ms`, а не выдуманное.
+    expect(screen.getByText("1. проверить место · 1200 мс")).toBeTruthy();
+    expect(screen.getByText("2. проверить копию · 2400 мс")).toBeTruthy();
+    // И самое медленное названо — ответ на «что чинить».
+    expect(screen.getByText(/медленнее всего: «проверить копию»/)).toBeTruthy();
+    // Отчёт сохранён вместе с числами: сравнить будет с чем.
+    expect(localStorage.getItem("jar.deedTiming")).toContain("2400");
+    localStorage.removeItem("jar.deedTiming");
+  });
+
   it("у ожидания назван срок и оно не спиннер без конца (шаг 134)", async () => {
     // Спиннер без срока не отличает «ещё работает» от «умерло».
     vi.mocked(think).mockReturnValueOnce(new Promise(() => {}));

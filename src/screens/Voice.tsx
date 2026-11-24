@@ -285,6 +285,16 @@ import {
   spinning as timeoutSpinning,
   state as timeoutState,
 } from "../lib/timeouts";
+import {
+  compared as deedCompared,
+  line as deedLine,
+  reconciles as deedReconciles,
+  restored as deedRestored,
+  slowest as deedSlowest,
+  stored as deedStored,
+  type Report as DeedReport,
+  type Row as DeedRow,
+} from "../lib/deedTiming";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -685,6 +695,20 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const kernelRef = useRef<WarmKernel>(kernel);
   kernelRef.current = kernel;
   const [report, setReport] = useState<PlanReport | null>(null);
+  // Шаг 135: замер каждого дела живёт **рядом с отчётом** и переживает закрытие окна —
+  // иначе «в прошлый раз было быстро» не проверить.
+  const [deedTiming, setDeedTiming] = useState<DeedReport | null>(null);
+  /** Сравнение с прошлым замером — сказанное в момент нового отчёта. */
+  const [deedComparedSaid, setDeedCompared] = useState("");
+  const [deedWas, setDeedWas] = useState<DeedReport | null>(() => {
+    try {
+      const saved = globalThis.localStorage?.getItem("jar.deedTiming");
+      return saved === undefined || saved === null ? null : deedRestored(JSON.parse(saved) as DeedReport);
+    } catch {
+      return null;
+    }
+  });
+  void setDeedWas;
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -2693,6 +2717,31 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     return () => clearInterval(timer);
   }, [mic.listening]);
 
+  /**
+   * Замер каждого дела — одной функцией на **оба** пути запуска.
+   *
+   * Две копии здесь означали бы, что один путь однажды забудут обновить, и замер
+   * будет у автозапуска и не будет у кнопки.
+   */
+  const recordDeedTiming = (result: PlanReport, totalMs: number) => {
+    // Число шага — настоящая `duration_ms`; отсутствие остаётся `null`, а не нулём.
+    const rows: DeedRow[] = result.steps.map((step) => ({
+      position: step.position,
+      what: step.registry,
+      ms: typeof step.duration_ms === "number" ? step.duration_ms : null,
+    }));
+    const timed: DeedReport = { totalMs, rows };
+    setDeedTiming((was) => {
+      if (was !== null) setDeedCompared(deedCompared(timed, was));
+      return timed;
+    });
+    try {
+      globalThis.localStorage?.setItem("jar.deedTiming", JSON.stringify(deedStored(timed)));
+    } catch {
+      // Хранилище недоступно — замер всё равно виден в этом запуске.
+    }
+  };
+
   runCheckedRef.current = (check) => {
     const guard = executeRequestRef.current;
     const request = ++planRunRef.current;
@@ -2708,6 +2757,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       .then((result) => {
         if (request !== planRunRef.current) return;
         setReport(result);
+        // Шаг 135: у каждого шага — свой замер, а не только сумма.
+        recordDeedTiming(result, Date.now() - deedStart);
         // Отрезок «дело» и общий срок: от поиска до отчёта. Итог — независимый
         // замер, и он не обязан сходиться с суммой до миллисекунды.
         const took = Date.now() - deedStart;
@@ -2809,6 +2860,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           setSegments((current) => ({ ...current, deed: took }));
           setSegmentsTotal(took);
           setPhrases((current) => logTimed(current, markRef.current.loggedAt ?? 0, took));
+          // Шаг 135: тот же замер и на пути «Выполнить» — иначе сравнение врёт.
+          recordDeedTiming(result, took);
         }
         const phrase = result.stopped
           ? voice.draftSpokenStopped(result.stopped)
@@ -4306,6 +4359,27 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </div>
       ) : null}
 
+      {/* Шаг 135: замер каждого дела — рядом с отчётом, с суммой, расхождением и самым
+          медленным. Одно число на отчёт не говорит, что именно чинить. */}
+      {deedTiming !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Сколько шло каждое дело</Text>
+          {deedTiming.rows.map((row) => (
+            <Text key={`deed-${row.position}`} className={styles.note}>
+              {deedLine(row)}
+            </Text>
+          ))}
+          <Text className={styles.note} role="status" aria-live="polite">
+            {deedReconciles(deedTiming).said}
+          </Text>
+          <Text className={styles.note}>{deedSlowest(deedTiming).said}</Text>
+          {deedComparedSaid !== "" ? (
+            <Text className={styles.note}>{deedComparedSaid}</Text>
+          ) : deedWas !== null && deedWas.totalMs > 0 ? (
+            <Text className={styles.note}>{deedCompared(deedTiming, deedWas)}</Text>
+          ) : null}
+        </div>
+      ) : null}
       {/* Шаг 134: у ожидания есть срок, и он назван; спиннер без срока назван
           бесконечным. По истечении — выбор, а не вечный круг. */}
       {thinking ? (
