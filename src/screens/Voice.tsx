@@ -21,6 +21,8 @@ import {
   isolationStatus,
   planCheckpoint,
   readinessStatus,
+  registrySnapshot,
+  listTools,
   smokeCheck,
   speechStatus,
   setVoiceTrayStatus,
@@ -246,6 +248,12 @@ import {
   word as reactiveWord,
   type Job as ResponsiveJob,
 } from "../lib/responsive";
+import {
+  answer as registryAnswer,
+  cache as registryCache,
+  report as registryReport,
+  type Cache as RegistryCache,
+} from "../lib/registryCache";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -736,6 +744,13 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [screenBusy, setScreenBusy] = useState(false);
   /** Что модель предложила. Предложение, а не действие: выполнять его пока нечем. */
   const [thought, setThought] = useState<Thought | null>(null);
+  // Шаг 127: ответ из реестра и его источник. Отдельно от `thought`: реестр — не
+  // модель, и смешивать их значит прятать, откуда пришёл ответ.
+  const [registrySaid, setRegistrySaid] = useState<{ said: string; source: string } | null>(null);
+  const registryCacheRef = useRef<RegistryCache>(registryCache(""));
+  // Числа реестра — состоянием, а не только ref: пока их нет, кэш молчит, и это
+  // должно быть **видно**, а не выглядеть как «кэш не работает».
+  const [registryCount, setRegistryCount] = useState({ actions: 0, hands: 0, version: "" });
   const [thinking, setThinking] = useState(false);
   const [thinkError, setThinkError] = useState<string | null>(null);
   const [enginePrompt, setEnginePrompt] = useState<string | null>(null);
@@ -858,6 +873,35 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   }, []);
 
   startInstalledEngineRef.current = startInstalledEngine;
+
+  // Шаг 127: числа реестра — из настоящего снапшота, а не выдуманные. Пока их нет,
+  // кэш не отвечает: «0 действий» был бы ложью.
+  useEffect(() => {
+    let alive = true;
+    void registrySnapshot()
+      .then((snapshot) => {
+        if (!alive) return;
+        // Рука — это инструмент, которым действие исполняется; их число берётся у
+        // настоящего списка, а не из догадки. Список может не ответить — тогда рук 0, и
+        // кэш не скажет «их 56».
+        return listTools()
+          .then((tools) => tools.length)
+          .catch(() => 0)
+          .then((hands) => {
+            if (!alive) return;
+            setRegistryCount({
+              actions: snapshot.stats.actions,
+              hands,
+              // Версия реестра — его содержимое: изменилось содержимое, изменился и кэш.
+              version: `${snapshot.stats.actions}:${snapshot.stats.domains}:${hands}`,
+            });
+          });
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   // Уже установленный движок поднимается вместе с экраном, не по первой фразе.
   // Скачивания нет. Неуспех не кричит: следующая фраза объяснит сама.
@@ -2783,6 +2827,19 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   };
 
   askModelRef.current = (requestedText: string) => {
+    // Шаг 127: частый вопрос отвечается из реестра, **без модели**, и сказано, откуда
+    // ответ. «Что ты умеешь» не должно ждать 3 секунды за пересказ того, что уже есть.
+    // Пока реестр не прочитан, кэш молчит: «0 действий» — ложь, а не ответ.
+    const cached = registryCount.version === "" ? null : registryAnswer(registryCacheRef.current, requestedText, registryCount);
+    if (cached !== null && cached.said !== null) {
+      // Ответ **из реестра**, а не «подумал»: он не притворяется мыслью модели.
+      setThinking(false);
+      setThinkError(null);
+      setRegistrySaid({ said: cached.said, source: cached.source });
+      speak(cached.said);
+      return;
+    }
+    setRegistrySaid(null);
     const request = ++thoughtRequestRef.current;
     const around = front;
     setThinking(true);
@@ -4069,6 +4126,22 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </div>
       ) : null}
 
+      {/* Шаг 127: частый вопрос отвечается из реестра, без модели — и сказано,
+          откуда ответ. Это не про задержку и не про отрезки: отдельное место. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Ответы из реестра</Text>
+        {registrySaid !== null ? (
+          <Text className={styles.note} role="status" aria-live="polite">
+            {`${registrySaid.said} · ${registrySaid.source}`}
+          </Text>
+        ) : null}
+        <Text className={styles.note}>
+          {registryCount.version === ""
+            ? "реестр ещё не прочитан: частые вопросы пока идут к модели"
+            : `реестр прочитан: ${registryCount.actions} действий, рук ${registryCount.hands}`}
+        </Text>
+        <Text className={styles.note}>{registryReport(registryCacheRef.current)}</Text>
+      </div>
       {/* Шаг 101: до запуска видно цель, шаги, риск и что изменится. Подробности
           за кнопкой не читают: согласие дают на то, что видно при нажатии. */}
       {draft?.plan ? (() => {

@@ -45,6 +45,12 @@ vi.mock("../ipc", () => ({
   facts: vi.fn().mockResolvedValue([]),
   think: vi.fn().mockResolvedValue(null),
   smokeCheck: vi.fn(),
+  // Шаг 127: настоящие числа реестра, как из снапшота.
+  registrySnapshot: vi.fn().mockResolvedValue({
+    actions: [],
+    stats: { actions: 835, domains: 12, verbs: 200, byRisk: {}, byTier: {}, byStatus: {} },
+  }),
+  listTools: vi.fn().mockResolvedValue(Array.from({ length: 56 }, () => ({}))),
   cancelTool: vi.fn().mockResolvedValue(undefined),
   uiDump: vi.fn().mockRejectedValue(new Error("в браузере нет UI Automation")),
   uiPress: vi.fn().mockRejectedValue(new Error("в браузере окон нет")),
@@ -1796,6 +1802,35 @@ describe("локальное распознавание на экране", () =
     expect(screen.queryByLabelText("разрешить шаг 1")).toBeNull();
     expect(screen.queryByRole("button", { name: "Выполнить" })).toBeNull();
     expect(runPlan).not.toHaveBeenCalled();
+  });
+
+  it("частый вопрос отвечается из реестра, без модели, и говорит откуда (шаг 127)", async () => {
+    // «Что ты умеешь» не должно ждать 3 секунды за пересказ того, что уже есть.
+    render(<Voice onOpen={() => {}} />);
+    // Без чисел реестра кэш молчит — и это видно, а не выдаётся за «ничего не умею».
+    expect(screen.getByText(/реестр ещё не прочитан: частые вопросы пока идут к модели/)).toBeTruthy();
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий, рук 56/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "что ты умеешь" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    await waitFor(() => expect(screen.getByText(/умею 835 действий/)).toBeTruthy());
+    // Сказано, откуда ответ: реестр — не «подумал».
+    expect(screen.getByText(/· реестр \d+:\d+:\d+$/)).toBeTruthy();
+    // И модель для этого не спрашивали вовсе.
+    expect(think).not.toHaveBeenCalled();
+    // Промаха не было — кэш говорит числом.
+    expect(screen.getByText(/из реестра: 1 из 1, к модели: 0/)).toBeTruthy();
+  });
+
+  it("незнакомый вопрос кэш не выдумывает — идёт к модели (шаг 127)", async () => {
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "переименуй все фото" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    await waitFor(() => expect(think).toHaveBeenCalled());
+    expect(screen.getByText(/из реестра: 0 из 1, к модели: 1/)).toBeTruthy();
   });
 
   it("план модели становится обычным планом: с подтверждением, а не сразу делом", async () => {

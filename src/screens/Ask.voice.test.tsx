@@ -13,6 +13,11 @@ import { Ask } from "./Ask";
  */
 
 vi.mock("../ipc", () => ({
+  registrySnapshot: async () => ({
+      actions: [],
+    stats: { actions: 0, domains: 0, verbs: 0, byRisk: {}, byTier: {}, byStatus: {} },
+  }),
+  listTools: async () => [],
   isTauri: () => true,
   planFor: vi.fn(),
   checkPlan: vi.fn(),

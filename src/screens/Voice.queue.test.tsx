@@ -26,6 +26,11 @@ import { Voice } from "./Voice";
  */
 
 vi.mock("../ipc", () => ({
+  registrySnapshot: async () => ({
+      actions: [],
+    stats: { actions: 0, domains: 0, verbs: 0, byRisk: {}, byTier: {}, byStatus: {} },
+  }),
+  listTools: async () => [],
   readinessStatus: vi.fn().mockRejectedValue(new Error("статус недоступен в этом тесте")),
   isTauri: () => true,
   planFor: vi.fn().mockResolvedValue([]),
