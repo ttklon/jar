@@ -73,11 +73,19 @@ export function Flows() {
           <Text className={styles.note} block>
             {flows.count(list.length)} · {flows.stepsCount(steps)}
           </Text>
-          <div className={styles.list}>
-            {list.map((flow) => (
-              <FlowCard key={flow.id} flow={flow} />
-            ))}
-          </div>
+          {list.length === 0 ? (
+            // Шаг 250: пустой список молчал. Пустота должна быть сказана, иначе
+            // её не отличить от «не загрузилось».
+            <Text className={styles.note} role="status">
+              {flows.empty}
+            </Text>
+          ) : (
+            <div className={styles.list}>
+              {list.map((flow) => (
+                <FlowCard key={flow.id} flow={flow} />
+              ))}
+            </div>
+          )}
         </>
       ) : null}
     </div>
