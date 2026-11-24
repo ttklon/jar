@@ -1806,8 +1806,13 @@ describe("локальное распознавание на экране", () =
 
   it("первое слово звучит раньше полного ответа, и его задержка — число (шаг 128)", async () => {
     // Тишина не отвечала на «услышал ли», и человек повторял фразу.
-    let resolveThink!: (value: null) => void;
-    vi.mocked(think).mockReturnValueOnce(new Promise<null>((resolve) => { resolveThink = resolve; }));
+    // Ответ модели ещё не пришёл — а первое слово уже должно быть сказано.
+    let resolveThink!: () => void;
+    vi.mocked(think).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveThink = () => resolve(null as never);
+      }),
+    );
     render(<Voice onOpen={() => {}} />);
     await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
 
@@ -1821,7 +1826,7 @@ describe("локальное распознавание на экране", () =
 
     // Полный ответ приходит следом и не подменяется первым словом.
     await act(async () => {
-      resolveThink(null);
+      resolveThink();
     });
   });
 
