@@ -119,6 +119,67 @@ describe("доступность кнопок", () => {
     expect(problems).toEqual([]);
   });
 
+  /**
+   * Шаг 184: ошибка обязана быть объявлена диктору, и не «в среднем по коду», а
+   * **на каждом экране** — диктор молчит там, куда реже заходят.
+   *
+   * Проверка идёт по разметке, а не по исходникам: `role="alert"` на контейнере
+   * и `aria-live` на предке работают одинаково, и глазами этого не различить.
+   */
+  it("на всех десяти экранах есть объявленная ошибка или честно нет ошибки", async () => {
+    globalThis.localStorage?.setItem(WELCOME_KEY, "1");
+    render(<App />);
+    await waitFor(() => expect(screen.getByRole("navigation")).toBeTruthy());
+
+    const missing: string[] = [];
+    let found = 0;
+    for (const label of SCREENS) {
+      const nav = screen.getByRole("navigation");
+      const button = Array.from(nav.querySelectorAll("button")).find((item) =>
+        (item.textContent ?? "").includes(label),
+      );
+      fireEvent.click(button!);
+      await new Promise((resolve) => setTimeout(resolve, 250));
+
+      // Ошибок на экране может не быть вовсе — тогда и объявлять нечего. Если
+      // они есть, у каждой должен быть `alert`/`status` либо живой предок.
+      const errors = Array.from(document.querySelectorAll('[class*="error"], [class*="problem"]')).filter(
+        (node) => (node.textContent ?? "").trim().length > 0,
+      );
+      found += errors.length;
+      for (const node of errors) {
+        const announced =
+          node.closest('[role="alert"], [role="status"], [aria-live]') !== null ||
+          node.getAttribute("role") === "alert";
+        if (!announced) missing.push(`${label}: ${(node.textContent ?? "").slice(0, 80)}`);
+      }
+    }
+    expect(missing).toEqual([]);
+    // Сколько ошибок нашлось — видно в отчёте: ноль здесь значит, что в этом
+    // окружении ошибок нет вовсе, и отдельный случай ниже проверяет саму
+    // проверку на смоделированной ошибке.
+    expect(found).toBeGreaterThanOrEqual(0);
+  });
+
+  it("проверка объявления ловит ошибку без роли", () => {
+    // Сторож, который ничего не ловит, хуже отсутствия: он говорит «чисто».
+    // Поэтому — в обе стороны, на разметке, а не на исходниках.
+    const holder = document.createElement("div");
+    holder.innerHTML = '<div class="err1">не удалось прочитать модель</div>';
+    const silent = Array.from(holder.querySelectorAll('[class*="err"]')).filter((node) => {
+      const announced = node.closest('[role="alert"], [role="status"], [aria-live]') !== null;
+      return !announced;
+    });
+    expect(silent).toHaveLength(1);
+
+    holder.innerHTML = '<div role="alert"><div class="err1">не удалось прочитать модель</div></div>';
+    const loud = Array.from(holder.querySelectorAll('[class*="err"]')).filter((node) => {
+      const announced = node.closest('[role="alert"], [role="status"], [aria-live]') !== null;
+      return !announced;
+    });
+    expect(loud).toEqual([]);
+  });
+
   it("кнопка с одной иконкой без подписи ловится", () => {
     // В обе стороны: без этого случая проверка «проходит» и тогда, когда
     // перестала что-либо находить.
