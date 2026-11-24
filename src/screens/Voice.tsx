@@ -277,6 +277,7 @@ import {
   type Ask as InstantAsk,
   type Ready as InstantReady,
 } from "../lib/instantAnswers";
+import { briefly as ackBriefly, early as ackEarly, line as ackLine, type Understood as AckUnderstood } from "../lib/ackLine";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -780,6 +781,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // Шаг 131: что происходит с фоновым подъёмом — факт, а не тайна.
   /** Шаг 132: что ответили мгновенно и откуда это. */
   const [instantSaid, setInstantSaid] = useState<{ said: string; source: string } | null>(null);
+  /** Шаг 133: первая строка — признание понятого, до шагов плана. */
+  const [ack, setAck] = useState<{ said: string; at: number; outcome: string } | null>(null);
   const [preloadNote, setPreloadNote] = useState("");
   const [preloadSaved, setPreloadSaved] = useState("");
   /** Слабая ли машина — на решении о фоне (131). Держим в ref: эффект стартует один раз. */
@@ -2974,6 +2977,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     // «сейчас всё будет».
     const firstSaid = firstWordOf(null);
     const askedAt = Date.now();
+    // Шаг 133: первая строка — признание понятого, **до** плана. Здесь понято дословно
+    // услышанное; уточнение придёт, когда станет ясен план.
+    setAck({ said: `понял: «${ackBriefly(requestedText, 60)}»`, at: askedAt, outcome: "" });
     setFirstWord({ got: firstSaid, at: askedAt, startedAt: askedAt });
     setLongWait({ askedAt: null, reply: null, startedAt: askedAt });
     speak(firstSaid.word);
@@ -2996,6 +3002,18 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         setThought(answer);
         if (answer.learning) setLearning(answer.learning);
         if (answer.plan) acceptModelPlan(answer.plan);
+        // Шаг 133: первая строка — «понял, делаю: …» — до шагов плана. План говорит
+        // «как», а человек в этот момент ждёт «ты меня понял?».
+        const understood: AckUnderstood = {
+          what: ackBriefly(answer.plan?.plan?.goal ?? requestedText),
+          // План из модели — понимание по её словам; уверенность честно ниже.
+          confident: answer.plan?.plan !== null && answer.plan?.plan !== undefined,
+        };
+        setAck((was) => ({
+          said: ackLine(understood),
+          at: was?.at ?? Date.now(),
+          outcome: ackEarly(was?.at ?? null, null).said,
+        }));
         // Шаг 128: если реестр уже узнал глагол — первое слово было бы делом, а не
         // «разбираю». Сказать его сейчас поздно (уже пришёл полный ответ), но видно,
         // что молчание было честным.
@@ -4271,6 +4289,14 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </div>
       ) : null}
 
+      {/* Шаг 133: признание понятого — одной строкой и раньше плана. */}
+      {ack !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Понял</Text>
+          <Text className={styles.note} role="status" aria-live="polite">{ack.said}</Text>
+          <Text className={styles.note}>{ack.outcome}</Text>
+        </div>
+      ) : null}
       {/* Шаг 132: ответ, готовый до вопроса, — и сказано, откуда он и что занял. */}
       {instantSaid !== null ? (
         <div className={styles.section}>

@@ -1804,6 +1804,28 @@ describe("локальное распознавание на экране", () =
     expect(runPlan).not.toHaveBeenCalled();
   });
 
+  it("первая строка «понял, делаю» приходит до плана, одной строкой (шаг 133)", async () => {
+    // «Разбираю» говорило «я здесь», но не «я понял» — и человек повторял фразу.
+    let resolveThink!: () => void;
+    vi.mocked(think).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveThink = () => resolve(null as never);
+      }),
+    );
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "переименуй фото" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    // Признание есть раньше плана: модель ещё думает.
+    await waitFor(() => expect(screen.getByText("Понял")).toBeTruthy());
+    expect(screen.getByText(/^понял: «переименуй фото»$/)).toBeTruthy();
+    expect(think).toHaveBeenCalled();
+    await act(async () => {
+      resolveThink();
+    });
+  });
+
   it("«что умеешь» отвечается сразу и без модели, и сказано, откуда числа (шаг 132)", async () => {
     // Ответ известен заранее — ему незачем ждать чтения реестра или модели.
     render(<Voice onOpen={() => {}} />);
