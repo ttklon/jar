@@ -193,7 +193,11 @@ export function allow(path: string, limits: Limits): Verdict {
 
 /** Одна строка для экрана: пустили или нет и почему. */
 export function say(got: Verdict): string {
-  return got.ok ? `путь в пределах: ${got.canon}` : `отказ: ${got.why}`;
+  if (!got.ok) return `отказ: ${got.why}`;
+  // Разрешённое **согласием** (шаг 171) называется своим словом: «путь в пределах»
+  // стёрло бы, что предела тут нет, а человек дал слово на одно дело.
+  if (got.why.startsWith("разрешено на это дело")) return got.why;
+  return `путь в пределах: ${got.canon}`;
 }
 
 /**
@@ -212,4 +216,83 @@ export function suggest(path: string): string | null {
   // `D:` без слэша — не папка, а диск; предложить такое значит предложить корень.
   const folder = parts.join("\\");
   return /^[A-Za-z]:$/.test(folder) || folder.length === 0 ? null : folder;
+}
+
+/**
+ * Явное согласие «работать вне списка» (шаг 171).
+ *
+ * Зачем отдельно от исключений. Исключение — это **папка**, которую человек
+ * назвал (шаг 164). А здесь — решение «эта одна задача может трогать то, чего в
+ * списке нет», и оно живёт **до конца дела**, а не до конца приложения: широкое
+ * согласие, выданное однажды, пережило бы и забылось, а вместе с ним и весь
+ * предел.
+ *
+ * Правила:
+ *
+ *  1. **по умолчанию узко.** Список папок пуст — работать негде; это рабочее
+ *     состояние, а не повод «разрешить на всякий случай»;
+ *  2. **согласие ограничено делом.** `key` — то, на что согласились; другое дело
+ *     — другое согласие;
+ *  3. **у согласия есть дата** и срок: через час оно кончается само, иначе
+ *     «одноразовое» становится постоянным;
+ *  4. **согласие не расширяет предел.** Оно пускает **одно** дело, а не делает
+ *     всё разрешённым: следующая проверка снова упрётся в предел.
+ */
+export interface Consent {
+  /** На что согласились — ключ дела. */
+  key: string;
+  /** Когда дали, мс. */
+  at: number;
+  /** До какого момента действует. */
+  until: number;
+}
+
+/** Сколько живёт согласие «вне списка». Час, а не вечность. */
+export const CONSENT_MS = 60 * 60 * 1000;
+
+/** Дать согласие на одно дело. */
+export function consentTo(key: string, now: number): Consent {
+  return { key: key.trim(), at: now, until: now + CONSENT_MS };
+}
+
+/**
+ * Действует ли согласие для этого дела.
+ *
+ * Пустой ключ не совпадает ни с чем: «согласен на всё» через пустую строку — это
+ * дыра, а не удобство.
+ */
+export function consented(consent: Consent | null, key: string, now: number): { ok: boolean; said: string } {
+  if (consent === null) return { ok: false, said: "согласия на работу вне списка нет" };
+  if (consent.key.length === 0) return { ok: false, said: "согласие без дела не считается" };
+  if (consent.key !== key.trim()) {
+    return { ok: false, said: `согласие было на другое дело (${consent.key}) — это не разрешение на всё` };
+  }
+  if (now > consent.until) {
+    return { ok: false, said: "согласие кончилось: оно было на час, а не навсегда" };
+  }
+  return { ok: true, said: "" };
+}
+
+/**
+ * Пускать ли путь с учётом согласия.
+ *
+ * Согласие проверяется **только** когда предел отказал: если путь и так внутри
+ * выбранной папки, спрашивать нечего.
+ */
+export function allowWith(path: string, limits: Limits, consent: Consent | null, key: string, now: number): Verdict {
+  const first = allow(path, limits);
+  if (first.ok) return first;
+  const yes = consented(consent, key, now);
+  if (!yes.ok) {
+    return { ...first, why: `${first.why}; ${yes.said}` };
+  }
+  // Согласие на месте, но `allow` всё равно отказывает — значит путь не понять, а
+  // не «вне списка». Согласие не делает непонятный путь понятным.
+  if (first.why.includes("не понять")) return first;
+  return {
+    ok: true,
+    why: `разрешено на это дело до ${new Date(consent!.until).toISOString().slice(11, 16)} — вне списка`,
+    canon: first.canon,
+    by: "",
+  };
 }

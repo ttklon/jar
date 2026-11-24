@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { allow, canon, inside, NOTHING, say, suggest, type Limits } from "./folderLimit";
+import { allow, allowWith, canon, CONSENT_MS, consented, consentTo, inside, NOTHING, say, suggest, type Limits } from "./folderLimit";
 
 /**
  * Шаг 164: выход за выбранные папки запрещён, исключение — явное.
@@ -119,5 +119,46 @@ describe("строка для экрана", () => {
 
   it("разрешение называет канон пути", () => {
     expect(say(allow("c:/фото/a.jpg", фото))).toContain("путь в пределах: C:\\фото\\a.jpg");
+  });
+});
+
+describe("согласие на работу вне списка — на дело и на час (шаг 171)", () => {
+  const NOW = Date.parse("2026-11-20T12:00:00Z");
+  const фото: Limits = { folders: ["C:\\Фото"], except: [] };
+
+  it("без согласия — отказ, и сказано, чего не хватает", () => {
+    const got = allowWith("D:\\Архив\\a.zip", фото, null, "почистить архив", NOW);
+    expect(got.ok).toBe(false);
+    expect(got.why).toContain("согласия на работу вне списка нет");
+  });
+
+  it("согласие на это дело пускает и называет срок", () => {
+    const consent = consentTo("почистить архив", NOW);
+    const got = allowWith("D:\\Архив\\a.zip", фото, consent, "почистить архив", NOW + 1000);
+    expect(got.ok).toBe(true);
+    expect(got.why).toContain("вне списка");
+  });
+
+  it("согласие на одно дело — не разрешение на всё", () => {
+    const consent = consentTo("почистить архив", NOW);
+    const got = allowWith("D:\\Архив\\a.zip", фото, consent, "другое дело", NOW);
+    expect(got.ok).toBe(false);
+    expect(got.why).toContain("не разрешение на всё");
+  });
+
+  it("через час согласие кончается само", () => {
+    const consent = consentTo("дело", NOW);
+    expect(allowWith("D:\\a", фото, consent, "дело", NOW + CONSENT_MS + 1).ok).toBe(false);
+    expect(allowWith("D:\\a", фото, consent, "дело", NOW + CONSENT_MS - 1).ok).toBe(true);
+  });
+
+  it("пустой ключ не считается согласием — иначе это дыра", () => {
+    const consent = consentTo("   ", NOW);
+    expect(consented(consent, "  ", NOW).ok).toBe(false);
+  });
+
+  it("путь внутри списка согласия не спрашивает", () => {
+    const got = allowWith("C:\\Фото\\a.jpg", фото, null, "дело", NOW);
+    expect(got.ok).toBe(true);
   });
 });

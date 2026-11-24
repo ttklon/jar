@@ -60,7 +60,7 @@ import { mark as repeatMark } from "../lib/repeatHand";
 import { allows as grantAllows, book as grantBook, EMPTY as EMPTY_GRANTS, give as grantGive, load as loadGrants, onRevoke as grantOnRevoke, revoke as grantRevoke, save as saveGrants, type Book as GrantBook, type Channel as GrantChannel } from "../lib/grants";
 import { exits as outboundExits, line as outboundLine, summary as outboundSummary } from "../lib/outbound";
 import { answer as scriptAnswer, limits as scriptLimits, limitsLine as scriptLimitsLine } from "../lib/scriptRules";
-import { allow as folderAllow, NOTHING as NO_FOLDERS, say as folderSay, suggest as folderSuggest, type Limits as FolderLimits } from "../lib/folderLimit";
+import { allow as folderAllow, allowWith as folderAllowWith, consentTo as folderConsentTo, NOTHING as NO_FOLDERS, say as folderSay, suggest as folderSuggest, type Consent as FolderConsent, type Limits as FolderLimits } from "../lib/folderLimit";
 import { journalNote as trashJournalNote, restoreCount as trashRestoreCount, say as trashSay, where as trashWhere } from "../lib/trashFirst";
 import { blast as blastOf, fromParams as blastFromParams, kindOf as blastKindOf, line as blastLine, louder as blastLouder } from "../lib/blast";
 import { neverDones as rightsNever, countWords as rightsCount, RULES as rightsRules, type Row as RightsRow } from "../lib/rights";
@@ -967,6 +967,19 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     }
   });
   const [folderDraft, setFolderDraft] = useState("");
+  /**
+   * Шаг 171: согласие на работу **вне списка** — на одно дело и на час. Не
+   * сохраняется на диск намеренно: широкое согласие, пережившее перезапуск, —
+   * это уже не одноразовое разрешение, а новый предел.
+   */
+  const [outsideConsent, setOutsideConsent] = useState<FolderConsent | null>(null);
+  /**
+   * Ключ дела для согласия — **один** на все проверки шага 171. Раньше в одном
+   * месте стояла цель плана, в другом `"без цели"`, и согласие не находилось:
+   * экран говорил «нет» после нажатия «разрешить».
+   */
+  const deedKey = (draft?.plan?.goal ?? "").trim() || "без цели";
+  const [outsideBusy, setOutsideBusy] = useState(false);
   const [thinking, setThinking] = useState(false);
   humanWaitingRef.current = thinking;
 
@@ -4252,8 +4265,18 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                   const paths = Object.entries(step?.params ?? {})
                     .filter(([name]) => name === "path" || name === "from" || name === "to")
                     .map(([, value]) => value);
-                  const folders_ = paths.map((value) => ({ value, got: folderAllow(value, folders) }));
-                  const outside = folders_.filter((item) => !item.got.ok);
+                  // С учётом согласия шага 171: путь, разрешённый на это дело, — не
+                  // отказ. Иначе человек разрешал бы, а экран продолжал говорить «нет».
+                  const folders_ = paths.map((value) => ({
+                    value,
+                    got: folderAllowWith(value, folders, outsideConsent, deedKey, Date.now()),
+                  }));
+                  // Показываем и отказ, и состоявшееся согласие: «разрешено на
+                  // это дело до 14:30» — это факт, который человек должен видеть,
+                  // а не помнить.
+                  const outside = folders_.filter(
+                    (item) => !item.got.ok || item.got.why.startsWith("разрешено на это дело"),
+                  );
                   return (
                     <Text key={`danger-${index}`} className={styles.note}>
                       {`${index + 1}. ${strongMark(danger)} · ${asked.text}`}
@@ -4336,6 +4359,32 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             </Button>
           ) : null}
         </div>
+        {/*
+          Шаг 171: всё вне списка — только с явным согласием, и согласие это на
+          **одно дело** и на час. Оно не сохраняется: широкое разрешение,
+          пережившее перезапуск, — это уже новый предел, а не одноразовое слово.
+        */}
+        {(draft?.plan?.steps ?? []).some((step) =>
+          Object.entries(step.params ?? {}).some(
+            ([name, value]) =>
+              (name === "path" || name === "from" || name === "to") &&
+              !folderAllowWith(value, folders, outsideConsent, deedKey, Date.now()).ok,
+          ),
+        ) ? (
+          <Button
+            size="small"
+            appearance="subtle"
+            disabled={outsideBusy}
+            onClick={() => {
+              setOutsideConsent(folderConsentTo(deedKey, Date.now()));
+              setOutsideBusy(true);
+              speak(`разрешил на это дело, на час: ${deedKey}`);
+              setOutsideBusy(false);
+            }}
+          >
+            Разрешить на это дело (на час)
+          </Button>
+        ) : null}
         {(draft?.plan?.steps ?? []).some((step) =>
           Object.entries(step.params ?? {}).some(
             ([name, value]) => (name === "path" || name === "from" || name === "to") && !folderAllow(value, folders).ok,

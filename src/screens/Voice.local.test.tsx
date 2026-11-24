@@ -1963,6 +1963,57 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/удаление в корзину: вернуть можно/)).toBeTruthy();
   });
 
+  it("вне списка — только с явным согласием на это дело (шаг 171)", async () => {
+    // Дефект: предел был, но выйти за него на одно дело было нельзя — либо
+    // правь список навсегда, либо ничего.
+    localStorage.setItem("jar.folders", JSON.stringify({ folders: ["C:\\Фото"], except: [] }));
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Call: { registry: "files|удалить|в корзину", params: {}, why: "удали" } },
+      plan: {
+        plan: {
+          goal: "почистить архив",
+          source: "model",
+          steps: [
+            { registry: "files|удалить|в корзину", params: { path: "D:\\Архив\\a.zip" }, why: "старое" },
+          ],
+        },
+        problems: [],
+        questions: [],
+        gates: [
+          {
+            position: 1,
+            registry: "files|удалить|в корзину",
+            decision: "confirm",
+            risk: "destructive",
+            wants_approval: true,
+          },
+        ],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "почисти архив" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Цена ошибки")).toBeTruthy());
+
+    // До согласия — отказ, и причина названа.
+    expect(screen.getByText(/отказ: вне выбранных папок/)).toBeTruthy();
+    // Согласие — кнопкой, на это дело.
+    fireEvent.click(screen.getByRole("button", { name: "Разрешить на это дело (на час)" }));
+    // После согласия тот же путь больше не отказ: иначе разрешение было бы
+    // формальностью, а экран продолжал бы говорить «нет».
+    await waitFor(() => expect(screen.queryByText(/отказ: вне выбранных папок/)).toBeNull());
+    // И сказано, что это именно на дело и до срока.
+    expect(screen.getByText(/разрешено на это дело до /)).toBeTruthy();
+    localStorage.removeItem("jar.folders");
+  });
+
   it("путь вне выбранных папок — отказ до запуска, и предлагается ближайшая папка (шаг 164)", async () => {
     // Дефект: путь из фразы чистился от кавычек и шёл в дело. `..` в середине
     // выводил наружу, оставаясь «похожим» на путь внутри папки.
