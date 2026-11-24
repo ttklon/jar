@@ -128,3 +128,25 @@ describe("старый профиль называется старым", () => 
     ).toBe("Notepad: проверен 2 дня назад, стек UIA, 12 якорей");
   });
 });
+
+describe("чужой профиль отклоняется, и причина названа (шаг 177)", () => {
+  it("чтение чужой папки пользователя — отказ с причиной", () => {
+    // Дефект: список знал про `iex` и `schtasks`, но не про самое простое —
+    // залезть в чужой профиль. «Файл рядом» и «чужие данные» — не одно и то же.
+    const got = answer("Get-ChildItem -Path 'C:\\Users\\Мария\\Documents' -Recurse");
+    expect(got.ok).toBe(false);
+    expect(got.said).toContain("чужой профиль");
+    expect(got.found.map((item) => item.piece)).toContain("c:\\users\\");
+  });
+
+  it("свой профиль через %USERPROFILE% не считается чужим", () => {
+    // Иначе правило запретило бы работать со своими же файлами.
+    expect(answer("Copy-Item $env:USERPROFILE\\a.txt C:\\Temp\\").ok).toBe(true);
+    expect(answer("Get-ChildItem '%USERPROFILE%\\Documents'").ok).toBe(true);
+  });
+
+  it("C:\\Users\\ без имени пользователя — не профиль", () => {
+    // Сам по себе корень — это перечисление папок, а не чтение чужого профиля.
+    expect(answer("Get-PSDrive").ok).toBe(true);
+  });
+});

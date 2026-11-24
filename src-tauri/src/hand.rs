@@ -105,6 +105,33 @@ pub fn forget(memory: &Memory, key: &str) -> Result<(), String> {
 /// черновике **никогда**, при любой формулировке задачи.
 ///
 /// Сравнение без учёта регистра: `IEX` и `iex` — одно и то же.
+/// Свой профиль — не чужой (шаг 177).
+///
+/// `C:\Users\<имя>\` — доступ к чужим данным. Но `%USERPROFILE%` и
+/// `$env:USERPROFILE` указывают на **самого** человека, и правило про `c:\users\`
+/// задело бы их: запрет стал бы запретом работать со своими файлами. Поэтому перед
+/// проверкой пути внутри `C:\Users\` вычищаются, если в тексте есть переменная
+/// своего профиля.
+fn own_profile(lower: String) -> String {
+    if !(lower.contains("%userprofile%") || lower.contains("$env:userprofile")) {
+        return lower;
+    }
+    lower
+        .split("c:\\users\\")
+        .enumerate()
+        .map(|(i, part)| {
+            if i == 0 {
+                part.to_string()
+            } else {
+                // отбрасываем имя пользователя до следующего слэша
+                let rest = part.find('\\').map(|at| &part[at..]).unwrap_or("");
+                format!("c:\\users\\<свой>{rest}")
+            }
+        })
+        .collect::<Vec<_>>()
+        .concat()
+}
+
 pub const FORBIDDEN: &[(&str, &str)] = &[
     ("invoke-expression", "выполнение строки как кода"),
     ("iex ", "выполнение строки как кода"),
@@ -133,6 +160,10 @@ pub const FORBIDDEN: &[(&str, &str)] = &[
     ("rmdir /s", "необратимое удаление"),
     ("format ", "необратимое удаление"),
     ("shutdown", "остановка машины"),
+    // Шаг 177: чужой профиль. `C:\Users\<имя>\` — это доступ к чужим данным, а не
+    // «файл рядом»: свой профиль скрипт знает как `%USERPROFILE%`, и чужое имя в
+    // пути означает, что он идёт не туда, куда смотрит человек.
+    ("c:\\users\\", "чужой профиль: работа с чужой папкой пользователя"),
 ];
 
 /// Почему черновик не годится. Пусто — годится к показу человеку.
@@ -140,7 +171,7 @@ pub const FORBIDDEN: &[(&str, &str)] = &[
 /// Это не проверка безопасности, а проверка приличия: скрипт с `iex` не показываем даже
 /// человеку, чтобы он случайно не скопировал его вручную.
 pub fn scan(code: &str) -> Vec<String> {
-    let lower = code.to_lowercase();
+    let lower = own_profile(code.to_lowercase());
     FORBIDDEN
         .iter()
         .filter(|(needle, _)| lower.contains(&needle.to_lowercase()))
@@ -226,6 +257,28 @@ mod tests {
         // Регистр не спасает запрещённое.
         assert!(!scan("IEX $x").is_empty());
         assert!(!scan("Start-Process -Verb RunAs powershell").is_empty());
+    }
+
+    #[test]
+    fn reading_another_users_profile_is_refused_with_the_reason() {
+        // Шаг 177: самый простой способ достать чужие данные — прочитать чужую
+        // папку. Причина названа словами, а не «запрещено».
+        let found = scan("Get-ChildItem -Path 'C:\\Users\\Мария\\Documents' -Recurse");
+        assert!(found.iter().any(|line| line.contains("чужой профиль")), "{:?}", found);
+
+        // Свой профиль через переменную — не чужой: иначе правило запрещает
+        // работать со своими же файлами.
+        let mine = "Copy-Item $env:USERPROFILE\\a.txt C:\\Temp\\";
+        assert!(scan(mine).is_empty(), "{:?}", scan(mine));
+    }
+
+    #[test]
+    fn the_own_profile_variable_whitelists_the_users_own_folder() {
+        // Правило про `c:\users\` не должно запрещать человеку его же файлы.
+        assert!(!own_profile("copy $env:userprofile\\a.txt".into()).contains("c:\\users\\a"));
+        assert!(scan("Get-ChildItem '%USERPROFILE%\\Documents'").is_empty());
+        // А без переменной — чужой путь остаётся чужим.
+        assert!(!scan("Get-ChildItem 'C:\\Users\\Мария'").is_empty());
     }
 
     #[test]

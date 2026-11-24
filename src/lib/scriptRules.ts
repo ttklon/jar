@@ -83,6 +83,10 @@ export const BANNED: readonly Banned[] = [
   { piece: "rmdir /s", why: "необратимое удаление" },
   { piece: "format ", why: "необратимое удаление" },
   { piece: "shutdown", why: "остановка машины" },
+  // Шаг 177: чужой профиль. `C:\Users\<имя>\` — доступ к чужим данным, а не
+  // «файл рядом»: свой профиль скрипт знает как `%USERPROFILE%`, и чужое имя в
+  // пути означает, что он идёт не туда, куда смотрит человек.
+  { piece: "c:\\users\\", why: "чужой профиль: работа с чужой папкой пользователя" },
 ];
 
 /** Лимиты, с которыми идёт проба. Числа — из ядра, а не «около того». */
@@ -122,7 +126,17 @@ export function limits(where: Where, kernel: Limits = KERNEL): Limits {
  */
 export function check(code: string): Banned[] {
   const lower = code.toLowerCase();
-  return BANNED.filter((item) => lower.includes(item.piece));
+  /*
+    Шаг 177: свой профиль — не чужой. `C:\Users\%USERNAME%\…` и переменная
+    `%USERPROFILE%` указывают на того же человека; правило про `c:\users\` их
+    задело бы, и запрет стал бы запретом работать со своими файлами.
+
+    Подставляем имя текущего пользователя, если оно есть в тексте как переменная:
+    тогда «свой» путь вычищается до проверки списка.
+  */
+  const mine = /%userprofile%|\$env:userprofile|%username%|\$env:username/g;
+  const cleaned = mine.test(lower) ? lower.replace(/c:\\users\\[^\\"']*/g, "c:\\users\\<свой>") : lower;
+  return BANNED.filter((item) => cleaned.includes(item.piece));
 }
 
 /** Итог проверки — как он звучит на экране. */
