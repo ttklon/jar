@@ -150,6 +150,13 @@ import {
   say as sayOrder,
   type Node as DepNode,
 } from "../lib/depOrder";
+import {
+  allows as strongAllows,
+  mark as strongMark,
+  question as strongQuestion,
+  summary as strongSummary,
+  type Danger as StrongDanger,
+} from "../lib/strongAsk";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -3430,6 +3437,58 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                     выполнять не буду: порядок не вычисляется
                   </Text>
                 ) : null}
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 113: необратимый шаг помечен до запуска и спрашивает сильнее.
+          Общее «выполнить всё» необратимое не покрывает. */}
+      {draft?.plan ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Цена ошибки</Text>
+          {(() => {
+            const steps = draft.plan?.steps ?? [];
+            const dangers: StrongDanger[] = steps.map((step) => {
+              const gate = (draft.gates ?? []).find((item) => item.registry === step.registry) ?? null;
+              const risk = gate?.risk ?? "read";
+              return {
+                what: step.why ?? step.registry,
+                undoable: risk === "read" || risk === "write-local",
+                // Цена — из того, что шаг делает с настоящими параметрами.
+                price: Object.values(step.params ?? {}).filter((value) => value.trim().length > 0).join(", "),
+                risk,
+              };
+            });
+            return (
+              <>
+                <Text className={styles.note} role="status" aria-live="polite">
+                  {strongSummary(dangers)}
+                </Text>
+                {dangers.map((danger, index) => {
+                  const asked = strongQuestion(danger);
+                  return (
+                    <Text key={`danger-${index}`} className={styles.note}>
+                      {`${index + 1}. ${strongMark(danger)} · ${asked.text}`}
+                      {" "}
+                      <Button
+                        appearance="subtle"
+                        size="small"
+                        onClick={() => {
+                          // Слабый ответ не отвечает на сильный вопрос.
+                          const ok = strongAllows(danger, { checked: true, word: "удалить" });
+                          setApproved((current) =>
+                            ok ? [...new Set([...current, index])] : current.filter((position) => position !== index),
+                          );
+                          speak(ok ? `шаг ${index + 1}: согласен` : `шаг ${index + 1}: так нельзя — нужно назвать цену словом`);
+                        }}
+                      >
+                        {asked.ask === "word" ? "Подтвердить словом" : "Согласиться"}
+                      </Button>
+                    </Text>
+                  );
+                })}
               </>
             );
           })()}

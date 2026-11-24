@@ -1946,6 +1946,12 @@ describe("локальное распознавание на экране", () =
     // красоты нет: независимые шаги остаются как записаны.
     expect(screen.getByText("Порядок шагов")).toBeTruthy();
     expect(screen.getByText(/порядок: 2 шагов/)).toBeTruthy();
+
+    // Шаг 113: необратимый шаг помечен до запуска и спрашивает сильнее. Второй шаг
+    // плана — `destructive` с ценой «12 файлов», значит вопрос со словом.
+    expect(screen.getByText("Цена ошибки")).toBeTruthy();
+    expect(screen.getByText(/необратимых 1 из 2/)).toBeTruthy();
+    expect(screen.getByText(/НЕ ОТМЕНИТЬ: /)).toBeTruthy();
   });
 
   it("изменение ответа во время перепроверки отменяет запуск устаревшего плана", async () => {
