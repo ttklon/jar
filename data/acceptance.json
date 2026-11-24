@@ -1,0 +1,18 @@
+{
+  "scenario": "сказал → сделано",
+  "runs": [
+    {
+      "date": "2026-11-24",
+      "at": "2026-11-24T15:29:21Z",
+      "scenario": "сказал → сделано",
+      "what": "фраза находит действие, права названы причиной, план не подделывает исполнение",
+      "files": [
+        "src/lib/headline.test.ts",
+        "src/lib/nothingExtra.test.ts",
+        "src/lib/harshEnv.test.ts",
+        "src/screens/Catalog.test.tsx"
+      ],
+      "passed": true
+    }
+  ]
+}

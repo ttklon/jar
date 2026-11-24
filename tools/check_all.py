@@ -56,6 +56,9 @@ STEPS: list[tuple[str, list[str], str]] = [
     # Шаг 248: обратная сверка. Разрыв здесь тише: код умеет, документация молчит,
     # и человек не узнаёт о возможности, которая есть.
     ("code does not promise more than the docs", ["tools/code_truth.py"], "every undo kind and risk level is named in the guide"),
+    # Шаг 249: «зелено» не хранится — следующий прогон затирает прошлый. Запись
+    # с датой и исходом отвечает на «проходил ли сценарий на прошлой неделе».
+    ("the live scenario ran this week", ["tools/acceptance.py", "--check"], "the last acceptance run is recent and green"),
     ("targets", ["tools/app_targets.py"], "tier A apps have profiles"),
     ("skills", ["tools/skills.py"], "skills reference real rows, risk not lowered"),
     ("hands", ["tools/hands.py"], "data/tools.json points at real, allowed registry rows"),

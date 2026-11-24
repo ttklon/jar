@@ -98,6 +98,7 @@
 
 | Файл | Что делает |
 | --- | --- |
+| `acceptance.py` | — |
 | `actions.py` | реестр → actions.json + docs/ACTIONS.md |
 | `app_targets.py` | каталог приложений → docs/APP-COVERAGE.md |
 | `audit_actions.py` | аудит покрытия → docs/COVERAGE.md |

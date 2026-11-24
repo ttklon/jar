@@ -126,6 +126,14 @@ jobs:
           python3 tools/docs_truth.py --selftest
           python3 tools/docs_truth.py
 
+      # Шаг 249: еженедельный живой сценарий с записью. Здесь только проверка
+      # свежести записи: сам прогон — еженедельный, он не должен гоняться на
+      # каждой правке (иначе «недельный» перестаёт что-либо значить).
+      - name: The live scenario ran this week
+        run: |
+          python3 tools/acceptance.py --selftest
+          python3 tools/acceptance.py --check
+
       # Шаг 248: обратная сверка — что код умеет, документация обязана назвать.
       - name: Code does not promise more than the docs
         run: |
