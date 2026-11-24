@@ -1932,6 +1932,10 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText("Связка рук")).toBeTruthy();
     expect(screen.getByText(/дел по словам: 1 · дел в плане: 2/)).toBeTruthy();
     expect(screen.getByText(/в связке есть опасный шаг — согласие по нему отдельное/)).toBeTruthy();
+
+    // Шаг 109: бюджет назван числом до запуска, а не выясняется остановкой.
+    expect(screen.getByText("Бюджет дела")).toBeTruthy();
+    expect(screen.getByText(/шагов 0 из 10, секунд 0 из 60, память 64 МБ — в пределах/)).toBeTruthy();
   });
 
   it("изменение ответа во время перепроверки отменяет запуск устаревшего плана", async () => {

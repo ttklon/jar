@@ -148,6 +148,15 @@ import {
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
+import {
+  DEFAULT as defaultBudget,
+  check as budgetCheck,
+  nothing as budgetNothing,
+  offer as budgetOffer,
+  outcome as budgetOutcome,
+  step as budgetStep,
+  type Budget as RunBudget,
+} from "../lib/budget";
 import { already as repeatAlready, decide as repeatDecide, offer as repeatOffer } from "../lib/repeatDeed";
 import { attention as reportAttention, one as oneReport, summary as reportSummary, whole as wholeReport } from "../lib/oneReport";
 import { answer as handAnswer, coverage as handCoverage, line as handLine, worst as handWorst } from "../lib/handAnswer";
@@ -503,6 +512,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // выставленный один раз.
   const [cancel, setCancel] = useState(() => cancelStart(0));
   const [cancelNote, setCancelNote] = useState<string | null>(null);
+  // Шаг 109: у дела есть бюджет, и по нему — остановка с причиной. Три предела
+  // названы числом: предел, который не назван, наступает неожиданно.
+  const [runBudget] = useState<RunBudget>(defaultBudget);
+  const [spent, setSpent] = useState(() => budgetNothing());
   const [report, setReport] = useState<PlanReport | null>(null);
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
@@ -3285,6 +3298,48 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                     {`${item.index + 1}. ${item.said}`}
                   </Text>
                 ))}
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 109: бюджет дела — числом до запуска, остановка — с причиной.
+          Остановка по бюджету не выдаёт себя ни за провал, ни за успех. */}
+      {draft?.plan ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Бюджет дела</Text>
+          {(() => {
+            const state = budgetCheck(runBudget, spent);
+            const verdict = budgetOutcome(state);
+            return (
+              <>
+                <Text className={styles.note} role="status" aria-live="polite">
+                  {`шагов ${Math.min(spent.steps, runBudget.steps)} из ${runBudget.steps}, секунд ${Math.min(spent.seconds, runBudget.seconds)} из ${runBudget.seconds}, память ${runBudget.megabytes} МБ — ${
+                    verdict === "budget" ? "бюджет кончился" : "в пределах"
+                  }`}
+                </Text>
+                {state.said ? <Text className={styles.note}>{state.said}</Text> : null}
+                {verdict === "budget" ? (
+                  <Text className={styles.note}>{budgetOffer(runBudget, spent)}</Text>
+                ) : (
+                  <Button
+                    appearance="subtle"
+                    size="small"
+                    onClick={() => {
+                      // Тратим по отчёту, а не «сколько показалось»: бюджет — это
+                      // счётчик, а не настроение.
+                      const reported = report?.steps.length ?? 1;
+                      const before = spent;
+                      let after = before;
+                      for (let index = 0; index < reported; index += 1) after = budgetStep(after, 1, 0);
+                      setSpent(after);
+                      speak(budgetCheck(runBudget, after).said || `сделано ${reported}, бюджет в порядке`);
+                    }}
+                  >
+                    Учесть бюджет
+                  </Button>
+                )}
               </>
             );
           })()}
