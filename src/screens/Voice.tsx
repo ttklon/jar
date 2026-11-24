@@ -222,6 +222,12 @@ import {
   scaled as latencyScaled,
   tally as latencyTally,
 } from "../lib/latencyBudget";
+import {
+  line as latencyLine,
+  repeated as latencyRepeated,
+  total as latencyTotal,
+  type Deed as LatencyDeed,
+} from "../lib/latencyReport";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -3937,6 +3943,37 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                 <Text className={styles.note}>
                   {sayLatency(latencyTally(latencyDefault, [{ kind: (draft?.plan?.steps.length ?? 0) > 1 ? "complex" : "simple", ms: toSound > 0 ? toSound : null }]))}
                 </Text>
+                {(() => {
+                  // Шаг 124: нарушение — строка рядом с делом, а не сноска.
+                  const kind = (draft?.plan?.steps.length ?? 0) > 1 ? "complex" : "simple";
+                  const deeds: LatencyDeed[] = [
+                    {
+                      what: draft?.plan?.goal ?? "ответ",
+                      ms: toSound > 0 ? toSound : null,
+                      limit: latencyCheck(latencyDefault, { kind, ms: null }).limit,
+                    },
+                  ];
+                  const sum = latencyTotal(deeds);
+                  return (
+                    <>
+                      {deeds.map((deed) => (
+                        <Text key={`lat-${deed.what}`} className={styles.note}>
+                          {latencyLine(deed)}
+                        </Text>
+                      ))}
+                      <Text className={styles.note} role="status" aria-live="polite">
+                        {sum.said}
+                      </Text>
+                      {latencyRepeated(deeds).length > 0 ? (
+                        <Text className={styles.note}>
+                          {`чаще всего за бюджетом: ${latencyRepeated(deeds)
+                            .map((item) => `${item.what} (${item.times})`)
+                            .join(", ")}`}
+                        </Text>
+                      ) : null}
+                    </>
+                  );
+                })()}
                 {segmentLines(trace).map((line) => (
                   <Text key={`seg-${line}`} className={styles.note}>
                     {line}
