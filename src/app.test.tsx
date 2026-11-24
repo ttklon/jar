@@ -534,3 +534,24 @@ describe("App", () => {
     expect((entry as HTMLInputElement).value).toBe("");
   });
 });
+
+describe("уменьшение движения доходит до документа (шаг 187)", () => {
+  it("при включённой настройке системы на корне стоит data-motion=still", async () => {
+    // Дефект: флаг вычислялся и оставался переменной — настройка, которая
+    // ничего не меняет, это «не сделано», а не «почти сделано».
+    const origin = globalThis.matchMedia;
+    globalThis.matchMedia = ((q: string) => ({
+      matches: q.includes("prefers-reduced-motion"),
+      media: q,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof globalThis.matchMedia;
+    globalThis.localStorage?.setItem(WELCOME_KEY, "1");
+
+    render(<App />);
+    await waitFor(() => expect(screen.getByRole("navigation")).toBeTruthy());
+    expect(document.documentElement.getAttribute("data-motion")).toBe("still");
+
+    globalThis.matchMedia = origin;
+  });
+});

@@ -65,6 +65,7 @@ import {
   type ThemeChoice,
 } from "./lib/theme";
 import { ask as askSystem, plan as systemPlan, type System as SystemPrefs } from "./lib/contrast";
+import { apply as applyMotion, CSS as MOTION_CSS } from "./lib/motion";
 import { apps, ask, flows, hands, journal, models, t, voice } from "./i18n/ru";
 import { APP_VERSION } from "./version";
 
@@ -280,6 +281,23 @@ export function App() {
     };
   }, [systemDark]);
   const prefsPlan = systemPlan(prefs);
+  /**
+   * Шаг 187: `still` вычислялся и никуда не доходил — настройка, которая ничего
+   * не меняет. Теперь она **применяется атрибутом на корне документа**: так её
+   * видят и CSS, и чужие компоненты, и не надо передавать проп в сорок мест.
+   */
+  useEffect(() => {
+    const undo = applyMotion(document.documentElement, prefsPlan.still);
+    // Правило вставляется один раз: без него атрибут — просто подпись.
+    const id = "jar-motion";
+    if (!document.getElementById(id)) {
+      const style = document.createElement("style");
+      style.id = id;
+      style.textContent = MOTION_CSS;
+      document.head.appendChild(style);
+    }
+    return undo;
+  }, [prefsPlan.still]);
   const dark = prefsPlan.systemColors ? prefsPlan.theme === "dark" : resolveTheme(choice, systemDark) === "dark";
   // Ширина окна: при 200% масштабе или маленьком окне колонка уходит наверх,
   // иначе содержимое сжимается в полоску. Правило — в `layout.ts`, здесь только подписка.
