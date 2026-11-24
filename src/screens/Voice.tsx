@@ -58,6 +58,7 @@ import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
 import { allows as grantAllows, book as grantBook, EMPTY as EMPTY_GRANTS, give as grantGive, load as loadGrants, onRevoke as grantOnRevoke, revoke as grantRevoke, save as saveGrants, type Book as GrantBook, type Channel as GrantChannel } from "../lib/grants";
+import { executable as launchExecutable, line as launchLine, needsAsk as launchNeedsAsk, origin as launchOrigin } from "../lib/launchOrigin";
 import { allow as netAllow, askBefore as netAskBefore, say as netSay } from "../lib/networkAllow";
 import { exits as outboundExits, line as outboundLine, summary as outboundSummary } from "../lib/outbound";
 import { answer as scriptAnswer, limits as scriptLimits, limitsLine as scriptLimitsLine } from "../lib/scriptRules";
@@ -4285,6 +4286,19 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                     .filter(([name]) => name === "url" || name === "link" || name === "href")
                     .map(([, value]) => ({ value, got: netAllow(value) }));
                   const blocked = links.filter((item) => !item.got.ok);
+                  // Шаг 173: перед запуском программы видно, **что** запускается и
+                  // **откуда**. Путь говорит «где», а не «откуда»: `Program Files` и
+                  // `%TEMP%` в строке выглядят одинаково и означают разное.
+                  const launches = /запустить\|программ/.test(step?.registry ?? "")
+                    ? Object.entries(step?.params ?? {})
+                        .filter(([name]) => name === "path")
+                        .map(([, value]) => ({
+                          value,
+                          source: launchOrigin(value),
+                          ok: launchExecutable(value),
+                          ask: launchNeedsAsk(launchOrigin(value)),
+                        }))
+                    : [];
                   const asks = blocked.map((item) => netAskBefore(item.value).said);
                   return (
                     <Text key={`danger-${index}`} className={styles.note}>
@@ -4300,6 +4314,13 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                       ))}
                       {asks.map((said) => (
                         <span key={`ask-${said}`}>{` · ${said}`}</span>
+                      ))}
+                      {launches.map((item) => (
+                        <span key={`launch-${item.value}`}>
+                          {` · ${launchLine(item.source)}${item.ask.ask ? ` · ${item.ask.why}` : ""}${
+                            item.ok.ok ? "" : ` · ${item.ok.said}`
+                          }`}
+                        </span>
                       ))}
                       {" "}
                       <Button

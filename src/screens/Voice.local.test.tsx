@@ -1963,6 +1963,54 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/удаление в корзину: вернуть можно/)).toBeTruthy();
   });
 
+  it("перед запуском программы видно, что и откуда, и временная папка настораживает (шаг 173)", async () => {
+    // Дефект: путь говорит «где», а не «откуда». `%TEMP%` и `Program Files` в
+    // строке выглядят одинаково.
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Call: { registry: "apps-windows|запустить|программу", params: {}, why: "открой" } },
+      plan: {
+        plan: {
+          goal: "открыть программу",
+          source: "model",
+          steps: [
+            {
+              registry: "apps-windows|запустить|программу",
+              params: { path: "C:\\Users\\test\\AppData\\Local\\Temp\\setup.exe" },
+              why: "установить",
+            },
+          ],
+        },
+        problems: [],
+        questions: [],
+        gates: [
+          {
+            position: 1,
+            registry: "apps-windows|запустить|программу",
+            decision: "confirm",
+            risk: "external",
+            wants_approval: true,
+          },
+        ],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "открой установщик" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Цена ошибки")).toBeTruthy());
+
+    // Что запускается и откуда — до нажатия.
+    expect(screen.getByText(/запустится setup\.exe — из временной папки/)).toBeTruthy();
+    // И это не «обычная программа»: причина названа.
+    expect(screen.getByText(/из временной папки: откуда файл — не понять/)).toBeTruthy();
+  });
+
   it("чужой сетевой адрес отклоняется до запуска, подделка через user@ тоже (шаг 172)", async () => {
     // Дефект: ядро проверяло схему, а не хост. «Начинается с https» — не проверка.
     vi.mocked(think).mockResolvedValueOnce({
