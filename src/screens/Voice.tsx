@@ -238,6 +238,14 @@ import {
   willPay as warmWillPay,
   type Kernel as WarmKernel,
 } from "../lib/warmStart";
+import {
+  busy as reactiveBusy,
+  can as reactiveCan,
+  stuck as reactiveStuck,
+  why as reactiveWhy,
+  word as reactiveWord,
+  type Job as ResponsiveJob,
+} from "../lib/responsive";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -631,6 +639,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [segments, setSegments] = useState<Partial<Record<SegmentKind, number | null>>>({});
   const [segmentsTotal, setSegmentsTotal] = useState(0);
   // Шаг 125: ядро поднимается **один раз**, и холодный старт назван числом.
+  // Шаг 126: блокируется действие, а не экран — состояние считается ниже, когда
+  // известны все настоящие флаги.
+  const [jobSince, setJobSince] = useState(Date.now());
   const [kernel, setKernel] = useState<WarmKernel>(warmInitial);
   const kernelRef = useRef<WarmKernel>(kernel);
   kernelRef.current = kernel;
@@ -1386,6 +1397,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       setBusy(false);
       setRunning(false);
       setThinking(false);
+      // Шаг 126: занятие снимается при любом исходе — здесь, отменой. Забытое снятие
+      // оставило бы экран серым до перезагрузки.
       setEngineBusy(false);
       setAlways(false);
       lastTaskRef.current = null;
@@ -2296,6 +2309,26 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
 
   // Слово у микрофона всегда (шаг 49): цвет — подсказка, слово — ответ. Его
   // видно на экране и передаётся в трей.
+  // Шаг 126: состояние занятия — из настоящих флагов; выбирается **самое позднее**,
+  // потому что именно оно объясняет, почему что-то недоступно.
+  const job: ResponsiveJob = running
+    ? "running"
+    : thinking
+      ? "thinking"
+      : busy
+        ? "transcribing"
+        : mic.listening
+          ? "listening"
+          : "none";
+  const jobStuck = reactiveStuck(job, jobSince, Date.now());
+  // Начало работы — отметка времени; конец — снятие. Это то, без чего «зависло» не
+  // отличить от «ещё думает».
+  const jobBusy = reactiveBusy(job);
+  useEffect(() => {
+    if (jobBusy) setJobSince((current) => (current === 0 ? Date.now() : current));
+    else setJobSince(Date.now());
+  }, [jobBusy]);
+
   const micState: MicState = micPause.paused
     ? "closed"
     : voiceError
@@ -3968,6 +4001,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             void segmentWord;
             return (
               <>
+                {/* Шаг 126: занятость названа словами; зависание — видно, а не «ещё думает». */}
+                <Text className={styles.note} role="status" aria-live="polite">
+                  {`сейчас: ${reactiveWord(job)}`}
+                </Text>
+                {jobStuck.stuck ? (
+                  <Text className={styles.note} role="alert">
+                    {jobStuck.said}
+                  </Text>
+                ) : null}
                 {/* Шаг 125: ядро поднимается один раз, холодный старт — числом. */}
                 <Text className={styles.note} role="status" aria-live="polite">
                   {sayWarm(kernel)}
@@ -4866,10 +4908,19 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         />
         <Button
           type="submit"
-          disabled={busy}
-          // Подпись подсказывает клавишу: сценарий «напечатал и нажал Enter»
-          // должен находиться сам, а не угадываться.
-          title={draftWaitingAnswer ? voice.answerSubmitHint : voice.findHint}
+          // Шаг 126: недоступно только то, что столкнётся (второй разбор), и сказано
+          // почему — «серая кнопка» ответом не является.
+          // Недоступно только то, что столкнётся, и сказано почему — «серая кнопка»
+          // ответом не является. Подпись подсказывает клавишу: сценарий «напечатал и
+          // нажал Enter» должен находиться сам, а не угадываться.
+          disabled={!reactiveCan(job, "submit")}
+          title={
+            reactiveCan(job, "submit")
+              ? draftWaitingAnswer
+                ? voice.answerSubmitHint
+                : voice.findHint
+              : reactiveWhy(job, "submit")
+          }
         >
           {draftWaitingAnswer ? voice.answerSubmit : voice.find}
         </Button>
@@ -4979,7 +5030,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           <Button
             size="small"
             appearance="subtle"
-            disabled={!queueOn && queueSummary.waiting === 0 && !running && !busy && !thinking && !engineBusy}
+            // Шаг 126: «стоп» доступен, когда есть что останавливать — в том числе
+            // посреди работы. Именно тогда он и нужен.
+            disabled={!reactiveCan(job, "stop") && queueSummary.waiting === 0 && !engineBusy}
             onClick={() => halt("стоп")}
           >
             {voice.queueStop}
