@@ -14,6 +14,7 @@ import {
 } from "../ipc";
 import type { ReadinessStatus, SmokeResult } from "../ipc";
 import { NEED_NETWORK_MIXED, needsNetworkFor, offlineNote, onlineState } from "../lib/offline";
+import { verdict as requestVerdict, type Attempt } from "../lib/offlineRequests";
 import { assessReadiness, formatSize, hasRoom, planPrepare } from "../lib/readiness";
 import { readiness as text } from "../i18n/ru";
 import { ErrorLine } from "./ErrorLine";
@@ -128,6 +129,13 @@ export function ReadinessCard({
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [confirmSpeechRemove, setConfirmSpeechRemove] = useState(false);
   const [smoke, setSmoke] = useState<SmokeResult | null>(null);
+  // Попытки, которые карточка уже сделала. При запуске их ноль — и это видно
+  // прямо в тексте: «ни одного запроса наружу». Заполняются только скачивания по
+  // нажатию; фоновых у карточки нет (это проверяет `no_silent_download.py`).
+  // Хук объявлен здесь, а не у места показа: ниже есть ранний `return` для
+  // «статуса ещё нет», и `useState` после него давал «Rendered more hooks than
+  // during the previous render» — приложение падало на первом же статусе.
+  const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [includeSpeech, setIncludeSpeech] = useState(true);
   const [sequence, setSequence] = useState<string | null>(null);
   // Идёт ли скачивание прямо сейчас. Отдельно от `sequence`: та строка есть только
@@ -228,6 +236,18 @@ export function ReadinessCard({
       setActionError(null);
       setDone(null);
       setSmoke(null);
+      // Учёт попытки — **до** вызова, а не после успеха: провал тоже случился, и
+      // именно он должен быть в списке. Иначе список показывал бы одни удачи и
+      // молчал о том, что не прошло.
+      const where =
+        kind === "model"
+          ? status.model_spec.url
+          : kind === "speech-model"
+            ? status.speech_model_spec.url
+            : kind === "runtime"
+              ? status.runtime_spec.source
+              : status.speech_runtime_spec.source;
+      const what = needsNetworkFor(kind);
       try {
         // Шаг 40: каждое скачивание оставляет след в журнале первого запуска.
         // Пишем при успехе, а не при нажатии: журнал говорит, что **произошло**,
@@ -268,9 +288,14 @@ export function ReadinessCard({
           remember({ what: "downloaded", item: text.prepareStep["speech-runtime"] });
           setDone(text.downloaded(installed.program));
         }
+        // Успех тоже попытка: список без удач не отвечает на «а оно стучалось?».
+        if (alive.current) setAttempts((list) => [...list, { where, by: "press", result: "ok", what }]);
         refresh();
       } catch (reason: unknown) {
         if (!alive.current) return;
+        // Провал — в список **и** на экран. Провал без записи и без строки — это
+        // ровно тот тихий сбой, который шаг запрещает.
+        setAttempts((list) => [...list, { where, by: "press", result: "failed", what }]);
         const message = reason instanceof Error ? reason.message : String(reason);
         refresh(); // Publication may have succeeded even when temporary-file cleanup failed.
         setActionError(
@@ -872,6 +897,16 @@ export function ReadinessCard({
         {assessment.speechLocal ? text.speechReady : text.speechNote}
       </Text>
       <Text className={styles.note}>{text.micPermission(micPermission)}</Text>
+      {/* Шаг 220: обещание «без сети ни одного неуспешного запроса, кроме
+          названного» проверяется списком, а не словом. Здесь — ровно то, что
+          случилось в этом сеансе: пусто значит «приложение никуда не стучалось»,
+          а не «мы не смотрели». */}
+      <Text className={styles.note} data-testid="offline-promise">
+        {requestVerdict(
+          attempts,
+          attempts.filter((item) => item.by === "press").map((item) => ({ where: item.where, how: `кнопка «${item.what}»` })),
+        ).said}
+      </Text>
       {browser ? <Text className={styles.note}>{text.browserNote}</Text> : null}
 
       <div className={styles.row}>

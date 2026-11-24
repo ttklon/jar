@@ -721,3 +721,11 @@ describe("ошибки восстановления не подменяются 
     Object.defineProperty(globalThis.navigator, "onLine", { value: true, configurable: true });
   });
 });
+
+describe("обещание «без сети ни одного провала, кроме названного» видно (шаг 220)", () => {
+  it("до первого скачивания сказано, что запросов наружу не было", () => {
+    // Пустота читалась бы как «не смотрели». Ответ — словом и числом: ноль.
+    render(<ReadinessCard status={status()} error={null} />);
+    expect(screen.getByTestId("offline-promise").textContent).toContain("не стучалось вовсе");
+  });
+});
