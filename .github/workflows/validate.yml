@@ -120,6 +120,12 @@ jobs:
 
       # Шаг 253: подставное медленное и подставное пустое окружение — крайние
       # случаи, на которых ломаются терпение и честность.
+      # Шаг 247: числа в документации обязаны сходиться с данными.
+      - name: Docs do not promise more than the code
+        run: |
+          python3 tools/docs_truth.py --selftest
+          python3 tools/docs_truth.py
+
       - name: Evals on a slow and on an empty machine
         run: |
           python3 tools/run_evals.py --env slow

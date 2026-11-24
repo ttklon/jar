@@ -50,6 +50,9 @@ STEPS: list[tuple[str, list[str], str]] = [
     # (медленное и пустое) ломаются по-разному: терпение и честность.
     ("evals on a slow machine", ["tools/run_evals.py", "--env", "slow"], "the run survives 200 ms per check"),
     ("evals on an empty machine", ["tools/run_evals.py", "--env", "empty"], "an empty plan is named empty, not fine"),
+    # Шаг 247: документация не обещает больше кода. Числа в документации сверяются
+    # с данными, а не с другими документами.
+    ("docs do not promise more than the code", ["tools/docs_truth.py"], "the docs and the registry agree"),
     ("targets", ["tools/app_targets.py"], "tier A apps have profiles"),
     ("skills", ["tools/skills.py"], "skills reference real rows, risk not lowered"),
     ("hands", ["tools/hands.py"], "data/tools.json points at real, allowed registry rows"),

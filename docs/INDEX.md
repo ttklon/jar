@@ -108,6 +108,7 @@
 | `dashboard.py` | DASHBOARD.md + INDEX.md (этот индекс) |
 | `defects.py` | — |
 | `deps_report.py` | стек и лицензии → docs/DEPENDENCIES.md |
+| `docs_truth.py` | — |
 | `done_words.py` | — |
 | `ecosystem.py` | валидатор экосистемы → docs/ECOSYSTEM.md |
 | `evals.py` | план проверок → docs/EVALS.md, data/evals.json |
