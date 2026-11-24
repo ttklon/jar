@@ -1804,6 +1804,27 @@ describe("локальное распознавание на экране", () =
     expect(runPlan).not.toHaveBeenCalled();
   });
 
+  it("первое слово звучит раньше полного ответа, и его задержка — число (шаг 128)", async () => {
+    // Тишина не отвечала на «услышал ли», и человек повторял фразу.
+    let resolveThink!: (value: null) => void;
+    vi.mocked(think).mockReturnValueOnce(new Promise<null>((resolve) => { resolveThink = resolve; }));
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "переименуй фото" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    // Модель ещё думает, а первое слово уже сказано — и оно про «услышал», а не про
+    // результат.
+    await waitFor(() => expect(think).toHaveBeenCalled());
+    expect(screen.getByText(/^разбираю — первое слово через \d+ мс$/)).toBeTruthy();
+
+    // Полный ответ приходит следом и не подменяется первым словом.
+    await act(async () => {
+      resolveThink(null);
+    });
+  });
+
   it("частый вопрос отвечается из реестра, без модели, и говорит откуда (шаг 127)", async () => {
     // «Что ты умеешь» не должно ждать 3 секунды за пересказ того, что уже есть.
     render(<Voice onOpen={() => {}} />);

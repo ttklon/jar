@@ -254,6 +254,11 @@ import {
   report as registryReport,
   type Cache as RegistryCache,
 } from "../lib/registryCache";
+import {
+  first as firstWordOf,
+  waited as firstWordWaited,
+  type First as FirstWord,
+} from "../lib/firstWord";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -747,6 +752,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // Шаг 127: ответ из реестра и его источник. Отдельно от `thought`: реестр — не
   // модель, и смешивать их значит прятать, откуда пришёл ответ.
   const [registrySaid, setRegistrySaid] = useState<{ said: string; source: string } | null>(null);
+  // Шаг 128: первое слово, когда сказано и когда начали — чтобы задержка молчания
+  // была числом.
+  const [firstWord, setFirstWord] = useState<{ got: FirstWord; at: number; startedAt: number } | null>(null);
   const registryCacheRef = useRef<RegistryCache>(registryCache(""));
   // Числа реестра — состоянием, а не только ref: пока их нет, кэш молчит, и это
   // должно быть **видно**, а не выглядеть как «кэш не работает».
@@ -2842,6 +2850,13 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     setRegistrySaid(null);
     const request = ++thoughtRequestRef.current;
     const around = front;
+    // Шаг 128: первое слово — **сейчас**, до плана. Тишина не отвечает на «услышал
+    // ли», и человек повторяет фразу. Оно честное: «разбираю», пока непонятно, а не
+    // «сейчас всё будет».
+    const firstSaid = firstWordOf(null);
+    const askedAt = Date.now();
+    setFirstWord({ got: firstSaid, at: askedAt, startedAt: askedAt });
+    speak(firstSaid.word);
     setThinking(true);
     setThinkError(null);
     setThought(null);
@@ -2861,6 +2876,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         setThought(answer);
         if (answer.learning) setLearning(answer.learning);
         if (answer.plan) acceptModelPlan(answer.plan);
+        // Шаг 128: если реестр уже узнал глагол — первое слово было бы делом, а не
+        // «разбираю». Сказать его сейчас поздно (уже пришёл полный ответ), но видно,
+        // что молчание было честным.
+        setFirstWord((current) =>
+          current === null ? current : { ...current, got: firstWordOf(answer.plan?.plan?.steps[0]?.registry.split("|")[1] ?? null) },
+        );
         const phrase = answer.plan
           ? `${describeThought(answer)}. ${voice.thinkPlanReady(answer.plan.plan?.steps.length ?? 0)}`
           : describeThought(answer);
@@ -4126,6 +4147,16 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </div>
       ) : null}
 
+      {/* Шаг 128: первое слово и его задержка — числом. Молчание, которого не было,
+          не превращается в «0 мс»: если слова не сказали, так и сказано. */}
+      {firstWord !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Первое слово</Text>
+          <Text className={styles.note} role="status" aria-live="polite">
+            {`${firstWord.got.word} — ${firstWordWaited(firstWord.startedAt, firstWord.at).said}`}
+          </Text>
+        </div>
+      ) : null}
       {/* Шаг 127: частый вопрос отвечается из реестра, без модели — и сказано,
           откуда ответ. Это не про задержку и не про отрезки: отдельное место. */}
       <div className={styles.section}>
