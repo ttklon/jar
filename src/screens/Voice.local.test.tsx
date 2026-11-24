@@ -1804,6 +1804,26 @@ describe("локальное распознавание на экране", () =
     expect(runPlan).not.toHaveBeenCalled();
   });
 
+  it("долгое ожидание спрашивает «ждать?» до конца, и «не ждать» останавливает (шаг 129)", async () => {
+    // Долгое дело молча шло, и человек уходил, не зная, что можно не ждать.
+    vi.mocked(think).mockReturnValueOnce(new Promise(() => {}));
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "переименуй фото" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(think).toHaveBeenCalled());
+
+    // Порог срабатывает сам, таймером, а не по остаточному глазомеру.
+    await waitFor(
+      () => expect(screen.getByText(/«поиск ответа» — это долго \(\d+ с\)\. Ждать\?/)).toBeTruthy(),
+      { timeout: 6000 },
+    );
+    // У вопроса оба ответа: выбор, а не уведомление.
+    fireEvent.click(screen.getByText("Не ждать"));
+    await waitFor(() => expect(screen.getByText(/^останавливаю: не буду ждать$/)).toBeTruthy());
+  }, 12_000);
+
   it("первое слово звучит раньше полного ответа, и его задержка — число (шаг 128)", async () => {
     // Тишина не отвечала на «услышал ли», и человек повторял фразу.
     // Ответ модели ещё не пришёл — а первое слово уже должно быть сказано.

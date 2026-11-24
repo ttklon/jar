@@ -259,6 +259,7 @@ import {
   waited as firstWordWaited,
   type First as FirstWord,
 } from "../lib/firstWord";
+import { ask as longAsk, answered as longAnswered, inTime as longInTime, LONG_MS } from "../lib/longAsk";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -755,11 +756,32 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // Шаг 128: первое слово, когда сказано и когда начали — чтобы задержка молчания
   // была числом.
   const [firstWord, setFirstWord] = useState<{ got: FirstWord; at: number; startedAt: number } | null>(null);
+  // Шаг 129: долгое ожидание не молчит — но и не пилит. Вопрос задаётся один раз, с
+  // выбором («ждать» / «не ждать»), и только если остановить действительно можно.
+  const [longWait, setLongWait] = useState<{ askedAt: number | null; reply: "wait" | "stop" | null; startedAt: number } | null>(null);
+  const [longAskSaid, setLongAskSaid] = useState("");
+  const longWaitRef = useRef<typeof longWait>(null);
+  longWaitRef.current = longWait;
   const registryCacheRef = useRef<RegistryCache>(registryCache(""));
   // Числа реестра — состоянием, а не только ref: пока их нет, кэш молчит, и это
   // должно быть **видно**, а не выглядеть как «кэш не работает».
   const [registryCount, setRegistryCount] = useState({ actions: 0, hands: 0, version: "" });
   const [thinking, setThinking] = useState(false);
+
+  /**
+   * Порог «это долго» срабатывает **сам**, таймером.
+   *
+   * Глазомер опаздывает ровно настолько, насколько человек уже ушёл: вопрос должен
+   * появиться, пока ждать ещё можно передумать.
+   */
+  useEffect(() => {
+    if (longWait === null || !thinking || longWait.askedAt !== null || longWait.reply !== null) return;
+    const left = Math.max(0, LONG_MS + 1 - (Date.now() - longWait.startedAt));
+    const timer = setTimeout(() => {
+      setLongWait((was) => (was === null || was.askedAt !== null ? was : { ...was, askedAt: Date.now() }));
+    }, left);
+    return () => clearTimeout(timer);
+  }, [longWait, thinking]);
   const [thinkError, setThinkError] = useState<string | null>(null);
   const [enginePrompt, setEnginePrompt] = useState<string | null>(null);
   const [engineBusy, setEngineBusy] = useState(false);
@@ -2856,6 +2878,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     const firstSaid = firstWordOf(null);
     const askedAt = Date.now();
     setFirstWord({ got: firstSaid, at: askedAt, startedAt: askedAt });
+    setLongWait({ askedAt: null, reply: null, startedAt: askedAt });
     speak(firstSaid.word);
     setThinking(true);
     setThinkError(null);
@@ -2902,7 +2925,11 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         setEnginePrompt(null);
       })
       .finally(() => {
-        if (request === thoughtRequestRef.current) setThinking(false);
+        if (request !== thoughtRequestRef.current) return;
+        setThinking(false);
+        // Шаг 129: вопрос вовремя или нет — это факт, и он назван, а не забыт.
+        const was = longWaitRef.current;
+        if (was !== null) setLongAskSaid(longInTime(was.askedAt, Date.now(), was.startedAt).said);
       });
   };
 
@@ -4147,6 +4174,44 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </div>
       ) : null}
 
+      {/* Шаг 129: «это долго, ждать?» — до того, как ждать стало поздно, с выбором и
+          ровно один раз. Вопрос без остановки был бы уведомлением, поэтому «не ждать»
+          действительно останавливает. */}
+      {longWait?.askedAt != null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Это долго</Text>
+          <Text className={styles.note} role="alert" aria-live="polite">
+            {longAsk({ what: "поиск ответа", ms: longWait.askedAt - longWait.startedAt, asked: false, chosen: false, stoppable: true }).said}
+          </Text>
+          <Button
+            size="small"
+            onClick={() => {
+              const got = longAnswered("wait");
+              setLongWait((was) => (was === null ? was : { ...was, reply: "wait" }));
+              setLongAskSaid(got.said);
+              setSpoken(speak(got.said) ? got.said : got.said);
+            }}
+          >
+            Ждать
+          </Button>
+          <Button
+            size="small"
+            appearance="subtle"
+            onClick={() => {
+              const got = longAnswered("stop");
+              setLongWait((was) => (was === null ? was : { ...was, reply: "stop" }));
+              // Ответ человека — факт ожидания, и он не теряется в общем «стопе».
+              setLongAskSaid(got.said);
+              halt(got.said);
+            }}
+          >
+            Не ждать
+          </Button>
+        </div>
+      ) : null}
+      {longAskSaid !== "" ? (
+        <Text className={styles.note} role="status" aria-live="polite">{longAskSaid}</Text>
+      ) : null}
       {/* Шаг 128: первое слово и его задержка — числом. Молчание, которого не было,
           не превращается в «0 мс»: если слова не сказали, так и сказано. */}
       {firstWord !== null ? (
