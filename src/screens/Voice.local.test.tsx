@@ -18,6 +18,7 @@ import {
   think,
   trialHand,
   runPlan,
+  undoReport,
   transcribeLocal,
   uiDump,
   machineState,
@@ -49,6 +50,8 @@ vi.mock("../ipc", () => ({
   // Шаг 127: настоящие числа реестра, как из снапшота.
   // Шаг 161: снапшот — настоящий реестр, а не пустышка: список прав на экране
   // собирается из него, и заглушка «действий нет» проверяла бы выдумку.
+  undoReport: vi.fn().mockResolvedValue({ session: "", steps: [], note: "журнала нет" }),
+  undoApply: vi.fn().mockResolvedValue({ session: "", undone: 0, refused: [] }),
   registrySnapshot: vi.fn().mockResolvedValue({
     actions: actionsJson,
     stats: {
@@ -1958,6 +1961,68 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/последствия: 2 файла, 0 Б: IMG_0001\.jpg, IMG_0002\.jpg/)).toBeTruthy();
     // И обратимость названа рядом: корзина — вернуть можно.
     expect(screen.getByText(/удаление в корзину: вернуть можно/)).toBeTruthy();
+  });
+
+  it("удаление по умолчанию идёт в корзину, и журнал называет, сколько вернёт (шаг 163)", async () => {
+    // Дефект: план мог позвать удаление мимо корзины, а фраза «удали» не уточняла,
+    // что значит «удали». Человек узнавал разницу после.
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Call: { registry: "files|удалить|в корзину", params: {}, why: "сказал удали" } },
+      plan: {
+        plan: {
+          goal: "убрать старое",
+          source: "model",
+          steps: [{ registry: "files|удалить|в корзину", params: {}, why: "удали папку Старое" }],
+        },
+        problems: [],
+        questions: [],
+        gates: [
+          {
+            position: 1,
+            registry: "files|удалить|в корзину",
+            decision: "confirm",
+            risk: "destructive",
+            wants_approval: true,
+          },
+        ],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "удали папку Старое" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Цена ошибки")).toBeTruthy());
+
+    // Куда уйдёт — до нажатия, и это умолчание, а не догадка.
+    expect(screen.getByText(/удаление в корзину · вернуть можно: запись в журнале есть/)).toBeTruthy();
+
+    // Журнал: число, а не «вернуть можно». Один шаг вернётся, второй — нет.
+    vi.mocked(undoReport).mockResolvedValueOnce({
+      session: "тест",
+      steps: [
+        {
+          entry: { at: 1, session: "тест", kind: "move", from: "C:\\Старое\\a.txt", to: "" },
+          refusal: null,
+        },
+        {
+          entry: { at: 2, session: "тест", kind: "move", from: "C:\\Старое\\b.txt", to: "" },
+          refusal: "файла уже нет",
+        },
+      ],
+      note: "журнал этой сессии",
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Что вернёт журнал" }));
+    await waitFor(() =>
+      expect(screen.getByText(/вернётся 1 из 1: всё на месте · журнал этой сессии/)).toBeTruthy(),
+    );
+    // Кнопка возврата — только когда вернуть правда есть что.
+    expect(screen.getByRole("button", { name: "Вернуть" })).toBeTruthy();
   });
 
   it("список прав: что делаю и чего не делаю никогда — в одном месте (шаг 161)", async () => {

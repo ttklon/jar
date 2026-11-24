@@ -31,6 +31,8 @@ import {
   uiDump,
   uiPress,
   uiType,
+  undoReport,
+  undoApply,
 } from "../ipc";
 import type {
   CustomHand,
@@ -55,6 +57,7 @@ import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
+import { journalNote as trashJournalNote, restoreCount as trashRestoreCount, say as trashSay, where as trashWhere } from "../lib/trashFirst";
 import { blast as blastOf, fromParams as blastFromParams, kindOf as blastKindOf, line as blastLine, louder as blastLouder } from "../lib/blast";
 import { neverDones as rightsNever, countWords as rightsCount, RULES as rightsRules, type Row as RightsRow } from "../lib/rights";
 import { consentCanRun, consentPositions, isSpokenConsent, keepsPendingPlan } from "../lib/consent";
@@ -903,6 +906,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
    */
   const [rightsTally, setRightsTally] = useState<{ ready: number; planned: number; never: number; total: number } | null>(null);
   const [rightsNeverList, setRightsNeverList] = useState<{ what: string; why: string; instead: string }[]>([]);
+  /**
+   * Шаг 163: что вернёт журнал отката — числом, а не «вернуть можно». Журнал
+   * пишет ядро; читаем его по кнопке, а не на каждом кадре: это чтение файла.
+   */
+  const [journal, setJournal] = useState<{ can: number; total: number; said: string } | null>(null);
+  const [journalSaid, setJournalSaid] = useState<string | null>(null);
   const [thinking, setThinking] = useState(false);
   humanWaitingRef.current = thinking;
 
@@ -4180,11 +4189,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                   const seen = blastFromParams(step?.params ?? {});
                   const size = blastOf(kind, seen, seen === null ? "папку не удалось посмотреть до запуска" : "");
                   const loud = blastLouder(size, seen?.files.length ?? 0, kind);
+                  // Шаг 163: куда уйдёт удаление — до нажатия. «Удали» без уточнения
+                  // значит корзину: ошибка в чужом деле должна быть поправима.
+                  const trash = kind === "delete" || kind === "trash" ? trashWhere(step?.why ?? "") : null;
                   return (
                     <Text key={`danger-${index}`} className={styles.note}>
                       {`${index + 1}. ${strongMark(danger)} · ${asked.text}`}
                       {step?.params ? ` · ${blastLine(size)}` : ""}
                       {loud.loud ? ` · ${loud.why}` : ""}
+                      {trash ? ` · ${trashSay(trash, true)} · ${trashJournalNote(true, trash.where)}` : ""}
                       {" "}
                       <Button
                         appearance="subtle"
@@ -4208,6 +4221,63 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           })()}
         </div>
       ) : null}
+
+      {/* Шаг 163: корзина вместо удаления по умолчанию — и путь назад из журнала.
+          Ядро пишет журнал отката само; здесь он читается числом, чтобы «вернуть
+          можно» не было обещанием без основания. */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Вернуть удалённое</Text>
+        <Text className={styles.note}>
+          удаление по умолчанию идёт в корзину: ошибка должна быть поправима
+        </Text>
+        <Button
+          size="small"
+          appearance="subtle"
+          onClick={() => {
+            void undoReport()
+              .then((preview) => {
+                // Считаем только то, что действительно вернёт файлы: журнал помнит
+                // и то, чего уже нет, и «вернётся 3 из 5» — честный ответ.
+                // Только выполнимые шаги: `refusal === null` значит «вернётся», а
+                // строка — причину, по которой нет. Обещать больше журнала нельзя.
+                const doable = preview.steps.filter((step) => step.refusal === null);
+                const got = trashRestoreCount(
+                  doable.map((step) => ({ from: step.entry.from, kind: step.entry.kind })),
+                  (path) => doable.some((step) => step.entry.from === path),
+                );
+                setJournal(got);
+                setJournalSaid(preview.note);
+              })
+              .catch((problem: unknown) => {
+                setJournal({ can: 0, total: 0, said: problem instanceof Error ? problem.message : String(problem) });
+              });
+          }}
+        >
+          Что вернёт журнал
+        </Button>
+        {journal ? (
+          <Text className={styles.note} role="status" aria-live="polite">
+            {`${journal.said}${journalSaid ? ` · ${journalSaid}` : ""}`}
+          </Text>
+        ) : null}
+        {journal !== null && journal.can > 0 ? (
+          <Button
+            size="small"
+            appearance="primary"
+            onClick={() => {
+              void undoApply()
+                .then((report) => {
+                  speak(`вернул ${report.undone}; откажу не смог: ${report.refused.length}`);
+                })
+                .catch((problem: unknown) =>
+                  speak(problem instanceof Error ? problem.message : "вернуть не удалось"),
+                );
+            }}
+          >
+            Вернуть
+          </Button>
+        ) : null}
+      </div>
 
       {/* Шаг 114: повторный запуск видит, что уже сделано, и не делает дважды.
           «Создать папку» на существующую — успех, а не провал. */}
