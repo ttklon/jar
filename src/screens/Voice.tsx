@@ -55,6 +55,7 @@ import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
+import { blast as blastOf, fromParams as blastFromParams, kindOf as blastKindOf, line as blastLine, louder as blastLouder } from "../lib/blast";
 import { neverDones as rightsNever, countWords as rightsCount, RULES as rightsRules, type Row as RightsRow } from "../lib/rights";
 import { consentCanRun, consentPositions, isSpokenConsent, keepsPendingPlan } from "../lib/consent";
 import { installedEngine, isEngineDown } from "../lib/engineReady";
@@ -4172,9 +4173,18 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                 </Text>
                 {dangers.map((danger, index) => {
                   const asked = strongQuestion(danger);
+                  // Шаг 162: объём до нажатия. Риск говорит «что может быть», смета —
+                  // «сколько именно»: «удалить 340 файлов» понятнее, чем «удалить папку».
+                  const step = steps[index];
+                  const kind = blastKindOf(step?.registry ?? "");
+                  const seen = blastFromParams(step?.params ?? {});
+                  const size = blastOf(kind, seen, seen === null ? "папку не удалось посмотреть до запуска" : "");
+                  const loud = blastLouder(size, seen?.files.length ?? 0, kind);
                   return (
                     <Text key={`danger-${index}`} className={styles.note}>
                       {`${index + 1}. ${strongMark(danger)} · ${asked.text}`}
+                      {step?.params ? ` · ${blastLine(size)}` : ""}
+                      {loud.loud ? ` · ${loud.why}` : ""}
                       {" "}
                       <Button
                         appearance="subtle"

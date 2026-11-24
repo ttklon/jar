@@ -1911,6 +1911,55 @@ describe("локальное распознавание на экране", () =
     localStorage.removeItem("jar.startKinds");
   });
 
+  it("опасное дело называет объём до нажатия, а не только слово «удаление» (шаг 162)", async () => {
+    // Дефект: человек читал «удаление/перезапись — нужно подтверждение» и не мог
+    // узнать, что это: одна пустая папка или 340 файлов.
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Call: { registry: "files|удалить|в корзину", params: {}, why: "просил почистить" } },
+      plan: {
+        plan: {
+          goal: "почистить фото",
+          source: "model",
+          steps: [
+            {
+              registry: "files|удалить|в корзину",
+              params: { path: "C:\\Фото\\IMG_0001.jpg\nC:\\Фото\\IMG_0002.jpg" },
+              why: "убрать старые",
+            },
+          ],
+        },
+        problems: [],
+        questions: [],
+        gates: [
+          {
+            position: 1,
+            registry: "files|удалить|в корзину",
+            decision: "confirm",
+            risk: "destructive",
+            wants_approval: true,
+          },
+        ],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "почисти фото" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Цена ошибки")).toBeTruthy());
+
+    // Объём — числом и с именами: «2 файла», а не «папку».
+    // Число названо и без образцов не остаётся: имена — те самые файлы.
+    expect(screen.getByText(/последствия: 2 файла, 0 Б: IMG_0001\.jpg, IMG_0002\.jpg/)).toBeTruthy();
+    // И обратимость названа рядом: корзина — вернуть можно.
+    expect(screen.getByText(/удаление в корзину: вернуть можно/)).toBeTruthy();
+  });
+
   it("список прав: что делаю и чего не делаю никогда — в одном месте (шаг 161)", async () => {
     // Дефект: правила были верные, но разбросаны (policy.ts, реестр, refusal.ts),
     // и ответ на «что ты вообще можешь» приходил по частям.
