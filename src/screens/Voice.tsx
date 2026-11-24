@@ -169,6 +169,11 @@ import {
   say as sayRefuse,
   type Planned as RefusePlanned,
 } from "../lib/refuseAll";
+import {
+  change as editPlanChange,
+  fields as editPlanFields,
+  ready as editPlanReady,
+} from "../lib/editPlan";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -549,6 +554,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [spent, setSpent] = useState(() => budgetNothing());
   // Шаг 114: что уже сделано в прошлый раз — по отпечатку шага и параметров.
   const [pastRuns, setPastRuns] = useState<IdemPast[]>([]);
+  // Шаг 116: план правится **полями со словами**, а не JSON. Правки — до запуска,
+  // и каждая проверяется сразу.
+  const [planEdits, setPlanEdits] = useState<{ position: number; name: string; value: string }[]>([]);
+  const [editNote, setEditNote] = useState<string | null>(null);
   const [report, setReport] = useState<PlanReport | null>(null);
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
@@ -3578,6 +3587,95 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                 {!verdict.run && gaps.length > 0 ? (
                   <Text className={styles.note}>
                     {`в обучение: ${gaps.join("; ")}`}
+                  </Text>
+                ) : null}
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 116: план правится понятными полями, а не JSON. Правка проверяется
+          до запуска, и после неё нужно новое согласие (шаг 117). */}
+      {draft?.plan && (draft.plan.steps.length > 0) ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Поправить план</Text>
+          {(() => {
+            const applied = editPlanChange(draft.plan!.steps, planEdits);
+            const fields = editPlanFields(applied.steps);
+            return (
+              <>
+                <Text className={styles.note}>{"поля — словами: что это, а не имя параметра"}</Text>
+                {fields.map((field) => (
+                  <Text key={`edit-${field.position}-${field.name}`} className={styles.note}>
+                    {`${field.position + 1}. ${field.label}`}
+                    {" "}
+                    <Input
+                      aria-label={`${field.position + 1}. ${field.label}`}
+                      value={field.value}
+                      placeholder={field.hint}
+                      onChange={(_event, data) => {
+                        setPlanEdits((current) => [
+                          ...current.filter((edit) => !(edit.position === field.position && edit.name === field.name)),
+                          { position: field.position, name: field.name, value: data.value },
+                        ]);
+                      }}
+                    />
+                  </Text>
+                ))}
+                {applied.result.said.map((line) => (
+                  <Text key={`said-${line}`} className={styles.note} role="status" aria-live="polite">
+                    {line}
+                  </Text>
+                ))}
+                {applied.result.problems.map((problem) => (
+                  <Text key={`problem-${problem.position}-${problem.name}`} className={styles.note}>
+                    {problem.problem}
+                  </Text>
+                ))}
+                <Text className={styles.note}>
+                  {applied.result.consent
+                    ? "правка меняет шаг — согласие по нему нужно дать заново"
+                    : "правок нет — согласие остаётся в силе"}
+                </Text>
+                <Button
+                  appearance="subtle"
+                  size="small"
+                  onClick={() => {
+                    if (!editPlanReady(applied.result)) {
+                      setEditNote("правка не готова: сначала исправьте поле");
+                      return;
+                    }
+                    // Правка после согласия — **новое** согласие: плата за
+                    // удобство не может быть обходом согласия (шаг 117).
+                    setConsents([]);
+                    setApproved([]);
+                    setDraft((current) =>
+                      current === null
+                        ? current
+                        : {
+                            ...current,
+                            plan:
+                              current.plan === null
+                                ? null
+                                : {
+                                    ...current.plan,
+                                    steps: current.plan.steps.map((step, index) => ({
+                                      ...step,
+                                      params: applied.steps[index]?.params ?? step.params,
+                                    })),
+                                  },
+                          },
+                    );
+                    setEditNote(`план поправлен: ${applied.result.said.join("; ")}`);
+                    speak("план поправлен — согласие нужно заново");
+                  }}
+                >
+                  Применить правку
+                </Button>
+                {editNote !== null ? (
+                  <Text className={styles.note} role="status" aria-live="polite">
+                    {editNote}
                   </Text>
                 ) : null}
               </>

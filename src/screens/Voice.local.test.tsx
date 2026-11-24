@@ -1968,6 +1968,17 @@ describe("локальное распознавание на экране", () =
     // до запуска, а не после половины.
     expect(screen.getByText("Собирается ли план")).toBeTruthy();
     expect(screen.getByText("план собирается целиком — можно выполнять")).toBeTruthy();
+
+    // Шаг 116: план правится полями со словами, а не JSON. Подпись — «Куда
+    // положить», а не `path`, и правка проверяется до запуска.
+    expect(screen.getByText("Поправить план")).toBeTruthy();
+    expect(screen.getByLabelText("1. Куда положить")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("1. Куда положить"), { target: { value: "Ерунда" } });
+    // Ошибка названа сразу: сломанное поле не ломает остальные.
+    await waitFor(() => expect(screen.getByText(/«Куда положить» — нужен полный путь/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("1. Куда положить"), { target: { value: "E:\\Новое" } });
+    expect(screen.getByText(/«Куда положить» — было C:\\Users\\test\\backup.zip, стало E:\\Новое/)).toBeTruthy();
+    expect(screen.getByText(/правка меняет шаг — согласие по нему нужно дать заново/)).toBeTruthy();
   });
 
   it("изменение ответа во время перепроверки отменяет запуск устаревшего плана", async () => {
