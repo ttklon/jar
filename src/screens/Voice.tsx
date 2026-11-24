@@ -58,6 +58,7 @@ import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
 import { allows as grantAllows, book as grantBook, EMPTY as EMPTY_GRANTS, give as grantGive, load as loadGrants, onRevoke as grantOnRevoke, revoke as grantRevoke, save as saveGrants, type Book as GrantBook, type Channel as GrantChannel } from "../lib/grants";
+import { filled as permsFilled, sheet as permsSheet, summary as permsSummary } from "../lib/permissionsSheet";
 import { line as signatureLine } from "../lib/signature";
 import { items as undoItemsList, summary as undoItemsSummary } from "../lib/undoItems";
 import { executable as launchExecutable, line as launchLine, needsAsk as launchNeedsAsk, origin as launchOrigin } from "../lib/launchOrigin";
@@ -954,6 +955,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [journalSaid, setJournalSaid] = useState<string | null>(null);
   /** Шаг 175: предметный список «что вернётся» — до нажатия, а не после. */
   const [undoList, setUndoList] = useState<{ lines: string[]; summary: string } | null>(null);
+  /**
+   * Шаг 179: один свод «что мне разрешено». Собирается **по кнопке**, а не на
+   * каждом кадре: `Date.now()` в рендере — это лишний повод перерисовать экран
+   * ради строки, которая меняется раз в день.
+   */
+  const [perms, setPerms] = useState<{ summary: string; rows: string[]; filled: boolean } | null>(null);
   /**
    * Шаг 164: выбранные папки — предел, за который шаг не выйдет. Хранится на
    * диске: это выбор человека, а не состояние кадра. Пустой список — «ничего
@@ -5052,6 +5059,60 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         действует сразу. «По умолчанию» здесь значит «не разрешено»: согласие по
         умолчанию — не согласие.
       */}
+      {/*
+        Шаг 179: граница прав была разрезана на пять мест — согласия, папки, хосты,
+        режим «без меня», «чего не делаю». Человек складывал ответ в голове и
+        терял половину. Кнопка собирает всё в один свод: разрешено / ждёт слова /
+        запрещено / нет вовсе.
+      */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Что мне разрешено</Text>
+        <Button
+          size="small"
+          appearance="subtle"
+          onClick={() => {
+            const now = Date.now();
+            const grantsNow = [
+              { channel: "mic", title: "микрофон", at: grants.mic.at, revokedAt: grants.mic.revokedAt },
+              { channel: "net", title: "сеть", at: grants.net.at, revokedAt: grants.net.revokedAt },
+              { channel: "files", title: "файлы", at: grants.files.at, revokedAt: grants.files.revokedAt },
+            ];
+            const rows = permsSheet({
+              grants: grantsNow,
+              folders: { allow: folders.folders, except: folders.except },
+              // Список по умолчанию — тот же, что пускает `networkAllow`.
+              hosts: ["huggingface.co"],
+              deed: outsideConsent === null ? null : { key: outsideConsent.key, until: outsideConsent.until },
+              never: rightsNeverList.map((item) => ({ what: item.what, proof: item.instead })),
+              now,
+            });
+            setPerms({
+              summary: permsSummary(rows),
+              rows: rows.map((row) => `${row.group}: ${row.what} — ${row.detail}`),
+              filled: permsFilled(rows),
+            });
+          }}
+        >
+          Покажи, что мне разрешено
+        </Button>
+        {perms !== null ? (
+          <>
+            <Text className={styles.note} role="status" aria-live="polite">
+              {perms.filled
+                ? perms.summary
+                : "свод не собрался: показать «ничего не разрешено» вместо ответа значило бы соврать"}
+            </Text>
+            {perms.filled
+              ? perms.rows.map((said) => (
+                  <Text key={said} className={styles.note}>
+                    {`· ${said}`}
+                  </Text>
+                ))
+              : null}
+          </>
+        ) : null}
+      </div>
+
       <div className={styles.section}>
         <Text className={styles.title}>Согласия</Text>
         <Text className={styles.note} role="status" aria-live="polite">

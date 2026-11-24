@@ -54,7 +54,7 @@ describe("список не разошёлся с ядром", () => {
     // интерфейсе (показ). Разойтись они не должны — это проверка на данных.
     const rust = readFileSync(new URL("../../src-tauri/src/hand.rs", import.meta.url), "utf8");
     const block = /pub const FORBIDDEN[^=]*= &\[([\s\S]*?)\n\];/.exec(rust)?.[1] ?? "";
-    const pairs = [...block.matchAll(/\("((?:[^"\\]|\\.)*)",\s*"((?:[^"\\]|\\.)*)"\)/g)].map((m) => ({
+    const pairs = [...block.matchAll(/\(\s*"((?:[^"\\]|\\.)*)"\s*,\s*"((?:[^"\\]|\\.)*)"\s*,?\s*\)/g)].map((m) => ({
       piece: m[1]!.replace(/\\\\/g, "\\"),
       why: m[2]!.replace(/\\\\/g, "\\"),
     }));
