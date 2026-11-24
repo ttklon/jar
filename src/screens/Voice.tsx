@@ -57,6 +57,7 @@ import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
+import { exits as outboundExits, line as outboundLine, summary as outboundSummary } from "../lib/outbound";
 import { answer as scriptAnswer, limits as scriptLimits, limitsLine as scriptLimitsLine } from "../lib/scriptRules";
 import { allow as folderAllow, NOTHING as NO_FOLDERS, say as folderSay, suggest as folderSuggest, type Limits as FolderLimits } from "../lib/folderLimit";
 import { journalNote as trashJournalNote, restoreCount as trashRestoreCount, say as trashSay, where as trashWhere } from "../lib/trashFirst";
@@ -4890,6 +4891,24 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </Text>
         <Text className={styles.note}>{registryReport(registryCacheRef.current)}</Text>
       </div>
+      {/*
+        Шаг 167: «что уйдёт наружу» — наблюдаемое свойство, а не обещание.
+        Единственная дверь в сеть — загрузка модели; локальный движок назван
+        отдельно, потому что `127.0.0.1` — это свой же компьютер, и путать его с
+        интернетом значит и пугать зря, и прятать настоящее.
+      */}
+      <div className={styles.section}>
+        <Text className={styles.title}>Что уйдёт наружу</Text>
+        <Text className={styles.note} role="status" aria-live="polite">
+          {outboundSummary(outboundExits())}
+        </Text>
+        {outboundExits().map((exit) => (
+          <Text key={`exit-${exit.what}`} className={styles.note}>
+            {outboundLine(exit)}
+          </Text>
+        ))}
+      </div>
+
       {/* Шаг 161: один список прав. «Что умею» и «чего не делаю никогда» — в одном
           месте и из одного снапшота реестра: второй перечень можно забыть обновить,
           и он разойдётся с тем, что правда. */}
