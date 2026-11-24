@@ -1952,6 +1952,17 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText("Цена ошибки")).toBeTruthy();
     expect(screen.getByText(/необратимых 1 из 2/)).toBeTruthy();
     expect(screen.getByText(/НЕ ОТМЕНИТЬ: /)).toBeTruthy();
+
+    // Шаг 114: повтор видит, что уже сделано. Сейчас — ничего, и это сказано
+    // числом, а не молчанием.
+    expect(screen.getByText("Что уже сделано")).toBeTruthy();
+    expect(screen.getByText("сделано раньше: 0 из 2, выполню всё")).toBeTruthy();
+
+    // А после «Запомнить сделанное» шаг, который отчитался `ok`, пропускается:
+    // повтор не делает дважды.
+    fireEvent.click(screen.getByText("Запомнить сделанное"));
+    await waitFor(() => expect(screen.getByText(/сделано раньше: 1 из 2, остальные 1 выполню/)).toBeTruthy());
+    expect(screen.getByText(/1\. пропущу — уже сделано в прошлый раз/)).toBeTruthy();
   });
 
   it("изменение ответа во время перепроверки отменяет запуск устаревшего плана", async () => {

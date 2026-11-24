@@ -157,6 +157,12 @@ import {
   summary as strongSummary,
   type Danger as StrongDanger,
 } from "../lib/strongAsk";
+import {
+  judge as idemJudge,
+  remember as idemRemember,
+  summary as idemSummary,
+  type Past as IdemPast,
+} from "../lib/idempotent";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -535,6 +541,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // названы числом: предел, который не назван, наступает неожиданно.
   const [runBudget] = useState<RunBudget>(defaultBudget);
   const [spent, setSpent] = useState(() => budgetNothing());
+  // Шаг 114: что уже сделано в прошлый раз — по отпечатку шага и параметров.
+  const [pastRuns, setPastRuns] = useState<IdemPast[]>([]);
   const [report, setReport] = useState<PlanReport | null>(null);
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
@@ -3489,6 +3497,46 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                     </Text>
                   );
                 })}
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 114: повторный запуск видит, что уже сделано, и не делает дважды.
+          «Создать папку» на существующую — успех, а не провал. */}
+      {draft?.plan ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Что уже сделано</Text>
+          {(() => {
+            const steps = draft.plan?.steps ?? [];
+            const verdicts = steps.map((step) => idemJudge(step.registry, step.params, pastRuns, Date.now()));
+            return (
+              <>
+                <Text className={styles.note} role="status" aria-live="polite">
+                  {idemSummary(verdicts)}
+                </Text>
+                {verdicts.map((verdict, index) => (
+                  <Text key={`idem-${index}`} className={styles.note}>
+                    {`${index + 1}. ${verdict.kind === "skip" ? "пропущу" : "выполню"} — ${verdict.why}`}
+                  </Text>
+                ))}
+                <Button
+                  appearance="subtle"
+                  size="small"
+                  onClick={() => {
+                    // Лента прошлых запусков пополняется **по настоящему отчёту**:
+                    // отметка «сделано» должна значить «сделано», а не «нажал».
+                    const ok = report?.steps.filter((step) => step.status === "ok").length ?? 0;
+                    setPastRuns((current) => [
+                      ...current,
+                      ...steps.slice(0, ok).map((step) => idemRemember(step.registry, step.params, true, Date.now())),
+                    ]);
+                    speak(idemSummary(verdicts));
+                  }}
+                >
+                  Запомнить сделанное
+                </Button>
               </>
             );
           })()}
