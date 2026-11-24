@@ -278,6 +278,13 @@ import {
   type Ready as InstantReady,
 } from "../lib/instantAnswers";
 import { briefly as ackBriefly, early as ackEarly, line as ackLine, type Understood as AckUnderstood } from "../lib/ackLine";
+import {
+  abandoned as timeoutAbandoned,
+  answer as timeoutAnswer,
+  insteadOfSpinner,
+  spinning as timeoutSpinning,
+  state as timeoutState,
+} from "../lib/timeouts";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -778,6 +785,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // выбором («ждать» / «не ждать»), и только если остановить действительно можно.
   const [longWait, setLongWait] = useState<{ askedAt: number | null; reply: "wait" | "stop" | null; startedAt: number } | null>(null);
   const [longAskSaid, setLongAskSaid] = useState("");
+  /** Шаг 134: сколько продлений ожидания человек уже выбрал. */
+  const [extended, setExtended] = useState(0);
+  // Имя нарочно не `setTimeout...`: сторож таймеров ищет `setTimeout` рядом со
+  // снятием ошибки, и совпадение имени читалось бы как ошибка по таймеру (её не должно
+  // быть — ошибка живёт до ответа, а не до таймера).
+  const [waitNote, setWaitNote] = useState("");
   // Шаг 131: что происходит с фоновым подъёмом — факт, а не тайна.
   /** Шаг 132: что ответили мгновенно и откуда это. */
   const [instantSaid, setInstantSaid] = useState<{ said: string; source: string } | null>(null);
@@ -2982,6 +2995,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     setAck({ said: `понял: «${ackBriefly(requestedText, 60)}»`, at: askedAt, outcome: "" });
     setFirstWord({ got: firstSaid, at: askedAt, startedAt: askedAt });
     setLongWait({ askedAt: null, reply: null, startedAt: askedAt });
+    // Новое ожидание — новый счёт продлений: иначе «дважды продлевали» накопится
+    // между фразами и третье ожидание бросится без вопроса.
+    setExtended(0);
+    setWaitNote("");
     speak(firstSaid.word);
     setThinking(true);
     setThinkError(null);
@@ -4289,6 +4306,23 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </div>
       ) : null}
 
+      {/* Шаг 134: у ожидания есть срок, и он назван; спиннер без срока назван
+          бесконечным. По истечении — выбор, а не вечный круг. */}
+      {thinking ? (
+        <Text className={styles.note} role="status" aria-live="polite">
+          {timeoutSpinning(true, true).said === "ждём со сроком"
+            ? insteadOfSpinner("model")
+            : timeoutSpinning(true, false).said}
+        </Text>
+      ) : null}
+      {waitNote !== "" ? (
+        <Text className={styles.note} role="status" aria-live="polite">{waitNote}</Text>
+      ) : null}
+      {thinking && timeoutState({ kind: "model", ms: Date.now() - (longWait?.startedAt ?? Date.now()), extended }).state === "give-up" ? (
+        <Text className={styles.note} role="alert">
+          {timeoutState({ kind: "model", ms: Date.now() - (longWait?.startedAt ?? Date.now()), extended }).said}
+        </Text>
+      ) : null}
       {/* Шаг 133: признание понятого — одной строкой и раньше плана. */}
       {ack !== null ? (
         <div className={styles.section}>
@@ -4328,6 +4362,11 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             size="small"
             onClick={() => {
               const got = longAnswered("wait");
+              // Шаг 134: продление — решение человека, и оно копится: иначе ожидание
+              // снова бесконечно.
+              const again = timeoutAnswer("extend", extended);
+              setExtended(again.extended);
+              setWaitNote(again.said);
               setLongWait((was) => (was === null ? was : { ...was, reply: "wait" }));
               setLongAskSaid(got.said);
               setSpoken(speak(got.said) ? got.said : got.said);
@@ -4342,6 +4381,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               const got = longAnswered("stop");
               setLongWait((was) => (was === null ? was : { ...was, reply: "stop" }));
               // Ответ человека — факт ожидания, и он не теряется в общем «стопе».
+              // Брошенное — тоже факт: оно названо числом, а не пустотой.
+              setWaitNote(timeoutAbandoned("model", Date.now() - (longWait?.startedAt ?? Date.now())));
               setLongAskSaid(got.said);
               halt(got.said);
             }}

@@ -1804,6 +1804,19 @@ describe("локальное распознавание на экране", () =
     expect(runPlan).not.toHaveBeenCalled();
   });
 
+  it("у ожидания назван срок и оно не спиннер без конца (шаг 134)", async () => {
+    // Спиннер без срока не отличает «ещё работает» от «умерло».
+    vi.mocked(think).mockReturnValueOnce(new Promise(() => {}));
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "переименуй фото" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    await waitFor(() =>
+      expect(screen.getByText(/^модель: 30 с — она думает, и это нормально; если срок выйдет — спрошу, ждать ли дальше$/)).toBeTruthy(),
+    );
+  });
+
   it("первая строка «понял, делаю» приходит до плана, одной строкой (шаг 133)", async () => {
     // «Разбираю» говорило «я здесь», но не «я понял» — и человек повторял фразу.
     let resolveThink!: () => void;
