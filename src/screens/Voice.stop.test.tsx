@@ -109,6 +109,31 @@ describe("стоп не блокируется размышлением", () => 
     );
   });
 
+  it("стоп отвечает мгновенно и не ждёт ответа ядра (шаг 138/140)", async () => {
+    // Правило, которое этот тест закрепляет: «стоп» — это смена состояния, а не
+    // «попросить ядро и дождаться». Ядро здесь никогда не ответит.
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "убери рабочий стол" } });
+    fireEvent.click(screen.getByRole("button", { name: "Спросить модель" }));
+
+    const stop = await screen.findByRole("button", { name: "Стоп" });
+    await waitFor(() => expect((stop as HTMLButtonElement).disabled).toBe(false), { timeout: 3000 });
+    // Дожидаемся, что ядро действительно спросили: иначе «стоп» проверялся бы до
+    // вопроса, а не во время него.
+    await waitFor(() => expect(mocks.thinkCalls).toBeGreaterThan(0), { timeout: 3000 });
+
+    const askedAt = Date.now();
+    fireEvent.click(stop);
+
+    // Ответ — в кадре, при том что ядро молчит: `mocks.resolve` так и не звался.
+    await waitFor(() => expect(screen.getByText(/сейчас: свободно/)).toBeTruthy(), { timeout: 1000 });
+    const took = Date.now() - askedAt;
+    expect(took).toBeLessThan(500);
+    // И сказано, что поздний ответ будет выброшен.
+    expect(screen.getByText(/управление у вас; ядро досчитает и его ответ будет выброшен/)).toBeTruthy();
+    expect(mocks.thinkCalls).toBeGreaterThan(0);
+  });
+
   it("после остановки стоп снова недоступен: останавливать нечего", async () => {
     render(<Voice onOpen={() => {}} />);
 
