@@ -91,6 +91,13 @@ jobs:
           python3 tools/licenses.py --selftest
           python3 tools/licenses.py --check
 
+      # Шаг 218: «никаких рекомендованных платных сервисов» — правило в коде, а не
+      # в комментарии. Одна кнопка «Попробовать Pro» собирает витрину.
+      - name: No storefront in the interface
+        run: |
+          python3 tools/no_storefront.py --selftest
+          python3 tools/no_storefront.py --quiet
+
       - name: UIA draft generator works on a fixture dump
         run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
 
