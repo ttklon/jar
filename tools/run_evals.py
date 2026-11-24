@@ -130,12 +130,25 @@ def check_curated(plan: dict) -> list[str]:
     сценария в нём нет.
     """
     problems: list[str] = []
-    for item in plan.get("curated", []):
+    curated = plan.get("curated", [])
+    # Шаг 260: обязательных сценариев ровно пятнадцать. Меньше — список поредел
+    # молча; больше — кто-то добавил, не назвав владельца (см. ниже).
+    if len(curated) != 15:
+        problems.append(f"обязательных сценариев {len(curated)}, а обещано 15")
+    for item in curated:
         name = item.get("name", "?")
         if not str(item.get("then", "")).strip():
             problems.append(f"ручной сценарий «{name}»: пустое «что должно быть»")
         if not item.get("priority"):
             problems.append(f"ручной сценарий «{name}»: нет приоритета — никто не знает, что важнее")
+        # «Никто не потеряет» проверяется владельцем и датой, а не обещанием.
+        owner = item.get("owner", "")
+        if not owner or owner == "не назначен":
+            problems.append(f"ручной сценарий «{name}»: нет владельца — потеряется")
+        elif not (ROOT / owner).exists():
+            problems.append(f"ручной сценарий «{name}»: владелец {owner} не существует")
+        if not item.get("checked"):
+            problems.append(f"ручной сценарий «{name}»: нет даты проверки")
     return problems
 
 
