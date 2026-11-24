@@ -295,6 +295,16 @@ import {
   type Report as DeedReport,
   type Row as DeedRow,
 } from "../lib/deedTiming";
+import {
+  compared as kindCompared,
+  kindOf as kindOfStart,
+  line as kindLine,
+  split as kindSplit,
+  stored as kindStored,
+  worthOfWarming,
+  type Kind as StartKind,
+  type Timed as StartTimed,
+} from "../lib/startKinds";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -820,6 +830,19 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [instantSaid, setInstantSaid] = useState<{ said: string; source: string } | null>(null);
   /** Шаг 133: первая строка — признание понятого, до шагов плана. */
   const [ack, setAck] = useState<{ said: string; at: number; outcome: string } | null>(null);
+  // Шаг 136: у каждого замера есть род — холодный или тёплый. Смешивать их значит
+  // складывать две разные причины в одно непонятное число.
+  const [startTimings, setStartTimings] = useState<StartTimed[]>(() => {
+    try {
+      const saved = globalThis.localStorage?.getItem("jar.startKinds");
+      return saved === undefined || saved === null ? [] : (JSON.parse(saved) as StartTimed[]);
+    } catch {
+      return [];
+    }
+  });
+  const [startNote, setStartNote] = useState("");
+  /** Сколько стартов ядра было, когда началась эта работа (шаг 136). */
+  const startsAtRequestRef = useRef(0);
   const [preloadNote, setPreloadNote] = useState("");
   const [preloadSaved, setPreloadSaved] = useState("");
   /** Слабая ли машина — на решении о фоне (131). Держим в ref: эффект стартует один раз. */
@@ -2718,6 +2741,28 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   }, [mic.listening]);
 
   /**
+   * Род старта — холодный или тёплый — по **факту** подъёма ядра.
+   *
+   * Смешивать роды значит складывать две разные причины в одно непонятное число.
+   */
+  const recordStartKind = (what: string, ms: number) => {
+    // Холодный — если **на этом ответе** ядро поднималось: сравниваем число стартов
+    // с тем, что было, когда работа началась.
+    const kind: StartKind = kindOfStart(kernelRef.current.starts > startsAtRequestRef.current);
+    const timed: StartTimed = { what, ms, kind };
+    setStartTimings((was) => {
+      const next = [...was, timed].slice(-40);
+      setStartNote(kindCompared(kind, [timed], was));
+      try {
+        globalThis.localStorage?.setItem("jar.startKinds", JSON.stringify(kindStored(next)));
+      } catch {
+        // Хранилище недоступно — журнал этого запуска всё равно виден.
+      }
+      return next;
+    });
+  };
+
+  /**
    * Замер каждого дела — одной функцией на **оба** пути запуска.
    *
    * Две копии здесь означали бы, что один путь однажды забудут обновить, и замер
@@ -2750,6 +2795,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     // Отрезок «дело» считается от старта разбора, а не от этого вызова: иначе
     // замер говорит, что дело мгновенное, а ждали его с самого начала.
     const deedStart = markRef.current.start || Date.now();
+    startsAtRequestRef.current = kernelRef.current.starts;
     setRunning(true);
     setError(null);
     setDraft(check);
@@ -2759,6 +2805,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         setReport(result);
         // Шаг 135: у каждого шага — свой замер, а не только сумма.
         recordDeedTiming(result, Date.now() - deedStart);
+        // Шаг 136: род старта — по факту: поднималось ли ядро на этом ответе. Первый
+        // раз дороже, и это отдельная причина, а не «нестабильность».
+        recordStartKind(check.plan?.goal ?? "дело", Date.now() - deedStart);
         // Отрезок «дело» и общий срок: от поиска до отчёта. Итог — независимый
         // замер, и он не обязан сходиться с суммой до миллисекунды.
         const took = Date.now() - deedStart;
@@ -2862,6 +2911,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           setPhrases((current) => logTimed(current, markRef.current.loggedAt ?? 0, took));
           // Шаг 135: тот же замер и на пути «Выполнить» — иначе сравнение врёт.
           recordDeedTiming(result, took);
+          // Шаг 136: тот же род старта и на пути «Выполнить».
+          recordStartKind(draft?.plan?.goal ?? text.trim(), took);
         }
         const phrase = result.stopped
           ? voice.draftSpokenStopped(result.stopped)
@@ -3043,6 +3094,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     // «сейчас всё будет».
     const firstSaid = firstWordOf(null);
     const askedAt = Date.now();
+    startsAtRequestRef.current = kernelRef.current.starts;
     // Шаг 133: первая строка — признание понятого, **до** плана. Здесь понято дословно
     // услышанное; уточнение придёт, когда станет ясен план.
     setAck({ said: `понял: «${ackBriefly(requestedText, 60)}»`, at: askedAt, outcome: "" });
@@ -4359,6 +4411,24 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </div>
       ) : null}
 
+      {/* Шаг 136: холодный и тёплый — отдельно, оба в журнале. Средняя по смеси
+          нарочно не показывается: она скрывает обе причины. */}
+      {startTimings.length > 0 ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Холодный старт и тёплый — отдельно</Text>
+          {startTimings.slice(-5).map((timed, index) => (
+            <Text key={`kind-${index}-${timed.kind}`} className={styles.note}>
+              {kindLine(timed)}
+            </Text>
+          ))}
+          <Text className={styles.note} role="status" aria-live="polite">
+            {kindSplit(startTimings).cold.said}
+          </Text>
+          <Text className={styles.note}>{kindSplit(startTimings).warm.said}</Text>
+          <Text className={styles.note}>{worthOfWarming(kindSplit(startTimings))}</Text>
+          {startNote !== "" ? <Text className={styles.note}>{startNote}</Text> : null}
+        </div>
+      ) : null}
       {/* Шаг 135: замер каждого дела — рядом с отчётом, с суммой, расхождением и самым
           медленным. Одно число на отчёт не говорит, что именно чинить. */}
       {deedTiming !== null ? (

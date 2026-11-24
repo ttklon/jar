@@ -1804,6 +1804,50 @@ describe("локальное распознавание на экране", () =
     expect(runPlan).not.toHaveBeenCalled();
   });
 
+  it("холодный старт и тёплый замеряются отдельно, и оба в журнале (шаг 136)", async () => {
+    // «3,4 с, потом 0,4» читалось как нестабильность, а это две разные причины.
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Call: { registry: "storage-backup|проверить|свободное место", params: {}, why: "просил" } },
+      plan: {
+        plan: {
+          goal: "что с диском",
+          source: "model",
+          steps: [{ registry: "storage-backup|проверить|свободное место", params: {}, why: "первый" }],
+        },
+        problems: [],
+        gates: [],
+        questions: [],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+    vi.mocked(runPlan).mockResolvedValueOnce({
+      goal: "что с диском",
+      steps: [{ position: 1, registry: "проверить место", status: "ok", reason: "", evidence: "120 ГБ", duration_ms: 400 }],
+      stopped: null,
+      run_id: 3,
+      sight: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "что с диском" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Что могу сделать")).toBeTruthy());
+    for (const box of screen.queryAllByLabelText(/^разрешить шаг \d+$/)) fireEvent.click(box);
+    fireEvent.click(screen.getByRole("button", { name: "Выполнить" }));
+
+    await waitFor(() => expect(screen.getByText("Холодный старт и тёплый — отдельно")).toBeTruthy());
+    // Род назван словами у замера, а не угадывается при чтении.
+    expect(screen.getAllByText(/· (холодный старт|тёплый)$/).length).toBeGreaterThan(0);
+    // И средняя по смеси не выдаётся: роды считаются раздельно.
+    expect(screen.getByText(/(холодный старт: \d+, всего \d+ мс|холодных стартов не было)/)).toBeTruthy();
+    localStorage.removeItem("jar.startKinds");
+  });
+
   it("в отчёте у каждого дела свой замер, и он хранится рядом (шаг 135)", async () => {
     // «Шаг 2 не выполнен» без времени не говорил, упал он сразу или висел 20 секунд.
     vi.mocked(think).mockResolvedValueOnce({
