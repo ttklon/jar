@@ -4,6 +4,7 @@ import { autostartDisable, autostartEnable, autostartStatus, isTauri } from "../
 import type { Autostart } from "../ipc";
 import { t } from "../i18n/ru";
 import type { ThemeChoice } from "../lib/theme";
+import { ask as askSystem, note as systemNote } from "../lib/contrast";
 import { UndoCard } from "./Undo";
 import { ResourceReportCard } from "../components/ResourceReport";
 import { DataPlaces } from "./DataPlaces";
@@ -115,6 +116,16 @@ export function Settings({
                 : dark
                   ? t.settingsThemeDark
                   : t.settingsThemeLight}
+            </Text>
+            {/*
+              Шаг 186: высокий контраст и уменьшение движения — настройки системы,
+              а не приложения. Человек должен **видеть**, что его настройку
+              заметили: иначе он решит, что её проигнорировали, и уйдёт.
+            */}
+            <Text className={styles.muted} block role="status" aria-live="polite">
+              {systemNote(
+                askSystem((q) => globalThis.matchMedia?.(q).matches ?? false, dark),
+              )}
             </Text>
           </div>
           {/* Три состояния, а не выключатель: «как в системе» — это не «светлая»

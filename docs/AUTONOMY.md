@@ -17,13 +17,14 @@
 опасны: чтение статуса нужно, иначе экран пустой. Опасным было бы **писать**
 или **ходить в сеть** из такого эффекта — и вот этого здесь быть не должно.
 
-* `src/app.tsx:249` — useEffect(() => {
-* `src/app.tsx:260` — useEffect(() => {
-* `src/app.tsx:269` — useEffect(() => {
-* `src/app.tsx:334` — useEffect(() => {
-* `src/app.tsx:353` — useEffect(() => {
-* `src/app.tsx:370` — useEffect(() => {
-* `src/app.tsx:377` — useEffect(() => {
+* `src/app.tsx:250` — useEffect(() => {
+* `src/app.tsx:266` — useEffect(() => {
+* `src/app.tsx:287` — useEffect(() => {
+* `src/app.tsx:296` — useEffect(() => {
+* `src/app.tsx:361` — useEffect(() => {
+* `src/app.tsx:380` — useEffect(() => {
+* `src/app.tsx:397` — useEffect(() => {
+* `src/app.tsx:404` — useEffect(() => {
 * `src/screens/Apps.tsx:24` — useEffect(() => {
 * `src/screens/Ask.tsx:147` — useEffect(() => {
 * `src/screens/DataPlaces.tsx:52` — useEffect(() => {
@@ -32,7 +33,7 @@
 * `src/screens/Hands.tsx:55` — useEffect(() => {
 * `src/screens/Journal.tsx:200` — useEffect(load, [load]);
 * `src/screens/Models.tsx:221` — useEffect(load, [load]);
-* `src/screens/Settings.tsx:58` — useEffect(() => {
+* `src/screens/Settings.tsx:59` — useEffect(() => {
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
 * `src/screens/Undo.tsx:68` — useEffect(load, [load]);

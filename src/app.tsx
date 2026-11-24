@@ -64,6 +64,7 @@ import {
   resolveTheme,
   type ThemeChoice,
 } from "./lib/theme";
+import { ask as askSystem, plan as systemPlan, type System as SystemPrefs } from "./lib/contrast";
 import { apps, ask, flows, hands, journal, models, t, voice } from "./i18n/ru";
 import { APP_VERSION } from "./version";
 
@@ -253,7 +254,33 @@ export function App() {
     mql.addEventListener("change", onChange);
     return () => mql.removeEventListener("change", onChange);
   }, []);
-  const dark = resolveTheme(choice, systemDark) === "dark";
+  /**
+   * Шаг 186: система рассказывает не только про тему. Высокий контраст и
+   * уменьшение движения — отдельные вопросы, и «тёмная тема» на них не отвечает.
+   * Спрашиваем и подписываемся: человек, включивший контраст, не должен
+   * перезапускать приложение, чтобы его заметили.
+   */
+  const [prefs, setPrefs] = useState<SystemPrefs>(() =>
+    askSystem((q) => globalThis.matchMedia?.(q).matches ?? false, systemDark),
+  );
+  useEffect(() => {
+    const queries = [
+      "(prefers-color-scheme: dark)",
+      "(forced-colors: active)",
+      "(-ms-high-contrast: active)",
+      "(prefers-reduced-motion: reduce)",
+    ];
+    const lists = queries.map((q) => globalThis.matchMedia?.(q)).filter((mql): mql is MediaQueryList => Boolean(mql));
+    if (lists.length === 0) return;
+    const onChange = () =>
+      setPrefs(askSystem((q) => globalThis.matchMedia?.(q).matches ?? false, systemDark));
+    for (const mql of lists) mql.addEventListener("change", onChange);
+    return () => {
+      for (const mql of lists) mql.removeEventListener("change", onChange);
+    };
+  }, [systemDark]);
+  const prefsPlan = systemPlan(prefs);
+  const dark = prefsPlan.systemColors ? prefsPlan.theme === "dark" : resolveTheme(choice, systemDark) === "dark";
   // Ширина окна: при 200% масштабе или маленьком окне колонка уходит наверх,
   // иначе содержимое сжимается в полоску. Правило — в `layout.ts`, здесь только подписка.
   const [width, setWidth] = useState(() => globalThis.innerWidth || 1200);

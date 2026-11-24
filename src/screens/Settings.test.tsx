@@ -109,3 +109,25 @@ describe("настройки", () => {
     expect(screen.getByText(t.settingsTheme)).toBeTruthy();
   });
 });
+
+describe("высокий контраст и уменьшение движения — настройки системы (шаг 186)", () => {
+  it("приложение говорит, что настройку заметило, а не молчит", async () => {
+    // Дефект: тема умела три состояния, а контраст не учитывался никак — и
+    // человек, включивший его в Windows, не понимал, слышит ли его приложение.
+    const origin = globalThis.matchMedia;
+    globalThis.matchMedia = ((q: string) => ({
+      matches: q.includes("forced-colors") || q.includes("dark"),
+      media: q,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    })) as unknown as typeof globalThis.matchMedia;
+
+    renderSettings();
+    // Все три состояния названы словами — и включённое, и выключенное.
+    expect(screen.getByText(/тема системы: тёмная/)).toBeTruthy();
+    expect(screen.getByText(/высокая контрастность: включена — цвета берутся у системы/)).toBeTruthy();
+    expect(screen.getByText(/уменьшение движения: выключено/)).toBeTruthy();
+
+    globalThis.matchMedia = origin;
+  });
+});
