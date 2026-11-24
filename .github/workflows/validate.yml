@@ -64,6 +64,11 @@ jobs:
       - name: Risk policy did not quietly widen (deny/confirm/allow per risk)
         run: python3 tools/policy_drift.py --quiet
 
+      # План — тоже данные, и он уже расходился: 516 строк при 500 номерах (под
+      # одним номером стояли исходная формулировка и отчёт).
+      - name: The plan has exactly 500 steps, no number twice
+        run: python3 tools/plan_progress.py --strict --quiet
+
       - name: SPDX SBOM can be built from both lockfiles
         run: python3 tools/sbom.py --check
 
