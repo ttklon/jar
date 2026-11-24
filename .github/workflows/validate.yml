@@ -118,6 +118,13 @@ jobs:
           python3 tools/defects.py --selftest
           python3 tools/defects.py --list
 
+      # Шаг 253: подставное медленное и подставное пустое окружение — крайние
+      # случаи, на которых ломаются терпение и честность.
+      - name: Evals on a slow and on an empty machine
+        run: |
+          python3 tools/run_evals.py --env slow
+          python3 tools/run_evals.py --env empty
+
       - name: UIA draft generator works on a fixture dump
         run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
 

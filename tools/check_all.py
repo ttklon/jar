@@ -46,6 +46,10 @@ STEPS: list[tuple[str, list[str], str]] = [
     # в обе стороны: у каждого дефекта есть тест со своим номером, и каждый номер
     # в тесте есть в реестре.
     ("defect <-> test", ["tools/defects.py"], "every closed defect has a test named after it"),
+    # Шаг 253: всё отвечает и всё есть — это только одно окружение. Две крайности
+    # (медленное и пустое) ломаются по-разному: терпение и честность.
+    ("evals on a slow machine", ["tools/run_evals.py", "--env", "slow"], "the run survives 200 ms per check"),
+    ("evals on an empty machine", ["tools/run_evals.py", "--env", "empty"], "an empty plan is named empty, not fine"),
     ("targets", ["tools/app_targets.py"], "tier A apps have profiles"),
     ("skills", ["tools/skills.py"], "skills reference real rows, risk not lowered"),
     ("hands", ["tools/hands.py"], "data/tools.json points at real, allowed registry rows"),

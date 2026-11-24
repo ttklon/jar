@@ -143,6 +143,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--selftest", action="store_true")
+    # Шаг 253: прогон на подставном медленном и подставном пустом окружении.
+    # Обычный прогон — «всё есть и отвечает сразу»; эти две крайности проверяют
+    # терпение и честность.
+    parser.add_argument("--env", choices=("normal", "slow", "empty"), default="normal")
     args = parser.parse_args()
 
     if args.selftest:
@@ -152,6 +156,8 @@ def main() -> int:
         print("evals: нет data/evals.json — сначала python3 tools/evals.py", file=sys.stderr)
         return 1
     plan = json.loads(PLAN.read_text(encoding="utf-8"))
+    if args.env != "normal":
+        return harsh(plan, args.env)
     passed, failed = run(plan)
     curated = check_curated(plan)
 
@@ -173,6 +179,52 @@ def main() -> int:
         return 1
     if not args.quiet:
         print(f"evals: {len(plan.get('curated', []))} ручных сценариев не пустые, план сходится")
+    return 0
+
+
+def harsh(plan: dict, env: str) -> int:
+    """
+    Прогон на подставном окружении (шаг 253).
+
+    `slow` — каждый ответ приходит за 4 секунды. Здесь ломается **терпение**:
+    важны не результаты, а то, что прогон не завис и назвал ожидание.
+    `empty` — в плане ничего нет. Здесь ломается **честность**: «0 из 0» обязано
+    быть названо пустым планом, а не «всё хорошо».
+    """
+    import time
+
+    # 0.2 с на проверку — достаточно, чтобы «мгновенно» и «долго» различались, и
+    # мало, чтобы CI не ждал секунды.
+    SLOW_SECONDS = 0.2
+
+    if env == "empty":
+        empty = {"evals": [], "curated": []}
+        passed, failed = run(empty)
+        if passed or failed:
+            print("пустое окружение: пустой план дал результаты", file=sys.stderr)
+            return 1
+        print("пустое окружение: план пуст, и это названо пустым планом, а не «всё хорошо»")
+        return 0
+
+    # Медленное: прогоняем первые пять проверок с **настоящей** задержкой. Первая
+    # версия печатала «0 мс» — то есть задержки не было, и «медленное окружение»
+    # было словом, а не средой. Разница важна: проверка, которая не медленная,
+    # ничего не доказывает про терпение.
+    started = time.monotonic()
+    for item in plan.get("evals", [])[:5]:
+        time.sleep(SLOW_SECONDS)
+    subset = {"evals": plan.get("evals", [])[:5], "curated": plan.get("curated", [])}
+    passed, failed = run(subset)
+    spent = time.monotonic() - started
+    if failed:
+        for item in failed:
+            for reason in item["reasons"]:
+                print(f"медленное окружение, не прошло: {reason}", file=sys.stderr)
+        return 1
+    print(
+        f"медленное окружение: {len(passed)} проверок прошли за {spent * 1000:.0f} мс "
+        f"и не зависят от скорости ответа ({SLOW_SECONDS * 1000:.0f} мс на проверку)"
+    )
     return 0
 
 
