@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { welcome } from "../i18n/ru";
 import {
   MIN_ENGINE_MAJOR,
+  MIN_WINDOWS_MAJOR,
   decide,
   describe as describeVerdict,
   readFacts,
@@ -238,5 +239,97 @@ describe("WebView2 до первого окна (шаг 225)", () => {
 
   it("без окна остаётся файл: урезанная система не оставит человека без слов", () => {
     expect(lib).toContain("webview2-missing.txt");
+  });
+});
+
+/**
+ * Шаг 238: старые Windows — честное «не поддерживается» вместо тихого отказа.
+ *
+ * В JavaScript проверка была (шаг 35), и она верная. Дефект нашёлся в **нативном**
+ * коде: проверка WebView2 (шаг 225) знала только «движок есть / нет» и версию
+ * системы не смотрела вовсе. На Windows 7 с установленным WebView2 приложение
+ * уверенно запускалось: «движок есть» ещё не значит «система подходит».
+ */
+describe("старые Windows: отказ до окна, а не после (шаг 238)", () => {
+  const rust = readFileSync(new URL("../../src-tauri/src/webview2.rs", import.meta.url), "utf8");
+  const lib = readFileSync(new URL("../../src-tauri/src/lib.rs", import.meta.url), "utf8");
+
+  it("нативная проверка читает версию системы, а не только наличие движка", () => {
+    expect(rust).toContain("windows_major");
+    expect(rust).toContain("CurrentMajorVersionNumber");
+    // До десятки первого ключа не существует: без **второй ветви** любая старая
+    // система считалась бы десяткой. Проверяется не упоминание ключа, а то, что
+    // при пустом DWORD управление доходит до `CurrentVersion`: первая версия
+    // теста была зелёной, когда ветвь убрали.
+    // Границы функции — по маркерам, а не по отступу: внутри вложенные скобки,
+    // и первый вариант обрезал её на середине.
+    const from = rust.indexOf("pub fn windows_major");
+    const fn = rust.slice(from, rust.indexOf("pub fn check", from));
+    // Ищем **имя значения** (`"/v", "CurrentVersion"`), а не упоминание слова:
+    // оно встречается и в пути реестра (`...\\Windows NT\\CurrentVersion`),
+    // и первая версия проверки именно на это и наткнулась.
+    const fallback = fn.indexOf('"/v",\n                "CurrentVersion"');
+    const earlyReturn = fn.indexOf("return major;");
+    expect(fallback).toBeGreaterThan(-1);
+    // Есть проверка «нашлось — вернуть сразу», а не безусловный `return major`.
+    expect(fn).toContain("if major.is_some()");
+    expect(earlyReturn).toBeGreaterThan(fn.indexOf("if major.is_some()"));
+    // И вторая ветвь идёт **после** этого возврата.
+    expect(fallback).toBeGreaterThan(earlyReturn);
+  });
+
+  it("минимум — десятая версия, и он назван один раз", () => {
+    expect(rust).toContain("MIN_WINDOWS_MAJOR: u32 = 10");
+    // Совпадение с JavaScript-проверкой: две правды об одном не должны разойтись.
+    expect(MIN_WINDOWS_MAJOR).toBe(10);
+  });
+
+  it("отказ — до открытия окна, с кодом 3 и окном-инструкцией", () => {
+    // Проверять **наличие** трёх строк мало: первая версия была зелёной, когда
+    // условие заменили на `if false`. Смотрим блок целиком: `supported` → окно
+    // → выход, по порядку, без `false`.
+    const start = lib.indexOf("let major = webview2::windows_major();");
+    expect(start).toBeGreaterThan(-1);
+    const block = lib.slice(start, start + 400);
+    const condition = block.indexOf("if !webview2::supported(major)");
+    const shown = block.indexOf("show_old_windows()");
+    const exit = block.indexOf("std::process::exit(3)");
+    expect(condition).toBeGreaterThan(-1);
+    expect(shown).toBeGreaterThan(condition);
+    expect(exit).toBeGreaterThan(shown);
+    expect(block).not.toContain("if false");
+    // И всё это до первого `tauri::Builder`.
+    expect(start).toBeLessThan(lib.indexOf("tauri::Builder::default()"));
+  });
+
+  it("нечитаемый реестр не превращается в отказ", () => {
+    // Отказ должен опираться на факт, иначе приложение не запустится там, где
+    // всё в порядке, только реестр закрыт.
+    expect(rust).toContain("supported(None)");
+    const body = rust.slice(rust.indexOf("pub fn supported"));
+    const fn = body.slice(0, body.indexOf("\n}\n"));
+    expect(fn).toContain("None => true");
+  });
+
+  it("текст отказа называет версии и снимает вину с человека", () => {
+    // «Тихий отказ» на 7 выглядит как «запустилось, но половина не работает» —
+    // и человек ищет причину в приложении.
+    expect(rust).toContain("Windows 10");
+    expect(rust).toContain("не ваша вина");
+    // Файл пишет `lib.rs` — там, где показывается окно: у урезанной системы окно
+    // может не показаться, и слова должны остаться хоть где-то.
+    expect(lib).toContain("windows-too-old.txt");
+  });
+
+  it("и граница возможного названа: Chromium 109 — последний для 7/8.1", () => {
+    // Из этого и следует, что «обновите WebView2» на 7 — совет, который нельзя
+    // выполнить дальше 109.
+    expect(MIN_ENGINE_MAJOR).toBe(109);
+  });
+
+  it("вёрстка окна про старую систему безопасна для format!", () => {
+    const text = rust.slice(rust.indexOf("pub const OLD_WINDOWS"), rust.indexOf("/// Итог проверки"));
+    expect(text).not.toContain("{");
+    expect(text).not.toContain("}");
   });
 });

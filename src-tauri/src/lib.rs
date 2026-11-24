@@ -136,6 +136,26 @@ fn show_webview2_instruction() {
     }
 }
 
+/// Окно «нужна Windows 10» — по той же причине, что и окно про WebView2: у
+/// релизной сборки нет консоли, и текст в stderr не увидит никто.
+fn show_old_windows() {
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        let text = webview2::OLD_WINDOWS.replace('"', "'").replace('\n', " ");
+        let script = format!("mshta.exe javascript:alert(\"{text}\");close();");
+        let _ = std::process::Command::new("cmd")
+            .args(["/C", &script])
+            .creation_flags(0x0800_0000)
+            .status();
+    }
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(parent) = exe.parent() {
+            let _ = std::fs::write(parent.join("windows-too-old.txt"), webview2::OLD_WINDOWS);
+        }
+    }
+}
+
 pub fn run() {
     // Засечка до всего остального: «старт» — это от входа в main до окна,
     // и всё, что мы успели сделать, должно в него попасть (шаг 381).
@@ -152,6 +172,21 @@ pub fn run() {
     // вообще (или откроется белым), и человек не узнает ни причины, ни действия.
     // Проверка живёт здесь, потому что JS внутри WebView2 в этом случае не
     // запустится ни разу: проверка платформы на JavaScript тут бессильна.
+    // Шаг 238: старая Windows — отказ **до** запуска окна, а не тихий отказ после.
+    //
+    // На 7 и 8.1 WebView2 не обновляется дальше Chromium 109, и «движок есть» не
+    // значит «система подходит»: голос и часть возможностей там не поднимутся, а
+    // человек будет искать причину в приложении.
+    #[cfg(windows)]
+    {
+        let major = webview2::windows_major();
+        if !webview2::supported(major) {
+            tracing::error!(major = ?major, "слишком старая версия Windows");
+            show_old_windows();
+            std::process::exit(3);
+        }
+    }
+
     let webview = webview2::check();
     tracing::info!(webview = webview2::describe(webview), "проверка WebView2");
     if webview2::should_stop(webview) {

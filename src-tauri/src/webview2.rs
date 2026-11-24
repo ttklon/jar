@@ -34,6 +34,26 @@ https://developer.microsoft.com/microsoft-edge/webview2/ и запустить �
 Нужны права администратора; установка занимает минуту и не требует перезагрузки.\n\n\
 После установки запустите приложение снова.";
 
+/// Минимальная версия Windows (шаг 238).
+///
+/// Десятая — не «вкус»: WebView2 на 7 и 8.1 не обновляется дальше Chromium 109,
+/// а он уже не гарантирует то, на чём стоит экран «Голос». Проверка платформы в
+/// JavaScript это знает (`MIN_WINDOWS_MAJOR`), а **нативная** — нет, и на 7 с
+/// установленным WebView2 приложение уверенно запустится: «движок есть» ещё не
+/// значит «система подходит».
+pub const MIN_WINDOWS_MAJOR: u32 = 10;
+
+/// Почему старая система — это отказ, а не «попробуем».
+///
+/// Тихий отказ на 7 выглядит как «приложение запустилось, но половина не
+/// работает»: голос не поднимается, горячие клавиши не срабатывают. Человек
+/// ищет причину в приложении, а причина — в системе.
+pub const OLD_WINDOWS: &str = "Нужна Windows 10 или новее.\
+\n\nНа Windows 7 и 8.1 приложение запускается, но голос и часть возможностей \n\
+работать не будут: WebView2 там не обновляется дальше версии, которой для этого\n\
+не хватает. Это не ошибка установки и не ваша вина — не та система.\n\n\
+Windows 10 и 11 эта версия поддерживает полностью.";
+
 /// Итог проверки. Отдельный тип, а не `bool`: «не смог прочитать реестр» — это
 /// не «WebView2 нет», и путать их значит отправлять человека ставить то, что у
 /// него уже стоит.
@@ -70,6 +90,40 @@ mod probe {
     use super::Present;
     use std::process::Command;
 
+    /// Старшая цифра версии Windows из реестра: `10.0` → 10, `6.1` → 6.
+    ///
+    /// Читается `CurrentMajorVersionNumber` (есть с Windows 10), а если его нет —
+    /// `CurrentVersion`, где стоит `6.1` (Windows 7) и `6.3` (8.1). Две ветви, а
+    /// не одна: до десятки первого ключа просто не существует, и проверять
+    /// только его значило бы считать любую старую систему десяткой.
+    pub fn windows_major() -> Option<u32> {
+        let major = Command::new("reg")
+            .args([
+                "query",
+                r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion",
+                "/v",
+                "CurrentMajorVersionNumber",
+            ])
+            .output()
+            .ok()
+            .filter(|out| out.status.success())
+            .and_then(|out| parse_reg_dword(&String::from_utf8_lossy(&out.stdout)));
+        if major.is_some() {
+            return major;
+        }
+        Command::new("reg")
+            .args([
+                "query",
+                r"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion",
+                "/v",
+                "CurrentVersion",
+            ])
+            .output()
+            .ok()
+            .filter(|out| out.status.success())
+            .and_then(|out| parse_reg_version(&String::from_utf8_lossy(&out.stdout)))
+    }
+
     /// Прочитать наличие ключа через `reg query`: без лишних зависимостей, и то
     /// же самое делает установщик в CI.
     pub fn check() -> Present {
@@ -98,7 +152,52 @@ mod probe {
     }
 }
 
+/// `CurrentMajorVersionNumber` — DWORD: в выводе `reg` он шестнадцатеричный.
+pub fn parse_reg_dword(output: &str) -> Option<u32> {
+    for line in output.lines() {
+        let lower = line.trim().to_ascii_lowercase();
+        if !lower.contains("currentmajorversionnumber") {
+            continue;
+        }
+        // Строка вида `CurrentMajorVersionNumber    REG_DWORD    0xa`.
+        let value = line.split_whitespace().last()?;
+        let hex = value.trim_start_matches("0x").trim_start_matches("0X");
+        if let Ok(number) = u32::from_str_radix(hex, 16) {
+            return Some(number);
+        }
+    }
+    None
+}
+
+/// `CurrentVersion` — строка `6.1` / `6.3` / `10.0`. Берётся старшая цифра.
+pub fn parse_reg_version(output: &str) -> Option<u32> {
+    for line in output.lines() {
+        let lower = line.trim().to_ascii_lowercase();
+        if !lower.contains("currentversion") {
+            continue;
+        }
+        let value = line.split_whitespace().last()?;
+        let major = value.split('.').next()?;
+        if let Ok(number) = major.parse::<u32>() {
+            return Some(number);
+        }
+    }
+    None
+}
+
+/// Подходит ли система. `None` — прочитать не удалось: это не отказ, а «не знаю».
+pub fn supported(major: Option<u32>) -> bool {
+    // Не прочитали — не отказываем: на урезанной системе реестр может молчать, а
+    // приложение при этом работает. Отказ должен опираться на факт.
+    match major {
+        Some(value) => value >= MIN_WINDOWS_MAJOR,
+        None => true,
+    }
+}
+
 pub use probe::check;
+#[cfg(windows)]
+pub use probe::windows_major;
 
 #[cfg(test)]
 mod tests {
@@ -129,6 +228,47 @@ mod tests {
         assert!(INSTRUCTION.contains("права администратора"));
         // И не пугает кодом ошибки, который человеку некуда деть.
         assert!(!INSTRUCTION.contains("0x"));
+    }
+
+    #[test]
+    fn a_windows_10_dword_is_read_as_ten() {
+        // Вывод `reg query` для DWORD — шестнадцатеричный.
+        let output = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\r\n    CurrentMajorVersionNumber    REG_DWORD    0xa\r\n";
+        assert_eq!(parse_reg_dword(output), Some(10));
+    }
+
+    #[test]
+    fn an_old_system_is_read_from_current_version() {
+        // На 7 и 8.1 ключа `CurrentMajorVersionNumber` нет вовсе — только `6.1`/`6.3`.
+        let win7 = "    CurrentVersion    REG_SZ    6.1";
+        let win81 = "    CurrentVersion    REG_SZ    6.3";
+        let win10 = "    CurrentVersion    REG_SZ    10.0";
+        assert_eq!(parse_reg_version(win7), Some(6));
+        assert_eq!(parse_reg_version(win81), Some(6));
+        assert_eq!(parse_reg_version(win10), Some(10));
+    }
+
+    #[test]
+    fn only_windows_below_ten_is_refused() {
+        assert!(!supported(Some(6)));
+        assert!(supported(Some(10)));
+        assert!(supported(Some(11)));
+    }
+
+    #[test]
+    fn an_unreadable_registry_does_not_refuse() {
+        // Отказ должен опираться на факт: на урезанной системе реестр молчит, а
+        // приложение при этом работает.
+        assert!(supported(None));
+    }
+
+    #[test]
+    fn the_old_system_text_names_the_versions_and_the_reason() {
+        assert!(OLD_WINDOWS.contains("Windows 10"));
+        assert!(OLD_WINDOWS.contains("7"));
+        assert!(OLD_WINDOWS.contains("8.1"));
+        // «Не ваша вина» — чтобы человек не искал причину в себе.
+        assert!(OLD_WINDOWS.contains("не ваша вина"));
     }
 
     #[test]
