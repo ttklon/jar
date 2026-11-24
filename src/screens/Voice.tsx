@@ -174,6 +174,13 @@ import {
   fields as editPlanFields,
   ready as editPlanReady,
 } from "../lib/editPlan";
+import {
+  diff as planDiff,
+  grant as planGrant,
+  holds as planHolds,
+  say as sayPlanConsent,
+  type Seen as PlanSeen,
+} from "../lib/planConsent";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -558,6 +565,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // и каждая проверяется сразу.
   const [planEdits, setPlanEdits] = useState<{ position: number; name: string; value: string }[]>([]);
   const [editNote, setEditNote] = useState<string | null>(null);
+  // Шаг 117: согласие даётся на **план целиком** — состав, порядок, риск и
+  // параметры. Шаг 102 закрыл параметры, здесь — остальное.
+  const [planConsent, setPlanConsent] = useState<{ plan: PlanSeen[]; print: string; at: number } | null>(null);
   const [report, setReport] = useState<PlanReport | null>(null);
   const [running, setRunning] = useState(false);
   // Ответы на вопросы плана: ключ — «шаг:параметр», чтобы два шага не путались.
@@ -3678,6 +3688,47 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                     {editNote}
                   </Text>
                 ) : null}
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 117: согласие — на план целиком. Добавили шаг, переставили шаги,
+          сменился риск — согласие заново, и причина названа. */}
+      {draft?.plan ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Согласие на план</Text>
+          {(() => {
+            const seen: PlanSeen[] = (draft.plan?.steps ?? []).map((step, index) => ({
+              tool: step.registry,
+              params: step.params ?? {},
+              risk: (draft.gates ?? []).find((gate) => gate.position === index + 1)?.risk ?? "read",
+            }));
+            // Сравниваем с **тем** планом, на который дали согласие, а не с
+            // отпечатком: отпечаток говорит «изменилось», но не «что именно».
+            const holdsNow = planConsent !== null && planHolds(planConsent, seen);
+            const change = planDiff(planConsent?.plan ?? [], seen);
+            return (
+              <>
+                <Text className={styles.note} role="status" aria-live="polite">
+                  {planConsent === null
+                    ? "согласия на план ещё нет — спрошу перед запуском"
+                    : holdsNow
+                      ? sayPlanConsent({ changed: false, why: [], worse: false })
+                      : sayPlanConsent(change)}
+                </Text>
+                <Button
+                  appearance="subtle"
+                  size="small"
+                  onClick={() => {
+                    const saved = planGrant(seen, Date.now());
+                    setPlanConsent({ plan: seen, ...saved });
+                    speak("согласие на план записано — любое изменение потребует нового");
+                  }}
+                >
+                  Согласиться на план целиком
+                </Button>
               </>
             );
           })()}

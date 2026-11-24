@@ -1979,6 +1979,13 @@ describe("локальное распознавание на экране", () =
     fireEvent.change(screen.getByLabelText("1. Куда положить"), { target: { value: "E:\\Новое" } });
     expect(screen.getByText(/«Куда положить» — было C:\\Users\\test\\backup.zip, стало E:\\Новое/)).toBeTruthy();
     expect(screen.getByText(/правка меняет шаг — согласие по нему нужно дать заново/)).toBeTruthy();
+
+    // Шаг 117: согласие — на план целиком. Сначала его нет, потом оно в силе, а
+    // правка его снимает — с причиной, а не молча.
+    expect(screen.getByText("Согласие на план")).toBeTruthy();
+    expect(screen.getByText("согласия на план ещё нет — спрошу перед запуском")).toBeTruthy();
+    fireEvent.click(screen.getByText("Согласиться на план целиком"));
+    await waitFor(() => expect(screen.getByText("план не менялся — согласие в силе")).toBeTruthy());
   });
 
   it("изменение ответа во время перепроверки отменяет запуск устаревшего плана", async () => {
