@@ -160,6 +160,13 @@ import {
 import { already as repeatAlready, decide as repeatDecide, offer as repeatOffer } from "../lib/repeatDeed";
 import { attention as reportAttention, one as oneReport, summary as reportSummary, whole as wholeReport } from "../lib/oneReport";
 import { answer as handAnswer, coverage as handCoverage, line as handLine, worst as handWorst } from "../lib/handAnswer";
+import {
+  checkFor as proofFor,
+  done as proofDone,
+  plan as proofPlan,
+  say as sayProof,
+  type Proof as StepProof,
+} from "../lib/stepProof";
 import { finished as cancelFinished, say as cancelSay, stop as cancelStop, start as cancelStart } from "../lib/cancelRun";
 import {
   create as createQuick,
@@ -3340,6 +3347,51 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                     Учесть бюджет
                   </Button>
                 )}
+              </>
+            );
+          })()}
+        </div>
+      ) : null}
+
+      {/* Шаг 111: у каждого шага своя проверка — названа **до** запуска. «Готово»
+          говорит проверка, а не удобство: шаг без проверки помечен заранее. */}
+      {draft?.plan ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Как проверю результат</Text>
+          {(() => {
+            const steps = draft.plan?.steps ?? [];
+            // Вид проверки берётся из реестра: у одной руки результат — путь, у
+            // другой — число. Одна проверка на весь план была бы верой.
+            const checks = steps.map((step) => {
+              // Реестр — из того, что экран уже знает о руках. Без записи в
+              // реестре проверки нет, и это честно помечается как «none».
+              const tool = (items ?? []).find((item) => item.tool === step.registry) ?? null;
+              const registry = `${tool?.key ?? ""} ${tool?.example ?? ""}`.toLowerCase();
+              const proof: StepProof = /переименован|посчита|найдено|файлов/.test(registry)
+                ? "count"
+                : /созда|перемест|скопир|удал|путь/.test(registry)
+                  ? "path"
+                  : /текст|содержим|запиш/.test(registry)
+                    ? "content"
+                    : tool === null
+                      ? "none"
+                      : "marker";
+              return proofFor(step.why ?? step.registry, proof, step.params?.["path"] ?? "");
+            });
+            const got = proofPlan(checks);
+            return (
+              <>
+                <Text className={styles.note}>{sayProof(got)}</Text>
+                {got.said.map((line) => (
+                  <Text key={line} className={styles.note}>
+                    {line}
+                  </Text>
+                ))}
+                {report !== null ? (
+                  <Text className={styles.note} role="status" aria-live="polite">
+                    {`после запуска: ${report.steps.map((step, index) => proofDone(checks[index]?.proof ?? "none", step.status === "ok").said).join("; ")}`}
+                  </Text>
+                ) : null}
               </>
             );
           })()}
