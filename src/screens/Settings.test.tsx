@@ -131,3 +131,52 @@ describe("высокий контраст и уменьшение движени
     globalThis.matchMedia = origin;
   });
 });
+
+describe("три состояния темы, и каждое переключается (шаг 197)", () => {
+  it("светлая, тёмная и «как в системе» — три кнопки, и нажатие ведёт к своему выбору", () => {
+    // Дефект был в том, что темнота зашита: «как в системе» не существовало.
+    // Здесь проверяется не значение по умолчанию, а то, что **все три** доступны
+    // и каждая сообщает наверх именно себя.
+    const onThemeChange = vi.fn();
+    render(
+      <Settings
+        theme="dark"
+        dark
+        onThemeChange={onThemeChange}
+        onShowWelcome={() => undefined}
+        version="0.1.0"
+        source="ядро"
+      />,
+    );
+
+    const group = screen.getByRole("radiogroup", { name: t.settingsTheme });
+    const buttons = Array.from(group.querySelectorAll("button"));
+    expect(buttons).toHaveLength(3);
+    // Выбранное состояние помечено для диктора, а не только цветом.
+    expect(buttons.find((item) => item.getAttribute("aria-pressed") === "true")).toBeTruthy();
+
+    for (const button of buttons) {
+      fireEvent.click(button);
+    }
+    // Каждое нажатие — свой выбор, и три разных, а не одно и то же трижды.
+    const chosen = onThemeChange.mock.calls.map((call) => call[0]);
+    expect(buttons.length, "кнопок темы меньше трёх — проверка была бы пустой").toBe(3);
+    expect(new Set(chosen).size).toBe(3);
+    expect(chosen).toEqual(expect.arrayContaining(["light", "dark", "system"]));
+  });
+
+  it("«как в системе» честно говорит, какая тема сейчас", () => {
+    render(
+      <Settings
+        theme="system"
+        dark={false}
+        onThemeChange={() => undefined}
+        onShowWelcome={() => undefined}
+        version="0.1.0"
+        source="ядро"
+      />,
+    );
+    // Не «системная» без пояснения: человек должен видеть, что это значит сейчас.
+    expect(screen.getByText(t.settingsThemeSystem(false))).toBeTruthy();
+  });
+});
