@@ -15,6 +15,8 @@ import {
 import type { ReadinessStatus, SmokeResult } from "../ipc";
 import { NEED_NETWORK_MIXED, needsNetworkFor, offlineNote, onlineState } from "../lib/offline";
 import { verdict as requestVerdict, type Attempt } from "../lib/offlineRequests";
+import { cadence as cadenceOf, cadenceNote, grade } from "../lib/machineProfile";
+import type { Profile } from "../lib/machineProfile";
 import { assessReadiness, formatSize, hasRoom, planPrepare } from "../lib/readiness";
 import { readiness as text } from "../i18n/ru";
 import { ErrorLine } from "./ErrorLine";
@@ -72,6 +74,12 @@ interface ReadinessCardProps {
   error?: string | null;
   /** Перечитать статус. */
   onRefresh?: () => void;
+  /**
+   * Профиль машины (шаг 221). Карточка его не снимает: железо спрашивает ядро, а
+   * карточка только решает, как часто замерять. Без профиля берётся средняя
+   * частота — неизвестность не повод ни грузить, ни ждать три секунды.
+   */
+  profile?: Profile | null;
 }
 
 /**
@@ -89,7 +97,15 @@ export function ReadinessCard({
   status: statusProp,
   error: errorProp,
   onRefresh,
+  profile = null,
 }: ReadinessCardProps) {
+  // Шаг 221: частота замеров — следствие класса машины, а не константа в экране.
+  // Профиля нет — средняя частота: неизвестность не повод ни грузить, ни ждать.
+  const cls = profile ? grade(profile) : "unknown";
+  // Считаем от класса, а не от профиля: класс уже учитывает «профиля нет» и не
+  // требует подставлять нулевой профиль — подстановка была бы подменой данных.
+  const cadence = cadenceOf(cls);
+  const cadenceWhy = cadenceNote(cls);
   const styles = useStyles();
   const [innerStatus, setInnerStatus] = useState<ReadinessStatus | null>(null);
   const [innerError, setInnerError] = useState<string | null>(null);
@@ -195,6 +211,9 @@ export function ReadinessCard({
     if (!name) return;
     let active = true;
     let polling = false;
+    // Шаг 221: шаг опроса — от класса машины. На слабой раз в 3 с: раз в секунду
+    // опрос читает диск и шлёт IPC, и на двух ядрах это заметная доля того, что
+    // человек видит как «приложение тормозит».
     const timer = setInterval(() => {
       if (polling) return;
       polling = true;
@@ -202,15 +221,15 @@ export function ReadinessCard({
         .then((value) => { if (active) setProgress(value); })
         .catch(() => undefined)
         .finally(() => { polling = false; });
-    }, 500);
+    }, cadence.progress);
     return () => { active = false; clearInterval(timer); };
-  }, [busy, status]);
+  }, [busy, status, cadence.progress]);
 
   useEffect(() => {
     if (!active || statusProp !== undefined || !status?.download_name) return;
-    const timer = setInterval(refresh, 1000);
+    const timer = setInterval(refresh, cadence.poll);
     return () => clearInterval(timer);
-  }, [active, statusProp, status?.download_name, refresh]);
+  }, [active, statusProp, status?.download_name, refresh, cadence.poll]);
 
   const download = useCallback(
     async (kind: "model" | "runtime" | "speech-model" | "speech-runtime") => {
@@ -908,6 +927,9 @@ export function ReadinessCard({
         ).said}
       </Text>
       {browser ? <Text className={styles.note}>{text.browserNote}</Text> : null}
+      {/* Шаг 221: молчаливое «редко» читается как «подвисает». Одна фраза
+          объясняет, что замеры реже — забота о слабой машине, а не поломка. */}
+      {cadenceWhy ? <Text className={styles.note}>{cadenceWhy}</Text> : null}
 
       <div className={styles.row}>
         <Button size="small" appearance="subtle" icon={<ArrowClockwiseRegular />} onClick={refresh}>

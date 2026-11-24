@@ -674,13 +674,20 @@ describe("ошибки восстановления не подменяются 
       mocks.desktop = true;
       let finish!: (value: number) => void;
       mocks.progress.mockResolvedValue(200).mockReturnValueOnce(new Promise((yes) => { finish = yes; }));
-      const { unmount } = render(<ReadinessCard status={status({ download_name: "m.gguf" })} error={null} />);
-      await act(async () => { await vi.advanceTimersByTimeAsync(1500); });
+      // Шаг 221: шаг опроса больше не константа 500 — он зависит от класса машины
+      // (без профиля — 1500). Тест не должен знать это число: он проверяет
+      // **смысл** — пока запрос не вернулся, второй не уходит.
+      const card = render(<ReadinessCard status={status({ download_name: "m.gguf" })} error={null} />);
+      // Три шага опроса при первом висящем запросе: если бы наложение было
+      // возможно, вызовов стало бы три, а не один.
+      await act(async () => { await vi.advanceTimersByTimeAsync(9000); });
       expect(mocks.progress).toHaveBeenCalledOnce();
+      // Вернулся — опрос продолжается: «не накладывать» не значит «замолчать».
+      const before = mocks.progress.mock.calls.length;
       await act(async () => { finish(100); });
-      await act(async () => { await vi.advanceTimersByTimeAsync(500); });
-      expect(mocks.progress).toHaveBeenCalledTimes(2);
-      unmount();
+      await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+      expect(mocks.progress.mock.calls.length).toBeGreaterThan(before);
+      card.unmount();
     } finally { vi.useRealTimers(); }
   });
 
@@ -727,5 +734,40 @@ describe("обещание «без сети ни одного провала, �
     // Пустота читалась бы как «не смотрели». Ответ — словом и числом: ноль.
     render(<ReadinessCard status={status()} error={null} />);
     expect(screen.getByTestId("offline-promise").textContent).toContain("не стучалось вовсе");
+  });
+});
+
+describe("частота замеров идёт от машины (шаг 221)", () => {
+  it("на слабой машине опрос реже, и это сказано", async () => {
+    vi.useFakeTimers();
+    try {
+      mocks.desktop = true;
+      mocks.progress.mockResolvedValue(200);
+      const weak = { cores: 2, ramMb: 4096, gpu: { found: false, vramMb: 0, name: null }, disk: "hdd" as const, at: 0 };
+      const card = render(<ReadinessCard status={status({ download_name: "m.gguf" })} error={null} profile={weak} />);
+      // 2 секунды при шаге 3 с — ни одного опроса; при прежних 500 мс их было бы
+      // четыре. Здесь важно именно число: иначе «редко» останется словом.
+      await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+      expect(mocks.progress).toHaveBeenCalledTimes(0);
+      card.unmount();
+    } finally { vi.useRealTimers(); }
+
+    // И объяснение на экране: молчаливое «редко» читается как «подвисает».
+    const weak = { cores: 2, ramMb: 4096, gpu: { found: false, vramMb: 0, name: null }, disk: "hdd" as const, at: 0 };
+    render(<ReadinessCard status={status()} error={null} profile={weak} />);
+    expect(screen.getByText(/замеры раз в 3 секунды/)).toBeTruthy();
+  });
+
+  it("на сильной машине — раз в секунду", async () => {
+    vi.useFakeTimers();
+    try {
+      mocks.desktop = true;
+      mocks.progress.mockResolvedValue(200);
+      const strong = { cores: 16, ramMb: 65536, gpu: { found: true, vramMb: 16384, name: "RTX" }, disk: "ssd" as const, at: 0 };
+      const card = render(<ReadinessCard status={status({ download_name: "m.gguf" })} error={null} profile={strong} />);
+      await act(async () => { await vi.advanceTimersByTimeAsync(1100); });
+      expect(mocks.progress.mock.calls.length).toBeGreaterThanOrEqual(1);
+      card.unmount();
+    } finally { vi.useRealTimers(); }
   });
 });

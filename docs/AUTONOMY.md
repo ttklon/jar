@@ -68,14 +68,14 @@
 * `src/components/MemoryNote.tsx:65` — useEffect(() => {
 * `src/components/MicrophoneCheck.tsx:22` — useEffect(() => {
 * `src/components/NetworkCard.tsx:78` — useEffect(() => {
-* `src/components/ReadinessCard.tsx:100` — useEffect(() => {
-* `src/components/ReadinessCard.tsx:151` — useEffect(() => {
-* `src/components/ReadinessCard.tsx:172` — useEffect(() => {
-* `src/components/ReadinessCard.tsx:177` — useEffect(() => {
-* `src/components/ReadinessCard.tsx:184` — useEffect(() => {
-* `src/components/ReadinessCard.tsx:209` — useEffect(() => {
-* `src/components/ReadinessCard.tsx:403` — useEffect(() => { if (!status?.engine_running) setSmoke(null); }, [status?.engine_running]);
-* `src/components/ReadinessCard.tsx:404` — useEffect(() => { setSmoke(null); }, [status?.engine_program, status?.model_name]);
+* `src/components/ReadinessCard.tsx:116` — useEffect(() => {
+* `src/components/ReadinessCard.tsx:167` — useEffect(() => {
+* `src/components/ReadinessCard.tsx:188` — useEffect(() => {
+* `src/components/ReadinessCard.tsx:193` — useEffect(() => {
+* `src/components/ReadinessCard.tsx:200` — useEffect(() => {
+* `src/components/ReadinessCard.tsx:228` — useEffect(() => {
+* `src/components/ReadinessCard.tsx:422` — useEffect(() => { if (!status?.engine_running) setSmoke(null); }, [status?.engine_running]);
+* `src/components/ReadinessCard.tsx:423` — useEffect(() => { setSmoke(null); }, [status?.engine_program, status?.model_name]);
 * `src/components/RecentFailures.tsx:58` — useEffect(() => {
 * `src/components/ResourceReport.tsx:58` — useEffect(load, []);
 * `src/lib/useVoice.ts:662` — useEffect(() => {
@@ -87,10 +87,10 @@
 
 | Где | Строка | Как вызывается |
 | --- | --- | --- |
-| `src/components/ReadinessCard.tsx` | 681 | по нажатию |
-| `src/components/ReadinessCard.tsx` | 708 | по нажатию |
-| `src/components/ReadinessCard.tsx` | 742 | по нажатию |
-| `src/components/ReadinessCard.tsx` | 773 | по нажатию |
+| `src/components/ReadinessCard.tsx` | 700 | по нажатию |
+| `src/components/ReadinessCard.tsx` | 727 | по нажатию |
+| `src/components/ReadinessCard.tsx` | 761 | по нажатию |
+| `src/components/ReadinessCard.tsx` | 792 | по нажатию |
 
 ## Что это значит
 

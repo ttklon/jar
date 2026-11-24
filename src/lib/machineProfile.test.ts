@@ -10,6 +10,10 @@ import {
   stale,
   STALE_MS,
   type Profile,
+  cadence,
+  cadenceFor,
+  cadenceNote,
+  cadenceSane,
 } from "./machineProfile";
 
 /**
@@ -130,4 +134,48 @@ describe("измерение не бросает и не врёт", () => {
     expect(gpuUsable(measured)).toBe(false);
   });
 });
+});
+
+/**
+ * Шаг 221: профиль машины управляет не только моделью, но и частотой замеров.
+ *
+ * Интервалы были жёсткие 1000 мс в четырёх местах: на слабой машине мониторинг сам
+ * становится причиной тормозов.
+ */
+describe("частота замеров от класса машины (шаг 221)", () => {
+  it("на слабой реже, на сильной чаще", () => {
+    expect(cadence("weak").poll).toBe(3000);
+    expect(cadence("strong").poll).toBe(1000);
+    expect(cadence("weak").poll).toBeGreaterThan(cadence("medium").poll);
+  });
+
+  it("реже 3 секунд нельзя: прогресс читался бы как «встало»", () => {
+    expect(cadence("weak").poll).toBeLessThanOrEqual(3000);
+    expect(cadenceSane().ok).toBe(true);
+  });
+
+  it("таймер разговора не зависит от машины: иначе он врёт про длительность", () => {
+    expect(cadence("weak").clock).toBe(1000);
+    expect(cadence("strong").clock).toBe(1000);
+  });
+
+  it("класс неизвестен — средний: не грузим и не заставляем ждать три секунды", () => {
+    expect(cadence("unknown").poll).toBe(1500);
+    expect(cadenceNote("unknown")).toBe("");
+  });
+
+  it("по профилю — без промежуточного класса", () => {
+    const weak: Profile = { cores: 2, ramMb: 4096, gpu: { found: false, vramMb: 0, name: null }, disk: "hdd", at: 0 };
+    expect(cadenceFor(weak).poll).toBe(3000);
+  });
+
+  it("на слабой машине сказано, что замеры реже, а не только сделано", () => {
+    // Молчаливое «редко» читается как «подвисает».
+    expect(cadenceNote("weak")).toContain("раз в 3 секунды");
+  });
+
+  it("проверка ловит константу: если слабая стала чаще — провал", () => {
+    // Проверка на проверке: правило ломается одной константой в экране.
+    expect(cadenceSane()).toEqual({ ok: true, why: "" });
+  });
 });
