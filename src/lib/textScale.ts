@@ -139,6 +139,24 @@ export function arrangement(scale: Scale, label: string, width: number): "row" |
   return needed(scale, label) > width ? "full" : "row";
 }
 
+/**
+ * Сколько знаков влезает в отчёт — на **таком** окне (шаг 237).
+ *
+ * Почему это отдельная функция, а не «78ch и всё». Ограничение `maxWidth: "78ch"`
+ * задаёт **потолок**, но не пол: на 1024×600 за вычетом боковой колонки остаётся
+ * 788 px, это 49 знаков при строке 16 px. Отчёт, рассчитанный на 78, в эти 49 не
+ * влезает и переносится — и на узком экране он занимает **больше строк**, чем на
+ * 4K. Это не поломка вёрстки, это факт, и его надо знать: «одинаковый отчёт» не
+ * значит «одинаковое число строк».
+ *
+ * Возвращается число знаков, чтобы по нему можно было посчитать строки и
+ * назвать разницу, а не гадать.
+ */
+export function reportChars(widthPx: number, sidebarPx = 236, linePx = 16, ceiling = 78): number {
+  const room = Math.max(0, widthPx - sidebarPx);
+  return Math.min(Math.floor(room / linePx), ceiling);
+}
+
 /** Строка для журнала: масштаб назван числом. */
 export function describe(scale: Scale): string {
   return `масштаб шрифта ${Math.round(scale * 100)}%: строка ${metrics(scale).line} px`;
