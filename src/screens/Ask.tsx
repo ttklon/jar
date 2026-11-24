@@ -1,4 +1,5 @@
 import { screen as emptyScreen, usable as emptyUsable, again as emptyAgain } from "../lib/emptyWay";
+import { warning as routeWarning } from "../lib/remoteRoute";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
@@ -437,6 +438,10 @@ export function Ask() {
         {ask.voiceConsent}
       </label>
       <Text className={styles.note}>{ask.voiceConsentHint}</Text>
+      {/* Шаг 216: согласие на микрофон не разрешает удалённую модель — но и
+          «разрешает» здесь нечего: маршрута нет. Сказать это прямо дешевле, чем
+          оставить человека гадать, куда уходит его фраза. */}
+      <Text className={styles.note}>{routeWarning({ url: "" }, []).said}</Text>
 
       <form
         className={styles.bar}
