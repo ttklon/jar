@@ -223,3 +223,75 @@ describe("один отчёт на 1024×600 и на 4K (шаг 237)", () => {
     }
   });
 });
+
+/**
+ * Шаг 239: установка на диск D без прав администратора, а не только на C:.
+ *
+ * Дефект найден в конфиге сборки. `bundle.targets` собирает **два** пакета —
+ * `nsis` и `msi`, — а `installMode` есть только у NSIS (и только он умеет
+ * `currentUser`: установка в `%LOCALAPPDATA%\Programs` без прав администратора).
+ * Установщик WiX (`msi`) в Tauri 2 такого режима **не имеет**: MSI по своей
+ * природе ставится в `Program Files` и требует повышения прав. То есть
+ * «устанавливается без администратора» было верно ровно для половины того, что
+ * отдаёт сборка, — и верно молча.
+ *
+ * Второе: `docs/BUILD-GUIDE.md` обещает «NSIS → MSIX через MakeAppx», а конфиг
+ * собирает `msi`. Две правды об одном пакете: документация и сборка.
+ *
+ * Правило шага: пакет, который требует администратора, не должен уезжать
+ * человеку как обычная сборка. NSIS — да, MSI — отдельно и с объяснением, если
+ * он вообще нужен.
+ */
+describe("установка без прав администратора (шаг 239)", () => {
+  const config = JSON.parse(
+    readFileSync(new URL("../../src-tauri/tauri.conf.json", import.meta.url), "utf8"),
+  ) as {
+    bundle: { targets: string[]; windows?: { installMode?: string; webviewInstallMode?: unknown } };
+  };
+
+  it("NSIS ставит для текущего человека, а не для всех", () => {
+    // `currentUser` — это `%LOCALAPPDATA%\Programs`, куда писать можно без
+    // повышения прав. `perMachine` — `Program Files` и администратор.
+    //
+    // Умолчание Tauri 2 — как раз `currentUser`, но умолчание не обещание:
+    // его меняют, не заметив, и проверять надо **сказанное вслух**.
+    expect(config.bundle.windows?.installMode).toBe("currentUser");
+  });
+
+  it("пакета, который требует администратора, нет в обычной сборке", () => {
+    // MSI/WiX в Tauri 2 не умеет `currentUser`: он ставится в `Program Files`.
+    // Оставлять его в `targets` — значит отдавать человеку установщик, который
+    // молча спросит права (и не встанет на машине без администратора).
+    expect(config.bundle.targets).toContain("nsis");
+    expect(config.bundle.targets).not.toContain("msi");
+  });
+
+  it("и на диске D место есть: данные не рядом с программой", () => {
+    // Установка на D: возможна только потому, что данные пишутся не рядом с
+    // `.exe`, а в `%LOCALAPPDATA%`. Если бы путь данных считался от программы,
+    // установка в `Program Files` без прав ломала бы запись, а установка на D:
+    // уносила бы данные на медленный диск. Оба — молча.
+    const logging = readFileSync(
+      new URL("../../src-tauri/src/logging.rs", import.meta.url),
+      "utf8",
+    );
+    expect(logging).toContain("LOCALAPPDATA");
+    expect(logging).not.toMatch(/current_exe\(\)[\s\S]{0,80}join\("ZShelper"\)/);
+  });
+
+  it("документация и сборка говорят об одном пакете", () => {
+    // BUILD-GUIDE обещает NSIS + MSIX. Значит `msi` не должен появляться в
+    // `targets` — иначе человек, читающий документацию, и человек, собирающий
+    // релиз, видят разные вещи.
+    const guide = readFileSync(new URL("../../docs/BUILD-GUIDE.md", import.meta.url), "utf8");
+    expect(guide).toContain("NSIS");
+    expect(config.bundle.targets).not.toContain("msi");
+  });
+
+  it("WebView2 ставится загрузчиком, а не требует ручной установки", () => {
+    // Тот же смысл «без администратора»: если движка нет, установщик обязан
+    // принести его сам, иначе человек упирается в шаг, который не может пройти.
+    const mode = config.bundle.windows?.webviewInstallMode as { type?: string } | undefined;
+    expect(mode?.type).toBe("downloadBootstrapper");
+  });
+});
