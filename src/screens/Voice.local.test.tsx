@@ -1901,6 +1901,93 @@ describe("локальное распознавание на экране", () =
     localStorage.removeItem("jar.startKinds");
   });
 
+  it("повтор спрашивает только про необратимое, и причина названа (шаг 144)", async () => {
+    // Дефект: повтор шёл по факту «не получилось», а не по риску. «Прочитать не
+    // вышло» повторяется само, «удалить не вышло» — только со слова, и вопрос
+    // называет причину: двойное удаление хуже отказа.
+    vi.mocked(think).mockResolvedValueOnce({
+      prompt: "…",
+      answer: "…",
+      proposal: { Call: { registry: "storage-backup|проверить|свободное место", params: {}, why: "просил про диск" } },
+      plan: {
+        plan: {
+          goal: "что с диском",
+          source: "model",
+          steps: [
+            { registry: "storage-backup|проверить|свободное место", params: {}, why: "прочитать" },
+            { registry: "storage-backup|удалить|старую копию", params: {}, why: "удалить" },
+          ],
+        },
+        problems: [],
+        questions: [],
+        gates: [
+          {
+            position: 1,
+            registry: "storage-backup|проверить|свободное место",
+            decision: "allow",
+            risk: "read",
+            wants_approval: false,
+          },
+          {
+            position: 2,
+            registry: "storage-backup|удалить|старую копию",
+            decision: "confirm",
+            risk: "destructive",
+            wants_approval: true,
+          },
+        ],
+      },
+      learning: null,
+      deeds: null,
+      problem: null,
+    });
+    vi.mocked(runPlan).mockResolvedValueOnce({
+      goal: "что с диском",
+      steps: [
+        {
+          position: 1,
+          registry: "storage-backup|проверить|свободное место",
+          status: "failed",
+          reason: "таймаут",
+          evidence: "",
+          duration_ms: 900,
+        },
+        {
+          position: 2,
+          registry: "storage-backup|удалить|старую копию",
+          status: "failed",
+          reason: "файл занят",
+          evidence: "",
+          duration_ms: 700,
+        },
+      ],
+      stopped: null,
+      run_id: 3,
+      sight: null,
+    });
+
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий/)).toBeTruthy());
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "что с диском" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+    await waitFor(() => expect(screen.getByText("Что могу сделать")).toBeTruthy());
+
+    for (const box of screen.queryAllByLabelText(/^разрешить шаг \d+$/)) fireEvent.click(box);
+    fireEvent.click(screen.getByRole("button", { name: "Выполнить" }));
+    await waitFor(() => expect(vi.mocked(runPlan)).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByText("Что сделано")).toBeTruthy());
+
+    // Безопасное чтение: вопроса нет — повтор не требует слова.
+    expect(screen.queryByText(/1\. повтор требует слова/)).toBeNull();
+    // Необратимое удаление: слово нужно, и причина названа словами про второй объект.
+    await waitFor(() =>
+      expect(screen.getByText(/2\. повтор требует слова: шаг необратим/)).toBeTruthy(),
+    );
+    expect(screen.getByText(/может удалить второй объект, а не этот \(файл занят\)/)).toBeTruthy();
+    // Причина названа, а не спрятана: вопрос без «потому что» — формальность.
+    expect(screen.getByText(/шаг необратим: повтор может удалить второй объект/)).toBeTruthy();
+  });
+
   it("в отчёте у каждого дела свой замер, и он хранится рядом (шаг 135)", async () => {
     // «Шаг 2 не выполнен» без времени не говорил, упал он сразу или висел 20 секунд.
     vi.mocked(think).mockResolvedValueOnce({

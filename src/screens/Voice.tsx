@@ -54,6 +54,7 @@ import type {
 import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
+import { mark as repeatMark } from "../lib/repeatHand";
 import { consentCanRun, consentPositions, isSpokenConsent, keepsPendingPlan } from "../lib/consent";
 import { installedEngine, isEngineDown } from "../lib/engineReady";
 import { followUpQuery, isFollowUp } from "../lib/followUp";
@@ -3861,6 +3862,16 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
               };
             });
             const undo = undoHere(undoSteps);
+            // Шаг 144: повтор — по риску шага, а не по одному факту «не вышло».
+            // Безопасное повторяется само, необратимое — только со слова, и вопрос
+            // называет причину. Двойное удаление хуже отказа.
+            const repeatNotes = report.steps
+              .filter((step) => step.status !== "ok")
+              .map((step) => {
+                const risk = (draft?.gates ?? []).find((gate) => gate.registry === step.registry)?.risk ?? "read";
+                return { position: step.position, risk, note: repeatMark(risk, step.reason ?? "шаг не сделался") };
+              })
+              .filter((item) => item.note.length > 0);
             return (
               <>
                 <Text className={styles.note}>{reportSummary(total)}</Text>
@@ -3896,6 +3907,11 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
                 {undo.steps.map((step) => (
                   <Text key={`undo-${step.position}`} className={styles.note}>
                     {`${step.position}. ${step.what} — ${undoAt(step)}`}
+                  </Text>
+                ))}
+                {repeatNotes.map((item) => (
+                  <Text key={`repeat-${item.position}`} className={styles.note} role="status" aria-live="polite">
+                    {`${item.position}. ${item.note}`}
                   </Text>
                 ))}
                 {undoOffer(undo) ? (
