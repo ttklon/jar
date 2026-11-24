@@ -181,6 +181,12 @@ import {
   say as sayPlanConsent,
   type Seen as PlanSeen,
 } from "../lib/planConsent";
+import {
+  answer as threeAnswer,
+  say as sayThree,
+  tally as threeTally,
+  type Raw as ThreeRaw,
+} from "../lib/threeWords";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -3284,15 +3290,29 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             );
             const cover = handCoverage(answers);
             const attention = reportAttention(total);
+            // Шаг 118: три слова на каждый шаг. `failed` — не всегда «не сделано»:
+            // шаг мог выполниться и сломаться на проверке, и тогда честный ответ —
+            // «неизвестно».
+            const raws: ThreeRaw[] = report.steps.map((step) => ({
+              status: step.status,
+              proof: step.evidence,
+              confirmed: step.status === "ok" && (step.evidence ?? "").trim().length > 0,
+              conflicted: reports.find((item) => item.position === step.position)?.conflicts.length !== 0,
+              interrupted: step.status === "cancelled" && (step.reason ?? "").includes("время"),
+            }));
+            const three = threeTally(raws);
             return (
               <>
                 <Text className={styles.note}>{reportSummary(total)}</Text>
+                <Text className={styles.note} role="status" aria-live="polite">
+                  {sayThree(three)}
+                </Text>
                 <Text className={styles.note}>
                   {`рука ответила полностью: ${cover.full} из ${cover.total}`}
                 </Text>
                 {reports.map((step) => (
                   <Text key={`answer-${step.position}`} className={styles.note}>
-                    {`${step.position + 1}. ${handLine(answers[reports.indexOf(step)] ?? answers[0]!)}`}
+                    {`${step.position + 1}. ${threeAnswer(raws[reports.indexOf(step)] ?? { status: "pending" })} — ${handLine(answers[reports.indexOf(step)] ?? answers[0]!)}`}
                   </Text>
                 ))}
                 {attention.length > 0 ? (
