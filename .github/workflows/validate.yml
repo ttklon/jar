@@ -84,6 +84,13 @@ jobs:
           python3 tools/no_silent_download.py --selftest
           python3 tools/no_silent_download.py --quiet
 
+      # Шаг 217: одна таблица лицензий всего встроенного, собранная из блокировок.
+      # Проверяется, что файлы на месте и сумма сходится с общим числом.
+      - name: License table is present and adds up
+        run: |
+          python3 tools/licenses.py --selftest
+          python3 tools/licenses.py --check
+
       - name: UIA draft generator works on a fixture dump
         run: python3 tools/uia_probe.py draft --dump tests/fixtures/uia_dump.json --out /tmp/draft.json
 

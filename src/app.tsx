@@ -27,6 +27,7 @@ import {
   SearchRegular,
   SettingsRegular,
   InfoRegular,
+  DocumentBulletListRegular,
 } from "@fluentui/react-icons";
 import { afterWake, isTauri, registrySnapshot } from "./ipc";
 import { watchWake } from "./lib/wakeWatch";
@@ -49,6 +50,7 @@ const StateRoute = lazy(() =>
 const Journal = lazy(() => import("./screens/Journal").then((m) => ({ default: m.Journal })));
 const Apps = lazy(() => import("./screens/Apps").then((m) => ({ default: m.Apps })));
 const Settings = lazy(() => import("./screens/Settings").then((m) => ({ default: m.Settings })));
+const Licenses = lazy(() => import("./screens/Licenses").then((m) => ({ default: m.Licenses })));
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
 import { filterCommands, type Command } from "./lib/commands";
@@ -80,7 +82,8 @@ type Screen =
   | "models"
   | "journal"
   | "settings"
-  | "state";
+  | "state"
+  | "licenses";
 
 const useStyles = makeStyles({
   shell: {
@@ -209,6 +212,10 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement; keywords: read
   { id: "models", label: models.nav, icon: <BrainCircuitRegular />, keywords: ["модели", "движок", "models", "llm"] },
   { id: "journal", label: journal.nav, icon: <HistoryRegular />, keywords: ["история", "журнал", "journal", "logs"] },
   { id: "settings", label: t.navSettings, icon: <SettingsRegular />, keywords: ["настройки", "тема", "settings"] },
+  // «Лицензии» — рядом с настройками и по той же причине, по которой «Состояние»
+  // стоит рядом с «Обзором»: обе отвечают на вопрос о доверии, и обе должны
+  // находиться без поиска по документации (шаг 217).
+  { id: "licenses", label: "Лицензии", icon: <DocumentBulletListRegular />, keywords: ["лицензии", "licenses", "spdx", "gpl"] },
 ];
 
 /**
@@ -655,6 +662,8 @@ export function App() {
                   onOpenSettings={() => setScreen("settings")}
                   onOpenAsk={() => setScreen("ask")}
                 />
+              ) : screen === "licenses" ? (
+                <Licenses />
               ) : (
                 <Settings
                   theme={choice}
