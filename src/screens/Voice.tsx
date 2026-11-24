@@ -267,6 +267,16 @@ import {
   say as sayPreload,
   type Start as PreloadStart,
 } from "../lib/preload";
+import {
+  instant as instantAnswer,
+  instantEnough,
+  provenance as instantProvenance,
+  refresh as instantRefresh,
+  save as instantSave,
+  store as instantStore,
+  type Ask as InstantAsk,
+  type Ready as InstantReady,
+} from "../lib/instantAnswers";
 import { clean as cleanSecrets, forLog as secretsForLog, say as saySecrets } from "../lib/secrets";
 import { heard as previewHeard } from "../lib/secretPreview";
 import { split as splitChain, risky as chainRisky } from "../lib/chainHands";
@@ -768,6 +778,8 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const [longWait, setLongWait] = useState<{ askedAt: number | null; reply: "wait" | "stop" | null; startedAt: number } | null>(null);
   const [longAskSaid, setLongAskSaid] = useState("");
   // Шаг 131: что происходит с фоновым подъёмом — факт, а не тайна.
+  /** Шаг 132: что ответили мгновенно и откуда это. */
+  const [instantSaid, setInstantSaid] = useState<{ said: string; source: string } | null>(null);
   const [preloadNote, setPreloadNote] = useState("");
   const [preloadSaved, setPreloadSaved] = useState("");
   /** Слабая ли машина — на решении о фоне (131). Держим в ref: эффект стартует один раз. */
@@ -777,6 +789,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   const humanWaitingRef = useRef(false);
   const longWaitRef = useRef<typeof longWait>(null);
   longWaitRef.current = longWait;
+  // Шаг 132: ответы «что умеешь / где данные / как дела» готовы **до** вопроса — в том
+  // числе из прошлого запуска. Реестр их не держит: он только уточняет числа.
+  const [instant] = useState(() => {
+    const saved = globalThis.localStorage?.getItem("jar.instant");
+    const past = saved === undefined || saved === null ? [] : (JSON.parse(saved) as InstantReady[]);
+    return instantStore(past);
+  });
+  const instantRef = useRef(instant);
+  instantRef.current = instant;
   const registryCacheRef = useRef<RegistryCache>(registryCache(""));
   // Числа реестра — состоянием, а не только ref: пока их нет, кэш молчит, и это
   // должно быть **видно**, а не выглядеть как «кэш не работает».
@@ -935,12 +956,25 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           .catch(() => 0)
           .then((hands) => {
             if (!alive) return;
+            const version = `${snapshot.stats.actions}:${snapshot.stats.domains}:${hands}`;
             setRegistryCount({
               actions: snapshot.stats.actions,
               hands,
               // Версия реестра — его содержимое: изменилось содержимое, изменился и кэш.
-              version: `${snapshot.stats.actions}:${snapshot.stats.domains}:${hands}`,
+              version,
             });
+            // Шаг 132: готовые ответы уточняются числами и сохраняются на следующий
+            // запуск — «как дела» спрашивают именно при старте.
+            const numbers = { actions: snapshot.stats.actions, hands, version };
+            for (const ask of ["skills", "data", "health"] as InstantAsk[]) {
+              instantRefresh(instantRef.current, ask, numbers, false);
+            }
+            try {
+              globalThis.localStorage?.setItem("jar.instant", JSON.stringify(instantSave(instantRef.current)));
+            } catch {
+              // Хранилище недоступно — ответ всё равно есть, он просто не переживёт
+              // перезапуск.
+            }
           });
       })
       .catch(() => undefined);
@@ -2901,6 +2935,28 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     // Шаг 127: частый вопрос отвечается из реестра, **без модели**, и сказано, откуда
     // ответ. «Что ты умеешь» не должно ждать 3 секунды за пересказ того, что уже есть.
     // Пока реестр не прочитан, кэш молчит: «0 действий» — ложь, а не ответ.
+    // Шаг 132: ответ, известный заранее, отдаётся **сразу** и не ждёт реестра. Он не
+    // притворяется свежим: если числа прошлого запуска — так и сказано.
+    const asked = requestedText.toLowerCase().replace(/ё/g, "е");
+    const quick: InstantAsk | null = /(что|что-то)?\s*(ты\s+)?(умеешь|можешь)/.test(asked)
+      ? "skills"
+      : /(где|куда)\s+(мои\s+)?(данные|файлы|фото)/.test(asked)
+        ? "data"
+        : /(как\s+дела|ты\s+работаешь|ты\s+жив)/.test(asked)
+          ? "health"
+          : null;
+    if (quick !== null) {
+      const readyAt = Date.now();
+      const ready = instantAnswer(instantRef.current, quick);
+      const took = Date.now() - readyAt;
+      setInstantSaid({ said: ready.said, source: `${instantProvenance(ready)} · ${instantEnough(took).said}` });
+      setThinking(false);
+      setThinkError(null);
+      setRegistrySaid(null);
+      setLongWait(null);
+      speak(ready.said);
+      return;
+    }
     const cached = registryCount.version === "" ? null : registryAnswer(registryCacheRef.current, requestedText, registryCount);
     if (cached !== null && cached.said !== null) {
       // Ответ **из реестра**, а не «подумал»: он не притворяется мыслью модели.
@@ -4215,6 +4271,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </div>
       ) : null}
 
+      {/* Шаг 132: ответ, готовый до вопроса, — и сказано, откуда он и что занял. */}
+      {instantSaid !== null ? (
+        <div className={styles.section}>
+          <Text className={styles.title}>Ответ сразу</Text>
+          <Text className={styles.note} role="status" aria-live="polite">
+            {`${instantSaid.said} · ${instantSaid.source}`}
+          </Text>
+        </div>
+      ) : null}
       {/* Шаг 131: фоновый подъём ядра — назван, вместе с ценой: «400 мс вместо
           3400». Иначе быстрый первый ответ выглядит чудом, а медленный — поломкой. */}
       {preloadNote !== "" ? (

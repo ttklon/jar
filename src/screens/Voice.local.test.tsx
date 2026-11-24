@@ -1804,6 +1804,38 @@ describe("локальное распознавание на экране", () =
     expect(runPlan).not.toHaveBeenCalled();
   });
 
+  it("«что умеешь» отвечается сразу и без модели, и сказано, откуда числа (шаг 132)", async () => {
+    // Ответ известен заранее — ему незачем ждать чтения реестра или модели.
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "что ты умеешь" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    await waitFor(() => expect(screen.getByText("Ответ сразу")).toBeTruthy());
+    // Модель не спрашивали вовсе: это условие ответа, а не «повезло».
+    expect(think).not.toHaveBeenCalled();
+    // И сказано, что это за числа и что ответ занял.
+    expect(screen.getByText(/(без чисел: реестр ещё не прочитан|числа из реестра этого запуска|числа из прошлого запуска — могли измениться) · \d+ мс — (в кадре|дольше кадра \(16 мс\): это задержка, а не «мгновенно»)/)).toBeTruthy();
+  });
+
+  it("ответ из прошлого запуска не выдаётся за свежий (шаг 132)", async () => {
+    // Ответ, сохранённый в прошлый раз, называется прошлым — и всё равно мгновенный.
+    localStorage.setItem(
+      "jar.instant",
+      JSON.stringify([
+        { ask: "health", said: "работаю на этой машине; если что-то долго — скажу числом", numbers: "past", version: "800:12:50" },
+      ]),
+    );
+    render(<Voice onOpen={() => {}} />);
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "как дела" } });
+    fireEvent.click(screen.getByText("Спросить модель"));
+
+    await waitFor(() =>
+      expect(screen.getByText(/^работаю на этой машине; если что-то долго — скажу числом · /)).toBeTruthy(),
+    );
+    expect(think).not.toHaveBeenCalled();
+    localStorage.removeItem("jar.instant");
+  });
+
   it("ядро поднимается в фоне при старте и это названо, а не спрятано (шаг 131)", async () => {
     // Первая фраза платила за старт, хотя окно было открыто давно.
     // Движок и модель на месте — значит поднимать есть что.
@@ -1869,10 +1901,12 @@ describe("локальное распознавание на экране", () =
     expect(screen.getByText(/реестр ещё не прочитан: частые вопросы пока идут к модели/)).toBeTruthy();
     await waitFor(() => expect(screen.getByText(/реестр прочитан: 835 действий, рук 56/)).toBeTruthy());
 
-    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "что ты умеешь" } });
+    // «Что умеешь» с шага 132 отвечается мгновенно и раньше; здесь — вопрос, который
+    // кэш реестра знает, а мгновенные ответы нет.
+    fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "помощь" } });
     fireEvent.click(screen.getByText("Спросить модель"));
 
-    await waitFor(() => expect(screen.getByText(/умею 835 действий/)).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/скажите делом: «переименуй фото»/)).toBeTruthy());
     // Сказано, откуда ответ: реестр — не «подумал».
     expect(screen.getByText(/· реестр \d+:\d+:\d+$/)).toBeTruthy();
     // И модель для этого не спрашивали вовсе.
