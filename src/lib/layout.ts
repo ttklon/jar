@@ -13,6 +13,48 @@
 /** Порог, ниже которого колонка уходит вверх, а не отнимает ширину. */
 export const NARROW_WIDTH = 760;
 
+/**
+ * Обещанный минимум окна: 1024×600 (шаг 222).
+ *
+ * Число здесь, а не только в `tauri.conf.json`, по двум причинам:
+ *
+ *  * **обещание проверяется тестом**, а конфиг окна — нет: `minHeight` в JSON
+ *    однажды поменяют, и никто не заметит, что обещание про 600 стало ложью;
+ *  * **высота считалась «сколько получится»**: `minHeight` было 620, то есть окно
+ *    шире обещанного минимума по высоте — на экране 600 нижняя часть уезжала за
+ *    край, и «работает от 600» было неправдой на один скролл, который никто не
+ *    проверял.
+ */
+export const MIN_SCREEN = { width: 1024, height: 600 } as const;
+
+/**
+ * Влезает ли окно в экран — и что ужать, если нет.
+ *
+ * `chrome` — рамка и панель задач, они отнимают от экрана, а не от окна. Когда
+ * места меньше обещанного минимума, приложение не притворяется, что всё хорошо:
+ * оно говорит «тесно» и уходит в одну колонку, а не режет содержимое справа.
+ */
+export function fitWork(screen: { width: number; height: number }): {
+  /** Меньше обещанного минимума — хотя бы по одной стороне. */
+  tight: boolean;
+  /** Что делать: одна колонка или обычная раскладка. */
+  layout: Layout;
+  /** Сказать человеку. */
+  said: string;
+} {
+  const layout = layoutFor(screen.width);
+  const tight = screen.width < MIN_SCREEN.width || screen.height < MIN_SCREEN.height;
+  if (!tight) return { tight, layout, said: "" };
+  const short: string[] = [];
+  if (screen.width < MIN_SCREEN.width) short.push(`ширина ${screen.width} меньше ${MIN_SCREEN.width}`);
+  if (screen.height < MIN_SCREEN.height) short.push(`высота ${screen.height} меньше ${MIN_SCREEN.height}`);
+  return {
+    tight,
+    layout: { ...layout, narrow: true },
+    said: `экран теснее обещанного (${short.join(", ")}): колонка уходит наверх, чтобы содержимое не резалось справа`,
+  };
+}
+
 export type Layout = {
   /** Одна колонка: навигация сверху лентой. */
   narrow: boolean;
