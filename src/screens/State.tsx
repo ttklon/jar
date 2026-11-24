@@ -3,6 +3,7 @@ import { makeStyles, tokens } from "@fluentui/react-components";
 import type { StateItem } from "../lib/state";
 import { CONDITION_HINT, CONDITION_LABEL, headline, nextStep, summarize } from "../lib/state";
 import { emptyLine } from "../lib/empty";
+import { promise as reinstallPromise } from "../lib/reinstall";
 
 /**
  * Экран «Состояние» (шаг 1).
@@ -97,6 +98,12 @@ export function StateScreen({ items, onGo }: StateScreenProps) {
           Что работает на этой машине, что не проверено и что сломалось. У каждого
           пункта сказано, где и чем это проверено, — чтобы «работает» не значило
           «кажется, работает».
+        </Text>
+        {/* Шаг 219: вопрос «а если переустановить — опять всё качать?» задаётся
+            раньше, чем человек нажмёт «удалить». Ответ — списками: «данные
+            в безопасности» каждый понимает по-своему. */}
+        <Text className={styles.lead} block>
+          {reinstallPromise()}
         </Text>
       </div>
 
