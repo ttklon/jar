@@ -1,0 +1,136 @@
+/**
+ * Шаг 285: Obsidian — файлы принадлежат человеку и читаемы.
+ *
+ * Что взято. У Obsidian память — это **обычные файлы на диске**: `.md`, которые
+ * открываются любым редактором, читаются без приложения и переезжают без
+ * экспорта. Человек владеет ими по-настоящему: может открыть, поправить,
+ * скопировать, положить в свой архив.
+ *
+ * Что **не** взято:
+ *
+ *  * **своя разметка.** Obsidian придумал `[[ссылки]]` и frontmatter — они хороши
+ *    внутри Obsidian и странны снаружи. Наш файл — простой текст, который понятен
+ *    и без нас;
+ *  * **папка-хранилище вместо файла.** «Открой хранилище» — это шаг, который
+ *    человек не сделает. Наш файл один, и его можно просто найти;
+ *  * **html и вложенные структуры.** Читаемость важнее выразительности: если
+ *    факт нельзя прочитать глазами в блокноте, это не «файлы человека», а
+ *    экспорт.
+ *
+ * Три правила формата:
+ *
+ *  1. **одна строка — один факт.** Не дерево и не таблица: строки можно
+ *     сравнивать, искать и править по одной;
+ *  2. **заголовок объясняет, что это и что с этим делать** — человек, открывший
+ *     файл через год, не должен догадываться;
+ *  3. **файл можно править руками и вернуть обратно.** Значит, разбор должен
+ *     прощать то, что человек напишет: лишние пробелы, свои пометки, пустые
+ *     строки.
+ */
+
+import type { Sourced } from "./factOrigin";
+
+/** Что видно в файле: шапка, потом строки. */
+export const HEADER = [
+  "# Память приложения",
+  "",
+  "> Этот файл принадлежит вам: его можно открыть в блокноте, поправить и удалить.",
+  "> Одна строка — один факт. Формат строки: `вид: значение — откуда`.",
+  "> Строки, которые не понятны, при чтении пропускаются и называются.",
+  "",
+].join("\n");
+
+/**
+ * Записать память в текст.
+ *
+ * Строка несёт и происхождение: «вы сказали» / «приложение заметило» — иначе
+ * через месяц не отличить своё слово от догадки (шаг 273).
+ */
+export function write(facts: readonly Sourced[]): string {
+  const lines = facts.map((fact) => `${fact.kind}: ${fact.value} — ${sourceWord(fact.origin)}`);
+  return `${HEADER}${lines.join("\n")}${lines.length > 0 ? "\n" : ""}`;
+}
+
+/**
+ * Прочитать текст, поправленный руками.
+ *
+ * Молча пропускать непонятное нельзя: человек поправит файл, увидит «прочитано»
+ * и будет искать пропавший факт. Поэтому непонятное возвращается списком.
+ */
+export function read(text: string): { facts: Sourced[]; skipped: string[] } {
+  const facts: Sourced[] = [];
+  const skipped: string[] = [];
+
+  for (const raw of text.split("\n")) {
+    const line = raw.trim();
+    if (line === "") continue;
+    // Свои пометки и заголовки — не факты и не ошибки.
+    if (line.startsWith("#") || line.startsWith(">") || line.startsWith("//")) continue;
+
+    const match = /^([a-zа-я-]+):\s*(.+?)(?:\s+—\s+(.+))?$/i.exec(line);
+    if (match === null) {
+      skipped.push(line);
+      continue;
+    }
+
+    const kind = match[1]!.toLowerCase();
+    const value = match[2]!.trim();
+    if (value === "") {
+      skipped.push(line);
+      continue;
+    }
+    if (!KINDS.includes(kind)) {
+      skipped.push(line);
+      continue;
+    }
+
+    facts.push({
+      kind,
+      value,
+      origin: originOf(match[3]?.trim() ?? ""),
+      at: 0,
+      from: "",
+    });
+  }
+
+  return { facts, skipped };
+}
+
+/** Виды, которые файл понимает. Незнакомый вид — пропуск, а не догадка. */
+export const KINDS: readonly string[] = ["folder", "program", "voice", "volume", "method"];
+
+/**
+ * Как происхождение написано в файле.
+ *
+ * По-русски: файл читают люди, а не только мы.
+ */
+export function sourceWord(origin: Sourced["origin"]): string {
+  if (origin === "said") return "вы сказали";
+  if (origin === "shown") return "приложение заметило";
+  return "перенесено";
+}
+
+function originOf(text: string): Sourced["origin"] {
+  const clean = text.toLowerCase();
+  if (clean.includes("вы сказали") || clean.includes("сказал")) return "said";
+  if (clean.includes("заметило") || clean.includes("наблюд")) return "shown";
+  if (clean.includes("перенес")) return "imported";
+  // Нет пометки — считаем сказанным: человек, убравший комментарий, не хотел
+  // понизить факт до догадки.
+  return "said";
+}
+
+/**
+ * Что сказать о прочитанном.
+ *
+ * Числом, и с названием пропущенного: «файл прочитан» без этого — обещание,
+ * которое не проверено.
+ */
+export function report(got: { facts: readonly unknown[]; skipped: readonly string[] }): string {
+  if (got.facts.length === 0 && got.skipped.length === 0) return "файл пуст: в нём нет ни одной строки с фактом";
+  const parts = [`прочитано ${got.facts.length}`];
+  if (got.skipped.length > 0) {
+    parts.push(`пропущено ${got.skipped.length}: ${got.skipped.slice(0, 2).join("; ")}`);
+  }
+  return parts.join(", ");
+}
