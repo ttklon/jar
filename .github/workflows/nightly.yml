@@ -33,3 +33,49 @@ jobs:
   validate:
     name: nightly · данные и документы
     uses: ./.github/workflows/validate.yml
+
+  # Шаг 256: живой сценарий на Windows — по расписанию и **с сохранением
+  # результата в историю**.
+  #
+  # Дефект, который это закрывает. Ночной прогон уже вызывал `app.yml`, а в нём
+  # есть живой прогон на Windows (Chromium с виртуальным микрофоном). Но результат
+  # жил 14 дней как артефакт и **никуда не копился**: «упало сегодня» видно, а
+  # «стало падать, а раньше проходило» — нет. Артефакт без истории отвечает на
+  # вопрос «прошло ли», а спрашивают другое: «когда перестало».
+  #
+  # Поэтому после прогона пишется строка истории: дата, коммит, что было.
+  history:
+    name: nightly · история живого прогона
+    needs: [app, validate]
+    # `always()`: строка истории нужна и тогда, когда прогон упал — особенно
+    # тогда. Иначе в истории будут только успешные ночи, и «когда перестало»
+    # окажется «никогда».
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Записать, чем кончилась ночь
+        env:
+          APP: ${{ needs.app.result }}
+          VALIDATE: ${{ needs.validate.result }}
+        run: python3 tools/nightly_history.py --app "$APP" --validate "$VALIDATE"
+      - name: Сохранить историю в репозитории
+        run: |
+          git config user.name "zshelper-ci"
+          git config user.email "ci@zshelper.invalid"
+          git add data/nightly.jsonl
+          git diff --staged --quiet || git commit -m "ночная история: $(date -u +%Y-%m-%d)"
+          git push
+      - name: Снимок истории в артефакты
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-history
+          path: data/nightly.jsonl
+          if-no-files-found: warn
+          # Дольше, чем у прогона: история нужна, чтобы сравнивать версии, а не
+          # чтобы разбирать одну ночь.
+          retention-days: 90

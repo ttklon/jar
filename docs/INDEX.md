@@ -123,6 +123,7 @@
 | `make_receipts.py` | — |
 | `metrics_ci.py` | — |
 | `mine_awesome.py` | разбор awesome-листов |
+| `nightly_history.py` | — |
 | `no_silent_download.py` | — |
 | `no_storefront.py` | — |
 | `no_telemetry.py` | — |
