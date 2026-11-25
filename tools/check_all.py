@@ -40,6 +40,9 @@ STEPS: list[tuple[str, list[str], str]] = [
     # проверить, а регрессия понимания видна только по жалобе через месяц.
     # Пустой журнал честно говорит «не измеряли», а не «0%».
     ("metrics", ["tools/metrics_ci.py"], "phrases understood and deeds finished, with floors"),
+    # Шаг 257: снимок отчёта совпадает с репозиторием. Устаревший снимок значит,
+    # что сравнивают версии не с тем, что в коде.
+    ("report snapshot", ["tools/report_snapshot.py", "--check"], "the report snapshot matches the repository"),
     # Шаг 251: план, который никто не прогоняет, — это документ, а не проверка.
     # Прогон отвечает «прошло/не прошло» с причиной, без сети и без модели.
     ("evals pass", ["tools/run_evals.py", "--quiet"], "every eval passes, with a reason when it does not"),

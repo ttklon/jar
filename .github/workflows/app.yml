@@ -94,6 +94,33 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+  # Шаг 257: снимок отчёта в артефактах — чтобы сравнивать **версии**, а не
+  # только править код. В CI уже лежали сборка, снимки экрана и SBOM, а отчёта
+  # не было: на «что изменилось между 1.1.0 и 1.2.0» отвечал diff кода — он
+  # говорит, что правили, и молчит о том, что изменилось для человека.
+  report:
+    name: report snapshot (for comparing versions)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Снять отчёт и сверить с репозиторием
+        run: |
+          python3 tools/report_snapshot.py --write
+          python3 tools/report_snapshot.py --check
+      - name: Сохранить снимок отчёта
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: report-snapshot
+          path: data/report.json
+          # Снимок нужен, чтобы сравнивать версии: он должен пережить сам прогон
+          # и следующую ночь.
+          retention-days: 90
+          if-no-files-found: error
+
   voice-simulation:
     name: voice simulation (Windows Chromium, virtual microphone)
     runs-on: windows-latest
