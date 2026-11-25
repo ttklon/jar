@@ -1,3 +1,3 @@
-{"night": "2026-11-24", "commit": "abc1234def56", "app": "success", "validate": "success", "decided_at": "2026-11-25T13:55:46Z"}
-{"night": "2026-11-25", "commit": "136b31d29280", "app": "failure", "validate": "success", "decided_at": "2026-11-25T13:55:46Z"}
-{"night": "2026-11-26", "commit": "136b31d29280", "app": "success", "validate": "success", "decided_at": "2026-11-25T13:55:46Z"}
+{"night": "2026-11-24", "commit": "abc1234def56", "app": "success", "validate": "success", "decided_at": "2026-11-25T14:12:28Z"}
+{"night": "2026-11-25", "commit": "b29013fefa67", "app": "failure", "validate": "success", "decided_at": "2026-11-25T14:12:28Z"}
+{"night": "2026-11-26", "commit": "b29013fefa67", "app": "success", "validate": "success", "decided_at": "2026-11-25T14:12:28Z"}
