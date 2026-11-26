@@ -55,6 +55,7 @@ const Settings = lazy(() => import("./screens/Settings").then((m) => ({ default:
 const Licenses = lazy(() => import("./screens/Licenses").then((m) => ({ default: m.Licenses })));
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
+import { applyScale, readScale } from "./components/TextSizeCard";
 import { filterCommands, type Command } from "./lib/commands";
 import { readEntry } from "./lib/entry";
 import { readScreen, saveScreen } from "./lib/lastScreen";
@@ -492,6 +493,18 @@ export function App() {
       });
     });
     return stop;
+  }, []);
+
+  /**
+   * Масштаб текста — при запуске, а не только по нажатию (шаг 10).
+   *
+   * Выбор человека сохраняется, значит при следующем запуске он должен
+   * действовать с первого кадра: иначе человек с плохим зрением каждое утро
+   * видит мелкий текст и идёт его увеличивать заново. Читаем тем же правилом,
+   * что и настройка, — двух разных «что было выбрано» быть не должно.
+   */
+  useEffect(() => {
+    applyScale(readScale(globalThis.localStorage), globalThis.document?.documentElement ?? null);
   }, []);
 
   // Место запоминается одним эффектом, а не `setItem` в каждой кнопке: переходов

@@ -13,6 +13,7 @@ import { RecentFailures } from "../components/RecentFailures";
 import { MemoryNote } from "../components/MemoryNote";
 import { MemoryBackups } from "../components/MemoryBackups";
 import { MemoryFacts } from "../components/MemoryFacts";
+import { TextSizeCard } from "../components/TextSizeCard";
 import { Diagnostics } from "../components/Diagnostics";
 import { levels, show as noticeShow, type SuccessLevel } from "../lib/noticePolicy";
 
@@ -281,6 +282,10 @@ export function Settings({
           </Button>
         </div>
       </div>
+
+      {/* Размер текста — рядом с темой: это одна и та же просьба «мне так
+          удобнее видеть», и искать её в двух местах человек не станет. */}
+      <TextSizeCard />
 
       {section(t.settingsSectionData)}
 
