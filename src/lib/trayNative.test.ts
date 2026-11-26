@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exitWarn, icon, menu, notDo, tooltip, type State } from "./trayNative";
+import { exitWarn, icon, matchesRust, menu, mustHave, notDo, tooltip, type State } from "./trayNative";
 
 /**
  * Шаг 441: трей — состояние, пауза, выход.
@@ -7,11 +7,11 @@ import { exitWarn, icon, menu, notDo, tooltip, type State } from "./trayNative";
 
 describe("подсказка говорит состояние, а не название", () => {
   it("идёт дело — что именно", () => {
-    expect(tooltip("running", "уборка загрузок")).toBe("ZShelper: делаю «уборка загрузок»");
+    expect(tooltip("running", "уборка загрузок")).toBe("делаю «уборка загрузок»");
   });
 
   it("ждёт ответа — так и сказано", () => {
-    expect(tooltip("waiting", "уборка")).toContain("ждёт вашего ответа");
+    expect(tooltip("waiting", "уборка")).toContain("жду вашего ответа");
   });
 
   it("на паузе, сбой, простой — у каждого свой текст", () => {
@@ -72,5 +72,37 @@ describe("что трей не делает", () => {
     const got = notDo().join();
     expect(got).toContain("обрывается молча");
     expect(got).toContain("мышца помнит место");
+  });
+});
+
+/**
+ * Сведение с Rust (фаза 1, шаг 41).
+ *
+ * Проверка нашла расхождение: подсказка в Rust повторяла имя, а меню было короче
+ * правила. Теперь правило перечисляет обязательное, и тест держит Rust рядом.
+ */
+describe("правило и Rust сходятся", () => {
+  it("три требования названы", () => {
+    expect(mustHave()).toHaveLength(3);
+    expect(mustHave()[0]).toContain("без имени");
+  });
+
+  it("меню Rust с «выход» последним — сходится", () => {
+    expect(matchesRust(["show", "stop-voice", "quit"])).toEqual([]);
+  });
+
+  it("без «выход» или не последним — расхождение", () => {
+    expect(matchesRust(["show", "stop-voice"]).join()).toContain("нет пункта «выход»");
+    expect(matchesRust(["quit", "show"]).join()).toContain("«выход» не последний");
+  });
+
+  it("без разговора — расхождение", () => {
+    expect(matchesRust(["show", "quit"]).join()).toContain("нет пункта разговора");
+  });
+
+  it("правило требует состояние, а не имя", () => {
+    // Подсказка с именем — это повтор, а не состояние.
+    expect(tooltip("idle")).not.toContain("ZShelper");
+    expect(tooltip("idle")).toBe("жду вашу фразу");
   });
 });

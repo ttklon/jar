@@ -18,7 +18,7 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
     let menu = Menu::with_items(app, &[&show, &stop_voice, &separator, &quit])?;
 
     let mut builder = TrayIconBuilder::with_id("main")
-        .tooltip("ZShelper — готово")
+        .tooltip("жду вашу фразу")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
@@ -60,14 +60,14 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
 /// системный tooltip — единственная видимая подсказка без вмешательства в чужое окно.
 fn voice_tooltip(status: &str) -> Result<&'static str, String> {
     match status {
-        "ready" => Ok("ZShelper — готово"),
-        "key-down" => Ok("ZShelper — голосовая клавиша зажата"),
-        "key-up" => Ok("ZShelper — клавиша отпущена"),
-        "listening" => Ok("ZShelper — слушаю"),
-        "working" => Ok("ZShelper — обрабатываю запрос"),
-        "awaiting-confirmation" => Ok("ZShelper — жду подтверждения"),
-        "executing" => Ok("ZShelper — выполняю действие"),
-        "error" => Ok("ZShelper — ошибка; откройте окно"),
+        "ready" => Ok("жду вашу фразу"),
+        "key-down" => Ok("голосовая клавиша зажата"),
+        "key-up" => Ok("клавиша отпущена"),
+        "listening" => Ok("слушаю"),
+        "working" => Ok("обрабатываю запрос"),
+        "awaiting-confirmation" => Ok("жду подтверждения"),
+        "executing" => Ok("выполняю действие"),
+        "error" => Ok("ошибка; откройте окно"),
         _ => Err("неизвестное состояние голоса".to_string()),
     }
 }
@@ -107,24 +107,24 @@ mod tests {
     fn tray_has_explicit_voice_states_and_rejects_unknown_values() {
         assert_eq!(
             voice_tooltip("key-down").unwrap(),
-            "ZShelper — голосовая клавиша зажата"
+            "голосовая клавиша зажата"
         );
-        assert_eq!(voice_tooltip("listening").unwrap(), "ZShelper — слушаю");
+        assert_eq!(voice_tooltip("listening").unwrap(), "слушаю");
         assert_eq!(
             voice_tooltip("working").unwrap(),
-            "ZShelper — обрабатываю запрос"
+            "обрабатываю запрос"
         );
         assert_eq!(
             voice_tooltip("awaiting-confirmation").unwrap(),
-            "ZShelper — жду подтверждения"
+            "жду подтверждения"
         );
         assert_eq!(
             voice_tooltip("executing").unwrap(),
-            "ZShelper — выполняю действие"
+            "выполняю действие"
         );
         assert_eq!(
             voice_tooltip("error").unwrap(),
-            "ZShelper — ошибка; откройте окно"
+            "ошибка; откройте окно"
         );
         assert!(voice_tooltip("untrusted arbitrary tooltip").is_err());
     }
