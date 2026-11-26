@@ -1,80 +1,61 @@
 import { describe, expect, it } from "vitest";
-import { PER_USER, before, check, needsAdmin, rebootNeeded, whereMarks, type Plan } from "./noAdmin";
+import { checks, explain, needs, refused, withoutAdmin, type Action } from "./noAdmin";
 
 /**
- * Шаг 301: установщик без прав администратора и без перезагрузки.
- *
- * На рабочем ноутбуке администратора нет — установка не должна упираться в UAC.
+ * Шаг 449: никаких прав администратора без явной причины и объяснения.
  */
 
-const plan = (over: Partial<Plan> = {}): Plan => ({
-  path: PER_USER,
-  adds: ["приложение", "движок", "ярлыки"],
-  driver: false,
-  ...over,
-});
-
-describe("своё место, свои права", () => {
-  it("папка человека — прав не нужно", () => {
-    expect(needsAdmin(plan())).toBe(false);
-    expect(check(plan()).ok).toBe(true);
+describe("администратор нужен только там, где нельзя иначе", () => {
+  it("установка, общее обновление, изменение системы", () => {
+    expect(needs("install").needed).toBe(true);
+    expect(needs("updateAll").needed).toBe(true);
+    expect(needs("systemChange").needed).toBe(true);
   });
 
-  it("путь вне профиля — понадобятся права, и это сказано", () => {
-    const got = check(plan({ path: "%PROGRAMFILES%\\ZShelper" }));
-    expect(got.ok).toBe(false);
-    expect(got.problems.join()).toContain("права администратора");
+  it("память, модель, автозапуск, файлы, своё обновление — нет", () => {
+    for (const action of ["memory", "model", "autostart", "files", "updateMe"] as Action[]) {
+      expect(needs(action).needed).toBe(false);
+    }
   });
 
-  it("драйвер — единственная честная причина повышения прав", () => {
-    const got = check(plan({ driver: true }));
-    expect(got.ok).toBe(false);
-    expect(got.problems.join()).toContain("это надо назвать");
-  });
-
-  it("пустая установка — ошибка, а не «ничего не делаем»", () => {
-    expect(check(plan({ adds: [] })).problems.join()).toContain("не сказано, что устанавливается");
+  it("три из восьми — проверка", () => {
+    const all: Action[] = ["install", "updateAll", "updateMe", "memory", "model", "autostart", "files", "systemChange"];
+    expect(all.filter((action) => needs(action).needed)).toHaveLength(3);
   });
 });
 
-describe("что человек читает до установки", () => {
-  it("одна строка про папку, права и перезагрузку", () => {
-    const got = before(plan());
-    expect(got).toContain("права администратора не нужны");
-    expect(got).toContain("перезагрузка не нужна");
+describe("перед запросом сказано, что будет сделано", () => {
+  it("установка — с альтернативой без UAC", () => {
+    const got = explain("install");
+    expect(got).toContain("понадобится разрешение Windows");
+    expect(got).toContain("%LOCALAPPDATA%");
   });
 
-  it("без «возможно» и «в некоторых случаях»", () => {
-    expect(before(plan())).not.toMatch(/возможно|в некоторых случаях/i);
-  });
-
-  it("если права нужны — зачем именно", () => {
-    expect(before(plan({ driver: true }))).toContain("понадобятся права администратора");
+  it("где администратор не нужен — так и говорим", () => {
+    expect(explain("memory")).toBe("администратор не нужен");
   });
 });
 
-describe("перезагрузка — ответ, а не отговорка", () => {
-  it("помощнику перезагрузка не нужна", () => {
-    const got = rebootNeeded(plan());
-    expect(got.needed).toBe(false);
-    expect(got.why).toContain("ничего не меняет систему целиком");
+describe("человек отказал — не «всё сломалось»", () => {
+  it("есть альтернатива — продолжим без прав", () => {
+    expect(refused("install")).toContain("продолжу без администратора");
   });
 
-  it("драйвер — нужна, и сказано, что это цена драйвера", () => {
-    const got = rebootNeeded(plan({ driver: true }));
-    expect(got.needed).toBe(true);
-    expect(got.why).toContain("цена драйвера");
+  it("есть альтернатива — предлагается сделать самому", () => {
+    const got = refused("systemChange");
+    expect(got).toContain("продолжу без администратора");
+    expect(got).toContain("как сделать самому");
   });
 });
 
-describe("ярлыки и реестр без администратора", () => {
-  it("HKCU, а не HKLM", () => {
-    const got = whereMarks();
-    expect(got.registry.startsWith("HKCU")).toBe(true);
-    expect(got.registry).not.toContain("HKLM");
+describe("без администратора — пять вещей", () => {
+  it("включая автозапуск в HKCU", () => {
+    const got = withoutAdmin();
+    expect(got).toHaveLength(5);
+    expect(got.join()).toContain("HKCU");
   });
 
-  it("причина названа человеку, а не только нам", () => {
-    expect(whereMarks().why).toContain("без администратора");
+  it("три проверки", () => {
+    expect(checks()).toHaveLength(3);
   });
 });
