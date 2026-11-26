@@ -38,6 +38,10 @@ import { Voice } from "./Voice";
  */
 
 vi.mock("../ipc", () => ({
+    // Экран «Голос» теперь показывает «что сейчас» и «как у меня дела»:
+    // без этих двух чтение состояния падало бы, и тест проверял бы не экран.
+    memoryRuns: async () => [],
+    engineStatus: async () => ({ found: true, program: null, search_dir: "", running: false, port: null, pid: null }),
   readinessStatus: vi.fn().mockRejectedValue(new Error("статус недоступен в этом тесте")),
   isTauri: () => true,
   planFor: vi.fn().mockResolvedValue([]),

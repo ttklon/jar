@@ -45,8 +45,21 @@ export interface Stats {
  * не живёт по календарю отчётов.
  */
 export function week(deeds: readonly Deed[], now: number): Stats {
-  const since = now - 7 * 86_400_000;
-  return count(deeds.filter((deed) => deed.at >= since && deed.at <= now));
+  // Правая граница — «сейчас включительно»: дело, которое кончилось в эту
+  // секунду, уже случилось и должно попасть в «эту неделю», а не в «ту».
+  return between(deeds, now - 7 * 86_400_000, now + 1);
+}
+
+/**
+ * Окно счёта — половина открытая: `from` включается, `to` нет.
+ *
+ * Это единственное, что было полезного в `weekCounters` и чего здесь не хватало:
+ * две недели подряд не должны пересекаться одной записью, иначе дело на границе
+ * посчитается дважды и «стало больше» окажется выдумкой. `week()` выше — частный
+ * случай окна, и теперь он им и пользуется.
+ */
+export function between(deeds: readonly Deed[], from: number, to: number): Stats {
+  return count(deeds.filter((deed) => deed.at >= from && deed.at < to));
 }
 
 /**
@@ -97,6 +110,8 @@ export function compare(now: Stats, before: Stats): string {
 export function notCounted(): string[] {
   return [
     "просмотры экранов и время в приложении: это не дело",
+    // Из weekCounters: «худший день» — тоже слежка, а не польза.
+    "«худший день»: журнал — не табель, и худший день ничего не значит",
     "открытия меню и нажатия кнопок",
     "сколько раз человек ошибся при наборе фразы",
   ];

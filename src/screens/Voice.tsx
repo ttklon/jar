@@ -56,6 +56,7 @@ import type {
 import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { RightNowCard } from "../components/RightNowCard";
+import { WeekStatsCard } from "../components/WeekStatsCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
 import { allows as grantAllows, book as grantBook, EMPTY as EMPTY_GRANTS, give as grantGive, load as loadGrants, onRevoke as grantOnRevoke, revoke as grantRevoke, save as saveGrants, type Book as GrantBook, type Channel as GrantChannel } from "../lib/grants";
@@ -3382,6 +3383,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           `rightNow` показывает и не управляет: «остановить всё» рядом с идущим
           делом — худшая кнопка из возможных. */}
       <RightNowCard />
+      {/* «Как у меня дела» — сразу после «что сейчас»: два ответа на один вопрос
+          «что вообще происходит», и оба нужны при первом запуске. */}
+      <WeekStatsCard />
 
       {mic.listening && !always ? (
         <Text className={styles.note}>{voice.pauseSend}</Text>

@@ -26,6 +26,10 @@ import { Voice } from "./Voice";
  */
 
 vi.mock("../ipc", () => ({
+    // Экран «Голос» теперь показывает «что сейчас» и «как у меня дела»:
+    // без этих двух чтение состояния падало бы, и тест проверял бы не экран.
+    memoryRuns: async () => [],
+    engineStatus: async () => ({ found: true, program: null, search_dir: "", running: false, port: null, pid: null }),
   registrySnapshot: async () => ({
       actions: [],
     stats: { actions: 0, domains: 0, verbs: 0, byRisk: {}, byTier: {}, byStatus: {} },

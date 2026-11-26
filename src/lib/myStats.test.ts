@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compare, count, notCounted, time, week, type Deed } from "./myStats";
+import { between, compare, count, notCounted, time, week, type Deed } from "./myStats";
 
 /**
  * Шаг 424: статистика своих дел на экране «Обзор».
@@ -75,5 +75,21 @@ describe("что не считаем", () => {
     const got = notCounted().join();
     expect(got).toContain("это не дело");
     expect(got).toContain("сколько раз человек ошибся");
+  });
+});
+
+describe("окно счёта (сведено из weekCounters)", () => {
+  // Единственное полезное, что было в weekCounters: недели не пересекаются.
+  const WEEK = 7 * 86_400_000;
+
+  it("граница окна: from включается, to нет", () => {
+    expect(between([deed({ at: now - WEEK }), deed({ at: now })], now - WEEK, now).total).toBe(1);
+  });
+
+  it("дело на границе двух недель считается один раз, а не дважды", () => {
+    const border = now - WEEK;
+    const before = between([deed({ at: border })], now - 2 * WEEK, border);
+    const after = between([deed({ at: border })], border, now);
+    expect(before.total + after.total).toBe(1);
   });
 });
