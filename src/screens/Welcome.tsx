@@ -5,6 +5,7 @@ import { welcome } from "../i18n/ru";
 import { cleanName, readName, saveName } from "../lib/person";
 import { decide, readFacts } from "../lib/platform";
 import { checkFirstRun, summarizeFirstRun } from "../lib/firstRunCheck";
+import { groups as starterGroups, phrases as starterPhrases, NEEDED } from "../lib/starterPage";
 
 /**
  * Экран знакомства — то, что человек видит при первом запуске.
@@ -49,6 +50,11 @@ const useStyles = makeStyles({
     border: `1px solid ${tokens.colorNeutralStroke2}`,
   },
   ruleText: { color: tokens.colorNeutralForeground2 },
+  // Двадцать фраз — списком по группам, а не простынёй: человек ищет «то, что
+  // хочет», а не читает двадцать строк подряд.
+  want: { display: "flex", flexDirection: "column", gap: "2px" },
+  wantTitle: { color: tokens.colorNeutralForeground2, fontSize: tokens.fontSizeBase200 },
+  said: { display: "flex", flexWrap: "wrap", gap: "8px" },
   actions: { display: "flex", flexWrap: "wrap", gap: "8px" },
   note: { color: tokens.colorNeutralForeground3, fontSize: tokens.fontSizeBase200 },
   sideways: { display: "flex", flexWrap: "wrap", gap: "4px", alignItems: "center" },
@@ -108,6 +114,31 @@ export function Welcome({
         <Text className={styles.note}>{welcome.firstPhraseHint}</Text>
         {welcome.firstPhraseExamples.map((example) => (
           <Text key={example} className={styles.phrase}>«{example}»</Text>
+        ))}
+      </div>
+
+      {/*
+        Шаг 8 плана подключения: страница «20 фраз, которые точно работают».
+        Правило `starterPage` было написано и не подключено: три примера выше
+        говорят «можно просто сказать», но не отвечают «а что именно». Здесь —
+        все двадцать по тому, что человек хочет, и у каждой группы сказано, что
+        она сделает: пробовать вслепую страшно.
+      */}
+      <div className={styles.rules} aria-label="двадцать фраз, которые точно работают">
+        <Text weight="semibold">двадцать фраз, которые точно работают</Text>
+        <Text className={styles.note}>
+          {`${starterPhrases().length} из ${NEEDED}: выберите, что хотите, и скажите как есть`}
+        </Text>
+        {starterGroups().map((group) => (
+          <div key={group.want} className={styles.want}>
+            <Text className={styles.wantTitle}>{group.want}</Text>
+            <div className={styles.said}>
+              {group.said.map((phrase) => (
+                <Text key={phrase} className={styles.phrase}>«{phrase}»</Text>
+              ))}
+            </div>
+            <Text className={styles.note}>{group.gets}</Text>
+          </div>
         ))}
       </div>
 
