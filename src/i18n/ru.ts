@@ -105,6 +105,16 @@ export const t = {
   settingsAutostartOff: "выключено: приложение запускается, когда вы его откроете",
   settingsAutostartReading: "читаю состояние из реестра…",
   settingsAutostartError: (reason: string) => `не получилось: ${reason}`, 
+  /**
+   * Уведомления (шаг 337). Формулировки не «тихий режим», а «когда сообщать»:
+   * человек выбирает не громкость, а повод. Об ошибках галочки нет и быть не
+   * может — она значила бы «сломайся тихо», и это записано рядом.
+   */
+  settingsSectionNotices: "Когда сообщать о делах",
+  settingsNoticeSuccess: "Об успешных делах",
+  settingsNoticeErrorsAlways: "об ошибках сообщаю всегда: это не настройка",
+  settingsNoticeSaved: "запомнил: об успехах — ",
+
   entryPlaceholder: "скажи или напиши — или назови экран",
   paletteTitle: "Куда перейти",
   paletteSearch: "Поиск экрана",

@@ -35,7 +35,7 @@
 * `src/screens/Hands.tsx:55` — useEffect(() => {
 * `src/screens/Journal.tsx:200` — useEffect(load, [load]);
 * `src/screens/Models.tsx:221` — useEffect(load, [load]);
-* `src/screens/Settings.tsx:59` — useEffect(() => {
+* `src/screens/Settings.tsx:79` — useEffect(() => {
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
 * `src/screens/Undo.tsx:68` — useEffect(load, [load]);

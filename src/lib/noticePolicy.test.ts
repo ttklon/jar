@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cannotDisable, levels, show, summary, whyAlways, type Settings } from "./noticePolicy";
+import { cannotDisable, levels, roles, show, summary, type Settings, whyAlways } from "./noticePolicy";
 
 /**
  * Шаг 337: уведомление об успехе — настраиваемо, об ошибке — всегда.
@@ -65,5 +65,25 @@ describe("в настройках видно, что ошибки придут",
 
   it("почему у ошибки нет настройки", () => {
     expect(whyAlways()).toContain("нарушено незаметно");
+  });
+});
+
+/**
+ * Сведение с `resultNotice` (фаза 1, шаг 41): одна правда о «показывать ли».
+ */
+describe("роли разведены, дубль снят", () => {
+  it("три роли названы, и решение — одно", () => {
+    const got = roles();
+    expect(got).toHaveLength(3);
+    expect(got[0]).toContain("один ответ на два вопроса");
+  });
+
+  it("`show` учитывает и настройку, и «у экрана»", () => {
+    expect(show("done", { success: "away", atDesk: true }).show).toBe(false);
+    expect(show("done", { success: "away", atDesk: false }).show).toBe(true);
+  });
+
+  it("ошибка не выключается настройкой", () => {
+    expect(show("failed", { success: "none", atDesk: true }).show).toBe(true);
   });
 });

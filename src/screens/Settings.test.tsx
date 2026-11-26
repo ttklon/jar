@@ -31,7 +31,13 @@ vi.mock("../ipc", async (importOriginal) => {
  * первого запуска станет недоступным навсегда: показать его больше нечем.
  */
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  // Выбор уведомлений живёт в localStorage и переживает `cleanup` — без чистки
+  // третий тест видит «always» от второго. Это ловушка, а не мелочь: тест,
+  // который зависит от порядка, однажды соврёт.
+  globalThis.localStorage?.removeItem("zshelper.noticeSuccess");
+});
 
 const renderSettings = (onShowWelcome = vi.fn(), onThemeChange = vi.fn()) => {
   render(
@@ -179,5 +185,41 @@ describe("три состояния темы, и каждое переключа
     );
     // Не «системная» без пояснения: человек должен видеть, что это значит сейчас.
     expect(screen.getByText(t.settingsThemeSystem(false))).toBeTruthy();
+  });
+});
+
+/**
+ * Уведомления об успехах (фаза 1, шаг 41 — сведение `noticePolicy` и `resultNotice`).
+ *
+ * Проверяем глазами экрана: три уровня видны кнопками, выбор запоминается и
+ * объявляется словами, а выключателя «не сообщать об ошибках» нет вовсе.
+ */
+describe("уведомления об успехах", () => {
+  it("три уровня и никакого выключателя ошибок", () => {
+    renderSettings();
+
+    expect(screen.getByRole("button", { name: "не сообщать: успехи видно в журнале" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "только если меня нет за компьютером" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "сообщать всегда" })).toBeTruthy();
+
+    // Об ошибках — не настройка: сказано словами.
+    expect(screen.getByText("об ошибках сообщаю всегда: это не настройка")).toBeTruthy();
+  });
+
+  it("выбор запоминается и объявляется словами", () => {
+    renderSettings();
+
+    fireEvent.click(screen.getByRole("button", { name: "сообщать всегда" }));
+
+    expect(globalThis.localStorage.getItem("zshelper.noticeSuccess")).toBe("always");
+    // Подсветка — не единственный признак: рядом есть слова.
+    expect(screen.getByText(/запомнил/)).toBeTruthy();
+  });
+
+  it("умолчание — «только если не у экрана»: нажато и подсвечено", () => {
+    renderSettings();
+
+    const away = screen.getByRole("button", { name: "только если меня нет за компьютером" });
+    expect(away.getAttribute("aria-pressed")).toBe("true");
   });
 });

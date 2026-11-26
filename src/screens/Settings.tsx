@@ -13,6 +13,10 @@ import { RecentFailures } from "../components/RecentFailures";
 import { MemoryNote } from "../components/MemoryNote";
 import { MemoryBackups } from "../components/MemoryBackups";
 import { Diagnostics } from "../components/Diagnostics";
+import { levels, show as noticeShow, type SuccessLevel } from "../lib/noticePolicy";
+
+/** Ключ настройки уведомлений. Один, чтобы не разъехаться с чтением. */
+const NOTICE_KEY = "zshelper.noticeSuccess";
 
 const useStyles = makeStyles({
   root: { display: "flex", flexDirection: "column", gap: "20px", maxWidth: "760px" },
@@ -50,9 +54,25 @@ export function Settings({
   version: string;
 }) {
   const styles = useStyles();
+
+  // Что выбрать и что сказать — по правилу, а не по месту в вёрстке: `noticeShow`
+  // отвечает и за то, что об ошибках выключателя нет.
+  const chooseLevel = (next: SuccessLevel) => {
+    setSuccessLevel(next);
+    globalThis.localStorage?.setItem(NOTICE_KEY, next);
+    setNoticeSaved(noticeShow("done", { success: next, atDesk: false }).said);
+  };
   const [autostart, setAutostart] = useState<Autostart | null>(null);
   const [autostartBusy, setAutostartBusy] = useState(false);
   const [autostartError, setAutostartError] = useState<string | null>(null);
+
+  // Уровень уведомлений об успехах (шаг 337). Хранится рядом с темой — в
+  // localStorage: это выбор вида, а не данные дел, и в журнал ему не надо.
+  const [successLevel, setSuccessLevel] = useState<SuccessLevel>(() => {
+    const stored = globalThis.localStorage?.getItem(NOTICE_KEY);
+    return stored === "none" || stored === "away" || stored === "always" ? stored : "away";
+  });
+  const [noticeSaved, setNoticeSaved] = useState<string | null>(null);
 
   // Состояние читаем из реестра, а не из своей памяти: «я включил» и «включено» —
   // разные утверждения, и показать надо второе.
@@ -148,6 +168,34 @@ export function Settings({
             ))}
           </div>
         </div>
+      </div>
+
+      {section(t.settingsSectionNotices)}
+
+      <div className={styles.card}>
+        <div>
+          <Text weight="semibold" block>{t.settingsNoticeSuccess}</Text>
+          {/* Об ошибках здесь нет выключателя нарочно: галочка «не сообщать об
+              ошибках» значит «сломайся тихо». Сказано словами, а не умолчанием. */}
+          <Text className={styles.muted} block>{t.settingsNoticeErrorsAlways}</Text>
+        </div>
+        <div className={styles.row} role="group" aria-label={t.settingsNoticeSuccess}>
+          {levels().map((level) => (
+            <Button
+              key={level.value}
+              appearance={successLevel === level.value ? "primary" : "subtle"}
+              aria-pressed={successLevel === level.value}
+              onClick={() => chooseLevel(level.value)}
+            >
+              {level.label}
+            </Button>
+          ))}
+        </div>
+        {/* Выбор объявляется и словами: после нажатия человек должен знать, что
+            запомнилось, а не догадываться по подсветке кнопки. */}
+        <Text className={styles.muted} block role="status" aria-live="polite">
+          {noticeSaved === null ? levels().find((level) => level.value === successLevel)?.label ?? "" : `${t.settingsNoticeSaved}${noticeSaved}`}
+        </Text>
       </div>
 
       {section(t.settingsSectionStart)}
