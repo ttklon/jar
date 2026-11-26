@@ -8,6 +8,7 @@ import { audit as dangerAudit, dangerous as dangerOnly, line as dangerLine, summ
 import { first as firstDanger, order as dangerOrder, tally as dangerTally } from "../lib/dangerFirst";
 import { groupReasons } from "../lib/journal";
 import { line as replayLine } from "../lib/journalReplay";
+import { line as timingLine, mismatch as timingMismatch, slowest, sum as timingSum, type Step as TimingStep } from "../lib/stepTimingView";
 import { ALL as ALL_FILTER, apply as applyFilter, caption as filterCaption, type Filter } from "../lib/feedFilters";
 import { fromJournal, line as refusalLine } from "../lib/refusal";
 import { DeedCard } from "../components/DeedCard";
@@ -165,6 +166,25 @@ function RunCard({
    * должен путать разбор вчерашнего провала с повторным удалением файлов.
    */
   const [said, setSaid] = useState<string | null>(null);
+  /**
+   * Время по шагам (шаг 49).
+   *
+   * Общее время память запусков хранит, а время каждого шага — нет. Правило
+   * требует не врать: шаги без времени называются «не мерили», а расхождение
+   * с общим — числом. Показывать «40 секунд» без разбивки лучше, чем выдумать
+   * разбивку; но и молчать про общее нельзя — именно оно вызывает вопрос
+   * «почему так долго».
+   */
+  const timingSteps: TimingStep[] = run.steps.map((step) => ({ name: step.tool, ms: null }));
+  const timingTotal =
+    run.finished_ms === null ? null : Math.max(0, run.finished_ms - run.started_ms);
+  const timing = timingSum(timingSteps, timingTotal);
+  const timingSaid = [
+    timingTotal === null ? "время не мерили: дело ещё идёт или его прервали" : `всего ${timingLine({ name: "дело", ms: timingTotal }).split(": ")[1] ?? ""}`,
+    slowest(timingSteps),
+    timingMismatch(timing),
+  ].filter((part): part is string => part !== null);
+
   return (
     <div className={styles.runs}>
       <DeedCard
@@ -187,7 +207,11 @@ function RunCard({
           <Text className={styles.note} role="status" aria-live="polite">
             {said}
           </Text>
-        ) : null}
+        ) : (
+          // Без нажатия строка уже говорит, сколько шло дело и что по шагам
+          // времени нет: «почему так долго» спрашивают именно тут.
+          <Text className={styles.note}>{timingSaid.join("; ")}</Text>
+        )}
       </div>
     </div>
   );

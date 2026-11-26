@@ -58,6 +58,29 @@ function run(patch: Partial<RunRecord> = {}): RunRecord {
   };
 }
 
+describe("время дела", () => {
+  it("называет общее время и честно говорит, что по шагам его не мерили", async () => {
+    // Шаг 49: «40 секунд» без разбивки лучше выдуманной разбивки, но молчать
+    // про общее нельзя — именно оно вызывает «почему так долго».
+    vi.mocked(auditTail).mockResolvedValue([]);
+    vi.mocked(memoryRuns).mockResolvedValue([
+      run({ started_ms: 1_000, finished_ms: 41_000, steps: [{ position: 0, tool: "files|найти|файл", ok: true, reason: "", evidence: "ok" }] }),
+    ]);
+
+    render(<Journal />);
+    expect(await screen.findByText(/всего 40 с/)).toBeTruthy();
+    expect(screen.getByText(/шаг без времени: сумма не может сойтись с общим/)).toBeTruthy();
+  });
+
+  it("идущее дело не получает выдуманную длительность", async () => {
+    vi.mocked(auditTail).mockResolvedValue([]);
+    vi.mocked(memoryRuns).mockResolvedValue([run({ finished_ms: null, outcome: "running" })]);
+
+    render(<Journal />);
+    expect(await screen.findByText(/время не мерили: дело ещё идёт/)).toBeTruthy();
+  });
+});
+
 describe("разобрать заново", () => {
   it("кнопка есть у каждого дела и говорит, что сделала", async () => {
     // Шаг 45: разбор вчерашнего провала не трогает мир — поэтому это отдельная

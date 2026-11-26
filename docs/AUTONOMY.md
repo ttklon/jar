@@ -34,7 +34,7 @@
 * `src/screens/DataPlaces.tsx:66` — useEffect(() => {
 * `src/screens/Flows.tsx:26` — useEffect(() => {
 * `src/screens/Hands.tsx:55` — useEffect(() => {
-* `src/screens/Journal.tsx:307` — useEffect(load, [load]);
+* `src/screens/Journal.tsx:331` — useEffect(load, [load]);
 * `src/screens/Models.tsx:221` — useEffect(load, [load]);
 * `src/screens/Settings.tsx:81` — useEffect(() => {
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
