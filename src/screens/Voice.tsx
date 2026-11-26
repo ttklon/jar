@@ -57,6 +57,7 @@ import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
 import { RightNowCard } from "../components/RightNowCard";
 import { WeekStatsCard } from "../components/WeekStatsCard";
+import { TrustCard } from "../components/TrustCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
 import { allows as grantAllows, book as grantBook, EMPTY as EMPTY_GRANTS, give as grantGive, load as loadGrants, onRevoke as grantOnRevoke, revoke as grantRevoke, save as saveGrants, type Book as GrantBook, type Channel as GrantChannel } from "../lib/grants";
@@ -3386,6 +3387,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       {/* «Как у меня дела» — сразу после «что сейчас»: два ответа на один вопрос
           «что вообще происходит», и оба нужны при первом запуске. */}
       <WeekStatsCard />
+      {/* «Что можно без вопроса» — рядом: это один вопрос «что приложение
+          делает само и почему». */}
+      <TrustCard />
 
       {mic.listening && !always ? (
         <Text className={styles.note}>{voice.pauseSend}</Text>
