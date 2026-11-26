@@ -35,7 +35,7 @@
 * `src/screens/Hands.tsx:55` — useEffect(() => {
 * `src/screens/Journal.tsx:249` — useEffect(load, [load]);
 * `src/screens/Models.tsx:221` — useEffect(load, [load]);
-* `src/screens/Settings.tsx:79` — useEffect(() => {
+* `src/screens/Settings.tsx:80` — useEffect(() => {
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
 * `src/screens/Undo.tsx:68` — useEffect(load, [load]);
@@ -66,6 +66,7 @@
 * `src/components/DownloadBar.tsx:73` — useEffect(() => {
 * `src/components/DownloadBar.tsx:80` — useEffect(() => {
 * `src/components/MemoryBackups.tsx:87` — useEffect(() => {
+* `src/components/MemoryFacts.tsx:50` — useEffect(load, [load]);
 * `src/components/MemoryNote.tsx:65` — useEffect(() => {
 * `src/components/MicrophoneCheck.tsx:22` — useEffect(() => {
 * `src/components/NetworkCard.tsx:78` — useEffect(() => {

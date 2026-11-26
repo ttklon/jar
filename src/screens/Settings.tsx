@@ -12,6 +12,7 @@ import { SelfCheckCard } from "./SelfCheck";
 import { RecentFailures } from "../components/RecentFailures";
 import { MemoryNote } from "../components/MemoryNote";
 import { MemoryBackups } from "../components/MemoryBackups";
+import { MemoryFacts } from "../components/MemoryFacts";
 import { Diagnostics } from "../components/Diagnostics";
 import { levels, show as noticeShow, type SuccessLevel } from "../lib/noticePolicy";
 
@@ -286,6 +287,9 @@ export function Settings({
       {/* Выравнивание исправлено: две карточки стояли с разным отступом, и одна
           из них выглядела подпунктом другой. */}
       <MemoryNote />
+      {/* Список «что я о вас помню» — до резервных копий: сначала человек видит,
+          что запомнено, и только потом — как это восстанавливают. */}
+      <MemoryFacts />
       <MemoryBackups />
       <Diagnostics />
 

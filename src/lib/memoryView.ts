@@ -205,3 +205,43 @@ export function summary(list: readonly Fact[]): string {
   if (removable === list.length) return `${list.length} ${word}, каждый удаляется одной кнопкой`;
   return `${list.length} ${word}, удаляются ${removable}`;
 }
+
+/**
+ * Мост от того, что реально лежит в памяти, к тому, что видит человек.
+ *
+ * `facts()` в ядре отдаёт пары «ключ — значение» (`folder:D:\Отчёты`, `voice:Алла`).
+ * Экран памяти не должен знать про внутренние ключи, поэтому ключ разбирается
+ * здесь: вид — до двоеточия, значение — после. Неизвестный вид не выбрасывается
+ * и не превращается в «другое»: он показывается как есть, потому что **честнее
+ * показать непонятное, чем скрыть** запомненное.
+ */
+export function fromStored(stored: readonly { key: string; value: string }[]): {
+  preferences: Preference[];
+  methods: Method[];
+} {
+  const preferences: Preference[] = [];
+  const methods: Method[] = [];
+
+  for (const item of stored) {
+    const at = item.key.indexOf(":");
+    const kind = at > 0 ? item.key.slice(0, at) : item.key;
+    const value = at > 0 ? item.key.slice(at + 1) : item.value;
+
+    // Способы лежат с своим префиксом и несут шаги в значении — их разбирает
+    // `methods.ts`; здесь они проходят как есть, чтобы не придумывать шаги.
+    if (kind === "method") {
+      methods.push({ dayStart: Number(item.value) || 0, said: value, steps: [], params: {} } as Method);
+      continue;
+    }
+
+    preferences.push({
+      kind: (["folder", "program", "voice", "volume"] as const).includes(kind as PrefKind) ? (kind as PrefKind) : "folder",
+      value,
+      times: 0,
+      last: 0,
+      why: "запомнено по вашим делам",
+    });
+  }
+
+  return { preferences, methods };
+}

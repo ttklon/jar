@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canRemove, facts, remove, removeAll, summary, willDo, type Fact } from "./memoryView";
+import { canRemove, facts, fromStored, remove, removeAll, summary, willDo, type Fact } from "./memoryView";
 import { all as allPreferences, type Preference, type Sighting } from "./preferences";
 import { list as listMethods, type Method } from "./methods";
 import type { Done } from "./likeYesterday";
@@ -178,5 +178,35 @@ describe("сводка экрана памяти", () => {
       { id: "folder:A", kind: "folder", label: "папка A", why: "два раза", removable: true, because: "" },
     ];
     expect(summary(one)).toBe("1 факт, каждый удаляется одной кнопкой");
+  });
+});
+
+describe("мост от пар ключ — значение", () => {
+  it("ключ разбирается: вид до двоеточия, значение после", () => {
+    const got = fromStored([{ key: "folder:D:\\Отчёты", value: "отчёты" }]);
+    expect(got.preferences).toHaveLength(1);
+    expect(got.preferences[0]?.kind).toBe("folder");
+    expect(got.preferences[0]?.value).toBe("D:\\Отчёты");
+  });
+
+  it("неизвестный вид не выбрасывается: честнее показать, чем скрыть", () => {
+    const got = fromStored([{ key: "city:Рига", value: "Рига" }]);
+    expect(got.preferences).toHaveLength(1);
+    expect(got.preferences[0]?.value).toBe("Рига");
+  });
+
+  it("способ не становится предпочтением", () => {
+    const got = fromStored([{ key: "method:отчёт за месяц", value: "3" }]);
+    expect(got.preferences).toHaveLength(0);
+    expect(got.methods).toHaveLength(1);
+  });
+
+  it("из пар получается список, который человек читает без ключей", () => {
+    const got = fromStored([
+      { key: "voice:Алла", value: "Алла" },
+      { key: "volume:40", value: "40" },
+    ]);
+    const labels = facts(got.preferences, got.methods, 0).map((fact) => fact.label);
+    expect(labels).toEqual(["голос Алла", "громкость 40%"]);
   });
 });
