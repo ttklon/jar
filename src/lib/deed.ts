@@ -123,12 +123,34 @@ export function judge(deed: Deed): DeedVerdict {
   };
 }
 
+/**
+ * Когда это было — так, чтобы давнее не читалось как сегодняшнее.
+ *
+ * `deedMemory.age` сказал это первым: «вчера чистил диск» без даты через месяц
+ * читается как «вчера», и человек уверен в том, чего не было. Здесь то же
+ * правило, но для карточки: сегодня — время (`14:32`), вчера — слово, дальше —
+ * сколько дней, совсем старое — дата. `now` подставляется, чтобы тест не зависел
+ * от текущих суток.
+ */
+export function whenWord(at: number, now: number): string {
+  const day = 24 * 60 * 60 * 1000;
+  const todayStart = new Date(now).setHours(0, 0, 0, 0);
+  const time = new Date(at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+  if (at >= todayStart) return time;
+  if (at >= todayStart - day) return `вчера, ${time}`;
+  // Календарные дни, не часы: дело вчера в 23:30 при разговоре в 8 утра —
+  // «вчера», а не «сегодня». `round` — в сутках перехода времени 23 или 25 часов.
+  const days = Math.round((todayStart - new Date(at).setHours(0, 0, 0, 0)) / day);
+  if (days <= 7) return `${days} ${days === 1 ? "день" : days < 5 ? "дня" : "дней"} назад`;
+  const date = new Date(at);
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  return `${dd}.${mm}.${date.getFullYear()}`;
+}
+
 /** Одна строка для ленты: что, когда, чем кончилось. */
-export function oneLine(deed: Deed): string {
-  const time = new Date(deed.startedMs).toLocaleTimeString("ru-RU", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+export function oneLine(deed: Deed, now = Date.now()): string {
+  const time = whenWord(deed.startedMs, now);
   const verdict = OUTCOME[deed.outcome] ?? deed.outcome;
   // Счёт шагов — только когда они есть: «0 из 0» у скачивания читалось бы
   // как поломка, а там просто нет шагов.

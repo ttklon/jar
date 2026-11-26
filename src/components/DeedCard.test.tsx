@@ -229,3 +229,15 @@ describe("«что дальше» в карточке дела (шаг 189)", ()
     expect(screen.queryByText(/^дальше:/)).toBeNull();
   });
 });
+
+describe("возраст в строке ленты", () => {
+  it("давнее дело названо возрастом, а не временем суток", () => {
+    // Настоящий дефект: строка показывала «14:32» у дела недельной давности, и
+    // «чистил диск вчера» было не отличить от «чистил диск в прошлом месяце».
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 10, 25, 9, 0));
+    render(<DeedCard deed={deed()} />);
+    expect(screen.getByRole("button", { name: /5 дней назад/ })).toBeTruthy();
+    vi.useRealTimers();
+  });
+});

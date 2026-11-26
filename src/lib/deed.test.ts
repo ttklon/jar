@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deedText, evidenceText, judge, links, oneLine } from "./deed";
+import { deedText, evidenceText, judge, links, oneLine, whenWord } from "./deed";
 import type { Deed } from "./deed";
 
 /**
@@ -26,16 +26,18 @@ function deed(patch: Partial<Deed> = {}): Deed {
 
 describe("карточка дела", () => {
   it("в одну строку помещается что, когда и чем кончилось", () => {
-    const line = oneLine(deed());
+    // «Сейчас» — через минуту после дела: иначе день в фикстуре уже прошёл и
+    // строка честно назовёт возраст вместо времени.
+    const line = oneLine(deed(), Date.UTC(2026, 10, 20, 12, 35));
     expect(line).toContain("разобрать «Загрузки» по папкам");
     expect(line).toContain("готово");
     expect(line).toContain("шагов 2");
-    // Время — в местном формате, поэтому проверяем только формат чч:мм.
+    // Дело того же дня — время в местном формате, поэтому чч:мм.
     expect(line).toMatch(/\d{2}:\d{2}/);
   });
 
   it("у дела без шагов счёт шагов не выдумывается", () => {
-    const line = oneLine(deed({ kind: "download", steps: [], subject: "модель" }));
+    const line = oneLine(deed({ kind: "download", steps: [], subject: "модель" }), Date.UTC(2026, 10, 20, 12, 35));
     expect(line).not.toContain("шагов");
     expect(line).toContain("готово");
   });
@@ -150,5 +152,28 @@ describe("карточка дела", () => {
     // не ломал, сработало правило.
     const verdict = judge(deed({ outcome: "denied" }));
     expect(verdict.verdict).toBe("отказано политикой");
+  });
+});
+
+describe("возраст дела словами", () => {
+  // 20 ноября 2026, 10:00 по местному — «сегодня» для этих проверок.
+  const today = new Date(2026, 10, 20, 10, 0).getTime();
+  const day = 24 * 60 * 60 * 1000;
+
+  it("сегодняшнее дело — время, а не дата", () => {
+    const at = new Date(2026, 10, 20, 8, 15).getTime();
+    expect(whenWord(at, today)).toMatch(/\d{2}:\d{2}/);
+  });
+
+  it("вчерашнее названо «вчера», а не временем", () => {
+    // Это и есть правка: без неё дело трёхдневной давности читалось как сегодняшнее.
+    expect(whenWord(new Date(2026, 10, 19, 23, 0).getTime(), today)).toMatch(/^вчера, /);
+  });
+
+  it("давнее — сколько дней, совсем старое — дата", () => {
+    expect(whenWord(today - 3 * day, today)).toBe("3 дня назад");
+    expect(whenWord(today - 20 * day, today)).toBe("31.10.2026");
+    // Вечернее дело не «молодеет»: та же ошибка, что была в deedMemory.age.
+    expect(whenWord(new Date(2026, 10, 17, 23, 30).getTime(), today)).toBe("3 дня назад");
   });
 });

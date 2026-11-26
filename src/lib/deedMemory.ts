@@ -163,9 +163,14 @@ export function age(deed: Remembered, todayStart: number): string {
   const day = 24 * 60 * 60 * 1000;
   if (deed.at >= todayStart) return "сегодня";
   if (deed.at >= todayStart - day) return "вчера";
-  // Начало сегодняшнего дня минус день — это граница «вчера», и дело, начатое
-  // ровно вчера, отстоит от неё на ноль дней: значит, «вчера» = 1, а не 2.
-  const days = Math.floor((todayStart - day - deed.at) / day) + 1;
+  // Считаются **календарные** дни, а не прошедшие часы: дело вчера в 23:30 и
+  // разговор сегодня в 8 утра — это «вчера», хотя прошло девять часов.
+  // Отсюда и дефект, который здесь закрыт: прежняя формула сравнивала `at` с
+  // «началом сегодня минус сутки» и округляла вниз, поэтому дело в 23:30
+  // трое суток назад называлось «2 дня назад» — на день моложе, чем было.
+  // `round` — потому что в сутках перехода времени 23 или 25 часов.
+  const fromMidnight = new Date(deed.at).setHours(0, 0, 0, 0);
+  const days = Math.round((todayStart - fromMidnight) / day);
   if (days <= 7) return `${days} ${plural(days, "день", "дня", "дней")} назад`;
   return when(deed.at);
 }
