@@ -7,6 +7,7 @@ import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
 import { audit as dangerAudit, dangerous as dangerOnly, line as dangerLine, summary as dangerSummary } from "../lib/dangerAudit";
 import { first as firstDanger, order as dangerOrder, tally as dangerTally } from "../lib/dangerFirst";
 import { groupReasons } from "../lib/journal";
+import { line as replayLine } from "../lib/journalReplay";
 import { ALL as ALL_FILTER, apply as applyFilter, caption as filterCaption, type Filter } from "../lib/feedFilters";
 import { fromJournal, line as refusalLine } from "../lib/refusal";
 import { DeedCard } from "../components/DeedCard";
@@ -154,15 +155,41 @@ function RunCard({
   alone: boolean;
   onOpenUndo?: () => void;
 }) {
+  const styles = useStyles();
   const deed = toDeed(run);
+  /**
+   * «Разобрать заново» (шаг 45): собрать отчёт из того, что помнит память.
+   *
+   * Это **не** «повторить»: мир не трогается, и кнопка не запускает ничего.
+   * Поэтому она стоит рядом с карточкой, а не в ряду действий дела — человек не
+   * должен путать разбор вчерашнего провала с повторным удалением файлов.
+   */
+  const [said, setSaid] = useState<string | null>(null);
   return (
-    <DeedCard
-      deed={deed}
-      startOpen={alone}
-      // Откат — в настройках, и он откатывает **свою** сессию: вести туда
-      // честно только у дела, которое шло в текущей сессии (шаг 364).
-      onOpenUndo={onOpenUndo}
-    />
+    <div className={styles.runs}>
+      <DeedCard
+        deed={deed}
+        startOpen={alone}
+        // Откат — в настройках, и он откатывает **свою** сессию: вести туда
+        // честно только у дела, которое шло в текущей сессии (шаг 364).
+        onOpenUndo={onOpenUndo}
+      />
+      <div className={styles.bar}>
+        <Button
+          size="small"
+          appearance="subtle"
+          aria-label={`разобрать заново дело ${run.id}`}
+          onClick={() => setSaid(replayLine(run))}
+        >
+          разобрать заново
+        </Button>
+        {said !== null ? (
+          <Text className={styles.note} role="status" aria-live="polite">
+            {said}
+          </Text>
+        ) : null}
+      </div>
+    </div>
   );
 }
 

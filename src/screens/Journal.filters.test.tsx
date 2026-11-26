@@ -58,6 +58,20 @@ function run(patch: Partial<RunRecord> = {}): RunRecord {
   };
 }
 
+describe("разобрать заново", () => {
+  it("кнопка есть у каждого дела и говорит, что сделала", async () => {
+    // Шаг 45: разбор вчерашнего провала не трогает мир — поэтому это отдельная
+    // кнопка рядом с карточкой, а не «повторить» в ряду действий дела.
+    vi.mocked(auditTail).mockResolvedValue([]);
+    vi.mocked(memoryRuns).mockResolvedValue([run()]);
+
+    render(<Journal />);
+    const button = await screen.findByRole("button", { name: "разобрать заново дело 1" });
+    fireEvent.click(button);
+    expect(await screen.findByText(/воспроизведено/)).toBeTruthy();
+  });
+});
+
 describe("фильтры журнала", () => {
   it("«только ошибки» показывает провал запуска, хотя у события всё хорошо", async () => {
     // Иначе «что сломалось» отвечало бы половиной: отказы видны, провалы дел — нет.
