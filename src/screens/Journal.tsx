@@ -7,6 +7,7 @@ import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
 import { audit as dangerAudit, dangerous as dangerOnly, line as dangerLine, summary as dangerSummary } from "../lib/dangerAudit";
 import { first as firstDanger, order as dangerOrder, tally as dangerTally } from "../lib/dangerFirst";
 import { groupReasons } from "../lib/journal";
+import { ALL as ALL_FILTER, apply as applyFilter, caption as filterCaption, type Filter } from "../lib/feedFilters";
 import { fromJournal, line as refusalLine } from "../lib/refusal";
 import { DeedCard } from "../components/DeedCard";
 import type { AuditEvent, Episode, RunRecord } from "../ipc";
@@ -187,6 +188,11 @@ export function Journal({
   const [copiedRow, setCopiedRow] = useState<string | null>(null);
   /** Сколько секретов и путей убрано при последней выгрузке — числом. */
   const [exported, setExported] = useState<string | null>(null);
+  /**
+   * Выбранный фильтр (шаг 372). Фильтры складываются: «вчера + ошибки» — законный
+   * вопрос, поэтому это два поля, а не один список кнопок.
+   */
+  const [filter, setFilter] = useState<Filter>(ALL_FILTER);
   /** Номер последнего поиска: старый ответ не вправе переписать новый. */
   const lastSearch = useRef(0);
 
@@ -232,6 +238,31 @@ export function Journal({
       setCopiedRow(null);
     });
   };
+
+  /**
+   * Строки для фильтра: одно дело — одна строка, чем бы оно ни было (событие
+   * политики или запуск). Без этого «только ошибки» показывал бы отказы, но не
+   * провалы запусков — то есть половину ответа на вопрос «что сломалось».
+   */
+  const filterRows = [
+    ...(events ?? []).map((event, index) => ({
+      id: `e${index}`,
+      at: event.at_ms,
+      state: (event.outcome.startsWith("fail") ? "failed" : event.outcome.startsWith("denied") ? "cancelled" : "done") as "done" | "failed" | "cancelled" | "running",
+      risk: (event.risk === "dangerous" ? "dangerous" : "safe") as "safe" | "dangerous",
+    })),
+    ...(runs ?? []).map((run) => ({
+      id: `r${run.id}`,
+      at: run.started_ms,
+      state: (run.outcome.startsWith("fail") ? "failed" : run.outcome === "denied" ? "cancelled" : run.outcome === "running" ? "running" : "done") as "done" | "failed" | "cancelled" | "running",
+      risk: "safe" as const,
+    })),
+  ];
+  const shownRows = applyFilter(filterRows, filter, Date.now());
+  const shownCount = shownRows.length;
+  const filterOn = filter.when !== "all" || filter.only !== "none";
+  /** Видимые события — по тем же номерам, что в строках фильтра. */
+  const shownEvents = new Set(shownRows.filter((row) => row.id.startsWith("e")).map((row) => row.id));
 
   const load = useCallback(() => {
     setError(null);
@@ -372,16 +403,59 @@ export function Journal({
           </div>
         ) : null}
         {runs !== null && runs.length > 0
-          ? runs.map((run) => (
+          ? runs
+              .filter((run) => !filterOn || shownRows.some((row) => row.id === `r${run.id}`))
+              .map((run) => (
               <RunCard
                 key={run.id}
                 run={run}
                 alone={runs.length === 1}
                 onOpenUndo={onOpenSettings}
               />
-            ))
+              ))
           : null}
       </section>
+
+      {/* Фильтры — вопросы к журналу, а не украшение списка. Выбранный виден
+          над списком словами: иначе человек смотрит на суженный журнал и думает,
+          что дел было мало. */}
+      {events && events.length > 0 ? (
+        <div className={styles.bar} role="group" aria-label="фильтр журнала">
+          {([
+            ["all", "все"],
+            ["today", "сегодня"],
+            ["yesterday", "вчера"],
+          ] as const).map(([when, label]) => (
+            <Button
+              key={when}
+              size="small"
+              appearance={filter.when === when ? "primary" : "subtle"}
+              aria-pressed={filter.when === when}
+              onClick={() => { setFilter({ ...filter, when }); clearCopy(); }}
+            >
+              {label}
+            </Button>
+          ))}
+          {([
+            ["none", "все дела"],
+            ["failed", "только ошибки"],
+            ["dangerous", "только опасные"],
+          ] as const).map(([only, label]) => (
+            <Button
+              key={only}
+              size="small"
+              appearance={filter.only === only ? "primary" : "subtle"}
+              aria-pressed={filter.only === only}
+              onClick={() => { setFilter({ ...filter, only }); clearCopy(); }}
+            >
+              {label}
+            </Button>
+          ))}
+          <Text className={styles.note} role="status" aria-live="polite">
+            {filterCaption(shownCount, filterRows.length, filter)}
+          </Text>
+        </div>
+      ) : null}
 
       <div className={styles.bar}>
         <Button icon={<ArrowClockwiseRegular />} onClick={() => { clearCopy(); load(); }}>
@@ -505,7 +579,10 @@ export function Journal({
             </tr>
           </thead>
           <tbody>
-            {dangerOrder(events).map((event, index) => (
+            {dangerOrder(events)
+              .map((event, index) => ({ event, index }))
+              .filter(({ index }) => !filterOn || shownEvents.has(`e${index}`))
+              .map(({ event, index }) => (
               <tr key={`${event.at_ms}-${event.kind}-${index}`}>
                 <td className={styles.cell}>{time(event.at_ms)}</td>
                 <td className={styles.cell}>{journal.kind[event.kind] ?? event.kind}</td>
@@ -531,7 +608,7 @@ export function Journal({
                   })()}
                 </td>
               </tr>
-            ))}
+              ))}
           </tbody>
         </table>
       ) : null}
