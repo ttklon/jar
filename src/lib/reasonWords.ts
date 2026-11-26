@@ -57,6 +57,35 @@ export function words(fault: Fault): string {
 }
 
 /**
+ * Разобрать то, что записала рука, — без выдумывания.
+ *
+ * В памяти шага `reason` — свободная строка от инструмента: «EACCES: permission
+ * denied», «os error 32: файл занят». Экран не должен показывать её как есть
+ * (правило говорит: код отдельно, причина словами), но и **придумывать** вид
+ * отказа нельзя: неузнанная строка остаётся строкой, и это честно.
+ *
+ * Что узнаётся:
+ *
+ *  * код в тексте (`EACCES`, `os error 32`, `ETIMEDOUT`, `ENOSPC`, `ENOENT`) —
+ *    по нему определяется причина;
+ *  * слова, которые пишут сами руки (`занят`, `нет места`, `нет сети`,
+ *    `не пустил`, `не ответил`, `не найден`).
+ */
+export function kindOf(reason: string): Fault["about"] {
+  const text = reason.toLowerCase();
+  if (text === "") return undefined;
+  // Порядок важен: «нет места» встречается вместе с «os error 112», и код
+  // должен уточнять, а не перебивать уже понятную причину.
+  if (text.includes("eacces") || text.includes("denied") || text.includes("не пустил") || text.includes("os error 5")) return "denied";
+  if (text.includes("enospc") || text.includes("нет места") || text.includes("os error 112")) return "full";
+  if (text.includes("etimedout") || text.includes("timed out") || text.includes("не ответил")) return "timeout";
+  if (text.includes("enoent") || text.includes("не найден") || text.includes("os error 2")) return "missing";
+  if (text.includes("econnrefused") || text.includes("нет сети") || text.includes("offline")) return "offline";
+  if (text.includes("os error 32") || text.includes("занят") || text.includes("открыт в другой")) return "opened";
+  return undefined;
+}
+
+/**
  * Код — отдельно.
  *
  * Чтобы поддержка нашла, а человек не спотыкался: код в конце, в скобках, мелко.

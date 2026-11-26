@@ -241,3 +241,37 @@ describe("возраст в строке ленты", () => {
     vi.useRealTimers();
   });
 });
+
+describe("почему не вышло — словами", () => {
+  it("код руки превращается в причину и действие, а код остаётся для поддержки", () => {
+    // Настоящий дефект: в строке шага стояло «EACCES: permission denied» — это
+    // ничего не говорит человеку, а журнал читают именно тогда, когда не вышло.
+    render(
+      <DeedCard
+        startOpen
+        deed={deed({
+          outcome: "failed",
+          steps: [{ position: 1, tool: "files|удалить|файл", ok: false, reason: "EACCES: permission denied" }],
+        })}
+      />,
+    );
+    expect(screen.getByText(/система не пустила/)).toBeTruthy();
+    expect(screen.getByText(/EACCES/)).toBeTruthy();
+    // Английского «permission denied» в строке для человека нет.
+    expect(screen.queryByText(/permission denied/)).toBeNull();
+  });
+
+  it("неузнанная строка показывается как есть, а не выдумывается", () => {
+    render(
+      <DeedCard
+        startOpen
+        deed={deed({
+          outcome: "failed",
+          steps: [{ position: 1, tool: "files|удалить|файл", ok: false, reason: "оборвалось на середине" }],
+        })}
+      />,
+    );
+    expect(screen.getByText(/оборвалось на середине/)).toBeTruthy();
+    expect(screen.queryByText(/система не пустила/)).toBeNull();
+  });
+});

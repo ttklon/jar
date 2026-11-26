@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
 import { deed as text, journal } from "../i18n/ru";
 import { deedText, evidenceText, judge, links, oneLine } from "../lib/deed";
+import { kindOf as faultKind, line as faultLine } from "../lib/reasonWords";
 import type { Deed } from "../lib/deed";
 import { next as deedNext } from "../lib/deedNext";
 
@@ -81,6 +82,17 @@ export interface DeedCardProps {
   onOpenUndo?: (deed: Deed) => void;
 }
 
+/**
+ * Код из строки руки — только если он там есть.
+ *
+ * Поддержке нужен код, человеку — слова. Если кода нет, в скобках не появится
+ * ничего: пустые скобки читаются как «код потеряли».
+ */
+function codeOf(reason: string): string {
+  const found = reason.match(/\b(E[A-Z]{3,}|os error \d+)\b/);
+  return found?.[1] ?? "";
+}
+
 export function DeedCard({
   deed,
   onCancel,
@@ -153,7 +165,29 @@ export function DeedCard({
                         склеивается с доказательством в одну строку, и ни
                         человек, ни диктор не могут взять одно без другого. */}
                     <span>{step.tool}</span>
-                    {step.reason ? <span> — {step.reason}</span> : null}
+                    {/* Причина словами, а не кодом (шаг 42). Рука пишет в память
+                        свободную строку — «EACCES: permission denied»; правило
+                        reasonWords переводит её в «не получилось … в «…»: система
+                        не пустила», а код оставляет для поддержки отдельно.
+                        Неузнанная строка показывается как есть: выдумывать вид
+                        отказа хуже, чем показать непонятное. */}
+                    {step.reason ? (
+                      <span>
+                        {" — "}
+                        {(() => {
+                          const about = faultKind(step.reason);
+                          if (about === undefined) return step.reason;
+                          // Дальше `about` — известный вид отказа, и линия собирается правилом.
+                          const where = step.tool.split("|").slice(1).join(" ") || step.tool;
+                          return faultLine({
+                            code: codeOf(step.reason),
+                            what: where,
+                            where: deed.subject,
+                            about,
+                          });
+                        })()}
+                      </span>
+                    ) : null}
                     {/* Доказательства нет — так и написано. Пустота читалась бы
                         как «проверка прошла молча». */}
                     <span className={styles.proof}>

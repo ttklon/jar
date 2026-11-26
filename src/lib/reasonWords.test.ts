@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checks, line, neverWrite, words, type Fault } from "./reasonWords";
+import { checks, kindOf, line, neverWrite, words, type Fault } from "./reasonWords";
 
 /**
  * Шаг 431: журнал пишет причину отказа словами человека, а не кодом ошибки.
@@ -64,5 +64,20 @@ describe("ни одного английского слова в перевод�
       const got = words(fault({ about, code: "X", what: "удалить старый архив" }));
       expect(/[A-Za-z]{2,}/.test(got)).toBe(false);
     }
+  });
+});
+
+describe("разбор строки руки", () => {
+  it("коды узнаются по-русски понятными видами отказа", () => {
+    expect(kindOf("EACCES: permission denied")).toBe("denied");
+    expect(kindOf("os error 112: на диске нет места")).toBe("full");
+    expect(kindOf("ETIMEDOUT")).toBe("timeout");
+    expect(kindOf("os error 32: файл занят")).toBe("opened");
+    expect(kindOf("ENOENT: no such file")).toBe("missing");
+  });
+
+  it("пустая строка и незнакомый текст — без вида, а не «другое»", () => {
+    expect(kindOf("")).toBeUndefined();
+    expect(kindOf("оборвалось на середине")).toBeUndefined();
   });
 });
