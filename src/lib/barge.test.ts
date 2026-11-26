@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BARGE_LIMIT_MS, bargeDelay, bargeLine, slowest, withinLimit } from "./barge";
+import { BARGE_LIMIT_MS, RESUME_MS, bargeDelay, bargeLine, onHeard, resume, sameEverywhere, slowest, withinLimit } from "./barge";
 
 /**
  * Шаг 42: перебивание в пределах 200 мс.
@@ -59,5 +59,42 @@ describe("перебивание", () => {
       "замолчало через 120 мс — в срок (обещание: не дольше 200)",
     );
     expect(bargeLine({ spokenAt: 0, silentAt: 400 })).toContain("медленно");
+  });
+});
+
+/**
+ * Перебивание — не только «быстро», но и «что дальше» (фаза 1, шаг 4).
+ *
+ * Задержка отвечает на «быстро ли замолчал». Тут — продолжение: свой голос не
+ * перебивает, шум не перебивает, а после перебивания фраза договаривается, а не
+ * начинается заново.
+ */
+describe("перебивание: своё, чужое и продолжение", () => {
+  const talk = { speaking: true, saidSoFar: "Загрузки можно почистить" };
+
+  it("человек — замолкает и помечает место", () => {
+    const got = onHeard(talk, "человек");
+    expect(got.talk.speaking).toBe(false);
+    expect(got.talk.saidSoFar).toContain("[перебито]");
+  });
+
+  it("свой голос и шум — не перебивание", () => {
+    expect(onHeard(talk, "свой голос").talk).toBe(talk);
+    expect(onHeard(talk, "шум").talk).toBe(talk);
+  });
+
+  it("после перебивания договаривает с места", () => {
+    const stopped = onHeard(talk, "человек").talk;
+    const got = resume(stopped, RESUME_MS);
+    expect(got.talk.speaking).toBe(true);
+    expect(got.said).toContain("начало вы уже слышали");
+  });
+
+  it("мало тишины — ждёт и говорит сколько", () => {
+    expect(resume({ speaking: false, saidSoFar: "x" }, 300).said).toContain("подожду ещё 500 мс");
+  });
+
+  it("три места, и все одинаковы", () => {
+    expect(sameEverywhere()).toHaveLength(3);
   });
 });

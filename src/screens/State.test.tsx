@@ -21,7 +21,7 @@ describe("экран состояния", () => {
   const noop = vi.fn();
 
   it("слово состояния видно текстом, а не только цветом", () => {
-    // Дальтоник и диктор должны видеть то же, что зрячий: «провал» и
+    // Дальтоник и диктор должны видеть то же, что зрячий: «не работает» и
     // «проверено» отличаются буквами.
     const items: StateItem[] = [
       { id: "a", title: "Движок", hint: "чем думает", condition: "proven-here", evidence: "процесс запущен", screen: "models" },
@@ -29,7 +29,7 @@ describe("экран состояния", () => {
     ];
     render(<StateScreen items={items} onGo={noop} />);
     expect(screen.getByText("проверено на этой машине")).toBeTruthy();
-    expect(screen.getByText("провал")).toBeTruthy();
+    expect(screen.getByText("не работает")).toBeTruthy();
   });
 
   it("«проверено» без подтверждения показывается как «не проверено»", () => {
@@ -113,11 +113,11 @@ describe("экран состояния", () => {
         onGo={noop}
       />,
     );
-    // Пункт назван, версии показаны фактами, состояние — провал с причиной.
+    // Пункт назван, версии показаны фактами, состояние — «не работает» с причиной.
     expect(screen.getByText("Система")).toBeTruthy();
     expect(screen.getByText(/6\.1\.7601/)).toBeTruthy();
     expect(screen.getByText(/движок 95/)).toBeTruthy();
-    expect(screen.getAllByText("провал").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("не работает").length).toBeGreaterThan(0);
   });
 
   it("систему не спросили — «не проверено», а не «всё хорошо»", () => {
