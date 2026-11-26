@@ -365,6 +365,9 @@ export function App() {
   // следом: если человек искал именно их, слово всё равно выше.
   const matches = [...screenMatches, ...otherMatches];
   const go = (id: string) => {
+    // Экран выбран — значит, после закрытия палитры фокус идёт в его поле, а не
+    // обратно на кнопку, которой человек уже не пользуется.
+    chosen.current = true;
     setScreen(id as Screen);
     // Через `togglePalette`, а не голый `setPaletteOpen`: выбор экрана тоже
     // закрывает палитру, и фокус должен вернуться так же, как после Esc.
@@ -377,6 +380,8 @@ export function App() {
   // `document.body`, и следующий Tab начинает с самого начала страницы:
   // для того, кто ходит табуляцией, это потеря места.
   const beforePalette = useRef<HTMLElement | null>(null);
+  /** Палитру закрыли выбором экрана (а не Esc) — фокус пойдёт в поле. */
+  const chosen = useRef(false);
 
   /** Открыть/закрыть палитру, запомнив, куда вернуть фокус. */
   const togglePalette = (open: boolean) => {
@@ -392,10 +397,37 @@ export function App() {
     setPaletteOpen(open);
   };
 
+  /**
+   * Куда вернуть фокус после выбора экрана — и почему не туда, откуда пришли.
+   *
+   * Возврат «туда, откуда открыли» верен для Esc: человек передумал и хочет
+   * остаться где был. Для **выбора** экрана это ошибка: он выбрал другой экран,
+   * и фокус на старой кнопке навигации заставляет следующую табуляцию идти по
+   * меню, а не по делу. Правило `keyboardOnly` говорит это прямым текстом:
+   * «Enter → экран дела, поле фразы». Поэтому после выбора ведём в первое поле
+   * нового экрана; если полей нет — в его заголовок.
+   */
+  const toScreenField = () => {
+    const field = document.querySelector<HTMLElement>(
+      "main input:not([type=hidden]), main textarea, main [role=combobox]",
+    );
+    if (field) {
+      field.focus();
+      return true;
+    }
+    const heading = document.querySelector<HTMLElement>("main h1, main h2, main [role=heading]");
+    (heading ?? document.querySelector<HTMLElement>("nav button"))?.focus();
+    return false;
+  };
+
   /** Вернуть фокус туда, откуда палитру открыли. */
-  const restoreFocus = () => {
+  const restoreFocus = (byChoice: boolean) => {
     const target = beforePalette.current;
     beforePalette.current = null;
+    if (byChoice) {
+      toScreenField();
+      return;
+    }
     // Если запомнить было нечего (открыли сразу после запуска, до первого Tab),
     // ведём в навигацию: это начало пути по приложению, а не пустое тело.
     const fallback = document.querySelector<HTMLElement>("nav button");
@@ -405,7 +437,8 @@ export function App() {
 
   useEffect(() => {
     if (paletteOpen) return;
-    restoreFocus();
+    restoreFocus(chosen.current);
+    chosen.current = false;
   }, [paletteOpen]);
   const onThemeChange = (next: ThemeChoice) => {
     setChoice(next);

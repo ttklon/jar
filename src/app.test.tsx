@@ -154,6 +154,30 @@ describe("App", () => {
     );
   });
 
+  it("после выбора экрана клавиатурой фокус идёт в поле дела, а не на кнопку меню", async () => {
+    // Правило keyboardOnly говорит: «Enter → экран дела, поле фразы». До правки
+    // фокус возвращался на кнопку навигации — следующая табуляция шла по меню,
+    // и «дело в пять нажатий» превращалось в «дело с пятнадцати».
+    render(<App />);
+    await loaded();
+
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+    fireEvent.change(await screen.findByLabelText("Поиск экрана", {}, { timeout: 5000 }), {
+      target: { value: "голос" },
+    });
+    fireEvent.keyDown(screen.getByLabelText("Поиск экрана"), { key: "Enter" });
+
+    await waitFor(() => expect(screen.queryByLabelText("Поиск экрана")).toBeNull(), { timeout: 5000 });
+    await waitFor(
+      () => {
+        const active = document.activeElement as HTMLElement | null;
+        const tag = active?.tagName.toLowerCase() ?? "";
+        expect(["input", "textarea"].includes(tag) || active?.getAttribute("role") === "combobox").toBe(true);
+      },
+      { timeout: 2000 },
+    );
+  });
+
   it("при узком окне и крупном масштабе навигация уходит наверх, а не сжимает содержимое", async () => {
     // 640 логических пикселей — это экран 1280 при масштабе 200%. Раньше колонка
     // была жёстко 236 px и отнимала больше трети ширины.
