@@ -2748,11 +2748,24 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             : busy || thinking
               ? "working"
               : "ready";
+  /**
+   * Состояние трея (шаги 9 и 98).
+   *
+   * Ждущее подтверждение и идущее дело — разные состояния, и оба должны быть
+   * видны, когда окно скрыто: без ответа дело не сдвинется вовсе, а идущее
+   * человек иначе забудет. Правило `runningGlobally` говорит это прямым текстом:
+   * дело не должно теряться при уходе с экрана.
+   */
+  const trayDeedState = waitingForConfirmation
+    ? "deed-waiting"
+    : running
+      ? "deed-running"
+      : null;
   useEffect(() => {
-    void setVoiceTrayStatus(trayVoiceState).catch(() => {
+    void setVoiceTrayStatus(trayDeedState ?? trayVoiceState).catch(() => {
       // В браузере и при отсутствующей иконке трея UI продолжает работать.
     });
-  }, [trayVoiceState]);
+  }, [trayDeedState, trayVoiceState]);
 
   useEffect(() => {
     frontRef.current = front;

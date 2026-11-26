@@ -66,6 +66,12 @@ fn voice_tooltip(status: &str) -> Result<&'static str, String> {
         "listening" => Ok("слушаю"),
         "working" => Ok("обрабатываю запрос"),
         "awaiting-confirmation" => Ok("жду подтверждения"),
+        // Шаг 98: дело из памяти видно и в трее. Правило `runningGlobally`
+        // требует, чтобы идущее дело не терялось при уходе с экрана, а
+        // `waitingGlobally` — чтобы ждущее было настойчивее: без ответа оно не
+        // сдвинется никогда.
+        "deed-running" => Ok("дело идёт"),
+        "deed-waiting" => Ok("дело ждёт вашего ответа"),
         "executing" => Ok("выполняю действие"),
         "error" => Ok("ошибка; откройте окно"),
         _ => Err("неизвестное состояние голоса".to_string()),
@@ -125,6 +131,12 @@ mod tests {
         assert_eq!(
             voice_tooltip("error").unwrap(),
             "ошибка; откройте окно"
+        );
+        // Шаг 98: дело не теряется при уходе с экрана.
+        assert_eq!(voice_tooltip("deed-running").unwrap(), "дело идёт");
+        assert_eq!(
+            voice_tooltip("deed-waiting").unwrap(),
+            "дело ждёт вашего ответа"
         );
         assert!(voice_tooltip("untrusted arbitrary tooltip").is_err());
     }

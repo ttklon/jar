@@ -368,7 +368,10 @@ export type VoiceTrayStatus =
   | "working"
   | "awaiting-confirmation"
   | "executing"
-  | "error";
+  | "error"
+  // Шаг 98: дело из памяти видно и в трее, а не только на экране.
+  | "deed-running"
+  | "deed-waiting";
 
 export interface SpeechStatus {
   /** Найден ли `whisper-server.exe` рядом с приложением или в `PATH`. */
