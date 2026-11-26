@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
+import { copied as reportCopied, text as reportText } from "../lib/copyReport";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
 import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
 import { audit as dangerAudit, dangerous as dangerOnly, line as dangerLine, summary as dangerSummary } from "../lib/dangerAudit";
@@ -181,8 +182,37 @@ export function Journal({
   const [query, setQuery] = useState("");
   const [episodes, setEpisodes] = useState<Episode[] | null>(null);
   const [searchBusy, setSearchBusy] = useState(false);
+  /** Что уже скопировано — по ключу строки, чтобы человек видел подтверждение. */
+  const [copiedRow, setCopiedRow] = useState<string | null>(null);
   /** Номер последнего поиска: старый ответ не вправе переписать новый. */
   const lastSearch = useRef(0);
+
+  /**
+   * Скопировать отчёт по событию (шаг 374).
+   *
+   * Отчёт копируют **для другого человека**: в поддержку, в чат. Поэтому текст
+   * собирает правило `copyReport` — без путей вида `C:\Users\anna\...`, без
+   * JSON и без идентификаторов. Здесь только вызов и подтверждение.
+   */
+  const copyRow = (key: string, event: AuditEvent) => {
+    const text = reportText({
+      said: event.subject,
+      when: time(event.at_ms),
+      steps: [{ name: journal.kind[event.kind] ?? event.kind, detail: event.outcome }],
+      failed: event.outcome === "denied" || event.outcome === "failed" ? event.decision : undefined,
+    });
+    void globalThis.navigator?.clipboard?.writeText(text).then(() => {
+      setCopiedRow(key);
+    });
+  };
+
+  /**
+   * Подтверждение гаснет не по таймеру, а по действию: новое копирование его
+   * сменяет, «Обновить» — убирает. Ошибка по таймеру исчезать не должна (её
+   * стережёт `ErrorsAreAnnounced`), и подсказка об исчезнувшем — тоже: человек
+   * мог отвернуться, а потом искать, почему кнопка снова «копировать».
+   */
+  const clearCopy = () => setCopiedRow(null);
 
   const load = useCallback(() => {
     setError(null);
@@ -335,7 +365,7 @@ export function Journal({
       </section>
 
       <div className={styles.bar}>
-        <Button icon={<ArrowClockwiseRegular />} onClick={load}>
+        <Button icon={<ArrowClockwiseRegular />} onClick={() => { clearCopy(); load(); }}>
           {journal.refresh}
         </Button>
         {events && events.length > 0 ? (
@@ -447,6 +477,9 @@ export function Journal({
               <th className={styles.head}>{journal.columns.decision}</th>
               <th className={styles.head}>{journal.columns.outcome}</th>
               <th className={styles.head}>{journal.columns.duration}</th>
+              {/* Отчёт — действие, а не колонка: но стоит последним, чтобы
+                  читать строку слева направо и уходить с кнопкой. */}
+              <th className={styles.head}>отчёт</th>
             </tr>
           </thead>
           <tbody>
@@ -459,10 +492,35 @@ export function Journal({
                 <td className={styles.cell}>{event.decision}</td>
                 <td className={outcomeClass(styles, event.outcome)}>{event.outcome}</td>
                 <td className={styles.cell}>{journal.duration(event.duration_ms)}</td>
+                <td className={styles.cell}>
+                  {(() => {
+                    const key = `${event.at_ms}-${event.kind}-${index}`;
+                    const done = copiedRow === key;
+                    return (
+                      <Button
+                        size="small"
+                        appearance="subtle"
+                        aria-label={`скопировать отчёт: ${event.subject}`}
+                        onClick={() => copyRow(key, event)}
+                      >
+                        {done ? "скопировано" : "копировать"}
+                      </Button>
+                    );
+                  })()}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+      ) : null}
+
+      {/* Подтверждение — словами правила, а не своей строкой: текст «отчёт
+          скопирован: его можно вставить в чат или письмо как есть» уже написан
+          и проверен, второй такой же — лишняя правда. */}
+      {copiedRow !== null ? (
+        <Text className={styles.note} role="status" aria-live="polite">
+          {reportCopied()}
+        </Text>
       ) : null}
     </div>
   );
