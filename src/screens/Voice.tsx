@@ -55,6 +55,7 @@ import type {
 } from "../ipc";
 import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
+import { RightNowCard } from "../components/RightNowCard";
 import { firstOpenQuestion, phraseIsAnswer, questionField } from "../lib/answer";
 import { mark as repeatMark } from "../lib/repeatHand";
 import { allows as grantAllows, book as grantBook, EMPTY as EMPTY_GRANTS, give as grantGive, load as loadGrants, onRevoke as grantOnRevoke, revoke as grantRevoke, save as saveGrants, type Book as GrantBook, type Channel as GrantChannel } from "../lib/grants";
@@ -3375,6 +3376,12 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         onRefresh={reloadSpeech}
         onToModels={onOpen ? () => onOpen("models") : undefined}
       />
+
+      {/* «Что сейчас» — прямо над полем, где говорят: человек, который не понял,
+          шевелится приложение или нет, спрашивает именно здесь. Правило
+          `rightNow` показывает и не управляет: «остановить всё» рядом с идущим
+          делом — худшая кнопка из возможных. */}
+      <RightNowCard />
 
       {mic.listening && !always ? (
         <Text className={styles.note}>{voice.pauseSend}</Text>

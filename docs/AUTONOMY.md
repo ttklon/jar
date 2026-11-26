@@ -40,30 +40,30 @@
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
 * `src/screens/Undo.tsx:68` — useEffect(load, [load]);
-* `src/screens/Voice.tsx:662` — useEffect(() => {
-* `src/screens/Voice.tsx:1006` — useEffect(() => {
-* `src/screens/Voice.tsx:1071` — useEffect(() => {
-* `src/screens/Voice.tsx:1075` — useEffect(
-* `src/screens/Voice.tsx:1139` — useEffect(() => {
-* `src/screens/Voice.tsx:1200` — useEffect(() => {
-* `src/screens/Voice.tsx:2411` — useEffect(() => {
-* `src/screens/Voice.tsx:2466` — useEffect(() => {
-* `src/screens/Voice.tsx:2476` — useEffect(() => {
-* `src/screens/Voice.tsx:2498` — useEffect(() => {
-* `src/screens/Voice.tsx:2669` — useEffect(() => {
-* `src/screens/Voice.tsx:2702` — useEffect(() => {
-* `src/screens/Voice.tsx:2727` — useEffect(() => {
-* `src/screens/Voice.tsx:2748` — useEffect(() => {
-* `src/screens/Voice.tsx:2754` — useEffect(() => {
-* `src/screens/Voice.tsx:2761` — useEffect(() => {
-* `src/screens/Voice.tsx:2786` — useEffect(() => {
-* `src/screens/Voice.tsx:2801` — useEffect(() => {
-* `src/screens/Voice.tsx:2827` — useEffect(() => {
-* `src/screens/Voice.tsx:2875` — useEffect(() => {
-* `src/screens/Voice.tsx:2881` — useEffect(() => {
-* `src/screens/Voice.tsx:2897` — useEffect(() => {
-* `src/screens/Voice.tsx:3136` — useEffect(() => {
-* `src/screens/Voice.tsx:3168` — useEffect(
+* `src/screens/Voice.tsx:663` — useEffect(() => {
+* `src/screens/Voice.tsx:1007` — useEffect(() => {
+* `src/screens/Voice.tsx:1072` — useEffect(() => {
+* `src/screens/Voice.tsx:1076` — useEffect(
+* `src/screens/Voice.tsx:1140` — useEffect(() => {
+* `src/screens/Voice.tsx:1201` — useEffect(() => {
+* `src/screens/Voice.tsx:2412` — useEffect(() => {
+* `src/screens/Voice.tsx:2467` — useEffect(() => {
+* `src/screens/Voice.tsx:2477` — useEffect(() => {
+* `src/screens/Voice.tsx:2499` — useEffect(() => {
+* `src/screens/Voice.tsx:2670` — useEffect(() => {
+* `src/screens/Voice.tsx:2703` — useEffect(() => {
+* `src/screens/Voice.tsx:2728` — useEffect(() => {
+* `src/screens/Voice.tsx:2749` — useEffect(() => {
+* `src/screens/Voice.tsx:2755` — useEffect(() => {
+* `src/screens/Voice.tsx:2762` — useEffect(() => {
+* `src/screens/Voice.tsx:2787` — useEffect(() => {
+* `src/screens/Voice.tsx:2802` — useEffect(() => {
+* `src/screens/Voice.tsx:2828` — useEffect(() => {
+* `src/screens/Voice.tsx:2876` — useEffect(() => {
+* `src/screens/Voice.tsx:2882` — useEffect(() => {
+* `src/screens/Voice.tsx:2898` — useEffect(() => {
+* `src/screens/Voice.tsx:3137` — useEffect(() => {
+* `src/screens/Voice.tsx:3169` — useEffect(
 * `src/components/DownloadBar.tsx:73` — useEffect(() => {
 * `src/components/DownloadBar.tsx:80` — useEffect(() => {
 * `src/components/MemoryBackups.tsx:87` — useEffect(() => {
@@ -81,6 +81,7 @@
 * `src/components/ReadinessCard.tsx:423` — useEffect(() => { setSmoke(null); }, [status?.engine_program, status?.model_name]);
 * `src/components/RecentFailures.tsx:58` — useEffect(() => {
 * `src/components/ResourceReport.tsx:58` — useEffect(load, []);
+* `src/components/RightNowCard.tsx:40` — useEffect(() => {
 * `src/lib/useVoice.ts:662` — useEffect(() => {
 * `src/lib/useVoice.ts:699` — useEffect(
 * `src/lib/useVoice.ts:712` — useEffect(() => {
