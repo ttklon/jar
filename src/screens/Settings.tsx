@@ -14,6 +14,7 @@ import { MemoryNote } from "../components/MemoryNote";
 import { MemoryBackups } from "../components/MemoryBackups";
 import { MemoryFacts } from "../components/MemoryFacts";
 import { TextSizeCard } from "../components/TextSizeCard";
+import { HotkeyCard } from "../components/HotkeyCard";
 import { Diagnostics } from "../components/Diagnostics";
 import { levels, show as noticeShow, type SuccessLevel } from "../lib/noticePolicy";
 
@@ -241,17 +242,10 @@ export function Settings({
         ) : null}
       </div>
 
-      <div className={styles.card}>
-        <div className={styles.row}>
-          <div>
-            <Text weight="semibold">{t.settingsHotkey}</Text>
-            <Text className={styles.muted} block>
-              {t.settingsHotkeyHint}
-            </Text>
-          </div>
-          <Text className={styles.mono}>{t.settingsHotkeyValue}</Text>
-        </div>
-      </div>
+      {/* Назначение клавиши — с проверкой до сохранения (шаг 97). Раньше здесь
+          стояла строка значения: «занята другой программой» человек узнавал
+          только тогда, когда клавиша не срабатывала. */}
+      <HotkeyCard />
 
       <div className={styles.card}>
         <div className={styles.row}>
