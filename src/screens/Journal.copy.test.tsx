@@ -17,8 +17,8 @@ vi.mock("../ipc", async (importOriginal) => {
     ...actual,
     isTauri: () => false,
     auditTail: vi.fn().mockResolvedValue([
-      { at_ms: 1700000000000, kind: "hand", subject: "почисти загрузки", risk: "clean", decision: "принято", outcome: "done", duration_ms: 1200 },
-      { at_ms: 1700000060000, kind: "hand", subject: "удали старое", risk: "delete", decision: "отказ", outcome: "denied", duration_ms: 30 },
+      { at_ms: 1700000000000, kind: "requested", subject: "почисти загрузки", risk: "clean", decision: "принято", outcome: "done", duration_ms: 1200 },
+      { at_ms: 1700000060000, kind: "requested", subject: "удали старое", risk: "delete", decision: "отказ", outcome: "denied", duration_ms: 30 },
     ]),
     auditRuns: vi.fn().mockResolvedValue([]),
     auditSearch: vi.fn().mockResolvedValue([]),
@@ -76,5 +76,46 @@ describe("отчёт копируется из журнала", () => {
     await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1));
     const text = writeText.mock.calls[0]![0] as string;
     expect(text).toContain("Что не получилось: отказ");
+  });
+});
+
+/**
+ * Выгрузка журнала за сутки (фаза 1, шаг 41 — подключение `journalExport`).
+ *
+ * Журнал отдают поддержке, поэтому проверяем главное: секреты вычищены, пути
+ * сокращены, и человек видит **числа**, а не обещание «всё безопасно».
+ */
+describe("выгрузка журнала", () => {
+  it("кнопка есть, когда в журнале что-то есть", async () => {
+    render(<Journal />);
+    expect(await screen.findByRole("button", { name: "выгрузить журнал за сутки" })).toBeTruthy();
+  });
+
+  it("в выгрузке нет пароля из фразы и нет полного пути", async () => {
+    vi.mocked((await import("../ipc")).auditTail).mockResolvedValueOnce([
+      { at_ms: Date.now(), kind: "requested", subject: "пароль от почты: hunter2", risk: "read", decision: "принято", outcome: "done", duration_ms: 10, args_fingerprint: "f" },
+      { at_ms: Date.now(), kind: "requested", subject: "C:\\Users\\anna\\Загрузки\\старый.zip", risk: "clean", decision: "принято", outcome: "done", duration_ms: 20, args_fingerprint: "f" },
+    ]);
+    render(<Journal />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "выгрузить журнал за сутки" }));
+
+    await waitFor(() => expect(writeText).toHaveBeenCalled());
+    const text = writeText.mock.calls.at(-1)![0] as string;
+    expect(text).not.toContain("hunter2");
+    expect(text).not.toContain("anna");
+  });
+
+  it("сказано число, а не «безопасно»", async () => {
+    // Свой набор строк: предыдущий тест оставил `mockResolvedValueOnce`, и без
+    // этого здесь журнал пуст — тест, зависящий от порядка, врёт.
+    vi.mocked((await import("../ipc")).auditTail).mockResolvedValueOnce([
+      { at_ms: Date.now(), kind: "requested", subject: "почисти загрузки", risk: "clean", decision: "принято", outcome: "done", duration_ms: 10, args_fingerprint: "f" },
+      { at_ms: Date.now(), kind: "requested", subject: "C:\\Users\\anna\\a.zip", risk: "clean", decision: "принято", outcome: "done", duration_ms: 20, args_fingerprint: "f" },
+    ]);
+    render(<Journal />);
+    fireEvent.click(await screen.findByRole("button", { name: "выгрузить журнал за сутки" }));
+
+    await waitFor(() => expect(screen.getByText(/секрет|вычищ|путей/)).toBeTruthy());
   });
 });

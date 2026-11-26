@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import { copied as reportCopied, text as reportText } from "../lib/copyReport";
+import { build as buildExport } from "../lib/journalExport";
 import { ArrowClockwiseRegular } from "@fluentui/react-icons";
 import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
 import { audit as dangerAudit, dangerous as dangerOnly, line as dangerLine, summary as dangerSummary } from "../lib/dangerAudit";
@@ -184,6 +185,8 @@ export function Journal({
   const [searchBusy, setSearchBusy] = useState(false);
   /** Что уже скопировано — по ключу строки, чтобы человек видел подтверждение. */
   const [copiedRow, setCopiedRow] = useState<string | null>(null);
+  /** Сколько секретов и путей убрано при последней выгрузке — числом. */
+  const [exported, setExported] = useState<string | null>(null);
   /** Номер последнего поиска: старый ответ не вправе переписать новый. */
   const lastSearch = useRef(0);
 
@@ -213,6 +216,22 @@ export function Journal({
    * мог отвернуться, а потом искать, почему кнопка снова «копировать».
    */
   const clearCopy = () => setCopiedRow(null);
+
+  /**
+   * Выгрузить журнал для поддержки (шаг 423).
+   *
+   * Не «сохранить как есть»: правило `journalExport` вычищает секреты повторно
+   * (журнал мог быть записан до правила), сокращает пути до имени папки и режет
+   * по времени. Человек видит **числа** — сколько вычищено, — а не обещание.
+   */
+  const exportAll = () => {
+    const lines = (events ?? []).map((event) => ({ at: event.at_ms, text: `${event.kind} ${event.subject}: ${event.outcome}` }));
+    const got = buildExport(lines, Date.now(), 24);
+    void globalThis.navigator?.clipboard?.writeText(got.text).then(() => {
+      setExported(got.said);
+      setCopiedRow(null);
+    });
+  };
 
   const load = useCallback(() => {
     setError(null);
@@ -369,6 +388,9 @@ export function Journal({
           {journal.refresh}
         </Button>
         {events && events.length > 0 ? (
+          <Button onClick={exportAll}>выгрузить журнал за сутки</Button>
+        ) : null}
+        {events && events.length > 0 ? (
           <Text className={styles.note}>{journal.count(events.length)}</Text>
         ) : null}
       </div>
@@ -520,6 +542,14 @@ export function Journal({
       {copiedRow !== null ? (
         <Text className={styles.note} role="status" aria-live="polite">
           {reportCopied()}
+        </Text>
+      ) : null}
+
+      {/* Выгрузка говорит числами: сколько секретов вычищено и сколько путей
+          сокращено. «Всё безопасно» — это обещание, число — доказательство. */}
+      {exported !== null ? (
+        <Text className={styles.note} role="status" aria-live="polite">
+          {exported}
         </Text>
       ) : null}
     </div>
