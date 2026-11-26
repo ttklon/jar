@@ -1,88 +1,65 @@
 import { describe, expect, it } from "vitest";
-import { audit, badLine, check, digest, line, nothingVisible, type Entry, type Version } from "./changelogHuman";
+import { belongsToHuman, check, checkAll, checks, MAX_WORDS, notBelongs, text, type Line } from "./changelogHuman";
 
 /**
- * Шаг 316: журнал обновлений — что изменилось, по-человечески.
- *
- * Человек открывает журнал с одним вопросом: из-за меня это обновление или нет?
+ * Шаг 466: changelog по-человечески — одна строка на изменение.
  */
 
-const entry = (over: Partial<Entry> = {}): Entry => ({
-  was: "на батарее голос отвечал с задержкой в две секунды",
-  now: "отвечает сразу: задержка на батарее убрана",
-  who: "у кого ноутбук на батарее",
-  ...over,
+const line = (over: Partial<Line> = {}): Line => ({ what: "программа понимает «почисти загрузки»", kind: "новое", todo: null, ...over });
+
+describe("одна строка на изменение", () => {
+  it("правильная строка проходит", () => {
+    expect(check(line())).toEqual([]);
+  });
+
+  it("длинная — не строка", () => {
+    const long = line({ what: Array.from({ length: 30 }, () => "слово").join(" ") });
+    expect(check(long).join()).toContain("больше 25 не читают");
+  });
+
+  it("пустая — не сказано, что изменилось", () => {
+    expect(check(line({ what: "   " })).join()).toContain("не сказано, что изменилось");
+  });
 });
 
-describe("заглушки ловятся машинно", () => {
-  it("«исправлены баги» — сказать нечего", () => {
-    expect(check(entry({ was: "исправлены баги" })).join()).toContain("сказать нечего");
+describe("«исправлены ошибки» — отписка", () => {
+  it("ловится", () => {
+    expect(check(line({ what: "исправлены ошибки" })).join()).toContain("отписка");
   });
 
   it("«улучшена стабильность» — тоже", () => {
-    expect(badLine("улучшена стабильность и оптимизация")).toBe(true);
+    expect(check(line({ what: "улучшена стабильность работы" })).join()).toContain("отписка");
   });
 
-  it("«внутренние изменения» — тоже", () => {
-    expect(badLine("внутренние изменения")).toBe(true);
-  });
-
-  it("живой случай заглушкой не считается", () => {
-    expect(badLine("на батарее голос отвечал с задержкой")).toBe(false);
-    expect(check(entry())).toEqual([]);
+  it("конкретное исправление — проходит", () => {
+    expect(check(line({ what: "окно больше не уезжает на второй монитор", kind: "исправлено" }))).toEqual([]);
   });
 });
 
-describe("кого касается — условие, а не «всех»", () => {
-  it("«всем» — значит, никому конкретно", () => {
-    expect(check(entry({ who: "всем" })).join()).toContain("никто конкретно");
+describe("строка целиком", () => {
+  it("вид первым словом", () => {
+    expect(text(line())).toBe("Новое: программа понимает «почисти загрузки»");
   });
 
-  it("«пользователям» — то же", () => {
-    expect(check(entry({ who: "пользователям." })).join()).toContain("никто конкретно");
-  });
-
-  it("условие проходит", () => {
-    expect(check(entry({ who: "у кого Windows 11" }))).toEqual([]);
-  });
-
-  it("слишком короткие половины не проходят", () => {
-    expect(check(entry({ now: "лучше" })).join()).toContain("человек не поймёт");
+  it("действие — в скобках", () => {
+    expect(text(line({ kind: "изменилось", todo: "переназначить клавишу" }))).toContain("(переназначить клавишу)");
   });
 });
 
-describe("строка журнала", () => {
-  it("было → теперь → кого", () => {
-    expect(line(entry())).toBe(
-      "на батарее голос отвечал с задержкой в две секунды — теперь отвечает сразу: задержка на батарее убрана (у кого ноутбук на батарее)",
-    );
+describe("повторы и техническое", () => {
+  it("одинаковые строки — замечание", () => {
+    expect(checkAll([line(), line()]).join()).toContain("повторяется");
   });
 
-  it("весь журнал проверяется одним вызовом", () => {
-    expect(audit([entry(), entry({ was: "исправлены баги" })]).length).toBe(1);
-  });
-});
-
-describe("важное — в начале, а не в середине списка", () => {
-  const version: Version = {
-    version: "2.1",
-    important: ["память теперь в обычном текстовом файле: можно редактировать руками"],
-    entries: [entry(), entry({ was: "окно настроек открывалось две секунды" })],
-  };
-
-  it("сначала важное", () => {
-    expect(digest(version)).toContain("сначала важное");
+  it("техническое — не сюда", () => {
+    const got = notBelongs().join();
+    expect(got).toContain("рефакторинг");
+    expect(got).toContain("без изменения поведения");
   });
 
-  it("нечего важного — просто число изменений", () => {
-    expect(digest({ ...version, important: [] })).toBe("Версия 2.1: 2 изменений");
-  });
-});
-
-describe("когда показать нечего", () => {
-  it("«надёжность» — с объяснением, а не «исправлены баги»", () => {
-    const got = nothingVisible();
-    expect(got).toContain("Заметных изменений нет");
-    expect(badLine(got)).toBe(false);
+  it("что попадает — четыре пункта", () => {
+    expect(belongsToHuman()).toHaveLength(4);
+    expect(checks()).toHaveLength(3);
+    expect(MAX_WORDS).toBe(25);
   });
 });
