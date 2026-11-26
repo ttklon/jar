@@ -6,6 +6,7 @@ import { cleanName, readName, saveName } from "../lib/person";
 import { decide, readFacts } from "../lib/platform";
 import { checkFirstRun, summarizeFirstRun } from "../lib/firstRunCheck";
 import { groups as starterGroups, phrases as starterPhrases, NEEDED } from "../lib/starterPage";
+import { StrengthsCard } from "../components/StrengthsCard";
 
 /**
  * Экран знакомства — то, что человек видит при первом запуске.
@@ -141,6 +142,10 @@ export function Welcome({
           </div>
         ))}
       </div>
+
+      {/* Сила и предел — рядом с правилами: это тот же ответ «что это за
+          приложение», и без предела он превращается в рекламу. */}
+      <StrengthsCard />
 
       <div className={styles.rules}>
         {welcome.rules.map((rule) => (
