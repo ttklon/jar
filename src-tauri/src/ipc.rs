@@ -39,9 +39,9 @@ use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::readiness;
 use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::restricted;
-use crate::schedule;
 use crate::roles;
 use crate::sandbox::{self, Verdict};
+use crate::schedule;
 use crate::server::{self, Server};
 use crate::step::StepResult;
 use crate::stt;
@@ -600,7 +600,11 @@ pub fn schedules() -> Vec<schedule::store::Saved> {
 /// Разбор фразы — в правиле (`plainSchedule`), здесь только сохранение: команда
 /// получает уже проверенные «когда» и «что» и не угадывает второй раз.
 #[tauri::command]
-pub fn schedule_add(what: String, cadence: String, minute: u32) -> Result<Vec<schedule::store::Saved>, String> {
+pub fn schedule_add(
+    what: String,
+    cadence: String,
+    minute: u32,
+) -> Result<Vec<schedule::store::Saved>, String> {
     let what = what.trim();
     if what.is_empty() {
         return Err("не сказано, что делать: расписание из пустого дела не сработает".to_string());

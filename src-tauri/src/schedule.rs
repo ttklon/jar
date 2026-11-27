@@ -410,8 +410,10 @@ pub mod store {
             std::fs::create_dir_all(dir).map_err(|error| format!("папка расписаний: {error}"))?;
         }
         let text = serde_json::to_string_pretty(items).map_err(|error| error.to_string())?;
-        std::fs::write(&path, format!("{text}\n")).map_err(|error| format!("запись списка: {error}"))?;
-        let back = std::fs::read_to_string(&path).map_err(|error| format!("чтение обратно: {error}"))?;
+        std::fs::write(&path, format!("{text}\n"))
+            .map_err(|error| format!("запись списка: {error}"))?;
+        let back =
+            std::fs::read_to_string(&path).map_err(|error| format!("чтение обратно: {error}"))?;
         if back.trim() != text.trim() {
             return Err("в файле оказалось не то, что записали: список не сохранён".to_string());
         }
@@ -422,8 +424,13 @@ pub mod store {
     /// это два отчёта и «почему приходит два?».
     pub fn add(item: Saved) -> Result<Vec<Saved>, String> {
         let mut items = load();
-        if items.iter().any(|have| have.what == item.what && have.minute == item.minute && have.cadence == item.cadence) {
-            return Err(format!("такое уже есть: {} — не добавляю второй раз", item.when()));
+        if items.iter().any(|have| {
+            have.what == item.what && have.minute == item.minute && have.cadence == item.cadence
+        }) {
+            return Err(format!(
+                "такое уже есть: {} — не добавляю второй раз",
+                item.when()
+            ));
         }
         items.push(item);
         save(&items)?;
