@@ -234,3 +234,25 @@ describe("ночью мир не меняется", () => {
     expect(screen.getByText(/проверить место на диске — только читает/)).toBeTruthy();
   });
 });
+
+describe("какие «когда» проверяемы", () => {
+  it("границы триггера видны в строке правила до срабатывания", async () => {
+    rules = [
+      { id: "time:в 18:00:почисти Temp", kind: "time", when: "в 18:00", then: "почисти Temp", risky: false, on: true, fired: 0 },
+    ];
+    render(<Schedule />);
+
+    // «Если компьютер спал — спросим»: это не оправдание после, а обещание до.
+    expect(await screen.findByText(/если компьютер спал в это время/)).toBeTruthy();
+  });
+
+  it("какие «когда» программа правда видит — списком с ценой у каждого", async () => {
+    render(<Schedule />);
+    await screen.findByText(/правил нет/);
+
+    fireEvent.click(screen.getByText(/какие «когда» программа правда видит/));
+
+    expect(screen.getByText(/когда в «Загрузках» появляется файл — файл может появиться недокачанным/)).toBeTruthy();
+    expect(screen.getByText(/когда вы входите в систему — после входа уходит несколько секунд/)).toBeTruthy();
+  });
+});

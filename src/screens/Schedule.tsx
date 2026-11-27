@@ -18,6 +18,7 @@ import { row as scheduleRow } from "../lib/scheduleScreen";
 import { line as missedLine, type Policy } from "../lib/catchUp";
 import { deferred as nightDeferred, isNight, safeList } from "../lib/nightTasks";
 import { parse as parseWhenThen, summary as rulesSummary, type Rule as WhenThenRule, type When } from "../lib/whenThen";
+import { check as checkTrigger, describe as describeTrigger, limits as triggerLimits, type Trigger } from "../lib/whenTriggers";
 
 /**
  * «Расписание» — всё в одном списке (шаг 327, фраза — шаг 321).
@@ -70,6 +71,31 @@ function asRule(row: WhenThenRow): WhenThenRule {
           ? { kind: "said", phrase: row.when }
           : { kind: "file", path: row.when };
   return { id: row.id, when, then: row.then, risky: row.risky, on: row.on, fired: row.fired };
+}
+
+/**
+ * Условие правила — в вид триггера `whenTriggers`.
+ *
+ * Нужно, чтобы показать **границы** до создания правила: человек, который ждёт
+ * «наведения курсора», создаст правило, которое молча не сработает. `kind`
+ * сохранён рядом с подписью, поэтому это не догадка по тексту.
+ */
+function asTrigger(row: WhenThenRow): Trigger | null {
+  if (row.kind === "time") {
+    const match = /(\d{1,2}):(\d{2})/.exec(row.when);
+    if (match === null) return null;
+    return { kind: "time", at: Number(match[1]) * 60 + Number(match[2]) };
+  }
+  if (row.kind === "file") {
+    const lower = row.when.toLowerCase();
+    if (lower.includes("загрузк")) return { kind: "fileAppeared", folder: "downloads" };
+    if (lower.includes("рабоч") || lower.includes("стол")) return { kind: "fileAppeared", folder: "desktop" };
+    if (lower.includes("документ")) return { kind: "fileAppeared", folder: "documents" };
+    return { kind: "fileAppeared", folder: "custom" };
+  }
+  // Вход в систему — тоже время, но с другой ценой; `time` здесь честнее, чем
+  // выдуманный `signIn` без данных от ядра.
+  return null;
 }
 
 /** Что человек видит про одну строку — словами правила, а не своими. */
@@ -395,6 +421,17 @@ export function Schedule() {
                     {rule.on ? "включено" : "выключено"} — {rule.then}
                     {rule.risky ? " (спрошу перед выполнением)" : ""}
                     {rule.fired > 0 ? `; срабатывало ${rule.fired} раз` : "; ещё не срабатывало"}
+                    {/* Границы триггера — до срабатывания, а не после «почему не
+                        работает»: «файл может появиться недокачанным» и «за
+                        папками вне списка не следим» — это не оправдание. */}
+                    {(() => {
+                      const trigger = asTrigger(rule);
+                      if (trigger === null) return "";
+                      const bad = checkTrigger(trigger);
+                      if (bad.length > 0) return `; не сработает: ${bad.join("; ")}`;
+                      const limits = triggerLimits(trigger);
+                      return limits.length > 0 ? `; ${limits.join("; ")}` : "";
+                    })()}
                   </Text>
                 </span>
                 <span className={styles.row}>
@@ -415,6 +452,26 @@ export function Schedule() {
           </ul>
         </>
       )}
+
+      {/* Какие «когда» проверяемы — сказано до того, как человек придумает
+          правило, которое не сработает. */}
+      <details>
+        <summary className={styles.muted}>какие «когда» программа правда видит</summary>
+        <ul className={styles.list}>
+          {([
+            { kind: "time", at: 540 } as Trigger,
+            { kind: "fileAppeared", folder: "downloads" } as Trigger,
+            { kind: "diskFull", percent: 10 } as Trigger,
+            { kind: "signIn" } as Trigger,
+          ] as Trigger[]).map((trigger) => (
+            <li key={trigger.kind}>
+              <Text className={styles.muted}>
+                {describeTrigger(trigger)} — {triggerLimits(trigger)[0]}
+              </Text>
+            </li>
+          ))}
+        </ul>
+      </details>
 
       {said !== null ? (
         <Text className={styles.muted} role={bad ? "alert" : "status"} aria-live="polite">
