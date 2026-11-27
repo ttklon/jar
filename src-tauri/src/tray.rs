@@ -116,22 +116,13 @@ mod tests {
             "голосовая клавиша зажата"
         );
         assert_eq!(voice_tooltip("listening").unwrap(), "слушаю");
-        assert_eq!(
-            voice_tooltip("working").unwrap(),
-            "обрабатываю запрос"
-        );
+        assert_eq!(voice_tooltip("working").unwrap(), "обрабатываю запрос");
         assert_eq!(
             voice_tooltip("awaiting-confirmation").unwrap(),
             "жду подтверждения"
         );
-        assert_eq!(
-            voice_tooltip("executing").unwrap(),
-            "выполняю действие"
-        );
-        assert_eq!(
-            voice_tooltip("error").unwrap(),
-            "ошибка; откройте окно"
-        );
+        assert_eq!(voice_tooltip("executing").unwrap(), "выполняю действие");
+        assert_eq!(voice_tooltip("error").unwrap(), "ошибка; откройте окно");
         // Шаг 98: дело не теряется при уходе с экрана.
         assert_eq!(voice_tooltip("deed-running").unwrap(), "дело идёт");
         assert_eq!(
