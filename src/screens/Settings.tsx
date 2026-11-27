@@ -16,6 +16,10 @@ import { MemoryFacts } from "../components/MemoryFacts";
 import { TextSizeCard } from "../components/TextSizeCard";
 import { HotkeyCard } from "../components/HotkeyCard";
 import { UpdateCard } from "../components/UpdateCard";
+<<<<<<< HEAD
+=======
+import { UninstallCard } from "../components/UninstallCard";
+>>>>>>> a130074 (Удаление: список с путями и безвозвратное словом)
 import { Diagnostics } from "../components/Diagnostics";
 import { levels, show as noticeShow, type SuccessLevel } from "../lib/noticePolicy";
 
@@ -306,6 +310,13 @@ export function Settings({
           «переложил не туда», и искать его должны там же, где всё про поведение. */}
       <UndoCard />
       <ResourceReportCard />
+<<<<<<< HEAD
+=======
+
+      {/* Удаление — последним: это единственное действие, которое может стереть
+          память, и стоять оно должно там, где человек уже всё увидел (шаг 64). */}
+      <UninstallCard />
+>>>>>>> a130074 (Удаление: список с путями и безвозвратное словом)
 
       <div className={styles.card}>
         <Text weight="semibold">{t.settingsData}</Text>
