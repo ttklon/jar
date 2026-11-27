@@ -9,6 +9,7 @@
 export type {
   Action,
   ScheduleRow,
+  WhenThenRow,
   Autostart,
   DataPlace,
   DataTotals,
@@ -78,7 +79,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, HotkeyView, ScheduleRow, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, WakeReport, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, HotkeyView, ScheduleRow, WhenThenRow, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, WakeReport, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -259,6 +260,43 @@ export async function scheduleAdd(what: string, cadence: string, minute: number)
     return fromCore(what, cadence, minute);
   }
   throw new Error("в браузере расписание не сохраняется: список ведёт приложение");
+}
+
+/**
+ * Правила «когда …, тогда …»: список, добавление, выключение без удаления.
+ *
+ * В браузере правил нет — сказано словами, а не пустым списком.
+ */
+export async function whenThenRules(): Promise<WhenThenRow[]> {
+  if (isTauri()) {
+    const { whenThenRules: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  return [];
+}
+
+export async function whenThenAdd(kind: string, when: string, then: string, risky: boolean): Promise<WhenThenRow[]> {
+  if (isTauri()) {
+    const { whenThenAdd: fromCore } = await import("./tauri");
+    return fromCore(kind, when, then, risky);
+  }
+  throw new Error("в браузере правило не сохраняется: список ведёт приложение");
+}
+
+export async function whenThenSetOn(id: string, on: boolean): Promise<WhenThenRow[]> {
+  if (isTauri()) {
+    const { whenThenSetOn: fromCore } = await import("./tauri");
+    return fromCore(id, on);
+  }
+  throw new Error("в браузере нечего выключать: список ведёт приложение");
+}
+
+export async function whenThenRemove(id: string): Promise<WhenThenRow[]> {
+  if (isTauri()) {
+    const { whenThenRemove: fromCore } = await import("./tauri");
+    return fromCore(id);
+  }
+  throw new Error("в браузере нечего удалять: список ведёт приложение");
 }
 
 /**

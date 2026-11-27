@@ -25,6 +25,7 @@ import type {
   HandDraft,
   HashCheck,
   ScheduleRow,
+  WhenThenRow,
   HotkeyView,
   IsolationStatus,
   Learning,
@@ -454,6 +455,22 @@ export function schedules(): Promise<ScheduleRow[]> {
 
 export function scheduleAdd(what: string, cadence: string, minute: number): Promise<ScheduleRow[]> {
   return invoke<ScheduleRow[]>("schedule_add", { what, cadence, minute });
+}
+
+export function whenThenRules(): Promise<WhenThenRow[]> {
+  return invoke<WhenThenRow[]>("when_then_rules");
+}
+
+export function whenThenAdd(kind: string, when: string, then: string, risky: boolean): Promise<WhenThenRow[]> {
+  return invoke<WhenThenRow[]>("when_then_add", { kind, when, then, risky });
+}
+
+export function whenThenSetOn(id: string, on: boolean): Promise<WhenThenRow[]> {
+  return invoke<WhenThenRow[]>("when_then_set_on", { id, on });
+}
+
+export function whenThenRemove(id: string): Promise<WhenThenRow[]> {
+  return invoke<WhenThenRow[]>("when_then_remove", { id });
 }
 
 export function schedulePolicy(id: string, policy: string): Promise<ScheduleRow[]> {

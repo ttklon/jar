@@ -1,10 +1,22 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
-import { isTauri, scheduleAdd, schedulePause, schedulePolicy, scheduleRemove, schedules } from "../ipc";
-import type { ScheduleRow } from "../ipc";
+import {
+  isTauri,
+  scheduleAdd,
+  schedulePause,
+  schedulePolicy,
+  scheduleRemove,
+  schedules,
+  whenThenAdd,
+  whenThenRemove,
+  whenThenRules,
+  whenThenSetOn,
+} from "../ipc";
+import type { ScheduleRow, WhenThenRow } from "../ipc";
 import { clockText, confirm, nightNotice, parse } from "../lib/plainSchedule";
 import { row as scheduleRow } from "../lib/scheduleScreen";
 import { line as missedLine, type Policy } from "../lib/catchUp";
+import { parse as parseWhenThen, summary as rulesSummary, type Rule as WhenThenRule, type When } from "../lib/whenThen";
 
 /**
  * «Расписание» — всё в одном списке (шаг 327, фраза — шаг 321).
@@ -40,6 +52,25 @@ const useStyles = makeStyles({
   wide: { minWidth: "260px", minHeight: "44px" },
 });
 
+/**
+ * Правило из хранилища — в форму правила `whenThen`.
+ *
+ * `when` в файле лежит подписью словами, а правилу нужен вид триггера: без него
+ * `summary` не смог бы отличить правило по времени от правила по событию. Вид
+ * сохранён рядом (`kind`), поэтому обратное превращение — не догадка.
+ */
+function asRule(row: WhenThenRow): WhenThenRule {
+  const when: When =
+    row.kind === "time"
+      ? { kind: "time", at: row.when.replace(/^в\s*/, "") }
+      : row.kind === "app"
+        ? { kind: "app", name: row.when.replace(/^откроется\s*/, "") }
+        : row.kind === "said"
+          ? { kind: "said", phrase: row.when }
+          : { kind: "file", path: row.when };
+  return { id: row.id, when, then: row.then, risky: row.risky, on: row.on, fired: row.fired };
+}
+
 /** Что человек видит про одну строку — словами правила, а не своими. */
 function line(item: ScheduleRow): string {
   return scheduleRow(
@@ -58,6 +89,8 @@ function line(item: ScheduleRow): string {
 export function Schedule() {
   const styles = useStyles();
   const [items, setItems] = useState<ScheduleRow[] | null>(null);
+  const [rules, setRules] = useState<WhenThenRow[] | null>(null);
+  const [phraseWhen, setPhraseWhen] = useState("");
   const [phrase, setPhrase] = useState("");
   const [said, setSaid] = useState<string | null>(null);
   const [bad, setBad] = useState(false);
@@ -69,6 +102,9 @@ export function Schedule() {
   }, []);
 
   function scheduleList() {
+    whenThenRules()
+      .then((got) => setRules(got))
+      .catch(() => setRules([]));
     schedules()
       .then((got) => setItems(got))
       .catch((reason: unknown) => {
@@ -106,6 +142,65 @@ export function Schedule() {
         setSaid(reason instanceof Error ? reason.message : String(reason));
       })
       .finally(() => setBusy(false));
+  };
+
+  /**
+   * Добавить правило «когда …, тогда …».
+   *
+   * Разбор — правило `whenThen`: граница между условием и действием ищется явно,
+   * а непонятое **называется**, а не превращается в «наверное, вот так».
+   * Опасное действие помечается сразу: оно спросит и внутри правила.
+   */
+  const addRule = () => {
+    const parsed = parseWhenThen(phraseWhen, `rule:${Date.now()}`);
+    if (parsed.rule === null) {
+      setBad(true);
+      setSaid(parsed.said);
+      return;
+    }
+    const rule = parsed.rule;
+    setBad(false);
+    setBusy(true);
+    whenThenAdd(rule.when.kind, parsed.said.split(" — ")[0]!.replace(/^правило: /, ""), rule.then, rule.risky)
+      .then((got) => {
+        setRules(got);
+        setPhraseWhen("");
+        setSaid(parsed.said);
+      })
+      .catch((reason: unknown) => {
+        setBad(true);
+        setSaid(reason instanceof Error ? reason.message : String(reason));
+      })
+      .finally(() => setBusy(false));
+  };
+
+  const toggleRule = (rule: WhenThenRow) => {
+    whenThenSetOn(rule.id, !rule.on)
+      .then((got) => {
+        setRules(got);
+        // Выключение — не потеря: так и говорим.
+        setSaid(
+          rule.on
+            ? `«${rule.then}» выключено: правило осталось, срабатывать не будет`
+            : `«${rule.then}» снова включено`,
+        );
+      })
+      .catch((reason: unknown) => {
+        setBad(true);
+        setSaid(reason instanceof Error ? reason.message : String(reason));
+      });
+  };
+
+  const dropRule = (rule: WhenThenRow) => {
+    whenThenRemove(rule.id)
+      .then((got) => {
+        setRules(got);
+        setSaid(`удалено правило: ${rule.when} — ${rule.then}`);
+      })
+      .catch((reason: unknown) => {
+        setBad(true);
+        setSaid(reason instanceof Error ? reason.message : String(reason));
+      });
   };
 
   const toggle = (item: ScheduleRow) => {
@@ -241,6 +336,65 @@ export function Schedule() {
           <Text className={styles.muted}>
             {`всего ${items.length}, на паузе ${items.filter((item) => item.paused).length}`}
           </Text>
+        </>
+      )}
+
+      {/* «Когда …, тогда …» — то же место, потому что это тоже «что происходит
+          само». Отдельный список: правило по событию — не расписание по часам. */}
+      <div>
+        <Text weight="semibold" block>
+          Когда …, тогда …
+        </Text>
+        <Text className={styles.muted} block>
+          Правило по событию, а не по часам: «когда я открою Chrome, тогда включи музыку».
+          Опасное действие спросит подтверждение, даже внутри правила.
+        </Text>
+      </div>
+      <div className={styles.row}>
+        <Input
+          aria-label="правило когда тогда"
+          className={styles.wide}
+          placeholder="когда я открою Chrome, тогда включи музыку"
+          value={phraseWhen}
+          onChange={(_, data) => setPhraseWhen(data.value)}
+        />
+        <Button onClick={addRule} disabled={busy || !tauri}>
+          добавить правило
+        </Button>
+      </div>
+
+      {rules === null ? null : rules.length === 0 ? (
+        <Text className={styles.muted}>{rulesSummary([])}</Text>
+      ) : (
+        <>
+          <Text className={styles.muted}>{rulesSummary(rules.map(asRule))}</Text>
+          <ul className={styles.list}>
+            {rules.map((rule) => (
+              <li key={rule.id} className={styles.row}>
+                <span>
+                  <Text className={styles.mono}>{rule.when}</Text>
+                  <Text className={styles.muted} block>
+                    {rule.on ? "включено" : "выключено"} — {rule.then}
+                    {rule.risky ? " (спрошу перед выполнением)" : ""}
+                    {rule.fired > 0 ? `; срабатывало ${rule.fired} раз` : "; ещё не срабатывало"}
+                  </Text>
+                </span>
+                <span className={styles.row}>
+                  <Button size="small" appearance="subtle" onClick={() => toggleRule(rule)}>
+                    {rule.on ? "выключить" : "включить"}
+                  </Button>
+                  <Button
+                    size="small"
+                    appearance="subtle"
+                    aria-label={`удалить правило: ${rule.then}`}
+                    onClick={() => dropRule(rule)}
+                  >
+                    удалить
+                  </Button>
+                </span>
+              </li>
+            ))}
+          </ul>
         </>
       )}
 

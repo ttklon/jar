@@ -484,3 +484,87 @@ pub mod store {
         Ok(items)
     }
 }
+
+/// Правила «когда …, тогда …» — отдельный файл: это не расписание по времени, а
+/// реакция на событие, и смешивать их в одном списке значило бы обещать, что
+/// «когда я открою Chrome» срабатывает по часам.
+pub mod when_then {
+    use serde::{Deserialize, Serialize};
+
+    /// Правило, как его видит человек. `when` — уже словами («откроется chrome»):
+    /// вид триггера разбирает правило, а хранится готовая подпись плюс вид.
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+    pub struct Saved {
+        pub id: String,
+        /// Вид триггера: `time`, `app`, `file`, `said`.
+        pub kind: String,
+        /// Подпись условия словами.
+        pub when: String,
+        /// Что сделать.
+        pub then: String,
+        /// Опасное действие спрашивает, даже внутри правила.
+        pub risky: bool,
+        /// Выключенное правило не удалено — оно отложено.
+        pub on: bool,
+        /// Сколько раз срабатывало: числом, а не «работает».
+        pub fired: u32,
+    }
+
+    pub fn file() -> std::path::PathBuf {
+        let base = std::env::var_os("LOCALAPPDATA")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(std::env::temp_dir);
+        base.join("ZShelper").join("when_then.json")
+    }
+
+    pub fn load() -> Vec<Saved> {
+        let Ok(text) = std::fs::read_to_string(file()) else {
+            return Vec::new();
+        };
+        serde_json::from_str::<Vec<Saved>>(&text).unwrap_or_default()
+    }
+
+    pub fn save(items: &[Saved]) -> Result<(), String> {
+        let path = file();
+        if let Some(dir) = path.parent() {
+            std::fs::create_dir_all(dir).map_err(|error| format!("папка правил: {error}"))?;
+        }
+        let text = serde_json::to_string_pretty(items).map_err(|error| error.to_string())?;
+        std::fs::write(&path, format!("{text}\n")).map_err(|error| format!("запись правил: {error}"))?;
+        let back = std::fs::read_to_string(&path).map_err(|error| format!("чтение обратно: {error}"))?;
+        if back.trim() != text.trim() {
+            return Err("в файле оказалось не то, что записали: правило не сохранено".to_string());
+        }
+        Ok(())
+    }
+
+    pub fn add(item: Saved) -> Result<Vec<Saved>, String> {
+        let mut items = load();
+        // Одинаковое правило дважды — это два запуска одного действия.
+        if items.iter().any(|have| have.when == item.when && have.then == item.then) {
+            return Err(format!("такое правило уже есть: {} — {}", item.when, item.then));
+        }
+        items.push(item);
+        save(&items)?;
+        Ok(items)
+    }
+
+    /// Выключить или включить, **не удаляя**: выключение — решение «сейчас не
+    /// надо», а удаление — потеря.
+    pub fn set_on(id: &str, on: bool) -> Result<Vec<Saved>, String> {
+        let mut items = load();
+        let Some(found) = items.iter_mut().find(|item| item.id == id) else {
+            return Err("такого правила нет: возможно, оно уже удалено".to_string());
+        };
+        found.on = on;
+        save(&items)?;
+        Ok(items)
+    }
+
+    pub fn remove(id: &str) -> Result<Vec<Saved>, String> {
+        let mut items = load();
+        items.retain(|item| item.id != id);
+        save(&items)?;
+        Ok(items)
+    }
+}

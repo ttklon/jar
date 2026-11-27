@@ -867,6 +867,25 @@ export interface ScheduleRow {
   when: string;
 }
 
+/**
+ * Правило «когда …, тогда …» (шаг 284).
+ *
+ * `on: false` — не удалено, а отложено: выключение это решение «сейчас не надо»,
+ * а удаление — потеря.
+ */
+export interface WhenThenRow {
+  id: string;
+  /** `time`, `app`, `file`, `said`. */
+  kind: string;
+  /** Условие словами: «откроется chrome». */
+  when: string;
+  then: string;
+  /** Опасное действие спрашивает, даже внутри правила. */
+  risky: boolean;
+  on: boolean;
+  fired: number;
+}
+
 export interface UndoPreview {
   session: string;
   steps: UndoStep[];

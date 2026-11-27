@@ -625,6 +625,48 @@ pub fn schedule_add(
     })
 }
 
+/// Правила «когда …, тогда …».
+#[tauri::command]
+pub fn when_then_rules() -> Vec<schedule::when_then::Saved> {
+    schedule::when_then::load()
+}
+
+/// Добавить правило. Разбор фразы — в правиле (`whenThen.parse`), здесь только
+/// сохранение уже проверенного: команда не угадывает второй раз.
+#[tauri::command]
+pub fn when_then_add(
+    kind: String,
+    when: String,
+    then: String,
+    risky: bool,
+) -> Result<Vec<schedule::when_then::Saved>, String> {
+    let then = then.trim();
+    if then.is_empty() {
+        return Err("действие не названо: «тогда» без действия ничего не делает".to_string());
+    }
+    let id = format!("{kind}:{when}:{then}");
+    schedule::when_then::add(schedule::when_then::Saved {
+        id,
+        kind,
+        when: when.trim().to_string(),
+        then: then.to_string(),
+        risky,
+        on: true,
+        fired: 0,
+    })
+}
+
+/// Выключить или включить правило, не удаляя его.
+#[tauri::command]
+pub fn when_then_set_on(id: String, on: bool) -> Result<Vec<schedule::when_then::Saved>, String> {
+    schedule::when_then::set_on(&id, on)
+}
+
+#[tauri::command]
+pub fn when_then_remove(id: String) -> Result<Vec<schedule::when_then::Saved>, String> {
+    schedule::when_then::remove(&id)
+}
+
 /// Что делать с пропущенным запуском — выбор у конкретного правила.
 #[tauri::command]
 pub fn schedule_policy(id: String, policy: String) -> Result<Vec<schedule::store::Saved>, String> {

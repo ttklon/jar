@@ -20,7 +20,10 @@ vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
 type Row = { id: string; what: string; cadence: string; minute: number; paused: boolean; policy: string; when: string };
 
+type RuleRow = { id: string; kind: string; when: string; then: string; risky: boolean; on: boolean; fired: number };
+
 let rows: Row[] = [];
+let rules: RuleRow[] = [];
 const tauri = vi.fn(() => true);
 
 vi.mock("../ipc", () => ({
@@ -30,6 +33,19 @@ vi.mock("../ipc", () => ({
     const when = cadence === "hourly" ? "каждый час в :00" : `каждый день в ${String(Math.floor(minute / 60)).padStart(2, "0")}:00`;
     rows = [...rows, { id: `${cadence}:${minute}:${what}`, what, cadence, minute, paused: false, policy: "ask", when }];
     return rows;
+  },
+  whenThenRules: async () => rules,
+  whenThenAdd: async (kind: string, when: string, then: string, risky: boolean) => {
+    rules = [...rules, { id: `${kind}:${when}:${then}`, kind, when, then, risky, on: true, fired: 0 }];
+    return rules;
+  },
+  whenThenSetOn: async (id: string, on: boolean) => {
+    rules = rules.map((rule) => (rule.id === id ? { ...rule, on } : rule));
+    return rules;
+  },
+  whenThenRemove: async (id: string) => {
+    rules = rules.filter((rule) => rule.id !== id);
+    return rules;
   },
   schedulePolicy: async (id: string, policy: string) => {
     rows = rows.map((row) => (row.id === id ? { ...row, policy } : row));
@@ -47,6 +63,7 @@ vi.mock("../ipc", () => ({
 
 beforeEach(() => {
   rows = [];
+  rules = [];
   tauri.mockReturnValue(true);
 });
 afterEach(() => {
@@ -123,5 +140,57 @@ describe("экран расписания", () => {
     // а не семь отчётов после отпуска.
     await waitFor(() => expect(screen.getByRole("status").textContent).toMatch(/пропущено 1, сделаю один раз/));
     expect(rows[0]!.policy).toBe("catchUp");
+  });
+});
+
+describe("правила «когда …, тогда …»", () => {
+  it("правило по событию добавляется и называется словами", async () => {
+    render(<Schedule />);
+    await screen.findByText(/правил нет: автоматизации появляются/);
+
+    fireEvent.change(screen.getByLabelText("правило когда тогда"), {
+      target: { value: "когда я открою Chrome, тогда включи музыку" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "добавить правило" }));
+
+    await waitFor(() => expect(screen.getByRole("status").textContent).toMatch(/правило: откроется chrome — включи музыку/));
+    expect(screen.getByText(/включено — включи музыку/)).toBeTruthy();
+  });
+
+  it("опасное действие помечено и спросит, даже внутри правила", async () => {
+    render(<Schedule />);
+    await screen.findByText(/правил нет/);
+
+    fireEvent.change(screen.getByLabelText("правило когда тогда"), {
+      target: { value: "когда 18:00, тогда удали Temp" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "добавить правило" }));
+
+    // Подпись есть и в подтверждении, и в строке правила — ищем строку списка.
+    await waitFor(() => expect(screen.getByText(/включено — удали Temp \(спрошу перед выполнением\)/)).toBeTruthy());
+    expect(rules[0]!.risky).toBe(true);
+  });
+
+  it("выключение не удаляет правило: оно остаётся отложенным", async () => {
+    rules = [{ id: "app:откроется chrome:включи музыку", kind: "app", when: "откроется chrome", then: "включи музыку", risky: false, on: true, fired: 0 }];
+    render(<Schedule />);
+    await screen.findByText(/включено — включи музыку/);
+
+    fireEvent.click(screen.getByRole("button", { name: "выключить" }));
+
+    await waitFor(() => expect(screen.getByRole("status").textContent).toMatch(/выключено: правило осталось/));
+    expect(rules).toHaveLength(1);
+    expect(rules[0]!.on).toBe(false);
+  });
+
+  it("непонятная фраза — вопрос, а не правило", async () => {
+    render(<Schedule />);
+    await screen.findByText(/правил нет/);
+
+    fireEvent.change(screen.getByLabelText("правило когда тогда"), { target: { value: "включи музыку" } });
+    fireEvent.click(screen.getByRole("button", { name: "добавить правило" }));
+
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toMatch(/скажите «когда …, тогда …»/));
+    expect(rules).toHaveLength(0);
   });
 });
