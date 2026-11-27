@@ -86,7 +86,11 @@ pub fn add(book: &Book, name: &str, guest: bool) -> Result<Book, String> {
         return Err("имя не названо: без имени человек не отличит себя от гостя".to_string());
     }
     let mut next = book.clone();
-    if next.people.iter().any(|person| person.name.eq_ignore_ascii_case(name)) {
+    // Сравнение имён без регистра — **не** `eq_ignore_ascii_case`: он знает
+    // только латиницу, и «я» с «Я» прошли бы как разные люди. Для русских имён
+    // это и есть «два одинаковых имени» в вопросе «это вы?».
+    let wanted = name.to_lowercase();
+    if next.people.iter().any(|person| person.name.to_lowercase() == wanted) {
         return Err(format!("«{name}» уже есть: два одинаковых имени не помогают отличить людей"));
     }
     let id = format!("p{}", next.people.len() + 1);
