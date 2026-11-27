@@ -167,7 +167,19 @@ test("540 px: карточка дела не ломается — проверк
 
   const state = await page.evaluate(() => {
     const root = document.documentElement;
-    const buttons = Array.from(document.querySelectorAll("main button"));
+    const main = document.querySelector("main");
+    // Все экраны живут в DOM одновременно: неактивные скрыты `display: none`
+    // на своём контейнере (так сделано, чтобы переключение экранов не теряло
+    // состояние). Кнопки скрытого экрана имеют нулевую площадь **законно** —
+    // это не поломка вёрстки. Поэтому проверяются только те, что реально
+    // видны: у таких есть площадь и они не внутри `display: none`.
+    const visible = (element: Element): boolean => {
+      const style = getComputedStyle(element);
+      if (style.display === "none" || style.visibility === "hidden") return false;
+      const box = element.getBoundingClientRect();
+      return box.width > 0 && box.height > 0;
+    };
+    const buttons = Array.from(main ? main.querySelectorAll("button") : []).filter(visible);
     const out = buttons.map((element) => {
       const box = element.getBoundingClientRect();
       const style = getComputedStyle(element);
@@ -185,6 +197,9 @@ test("540 px: карточка дела не ломается — проверк
       scrolls: root.scrollWidth > root.clientWidth + 1,
       buttons: out,
       windowWidth: window.innerWidth,
+      // Сколько кнопок скрыто вместе с неактивными экранами: числом, чтобы
+      // «проверили мало» было видно, а не выглядело как «всё хорошо».
+      hiddenCount: (main ? main.querySelectorAll("button").length : 0) - buttons.length,
     };
   });
 
