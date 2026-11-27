@@ -742,7 +742,7 @@ mod tests {
         assert!(is_managed(&base, Kind::Llama));
         assert!(find(&base, Kind::Llama).is_none());
         assert!(verify(&base, Kind::Llama).is_err());
-        remove_under_lock(&base, Kind::Whisper).unwrap();
+        remove_under_lock(&base, Kind::Llama).unwrap();
         assert!(!directory(&base, Kind::Llama).exists());
         std::fs::remove_dir_all(base).unwrap();
     }
