@@ -64,18 +64,34 @@ static ACTIVE: Mutex<Option<String>> = Mutex::new(None);
 /// принимает `Shortcut::from_str`. Порядок модификаторов задан правилом, поэтому
 /// разбор детерминирован, а не «как получилось».
 pub fn accelerator_of(spec: &str) -> Option<String> {
-    let mut mods = Vec::new();
+    let mut ctrl = false;
+    let mut alt = false;
+    let mut shift = false;
+    let mut win = false;
     let mut key = None;
     for part in spec.split('+').map(str::trim).filter(|part| !part.is_empty()) {
         match part.to_ascii_lowercase().as_str() {
-            "ctrl" | "control" => mods.push("Ctrl"),
-            "alt" => mods.push("Alt"),
-            "shift" => mods.push("Shift"),
-            "win" | "super" | "meta" => mods.push("Super"),
+            "ctrl" | "control" => ctrl = true,
+            "alt" => alt = true,
+            "shift" => shift = true,
+            "win" | "super" | "meta" => win = true,
             other => key = Some(other.to_string()),
         }
     }
     let key = key?;
+    // Порядок модификаторов — **тот же, что у правила** (`hotkeyFree.format`):
+    // ctrl, alt, shift, win. Иначе `shift+ctrl+k` и `ctrl+shift+k` дали бы разные
+    // акселераторы, и сравнение с действующей клавишей не сработало бы: человек
+    // назначил бы клавишу, а обработчик её не узнал.
+    let mods: Vec<&str> = [
+        (ctrl, "Ctrl"),
+        (alt, "Alt"),
+        (shift, "Shift"),
+        (win, "Super"),
+    ]
+    .into_iter()
+    .filter_map(|(on, name)| if on { Some(name) } else { None })
+    .collect();
     // Одна буква без модификатора правило не пропускает, и здесь тоже: сочетание
     // из одной клавиши срабатывало бы при наборе текста.
     if mods.is_empty() {

@@ -60,6 +60,20 @@ describe("горячая клавиша: правило и Rust", () => {
     expect(rust).toContain('join("ZShelper")');
   });
 
+  it("порядок модификаторов в акселераторе тот же, что у правила", () => {
+    // Настоящий дефект, поймал `cargo test`: `accelerator_of` собирал
+    // модификаторы в том порядке, в каком их набрали, — «Shift+Ctrl+KeyK» вместо
+    // «Ctrl+Shift+KeyK». Сравнение с действующей клавишей после этого не
+    // срабатывало: человек назначил клавишу, а обработчик её не узнал.
+    const body = rust.match(/pub fn accelerator_of\([\s\S]*?\n\}/)?.[0] ?? "";
+    expect(body).not.toBe("");
+    const order = ["(ctrl, \"Ctrl\")", "(alt, \"Alt\")", "(shift, \"Shift\")", "(win, \"Super\")"];
+    const positions = order.map((piece) => body.indexOf(piece));
+    expect(positions.every((at) => at > -1)).toBe(true);
+    // Ровно в порядке правила: ctrl → alt → shift → win.
+    expect([...positions].sort((a, b) => a - b)).toEqual(positions);
+  });
+
   it("новая клавиша проверяется до снятия прежней", () => {
     // Порядок — не стиль: сними прежнюю раньше — и человек на мгновение остаётся
     // без клавиши, а при отказе и вовсе без неё.
