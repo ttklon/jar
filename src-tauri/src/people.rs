@@ -68,7 +68,8 @@ pub fn save(book: &Book) -> Result<(), String> {
     }
     let text = serde_json::to_string_pretty(book).map_err(|error| error.to_string())?;
     std::fs::write(&path, format!("{text}\n")).map_err(|error| format!("запись людей: {error}"))?;
-    let back = std::fs::read_to_string(&path).map_err(|error| format!("чтение обратно: {error}"))?;
+    let back =
+        std::fs::read_to_string(&path).map_err(|error| format!("чтение обратно: {error}"))?;
     if back.trim() != text.trim() {
         return Err("в файле оказалось не то, что записали: список людей не сохранён".to_string());
     }
@@ -90,11 +91,22 @@ pub fn add(book: &Book, name: &str, guest: bool) -> Result<Book, String> {
     // только латиницу, и «я» с «Я» прошли бы как разные люди. Для русских имён
     // это и есть «два одинаковых имени» в вопросе «это вы?».
     let wanted = name.to_lowercase();
-    if next.people.iter().any(|person| person.name.to_lowercase() == wanted) {
-        return Err(format!("«{name}» уже есть: два одинаковых имени не помогают отличить людей"));
+    if next
+        .people
+        .iter()
+        .any(|person| person.name.to_lowercase() == wanted)
+    {
+        return Err(format!(
+            "«{name}» уже есть: два одинаковых имени не помогают отличить людей"
+        ));
     }
     let id = format!("p{}", next.people.len() + 1);
-    next.people.push(Person { id: id.clone(), name: name.to_string(), guest, facts: 0 });
+    next.people.push(Person {
+        id: id.clone(),
+        name: name.to_string(),
+        guest,
+        facts: 0,
+    });
     // Первый человек становится действующим: «один человек — ничего не выбирает».
     if next.current.is_empty() {
         next.current = id;
@@ -123,13 +135,20 @@ pub fn switch(book: &Book, id: &str) -> Result<Book, String> {
 /// а «пусто» — это не «один человек».
 pub fn remove(book: &Book, id: &str) -> Result<Book, String> {
     if book.people.len() <= 1 {
-        return Err("единственного человека не удаляю: без него непонятно, от чьего имени работать".to_string());
+        return Err(
+            "единственного человека не удаляю: без него непонятно, от чьего имени работать"
+                .to_string(),
+        );
     }
     let mut next = book.clone();
     next.people.retain(|person| person.id != id);
     if next.current == id {
         // Действующим становится первый оставшийся — и это сказано экраном.
-        next.current = next.people.first().map(|person| person.id.clone()).unwrap_or_default();
+        next.current = next
+            .people
+            .first()
+            .map(|person| person.id.clone())
+            .unwrap_or_default();
     }
     save(&next)?;
     Ok(next)
@@ -142,7 +161,12 @@ mod tests {
     fn book() -> Book {
         Book {
             current: "p1".into(),
-            people: vec![Person { id: "p1".into(), name: "я".into(), guest: false, facts: 3 }],
+            people: vec![Person {
+                id: "p1".into(),
+                name: "я".into(),
+                guest: false,
+                facts: 3,
+            }],
         }
     }
 
@@ -173,7 +197,12 @@ mod tests {
     #[test]
     fn removing_the_current_person_switches_to_a_remaining_one() {
         let mut two = book();
-        two.people.push(Person { id: "p2".into(), name: "Аня".into(), guest: true, facts: 0 });
+        two.people.push(Person {
+            id: "p2".into(),
+            name: "Аня".into(),
+            guest: true,
+            facts: 0,
+        });
         let next = remove(&two, "p1").expect("удаляется");
         assert_eq!(next.current, "p2");
     }

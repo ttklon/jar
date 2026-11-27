@@ -63,8 +63,8 @@ pub mod places;
 pub mod plan;
 // Шаг 225: проверка WebView2 до первого окна. Без неё самый частый сбой
 // установки — белое окно без причины.
-pub mod planner;
 pub mod people;
+pub mod planner;
 pub mod policy;
 pub mod profiles;
 pub mod readiness;
