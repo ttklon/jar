@@ -469,6 +469,20 @@ pub fn remove(base: &Path, kind: Kind) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Удаление под общим замком.
+    ///
+    /// `remove` берёт глобальный флаг «идёт скачивание» (`download::acquire`) — один
+    /// на процесс. `cargo test` идёт параллельно, и два удаления разом дают не
+    /// дефект продукта, а гонку в проверке: падало «другое скачивание уже идёт» на
+    /// тесте, который ничего не скачивал. Замок — тот же, что у тестов скачивания:
+    /// один флаг, один замок.
+    fn remove_under_lock(base: &Path, kind: Kind) -> Result<(), String> {
+        let _guard = crate::download::TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        remove(base, kind)
+    }
     #[test]
     fn rejects_windows_path_attacks_on_every_host() {
         for name in [
@@ -602,7 +616,7 @@ mod tests {
         let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
-        assert!(remove(&base, Kind::Whisper)
+        assert!(remove_under_lock(&base, Kind::Whisper)
             .unwrap_err()
             .contains("метки владения"));
         std::fs::remove_dir_all(base).unwrap();
@@ -616,7 +630,7 @@ mod tests {
             let _test_guard = download::TEST_LOCK
                 .lock()
                 .unwrap_or_else(|e| e.into_inner());
-            remove(&base, kind).unwrap();
+            remove_under_lock(&base, kind).unwrap();
             assert!(!directory(&base, kind).exists());
             assert_eq!(
                 std::fs::read(base.join("sidecars/llama-server.exe")).unwrap(),
@@ -648,7 +662,7 @@ mod tests {
             installed(&base, Kind::Llama),
             "до переустановки движок есть"
         );
-        remove(&base, Kind::Llama).unwrap();
+        remove_under_lock(&base, Kind::Llama).unwrap();
         assert!(!installed(&base, Kind::Llama), "своя установка снята");
         assert!(!directory(&base, Kind::Llama).exists());
         assert_eq!(
@@ -701,7 +715,7 @@ mod tests {
         let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
-        remove(&base, Kind::Whisper).unwrap();
+        remove_under_lock(&base, Kind::Whisper).unwrap();
         assert!(!whisper_dir.exists(), "whisper удалён");
         assert!(
             directory(&base, Kind::Llama).is_dir(),
@@ -720,7 +734,7 @@ mod tests {
         let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
-        assert!(remove(&base, Kind::Llama)
+        assert!(remove_under_lock(&base, Kind::Llama)
             .unwrap_err()
             .contains("метки владения"));
         assert!(directory(&base, Kind::Llama)
@@ -743,7 +757,7 @@ mod tests {
         let _guard = download::TEST_LOCK
             .lock()
             .unwrap_or_else(|e| e.into_inner());
-        remove(&base, Kind::Llama).unwrap();
+        remove_under_lock(&base, Kind::Llama).unwrap();
         assert!(!directory(&base, Kind::Llama).exists());
         std::fs::remove_dir_all(base).unwrap();
     }
@@ -891,7 +905,7 @@ mod tests {
             "размер считается по всем файлам каталога, включая метку владения"
         );
 
-        remove(&base, Kind::Llama).expect("удаление");
+        remove_under_lock(&base, Kind::Llama).expect("удаление");
         // Каталога больше нет — `None`, а не паника и не случайный ноль.
         assert_eq!(dir_size(&base, Kind::Llama), None);
         let _ = std::fs::remove_dir_all(&base);
@@ -910,7 +924,7 @@ mod tests {
         std::fs::create_dir_all(&dir).expect("папка");
         std::fs::write(dir.join("llama-server.exe"), b"not ours").expect("файл");
 
-        let error = remove(&base, Kind::Llama).expect_err("чужое не удаляется");
+        let error = remove_under_lock(&base, Kind::Llama).expect_err("чужое не удаляется");
         assert!(error.contains("не имеет корректной метки"), "{error}");
         assert!(dir.join("llama-server.exe").exists(), "файл на месте");
         let _ = std::fs::remove_dir_all(&base);
