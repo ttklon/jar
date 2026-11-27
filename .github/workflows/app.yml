@@ -138,6 +138,23 @@ jobs:
         run: npx playwright install chromium
       - name: Virtual microphone and dialogue contract simulation
         run: npm run test:voice-simulation
+      # Причина падения иначе остаётся только в артефакте, а артефакт в
+      # песочнице не скачать: красный прогон говорит «1 failed» и молчит о том,
+      # какое ожидание не совпало. Печатаем отчёт в вывод — он читается через
+      # API аннотаций/логов.
+      - name: Show simulation report
+        if: failure()
+        shell: pwsh
+        run: |
+          # HTML-отчёт целиком в лог не влезет: печатаем текстовые следы падения
+          # (error-context.md и .txt), где видно несовпавшее ожидание.
+          $files = Get-ChildItem -Recurse artifacts -Include error-context.md,*.txt -ErrorAction SilentlyContinue |
+            Where-Object { $_.Length -lt 20000 } | Select-Object -First 5
+          if (-not $files) { Write-Host 'no text failure context found' }
+          foreach ($f in $files) {
+            Write-Host ("=== " + $f.FullName)
+            Get-Content -LiteralPath $f.FullName | Select-Object -First 80 | ForEach-Object { Write-Host $_ }
+          }
       - name: Upload simulation evidence (no real user audio)
         if: always()
         uses: actions/upload-artifact@v4
