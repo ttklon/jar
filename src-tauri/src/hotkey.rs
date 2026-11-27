@@ -362,7 +362,7 @@ pub fn install(app: &mut tauri::App) {
             // Действующая клавиша запоминается: обработчик сравнивает нажатие с
             // ней, и чтение файла на каждое нажатие было бы лишним.
             if let Ok(mut guard) = ACTIVE.lock() {
-                *guard = Some(wanted.clone());
+                *guard = Some(wanted);
             }
             tracing::info!(accelerator = %wanted_accel, "горячая клавиша зарегистрирована")
         }
@@ -370,13 +370,13 @@ pub fn install(app: &mut tauri::App) {
             tracing::warn!(%error, accelerator = %wanted_accel, "горячая клавиша занята");
             // Сохранённая не встала — возвращаемся к умолчанию, но **не молча**:
             // иначе человек видит в настройках одно, а работает другое.
-            if wanted_accel != ACCELERATOR {
-                if app.global_shortcut().register(shortcut()).is_ok() {
-                    if let Ok(mut guard) = ACTIVE.lock() {
-                        *guard = Some(spec_of(ACCELERATOR));
-                    }
-                    tracing::warn!("вернулся к клавише по умолчанию: сохранённая занята");
+            if wanted_accel != ACCELERATOR
+                && app.global_shortcut().register(shortcut()).is_ok()
+            {
+                if let Ok(mut guard) = ACTIVE.lock() {
+                    *guard = Some(spec_of(ACCELERATOR));
                 }
+                tracing::warn!("вернулся к клавише по умолчанию: сохранённая занята");
             }
         }
     }
