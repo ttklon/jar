@@ -6,6 +6,8 @@ import { ask as askWho, need as needWho, after as afterWho } from "../lib/whoNow
 import { absent as localAbsent, contents as localContents, worksOffline } from "../lib/localProfile";
 import { entry as journalEntry } from "../lib/whoAsked";
 import { may as personMay } from "../lib/personRights";
+import { allowed as guestAllowed, askOwner, wholePlan } from "../lib/guestHands";
+import { decide as guestDecide, howWord as attemptWord } from "../lib/guestCannotDanger";
 
 /**
  * «Люди» — кто за этим компьютером и кто действует сейчас (шаги 401–406).
@@ -239,6 +241,33 @@ export function People() {
               </Text>
             </div>
           ) : null}
+
+          {/* Гость: что можно, чего нельзя и почему. Не «ограниченный режим», а
+              четыре пути, по которым опасное могло бы пройти, — и отказ на каждом. */}
+          <details>
+            <summary className={styles.muted}>что может гость и почему опасное не пройдёт</summary>
+            <ul className={styles.list}>
+              <li>
+                <Text className={styles.muted}>{guestAllowed("read").said}</Text>
+              </li>
+              <li>
+                <Text className={styles.muted}>{guestAllowed("delete").said}</Text>
+              </li>
+              <li>
+                <Text className={styles.muted}>{wholePlan(["read", "delete"]).said}</Text>
+              </li>
+              <li>
+                <Text className={styles.muted}>{askOwner("удалить загрузки").said}</Text>
+              </li>
+              {(["ask", "schedule", "confirm", "switch"] as const).map((how) => (
+                <li key={how}>
+                  <Text className={styles.muted}>
+                    {`${attemptWord(how)}: ${guestDecide({ how, risk: "delete", owner: "guest" }).said}`}
+                  </Text>
+                </li>
+              ))}
+            </ul>
+          </details>
 
           {/* Где живёт профиль и что он не делает. */}
           <details>

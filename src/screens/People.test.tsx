@@ -131,4 +131,24 @@ describe("экран «Люди»", () => {
     render(<People />);
     expect(await screen.findByText(/в браузере профилей нет/)).toBeTruthy();
   });
-});
+
+  it("опасное от гостя не пройдёт ни одним из четырёх путей", async () => {
+    book = {
+      current: "p1",
+      people: [
+        { id: "p1", name: "Аня", guest: false, facts: 2 },
+        { id: "p2", name: "Гость", guest: true, facts: 0 },
+      ],
+    };
+    render(<People />);
+    await screen.findByText(/Сейчас действует: Аня/);
+
+    fireEvent.click(screen.getByText(/что может гость и почему опасное не пройдёт/));
+
+    // Прямая просьба, расписание, подтверждение, переключение — отказ на каждом.
+    expect(screen.getByText(/гостю нельзя: это меняет файлы или действует от имени хозяина/)).toBeTruthy();
+    expect(screen.getByText(/в деле есть шаг, который меняет файлы: для гостя оно не выполнится целиком/)).toBeTruthy();
+    expect(screen.getByText(/«удалить загрузки» ждёт хозяина: гость может попросить, но подтвердить должен он сам/)).toBeTruthy();
+    expect(screen.getByText(/подтверждение гостя не принимается — подтверждает хозяин и лично/)).toBeTruthy();
+  });
+})
