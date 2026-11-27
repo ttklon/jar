@@ -246,7 +246,15 @@ describe("установка без прав администратора (ша�
   const config = JSON.parse(
     readFileSync(new URL("../../src-tauri/tauri.conf.json", import.meta.url), "utf8"),
   ) as {
-    bundle: { targets: string[]; windows?: { installMode?: string; webviewInstallMode?: unknown } };
+    bundle: {
+      targets: string[];
+      // Шаг 239 был верен по смыслу и **неверен по месту**: `installMode` живёт
+      // внутри `windows.nsis`, а не прямо в `windows`. Прежний тест закреплял
+      // неверный путь, поэтому дефект не ловился и Rust падал на сборке с
+      // «unknown field `installMode`». Теперь проверяется тот путь, который
+      // читает `tauri-build`.
+      windows?: { installMode?: string; nsis?: { installMode?: string }; webviewInstallMode?: unknown };
+    };
   };
 
   it("NSIS ставит для текущего человека, а не для всех", () => {
@@ -255,7 +263,10 @@ describe("установка без прав администратора (ша�
     //
     // Умолчание Tauri 2 — как раз `currentUser`, но умолчание не обещание:
     // его меняют, не заметив, и проверять надо **сказанное вслух**.
-    expect(config.bundle.windows?.installMode).toBe("currentUser");
+    expect(config.bundle.windows?.nsis?.installMode).toBe("currentUser");
+    // И прямо в `windows` его быть не должно: там такого поля нет, и сборка
+    // падает на нём с «unknown field».
+    expect(config.bundle.windows?.installMode).toBeUndefined();
   });
 
   it("пакета, который требует администратора, нет в обычной сборке", () => {

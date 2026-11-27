@@ -44,7 +44,9 @@
       "webviewInstallMode": {
         "type": "downloadBootstrapper"
       },
-      "installMode": "currentUser"
+      "nsis": {
+        "installMode": "currentUser"
+      }
     }
   }
 }
