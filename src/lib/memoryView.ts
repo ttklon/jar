@@ -225,18 +225,50 @@ export function fromStored(stored: readonly { key: string; value: string }[]): {
   for (const item of stored) {
     const at = item.key.indexOf(":");
     const kind = at > 0 ? item.key.slice(0, at) : item.key;
-    const value = at > 0 ? item.key.slice(at + 1) : item.value;
 
-    // Способы лежат с своим префиксом и несут шаги в значении — их разбирает
-    // `methods.ts`; здесь они проходят как есть, чтобы не придумывать шаги.
+    // Способ лежит с префиксом `method`, а его номер дня — в значении.
     if (kind === "method") {
-      methods.push({ dayStart: Number(item.value) || 0, said: value, steps: [], params: {} } as Method);
+      methods.push({ dayStart: Number(item.value) || 0, said: item.key.slice(at + 1), steps: [], params: {} } as Method);
       continue;
     }
 
+    // Настоящий дефект, найденный при подключении файла памяти.
+    //
+    // Раньше значение бралось **из ключа**: `вопрос:путь` → «папка путь»,
+    // `model.sha256:qwen` → «папка qwen». Человек видел мусор вместо
+    // `D:\Отчёты`, а кнопка «забыть» строила из этой же строки ключ, которого
+    // в базе нет: удаление проходило «успешно» и ничего не удаляло. Экран
+    // обещал управление памятью и не управлял.
+    //
+    // Правило: **что человек сказал, то и видно** — значение берётся из
+    // `value`, вид — из ключа. Вид, которого мы не знаем, не выдаётся за
+    // папку: он показывается как «запомнено» со своим ключом, чтобы человек
+    // узнал факт и смог его убрать.
+    const keyValue = at > 0 ? item.key.slice(at + 1) : item.key;
+    const service = SERVICE_KINDS.includes(kind);
+    const known = (["folder", "program", "voice", "volume"] as const).includes(kind as PrefKind);
+
+    if (!known && !service) {
+      // Неизвестный вид: показываем его собственный ключ целиком, чтобы
+      // «забыть» удалял именно то, что показано.
+      preferences.push({
+        kind: keyValue === "" ? "folder" : (kind as PrefKind),
+        value: item.value,
+        times: 0,
+        last: 0,
+        why: `запомнено как «${item.key}»`,
+      } as Preference);
+      continue;
+    }
+
+    if (service) continue;
+
+    // У привычки значение лежит **в ключе** (`folder:D:\Отчёты`), а `value` —
+    // короткая подпись. Это проверено тестом ядра, а не выведено из вида поля:
+    // взять здесь `item.value` значит показать «отчёты» вместо пути.
     preferences.push({
-      kind: (["folder", "program", "voice", "volume"] as const).includes(kind as PrefKind) ? (kind as PrefKind) : "folder",
-      value,
+      kind: kind as PrefKind,
+      value: keyValue,
       times: 0,
       last: 0,
       why: "запомнено по вашим делам",
@@ -245,3 +277,107 @@ export function fromStored(stored: readonly { key: string; value: string }[]): {
 
   return { preferences, methods };
 }
+
+/**
+ * Список памяти прямо из того, что лежит в базе, — с настоящими ключами.
+ *
+ * Зачем отдельно от `fromStored`. `fromStored` переводит пары в формы
+ * `preferences`/`methods`, и по дороге **теряет ключ**: у факта остаётся
+ * `folder:<значение>`, тогда как в базе он лежит как `вопрос:путь`. Экран
+ * строил из этой строки кнопку «забыть» — и удалял ключ, которого нет.
+ * Человек нажимал «забыть», видел «удалено», а факт оставался.
+ *
+ * Здесь `id` — это **ровно тот ключ**, который вернуло ядро. Ничего не
+ * собирается заново, поэтому удаление не может промахнуться.
+ *
+ * Подпись выбирается по виду ключа:
+ *
+ *  * `вопрос:<имя>` — ответ человека на вопрос плана. Это его слова, и они
+ *    показываются как есть: «путь: D:\Отчёты»;
+ *  * `folder`/`program`/`voice`/`volume` — привычки;
+ *  * `method:<день>` — способ;
+ *  * служебные (`model.sha256`, `params`, `custom`, `hand`, `learn`, `trial`,
+ *    `run`, `role`, `os-build`, `plan`) — не привычки, а рабочий кэш. Они
+ *    **видны и удаляемы**, но названы служебными, чтобы человек не принимал
+ *    хеш модели за «память обо мне».
+ */
+export function factsFromStored(stored: readonly { key: string; value: string }[]): Fact[] {
+  const out: Fact[] = [];
+
+  for (const item of stored) {
+    const at = item.key.indexOf(":");
+    const kind = at > 0 ? item.key.slice(0, at) : item.key;
+    const rest = at > 0 ? item.key.slice(at + 1) : "";
+
+    // Форма ключа своя у каждого вида, и это не догадка — проверено тестами
+    // ядра (`memory.rs`, `facts_are_read_back_and_forgotten`):
+    //
+    //  * **привычки** (`folder`, `program`, `voice`, `volume`) несут значение
+    //    в самом ключе: `folder:D:\Отчёты`. `value` у них — подпись, брать её
+    //    за значение значит показать «отчёты» вместо пути;
+    //  * **ответ на вопрос плана** (`вопрос:путь` → `D:\Отчёты`) держит имя
+    //    поля в ключе, а слово человека — в `value`;
+    //  * **служебное** (`model.sha256`, `params`, `custom`, …) пишет само
+    //    приложение, и в ключе у него — имя предмета.
+    const habit = kind === "folder" || kind === "program" || kind === "voice" || kind === "volume";
+
+    const label = (() => {
+      if (kind === "вопрос") return `${rest}: ${item.value}`;
+      if (kind === "method") return `способ за ${rest}: ${item.value}`;
+      if (kind === "folder") return `папка ${rest}`;
+      if (kind === "program") return `программа ${rest}`;
+      if (kind === "voice") return `голос ${rest}`;
+      if (kind === "volume") return `громкость ${rest}%`;
+      if (kind === "custom") return `своя рука «${rest}»`;
+      if (kind === "hand") return `черновик руки «${rest}»`;
+      if (kind === "trial") return `проба руки «${rest}»`;
+      if (kind === "learn") return `выучено про «${rest}»`;
+      if (kind === "model.sha256") return `модель «${rest}» (отпечаток)`;
+      if (kind === "params") return `настройки инструмента «${rest}»`;
+      if (kind === "role") return `роль «${rest}»: ${item.value}`;
+      if (kind === "run") return `отметка запуска ${rest}`;
+      if (kind === "plan") return `последний план`;
+      if (kind === "os-build") return `версия Windows: ${item.value}`;
+      // Незнакомое не выдумываем: ключ и значение как есть.
+      return `${item.key}: ${item.value}`;
+    })();
+
+    const service = SERVICE_KINDS.includes(kind);
+    out.push({
+      // Настоящий ключ базы. По нему и только по нему удаляем.
+      id: item.key,
+      kind: habit || service ? (service ? "method" : (kind as PrefKind)) : "method",
+      label,
+      why: service ? "служебное: пишет само приложение, не ваши привычки" : "запомнено по вашим делам",
+      removable: true,
+      because: "",
+    });
+  }
+
+  // Порядок — по подписи: список читают глазами, и он не должен прыгать от
+  // порядка обхода базы.
+  return out.sort((left, right) => left.label.localeCompare(right.label, "ru"));
+}
+
+/**
+ * Служебные ключи (см. `factsFromStored`) — не привычки человека.
+ *
+ * `model.sha256:qwen`, `params:paint`, `plan:last`, `custom:*`, `hand:*`,
+ * `learn:*`, `trial:*`, `run:*` пишет само приложение: хеши моделей, параметры
+ * инструментов, черновики рук. Показывать их как «память обо мне» — значит
+ * выдавать служебный кэш за привычки. Но и прятать молча нельзя: в списке они
+ * **названы** своим ключом и удаляются — иначе человек не увидит, что о нём
+ * вообще что-то лежит.
+ */
+export const SERVICE_KINDS: readonly string[] = [
+  "model.sha256",
+  "params",
+  "plan",
+  "custom",
+  "hand",
+  "learn",
+  "trial",
+  "run",
+  "role",
+  "os-build",
+];

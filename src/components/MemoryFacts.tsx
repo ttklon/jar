@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import { facts as readFacts, forgetFact, isTauri } from "../ipc";
-import { facts as toView, fromStored, summary as memorySummary, willDo, type Fact } from "../lib/memoryView";
+import { factsFromStored, summary as memorySummary, willDo, type Fact } from "../lib/memoryView";
 
 /**
  * «Что я о вас помню» — один список, одна кнопка (шаг 263).
@@ -40,9 +40,11 @@ export function MemoryFacts() {
     setError(null);
     readFacts()
       .then((stored) => {
-        // Ядро отдаёт пары «ключ — значение»; экран показывает не ключи.
-        const got = fromStored(stored);
-        setItems(toView(got.preferences, got.methods, 0));
+        // Ядро отдаёт пары «ключ — значение». `factsFromStored` оставляет за
+        // фактом **настоящий ключ**: раньше мост собирал id вида
+        // `folder:<значение>`, а в базе ключ другой (`вопрос:путь`), и кнопка
+        // «забыть» удаляла то, чего нет — «удалено», а факт на месте.
+        setItems(factsFromStored(stored));
       })
       .catch((reason: unknown) => setError(reason instanceof Error ? reason.message : String(reason)));
   }, []);

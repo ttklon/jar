@@ -10,10 +10,17 @@ import { MemoryFacts } from "./MemoryFacts";
 
 let stored: Record<string, string> = {};
 
+/**
+ * Заглушка удаляет **по точному ключу** — как ядро.
+ *
+ * Раньше она искала первую попавшуюся строку по префиксу до двоеточия. Из-за
+ * этого она «удаляла» ключ, которого в базе нет, и тест был зелёным на дефекте:
+ * экран строил id `folder:<значение>`, а в памяти лежало `вопрос:путь`. Нажатие
+ * «забыть» показывало «удалено», а факт оставался. Заглушка обязана врать
+ * меньше, чем проверяемый код, иначе она проверяет саму себя.
+ */
 const forgetFact = vi.fn(async (id: string) => {
-  const [kind] = id.split(":");
-  const row = Object.keys(stored).find((key) => key.startsWith(kind + ":")) ?? "";
-  delete stored[row];
+  delete stored[id];
   return id;
 });
 
@@ -53,6 +60,41 @@ describe("экран памяти", () => {
     expect(await screen.findByText(/больше не будет предлагаться/)).toBeTruthy();
     expect(screen.getByText(/Вернуть нельзя/)).toBeTruthy();
     await waitFor(() => expect(screen.queryByText("голос Алла")).toBeNull());
+  });
+
+  it("ответ на вопрос плана показан словами человека, а не именем поля", async () => {
+    // Настоящий дефект шага 41: ядро хранит `вопрос:путь` → `D:\\Отчёты`, а
+    // экран показывал «папка путь» — значение бралось из ключа, а само
+    // значение не показывалось вообще.
+    stored = { "вопрос:путь": "D:\\Отчёты" };
+    render(<MemoryFacts />);
+
+    expect(await screen.findByText("путь: D:\\Отчёты")).toBeTruthy();
+    expect(screen.queryByText(/папка путь/)).toBeNull();
+  });
+
+  it("«забыть» удаляет тот ключ, который лежит в памяти", async () => {
+    // Главное: id факта — настоящий ключ базы. Иначе удаление промахивается.
+    stored = { "вопрос:путь": "D:\\Отчёты", "voice:Алла": "Алла" };
+    render(<MemoryFacts />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "забыть: путь: D:\\Отчёты" }));
+
+    await waitFor(() => expect(forgetFact).toHaveBeenCalledWith("вопрос:путь"));
+    // И второй факт не тронут: удаляется ровно то, что показано.
+    await waitFor(() => expect(screen.queryByText("путь: D:\\Отчёты")).toBeNull());
+    expect(screen.getByText("голос Алла")).toBeTruthy();
+  });
+
+  it("служебное названо служебным, а не привычкой", async () => {
+    // Хеш модели — не «память обо мне». Показывать его как «папка qwen» значит
+    // врать дважды: и про вид, и про то, что это вообще ваша привычка.
+    stored = { "model.sha256:qwen": "abc123" };
+    render(<MemoryFacts />);
+
+    expect(await screen.findByText("модель «qwen» (отпечаток)")).toBeTruthy();
+    expect(screen.getByText(/служебное/)).toBeTruthy();
+    expect(screen.queryByText(/папка qwen/)).toBeNull();
   });
 
   it("пустая память говорит об этом словами, а не пустым экраном", async () => {
