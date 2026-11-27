@@ -530,8 +530,10 @@ pub mod when_then {
             std::fs::create_dir_all(dir).map_err(|error| format!("папка правил: {error}"))?;
         }
         let text = serde_json::to_string_pretty(items).map_err(|error| error.to_string())?;
-        std::fs::write(&path, format!("{text}\n")).map_err(|error| format!("запись правил: {error}"))?;
-        let back = std::fs::read_to_string(&path).map_err(|error| format!("чтение обратно: {error}"))?;
+        std::fs::write(&path, format!("{text}\n"))
+            .map_err(|error| format!("запись правил: {error}"))?;
+        let back =
+            std::fs::read_to_string(&path).map_err(|error| format!("чтение обратно: {error}"))?;
         if back.trim() != text.trim() {
             return Err("в файле оказалось не то, что записали: правило не сохранено".to_string());
         }
@@ -541,8 +543,14 @@ pub mod when_then {
     pub fn add(item: Saved) -> Result<Vec<Saved>, String> {
         let mut items = load();
         // Одинаковое правило дважды — это два запуска одного действия.
-        if items.iter().any(|have| have.when == item.when && have.then == item.then) {
-            return Err(format!("такое правило уже есть: {} — {}", item.when, item.then));
+        if items
+            .iter()
+            .any(|have| have.when == item.when && have.then == item.then)
+        {
+            return Err(format!(
+                "такое правило уже есть: {} — {}",
+                item.when, item.then
+            ));
         }
         items.push(item);
         save(&items)?;
