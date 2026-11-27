@@ -24,6 +24,7 @@ import type {
   ForegroundWindow,
   HandDraft,
   HashCheck,
+  HotkeyView,
   IsolationStatus,
   Learning,
   ModelsView,
@@ -443,6 +444,19 @@ export function undoReport(): Promise<UndoPreview> {
 
 export function undoApply(): Promise<UndoReport> {
   return invoke<UndoReport>("undo_apply");
+}
+
+/** Какая клавиша действует. Доступно и в браузере через dev-адаптер. */
+export function hotkeyCurrent(): Promise<HotkeyView> {
+  return invoke<HotkeyView>("hotkey_current");
+}
+
+/**
+ * Назначить клавишу. Проверка занятости — в ядре, **до** сохранения: при отказе
+ * прежняя клавиша остаётся, а причина приходит словами.
+ */
+export function hotkeyAssign(spec: string): Promise<HotkeyView> {
+  return invoke<HotkeyView>("hotkey_assign", { spec });
 }
 
 export function autostartStatus(): Promise<Autostart> {

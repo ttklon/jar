@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Input, makeStyles, Text, tokens } from "@fluentui/react-components";
-import { assign, current as currentCombo, pretty, suggest } from "../lib/hotkeySaved";
+import { hotkeyAssign, hotkeyCurrent, isTauri } from "../ipc";
+import { current as currentCombo, pretty, suggest } from "../lib/hotkeySaved";
 import { format, type Combo } from "../lib/hotkeyFree";
 
 /**
@@ -10,13 +11,19 @@ import { format, type Combo } from "../lib/hotkeyFree";
  * работает**. Человек нажимает «назначить», клавиша занята другой программой, и
  * он узнаёт об этом через неделю, когда она не срабатывает.
  *
- * Поэтому здесь нет «сохранить и посмотреть»: проверка идёт **до** назначения, а
- * при отказе предлагается **свободная** клавиша из проверенных, а не «попробуйте
- * другую».
+ * Поэтому здесь нет «сохранить и посмотреть». Два честных исхода:
  *
- * Занятость определяется по списку системных сочетаний и по тому, что человек уже
- * назначил. Проверить занятость чужими программами без системного вызова нельзя —
- * и это честно называется, а не выдаётся за «свободна».
+ *  * **в приложении** занятость проверяет ядро — регистрацией новой клавиши
+ *    **до** снятия прежней. Windows не отдала — прежняя остаётся, причина
+ *    приходит словами. Никакого «сохранено» по факту нажатия кнопки:
+ *    `saved` ставится только по ответу ядра;
+ *  * **в браузере** ядра нет, и проверять нечем. Тогда не «свободна», а «не
+ *    знаю» — и назначение честно не выполняется, вместо обещания, которого
+ *    не будет.
+ *
+ * Прежняя версия карточки говорила «сохранил» по факту нажатия: клавиша в ядре
+ * была константой, и обещание было пустым. Это и был настоящий дефект — тот
+ * самый «сохранили, а не работает», против которого написано правило.
  */
 
 const useStyles = makeStyles({
@@ -53,14 +60,50 @@ export function parse(text: string): Combo | null {
   return { mods, key };
 }
 
-export function HotkeyCard({ taken = [] as readonly string[] } = {}) {
+/** Что человек видит про действующую клавишу. */
+type State = {
+  /** Что действует — словами. */
+  shown: string;
+  /** Удалось ли проверить занятость. */
+  known: boolean;
+  /** Почему не удалось. */
+  why: string;
+};
+
+const NOTHING_CHECKED: State = { shown: pretty(currentCombo()), known: false, why: "" };
+
+export function HotkeyCard() {
   const styles = useStyles();
-  const [active, setActive] = useState<Combo>(() => currentCombo());
-  const [want, setWant] = useState(format(currentCombo()));
+  const [state, setState] = useState<State>(NOTHING_CHECKED);
+  const [want, setWant] = useState(() => pretty(currentCombo()));
   const [said, setSaid] = useState<string | null>(null);
   const [bad, setBad] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const tauri = isTauri();
 
-  const choose = () => {
+  // Действующая клавиша — из ядра, а не из правила: если человек назначил свою
+  // раньше, экран обязан показать именно её.
+  useEffect(() => {
+    if (!tauri) {
+      setState((prev) => ({ ...prev, why: "занятость клавиши проверяется только в приложении: в браузере ядра нет" }));
+      return;
+    }
+    let alive = true;
+    void hotkeyCurrent()
+      .then((got) => {
+        if (!alive) return;
+        setState({ shown: got.shown, known: got.known, why: got.why });
+        setWant(got.shown);
+      })
+      .catch(() => {
+        if (alive) setSaid("не удалось узнать действующую клавишу — показана та, что в правиле");
+      });
+    return () => {
+      alive = false;
+    };
+  }, [tauri]);
+
+  const choose = async () => {
     const combo = parse(want);
     if (combo === null) {
       setBad(true);
@@ -68,18 +111,28 @@ export function HotkeyCard({ taken = [] as readonly string[] } = {}) {
       return;
     }
     setBad(false);
-    // Проверка — до сохранения. Здесь «занято чужими программами» неизвестно,
-    // поэтому в список идут системные сочетания и уже назначенные клавиши.
-    const known = new Set([...taken, format(active).toLowerCase()]);
-    // Занятое **не выкидывается** из списка: иначе проверка занятости проверяла
-    // бы пустоту, и занятая клавиша молча сохранялась бы. Именно это и ловил тест.
-    const got = assign(combo, active, [...known], true);
-    setSaid(got.said);
-    if (got.saved) setActive(got.active);
-    else {
-      // Отказ — и сразу свободная клавиша из проверенных, а не «попробуйте».
-      const next = suggest([...known]);
-      if (next.combo !== null) setSaid(`${got.said}. Свободна: ${pretty(next.combo)}`);
+    setSaid(null);
+
+    if (!tauri) {
+      // Ядра нет — проверять нечем. Говорим это, а не «сохранено».
+      setSaid(`в браузере клавишу проверить и назначить нечем. В приложении проверю: ${format(combo)}`);
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const got = await hotkeyAssign(format(combo));
+      setState({ shown: got.shown, known: got.known, why: got.why });
+      setSaid(`${format(combo)} свободна: назначил и проверил регистрацией. Действует: ${got.shown}`);
+    } catch (error) {
+      // Отказ ядра — это отказ, а не «почти получилось»: прежняя клавиша жива.
+      setBad(true);
+      const reason = error instanceof Error ? error.message : String(error);
+      setSaid(`${reason}`);
+      const next = suggest([]);
+      if (next.combo !== null) setSaid(`${reason}. Свободна: ${pretty(next.combo)}`);
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -95,7 +148,7 @@ export function HotkeyCard({ taken = [] as readonly string[] } = {}) {
       </div>
       <div className={styles.row}>
         <Text className={styles.muted}>сейчас:</Text>
-        <Text className={styles.mono}>{pretty(active)}</Text>
+        <Text className={styles.mono}>{state.shown}</Text>
       </div>
       <div className={styles.row}>
         <Input
@@ -104,8 +157,13 @@ export function HotkeyCard({ taken = [] as readonly string[] } = {}) {
           onChange={(_, data) => setWant(data.value)}
           placeholder="Ctrl+Alt+Space"
         />
-        <Button onClick={choose}>назначить</Button>
+        <Button onClick={() => void choose()} disabled={busy}>
+          назначить
+        </Button>
       </div>
+      {state.known ? null : (
+        <Text className={styles.muted}>{state.why === "" ? "занятость не проверена" : state.why}</Text>
+      )}
       {said !== null ? (
         <Text className={styles.muted} role={bad ? "alert" : "status"} aria-live="polite">
           {said}

@@ -827,6 +827,23 @@ export interface Autostart {
   note: string;
 }
 
+/**
+ * Горячая клавиша: что действует и удалось ли проверить занятость.
+ *
+ * `known: false` — не «свободна», а «не знаю»: занятость чужих программ Windows
+ * не показывает, пока не попробуешь зарегистрировать.
+ */
+export interface HotkeyView {
+  /** Действующая клавиша в форме правила: `ctrl+alt+space`. */
+  spec: string;
+  /** Она же словами человека: `Ctrl+Alt+Space`. */
+  shown: string;
+  /** Проверена ли занятость. */
+  known: boolean;
+  /** Почему не проверена. Пусто — проверена. */
+  why: string;
+}
+
 export interface UndoPreview {
   session: string;
   steps: UndoStep[];

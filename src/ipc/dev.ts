@@ -14,6 +14,7 @@ import actionsJson from "../../data/actions.json";
 import type {
   Action,
   Autostart,
+  HotkeyView,
   MachineState,
   NetworkAddress,
   Presence,
@@ -266,6 +267,27 @@ export async function undoReport(): Promise<UndoPreview> {
  * В браузере автозапуска нет — и это сказано, а не замаскировано «выключено».
  * `target` пустой: притворяться, что мы знаем путь программы, было бы хуже пустоты.
  */
+/**
+ * Горячая клавиша в браузере: показывается та, что в правиле по умолчанию, а про
+ * занятость честно сказано, что проверить её здесь нечем. Врать «свободна» —
+ * значит обещать то, чего не знаешь.
+ */
+export async function hotkeyCurrent(): Promise<HotkeyView> {
+  const { byDefault } = await import("../lib/hotkeyFree");
+  const { format } = await import("../lib/hotkeyFree");
+  const spec = format(byDefault());
+  return {
+    spec,
+    shown: spec.split("+").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join("+"),
+    known: false,
+    why: "в браузере ядра нет: занятость клавиши проверяется только в приложении",
+  };
+}
+
+export async function hotkeyAssign(_spec: string): Promise<HotkeyView> {
+  throw new Error("в браузере клавиша не назначается: глобальную клавишу ставит только приложение");
+}
+
 export async function autostartStatus(): Promise<Autostart> {
   return {
     enabled: false,

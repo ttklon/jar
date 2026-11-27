@@ -385,6 +385,8 @@ pub fn run() {
             ipc::repair_memory,
             ipc::undo_report,
             ipc::undo_apply,
+            ipc::hotkey_current,
+            ipc::hotkey_assign,
             ipc::autostart_status,
             ipc::autostart_enable,
             ipc::autostart_disable,

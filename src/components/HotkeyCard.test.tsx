@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { HotkeyCard, parse } from "./HotkeyCard";
 
 /**
@@ -8,6 +8,11 @@ import { HotkeyCard, parse } from "./HotkeyCard";
  *
  * Главная ошибка, которую это исключает: «сохранили, а оно не работает» — человек
  * узнавал о занятости через неделю, когда клавиша не срабатывала.
+ *
+ * Прежняя версия теста проверяла **слова** карточки, а сама карточка объявляла
+ * «сохранил» по факту нажатия: клавиша в ядре была константой. Поэтому здесь
+ * проверяется не текст, а договор с ядром: `saved` берётся из ответа, при отказе
+ * прежняя клавиша остаётся, а в браузере назначение честно не выполняется.
  */
 
 class ResizeObserverStub {
@@ -17,35 +22,65 @@ class ResizeObserverStub {
 }
 vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
+const current = vi.fn();
+const assign = vi.fn();
+const tauri = vi.fn(() => true);
+
+vi.mock("../ipc", () => ({
+  isTauri: () => tauri(),
+  hotkeyCurrent: () => current(),
+  hotkeyAssign: (spec: string) => assign(spec),
+}));
+
+beforeEach(() => {
+  current.mockReset();
+  assign.mockReset();
+  tauri.mockReturnValue(true);
+  current.mockResolvedValue({ spec: "ctrl+alt+space", shown: "Ctrl+Alt+Space", known: false, why: "занятость чужих программ Windows не показывает" });
+});
+
 afterEach(cleanup);
 
 describe("горячая клавиша", () => {
-  it("системное сочетание не назначается, и сказано почему", () => {
+  it("действующая клавиша приходит из ядра, а не выдумывается", async () => {
+    current.mockResolvedValue({ spec: "ctrl+shift+k", shown: "Ctrl+Shift+K", known: true, why: "" });
     render(<HotkeyCard />);
-    fireEvent.change(screen.getByLabelText("новое сочетание клавиш"), { target: { value: "Alt+F4" } });
-    fireEvent.click(screen.getByRole("button", { name: "назначить" }));
 
-    expect(screen.getByText(/системное сочетание Windows/)).toBeTruthy();
-    // Прежняя клавиша осталась действующей — молча ничего не поменялось.
-    expect(screen.getByText(/Прежняя клавиша осталась/)).toBeTruthy();
+    // Клавиша, назначенная раньше, видна — а не та, что в правиле по умолчанию.
+    await waitFor(() => expect(screen.getByText("Ctrl+Shift+K")).toBeTruthy());
   });
 
-  it("свободная клавиша назначается и называется", () => {
+  it("отказ ядра — повод, а не «сохранено»: прежняя клавиша осталась", async () => {
+    assign.mockRejectedValue(
+      new Error("Ctrl+Alt+Space: Windows не отдаёт это сочетание — занято другой программой. Прежняя клавиша осталась: Ctrl+Alt+Space"),
+    );
+    render(<HotkeyCard />);
+    fireEvent.change(screen.getByLabelText("новое сочетание клавиш"), { target: { value: "Ctrl+Alt+Space" } });
+    fireEvent.click(screen.getByRole("button", { name: "назначить" }));
+
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toMatch(/занято другой программой/));
+    // Никакого «сохранил» при отказе — именно это и было дефектом.
+    expect(screen.queryByText(/сохранил/i)).toBeNull();
+  });
+
+  it("успех называется проверенным: назначение подтверждено регистрацией", async () => {
+    assign.mockResolvedValue({ spec: "ctrl+shift+k", shown: "Ctrl+Shift+K", known: true, why: "" });
     render(<HotkeyCard />);
     fireEvent.change(screen.getByLabelText("новое сочетание клавиш"), { target: { value: "Ctrl+Shift+K" } });
     fireEvent.click(screen.getByRole("button", { name: "назначить" }));
 
-    expect(screen.getByText(/свободна: можно назначать; сохранил/)).toBeTruthy();
-    expect(screen.getByText("Ctrl+Shift+K")).toBeTruthy();
+    await waitFor(() => expect(screen.getByRole("status").textContent).toMatch(/назначил и проверил регистрацией/));
+    expect(assign).toHaveBeenCalledWith("ctrl+shift+k");
   });
 
-  it("на занятую клавишу сразу называется свободная альтернатива", () => {
-    render(<HotkeyCard taken={["ctrl+alt+space"]} />);
-    fireEvent.change(screen.getByLabelText("новое сочетание клавиш"), { target: { value: "Ctrl+Alt+Space" } });
+  it("в браузере не обещает сохранение: проверять нечем", async () => {
+    tauri.mockReturnValue(false);
+    render(<HotkeyCard />);
+    fireEvent.change(screen.getByLabelText("новое сочетание клавиш"), { target: { value: "Ctrl+Shift+K" } });
     fireEvent.click(screen.getByRole("button", { name: "назначить" }));
 
-    expect(screen.getByText(/уже занята другой программой/)).toBeTruthy();
-    expect(screen.getByText(/Свободна:/)).toBeTruthy();
+    await waitFor(() => expect(screen.getByRole("status").textContent).toMatch(/в браузере клавишу проверить и назначить нечем/));
+    expect(assign).not.toHaveBeenCalled();
   });
 
   it("непонятный ввод не превращается в «наверное, вот это»", () => {

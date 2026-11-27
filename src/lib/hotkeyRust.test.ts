@@ -40,6 +40,37 @@ describe("горячая клавиша: правило и Rust", () => {
     expect(fromRust(accelerator)).toBe(label.toLowerCase().replace(/key/g, ""));
   });
 
+  it("обработчик сравнивает нажатие с действующей клавишей, а не с константой", () => {
+    // Настоящий дефект: `with_handler` сравнивал нажатие с `shortcut()`, то есть с
+    // умолчанием. Человек назначал свою клавишу, экран говорил «назначено», а окно
+    // не показывалось — потому что обработчик про неё не знал.
+    const handler = rust.match(/\.with_handler\([\s\S]*?\)\s*\n\s*\.build\(\)/)?.[0] ?? "";
+    expect(handler).not.toBe("");
+    expect(handler).toContain("active_spec()");
+    expect(handler).not.toMatch(/pressed == &shortcut\(\)/);
+  });
+
+  it("сохранённая клавиша ставится при старте, и подпись берётся из неё", () => {
+    // Иначе назначение живёт до перезапуска: сохранили, а после запуска снова
+    // умолчание — тот же «сохранили, а не работает», только отложенный.
+    expect(rust).toMatch(/pub fn active_spec\(\)/);
+    expect(rust).toMatch(/pub fn saved\(\)/);
+    expect(rust).toMatch(/pub fn save\(/);
+    // Файл лежит в данных человека, а не в папке программы: её переустанавливают.
+    expect(rust).toContain('join("ZShelper")');
+  });
+
+  it("новая клавиша проверяется до снятия прежней", () => {
+    // Порядок — не стиль: сними прежнюю раньше — и человек на мгновение остаётся
+    // без клавиши, а при отказе и вовсе без неё.
+    const apply = rust.match(/pub fn apply\([\s\S]*?\n\}/)?.[0] ?? "";
+    expect(apply).not.toBe("");
+    const registerAt = apply.indexOf("shortcuts.register(next_shortcut)");
+    const unregisterAt = apply.indexOf("shortcuts.unregister(old)");
+    expect(registerAt).toBeGreaterThan(-1);
+    expect(unregisterAt).toBeGreaterThan(registerAt);
+  });
+
   it("удержание для разговора не занимает системное сочетание", () => {
     const talk = rust.match(/pub const TALK_ACCELERATOR: &str = "([^"]+)"/)?.[1] ?? "";
     // `ctrl+space` не входит в список системных: раскладку Windows переключает

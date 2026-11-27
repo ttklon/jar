@@ -22,6 +22,7 @@ use crate::download::{self, Downloaded};
 use crate::evals;
 use crate::flows::{self, FlowInput, FlowSpec, FlowStep};
 use crate::hand;
+use crate::hotkey;
 use crate::intent;
 use crate::isolation;
 use crate::learn::{self, Learning};
@@ -582,6 +583,26 @@ pub fn autostart_status(state: State<'_, AppState>) -> autostart::Autostart {
     }
     let _ = &state;
     status
+}
+
+/// Какая горячая клавиша действует.
+///
+/// `known = false` — не «свободна», а «проверить не удалось»: занятость чужими
+/// программами без системного вызова не узнать, и это честно называется, а не
+/// выдаётся за проверку.
+#[tauri::command]
+pub fn hotkey_current() -> hotkey::HotkeyView {
+    hotkey::view(false, "занятость чужих программ Windows не показывает: проверяется только при назначении")
+}
+
+/// Назначить горячую клавишу.
+///
+/// Проверка идёт **до** сохранения: новая регистрируется первой, и только если
+/// Windows её отдала — снимается прежняя. При отказе прежняя остаётся работать,
+/// а человек получает причину, а не «не получилось».
+#[tauri::command]
+pub fn hotkey_assign(app: AppHandle, spec: String) -> Result<hotkey::HotkeyView, String> {
+    hotkey::apply(&app, &spec)
 }
 
 /// Включить автозапуск текущего пользователя. Без прав администратора.

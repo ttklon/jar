@@ -77,7 +77,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, WakeReport, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, HotkeyView, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, WakeReport, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -238,6 +238,37 @@ export async function undoApply(): Promise<UndoReport> {
 // ровно то, что написано.
 
 /** Включён ли автозапуск и что именно запустится. Ничего не меняет. */
+/**
+ * Какая горячая клавиша действует.
+ *
+ * В браузере ядра нет, поэтому занятость проверить нечем — и это говорится
+ * прямо (`known: false`), а не выдаётся за «свободна».
+ */
+export async function hotkeyCurrent(): Promise<HotkeyView> {
+  if (isTauri()) {
+    const { hotkeyCurrent: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  const { hotkeyCurrent: fromData } = await import("./dev");
+  return fromData();
+}
+
+/**
+ * Назначить горячую клавишу.
+ *
+ * Проверка занятости идёт в ядре **до** сохранения: при отказе прежняя клавиша
+ * остаётся действующей, а причина приходит словами. В браузере сообщается, что
+ * назначить некуда.
+ */
+export async function hotkeyAssign(spec: string): Promise<HotkeyView> {
+  if (isTauri()) {
+    const { hotkeyAssign: fromCore } = await import("./tauri");
+    return fromCore(spec);
+  }
+  const { hotkeyAssign: fromData } = await import("./dev");
+  return fromData(spec);
+}
+
 export async function autostartStatus(): Promise<Autostart> {
   if (isTauri()) {
     const { autostartStatus: fromCore } = await import("./tauri");

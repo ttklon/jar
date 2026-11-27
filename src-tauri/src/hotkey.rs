@@ -21,6 +21,10 @@
 //! остаётся свёрнутым, а состояние голосовой клавиши показывается в подсказке трея.
 //! Сама клавиша ничего не подтверждает и ничего не выполняет.
 
+use std::str::FromStr;
+use std::sync::Mutex;
+
+use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
@@ -46,6 +50,199 @@ pub fn talk_shortcut() -> Shortcut {
 
 pub fn shortcut() -> Shortcut {
     Shortcut::new(Some(Modifiers::CONTROL | Modifiers::ALT), Code::Space)
+}
+
+/// Акселератор, который действует сейчас: по умолчанию — `ACCELERATOR`, после
+/// назначения человеком — сохранённый. Хранится один на приложение, чтобы
+/// обработчик и экран отвечали про одну и ту же клавишу.
+static ACTIVE: Mutex<Option<String>> = Mutex::new(None);
+
+/// Что нажал человек — в форме, которую разбирает плагин.
+///
+/// `spec` приходит из правила `hotkeyFree.format`: `ctrl+alt+space`, с модификаторами
+/// в одном порядке. Здесь она превращается в `Ctrl+Alt+KeySpace` — тот вид, который
+/// принимает `Shortcut::from_str`. Порядок модификаторов задан правилом, поэтому
+/// разбор детерминирован, а не «как получилось».
+pub fn accelerator_of(spec: &str) -> Option<String> {
+    let mut mods = Vec::new();
+    let mut key = None;
+    for part in spec.split('+').map(str::trim).filter(|part| !part.is_empty()) {
+        match part.to_ascii_lowercase().as_str() {
+            "ctrl" | "control" => mods.push("Ctrl"),
+            "alt" => mods.push("Alt"),
+            "shift" => mods.push("Shift"),
+            "win" | "super" | "meta" => mods.push("Super"),
+            other => key = Some(other.to_string()),
+        }
+    }
+    let key = key?;
+    // Одна буква без модификатора правило не пропускает, и здесь тоже: сочетание
+    // из одной клавиши срабатывало бы при наборе текста.
+    if mods.is_empty() {
+        return None;
+    }
+    let code = match key.as_str() {
+        "space" => "Space".to_string(),
+        single if single.chars().count() == 1 => format!("Key{}", single.to_uppercase()),
+        named => named.to_string(),
+    };
+    Some(format!("{}+{code}", mods.join("+")))
+}
+
+/// Обратно: акселератор плагина → форма правила (`ctrl+alt+space`).
+///
+/// Нужно, чтобы экран показывал то же, что сравнивает правило: `KeySpace` — это
+/// подробность плагина, а не то, что человек видит.
+pub fn spec_of(accelerator: &str) -> String {
+    accelerator
+        .split('+')
+        .map(str::trim)
+        .filter(|part| !part.is_empty())
+        .map(|part| {
+            let lower = part.to_ascii_lowercase();
+            match lower.as_str() {
+                "control" => "ctrl".to_string(),
+                "super" | "win" => "win".to_string(),
+                _ => lower.strip_prefix("key").unwrap_or(&lower).to_string(),
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("+")
+}
+
+/// Где лежит выбранная клавиша.
+///
+/// Рядом с логами и журналом, в `%LOCALAPPDATA%\ZShelper`. Не в папке программы:
+/// её переустанавливают, а выбор человека — это его данные.
+pub fn settings_file() -> std::path::PathBuf {
+    let base = std::env::var_os("LOCALAPPDATA")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(std::env::temp_dir);
+    base.join("ZShelper").join("hotkey.txt")
+}
+
+/// Что видит человек в настройках и что показывает экран после назначения.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct HotkeyView {
+    /// Что действует сейчас — в форме правила (`ctrl+alt+space`).
+    pub spec: String,
+    /// Оно же словами человека (`Ctrl+Alt+Space`).
+    pub shown: String,
+    /// Удалось ли проверить занятость. `false` — не «свободна», а «не знаю».
+    pub known: bool,
+    /// Почему проверка недоступна. Пусто — проверка была.
+    pub why: String,
+}
+
+/// Прочитать сохранённую клавишу.
+///
+/// Битый или чужой файл не чинится и не мешает: он просто не считается выбором,
+/// и действует клавиша по умолчанию. Это лучше, чем «приложение не запустилось
+/// из-за одной строки».
+pub fn saved() -> Option<String> {
+    let text = std::fs::read_to_string(settings_file()).ok()?;
+    let spec = text.trim().to_ascii_lowercase();
+    let accelerator = accelerator_of(&spec)?;
+    Shortcut::from_str(&accelerator).ok()?;
+    Some(spec)
+}
+
+/// Запомнить выбор. Ошибка записи — ошибка, а не «наверное, сохранилось».
+pub fn save(spec: &str) -> Result<(), String> {
+    let accelerator = accelerator_of(spec)
+        .ok_or_else(|| "сочетание не разобрать: нужны модификатор и клавиша".to_string())?;
+    Shortcut::from_str(&accelerator)
+        .map_err(|_| format!("{spec}: Windows такое сочетание не принимает"))?;
+    let file = settings_file();
+    if let Some(dir) = file.parent() {
+        std::fs::create_dir_all(dir).map_err(|error| format!("папка настроек: {error}"))?;
+    }
+    std::fs::write(&file, format!("{spec}\n")).map_err(|error| format!("запись настройки: {error}"))?;
+    // Доказательство — чтение обратно: «файл записался без ошибки» не значит, что
+    // в нём лежит то, что нужно. Так же сделано для базы знаний и памяти.
+    let back = std::fs::read_to_string(&file).map_err(|error| format!("чтение обратно: {error}"))?;
+    if back.trim() != spec {
+        return Err("в файле оказалось не то, что записали: назначение не сохранено".to_string());
+    }
+    Ok(())
+}
+
+/// Действующая клавиша в форме правила.
+pub fn active_spec() -> String {
+    if let Ok(guard) = ACTIVE.lock() {
+        if let Some(spec) = guard.as_ref() {
+            return spec.clone();
+        }
+    }
+    saved().unwrap_or_else(|| spec_of(ACCELERATOR))
+}
+
+/// Показать человеку, что действует.
+pub fn view(known: bool, why: &str) -> HotkeyView {
+    let spec = active_spec();
+    HotkeyView { shown: label(&spec), spec, known, why: why.to_string() }
+}
+
+/// Подпись для человека: `ctrl+alt+space` → `Ctrl+Alt+Space`.
+pub fn label(spec: &str) -> String {
+    spec.split('+')
+        .map(|part| match part {
+            "ctrl" => "Ctrl".to_string(),
+            "alt" => "Alt".to_string(),
+            "shift" => "Shift".to_string(),
+            "win" => "Win".to_string(),
+            "space" => "Space".to_string(),
+            other => other.to_uppercase(),
+        })
+        .collect::<Vec<_>>()
+        .join("+")
+}
+
+/// Поставить новую клавишу на место прежней.
+///
+/// Порядок важен и он именно такой: **сначала проверить, потом снять прежнюю**.
+/// Если снять прежнюю и не поставить новую, человек остаётся без клавиши и без
+/// объяснения — ровно тот дефект, который исключает `hotkeySaved`.
+///
+/// Возвращается либо «сохранено и работает», либо причина, и прежняя клавиша
+/// по-прежнему действует.
+pub fn apply(app: &AppHandle, spec: &str) -> Result<HotkeyView, String> {
+    let next = accelerator_of(spec).ok_or_else(|| "сочетание не разобрать: нужны модификатор и клавиша".to_string())?;
+    let next_shortcut = Shortcut::from_str(&next).map_err(|_| format!("{spec}: Windows такое сочетание не принимает"))?;
+    let current = active_spec();
+    let current_shortcut = accelerator_of(&current).and_then(|accel| Shortcut::from_str(&accel).ok());
+
+    if current_shortcut.as_ref() == Some(&next_shortcut) {
+        return Ok(view(true, ""));
+    }
+
+    // Проба: регистрация новой клавиши **до** снятия прежней. Если она занята
+    // другой программой, Windows откажет — и прежняя останется работать.
+    let shortcuts = app.global_shortcut();
+    if let Err(error) = shortcuts.register(next_shortcut) {
+        return Err(format!(
+            "{next}: Windows не отдаёт это сочетание — занято другой программой ({error}). Прежняя клавиша осталась: {}",
+            label(&current)
+        ));
+    }
+
+    // Новая зарегистрирована. Теперь её надо запомнить — и только если запись
+    // доказана чтением обратно, снимается прежняя.
+    //
+    // Если запись не удалась, новая снимается, а прежняя остаётся: иначе после
+    // перезапуска человек получил бы умолчание вместо выбранной клавиши, то есть
+    // ровно «сохранил, а не работает».
+    if let Err(error) = save(spec) {
+        let _ = shortcuts.unregister(next_shortcut);
+        return Err(format!("{error}. Прежняя клавиша осталась: {}", label(&current)));
+    }
+    if let Some(old) = current_shortcut {
+        let _ = shortcuts.unregister(old);
+    }
+    if let Ok(mut guard) = ACTIVE.lock() {
+        *guard = Some(spec.to_string());
+    }
+    Ok(view(true, ""))
 }
 
 /// Показать окно из любого состояния: свёрнуто, скрыто, за другими окнами.
@@ -113,7 +310,13 @@ pub fn install(app: &mut tauri::App) {
     let handle = app.handle().clone();
     let plugin = tauri_plugin_global_shortcut::Builder::new()
         .with_handler(move |_app, pressed, event| {
-            if pressed == &shortcut() && event.state() == ShortcutState::Pressed {
+            let active = accelerator_of(&active_spec())
+                .and_then(|accel| Shortcut::from_str(&accel).ok())
+                .unwrap_or_else(shortcut);
+            // Сравнение с **действующей** клавишей, а не с константой: человек
+            // назначает свою, и обработчик обязан знать про неё, иначе клавиша
+            // «назначена», а окно не показывается.
+            if pressed == &active && event.state() == ShortcutState::Pressed {
                 toggle_main(&handle);
             }
 
@@ -149,12 +352,33 @@ pub fn install(app: &mut tauri::App) {
         ),
     }
 
-    match app.global_shortcut().register(shortcut()) {
-        Ok(()) => tracing::info!(
-            accelerator = ACCELERATOR,
-            "горячая клавиша зарегистрирована"
-        ),
-        Err(error) => tracing::warn!(%error, accelerator = ACCELERATOR, "горячая клавиша занята"),
+    // Клавиша человека, а не только константа: сохранённую надо поставить на
+    // место умолчания ещё до того, как человек откроет настройки.
+    let wanted = active_spec();
+    let wanted_accel = accelerator_of(&wanted).unwrap_or_else(|| ACCELERATOR.to_string());
+    let wanted_shortcut = Shortcut::from_str(&wanted_accel).unwrap_or_else(|_| shortcut());
+    match app.global_shortcut().register(wanted_shortcut) {
+        Ok(()) => {
+            // Действующая клавиша запоминается: обработчик сравнивает нажатие с
+            // ней, и чтение файла на каждое нажатие было бы лишним.
+            if let Ok(mut guard) = ACTIVE.lock() {
+                *guard = Some(wanted.clone());
+            }
+            tracing::info!(accelerator = %wanted_accel, "горячая клавиша зарегистрирована")
+        }
+        Err(error) => {
+            tracing::warn!(%error, accelerator = %wanted_accel, "горячая клавиша занята");
+            // Сохранённая не встала — возвращаемся к умолчанию, но **не молча**:
+            // иначе человек видит в настройках одно, а работает другое.
+            if wanted_accel != ACCELERATOR {
+                if app.global_shortcut().register(shortcut()).is_ok() {
+                    if let Ok(mut guard) = ACTIVE.lock() {
+                        *guard = Some(spec_of(ACCELERATOR));
+                    }
+                    tracing::warn!("вернулся к клавише по умолчанию: сохранённая занята");
+                }
+            }
+        }
     }
 }
 
@@ -181,6 +405,39 @@ mod tests {
     #[test]
     fn the_talk_event_name_matches_the_frontend() {
         assert_eq!(TALK_EVENT, "voice://hold");
+    }
+
+    #[test]
+    fn a_spec_from_the_rule_becomes_an_accelerator_and_back() {
+        // Форма правила — `ctrl+alt+space`; её показывает и экран, и сравнение.
+        assert_eq!(accelerator_of("ctrl+alt+space").as_deref(), Some("Ctrl+Alt+Space"));
+        assert_eq!(spec_of("Ctrl+Alt+Space"), "ctrl+alt+space");
+        // Одна буква — `KeyK`, иначе Windows не поймёт акселератор.
+        assert_eq!(accelerator_of("ctrl+shift+k").as_deref(), Some("Ctrl+Shift+KeyK"));
+        assert_eq!(spec_of("Ctrl+Shift+KeyK"), "ctrl+shift+k");
+        // Порядок модификаторов не зависит от того, как их набрали.
+        assert_eq!(accelerator_of("shift+ctrl+k"), accelerator_of("ctrl+shift+k"));
+    }
+
+    #[test]
+    fn a_combination_without_a_modifier_is_not_a_shortcut() {
+        // Правило `hotkeyFree.check` не пропускает одну клавишу: она срабатывала
+        // бы при наборе текста. Ядро обязано отказать по той же причине.
+        assert_eq!(accelerator_of("k"), None);
+        assert_eq!(accelerator_of(""), None);
+        // И то, что Windows не разбирает, не становится «наверное, вот это».
+        assert!(Shortcut::from_str("Ctrl+Alt+НетТакой").is_err());
+    }
+
+    #[test]
+    fn a_changed_key_is_the_one_the_handler_compares() {
+        // Настоящий дефект, который здесь закрыт: обработчик сравнивал нажатие с
+        // константой, и назначенная человеком клавиша не показывала окно.
+        let custom = accelerator_of("ctrl+shift+k").unwrap();
+        let active = Shortcut::from_str(&custom).expect("назначенная клавиша разбирается");
+        assert_ne!(active, shortcut(), "назначенная клавиша отличается от умолчания");
+        // Подпись для человека совпадает с тем, что настраивали: без `Key`.
+        assert_eq!(label(&spec_of(&custom)), "Ctrl+Shift+K");
     }
 
     #[test]
