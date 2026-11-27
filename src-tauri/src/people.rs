@@ -34,17 +34,11 @@ pub struct Person {
 }
 
 /// Что лежит в файле целиком.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Book {
     /// Кто действует сейчас. Пусто — профилей ещё нет.
     pub current: String,
     pub people: Vec<Person>,
-}
-
-impl Default for Book {
-    fn default() -> Self {
-        Book { current: String::new(), people: Vec::new() }
-    }
 }
 
 /// Где лежит список людей.
