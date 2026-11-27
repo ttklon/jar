@@ -140,20 +140,35 @@ jobs:
         run: npm run test:voice-simulation
       # Причина падения иначе остаётся только в артефакте, а артефакт в
       # песочнице не скачать: красный прогон говорит «1 failed» и молчит о том,
-      # какое ожидание не совпало. Печатаем отчёт в вывод — он читается через
-      # API аннотаций/логов.
+      # какое ожидание не совпало. JSON-отчёт печатается аннотацией `::error::`
+      # (в одну строку, иначе GitHub её обрежет) — она читается через API, когда
+      # лог задания недоступен.
       - name: Show simulation report
         if: failure()
         shell: pwsh
         run: |
-          # HTML-отчёт целиком в лог не влезет: печатаем текстовые следы падения
-          # (error-context.md и .txt), где видно несовпавшее ожидание.
-          $files = Get-ChildItem -Recurse artifacts -Include error-context.md,*.txt -ErrorAction SilentlyContinue |
-            Where-Object { $_.Length -lt 20000 } | Select-Object -First 5
-          if (-not $files) { Write-Host 'no text failure context found' }
-          foreach ($f in $files) {
-            Write-Host ("=== " + $f.FullName)
-            Get-Content -LiteralPath $f.FullName | Select-Object -First 80 | ForEach-Object { Write-Host $_ }
+          if (-not (Test-Path artifacts/voice-report.json)) {
+            Write-Host '::error::no JSON report — the run died before reporting'
+            exit 0
+          }
+          $report = Get-Content artifacts/voice-report.json -Raw | ConvertFrom-Json
+          foreach ($suite in $report.suites) {
+            $stack = [System.Collections.Generic.Stack[object]]::new()
+            $stack.Push($suite)
+            while ($stack.Count -gt 0) {
+              $node = $stack.Pop()
+              foreach ($spec in $node.specs) {
+                if ($spec.ok) { continue }
+                foreach ($t in $spec.tests) {
+                  $fail = $t.results | Where-Object { $_.status -ne 'passed' } | Select-Object -First 1
+                  $msg = if ($fail -and $fail.error) { $fail.error.message } else { 'no message' }
+                  $msg = ($msg -replace '\s+', ' ')
+                  if ($msg.Length -gt 700) { $msg = $msg.Substring(0, 700) }
+                  Write-Host ("::error::FAILED {0} :: {1}" -f $spec.title, $msg)
+                }
+              }
+              foreach ($child in $node.suites) { $stack.Push($child) }
+            }
           }
       - name: Upload simulation evidence (no real user audio)
         if: always()

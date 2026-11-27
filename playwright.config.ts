@@ -31,6 +31,10 @@ export default defineConfig({
     ["list"],
     ["github"],
     ["html", { outputFolder: "artifacts/voice-report", open: "never" }],
+    // JSON рядом с HTML: причину падения надо уметь прочитать из CI, а не
+    // только глазами в браузере. Из него шаг «Show simulation report» печатает
+    // ::error:: — аннотация приходит даже когда лог задания недоступен.
+    ["json", { outputFile: "artifacts/voice-report.json" }],
   ],
   use: {
     baseURL: "http://127.0.0.1:5173",
