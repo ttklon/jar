@@ -452,7 +452,9 @@ pub mod store {
     /// Выбор «что делать с пропуском» для одного правила.
     pub fn set_policy(id: &str, policy: &str) -> Result<Vec<Saved>, String> {
         if !["catchUp", "skip", "ask"].contains(&policy) {
-            return Err(format!("{policy}: такого выбора нет — есть catchUp, skip, ask"));
+            return Err(format!(
+                "{policy}: такого выбора нет — есть catchUp, skip, ask"
+            ));
         }
         let mut items = load();
         let Some(found) = items.iter_mut().find(|item| item.id == id) else {
