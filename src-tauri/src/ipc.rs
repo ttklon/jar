@@ -656,14 +656,21 @@ pub struct RollbackFile {
 #[tauri::command]
 pub async fn rollback_file() -> RollbackFile {
     let exe = std::env::current_exe().unwrap_or_default();
-    let dir = exe.parent().map(|path| path.to_path_buf()).unwrap_or_default();
+    let dir = exe
+        .parent()
+        .map(|path| path.to_path_buf())
+        .unwrap_or_default();
     let looked_in = if dir.as_os_str().is_empty() {
         "папка программы не определилась".to_string()
     } else {
         dir.display().to_string()
     };
 
-    let mut found = RollbackFile { file: String::new(), bytes: 0, looked_in };
+    let mut found = RollbackFile {
+        file: String::new(),
+        bytes: 0,
+        looked_in,
+    };
     let Ok(entries) = std::fs::read_dir(&dir) else {
         return found;
     };
@@ -671,11 +678,17 @@ pub async fn rollback_file() -> RollbackFile {
         let name = entry.file_name().to_string_lossy().to_string();
         let lower = name.to_lowercase();
         // Только исполняемые файлы прошлых версий: `.bak` данных — не версия.
-        if !(lower.ends_with(".exe.old") || lower.ends_with(".old") || (lower.starts_with("zshelper-") && lower.ends_with(".exe"))) {
+        if !(lower.ends_with(".exe.old")
+            || lower.ends_with(".old")
+            || (lower.starts_with("zshelper-") && lower.ends_with(".exe")))
+        {
             continue;
         }
         // Не текущий файл: он тоже подходит под «zshelper-…exe».
-        if let (Ok(current), Ok(candidate)) = (std::fs::canonicalize(&exe), std::fs::canonicalize(entry.path())) {
+        if let (Ok(current), Ok(candidate)) = (
+            std::fs::canonicalize(&exe),
+            std::fs::canonicalize(entry.path()),
+        ) {
             if current == candidate {
                 continue;
             }
@@ -723,7 +736,10 @@ pub async fn when_then_add(
 
 /// Выключить или включить правило, не удаляя его.
 #[tauri::command]
-pub async fn when_then_set_on(id: String, on: bool) -> Result<Vec<schedule::when_then::Saved>, String> {
+pub async fn when_then_set_on(
+    id: String,
+    on: bool,
+) -> Result<Vec<schedule::when_then::Saved>, String> {
     schedule::when_then::set_on(&id, on)
 }
 
@@ -734,13 +750,19 @@ pub async fn when_then_remove(id: String) -> Result<Vec<schedule::when_then::Sav
 
 /// Что делать с пропущенным запуском — выбор у конкретного правила.
 #[tauri::command]
-pub async fn schedule_policy(id: String, policy: String) -> Result<Vec<schedule::store::Saved>, String> {
+pub async fn schedule_policy(
+    id: String,
+    policy: String,
+) -> Result<Vec<schedule::store::Saved>, String> {
     schedule::store::set_policy(&id, &policy)
 }
 
 /// Пауза и продолжение.
 #[tauri::command]
-pub async fn schedule_pause(id: String, paused: bool) -> Result<Vec<schedule::store::Saved>, String> {
+pub async fn schedule_pause(
+    id: String,
+    paused: bool,
+) -> Result<Vec<schedule::store::Saved>, String> {
     schedule::store::set_paused(&id, paused)
 }
 
