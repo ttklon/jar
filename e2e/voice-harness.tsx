@@ -53,6 +53,45 @@ mockIPC((command, payload) => {
     case "speech_status": return { found: true, program: "SIMULATED whisper", model: "SIMULATED model", search_dir: "fixture", models_dir: "fixture" };
     case "isolation_status": return { available: false, summary: "simulation", note: "No native process" };
     case "facts": return [];
+    // Экран «что сейчас» (rightNowLive) спрашивает дела, движок и реестр.
+    // Заглушка отвечала на них неизвестностью, и e2e падал на «unknown» —
+    // то есть валился тест голоса, а причина была в неподключённой заглушке.
+    // Отвечаем тем же, что сказало бы ядро на пустой машине.
+    case "memory_runs": return [];
+    case "engine_status": return { found: false, program: null, search_dir: "fixture", running: false, port: null, pid: null };
+    case "registry_snapshot": return {
+      actions: [],
+      stats: {
+        actions: 0, domains: 0, verbs: 0,
+        byRisk: { read: 0, "write-local": 0, external: 0, destructive: 0, identity: 0, money: 0 },
+        byTier: { T0: 0, T1: 0, T2: 0, T3: 0 },
+        byStatus: { v1: 0, v2: 0, later: 0, never: 0 },
+      },
+    };
+    // Дальше — команды, которые вызываются по действию человека, а не при
+    // загрузке. Отвечаем так же, как ответило бы ядро на пустой машине: ничего
+    // не наврали, и «unknown» больше не маскируется под сломанный голос.
+    // Формы возврата — настоящие, а не «похожие»: заглушка, которая отвечает
+    // не тем полем, врёт тихо, и следующий тест падает уже на разборе ответа.
+    case "adopt_hand": return { key: "fixture", title: "фикстура", code: "", risk: "read", source: "simulation", created_ms: 0 };
+    case "draft_hand": return { key: "fixture", goal: "", code: "", why: "simulation", created_ms: 0 };
+    case "trial_hand": return { key: "fixture", ran: false, ok: false, exit_code: null, stdout: "", stderr: "", timed_out: false, cell: "simulation" };
+    case "declare_presence": return { available: false, note: "simulation", sample: null, declared: null, budget: { parallel: 1, mode: "near", reason: "simulation", may_start: false } };
+    case "fill_plan": return { plan: null, problems: [], gates: [], questions: [] };
+    case "model_prompt": return { prompt: "SIMULATED prompt", answer: "" };
+    case "remember_fact": return;
+    case "cancel_tool": return;
+    case "plan_checkpoint": return null;
+    case "run_plan": return { goal: "simulation", steps: [], stopped: "simulation: no real plan", run_id: null, sight: null, resume_at: null, ask_on_resume: null };
+    case "say": return "";
+    case "smoke_check": return { ok: false, answer: null, model: null, port: null, note: "simulation: no real model" };
+    case "ui_dump": return { title: "simulation", process: "simulation", elements: [], truncated: false, note: "simulation: no real screen", text: "" };
+    case "ui_press": return { target: { name: "simulation", kind: "button", id: "fixture", actions: [] }, sent: false, changed: false, note: "simulation: nothing pressed" };
+    case "ui_type": return { target: { name: "simulation", kind: "edit", id: "fixture", actions: [] }, text: "", read_back: "", verified: false, note: "simulation: nothing typed" };
+    case "undo_report": return { session: "simulation", steps: [], note: "simulation: nothing to undo" };
+    case "undo_apply": return { session: "simulation", undone: 0, refused: [] };
+    case "audit_tail": return [];
+    case "list_tools": return [];
     case "foreground_window": return null;
     case "machine_state": return { available: false, note: "simulation", sample: null, declared: null, budget: { parallel: 1, mode: "near", reason: "simulation", may_start: false } };
     case "set_voice_tray_status": return;
