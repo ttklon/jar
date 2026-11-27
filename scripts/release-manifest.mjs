@@ -57,16 +57,34 @@ async function main() {
 
   const bundle = path.join(root, "src-tauri/target/release/bundle");
   const files = [];
+  // Собирается только то, что названо в tauri.conf.json. Шаг 239 оставил
+  // **только** NSIS: MSI не умеет установку без прав администратора. Здесь
+  // раньше папка msi читалась безусловно — сначала падало на её отсутствии
+  // (`ENOENT`), а после того как это обошли, — на «expected 3 files».
+  // Отсутствующая папка формата — это не ошибка, это «не собирали».
+  const present = [];
   for (const format of ["nsis", "msi"]) {
     const directory = path.join(bundle, format);
-    for (const entry of await readdir(directory, { withFileTypes: true })) {
+    let entries;
+    try {
+      entries = await readdir(directory, { withFileTypes: true });
+    } catch (error) {
+      if (error.code === "ENOENT") continue;
+      throw error;
+    }
+    present.push(format);
+    for (const entry of entries) {
       if (entry.isFile() && entry.name.toLowerCase().endsWith(format === "nsis" ? ".exe" : ".msi")) {
         files.push(path.join(directory, entry.name));
       }
     }
   }
   files.push(path.join(root, "dist/zshelper-portable.zip"));
-  if (files.length < 3) throw new Error(`expected NSIS, MSI and portable archive; found ${files.length} files`);
+  // Установщик обязан существовать — иначе манифест описывал бы портативную
+  // сборку, которую человек поставил бы «в папку», не установив приложение.
+  if (!present.includes("nsis") || !files.some((file) => file.includes(`${path.sep}nsis${path.sep}`))) {
+    throw new Error("no NSIS installer found; the installer gate must run before the manifest");
+  }
 
   const tauri = JSON.parse(await readFile(path.join(root, "src-tauri/tauri.conf.json"), "utf8"));
   let commit = process.env.GITHUB_SHA;

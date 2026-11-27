@@ -268,7 +268,12 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_RUN_ID: ${{ github.run_id }}
-        run: node scripts/release-manifest.mjs
+        run: |
+          node scripts/release-manifest.mjs
+          # Манифест обещает sha256 — значит его надо сверить с файлами, а не
+          # только напечатать. `--verify` читает каждый артефакт заново и
+          # сравнивает размер и хеш; до этого шага в CI сверки не было вовсе.
+          node scripts/release-manifest.mjs --verify dist/zshelper-release.json
 
       # Контрольные суммы печатаются в сводку прогона: скачанный файл можно сверить,
       # не доверяя ни каналу, ни дате.
