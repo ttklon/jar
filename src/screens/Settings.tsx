@@ -15,6 +15,7 @@ import { MemoryBackups } from "../components/MemoryBackups";
 import { MemoryFacts } from "../components/MemoryFacts";
 import { TextSizeCard } from "../components/TextSizeCard";
 import { HotkeyCard } from "../components/HotkeyCard";
+import { UpdateCard } from "../components/UpdateCard";
 import { Diagnostics } from "../components/Diagnostics";
 import { levels, show as noticeShow, type SuccessLevel } from "../lib/noticePolicy";
 
@@ -246,6 +247,10 @@ export function Settings({
           стояла строка значения: «занята другой программой» человек узнавал
           только тогда, когда клавиша не срабатывала. */}
       <HotkeyCard />
+
+      {/* Обновление — рядом с версией и источником: и то и другое про «что у меня
+          стоит и откуда» (шаги 99–100). */}
+      <UpdateCard />
 
       <div className={styles.card}>
         <div className={styles.row}>
