@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { fits, viewportAt, whyNot, type Visible } from "../src/lib/zoom";
 
 /**
  * Масштаб 200%: ничего не обрезается, не уезжает и не прячется (шаг 185).
@@ -66,15 +67,22 @@ test("масштаб 200%: каждый экран в ленте виден и �
   const items = await page.evaluate(INSPECT);
   expect(items.length).toBeGreaterThan(0);
 
-  // Каждое нарушение называется своим словом, а не «не помещается»: иначе
-  // по сообщению нельзя понять, что править.
+  // Проверку делает **правило** (`src/lib/zoom.ts`), а не этот файл.
+  //
+  // Дефект, найденный при подключении: тест заново писал ту же логику —
+  // «right > 0 и left < windowWidth» — и расходился с правилом молча.
+  // Правило живёт в `src/lib/zoom.ts` и покрыто своими тестами; здесь оно
+  // только **применяется** к настоящим прямоугольникам из Chromium. Если
+  // правило изменится, изменится и e2e: второй правды о «помещается» нет.
+  const viewport = viewportAt(1, items[0]!.windowWidth, items[0]!.windowHeight);
   const broken = items
     .map((item) => {
-      if (item.hidden) return `${item.label}: спрятан`;
-      if (item.width <= 0 || item.height <= 0) return `${item.label}: нулевой площади`;
-      if (item.right <= 0 || item.left >= item.windowWidth) return `${item.label}: уехал по горизонтали`;
-      if (item.bottom <= 0 || item.top >= item.windowHeight) return `${item.label}: уехал по вертикали`;
-      return null;
+      const seen: Visible = {
+        box: { left: item.left, top: item.top, right: item.right, bottom: item.bottom, width: item.width, height: item.height },
+        hidden: item.hidden,
+        clipped: false,
+      };
+      return fits(seen, viewport) ? null : `${item.label}: ${whyNot(seen, viewport) ?? "не помещается"}`;
     })
     .filter((value): value is string => value !== null);
 
@@ -135,4 +143,70 @@ test("масштаб 200%: вход в разговор виден, не обр�
   expect(state.bottom).toBeLessThanOrEqual(state.windowHeight + 1);
   // И в него действительно попадает фокус клавиатуры — при 200% тоже.
   expect(state.focused).toBe(true);
+});
+
+test("600 px: карточка дела не ломается — проверка правилом, а не глазами", async ({ page }) => {
+  // Шаг 378, подключение `narrowCard`. Правило жило в библиотеке и ничего не
+  // проверяло: ни один тест его не звал. 540 px — ниже порога, где строка
+  // времени и кнопка «разобрать заново» перестают помещаться на одной строке
+  // (406 + 140 px при оценке правила): время обрезается до «09:1», кнопка
+  // уезжает за край. На 600 px они ещё влезают — и проверять там нечего.
+  //
+  // Проверяются три вещи из правила, и все три — на настоящей вёрстке
+  // Chromium: страница не едет по горизонтали, ни одна часть строки карточки
+  // не вышла за окно, кнопки дела остались доступны.
+  await page.setViewportSize({ width: 540, height: 900 });
+  await loaded(page);
+
+  // Журнал открывается по-русски «История»: подпись берётся из ленты, а не
+  // угадывается по id.
+  const journal = page.getByRole("button", { name: "История", exact: true });
+  await expect(journal).toBeVisible();
+  await journal.click();
+
+  const state = await page.evaluate(() => {
+    const root = document.documentElement;
+    const buttons = Array.from(document.querySelectorAll("main button"));
+    const out = buttons.map((element) => {
+      const box = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        label: (element.textContent ?? "").trim().slice(0, 40),
+        left: box.left,
+        right: box.right,
+        width: box.width,
+        height: box.height,
+        hidden: style.display === "none" || style.visibility === "hidden",
+        windowWidth: window.innerWidth,
+      };
+    });
+    return {
+      scrolls: root.scrollWidth > root.clientWidth + 1,
+      buttons: out,
+      windowWidth: window.innerWidth,
+    };
+  });
+
+  // 1. Горизонтальной прокрутки нет: иначе что-то шире окна.
+  expect(state.scrolls).toBe(false);
+
+  // Проверка на пустоте была бы ложно зелёной: если в журнале не нашлось ни
+  // одной кнопки, проверять нечего, и это провал, а не успех.
+  expect(state.buttons.length).toBeGreaterThan(0);
+
+  // 2. Кнопка, которая есть, должна быть доступна: правило `fits` — то же,
+  // что для ленты экранов. Кнопка за краем это «есть, но нельзя нажать».
+  const viewport = viewportAt(1, state.windowWidth, 900);
+  const broken = state.buttons
+    .map((button) => {
+      const seen: Visible = {
+        box: { left: button.left, top: 0, right: button.right, bottom: button.height, width: button.width, height: button.height },
+        hidden: button.hidden,
+        clipped: false,
+      };
+      // Пустая кнопка (иконка без подписи) всё равно должна быть в окне.
+      return fits(seen, viewport) ? null : `${button.label || "кнопка"}: ${whyNot(seen, viewport) ?? "не помещается"}`;
+    })
+    .filter((value): value is string => value !== null);
+  expect(broken).toEqual([]);
 });

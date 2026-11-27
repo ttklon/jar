@@ -8,6 +8,7 @@ import { audit as dangerAudit, dangerous as dangerOnly, line as dangerLine, summ
 import { first as firstDanger, order as dangerOrder, tally as dangerTally } from "../lib/dangerFirst";
 import { groupReasons } from "../lib/journal";
 import { line as replayLine } from "../lib/journalReplay";
+import { oneLine } from "../lib/narrowCard";
 import { line as timingLine, mismatch as timingMismatch, slowest, sum as timingSum, type Step as TimingStep } from "../lib/stepTimingView";
 import { ALL as ALL_FILTER, apply as applyFilter, caption as filterCaption, type Filter } from "../lib/feedFilters";
 import { fromJournal, line as refusalLine } from "../lib/refusal";
@@ -167,6 +168,20 @@ function RunCard({
    */
   const [said, setSaid] = useState<string | null>(null);
   /**
+   * Ширина окна: правило `narrowCard` решает по ней, а не по догадке.
+   *
+   * В `app.tsx` ширина уже отслеживается, но у строки журнала своего доступа
+   * к ней нет, а протаскивать её через полэкрана ради одной строки — хуже, чем
+   * подписаться здесь. Слушатель снимается при размонтировании: иначе каждая
+   * перерисованная строка журнала оставляла бы за собой подписку.
+   */
+  const [width, setWidth] = useState(() => globalThis.innerWidth || 1200);
+  useEffect(() => {
+    const onResize = () => setWidth(globalThis.innerWidth || 1200);
+    globalThis.addEventListener("resize", onResize);
+    return () => globalThis.removeEventListener("resize", onResize);
+  }, []);
+  /**
    * Время по шагам (шаг 49).
    *
    * Общее время память запусков хранит, а время каждого шага — нет. Правило
@@ -185,6 +200,30 @@ function RunCard({
     timingMismatch(timing),
   ].filter((part): part is string => part !== null);
 
+  /**
+   * Узкое окно: время и кнопка — на двух строках, а не в обрез (шаг 378).
+   *
+   * Правило `narrowCard` жило в библиотеке и ничего не проверяло. Здесь оно
+   * спрашивается: при ширине меньше 600 px строка «всего 40 с · разобрать
+   * заново» не помещается, и раньше это решалось вёрсткой — то есть время
+   * обрезалось до «09:1» или кнопка уезжала за край, и человек не мог нажать.
+   *
+   * Считаем не «красиво ли», а помещается ли: время и кнопка — непереносимые
+   * части, и если вместе они шире окна, строка переносится.
+   */
+  // Вопрос здесь один: «влезет ли время и кнопка в одну строку». Это не
+  // `fit` — тот отвечает про прокрутку, и переносимый текст в нём ни при чём.
+  const stackNarrow = !oneLine(
+    [
+      // Текст: 7 px на символ — та же оценка, что в правиле.
+      { what: "время", px: timingSaid.join("; ").length * 7, wrappable: true },
+      { what: "разобрать заново", px: 140, wrappable: false },
+    ],
+    // Настоящая ширина окна, а не 600: подставлять константу значило бы
+    // «проверить» правило на числе, которого в этот момент нет.
+    width,
+  );
+
   return (
     <div className={styles.runs}>
       <DeedCard
@@ -194,7 +233,7 @@ function RunCard({
         // честно только у дела, которое шло в текущей сессии (шаг 364).
         onOpenUndo={onOpenUndo}
       />
-      <div className={styles.bar}>
+      <div className={styles.bar} style={stackNarrow ? { flexDirection: "column", alignItems: "flex-start" } : undefined}>
         <Button
           size="small"
           appearance="subtle"
