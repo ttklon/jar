@@ -27,6 +27,7 @@ import {
   HomeRegular,
   InfoRegular,
   MicRegular,
+  PeopleRegular,
   SearchRegular,
   SettingsRegular,
 } from "@fluentui/react-icons";
@@ -55,6 +56,7 @@ const Apps = lazy(() => import("./screens/Apps").then((m) => ({ default: m.Apps 
 const Settings = lazy(() => import("./screens/Settings").then((m) => ({ default: m.Settings })));
 const Licenses = lazy(() => import("./screens/Licenses").then((m) => ({ default: m.Licenses })));
 const Schedule = lazy(() => import("./screens/Schedule").then((m) => ({ default: m.Schedule })));
+const People = lazy(() => import("./screens/People").then((m) => ({ default: m.People })));
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
 import { applyScale, readScale } from "./components/TextSizeCard";
@@ -90,7 +92,8 @@ type Screen =
   | "settings"
   | "state"
   | "licenses"
-  | "schedule";
+  | "schedule"
+  | "people";
 
 const useStyles = makeStyles({
   shell: {
@@ -225,6 +228,8 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement; keywords: read
   { id: "licenses", label: "Лицензии", icon: <DocumentBulletListRegular />, keywords: ["лицензии", "licenses", "spdx", "gpl"] },
   // «Расписание» — рядом с журналом: и то и другое про «что происходит само».
   { id: "schedule", label: "Расписание", icon: <CalendarClockRegular />, keywords: ["расписание", "каждый день", "schedule", "авто", "утром"] },
+  // «Люди» — рядом с приложениями: и то и другое про «кто чем пользуется».
+  { id: "people", label: "Люди", icon: <PeopleRegular />, keywords: ["люди", "профиль", "гость", "people", "семья"] },
 ];
 
 /**
@@ -772,6 +777,8 @@ export function App() {
                 <Licenses />
               ) : screen === "schedule" ? (
                 <Schedule />
+              ) : screen === "people" ? (
+                <People />
               ) : (
                 <Settings
                   theme={choice}

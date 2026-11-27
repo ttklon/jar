@@ -24,6 +24,7 @@ import type {
   ForegroundWindow,
   HandDraft,
   HashCheck,
+  PeopleBook,
   RollbackFile,
   ScheduleRow,
   WhenThenRow,
@@ -456,6 +457,23 @@ export function schedules(): Promise<ScheduleRow[]> {
 
 export function scheduleAdd(what: string, cadence: string, minute: number): Promise<ScheduleRow[]> {
   return invoke<ScheduleRow[]>("schedule_add", { what, cadence, minute });
+}
+
+/** Люди и кто действует сейчас. */
+export function people(): Promise<PeopleBook> {
+  return invoke<PeopleBook>("people");
+}
+
+export function personAdd(name: string, guest: boolean): Promise<PeopleBook> {
+  return invoke<PeopleBook>("person_add", { name, guest });
+}
+
+export function personSwitch(id: string): Promise<PeopleBook> {
+  return invoke<PeopleBook>("person_switch", { id });
+}
+
+export function personRemove(id: string): Promise<PeopleBook> {
+  return invoke<PeopleBook>("person_remove", { id });
 }
 
 /** Файл предыдущей версии рядом: смотрим на диск, а не обещаем. */

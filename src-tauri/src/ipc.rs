@@ -32,6 +32,7 @@ use crate::machine;
 use crate::memory::{Episode, Memory, RunRecord};
 use crate::models::{self, ModelFile};
 use crate::places;
+use crate::people;
 use crate::plan::{self, Answer, Plan, Problem, Question, StepGate};
 use crate::planner::{self, PlanItem};
 use crate::policy::{self, Decision, PolicyState, TOKEN_TTL};
@@ -629,6 +630,31 @@ pub async fn schedule_add(
         // том, чего человек хотел.
         policy: "ask".to_string(),
     })
+}
+
+/// Люди за компьютером и кто действует сейчас.
+///
+/// Асинхронные: читают и пишут файл, а синхронная команда исполняется на потоке
+/// окна (шаги 388/397).
+#[tauri::command]
+pub async fn people() -> people::Book {
+    people::load()
+}
+
+#[tauri::command]
+pub async fn person_add(name: String, guest: bool) -> Result<people::Book, String> {
+    people::add(&people::load(), &name, guest)
+}
+
+/// Переключить «это я». Дело не начинается заново: переключение встраивается.
+#[tauri::command]
+pub async fn person_switch(id: String) -> Result<people::Book, String> {
+    people::switch(&people::load(), &id)
+}
+
+#[tauri::command]
+pub async fn person_remove(id: String) -> Result<people::Book, String> {
+    people::remove(&people::load(), &id)
 }
 
 /// Есть ли рядом файл предыдущей версии — и чем он подтверждён.

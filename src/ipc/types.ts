@@ -898,6 +898,26 @@ export interface RollbackFile {
   looked_in: string;
 }
 
+/**
+ * Человек за компьютером (шаг 401).
+ *
+ * `guest` — безопасные дела и ничего больше. `facts` — сколько у него фактов:
+ * числом, чтобы «своя память» было видно, а не обещано.
+ */
+export interface PersonRow {
+  id: string;
+  name: string;
+  guest: boolean;
+  facts: number;
+}
+
+/** Люди и кто действует сейчас. */
+export interface PeopleBook {
+  /** id действующего человека; пусто — профилей нет. */
+  current: string;
+  people: PersonRow[];
+}
+
 export interface UndoPreview {
   session: string;
   steps: UndoStep[];

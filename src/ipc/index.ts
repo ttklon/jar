@@ -8,6 +8,8 @@
 
 export type {
   Action,
+  PeopleBook,
+  PersonRow,
   RollbackFile,
   ScheduleRow,
   WhenThenRow,
@@ -80,7 +82,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, HotkeyView, RollbackFile, ScheduleRow, WhenThenRow, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, WakeReport, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, HotkeyView, PeopleBook, RollbackFile, ScheduleRow, WhenThenRow, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, WakeReport, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -261,6 +263,45 @@ export async function scheduleAdd(what: string, cadence: string, minute: number)
     return fromCore(what, cadence, minute);
   }
   throw new Error("в браузере расписание не сохраняется: список ведёт приложение");
+}
+
+/**
+ * Люди за компьютером: список и кто действует сейчас.
+ *
+ * В браузере профилей нет — пустой список с честной причиной, а не «профиль
+ * один»: врать про людей хуже, чем не показывать.
+ */
+export async function people(): Promise<PeopleBook> {
+  if (isTauri()) {
+    const { people: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  return { current: "", people: [] };
+}
+
+export async function personAdd(name: string, guest: boolean): Promise<PeopleBook> {
+  if (isTauri()) {
+    const { personAdd: fromCore } = await import("./tauri");
+    return fromCore(name, guest);
+  }
+  throw new Error("в браузере профиль не заводится: список людей ведёт приложение");
+}
+
+/** Переключить «это я». Дело не начинается заново — переключение встраивается. */
+export async function personSwitch(id: string): Promise<PeopleBook> {
+  if (isTauri()) {
+    const { personSwitch: fromCore } = await import("./tauri");
+    return fromCore(id);
+  }
+  throw new Error("в браузере переключать нечего: список людей ведёт приложение");
+}
+
+export async function personRemove(id: string): Promise<PeopleBook> {
+  if (isTauri()) {
+    const { personRemove: fromCore } = await import("./tauri");
+    return fromCore(id);
+  }
+  throw new Error("в браузере удалять нечего: список людей ведёт приложение");
 }
 
 /**

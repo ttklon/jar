@@ -64,6 +64,7 @@ pub mod plan;
 // Шаг 225: проверка WebView2 до первого окна. Без неё самый частый сбой
 // установки — белое окно без причины.
 pub mod planner;
+pub mod people;
 pub mod policy;
 pub mod profiles;
 pub mod readiness;
@@ -389,6 +390,10 @@ pub fn run() {
             ipc::schedule_add,
             ipc::schedule_pause,
             ipc::schedule_policy,
+            ipc::people,
+            ipc::person_add,
+            ipc::person_switch,
+            ipc::person_remove,
             ipc::rollback_file,
             ipc::when_then_rules,
             ipc::when_then_add,
