@@ -227,8 +227,22 @@ jobs:
         if: steps.bundle.outcome == 'success'
         shell: bash
         run: |
-          ls -la src-tauri/target/release/bundle/nsis
-          ls -la src-tauri/target/release/bundle/msi
+          # Собирается только то, что названо в tauri.conf.json. Здесь стоял
+          # жёсткий `ls .../bundle/msi`, а конфиг с шага 239 собирает **только**
+          # NSIS (MSI не умеет установку без прав администратора). Шаг падал на
+          # отсутствующей папке — уже после того, как установщик успешно собрался,
+          # и красный прогон выглядел как «сборка не работает».
+          for target in nsis msi; do
+            dir="src-tauri/target/release/bundle/$target"
+            if [ -d "$dir" ]; then
+              echo "== $target"
+              ls -la "$dir"
+            else
+              echo "== $target: не собирался (не в tauri.conf.json)"
+            fi
+          done
+          # Установщик обязан существовать: без него шаг бессмыслен.
+          ls src-tauri/target/release/bundle/nsis/*.exe
 
       # Портативная сборка — тот же exe, но без установки: положил в папку и запустил.
       # Чего она НЕ делает, сказано в файле рядом: WebView2 нужен системный, а данные
@@ -281,9 +295,10 @@ jobs:
         if: steps.bundle.outcome == 'success'
         uses: actions/attest-build-provenance@v2
         with:
+          # Только то, что действительно собирается: MSI в конфиге нет, а
+          # отсутствующий путь валит аттестацию целиком.
           subject-path: |
             src-tauri/target/release/bundle/nsis/*.exe
-            src-tauri/target/release/bundle/msi/*.msi
             dist/zshelper-portable.zip
             dist/zshelper-release.json
 
@@ -341,9 +356,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: zshelper-windows
+          # MSI не собирается (см. tauri.conf.json: установка без прав
+          # администратора есть только у NSIS). Путь к несуществующему файлу
+          # при if-no-files-found: error валит загрузку целиком.
           path: |
             src-tauri/target/release/bundle/nsis/*.exe
-            src-tauri/target/release/bundle/msi/*.msi
             dist/zshelper-portable.zip
             dist/zshelper-release.json
           if-no-files-found: error
@@ -365,7 +382,6 @@ jobs:
           fi
           gh release create "$RELEASE_TAG" \
             src-tauri/target/release/bundle/nsis/*.exe \
-            src-tauri/target/release/bundle/msi/*.msi \
             dist/zshelper-portable.zip \
             dist/zshelper-release.json \
             --target "$GITHUB_SHA" \
@@ -388,7 +404,6 @@ jobs:
           fi
           gh release upload "$RELEASE_TAG" \
             src-tauri/target/release/bundle/nsis/*.exe \
-            src-tauri/target/release/bundle/msi/*.msi \
             dist/zshelper-portable.zip \
             dist/zshelper-release.json \
             --clobber
