@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
+import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import { facts as readFacts, forgetFact, isTauri, rememberFact } from "../ipc";
 import { factsFromStored, summary as memorySummary, willDo, type Fact } from "../lib/memoryView";
 import { accept, fileText } from "../lib/plainMemoryBridge";
+import { search as searchMeaning } from "../lib/meaning";
 
 /**
  * «Что я о вас помню» — один список, одна кнопка (шаг 263).
@@ -48,6 +49,15 @@ export function MemoryFacts() {
   const [fileTextShown, setFileTextShown] = useState<string | null>(null);
   const [fileSaid, setFileSaid] = useState<string | null>(null);
   const [stored, setStored] = useState<{ key: string; value: string }[]>([]);
+  /**
+   * Что человек ищет в памяти — и что правило нашло.
+   *
+   * Пустая строка — поиска нет, показан весь список. Иначе показываются только
+   * найденное и **причина** каждой находки: найденное по синониму отличается от
+   * найденного буквально, иначе поиск «угадывает» поверх верного ответа.
+   */
+  const [query, setQuery] = useState("");
+  const found = items === null || query.trim() === "" ? null : searchMeaning(items, query);
 
   const load = useCallback(() => {
     setError(null);
@@ -134,13 +144,37 @@ export function MemoryFacts() {
       {items !== null ? (
         <>
           <Text className={styles.muted}>{memorySummary(items)}</Text>
+
+          {/* Поиск по смыслу: синоним, опечатка, латинская раскладка и слово
+              действия — самые частые «не нашлось» на верный вопрос. Правило
+              говорит, почему нашлось, а не только что нашлось. */}
+          <Input
+            aria-label="найти в памяти"
+            placeholder="например: директория с отчётами"
+            value={query}
+            onChange={(_, data) => setQuery(data.value)}
+          />
+          {found !== null ? (
+            <Text className={styles.muted} role="status" aria-live="polite">
+              {found.said}
+            </Text>
+          ) : null}
+
           <ul className={styles.list}>
-            {items.map((fact) => (
+            {(found === null ? items : found.hits.map((hit) => hit.fact)).map((fact) => (
               <li key={fact.id} className={styles.row}>
                 <span>
                   <Text className={styles.label}>{fact.label}</Text>
                   <Text className={styles.muted} block>
-                    {fact.why === "" ? "запомнено по вашим делам" : fact.why}
+                    {/* Найденное объясняется причиной находки — она важнее
+                        общего «запомнено по делам»: человек ищет, он должен
+                        видеть, почему это то, а не просто что оно есть. */}
+                    {found === null
+                      ? fact.why === ""
+                        ? "запомнено по вашим делам"
+                        : fact.why
+                      : found.hits.find((hit) => hit.fact.id === fact.id)?.because ??
+                        (fact.why === "" ? "запомнено по вашим делам" : fact.why)}
                   </Text>
                 </span>
                 <Button size="small" appearance="subtle" aria-label={`забыть: ${fact.label}`} onClick={() => forget(fact)}>

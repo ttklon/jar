@@ -159,3 +159,42 @@ describe("экран памяти", () => {
     expect(screen.getByRole("button", { name: /показать файлом/ })).toBeTruthy();
   });
 });
+
+describe("поиск в памяти по смыслу", () => {
+  it("синоним находит факт и говорит, почему нашёл", async () => {
+    stored = { "folder:D:\\Отчёты": "отчёты", "voice:Алла": "Алла" };
+    render(<MemoryFacts />);
+    await screen.findByText(/2 факта/);
+
+    // «директория» — синоним «папки», слова «папка» в запросе нет вовсе.
+    fireEvent.change(screen.getByLabelText("найти в памяти"), { target: { value: "директория" } });
+
+    expect(await screen.findByText("папка D:\\Отчёты")).toBeTruthy();
+    expect(screen.queryByText("голос Алла")).toBeNull();
+    // Причина находки названа словами правила — «это папка», а не просто
+    // «нашлось»: иначе поиск выглядел бы угадыванием.
+    expect(screen.getByText("это папка")).toBeTruthy();
+  });
+
+  it("латинская раскладка не мешает найти русское слово", async () => {
+    stored = { "folder:D:\\Отчёты": "отчёты" };
+    render(<MemoryFacts />);
+    await screen.findByText(/1 факт/);
+
+    // «Gfgrf» — это «Папка», набранная в латинице.
+    fireEvent.change(screen.getByLabelText("найти в памяти"), { target: { value: "Gfgrf" } });
+
+    expect(await screen.findByText("папка D:\\Отчёты")).toBeTruthy();
+  });
+
+  it("пустой результат предлагает близкое слово, а не молчит", async () => {
+    stored = { "folder:D:\\Отчёты": "отчёты" };
+    render(<MemoryFacts />);
+    await screen.findByText(/1 факт/);
+
+    fireEvent.change(screen.getByLabelText("найти в памяти"), { target: { value: "отчот" } });
+
+    const said = await screen.findByRole("status");
+    expect(said.textContent).toMatch(/нашлось|может быть/i);
+  });
+});
