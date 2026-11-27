@@ -10,6 +10,8 @@ export type {
   Action,
   PeopleBook,
   PersonRow,
+  UnfinishedNeed,
+  UnfinishedSaved,
   RollbackFile,
   ScheduleRow,
   WhenThenRow,
@@ -82,7 +84,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, HotkeyView, PeopleBook, RollbackFile, ScheduleRow, WhenThenRow, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, WakeReport, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, HotkeyView, PeopleBook, RollbackFile, UnfinishedNeed, UnfinishedSaved, ScheduleRow, WhenThenRow, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, WakeReport, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -263,6 +265,48 @@ export async function scheduleAdd(what: string, cadence: string, minute: number)
     return fromCore(what, cadence, minute);
   }
   throw new Error("в браузере расписание не сохраняется: список ведёт приложение");
+}
+
+/**
+ * Незавершённое дело (шаг 458).
+ *
+ * В браузере сохранять некуда и нечего: приложение живёт в файле, а браузерная
+ * вкладка закрывается без нашего участия. Отвечаем честно, а не «сохранено».
+ */
+export async function unfinishedSet(need: UnfinishedNeed): Promise<void> {
+  if (isTauri()) {
+    const { unfinishedSet: fromCore } = await import("./tauri");
+    return fromCore(need);
+  }
+  return;
+}
+
+export async function unfinished(): Promise<UnfinishedNeed | null> {
+  if (isTauri()) {
+    const { unfinished: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  return null;
+}
+
+export async function unfinishedForget(): Promise<void> {
+  if (isTauri()) {
+    const { unfinishedForget: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  return;
+}
+
+export async function unfinishedSave(): Promise<UnfinishedSaved> {
+  if (isTauri()) {
+    const { unfinishedSave: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  return {
+    allow: true,
+    items: [],
+    said: "в браузере сохранять нечего: вкладка закрывается без нашего участия",
+  };
 }
 
 /**

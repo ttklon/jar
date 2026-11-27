@@ -76,6 +76,7 @@ pub mod runtime;
 pub mod sandbox;
 pub mod schedule;
 pub mod selfcheck;
+pub mod session;
 pub mod server;
 pub mod services;
 pub mod step;
@@ -155,6 +156,21 @@ fn show_old_windows() {
             let _ = std::fs::write(parent.join("windows-too-old.txt"), webview2::OLD_WINDOWS);
         }
     }
+}
+
+/// Незавершённое дело: что сохранит хук выхода.
+///
+/// Отдельное состояние, а не поле `AppState`: писать в него будут команды,
+/// и брать блокировку на всё приложение ради номера шага незачем.
+pub struct Unfinished(pub Arc<std::sync::Mutex<Option<session::Need>>>);
+
+/// Отдать незавершённое, если оно есть. `None` — сохранять нечего.
+///
+/// Одна точка чтения: и хук выхода, и команда перед сном берут **одно и то же**
+/// значение из памяти. Иначе «сохранить перед сном» читало бы файл с диска и
+/// сохраняло вчерашнее дело поверх сегодняшнего.
+pub fn unfinished_of(state: &Unfinished) -> Option<session::Need> {
+    state.0.lock().ok().and_then(|guard| guard.clone())
 }
 
 pub fn run() {
@@ -331,6 +347,9 @@ pub fn run() {
             hotkey::reveal_main(app);
         }))
         .manage(state)
+        // Незавершённое дело: обновляется командами, читается при выходе. Без
+        // этого «сохранить при выключении» — обещание без содержимого.
+        .manage(Unfinished(Arc::new(std::sync::Mutex::new(None))))
         .invoke_handler(tauri::generate_handler![
             ipc::registry_snapshot,
             ipc::app_status,
@@ -390,6 +409,10 @@ pub fn run() {
             ipc::schedule_add,
             ipc::schedule_pause,
             ipc::schedule_policy,
+            ipc::unfinished_set,
+            ipc::unfinished,
+            ipc::unfinished_forget,
+            ipc::unfinished_save,
             ipc::people,
             ipc::person_add,
             ipc::person_switch,
@@ -477,6 +500,14 @@ pub fn run() {
                 tauri::RunEvent::ExitRequested { .. } | tauri::RunEvent::Exit
             ) {
                 return;
+            }
+
+            // Незавершённое дело — до остановки движка: у нас секунды, и
+            // сохранить номер шага важнее, чем аккуратно погасить сервер.
+            let unfinished = app.try_state::<Unfinished>().and_then(|state| unfinished_of(&state));
+            if let Some(need) = unfinished {
+                let saved = session::save_now(&need);
+                tracing::info!(said = %saved.said, "незавершённое сохранено при выходе");
             }
 
             let Some(state) = app.try_state::<AppState>() else {

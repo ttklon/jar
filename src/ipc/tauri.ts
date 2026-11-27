@@ -25,6 +25,8 @@ import type {
   HandDraft,
   HashCheck,
   PeopleBook,
+  UnfinishedNeed,
+  UnfinishedSaved,
   RollbackFile,
   ScheduleRow,
   WhenThenRow,
@@ -457,6 +459,30 @@ export function schedules(): Promise<ScheduleRow[]> {
 
 export function scheduleAdd(what: string, cadence: string, minute: number): Promise<ScheduleRow[]> {
   return invoke<ScheduleRow[]>("schedule_add", { what, cadence, minute });
+}
+
+/** Запомнить незавершённое дело: сон и выключение его не потеряют. */
+export function unfinishedSet(need: UnfinishedNeed): Promise<void> {
+  return invoke<void>("unfinished_set", {
+    deed: need.deed,
+    step: need.step,
+    said: need.said,
+    draft: need.draft,
+  });
+}
+
+/** Что осталось от прошлого раза. `null` — ничего. */
+export function unfinished(): Promise<UnfinishedNeed | null> {
+  return invoke<UnfinishedNeed | null>("unfinished");
+}
+
+export function unfinishedForget(): Promise<void> {
+  return invoke<void>("unfinished_forget");
+}
+
+/** Сохранить сейчас — перед сном, а не только при выходе. */
+export function unfinishedSave(): Promise<UnfinishedSaved> {
+  return invoke<UnfinishedSaved>("unfinished_save");
 }
 
 /** Люди и кто действует сейчас. */

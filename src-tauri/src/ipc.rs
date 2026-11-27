@@ -632,6 +632,52 @@ pub async fn schedule_add(
     })
 }
 
+/// Запомнить незавершённое дело — чтобы сон или выключение его не потеряли.
+#[tauri::command]
+pub async fn unfinished_set(
+    state: tauri::State<'_, crate::Unfinished>,
+    deed: Option<String>,
+    step: u32,
+    said: String,
+    draft: String,
+) -> Result<(), String> {
+    let need = crate::session::Need { deed, step, said, draft };
+    let mut guard = state
+        .0
+        .lock()
+        .map_err(|_| "незавершённое занято другой командой".to_string())?;
+    *guard = Some(need);
+    Ok(())
+}
+
+/// Что осталось от прошлого раза: дело и шаг, по которому человек ответит
+/// «продолжить». Пусто — ничего не осталось.
+#[tauri::command]
+pub async fn unfinished() -> Option<crate::session::Need> {
+    crate::session::unfinished()
+}
+
+/// Ответил «продолжить» или «не надо» — забыть.
+#[tauri::command]
+pub async fn unfinished_forget() -> Result<(), String> {
+    crate::session::forget()
+}
+
+/// Сохранить незавершённое сейчас: перед сном, а не только при выходе.
+#[tauri::command]
+pub async fn unfinished_save(state: tauri::State<'_, crate::Unfinished>) -> crate::session::Saved {
+    // Из памяти, а не с диска: на диске лежит вчерашнее, и записать его поверх
+    // сегодняшнего — потерять ровно то, что хотели сохранить.
+    match crate::unfinished_of(&state) {
+        Some(need) => crate::session::save_now(&need),
+        None => crate::session::Saved {
+            allow: true,
+            items: Vec::new(),
+            said: "сохранять нечего: дел и фраз не было".to_string(),
+        },
+    }
+}
+
 /// Люди за компьютером и кто действует сейчас.
 ///
 /// Асинхронные: читают и пишут файл, а синхронная команда исполняется на потоке

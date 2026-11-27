@@ -899,6 +899,24 @@ export interface RollbackFile {
 }
 
 /**
+ * Незавершённое дело (шаг 458): что сохраняет выключение и что ждёт ответа после
+ * включения. Пустой `deed` и пустые фразы — сохранять нечего.
+ */
+export interface UnfinishedNeed {
+  deed: string | null;
+  step: number;
+  said: string;
+  draft: string;
+}
+
+/** Что успели сохранить при выходе. `allow` — можно ли выключать. */
+export interface UnfinishedSaved {
+  allow: boolean;
+  items: string[];
+  said: string;
+}
+
+/**
  * Человек за компьютером (шаг 401).
  *
  * `guest` — безопасные дела и ничего больше. `facts` — сколько у него фактов:

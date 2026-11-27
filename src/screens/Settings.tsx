@@ -17,6 +17,7 @@ import { TextSizeCard } from "../components/TextSizeCard";
 import { HotkeyCard } from "../components/HotkeyCard";
 import { UpdateCard } from "../components/UpdateCard";
 import { UninstallCard } from "../components/UninstallCard";
+import { SleepCard } from "../components/SleepCard";
 import { Diagnostics } from "../components/Diagnostics";
 import { levels, show as noticeShow, type SuccessLevel } from "../lib/noticePolicy";
 
@@ -299,6 +300,10 @@ export function Settings({
       <Diagnostics />
 
       <DataPlaces />
+
+      {/* Сон и выключение — рядом с самопроверкой: оба про «а что будет, когда
+          я отойду» (шаг 65). */}
+      <SleepCard />
 
       <SelfCheckCard />
       <RecentFailures />
