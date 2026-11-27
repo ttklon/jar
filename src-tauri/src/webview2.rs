@@ -87,7 +87,11 @@ pub fn should_stop(state: Present) -> bool {
 
 #[cfg(windows)]
 mod probe {
-    use super::Present;
+    // Разбор вывода `reg query` живёт в родителе и проверяется тестами там же;
+    // модуль `probe` только вызывает его. Без этих двух имён сборка падала на
+    // «cannot find function `parse_reg_dword`» — и это была первая ошибка Rust,
+    // которую увидел Windows-раннер.
+    use super::{parse_reg_dword, parse_reg_version, Present};
     use std::process::Command;
 
     /// Старшая цифра версии Windows из реестра: `10.0` → 10, `6.1` → 6.
