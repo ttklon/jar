@@ -151,4 +151,45 @@ describe("экран «Люди»", () => {
     expect(screen.getByText(/«удалить загрузки» ждёт хозяина: гость может попросить, но подтвердить должен он сам/)).toBeTruthy();
     expect(screen.getByText(/подтверждение гостя не принимается — подтверждает хозяин и лично/)).toBeTruthy();
   });
+
+  it("перенос: файл собирается и проверяется до записи", async () => {
+    book = { current: "p1", people: [{ id: "p1", name: "Аня", guest: false, facts: 2 }] };
+    render(<People />);
+    await screen.findByText(/Сейчас действует: Аня/);
+
+    fireEvent.click(screen.getByRole("button", { name: "собрать файл" }));
+    await waitFor(() =>
+      expect(screen.getByRole("status").textContent).toMatch(
+        /профиль «Аня»; 0 фактов памяти; 0 разрешений; файл читается блокнотом/,
+      ),
+    );
+    expect(screen.getByLabelText("файл профиля").textContent).toMatch(/профиль ZShelper/);
+  });
+
+  it("чужой файл не перезаписывает профиль молча", async () => {
+    book = { current: "p1", people: [{ id: "p1", name: "Аня", guest: false, facts: 2 }] };
+    render(<People />);
+    await screen.findByText(/Сейчас действует: Аня/);
+
+    fireEvent.change(screen.getByLabelText("вставить файл профиля"), {
+      target: { value: "{ обрезанный" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "проверить файл" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("alert").textContent).toMatch(/файл не читается как JSON/),
+    );
+    expect(screen.getByText(/Аня — сейчас/)).toBeTruthy();
+  });
+
+  it("что будет на новой машине — сказано до переноса", async () => {
+    book = { current: "p1", people: [{ id: "p1", name: "Аня", guest: false, facts: 2 }] };
+    render(<People />);
+    await screen.findByText(/Сейчас действует: Аня/);
+
+    fireEvent.click(screen.getByRole("button", { name: "что будет на новой машине" }));
+    await waitFor(() =>
+      expect(screen.getByRole("status").textContent).toMatch(/профиль «Аня» собран в один файл/),
+    );
+  });
 })

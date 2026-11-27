@@ -8,6 +8,10 @@ import { entry as journalEntry } from "../lib/whoAsked";
 import { may as personMay } from "../lib/personRights";
 import { allowed as guestAllowed, askOwner, wholePlan } from "../lib/guestHands";
 import { decide as guestDecide, howWord as attemptWord } from "../lib/guestCannotDanger";
+import { after as transferAfter, pack, type Bundle } from "../lib/profileTransfer";
+import { build as exportBuild, fileName as exportName, summary as exportSummary } from "../lib/profileExport";
+import { conflict, notDo, read as readProfile } from "../lib/importChecks";
+import { ANON, FULL, hide } from "../lib/anonTransfer";
 
 /**
  * «Люди» — кто за этим компьютером и кто действует сейчас (шаги 401–406).
@@ -53,6 +57,8 @@ export function People() {
   const [name, setName] = useState("");
   const [guest, setGuest] = useState(false);
   const [said, setSaid] = useState<string | null>(null);
+  const [carried, setCarried] = useState("");
+  const [brought, setBrought] = useState<string | null>(null);
   const [bad, setBad] = useState(false);
   const tauri = isTauri();
 
@@ -241,6 +247,120 @@ export function People() {
               </Text>
             </div>
           ) : null}
+
+          {/* Перенос профиля файлом: один файл, который человек несёт с собой. */}
+          <div className={styles.card}>
+            <Text weight="semibold" block>
+              Перенести профиль на другой компьютер
+            </Text>
+            <Text className={styles.muted} block>
+              Один файл: память, имя и разрешения. Без сервера, без входа, без «подтвердите
+              перенос на почте».
+            </Text>
+            <div className={styles.row}>
+              <Button
+                onClick={() => {
+                  const person = current;
+                  if (person === null) {
+                    setBad(true);
+                    setSaid("переносить нечего: сначала заведите человека");
+                    return;
+                  }
+                  // Разрешения — текстом, который человек поймёт.
+                  const out = {
+                    name: person.name,
+                    facts: [] as string[],
+                    grants: [] as string[],
+                    at: new Date().toISOString().slice(0, 19),
+                  };
+                  const file = exportBuild(out);
+                  const parsed = readProfile(file);
+                  setCarried(file);
+                  setBad(!parsed.ok);
+                  setSaid(
+                    parsed.ok
+                      ? `${exportSummary(out)} — имя файла: ${exportName(person.name, new Date())}`
+                      : parsed.said,
+                  );
+                }}
+              >
+                собрать файл
+              </Button>
+              <Button
+                onClick={() => {
+                  const person = current;
+                  if (person === null) return;
+                  const bundle: Bundle = {
+                    version: 1,
+                    person: { id: person.id, name: person.name },
+                    facts: [],
+                    grants: [],
+                    from: "этот компьютер",
+                  };
+                  const packed = pack(bundle);
+                  const plan = transferAfter(bundle, ["Загрузки"]);
+                  setCarried(packed.text);
+                  setBad(!packed.ok);
+                  setSaid(`${packed.said}. ${plan.said}`);
+                }}
+              >
+                что будет на новой машине
+              </Button>
+            </div>
+            {carried !== "" ? (
+              <Text className={styles.mono} aria-label="файл профиля">
+                {carried.length > 400 ? `${carried.slice(0, 400)}…` : carried}
+              </Text>
+            ) : null}
+            <div className={styles.row}>
+              <Input
+                aria-label="вставить файл профиля"
+                className={styles.wide}
+                placeholder="вставьте сюда файл профиля"
+                value={brought ?? ""}
+                onChange={(_, data) => setBrought(data.value)}
+              />
+              <Button
+                onClick={() => {
+                  // Импорт проверяет формат и НЕ перезаписывает молча.
+                  const read = readProfile(brought ?? "");
+                  if (!read.ok) {
+                    setBad(true);
+                    setSaid(read.said);
+                    return;
+                  }
+                  const clash = conflict(read.got.name);
+                  setBad(false);
+                  setSaid(`${read.said} ${clash.said}`);
+                }}
+              >
+                проверить файл
+              </Button>
+            </div>
+            <ul className={styles.list}>
+              {notDo().slice(0, 3).map((line) => (
+                <li key={line}>
+                  <Text className={styles.muted}>{line}</Text>
+                </li>
+              ))}
+              <li>
+                <Text className={styles.muted}>
+                  {`перед отправкой наружу: файл памяти можно обезличить — ${hide(
+                    { version: 1, exportedAt: Date.now(), preferences: [], methods: [], exceptions: [] },
+                    ANON,
+                  ).said}`}
+                </Text>
+              </li>
+              <li>
+                <Text className={styles.muted}>
+                  {`без обезличивания — ${hide(
+                    { version: 1, exportedAt: Date.now(), preferences: [], methods: [], exceptions: [] },
+                    FULL,
+                  ).said}`}
+                </Text>
+              </li>
+            </ul>
+          </div>
 
           {/* Гость: что можно, чего нельзя и почему. Не «ограниченный режим», а
               четыре пути, по которым опасное могло бы пройти, — и отказ на каждом. */}
