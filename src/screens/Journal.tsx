@@ -36,7 +36,13 @@ const useStyles = makeStyles({
    * не действовало для поиска в журнале — человек с дрожащей рукой промахивался
    * именно там, где ищет вчерашнее дело.
    */
-  searchField: { minHeight: "44px" },
+  // Fluent `Input` — это обёртка, внутри которой настоящий `input`. Мерить надо
+  // ту, что человек видит: `minHeight` на самом `input` дал 42 px, потому что
+  // обёртка держала свою высоту. Мера 44 px ставится и обёртке.
+  searchField: {
+    minHeight: "44px",
+    "& input": { minHeight: "44px" },
+  },
   center: { display: "flex", gap: "10px", alignItems: "center", color: tokens.colorNeutralForeground2 },
   error: { color: tokens.colorPaletteRedForeground2 },
   table: {

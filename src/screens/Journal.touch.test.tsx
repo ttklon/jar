@@ -46,7 +46,9 @@ describe("поле поиска в журнале", () => {
     const source = readFileSync(resolve(process.cwd(), "src/screens/Journal.tsx"), "utf8");
     // Мера живёт в стиле `searchField` и применяется к самому полю: стиль без
     // применения ничего не значит.
-    expect(source).toContain("searchField: { minHeight: \"44px\" }");
+    // Мера стоит **и** на обёртке Fluent `Input`, и на самом поле: обёртка
+    // держала свою высоту, и одного `minHeight` на `input` не хватило (42 px).
+    expect(source).toMatch(/searchField: \{[\s\S]*?minHeight: "44px"[\s\S]*?& input[\s\S]*?minHeight: "44px"/);
     expect(source).toContain("className={styles.searchField}");
   });
 
