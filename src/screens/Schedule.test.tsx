@@ -18,7 +18,7 @@ class ResizeObserverStub {
 }
 vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
-type Row = { id: string; what: string; cadence: string; minute: number; paused: boolean; when: string };
+type Row = { id: string; what: string; cadence: string; minute: number; paused: boolean; policy: string; when: string };
 
 let rows: Row[] = [];
 const tauri = vi.fn(() => true);
@@ -28,7 +28,11 @@ vi.mock("../ipc", () => ({
   schedules: async () => rows,
   scheduleAdd: async (what: string, cadence: string, minute: number) => {
     const when = cadence === "hourly" ? "каждый час в :00" : `каждый день в ${String(Math.floor(minute / 60)).padStart(2, "0")}:00`;
-    rows = [...rows, { id: `${cadence}:${minute}:${what}`, what, cadence, minute, paused: false, when }];
+    rows = [...rows, { id: `${cadence}:${minute}:${what}`, what, cadence, minute, paused: false, policy: "ask", when }];
+    return rows;
+  },
+  schedulePolicy: async (id: string, policy: string) => {
+    rows = rows.map((row) => (row.id === id ? { ...row, policy } : row));
     return rows;
   },
   schedulePause: async (id: string, paused: boolean) => {
@@ -83,7 +87,7 @@ describe("экран расписания", () => {
   });
 
   it("пауза и отмена стоят на строке и объясняются словами", async () => {
-    rows = [{ id: "daily:540:отчёт", what: "отчёт о диске", cadence: "daily", minute: 540, paused: false, when: "каждый день в 09:00" }];
+    rows = [{ id: "daily:540:отчёт", what: "отчёт о диске", cadence: "daily", minute: 540, paused: false, policy: "ask", when: "каждый день в 09:00" }];
     render(<Schedule />);
     await screen.findByText(/\[включено\]; последний раз ещё не запускалось/);
 
@@ -100,5 +104,24 @@ describe("экран расписания", () => {
     tauri.mockReturnValue(false);
     render(<Schedule />);
     expect(await screen.findByText(/в браузере расписаний нет/)).toBeTruthy();
+  });
+
+  it("пропуск при сне решается у дела, и выбор виден", async () => {
+    rows = [
+      { id: "daily:540:отчёт", what: "отчёт о диске", cadence: "daily", minute: 540, paused: false, policy: "ask", when: "каждый день в 09:00" },
+    ];
+    render(<Schedule />);
+    await screen.findByText(/\[включено\]/);
+
+    // По умолчанию — «спрошу»: первый пропуск даёт вопрос, а не догадку.
+    const choice = screen.getByLabelText("если компьютер спал: отчёт о диске") as HTMLSelectElement;
+    expect(choice.value).toBe("ask");
+
+    fireEvent.change(choice, { target: { value: "catchUp" } });
+
+    // Слова правила `catchUp`: сколько пропущено и что будет — «один раз»,
+    // а не семь отчётов после отпуска.
+    await waitFor(() => expect(screen.getByRole("status").textContent).toMatch(/пропущено 1, сделаю один раз/));
+    expect(rows[0]!.policy).toBe("catchUp");
   });
 });

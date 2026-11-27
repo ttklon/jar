@@ -388,6 +388,7 @@ pub fn run() {
             ipc::schedules,
             ipc::schedule_add,
             ipc::schedule_pause,
+            ipc::schedule_policy,
             ipc::schedule_remove,
             ipc::hotkey_current,
             ipc::hotkey_assign,

@@ -619,7 +619,16 @@ pub fn schedule_add(
         cadence,
         minute,
         paused: false,
+        // Умолчание — «спрошу»: первый пропуск даёт вопрос, а не догадку о
+        // том, чего человек хотел.
+        policy: "ask".to_string(),
     })
+}
+
+/// Что делать с пропущенным запуском — выбор у конкретного правила.
+#[tauri::command]
+pub fn schedule_policy(id: String, policy: String) -> Result<Vec<schedule::store::Saved>, String> {
+    schedule::store::set_policy(&id, &policy)
 }
 
 /// Пауза и продолжение.

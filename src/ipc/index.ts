@@ -261,6 +261,20 @@ export async function scheduleAdd(what: string, cadence: string, minute: number)
   throw new Error("в браузере расписание не сохраняется: список ведёт приложение");
 }
 
+/**
+ * Что делать с пропущенным запуском — выбор у конкретного правила.
+ *
+ * Не общая настройка: человек не должен искать, почему одно правило догоняет,
+ * а другое нет.
+ */
+export async function schedulePolicy(id: string, policy: string): Promise<ScheduleRow[]> {
+  if (isTauri()) {
+    const { schedulePolicy: fromCore } = await import("./tauri");
+    return fromCore(id, policy);
+  }
+  throw new Error("в браузере нечего настраивать: список ведёт приложение");
+}
+
 export async function schedulePause(id: string, paused: boolean): Promise<ScheduleRow[]> {
   if (isTauri()) {
     const { schedulePause: fromCore } = await import("./tauri");

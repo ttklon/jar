@@ -456,6 +456,10 @@ export function scheduleAdd(what: string, cadence: string, minute: number): Prom
   return invoke<ScheduleRow[]>("schedule_add", { what, cadence, minute });
 }
 
+export function schedulePolicy(id: string, policy: string): Promise<ScheduleRow[]> {
+  return invoke<ScheduleRow[]>("schedule_policy", { id, policy });
+}
+
 export function schedulePause(id: string, paused: boolean): Promise<ScheduleRow[]> {
   return invoke<ScheduleRow[]>("schedule_pause", { id, paused });
 }

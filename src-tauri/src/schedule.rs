@@ -353,6 +353,18 @@ pub mod store {
         /// Минута внутри дня или часа.
         pub minute: u32,
         pub paused: bool,
+        /// Что делать с пропущенным запуском (компьютер спал): `catchUp`,
+        /// `skip`, `ask`. Выбор — у дела, а не глобальной настройкой: человек не
+        /// будет искать, почему одно правило догоняет, а другое нет.
+        ///
+        /// `serde(default)` — чтобы список, созданный до этого поля, читался: у
+        /// него выбор ещё не сделан, и умолчание честное — «спрошу».
+        #[serde(default = "default_policy")]
+        pub policy: String,
+    }
+
+    fn default_policy() -> String {
+        "ask".to_string()
     }
 
     impl Saved {
@@ -433,6 +445,20 @@ pub mod store {
             ));
         }
         items.push(item);
+        save(&items)?;
+        Ok(items)
+    }
+
+    /// Выбор «что делать с пропуском» для одного правила.
+    pub fn set_policy(id: &str, policy: &str) -> Result<Vec<Saved>, String> {
+        if !["catchUp", "skip", "ask"].contains(&policy) {
+            return Err(format!("{policy}: такого выбора нет — есть catchUp, skip, ask"));
+        }
+        let mut items = load();
+        let Some(found) = items.iter_mut().find(|item| item.id == id) else {
+            return Err("такого расписания нет: возможно, оно уже отменено".to_string());
+        };
+        found.policy = policy.to_string();
         save(&items)?;
         Ok(items)
     }

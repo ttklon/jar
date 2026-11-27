@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
-import { isTauri, scheduleAdd, schedulePause, scheduleRemove, schedules } from "../ipc";
+import { isTauri, scheduleAdd, schedulePause, schedulePolicy, scheduleRemove, schedules } from "../ipc";
 import type { ScheduleRow } from "../ipc";
 import { clockText, confirm, nightNotice, parse } from "../lib/plainSchedule";
 import { row as scheduleRow } from "../lib/scheduleScreen";
+import { line as missedLine, type Policy } from "../lib/catchUp";
 
 /**
  * «Расписание» — всё в одном списке (шаг 327, фраза — шаг 321).
@@ -123,6 +124,26 @@ export function Schedule() {
       });
   };
 
+  /**
+   * Выбор «что делать с пропуском».
+   *
+   * Решается **у дела**, а не общей настройкой: иначе человек не поймёт, почему
+   * одно правило догоняет, а другое нет (шаг 334). Подсказка зависит от дела:
+   * частое — пропускать, опасное — спрашивать.
+   */
+  const setPolicy = (item: ScheduleRow, policy: Policy) => {
+    schedulePolicy(item.id, policy)
+      .then((got) => {
+        setItems(got);
+        // Слова — правила `catchUp`: экран не сочиняет своё объяснение.
+        setSaid(missedLine({ what: item.what, policy, dangerous: false, missed: 1 }));
+      })
+      .catch((reason: unknown) => {
+        setBad(true);
+        setSaid(reason instanceof Error ? reason.message : String(reason));
+      });
+  };
+
   const cancel = (item: ScheduleRow) => {
     scheduleRemove(item.id)
       .then((got) => {
@@ -192,6 +213,16 @@ export function Schedule() {
                   </Text>
                 </span>
                 <span className={styles.row}>
+                  <select
+                    aria-label={`если компьютер спал: ${item.what}`}
+                    className={styles.muted}
+                    value={item.policy === "" ? "ask" : item.policy}
+                    onChange={(event) => setPolicy(item, event.target.value as Policy)}
+                  >
+                    <option value="ask">спрошу, когда включится</option>
+                    <option value="catchUp">сделаю один раз, а не все пропущенные</option>
+                    <option value="skip">пропущу до следующего раза</option>
+                  </select>
                   <Button size="small" appearance="subtle" onClick={() => toggle(item)}>
                     {item.paused ? "продолжить" : "пауза"}
                   </Button>
