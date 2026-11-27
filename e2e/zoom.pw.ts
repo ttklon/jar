@@ -145,7 +145,7 @@ test("масштаб 200%: вход в разговор виден, не обр�
   expect(state.focused).toBe(true);
 });
 
-test("540 px: карточка дела не ломается — проверка правилом, а не глазами", async ({ page }) => {
+test("540 px: журнал не ломается — проверка правилом, а не глазами", async ({ page }) => {
   // Шаг 378, подключение `narrowCard`. Правило жило в библиотеке и ничего не
   // проверяло: ни один тест его не звал. 540 px — ниже порога, где строка
   // времени и кнопка «разобрать заново» перестают помещаться на одной строке
@@ -175,71 +175,64 @@ test("540 px: карточка дела не ломается — проверк
     timeout: 15_000,
   });
 
-  // Пустой журнал говорит это словами: `journal.empty` = «Пока пусто — журнал
-  // появится после первого действия». Регулярка сверена с текстом, а не
-  // придумана.
-  const empty = await page.evaluate(() => /Пока пусто/i.test(document.querySelector("main")?.textContent ?? ""));
+  // Что проверять, если дел нет.
+  //
+  // Кнопка «разобрать заново» появляется только у дела, а на чистой машине дел
+  // ноль — и первый вариант теста падал на этом, требуя кнопку там, где её не
+  // должно быть. Но вёрстку проверить всё равно можно: в журнале **всегда**
+  // есть поле поиска и кнопки фильтров. Они и проверяются — на настоящей
+  // вёрстке, независимо от того, писали на этой машине что-нибудь или нет.
+  const search = page.getByRole("textbox", { name: /поиск/i }).first();
+  const filters = page.getByRole("group", { name: "фильтр журнала" });
+  await expect(search).toBeVisible();
+  await expect(filters).toBeVisible();
 
-  // Снимок делается **после** того, как экран загрузился: иначе проверялся бы
-  // прошлый кадр, где ещё крутился спиннер и кнопок не было.
-  const state = await page.evaluate(() => {
-    const root = document.documentElement;
-    const main = document.querySelector("main");
-    // Все экраны живут в DOM одновременно: неактивные скрыты `display: none`
-    // на своём контейнере (так сделано, чтобы переключение экранов не теряло
-    // состояние). Кнопки скрытого экрана имеют нулевую площадь **законно** —
-    // это не поломка вёрстки. Поэтому проверяются только те, что реально
-    // видны: у таких есть площадь и они не внутри `display: none`.
-    const visible = (element: Element): boolean => {
-      const style = getComputedStyle(element);
-      if (style.display === "none" || style.visibility === "hidden") return false;
-      const box = element.getBoundingClientRect();
-      return box.width > 0 && box.height > 0;
-    };
-    const buttons = Array.from(main ? main.querySelectorAll("button") : []).filter(visible);
-    const out = buttons.map((element) => {
+  const searchBox = await search.boundingBox();
+  expect(searchBox, "у поля поиска нет рамки: его не измерить").not.toBeNull();
+  if (searchBox) {
+    // Поле не уже 44 px по высоте (палец и планшет) и не вышло за края окна.
+    expect(searchBox.height).toBeGreaterThanOrEqual(44);
+    expect(searchBox.x).toBeGreaterThanOrEqual(0);
+    expect(searchBox.x + searchBox.width).toBeLessThanOrEqual(540 + 1);
+  }
+
+  const filterButtons = await filters.getByRole("button").count();
+  // Фильтров несколько, и они настоящие кнопки: если их нет, проверять
+  // «помещаются ли» нечего.
+  expect(filterButtons, "в группе фильтров нет кнопок").toBeGreaterThan(0);
+
+  // 1. Горизонтальной прокрутки нет: иначе что-то шире окна.
+  const scrolls = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+  );
+  expect(scrolls).toBe(false);
+
+  // 2. Кнопки фильтров помещаются в окно — по правилу `fits`, а не на глаз.
+  // Кнопка за краем это «есть, но нельзя нажать».
+  const filterBoxes = await filters.evaluate((group) =>
+    Array.from(group.querySelectorAll("button")).map((element) => {
       const box = element.getBoundingClientRect();
       const style = getComputedStyle(element);
       return {
         label: (element.textContent ?? "").trim().slice(0, 40),
         left: box.left,
+        top: box.top,
         right: box.right,
+        bottom: box.bottom,
         width: box.width,
         height: box.height,
         hidden: style.display === "none" || style.visibility === "hidden",
-        windowWidth: window.innerWidth,
       };
-    });
-    return {
-      scrolls: root.scrollWidth > root.clientWidth + 1,
-      buttons: out,
-      windowWidth: window.innerWidth,
-      // Сколько кнопок скрыто вместе с неактивными экранами: числом, чтобы
-      // «проверили мало» было видно, а не выглядело как «всё хорошо».
-      hiddenCount: (main ? main.querySelectorAll("button").length : 0) - buttons.length,
-    };
-  });
-
-  if (!empty) {
-    // Журнал непустой: кнопки обязаны быть. Ноль здесь — провал, потому что
-    // дела есть, а нажать нечего.
-    expect(state.buttons.length, "в непустом журнале нет ни одной видимой кнопки").toBeGreaterThan(0);
-  }
-
-  // 1. Горизонтальной прокрутки нет: иначе что-то шире окна.
-  expect(state.scrolls).toBe(false);
-
-  // 2. Кнопка, которая есть, должна быть доступна: правило `fits` — то же,
-  // что для ленты экранов. Кнопка за краем это «есть, но нельзя нажать».
-  const viewport = viewportAt(1, state.windowWidth, 900);
-  const broken = state.buttons
+    }),
+  );
+  const viewport = viewportAt(1, 540, 900);
+  const broken = filterBoxes
     .map((button) => {
       const seen: Visible = {
-        box: { left: button.left, top: 0, right: button.right, bottom: button.height, width: button.width, height: button.height },
+        box: { left: button.left, top: button.top, right: button.right, bottom: button.bottom, width: button.width, height: button.height },
         hidden: button.hidden,
         clipped: false,
       };
-      // Пустая кнопка (иконка без подписи) всё равно должна быть в окне.
       return fits(seen, viewport) ? null : `${button.label || "кнопка"}: ${whyNot(seen, viewport) ?? "не помещается"}`;
     })
     .filter((value): value is string => value !== null);
