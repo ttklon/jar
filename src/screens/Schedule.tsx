@@ -16,6 +16,7 @@ import type { ScheduleRow, WhenThenRow } from "../ipc";
 import { clockText, confirm, nightNotice, parse } from "../lib/plainSchedule";
 import { row as scheduleRow } from "../lib/scheduleScreen";
 import { line as missedLine, type Policy } from "../lib/catchUp";
+import { deferred as nightDeferred, isNight, safeList } from "../lib/nightTasks";
 import { parse as parseWhenThen, summary as rulesSummary, type Rule as WhenThenRule, type When } from "../lib/whenThen";
 
 /**
@@ -127,7 +128,9 @@ export function Schedule() {
     const minute = wanted.at === "hourly" ? 0 : wanted.at;
     const cadence = wanted.at === "hourly" ? "hourly" : "daily";
     // Ночью про мир — предупреждение до сохранения, а не после.
-    const night = nightNotice(wanted, false);
+    // Ночью — предупреждение до сохранения. Меняет ли дело мир, из фразы не
+    // видно, поэтому говорим не «нельзя», а что будет при отказе.
+    const night = nightNotice(wanted, true);
     setBad(false);
     setBusy(true);
     scheduleAdd(wanted.what, cadence, minute)
@@ -305,6 +308,9 @@ export function Schedule() {
                         «когда» и «как прошло» обязаны быть теми же, что в списке
                         правил, иначе экран и правило разойдутся. */}
                     {line(item)}
+                    {isNight(item.minute)
+                      ? ` · ночью мир не меняется: ${nightDeferred()}`
+                      : ""}
                   </Text>
                 </span>
                 <span className={styles.row}>
@@ -336,6 +342,18 @@ export function Schedule() {
           <Text className={styles.muted}>
             {`всего ${items.length}, на паузе ${items.filter((item) => item.paused).length}`}
           </Text>
+          {/* Ночью — только чтение: говорим это списком с причиной у каждого, а
+              не «ночью ничего нельзя». */}
+          <details>
+            <summary className={styles.muted}>что разрешено ночью (23:00–07:00)</summary>
+            <ul className={styles.list}>
+              {safeList().map((line) => (
+                <li key={line}>
+                  <Text className={styles.muted}>{line}</Text>
+                </li>
+              ))}
+            </ul>
+          </details>
         </>
       )}
 

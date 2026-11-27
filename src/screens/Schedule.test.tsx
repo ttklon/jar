@@ -194,3 +194,43 @@ describe("правила «когда …, тогда …»", () => {
     expect(rules).toHaveLength(0);
   });
 });
+
+describe("ночью мир не меняется", () => {
+  it("ночное расписание предупреждается до сохранения и говорит, что будет при отказе", async () => {
+    render(<Schedule />);
+    await screen.findByText(/расписаний нет/);
+
+    fireEvent.change(screen.getByLabelText("расписание фразой"), {
+      target: { value: "каждый день в 3 — почисти загрузки" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "добавить" }));
+
+    // Не «нельзя»: сказано, что ночью дела, меняющие мир, без подтверждения не
+    // запускаются, — это предупреждение, а решение за человеком.
+    await waitFor(() =>
+      expect(screen.getByRole("status").textContent).toMatch(/вы, скорее всего, спите.*без подтверждения/),
+    );
+  });
+
+  it("в строке ночного расписания видно, что оно подождёт до утра", async () => {
+    rows = [
+      { id: "daily:180:уборка", what: "почисти загрузки", cadence: "daily", minute: 180, paused: false, policy: "ask", when: "каждый день в 03:00" },
+    ];
+    render(<Schedule />);
+
+    expect(await screen.findByText(/ночью мир не меняется: утром спросим/)).toBeTruthy();
+  });
+
+  it("что разрешено ночью — списком с причиной у каждого", async () => {
+    rows = [
+      { id: "daily:180:отчёт", what: "отчёт о диске", cadence: "daily", minute: 180, paused: false, policy: "ask", when: "каждый день в 03:00" },
+    ];
+    render(<Schedule />);
+    await screen.findByText(/всего 1, на паузе 0/);
+
+    fireEvent.click(screen.getByText(/что разрешено ночью/));
+
+    // У каждого разрешения названа причина, а не просто «разрешено».
+    expect(screen.getByText(/проверить место на диске — только читает/)).toBeTruthy();
+  });
+});
