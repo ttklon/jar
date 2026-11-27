@@ -668,7 +668,10 @@ pub async fn unfinished_forget() -> Result<(), String> {
 pub async fn unfinished_save(state: tauri::State<'_, crate::Unfinished>) -> crate::session::Saved {
     // Из памяти, а не с диска: на диске лежит вчерашнее, и записать его поверх
     // сегодняшнего — потерять ровно то, что хотели сохранить.
-    match crate::unfinished_of(&state) {
+    // Значение берём ДО `match`: `tauri::State` — временная ссылка на обёртку, и
+    // живое заимствование в ветке не даёт ей умереть (E0597/E0277).
+    let found = crate::unfinished_of(&state);
+    match found {
         Some(need) => crate::session::save_now(&need),
         None => crate::session::Saved {
             allow: true,
