@@ -39,6 +39,7 @@ use crate::profiles::{self, ProfileOperation, ProfileSpec};
 use crate::readiness;
 use crate::registry::{Action, Registry, RegistrySnapshot};
 use crate::restricted;
+use crate::schedule;
 use crate::roles;
 use crate::sandbox::{self, Verdict};
 use crate::server::{self, Server};
@@ -583,6 +584,51 @@ pub fn autostart_status(state: State<'_, AppState>) -> autostart::Autostart {
     }
     let _ = &state;
     status
+}
+
+/// Список расписаний — то, что человек настроил, словами.
+///
+/// Без этого списка расписание «перестаёт существовать»: человек помнит, что
+/// что-то включал, но не помнит что, и создаёт второе поверх первого.
+#[tauri::command]
+pub fn schedules() -> Vec<schedule::store::Saved> {
+    schedule::store::load()
+}
+
+/// Добавить расписание.
+///
+/// Разбор фразы — в правиле (`plainSchedule`), здесь только сохранение: команда
+/// получает уже проверенные «когда» и «что» и не угадывает второй раз.
+#[tauri::command]
+pub fn schedule_add(what: String, cadence: String, minute: u32) -> Result<Vec<schedule::store::Saved>, String> {
+    let what = what.trim();
+    if what.is_empty() {
+        return Err("не сказано, что делать: расписание из пустого дела не сработает".to_string());
+    }
+    if minute > 1439 {
+        return Err("минут в сутках 1440: 0–1439".to_string());
+    }
+    let id = format!("{cadence}:{minute}:{what}");
+    schedule::store::add(schedule::store::Saved {
+        id,
+        what: what.to_string(),
+        cadence,
+        minute,
+        paused: false,
+    })
+}
+
+/// Пауза и продолжение.
+#[tauri::command]
+pub fn schedule_pause(id: String, paused: bool) -> Result<Vec<schedule::store::Saved>, String> {
+    schedule::store::set_paused(&id, paused)
+}
+
+/// Отменить расписание. Возвращается новый список: экран показывает его же, а не
+/// догадку о том, что получилось.
+#[tauri::command]
+pub fn schedule_remove(id: String) -> Result<Vec<schedule::store::Saved>, String> {
+    schedule::store::remove(&id)
 }
 
 /// Какая горячая клавиша действует.

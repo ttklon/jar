@@ -16,18 +16,19 @@ import {
   webLightTheme,
 } from "@fluentui/react-components";
 import {
-  AppsListDetailRegular,
   AppGenericRegular,
+  AppsListDetailRegular,
   BrainCircuitRegular,
   BranchRegular,
+  CalendarClockRegular,
+  DocumentBulletListRegular,
   HandRightRegular,
   HistoryRegular,
   HomeRegular,
+  InfoRegular,
   MicRegular,
   SearchRegular,
   SettingsRegular,
-  InfoRegular,
-  DocumentBulletListRegular,
 } from "@fluentui/react-icons";
 import { afterWake, engineStatus, isTauri, registrySnapshot } from "./ipc";
 import { watchWake } from "./lib/wakeWatch";
@@ -53,6 +54,7 @@ const Journal = lazy(() => import("./screens/Journal").then((m) => ({ default: m
 const Apps = lazy(() => import("./screens/Apps").then((m) => ({ default: m.Apps })));
 const Settings = lazy(() => import("./screens/Settings").then((m) => ({ default: m.Settings })));
 const Licenses = lazy(() => import("./screens/Licenses").then((m) => ({ default: m.Licenses })));
+const Schedule = lazy(() => import("./screens/Schedule").then((m) => ({ default: m.Schedule })));
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
 import { applyScale, readScale } from "./components/TextSizeCard";
@@ -87,7 +89,8 @@ type Screen =
   | "journal"
   | "settings"
   | "state"
-  | "licenses";
+  | "licenses"
+  | "schedule";
 
 const useStyles = makeStyles({
   shell: {
@@ -220,6 +223,8 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement; keywords: read
   // стоит рядом с «Обзором»: обе отвечают на вопрос о доверии, и обе должны
   // находиться без поиска по документации (шаг 217).
   { id: "licenses", label: "Лицензии", icon: <DocumentBulletListRegular />, keywords: ["лицензии", "licenses", "spdx", "gpl"] },
+  // «Расписание» — рядом с журналом: и то и другое про «что происходит само».
+  { id: "schedule", label: "Расписание", icon: <CalendarClockRegular />, keywords: ["расписание", "каждый день", "schedule", "авто", "утром"] },
 ];
 
 /**
@@ -765,6 +770,8 @@ export function App() {
                 />
               ) : screen === "licenses" ? (
                 <Licenses />
+              ) : screen === "schedule" ? (
+                <Schedule />
               ) : (
                 <Settings
                   theme={choice}

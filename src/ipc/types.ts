@@ -844,6 +844,24 @@ export interface HotkeyView {
   why: string;
 }
 
+/**
+ * Расписание, как его видит человек.
+ *
+ * `when` считает ядро (`schedule::store::Saved::when`), а не экран: подпись и
+ * настоящее время срабатывания обязаны быть одним и тем же.
+ */
+export interface ScheduleRow {
+  id: string;
+  what: string;
+  /** `daily` или `hourly`. */
+  cadence: string;
+  /** Минута внутри дня (0–1439) или часа (0–59). */
+  minute: number;
+  paused: boolean;
+  /** Когда — словами: «каждый день в 09:00». */
+  when: string;
+}
+
 export interface UndoPreview {
   session: string;
   steps: UndoStep[];

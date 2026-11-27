@@ -8,6 +8,7 @@
 
 export type {
   Action,
+  ScheduleRow,
   Autostart,
   DataPlace,
   DataTotals,
@@ -77,7 +78,7 @@ export type {
 } from "./types";
 export { RISK_ORDER, STATUS_ORDER, TIER_ORDER } from "./types";
 
-import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, HotkeyView, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, WakeReport, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
+import type { Autostart, AuditEvent, DataPlace, DataTotals, ResourceReport, SelfCheckVerdict, ConfirmToken, CustomHand, Downloaded, EngineStatus, Episode, Fact, FlowView, ForegroundWindow, HandDraft, HashCheck, HotkeyView, ScheduleRow, IsolationStatus, Learning, MachineState, Presence, UiPress, UiTyped, ModelsView, Plan, PlanAnswer, PlanCheck, PlanItem, PlanReport, ProfileView, NetworkAddress, AddressProbe, ReadinessStatus, RemovedAll, RoleView, RunRecord, SmokeResult, WakeReport, SpeechStatus, StepResult, Thought, ToolView, TrialReport, UiDump, UndoPreview, UndoReport, VoiceTrayStatus } from "./types";
 
 /** Ядро Tauri ставит это поле на window до загрузки фронтенда. */
 export function isTauri(): boolean {
@@ -238,6 +239,44 @@ export async function undoApply(): Promise<UndoReport> {
 // ровно то, что написано.
 
 /** Включён ли автозапуск и что именно запустится. Ничего не меняет. */
+/**
+ * Расписания: список, добавление, пауза, отмена.
+ *
+ * В браузере расписаний нет — и это говорится словами, а не пустым списком,
+ * который выглядит как «ничего не настроено».
+ */
+export async function schedules(): Promise<ScheduleRow[]> {
+  if (isTauri()) {
+    const { schedules: fromCore } = await import("./tauri");
+    return fromCore();
+  }
+  return [];
+}
+
+export async function scheduleAdd(what: string, cadence: string, minute: number): Promise<ScheduleRow[]> {
+  if (isTauri()) {
+    const { scheduleAdd: fromCore } = await import("./tauri");
+    return fromCore(what, cadence, minute);
+  }
+  throw new Error("в браузере расписание не сохраняется: список ведёт приложение");
+}
+
+export async function schedulePause(id: string, paused: boolean): Promise<ScheduleRow[]> {
+  if (isTauri()) {
+    const { schedulePause: fromCore } = await import("./tauri");
+    return fromCore(id, paused);
+  }
+  throw new Error("в браузере нечего ставить на паузу: список ведёт приложение");
+}
+
+export async function scheduleRemove(id: string): Promise<ScheduleRow[]> {
+  if (isTauri()) {
+    const { scheduleRemove: fromCore } = await import("./tauri");
+    return fromCore(id);
+  }
+  throw new Error("в браузере нечего отменять: список ведёт приложение");
+}
+
 /**
  * Какая горячая клавиша действует.
  *

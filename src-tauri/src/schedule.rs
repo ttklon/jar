@@ -333,3 +333,120 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
+
+/// Хранение расписаний: где лежит список и как он переживает перезапуск.
+///
+/// Список — файл рядом с журналом и логами, в `%LOCALAPPDATA%\ZShelper`. Не в
+/// памяти фактов: расписание — это настройка, которую человек **видит списком**
+/// и правит руками, а не то, что приложение «запомнило».
+pub mod store {
+    use super::{Cadence, Schedule};
+    use serde::{Deserialize, Serialize};
+
+    /// Одна запись списка — то, что видит человек и что нужно для запуска.
+    #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+    pub struct Saved {
+        pub id: String,
+        pub what: String,
+        /// `daily` или `hourly` — словами файла, а не номером варианта.
+        pub cadence: String,
+        /// Минута внутри дня или часа.
+        pub minute: u32,
+        pub paused: bool,
+    }
+
+    impl Saved {
+        pub fn schedule(&self) -> Schedule {
+            Schedule {
+                id: self.id.clone(),
+                what: self.what.clone(),
+                cadence: if self.cadence == "hourly" {
+                    Cadence::Hourly
+                } else {
+                    Cadence::Daily
+                },
+                minute: self.minute,
+                paused: self.paused,
+            }
+        }
+
+        /// Когда — словами. Экран берёт это, а не собирает сам: иначе подпись в
+        /// списке и то, когда оно правда срабатывает, разошлись бы.
+        pub fn when(&self) -> String {
+            let (hour, minute) = (self.minute / 60, self.minute % 60);
+            if self.cadence == "hourly" {
+                format!("каждый час в :{minute:02}")
+            } else {
+                format!("каждый день в {hour:02}:{minute:02}")
+            }
+        }
+    }
+
+    /// Файл списка.
+    pub fn file() -> std::path::PathBuf {
+        let base = std::env::var_os("LOCALAPPDATA")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(std::env::temp_dir);
+        base.join("ZShelper").join("schedules.json")
+    }
+
+    /// Прочитать список.
+    ///
+    /// Битые строки не чинятся и не мешают: они пропускаются, а остальные
+    /// остаются. Иначе одна испорченная запись стирала бы все расписания.
+    pub fn load() -> Vec<Saved> {
+        let Ok(text) = std::fs::read_to_string(file()) else {
+            return Vec::new();
+        };
+        match serde_json::from_str::<Vec<Saved>>(&text) {
+            Ok(items) => items,
+            Err(_) => Vec::new(),
+        }
+    }
+
+    /// Записать список. Доказательство — чтение обратно, как везде в этом проекте.
+    pub fn save(items: &[Saved]) -> Result<(), String> {
+        let path = file();
+        if let Some(dir) = path.parent() {
+            std::fs::create_dir_all(dir).map_err(|error| format!("папка расписаний: {error}"))?;
+        }
+        let text = serde_json::to_string_pretty(items).map_err(|error| error.to_string())?;
+        std::fs::write(&path, format!("{text}\n")).map_err(|error| format!("запись списка: {error}"))?;
+        let back = std::fs::read_to_string(&path).map_err(|error| format!("чтение обратно: {error}"))?;
+        if back.trim() != text.trim() {
+            return Err("в файле оказалось не то, что записали: список не сохранён".to_string());
+        }
+        Ok(())
+    }
+
+    /// Добавить. Одинаковое дважды не добавляется: два одинаковых расписания —
+    /// это два отчёта и «почему приходит два?».
+    pub fn add(item: Saved) -> Result<Vec<Saved>, String> {
+        let mut items = load();
+        if items.iter().any(|have| have.what == item.what && have.minute == item.minute && have.cadence == item.cadence) {
+            return Err(format!("такое уже есть: {} — не добавляю второй раз", item.when()));
+        }
+        items.push(item);
+        save(&items)?;
+        Ok(items)
+    }
+
+    /// Пауза или продолжение по id. Возвращает новый список.
+    pub fn set_paused(id: &str, paused: bool) -> Result<Vec<Saved>, String> {
+        let mut items = load();
+        let Some(found) = items.iter_mut().find(|item| item.id == id) else {
+            return Err("такого расписания нет: возможно, оно уже отменено".to_string());
+        };
+        found.paused = paused;
+        save(&items)?;
+        Ok(items)
+    }
+
+    /// Убрать по id. Отсутствие — не ошибка: цель достигнута.
+    pub fn remove(id: &str) -> Result<Vec<Saved>, String> {
+        let mut items = load();
+        items.retain(|item| item.id != id);
+        save(&items)?;
+        Ok(items)
+    }
+}

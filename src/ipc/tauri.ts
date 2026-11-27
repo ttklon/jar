@@ -24,6 +24,7 @@ import type {
   ForegroundWindow,
   HandDraft,
   HashCheck,
+  ScheduleRow,
   HotkeyView,
   IsolationStatus,
   Learning,
@@ -444,6 +445,23 @@ export function undoReport(): Promise<UndoPreview> {
 
 export function undoApply(): Promise<UndoReport> {
   return invoke<UndoReport>("undo_apply");
+}
+
+/** Список расписаний из ядра. */
+export function schedules(): Promise<ScheduleRow[]> {
+  return invoke<ScheduleRow[]>("schedules");
+}
+
+export function scheduleAdd(what: string, cadence: string, minute: number): Promise<ScheduleRow[]> {
+  return invoke<ScheduleRow[]>("schedule_add", { what, cadence, minute });
+}
+
+export function schedulePause(id: string, paused: boolean): Promise<ScheduleRow[]> {
+  return invoke<ScheduleRow[]>("schedule_pause", { id, paused });
+}
+
+export function scheduleRemove(id: string): Promise<ScheduleRow[]> {
+  return invoke<ScheduleRow[]>("schedule_remove", { id });
 }
 
 /** Какая клавиша действует. Доступно и в браузере через dev-адаптер. */
