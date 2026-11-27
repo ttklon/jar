@@ -613,9 +613,6 @@ mod tests {
             "чужая метка не опознаётся"
         );
         assert!(find(&base, Kind::Whisper).is_none());
-        let _guard = download::TEST_LOCK
-            .lock()
-            .unwrap_or_else(|e| e.into_inner());
         assert!(remove_under_lock(&base, Kind::Whisper)
             .unwrap_err()
             .contains("метки владения"));
@@ -627,9 +624,6 @@ mod tests {
             let base = fixture("removal", kind);
             std::fs::write(base.join("sidecars/llama-server.exe"), b"manual").unwrap();
             std::fs::write(base.join("model.gguf"), b"weights").unwrap();
-            let _test_guard = download::TEST_LOCK
-                .lock()
-                .unwrap_or_else(|e| e.into_inner());
             remove_under_lock(&base, kind).unwrap();
             assert!(!directory(&base, kind).exists());
             assert_eq!(
@@ -712,9 +706,6 @@ mod tests {
         )
         .unwrap();
         assert!(is_managed(&base, Kind::Whisper));
-        let _guard = download::TEST_LOCK
-            .lock()
-            .unwrap_or_else(|e| e.into_inner());
         remove_under_lock(&base, Kind::Whisper).unwrap();
         assert!(!whisper_dir.exists(), "whisper удалён");
         assert!(
@@ -731,9 +722,6 @@ mod tests {
         std::fs::remove_file(directory(&base, Kind::Llama).join(OWNER)).unwrap();
         assert!(!is_managed(&base, Kind::Llama));
         assert!(find(&base, Kind::Llama).is_none());
-        let _guard = download::TEST_LOCK
-            .lock()
-            .unwrap_or_else(|e| e.into_inner());
         assert!(remove_under_lock(&base, Kind::Llama)
             .unwrap_err()
             .contains("метки владения"));
@@ -754,10 +742,7 @@ mod tests {
         assert!(is_managed(&base, Kind::Llama));
         assert!(find(&base, Kind::Llama).is_none());
         assert!(verify(&base, Kind::Llama).is_err());
-        let _guard = download::TEST_LOCK
-            .lock()
-            .unwrap_or_else(|e| e.into_inner());
-        remove_under_lock(&base, Kind::Llama).unwrap();
+        remove_under_lock(&base, Kind::Whisper).unwrap();
         assert!(!directory(&base, Kind::Llama).exists());
         std::fs::remove_dir_all(base).unwrap();
     }
@@ -865,7 +850,7 @@ mod tests {
         println!("RUNTIME_SMOKE nonempty text response received");
         engine.0.stop().expect("stop runtime");
         assert!(!engine.0.is_alive());
-        remove(&work.0, Kind::Llama).expect("remove managed runtime after stopping");
+        remove_under_lock(&work.0, Kind::Llama).expect("remove managed runtime after stopping");
         assert!(find(&work.0, Kind::Llama).is_none());
         assert!(
             models_dir.join(&model.file).is_file(),
