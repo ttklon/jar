@@ -47,7 +47,18 @@ export const HEADER = [
  * через месяц не отличить своё слово от догадки (шаг 273).
  */
 export function write(facts: readonly Sourced[]): string {
-  const lines = facts.map((fact) => `${fact.kind}: ${fact.value} — ${sourceWord(fact.origin)}`);
+  const lines = facts.map((fact) => {
+    // Происхождение — всегда; `from` — когда он что-то добавляет.
+    //
+    // Дефект, найденный при подключении: `from` писался в памяти и терялся
+    // здесь. Для ответа на вопрос это единственное место, где остаётся имя
+    // поля («ответ на «путь»»), — без пометки «D:\Отчёты» через месяц просто
+    // путь, и непонятно, на что это ответ. `from` дописывается **в скобках**
+    // после происхождения, чтобы строка по-прежнему разбиралась форматом
+    // `вид: значение — откуда`.
+    const note = fact.from.trim() === "" ? "" : ` (${fact.from.trim()})`;
+    return `${fact.kind}: ${fact.value} — ${sourceWord(fact.origin)}${note}`;
+  });
   return `${HEADER}${lines.join("\n")}${lines.length > 0 ? "\n" : ""}`;
 }
 
