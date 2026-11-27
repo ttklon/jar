@@ -17,6 +17,7 @@ import { clockText, confirm, nightNotice, parse } from "../lib/plainSchedule";
 import { row as scheduleRow } from "../lib/scheduleScreen";
 import { line as missedLine, type Policy } from "../lib/catchUp";
 import { deferred as nightDeferred, isNight, safeList } from "../lib/nightTasks";
+import { longSleep, survivesRestart } from "../lib/scheduleSurvives";
 import { parse as parseWhenThen, summary as rulesSummary, type Rule as WhenThenRule, type When } from "../lib/whenThen";
 import { check as checkTrigger, describe as describeTrigger, limits as triggerLimits, type Trigger } from "../lib/whenTriggers";
 
@@ -452,6 +453,16 @@ export function Schedule() {
           </ul>
         </>
       )}
+
+
+      {/* Где живёт расписание и что будет после сна. Это не украшение: раньше
+          расписание жило в памяти процесса и исчезало вместе с ним — человек
+          выключал компьютер и не находил своих правил. */}
+      {items !== null && items.length > 0 ? (
+        <Text className={styles.muted}>
+          {`${survivesRestart("file").said}. ${longSleep(0) ?? "короткий сон: пропущенное спросим один раз, а не очередью"}`}
+        </Text>
+      ) : null}
 
       {/* Какие «когда» проверяемы — сказано до того, как человек придумает
           правило, которое не сработает. */}
