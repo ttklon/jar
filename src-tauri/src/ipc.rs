@@ -592,7 +592,10 @@ pub fn autostart_status(state: State<'_, AppState>) -> autostart::Autostart {
 /// выдаётся за проверку.
 #[tauri::command]
 pub fn hotkey_current() -> hotkey::HotkeyView {
-    hotkey::view(false, "занятость чужих программ Windows не показывает: проверяется только при назначении")
+    hotkey::view(
+        false,
+        "занятость чужих программ Windows не показывает: проверяется только при назначении",
+    )
 }
 
 /// Назначить горячую клавишу.
