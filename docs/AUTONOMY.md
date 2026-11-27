@@ -86,6 +86,7 @@
 * `src/components/ResourceReport.tsx:58` — useEffect(load, []);
 * `src/components/RightNowCard.tsx:40` — useEffect(() => {
 * `src/components/TrustCard.tsx:72` — useEffect(() => {
+* `src/components/UpdateCard.tsx:70` — useEffect(() => {
 * `src/components/WeekStatsCard.tsx:57` — useEffect(() => {
 * `src/lib/useVoice.ts:662` — useEffect(() => {
 * `src/lib/useVoice.ts:699` — useEffect(

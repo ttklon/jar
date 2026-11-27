@@ -590,8 +590,14 @@ pub fn autostart_status(state: State<'_, AppState>) -> autostart::Autostart {
 ///
 /// Без этого списка расписание «перестаёт существовать»: человек помнит, что
 /// что-то включал, но не помнит что, и создаёт второе поверх первого.
+///
+/// Команды расписания **асинхронные**: они читают и пишут файл, а синхронная
+/// команда исполняется на потоке окна — на медленном диске окно замирало бы
+/// (шаги 388/397). Правило проверяется сторожем `diskOnUiThread.test.ts`;
+/// чтение спрятано в модуле, поэтому сторож его не видит — и это не повод
+/// оставлять команду синхронной.
 #[tauri::command]
-pub fn schedules() -> Vec<schedule::store::Saved> {
+pub async fn schedules() -> Vec<schedule::store::Saved> {
     schedule::store::load()
 }
 
@@ -600,7 +606,7 @@ pub fn schedules() -> Vec<schedule::store::Saved> {
 /// Разбор фразы — в правиле (`plainSchedule`), здесь только сохранение: команда
 /// получает уже проверенные «когда» и «что» и не угадывает второй раз.
 #[tauri::command]
-pub fn schedule_add(
+pub async fn schedule_add(
     what: String,
     cadence: String,
     minute: u32,
@@ -625,16 +631,75 @@ pub fn schedule_add(
     })
 }
 
+/// Есть ли рядом файл предыдущей версии — и чем он подтверждён.
+///
+/// Откат без сети работает только если файл **лежит рядом**: «на сервере» — это
+/// не откат, а вторая загрузка, и в самолёте она не работает. Поэтому команда
+/// смотрит на диск, а не обещает.
+#[derive(Debug, Serialize)]
+pub struct RollbackFile {
+    /// Имя файла рядом (пусто — не нашли).
+    pub file: String,
+    /// Размер: 0 — файла нет; больше нуля — видно, что он цел.
+    pub bytes: u64,
+    /// Где искали: человеку нужно знать, куда положить файл, если его нет.
+    pub looked_in: String,
+}
+
+/// Найти файл предыдущей версии рядом с программой.
+///
+/// Ищем `*.old` и `zshelper-<версия>.exe` в папке программы: имя с версией —
+/// единственный способ сказать «вернуть версию 1.9», не гадая.
+///
+/// Команда **асинхронная**: она обходит каталог, а синхронная команда исполняется
+/// на потоке окна — на медленном диске окно замирало бы (шаги 388/397).
+#[tauri::command]
+pub async fn rollback_file() -> RollbackFile {
+    let exe = std::env::current_exe().unwrap_or_default();
+    let dir = exe.parent().map(|path| path.to_path_buf()).unwrap_or_default();
+    let looked_in = if dir.as_os_str().is_empty() {
+        "папка программы не определилась".to_string()
+    } else {
+        dir.display().to_string()
+    };
+
+    let mut found = RollbackFile { file: String::new(), bytes: 0, looked_in };
+    let Ok(entries) = std::fs::read_dir(&dir) else {
+        return found;
+    };
+    for entry in entries.flatten() {
+        let name = entry.file_name().to_string_lossy().to_string();
+        let lower = name.to_lowercase();
+        // Только исполняемые файлы прошлых версий: `.bak` данных — не версия.
+        if !(lower.ends_with(".exe.old") || lower.ends_with(".old") || (lower.starts_with("zshelper-") && lower.ends_with(".exe"))) {
+            continue;
+        }
+        // Не текущий файл: он тоже подходит под «zshelper-…exe».
+        if let (Ok(current), Ok(candidate)) = (std::fs::canonicalize(&exe), std::fs::canonicalize(entry.path())) {
+            if current == candidate {
+                continue;
+            }
+        }
+        let bytes = entry.metadata().map(|meta| meta.len()).unwrap_or(0);
+        if bytes > 0 {
+            found.file = name;
+            found.bytes = bytes;
+            break;
+        }
+    }
+    found
+}
+
 /// Правила «когда …, тогда …».
 #[tauri::command]
-pub fn when_then_rules() -> Vec<schedule::when_then::Saved> {
+pub async fn when_then_rules() -> Vec<schedule::when_then::Saved> {
     schedule::when_then::load()
 }
 
 /// Добавить правило. Разбор фразы — в правиле (`whenThen.parse`), здесь только
 /// сохранение уже проверенного: команда не угадывает второй раз.
 #[tauri::command]
-pub fn when_then_add(
+pub async fn when_then_add(
     kind: String,
     when: String,
     then: String,
@@ -658,31 +723,31 @@ pub fn when_then_add(
 
 /// Выключить или включить правило, не удаляя его.
 #[tauri::command]
-pub fn when_then_set_on(id: String, on: bool) -> Result<Vec<schedule::when_then::Saved>, String> {
+pub async fn when_then_set_on(id: String, on: bool) -> Result<Vec<schedule::when_then::Saved>, String> {
     schedule::when_then::set_on(&id, on)
 }
 
 #[tauri::command]
-pub fn when_then_remove(id: String) -> Result<Vec<schedule::when_then::Saved>, String> {
+pub async fn when_then_remove(id: String) -> Result<Vec<schedule::when_then::Saved>, String> {
     schedule::when_then::remove(&id)
 }
 
 /// Что делать с пропущенным запуском — выбор у конкретного правила.
 #[tauri::command]
-pub fn schedule_policy(id: String, policy: String) -> Result<Vec<schedule::store::Saved>, String> {
+pub async fn schedule_policy(id: String, policy: String) -> Result<Vec<schedule::store::Saved>, String> {
     schedule::store::set_policy(&id, &policy)
 }
 
 /// Пауза и продолжение.
 #[tauri::command]
-pub fn schedule_pause(id: String, paused: bool) -> Result<Vec<schedule::store::Saved>, String> {
+pub async fn schedule_pause(id: String, paused: bool) -> Result<Vec<schedule::store::Saved>, String> {
     schedule::store::set_paused(&id, paused)
 }
 
 /// Отменить расписание. Возвращается новый список: экран показывает его же, а не
 /// догадку о том, что получилось.
 #[tauri::command]
-pub fn schedule_remove(id: String) -> Result<Vec<schedule::store::Saved>, String> {
+pub async fn schedule_remove(id: String) -> Result<Vec<schedule::store::Saved>, String> {
     schedule::store::remove(&id)
 }
 

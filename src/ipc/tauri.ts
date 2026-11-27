@@ -24,6 +24,7 @@ import type {
   ForegroundWindow,
   HandDraft,
   HashCheck,
+  RollbackFile,
   ScheduleRow,
   WhenThenRow,
   HotkeyView,
@@ -455,6 +456,11 @@ export function schedules(): Promise<ScheduleRow[]> {
 
 export function scheduleAdd(what: string, cadence: string, minute: number): Promise<ScheduleRow[]> {
   return invoke<ScheduleRow[]>("schedule_add", { what, cadence, minute });
+}
+
+/** Файл предыдущей версии рядом: смотрим на диск, а не обещаем. */
+export function rollbackFile(): Promise<RollbackFile> {
+  return invoke<RollbackFile>("rollback_file");
 }
 
 export function whenThenRules(): Promise<WhenThenRow[]> {

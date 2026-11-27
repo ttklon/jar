@@ -886,6 +886,18 @@ export interface WhenThenRow {
   fired: number;
 }
 
+/**
+ * Файл предыдущей версии рядом с программой.
+ *
+ * `bytes: 0` — файла нет: откат без сети невозможен, и это говорится словами, а
+ * не серой кнопкой.
+ */
+export interface RollbackFile {
+  file: string;
+  bytes: number;
+  looked_in: string;
+}
+
 export interface UndoPreview {
   session: string;
   steps: UndoStep[];

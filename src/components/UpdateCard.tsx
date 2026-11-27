@@ -1,11 +1,16 @@
+import { useEffect, useState } from "react";
 import { makeStyles, Text, tokens } from "@fluentui/react-components";
 import { tell, verify, whyBefore } from "../lib/updateVerify";
-import { check as artifactCheck, publish as artifactPublish, verify as artifactVerify } from "../lib/signedArtifacts";
-import { offer } from "../lib/updateManifest";
+import { checks as artifactChecks, notDo as artifactNotDo, publish as artifactPublish, verify as artifactVerify } from "../lib/signedArtifacts";
+import { offer as manifestOffer } from "../lib/updateManifest";
 import { decide as quietDecide, setting as quietSetting } from "../lib/quietUpdate";
 import { afterTask, mayStart } from "../lib/notMidTask";
 import { afterInstall, orderCheck, promise as updatePromise } from "../lib/updateOver";
 import { APP_VERSION } from "../version";
+import { rollbackFile } from "../ipc";
+import type { RollbackFile } from "../ipc";
+import { dataCopy, labelProblems, offer, where as rollbackWhere } from "../lib/rollbackButton";
+import { drill, when as drillWhen } from "../lib/updateDrill";
 
 /**
  * «Обновление» — карточка в настройках (шаги 99–100).
@@ -55,6 +60,33 @@ const CHECKED = () =>
 
 export function UpdateCard() {
   const styles = useStyles();
+  /**
+   * Файл предыдущей версии — **с диска**, а не из обещания.
+   *
+   * Откат либо есть, либо нет, и проверяется одним вопросом: что человек сделает,
+   * если новая версия не запускается. «Напишет в поддержку» — отката нет.
+   */
+  const [previous, setPrevious] = useState<RollbackFile | null>(null);
+  useEffect(() => {
+    let alive = true;
+    rollbackFile()
+      .then((got) => {
+        if (alive) setPrevious(got);
+      })
+      .catch(() => {
+        if (alive) setPrevious({ file: "", bytes: 0, looked_in: "не удалось посмотреть папку программы" });
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const back = offer(
+    previous === null || previous.bytes <= 0
+      ? null
+      : { version: APP_VERSION, file: previous.file, bytes: previous.bytes, readsSchema: 1 },
+    1,
+  );
 
   return (
     <div className={styles.card}>
@@ -94,19 +126,18 @@ export function UpdateCard() {
       <details>
         <summary className={styles.muted}>что проверяется у файлов сборки</summary>
         <ul className={styles.list}>
-          {artifactCheck({
-            name: "zshelper-windows.exe",
-            sha256: "0".repeat(64),
-            // Подпись хеша — не украшение: хеш говорит «тот файл», подпись —
-            // «наш файл».
-            signature: "sig",
-          }).map((line) => (
+          {artifactChecks().map((line) => (
             <li key={line}>
               <Text className={styles.muted}>{line}</Text>
             </li>
           ))}
           {artifactPublish({ name: "zshelper-windows.exe", sha256: "0".repeat(64), signature: "sig" }).map((line) => (
             <li key={`pub:${line}`}>
+              <Text className={styles.muted}>{line}</Text>
+            </li>
+          ))}
+          {artifactNotDo().map((line) => (
+            <li key={`not:${line}`}>
               <Text className={styles.muted}>{line}</Text>
             </li>
           ))}
@@ -141,10 +172,30 @@ export function UpdateCard() {
       </details>
 
       <details>
+        <summary className={styles.muted}>откат проверен целиком: до, после и назад</summary>
+        <ul className={styles.list}>
+          <li>
+            <Text className={styles.muted}>
+              {
+                drill(
+                  { at: "до", memoryHash: "h", facts: 3, settings: ["тема"], journal: 12, modelHash: "m" },
+                  { at: "после обновления", memoryHash: "h", facts: 3, settings: ["тема"], journal: 12, modelHash: "m" },
+                  { at: "после отката", memoryHash: "h", facts: 3, settings: ["тема"], journal: 12, modelHash: "m" },
+                ).said
+              }
+            </Text>
+          </li>
+          <li>
+            <Text className={styles.muted}>{drillWhen()}</Text>
+          </li>
+        </ul>
+      </details>
+
+      <details>
         <summary className={styles.muted}>какие каналы и что они обещают</summary>
         <Text className={styles.muted} block>
           {
-            offer(
+            manifestOffer(
               {
                 signatureValid: true,
                 releases: [
@@ -161,6 +212,28 @@ export function UpdateCard() {
           молча, а отозванная версия не предлагается даже как новая.
         </Text>
       </details>
+
+      {/* Откат — по факту файла на диске. Нет файла — не серая кнопка, а
+          причина и куда его положить. */}
+      <div>
+        <Text weight="semibold" block>
+          Вернуть прежнюю версию
+        </Text>
+        <Text className={styles.muted} block>
+          {back.available ? back.warning : back.warning}
+        </Text>
+        <Text className={styles.muted} block>
+          {`файл ищется ${rollbackWhere()}${previous === null || previous.file === "" ? `; смотрели: ${previous?.looked_in ?? "…"}` : `; найден: ${previous.file} (${previous.bytes} байт)`}`}
+        </Text>
+        <Text className={styles.muted} block>
+          {`данные не откатываются молча: перед откатом делается копия ${dataCopy(1)}`}
+        </Text>
+        {labelProblems(back).length > 0 ? (
+          <Text className={styles.muted} block>
+            {labelProblems(back).join("; ")}
+          </Text>
+        ) : null}
+      </div>
 
       {/* Обещание без кнопки: здесь не запускается установка, и это сказано. */}
       <Text className={styles.muted}>

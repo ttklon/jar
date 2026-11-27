@@ -3,6 +3,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { UpdateCard } from "./UpdateCard";
 
+/** Файл предыдущей версии: по умолчанию — нет. */
+let previous = { file: "", bytes: 0, looked_in: "C:\\Program Files\\ZShelper" };
+vi.mock("../ipc", () => ({
+  rollbackFile: async () => previous,
+}));
+
 /**
  * «Обновление» (шаги 99–100).
  *
@@ -19,7 +25,10 @@ class ResizeObserverStub {
 }
 vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  previous = { file: "", bytes: 0, looked_in: "C:\\Program Files\\ZShelper" };
+});
 
 describe("обновление", () => {
   it("называет установленную версию, а не «доступно обновление»", () => {
@@ -53,12 +62,36 @@ describe("обновление", () => {
     expect(screen.getByText(/обновление подождёт: сейчас выполняется действие — не будем рвать дело/)).toBeTruthy();
     fireEvent.click(screen.getByText(/что проверяется у файлов сборки/));
     // У каждого файла сборки — своя проверка, а не «всё подписано».
-    expect(screen.getAllByText(/zshelper-windows\.exe/).length).toBeGreaterThan(0);
+    // «Не заменяет хеш подписью» — разные проверки, и это названо.
+    expect(screen.getByText(/не заменяет хеш подписью: хеш ловит битый файл, подпись — подмену/)).toBeTruthy();
   });
 
   it("каналы: «новее» и «стабильнее» — разные вещи", () => {
     render(<UpdateCard />);
     fireEvent.click(screen.getByText(/какие каналы и что они обещают/));
     expect(screen.getByText(/«Новее» и «стабильнее» — разные вещи/)).toBeTruthy();
+  });
+});
+
+describe("откат: есть он или нет — по файлу на диске", () => {
+  it("файла нет — сказано словами и куда его положить, а не серая кнопка", async () => {
+    render(<UpdateCard />);
+    expect(await screen.findByText(/файла предыдущей версии рядом нет — откат недоступен/)).toBeTruthy();
+    // Где искали — чтобы человек знал, куда положить файл.
+    expect(screen.getByText(/смотрели: C:\\Program Files\\ZShelper/)).toBeTruthy();
+  });
+
+  it("файл нашёлся — откат называется действием с размером", async () => {
+    previous = { file: "zshelper-0.0.9.exe", bytes: 6_000_000, looked_in: "C:\\Program Files\\ZShelper" };
+    render(<UpdateCard />);
+
+    expect(await screen.findByText(/найден: zshelper-0\.0\.9\.exe \(6000000 байт\)/)).toBeTruthy();
+    // Данные не откатываются молча: копия называется до нажатия.
+    expect(screen.getByText(/перед откатом делается копия data-до-отката-схема-1\.bak/)).toBeTruthy();
+  });
+
+  it("откат без сети: файл ищется рядом, а не на сервере", async () => {
+    render(<UpdateCard />);
+    expect(await screen.findByText(/в папке программы рядом с текущей версией/)).toBeTruthy();
   });
 });

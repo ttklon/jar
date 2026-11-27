@@ -389,6 +389,7 @@ pub fn run() {
             ipc::schedule_add,
             ipc::schedule_pause,
             ipc::schedule_policy,
+            ipc::rollback_file,
             ipc::when_then_rules,
             ipc::when_then_add,
             ipc::when_then_set_on,
