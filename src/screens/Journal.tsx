@@ -28,6 +28,15 @@ const useStyles = makeStyles({
     maxWidth: "78ch",
   },
   bar: { display: "flex", gap: "12px", alignItems: "center" },
+  /**
+   * Поле поиска — та же мера, что у главного входа (44 px, шаг 196).
+   *
+   * Дефект, найденный e2e на 540 px: поле было высотой 30 px. Обещание «цель,
+   * в которую попадает палец и дрожащая рука» действовало для поля в шапке и
+   * не действовало для поиска в журнале — человек с дрожащей рукой промахивался
+   * именно там, где ищет вчерашнее дело.
+   */
+  searchField: { minHeight: "44px" },
   center: { display: "flex", gap: "10px", alignItems: "center", color: tokens.colorNeutralForeground2 },
   error: { color: tokens.colorPaletteRedForeground2 },
   table: {
@@ -429,6 +438,7 @@ export function Journal({
           }}
         >
           <Input
+            className={styles.searchField}
             value={query}
             placeholder={journal.searchPlaceholder}
             aria-label={journal.searchTitle}
