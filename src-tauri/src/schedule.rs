@@ -398,10 +398,9 @@ pub mod store {
         let Ok(text) = std::fs::read_to_string(file()) else {
             return Vec::new();
         };
-        match serde_json::from_str::<Vec<Saved>>(&text) {
-            Ok(items) => items,
-            Err(_) => Vec::new(),
-        }
+        // Битый файл — пустой список, а не паника: расписание можно создать
+        // заново, а приложение без настроек запускается.
+        serde_json::from_str::<Vec<Saved>>(&text).unwrap_or_default()
     }
 
     /// Записать список. Доказательство — чтение обратно, как везде в этом проекте.
