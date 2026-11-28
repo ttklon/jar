@@ -1279,6 +1279,9 @@ pub async fn think_stream(
     let answered = tauri::async_runtime::spawn_blocking(move || {
         let count = sent;
         let mut collected = String::new();
+        // Накопитель на весь поток: фраза может прийти по частям, и решать по
+        // одной дельте значит рвать речь (шаг 79).
+        let mut sentences = crate::sentences::Sentences::new();
         let outcome = llm::post_lines(port, llm::CHAT_PATH, &body, llm::TIMEOUT, |line| {
             let (delta, error) = llm::stream_delta(line);
 
@@ -1289,14 +1292,15 @@ pub async fn think_stream(
                 collected.push_str(&delta);
 
                 // Событие на каждый токен — тысячи событий в секунду, и это не
-                // «плавность», а лишняя работа. Отдаём по границам фраз.
-                let piece = delta.trim().to_string();
-                let ends_phrase = delta.trim_end().ends_with(['.', '!', '?', '…']);
-                if ends_phrase
-                    && !piece.is_empty()
-                    && count.fetch_add(1, std::sync::atomic::Ordering::Relaxed) < STREAM_PIECES
-                {
-                    let _ = sender.emit("think://piece", piece);
+                // «плавность», а лишняя работа. Отдаём по границам **фраз**, а
+                // не дельт: дельта может содержать два предложения (тогда
+                // первое терялось) или кончаться на «т.е.» (тогда звучал
+                // обрывок). Правило то же, что в `firstWords`: произносим
+                // только законченное.
+                if let Some(sentence) = sentences.push(&delta) {
+                    if count.fetch_add(1, std::sync::atomic::Ordering::Relaxed) < STREAM_PIECES {
+                        let _ = sender.emit("think://piece", sentence);
+                    }
                 }
             }
 
@@ -1307,6 +1311,15 @@ pub async fn think_stream(
                 None => Ok(()),
             }
         });
+
+        // Поток кончился, а остаток не кончался точкой — договариваем его.
+        // Иначе короткий ответ без точки не прозвучал бы вовсе, а человек
+        // услышал бы тишину после «смотрю».
+        if let Some(rest) = sentences.flush() {
+            if count.fetch_add(1, std::sync::atomic::Ordering::Relaxed) < STREAM_PIECES {
+                let _ = sender.emit("think://piece", rest);
+            }
+        }
 
         outcome.map(|_| collected)
     })

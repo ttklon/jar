@@ -144,6 +144,7 @@ import {
 } from "../lib/planPreview";
 import { ActionList } from "../components/ActionList";
 import { clearDraft, readDraft, saveDraft } from "../lib/draft";
+import { STALL_LINE, STALL_MS, decide as firstWordsDecide } from "../lib/firstWords";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import { differ as intentDiffer, missing as intentMissing, parse as parseIntent, say as intentWords } from "../lib/intent";
@@ -3165,6 +3166,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           if (pieceStart.current === 0) pieceStart.current = now;
           pieceCount.current += 1;
           keepSpeedRef.current(pieceStart.current, now, pieceCount.current);
+          // Услышал — значит «ещё думаю» не нужно: отменяем запланированное.
+          heardAtRef.current = Date.now();
+          clearFirstWord();
           speechRef.current?.push(piece);
         }),
       )
@@ -3197,12 +3201,44 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
    * Куски приходят событием `think://piece` и звучат по очереди.
    */
   const sayRef = useRef<(question: string) => void>(() => {});
+  /**
+   * Когда человек последний раз что-то слышал в ответ на этот вопрос.
+   *
+   * Правило `firstWords`: молчание дольше секунды читается как поломка, и
+   * честнее сказать «ещё думаю», чем молчать. Здесь — только засечка: решает
+   * правило (`decide`), а не таймер в экране.
+   */
+  const heardAtRef = useRef(0);
+  const firstWordRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearFirstWord = useCallback(() => {
+    if (firstWordRef.current !== null) {
+      clearTimeout(firstWordRef.current);
+      firstWordRef.current = null;
+    }
+  }, []);
   sayRef.current = (question: string) => {
     const request = ++thoughtRequestRef.current;
     streamOwnerRef.current = request;
     speechRef.current?.clear();
     setThinking(true);
     setThinkError(null);
+
+    // Первые слова (шаг 79): если через STALL_MS ничего не прозвучало —
+    // говорим «ещё думаю». Не «секундочку, сейчас посмотрю»: обещание времени
+    // мы нарушить можем, а «работа идёт» — правда.
+    heardAtRef.current = Date.now();
+    clearFirstWord();
+    firstWordRef.current = setTimeout(() => {
+      if (request !== thoughtRequestRef.current) return;
+      // Если за это время уже начали говорить — молчим: правило `decide`
+      // ставит «что сказать» выше «что долго ждём».
+      if (Date.now() - heardAtRef.current < STALL_MS) return;
+      const piece = firstWordsDecide("", "", STALL_MS);
+      if (piece.kind === "stall") {
+        speechRef.current?.push(STALL_LINE);
+        heardAtRef.current = Date.now();
+      }
+    }, STALL_MS);
 
     say(question)
       .then((answer) => {
@@ -3226,6 +3262,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         setThinkError(message);
       })
       .finally(() => {
+        clearFirstWord();
         if (request === thoughtRequestRef.current) setThinking(false);
       });
   };

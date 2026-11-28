@@ -79,6 +79,7 @@ pub mod runtime;
 pub mod sandbox;
 pub mod schedule;
 pub mod selfcheck;
+pub mod sentences;
 pub mod server;
 pub mod services;
 pub mod session;

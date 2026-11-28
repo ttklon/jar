@@ -45,15 +45,42 @@ export function settled(text: string): string {
   const trimmed = text.replace(/\s+$/u, "");
   if (trimmed.length === 0) return "";
   let cut = -1;
-  for (let index = trimmed.length - 1; index >= 0; index -= 1) {
-    const char = trimmed[index];
-    if (char === "." || char === "!" || char === "?" || char === "…") {
-      cut = index;
-      break;
-    }
+  for (let index = 0; index < trimmed.length; index += 1) {
+    if (!isBoundary(trimmed[index] ?? "")) continue;
+    const next = trimmed[index + 1];
+    // Граница — только если за ней пробел или конец текста. Иначе «30.5»
+    // резалось бы на две фразы: человек услышал бы «в среднем 30» и замолчал.
+    if (next !== undefined && !/\s/u.test(next)) continue;
+    // И не граница, если это сокращение: «т.е.», «см.», «др.» — точка внутри
+    // слова, а не конец мысли. Ядро (`sentences.rs`) решает так же — тест
+    // `firstWordsRust` держит их вместе.
+    if (isAbbreviation(trimmed, index)) continue;
+    cut = index + 1;
   }
   if (cut === -1) return "";
-  return trimmed.slice(0, cut + 1).trim();
+  return trimmed.slice(0, cut).trim();
+}
+
+/** Знак, после которого человек делает паузу. Запятая и тире — не он. */
+function isBoundary(char: string): boolean {
+  return char === "." || char === "!" || char === "?" || char === "…";
+}
+
+/**
+ * Точка внутри сокращения — не конец фразы.
+ *
+ * «т.е.», «см.», «и т.д.» — одно слово с точками внутри. Проверяем по слову
+ * перед точкой: если в нём уже есть точка и все его части короче трёх букв,
+ * это сокращение. «Да.» так не считается: в слове «Да» точки нет, и это
+ * настоящий конец.
+ */
+function isAbbreviation(text: string, dot: number): boolean {
+  const before = text.slice(0, dot);
+  const start = Math.max(before.lastIndexOf(" "), before.lastIndexOf("\n"), before.lastIndexOf("\t"));
+  const token = before.slice(start + 1);
+  if (!token.includes(".")) return false;
+  const parts = token.split(".").filter((part) => part.length > 0);
+  return parts.length > 0 && parts.every((part) => /^\p{L}{1,2}$/u.test(part));
 }
 
 /**
