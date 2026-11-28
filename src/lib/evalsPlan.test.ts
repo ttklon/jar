@@ -128,6 +128,12 @@ describe("ни генератор, ни раннер не выпустят сц�
   it("генератор падает на сценарии без отказа", () => {
     // Живая проверка: подкладываем пустой шестой элемент — и он **не**
     // соглашается. Иначе «проверка есть» значит лишь «строка есть».
+    //
+    // D-017 (шаг 87): генератор зовётся с `--stdout` — проверка настоящая, а
+    // репозиторий не трогается. Без этого живой прогон писал `data/evals.json`
+    // мимо `check_all`, и упавший тест оставлял в дереве испорченный файл
+    // (`1840dbd`: `risk` у отказа стал пустым). CI видел «generated files are
+    // stale» и указывал на файл, а не на тест.
     const script = `
 import importlib.util, sys
 spec = importlib.util.spec_from_file_location("ev", "${new URL("tools/evals.py", root).pathname}")
@@ -135,6 +141,7 @@ m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
 m.CURATED = list(m.CURATED)
 m.CURATED[3] = m.CURATED[3][:5] + ("",)
+sys.argv.append("--stdout")
 try:
     m.main()
 except SystemExit as e:
@@ -152,5 +159,36 @@ sys.exit(1)
     const source = readFileSync(new URL("tools/run_evals.py", root), "utf8");
     expect(source).toContain("must_not");
     expect(source).toContain("проверяется только удачный путь");
+  });
+});
+
+/**
+ * D-017 (шаг 87): проверка не пишет в репозиторий мимо `check_all`.
+ *
+ * Как это было. Живой прогон генератора из теста писал `data/evals.json` в
+ * рабочее дерево. Файл попадал в следующий коммит (не в тот, где его
+ * изменили), а CI затем говорил «generated files are stale» — то есть называл
+ * симптом и указывал на файл, а не на тест. Человеку это читается как «забыли
+ * перегенерировать», хотя перегенерировать было нечего: файл испортили.
+ *
+ * Правило: тест, который зовёт генератор, обязан звать его в режиме
+ * «посчитать, но не писать». Иначе прогон тестов меняет репозиторий, а это
+ * уже не проверка, а правка.
+ */
+describe("D-017: прогон тестов не меняет сгенерированные файлы", () => {
+  it("живой вызов генератора идёт с --stdout, а не пишет в репозиторий", () => {
+    const source = readFileSync(new URL("src/lib/evalsPlan.test.ts", root), "utf8");
+    expect(source).toContain('sys.argv.append("--stdout")');
+  });
+
+  it("генератор пишет только когда не --stdout, и только после проверок", () => {
+    const source = readFileSync(new URL("tools/evals.py", root), "utf8");
+    expect(source).toContain('dry = "--stdout" in sys.argv');
+    // Запись под условием: без этого проверка «сначала проверки, потом
+    // запись» ничего не держит — файл пишется раньше, чем найден отказ.
+    const write = source.indexOf("JSON_OUT.write_text(");
+    const check = source.indexOf("не назван отказ");
+    expect(check).toBeGreaterThan(-1);
+    expect(write).toBeGreaterThan(check);
   });
 });

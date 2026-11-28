@@ -42,11 +42,44 @@ pub struct Book {
 }
 
 /// Где лежит список людей.
+///
+/// В тестах — **своя** папка на процесс (D-018, шаг 87). Было: `cargo test`
+/// писал в настоящий `%LOCALAPPDATA%\ZShelper\people.json`, потому что тесты
+/// `add`/`remove`/`switch` зовут `save` по-настоящему. Отсюда две беды сразу:
+///
+///  1. прогон тестов **затирал список людей** у того, кто его запустил: профили
+///     на машине разработчика исчезали «сами»;
+///  2. тесты шли параллельно и писали в один файл — `the_first_person_
+///     becomes_the_current_one` падал в CI примерно в одном прогоне из пяти:
+///     между записью и чтением обратно другой тест успевал переписать файл.
+///
+/// Правило: тест, который трогает диск, не смеет трогать **настоящий** диск.
+/// Путь подменяется только в сборке `cfg(test)`; в выпущенной программе он
+/// прежний.
 pub fn file() -> std::path::PathBuf {
-    let base = std::env::var_os("LOCALAPPDATA")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(std::env::temp_dir);
+    let base = base_dir();
     base.join("ZShelper").join("people.json")
+}
+
+/// Корень хранения: `LOCALAPPDATA`, а если его нет — временная папка.
+fn base_dir() -> std::path::PathBuf {
+    #[cfg(test)]
+    {
+        // Папка на процесс **и на поток**: тесты идут параллельно, каждый в
+        // своём потоке, и общая папка вернула бы ту же гонку — только тише.
+        // Настоящий список людей при этом не трогается вовсе.
+        return std::env::temp_dir().join(format!(
+            "zshelper-people-test-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+    }
+    #[cfg(not(test))]
+    {
+        std::env::var_os("LOCALAPPDATA")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(std::env::temp_dir)
+    }
 }
 
 /// Прочитать список.
@@ -210,5 +243,39 @@ mod tests {
     #[test]
     fn switching_to_an_unknown_person_is_refused() {
         assert!(switch(&book(), "p9").is_err());
+    }
+
+    /// D-018: тест не трогает настоящий список людей.
+    ///
+    /// Прогон тестов затирал `%LOCALAPPDATA%\ZShelper\people.json` у того, кто
+    /// его запустил, — профили исчезали «сами». И параллельные тесты писали в
+    /// один файл, поэтому `the_first_person_becomes_the_current_one` падал в CI
+    /// через раз.
+    #[test]
+    fn tests_do_not_touch_the_real_list_of_people() {
+        let path = file();
+        let shown = path.display().to_string();
+        assert!(
+            shown.contains("zshelper-people-test-"),
+            "тесты пишут в настоящий список людей: {shown}"
+        );
+        // И каждая проверка — в своей папке: иначе гонка остаётся, просто тише.
+        let first = file();
+        let other = std::thread::spawn(file).join().expect("поток");
+        assert_ne!(first, other, "два потока пишут в один файл");
+    }
+
+    /// Порядок: профили, заведённые подряд, не мешают друг другу.
+    ///
+    /// Раньше здесь была гонка за настоящий файл; теперь она ловится не
+    /// глазами, а делом: десять записей подряд должны дать десять людей.
+    #[test]
+    fn ten_people_in_a_row_are_all_kept() {
+        let _ = std::fs::remove_file(file());
+        for i in 0..10 {
+            let book = load();
+            add(&book, &format!("человек {i}"), false).expect("человек заводится");
+        }
+        assert_eq!(load().people.len(), 10, "записали десять — осталось десять");
     }
 }

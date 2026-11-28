@@ -37,11 +37,31 @@ pub struct Saved {
 }
 
 /// Где лежит незавершённое.
+///
+/// В тестах — своя папка (D-018, шаг 87), как у людей (`people.rs`). Иначе
+/// `cargo test` пишет в настоящий `%LOCALAPPDATA%\ZShelper\unfinished.json`:
+/// прогон тестов подменял бы «незавершённое дело» у того, кто его запустил, —
+/// и после перезапуска человек увидел бы чужую фразу вместо своей.
 pub fn file() -> std::path::PathBuf {
-    let base = std::env::var_os("LOCALAPPDATA")
-        .map(std::path::PathBuf::from)
-        .unwrap_or_else(std::env::temp_dir);
-    base.join("ZShelper").join("unfinished.json")
+    base_dir().join("ZShelper").join("unfinished.json")
+}
+
+/// Корень хранения: `LOCALAPPDATA`, а в тестах — своя папка на поток.
+fn base_dir() -> std::path::PathBuf {
+    #[cfg(test)]
+    {
+        return std::env::temp_dir().join(format!(
+            "zshelper-session-test-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+    }
+    #[cfg(not(test))]
+    {
+        std::env::var_os("LOCALAPPDATA")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(std::env::temp_dir)
+    }
 }
 
 /// Сохранить. `ok` — удалась ли запись.

@@ -52,11 +52,11 @@
   },
   "numbers": {
     "actions": 835,
-    "defects": 16,
+    "defects": 18,
     "evals": 835,
     "profiles": 88,
     "screens": 70,
     "skills": 20,
-    "tests": 496
+    "tests": 497
   }
 }

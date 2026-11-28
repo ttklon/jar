@@ -24,6 +24,7 @@ Run: python3 tools/evals.py
 from __future__ import annotations
 
 import json
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -239,6 +240,26 @@ def refusal_must_not(row: dict) -> list[str]:
 
 
 def main() -> int:
+    """
+    `--stdout` — посчитать и проверить, но **не писать** в репозиторий.
+
+    Зачем (шаг 87, D-017). Проверка «генератор отказывает сценарию без
+    отказа» (`src/lib/evalsPlan.test.ts`, шаг 241) запускает этот файл
+    по-настоящему: иначе «проверка есть» значит лишь «строка есть». Но
+    настоящий запуск писал `data/evals.json` **мимо `check_all`** — и упавший
+    прогон оставлял в дереве испорченный файл, который потом уезжал в коммит
+    (`1840dbd`: `risk` у отказа стал пустым; `0334b1c` вернул его обратно).
+    CI ловил это как «generated files are stale» — жаловался на симптом,
+    а причина была в тесте.
+
+    Второе: запись JSON шла **до** проверок CURATED, поэтому даже честно
+    упавший прогон успевал испортить файл. Теперь сначала проверки, потом
+    запись.
+
+    С `--stdout` проверка остаётся настоящей (те же строки, те же отказы,
+    тот же код возврата), а репозиторий не трогается.
+    """
+    dry = "--stdout" in sys.argv
     rows = json.loads(ACTIONS.read_text(encoding="utf-8"))
     evals = []
     by_domain: Counter = Counter()
@@ -275,30 +296,6 @@ def main() -> int:
         if path.name.startswith("_"):
             continue
         prof_ops += len(json.loads(path.read_text(encoding="utf-8")).get("operations", []))
-
-    JSON_OUT.write_text(
-        json.dumps({"generated_from": "data/actions.psv", "count": len(evals),
-                    "curated": [
-                        {
-                            "priority": p,
-                            "name": n,
-                            "given": g,
-                            "then": t,
-                            # Шаг 241: чего нельзя — третья часть сценария.
-                            # Порядок в кортеже: (p, name, given, then, отказ, риск).
-                            "must_not": m,
-                            "risk": r,
-                            # Шаг 260: владелец и дата — чтобы «никто не потеряет»
-                            # было проверяемым, а не пожеланием.
-                            "owner": owned(n)[0],
-                            "checked": owned(n)[1],
-                        }
-                        for p, n, g, t, m, r in CURATED
-                    ],
-                    "evals": evals},
-                   ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
 
     status = Counter(r["status"] for r in rows)
     risk = Counter(r["risk"] for r in rows)
@@ -409,9 +406,38 @@ def main() -> int:
                 "сценарий без отказа проверяет только удачный путь"
             )
 
-    MD_OUT.write_text("\n".join(L), encoding="utf-8")
+    # Шаг 87, D-017: сначала проверки, потом запись. Иначе даже честно
+    # упавший прогон успевает испортить `data/evals.json` — а `--stdout`
+    # (его зовёт тест) не пишет вовсе.
+    if not dry:
+        JSON_OUT.write_text(
+            json.dumps({"generated_from": "data/actions.psv", "count": len(evals),
+                        "curated": [
+                            {
+                                "priority": p,
+                                "name": n,
+                                "given": g,
+                                "then": t,
+                                # Шаг 241: чего нельзя — третья часть сценария.
+                                # Порядок в кортеже: (p, name, given, then, отказ, риск).
+                                "must_not": m,
+                                "risk": r,
+                                # Шаг 260: владелец и дата — чтобы «никто не потеряет»
+                                # было проверяемым, а не пожеланием.
+                                "owner": owned(n)[0],
+                                "checked": owned(n)[1],
+                            }
+                            for p, n, g, t, m, r in CURATED
+                        ],
+                        "evals": evals},
+                       ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        MD_OUT.write_text("\n".join(L), encoding="utf-8")
+    where = "не записано (--stdout)" if dry else (
+        f"{MD_OUT.relative_to(ROOT)}, {JSON_OUT.relative_to(ROOT)}")
     print(f"evals: {len(evals)} generated, {len(CURATED)} curated "
-          f"(ask={ask}, refuse={refuse}) -> {MD_OUT.relative_to(ROOT)}, {JSON_OUT.relative_to(ROOT)}")
+          f"(ask={ask}, refuse={refuse}) -> {where}")
     return 0
 
 
