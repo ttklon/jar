@@ -140,7 +140,10 @@ mod tests {
         assert_eq!(sentences.push("в среднем 30"), None);
         assert_eq!(sentences.push(".5 градуса т"), None);
         assert_eq!(sentences.push(".е. тепло"), None);
-        assert_eq!(sentences.push("."), Some("в среднем 30.5 градуса т.е. тепло.".to_string()));
+        assert_eq!(
+            sentences.push("."),
+            Some("в среднем 30.5 градуса т.е. тепло.".to_string())
+        );
     }
 
     #[test]
@@ -167,6 +170,9 @@ mod tests {
     fn a_long_dash_is_not_a_pause() {
         let mut sentences = Sentences::new();
         assert_eq!(sentences.push("файл — это папка"), None);
-        assert_eq!(sentences.push(" или нет?"), Some("файл — это папка или нет?".to_string()));
+        assert_eq!(
+            sentences.push(" или нет?"),
+            Some("файл — это папка или нет?".to_string())
+        );
     }
 }
