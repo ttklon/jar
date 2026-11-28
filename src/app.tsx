@@ -22,6 +22,7 @@ import {
   BrainCircuitRegular,
   BranchRegular,
   CalendarClockRegular,
+  DataBarVerticalRegular,
   DocumentBulletListRegular,
   GaugeRegular,
   HandRightRegular,
@@ -63,6 +64,7 @@ const People = lazy(() => import("./screens/People").then((m) => ({ default: m.P
 const Accessibility = lazy(() => import("./screens/Accessibility").then((m) => ({ default: m.Accessibility })));
 const Requirements = lazy(() => import("./screens/Requirements").then((m) => ({ default: m.Requirements })));
 const Build = lazy(() => import("./screens/Build").then((m) => ({ default: m.Build })));
+const Coverage = lazy(() => import("./screens/Coverage").then((m) => ({ default: m.Coverage })));
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
 import { applyScale, readScale } from "./components/TextSizeCard";
@@ -102,7 +104,8 @@ type Screen =
   | "people"
   | "accessibility"
   | "requirements"
-  | "build";
+  | "build"
+  | "coverage";
 
 const useStyles = makeStyles({
   shell: {
@@ -242,6 +245,7 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement; keywords: read
   { id: "accessibility", label: "Доступность", icon: <AccessibilityRegular />, keywords: ["доступность", "клавиатура", "диктор", "a11y", "не мышь"] },
   { id: "requirements", label: "Требования", icon: <GaugeRegular />, keywords: ["требования", "батарея", "слабая машина", "экономия", "4 гб"] },
   { id: "build", label: "Сборка", icon: <WrenchRegular />, keywords: ["сборка", "проверки", "тесты", "прогон", "рука", "ci"] },
+  { id: "coverage", label: "Покрытие", icon: <DataBarVerticalRegular />, keywords: ["покрытие", "тесты", "coverage", "процент"] },
 ];
 
 /**
@@ -797,6 +801,8 @@ export function App() {
                 <Requirements />
               ) : screen === "build" ? (
                 <Build />
+              ) : screen === "coverage" ? (
+                <Coverage />
               ) : (
                 <Settings
                   theme={choice}
