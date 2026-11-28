@@ -7,6 +7,7 @@ import {
   DialogTitle,
   FluentProvider,
   Input,
+  Button,
   makeStyles,
   mergeClasses,
   Spinner,
@@ -43,6 +44,7 @@ import type { RegistrySnapshot } from "./ipc";
 import { Voice } from "./screens/Voice";
 import { Welcome } from "./screens/Welcome";
 import { PauseSwitch } from "./components/PauseSwitch";
+import { GONE_MS, line as missedLineOf, markSeen, missed, when, lastSeen } from "./lib/missedWhileAway";
 import { RunningStrip } from "./components/RunningStrip";
 import type { Running } from "./lib/runningGlobally";
 // Экраны грузятся по требованию (шаги 387/393). Зачем: все одиннадцать в
@@ -284,6 +286,8 @@ export function App() {
    */
   const [runningNow, setRunningNow] = useState<readonly Running[]>([]);
   const [waitingFor, setWaitingFor] = useState(0);
+  /** Что случилось, пока человек не смотрел (шаг 81). Пусто — молчим. */
+  const [missedLine, setMissedLine] = useState("");
 
   // Опрос — раз в пять секунд, а не по каждому событию: плашка индикатор, и
   // «обновляется» не значит «дёргает диск на каждое нажатие». Скрытая вкладка
@@ -313,6 +317,26 @@ export function App() {
             .filter((run) => run.outcome === "running")
             .reduce<number>((min, run) => Math.min(min, run.started_ms), Number.POSITIVE_INFINITY);
           setWaitingFor(Number.isFinite(oldest) ? Math.max(0, Math.round((Date.now() - oldest) / 60_000)) : 0);
+
+          // «Пока вас не было» (шаг 81): считаем от последней показанной сводки
+          // и от момента, когда человек был у экрана. Одно сообщение на
+          // возвращение, а не поток уведомлений.
+          // Опора «когда видел» — отметка на диске, а **не** «сейчас»: в
+          // памяти отметки нет при первом кадре, и `seen = now` заставило бы
+          // сводку считать, что человек видел всё (настоящий дефект: в
+          // браузере она не появлялась никогда). Нет отметки — читаем журнал
+          // целиком: первый раз лучше показать лишнее, чем промолчать.
+          const storage = globalThis.localStorage ?? null;
+          const seen = lastSeen(storage) ?? 0;
+          const got = missed(runs, seen);
+          // «Ушёл ли» — по отметке, а не по нашей догадке: считается от того
+          // же момента, от которого считается «что пропустил».
+          const away = seen === 0 ? GONE_MS + 1 : Date.now() - seen;
+          const verdict = when(away, got);
+          if (verdict.say) {
+            setMissedLine(missedLineOf(got));
+            markSeen(storage, Date.now());
+          }
         })
         .catch(() => {
           // Журнал недоступен — плашки нет. Это индикатор, а не условие работы.
@@ -770,6 +794,22 @@ export function App() {
           {/* Плашка «что сейчас происходит» — надо ВСЕМИ экранами, а не на
               экране дел: человек ушёл с него именно поэтому (шаги 367/376). */}
           <RunningStrip running={runningNow} waitedSinceMin={waitingFor} />
+          {/* «Пока вас не было» — одна строка и один раз (шаг 81). Не
+              уведомление поверх всех окон: дело не срочнее того, чем человек
+              занят, — но и молчание о сделанном было дефектом. */}
+          {missedLine !== "" ? (
+            <div role="status" aria-live="polite">
+              <Text size={200}>{missedLine}</Text>
+              <Button
+                size="small"
+                appearance="subtle"
+                onClick={() => setMissedLine("")}
+                aria-label="скрыть сводку «пока вас не было»"
+              >
+                понятно
+              </Button>
+            </div>
+          ) : null}
           {/* Пауза — рядом с плашкой: увидел «идёт» — тут же решил «не сейчас». */}
           <PauseSwitch />
           {!error && snapshot && !welcome ? (

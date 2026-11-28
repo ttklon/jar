@@ -17,18 +17,18 @@
 опасны: чтение статуса нужно, иначе экран пустой. Опасным было бы **писать**
 или **ходить в сеть** из такого эффекта — и вот этого здесь быть не должно.
 
-* `src/app.tsx:291` — useEffect(() => {
-* `src/app.tsx:341` — useEffect(() => {
-* `src/app.tsx:357` — useEffect(() => {
-* `src/app.tsx:379` — useEffect(() => {
-* `src/app.tsx:395` — useEffect(() => {
-* `src/app.tsx:421` — useEffect(() => {
-* `src/app.tsx:518` — useEffect(() => {
-* `src/app.tsx:538` — useEffect(() => {
-* `src/app.tsx:559` — useEffect(() => {
-* `src/app.tsx:585` — useEffect(() => {
-* `src/app.tsx:592` — useEffect(() => {
-* `src/app.tsx:599` — useEffect(() => {
+* `src/app.tsx:295` — useEffect(() => {
+* `src/app.tsx:365` — useEffect(() => {
+* `src/app.tsx:381` — useEffect(() => {
+* `src/app.tsx:403` — useEffect(() => {
+* `src/app.tsx:419` — useEffect(() => {
+* `src/app.tsx:445` — useEffect(() => {
+* `src/app.tsx:542` — useEffect(() => {
+* `src/app.tsx:562` — useEffect(() => {
+* `src/app.tsx:583` — useEffect(() => {
+* `src/app.tsx:609` — useEffect(() => {
+* `src/app.tsx:616` — useEffect(() => {
+* `src/app.tsx:623` — useEffect(() => {
 * `src/screens/Apps.tsx:24` — useEffect(() => {
 * `src/screens/Ask.tsx:159` — useEffect(() => {
 * `src/screens/DataPlaces.tsx:52` — useEffect(() => {
