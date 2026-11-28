@@ -7,6 +7,8 @@ import { auditTail, isTauri, memoryRuns, searchEpisodes } from "../ipc";
 import { audit as dangerAudit, dangerous as dangerOnly, line as dangerLine, summary as dangerSummary } from "../lib/dangerAudit";
 import { first as firstDanger, order as dangerOrder, tally as dangerTally } from "../lib/dangerFirst";
 import { groupReasons } from "../lib/journal";
+import { days as groupDays, page, notShown } from "../lib/logReader";
+import { read as readSurviving } from "../lib/logSurvives";
 import { line as replayLine } from "../lib/journalReplay";
 import { oneLine } from "../lib/narrowCard";
 import { line as timingLine, mismatch as timingMismatch, slowest, sum as timingSum, type Step as TimingStep } from "../lib/stepTimingView";
@@ -666,6 +668,41 @@ export function Journal({
             </section>
           );
         })()
+      ) : null}
+
+      {/* Как читается журнал (шаги 433, 429): по дням, с числами, и без папки
+          данных. Файл — для поддержки, экран — для человека. */}
+      {events !== null ? (
+        <div>
+          <Text className={styles.note} block>
+            {groupDays(
+              events.map((event) => ({
+                at: event.at_ms,
+                title: event.subject,
+                level: event.outcome === "ok" ? ("дело" as const) : ("внимание" as const),
+              })),
+              Date.now(),
+            )
+              .map((day) => `${day.title}: ${day.items.length}`)
+              .join("; ")}
+          </Text>
+          <Text className={styles.note} block>
+            {page(events.map((event) => ({ at: event.at_ms, title: event.subject, level: "дело" as const })), 50).said}
+          </Text>
+          <details>
+            <summary className={styles.note}>что журнал на экране не показывает</summary>
+            <ul className={styles.note}>
+              {notShown().map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+              <li>
+                {readSurviving(
+                  '{"at":1,"text":"дело прочитано"}\nэто не json\n{"at":2,"text":"и это тоже"}',
+                ).said}
+              </li>
+            </ul>
+          </details>
+        </div>
       ) : null}
 
       {events && events.length > 0 ? (

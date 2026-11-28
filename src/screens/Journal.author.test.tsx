@@ -66,4 +66,29 @@ describe("журнал: кто выполнил", () => {
     // Догадка в журнале хуже пустоты: подставить «я» значит переписать историю.
     expect(screen.getByText("профилей тогда не было")).toBeTruthy();
   });
-});
+
+  it("журнал читается по дням, и это названо числом", async () => {
+    const now = Date.now();
+    vi.mocked(auditTail).mockResolvedValue([
+      event({ at_ms: now, subject: "files|удалить|папка" }),
+      event({ at_ms: now, subject: "files|найти|файл" }),
+      event({ at_ms: now - 86_400_000, subject: "system|проверить|диск" }),
+    ]);
+    vi.mocked(memoryRuns).mockResolvedValue([]);
+
+    render(<Journal />);
+    // «сегодня» и «вчера» вместо дат в обратном порядке.
+    expect(await screen.findByText(/(сегодня: 2|вчера: 1)/)).toBeTruthy();
+  });
+
+  it("битая строка журнала не ломает остальные", async () => {
+    vi.mocked(auditTail).mockResolvedValue([event({ author: "Аня" })]);
+    vi.mocked(memoryRuns).mockResolvedValue([]);
+
+    render(<Journal />);
+    await screen.findByText("Аня");
+    // Строка прочитана по строкам: одна испорчена — остальные всё равно видны.
+    const noted = screen.getAllByRole("listitem").map((item) => item.textContent ?? "");
+    expect(noted.some((text) => /2 строк, 1 испорчены и пропущены/.test(text))).toBe(true);
+  });
+})
