@@ -14,6 +14,8 @@ import {
   think,
   uiDump,
   foregroundWindow,
+  paused,
+  setVoiceTrayStatus,
 } from "../ipc";
 import { readinessFacts } from "./readinessFixture";
 import { Voice } from "./Voice";
@@ -63,6 +65,8 @@ vi.mock("../ipc", () => ({
   // прерванных запусков нет — «продолжать нечего».
   planCheckpoint: vi.fn().mockResolvedValue(null),
   setVoiceTrayStatus: vi.fn().mockResolvedValue(undefined),
+  // Шаг 82: экран спрашивает паузу, чтобы трей не говорил «жду фразу» на паузе.
+  paused: vi.fn().mockResolvedValue(false),
   speechStatus: vi.fn().mockResolvedValue({
     found: false,
     program: null,
@@ -117,6 +121,8 @@ const needsWord = {
 
 afterEach(() => {
   cleanup();
+  // Пауза — общая на файл: иначе тест о паузе оставил бы её следующему.
+  vi.mocked(paused).mockResolvedValue(false);
   vi.mocked(draftPlan).mockReset().mockResolvedValue(null);
   vi.mocked(runPlan).mockReset();
   vi.mocked(machineState).mockReset().mockResolvedValue(away as never);
@@ -874,5 +880,21 @@ describe("очередь дел на экране", () => {
     // И рядом — то, что видно: слова модели отдельно, экран отдельно.
     await waitFor(() => expect(screen.getByText(/Файлов: 12/)).toBeTruthy());
     expect(screen.getByText(/проверить можете только вы/)).toBeTruthy();
+  });
+});
+
+describe("трей не врёт на паузе (шаг 82)", () => {
+  it("пауза поставлена — трею уходит «paused», а не «жду вашу фразу»", async () => {
+    // Дефект был не в значке, а в правде: окно присылало «ready», и трей бодро
+    // писал «жду вашу фразу», хотя на паузе не запустится ни фраза, ни дело.
+    vi.mocked(paused).mockResolvedValue(true);
+    render(<Voice />);
+    await waitFor(() => {
+      const sent = vi.mocked(setVoiceTrayStatus).mock.calls.map((call) => call[0]);
+      expect(sent).toContain("paused");
+    });
+    // И «готово» на паузе не уходит вовсе.
+    const sent = vi.mocked(setVoiceTrayStatus).mock.calls.map((call) => call[0]);
+    expect(sent[sent.length - 1]).toBe("paused");
   });
 });

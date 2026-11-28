@@ -10,6 +10,7 @@ import {
   facts,
   foregroundWindow,
   isTauri,
+  paused,
   modelPrompt,
   planFor,
   say,
@@ -53,6 +54,7 @@ import type {
   UiDump,
   UiPress,
   UiTyped,
+  VoiceTrayStatus,
 } from "../ipc";
 import { MicrophoneCheck } from "../components/MicrophoneCheck";
 import { ReadinessCard } from "../components/ReadinessCard";
@@ -2738,7 +2740,42 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     playCue(cue(next));
   }, [micState]);
 
-  const trayVoiceState = voiceError
+  // Пауза — первое, что должно быть видно: пока она стоит, ни фраза, ни дело
+  // не запустятся, и «жду вашу фразу» было бы прямой ложью (шаг 82).
+  const [pauseOn, setPauseOn] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    void paused()
+      .then((now) => {
+        if (alive) setPauseOn(now);
+      })
+      .catch(() => undefined);
+    if (!isTauri()) {
+      return () => {
+        alive = false;
+      };
+    }
+    let stop: (() => void) | null = null;
+    void import("@tauri-apps/api/event")
+      .then(({ listen }) =>
+        listen<boolean>("pause://changed", (event) => {
+          if (alive) setPauseOn(event.payload);
+        }),
+      )
+      .then((off) => {
+        if (alive) stop = off;
+        else off();
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+      stop?.();
+    };
+  }, []);
+
+  const trayVoiceState: VoiceTrayStatus = pauseOn
+    ? "paused"
+    : voiceError
     ? "error"
     : mic.processing
       ? "working"

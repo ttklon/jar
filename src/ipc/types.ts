@@ -364,6 +364,8 @@ export type VoiceTrayStatus =
   | "ready"
   | "key-down"
   | "key-up"
+  // Шаг 82: пауза видна значком, а не только словами в окне.
+  | "paused"
   | "listening"
   | "working"
   | "awaiting-confirmation"

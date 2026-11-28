@@ -95,6 +95,9 @@ mockIPC((command, payload) => {
     case "foreground_window": return null;
     case "machine_state": return { available: false, note: "simulation", sample: null, declared: null, budget: { parallel: 1, mode: "near", reason: "simulation", may_start: false } };
     case "set_voice_tray_status": return;
+    // Шаг 82: экран спрашивает паузу, чтобы трей не говорил «жду фразу»,
+    // когда ничего не запустится. В симуляции паузы нет.
+    case "paused": return false;
     case "readiness_status": throw new Error("Native readiness intentionally not simulated");
     case "plan_for": return [];
     case "draft_plan": return null;

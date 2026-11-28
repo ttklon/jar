@@ -93,6 +93,8 @@ vi.mock("../ipc", () => ({
   planCheckpoint: vi.fn().mockResolvedValue(null),
   speechStatus: vi.fn().mockResolvedValue(null),
   setVoiceTrayStatus: vi.fn().mockResolvedValue(undefined),
+  // Шаг 82: экран спрашивает паузу, чтобы трей не говорил «жду фразу» на паузе.
+  paused: vi.fn().mockResolvedValue(false),
   foregroundWindow: vi.fn().mockResolvedValue({
     title: "Видео — браузер",
     process: "chrome.exe",
