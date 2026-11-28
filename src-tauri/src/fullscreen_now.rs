@@ -23,7 +23,12 @@ pub fn fullscreen_now() -> bool {
         return false;
     }
 
-    let mut rect = RECT { left: 0, top: 0, right: 0, bottom: 0 };
+    let mut rect = RECT {
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0,
+    };
     if unsafe { GetWindowRect(handle, &mut rect) } == 0 {
         return false;
     }

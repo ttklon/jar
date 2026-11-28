@@ -25,7 +25,10 @@ impl Default for State {
     fn default() -> Self {
         // `last_down_at` = очень давно: первое нажатие не должно считаться
         // дребезгом.
-        State { down: false, last_down_at: i64::MIN / 2 }
+        State {
+            down: false,
+            last_down_at: i64::MIN / 2,
+        }
     }
 }
 
@@ -35,7 +38,14 @@ pub const DEBOUNCE_MS: i64 = 50;
 /// Обработать событие. `fire` — считать ли это нажатием.
 pub fn handle(state: State, down: bool, now: i64) -> (State, bool, &'static str) {
     if !down {
-        return (State { down: false, last_down_at: state.last_down_at }, false, "отпущено");
+        return (
+            State {
+                down: false,
+                last_down_at: state.last_down_at,
+            },
+            false,
+            "отпущено",
+        );
     }
 
     // Дребезг — первым: при нём `down` уже true, и проверка удержания назвала бы
@@ -50,7 +60,14 @@ pub fn handle(state: State, down: bool, now: i64) -> (State, bool, &'static str)
         return (state, false, "удержание: повторы не считаются нажатиями");
     }
 
-    (State { down: true, last_down_at: now }, true, "нажатие")
+    (
+        State {
+            down: true,
+            last_down_at: now,
+        },
+        true,
+        "нажатие",
+    )
 }
 
 #[cfg(test)]
