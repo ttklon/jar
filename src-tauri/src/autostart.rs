@@ -368,9 +368,7 @@ mod tests {
         assert_eq!(parse_query("    Другое    REG_SZ    x.exe"), None);
         // Путь с двойным пробелом читается как есть: пересборка из слов
         // склеила бы его в один и автозапуск перестал бы узнаваться.
-        let spaced = concat!(
-            "    ZShelper    REG_SZ    \"C:\\Program  Files\\z.exe\" --quiet\r\n"
-        );
+        let spaced = "    ZShelper    REG_SZ    \"C:\\Program  Files\\z.exe\" --quiet\r\n";
         assert_eq!(
             parse_query(spaced).as_deref(),
             Some("\"C:\\Program  Files\\z.exe\" --quiet")
