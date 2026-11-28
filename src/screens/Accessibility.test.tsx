@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { Accessibility } from "./Accessibility";
+import { record, reset, settleAfter, useClock } from "../lib/bargeMeasure";
 
 /**
  * «Доступность» (шаги 193/198).
@@ -17,7 +18,10 @@ class ResizeObserverStub {
 }
 vi.stubGlobal("ResizeObserver", ResizeObserverStub);
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  reset();
+});
 
 describe("экран «Доступность»", () => {
   it("главный сценарий назван числом шагов, и у каждого — клавиша", () => {
@@ -25,6 +29,34 @@ describe("экран «Доступность»", () => {
     expect(screen.getByText(/Главный сценарий без мыши: \d+ шагов, все с клавишами/)).toBeTruthy();
     // Пять нажатий: палитра, буквы, Enter, фраза, Enter.
     expect(screen.getByText(/^1\. Ctrl\+K$/)).toBeTruthy();
+  });
+
+  it("перебивание названо числом, а не «работает» (шаг 80)", () => {
+    const now = { at: 0 };
+    const restore = useClock(() => now.at);
+    try {
+      record();
+      now.at = 130;
+      settleAfter(130);
+      render(<Accessibility />);
+      // Обещание — в заголовке, замер — строкой: «худшее перебивание: … 130 мс».
+      expect(screen.getByText(/Перебивание: не дольше 200 мс/)).toBeTruthy();
+      const line = screen.getByText(/худшее перебивание/);
+      expect(line.textContent).toContain("130 мс");
+      expect(line.textContent).toContain("в срок");
+      // Среднее не показываем: оно скрывает одно медленное за девятью быстрыми.
+      expect(screen.getByText(/среднее не показываем/)).toBeTruthy();
+    } finally {
+      restore();
+    }
+  });
+
+  it("без замеров сказано, что мерить, а не выдано «работает»", () => {
+    render(<Accessibility />);
+    expect(screen.getByText(/ещё не мерили: перебейте приложение голосом/)).toBeTruthy();
+    // И названо, где обещание действует: три места, а не одно.
+    expect(screen.getByText("кнопка в окне")).toBeTruthy();
+    expect(screen.getByText("горячая клавиша")).toBeTruthy();
   });
 
   it("у ошибки объявлены и роль, и срочность", () => {

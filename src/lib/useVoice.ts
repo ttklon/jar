@@ -24,6 +24,7 @@ import { saySwitch, switchTo } from "./micSwitch";
 import { say as sayDrop } from "./micDrop";
 import { hint as dictHint, sayHint } from "./dictHint";
 import { KNOWN } from "./context";
+import { record as recordBarge, settleAfter as settleBarge } from "./bargeMeasure";
 
 /** Сколько ждём разбор после того, как человек отпустил кнопку. */
 export const GRACE_MS = 2500;
@@ -437,6 +438,13 @@ export function useVoice(options: VoiceOptions): VoiceControl {
   }, [finish, invalidate, setPending, transcribe]);
 
   const start = useCallback(() => {
+    // Засечка «человек заговорил» — до всего остального (шаг 80). Обещание
+    // перебивания числовое («не дольше 200 мс»), и мерить его надо от звука,
+    // а не от конца открытия микрофона.
+    recordBarge();
+    // И засекаем «сколько прошло до тишины»: `record` — момент звука,
+    // `settle` — момент отчёта. Между ними ровно то, что чувствует человек.
+    const spokenAt = performance.now();
     if (!permission.current.enabled) {
       callbacks.current.onError(permission.current.disabledReason);
       return;
@@ -464,6 +472,8 @@ export function useVoice(options: VoiceOptions): VoiceControl {
     const signal = capture.current.signal;
     discardRef.current = false;
     stopSpeaking();
+    // Тишина наступила сейчас — это и есть конец замера (шаг 80).
+    settleBarge(Math.round(performance.now() - spokenAt));
     heardRef.current = false;
     activeRef.current = true;
     setListening(true);

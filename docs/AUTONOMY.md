@@ -45,30 +45,31 @@
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
 * `src/screens/Undo.tsx:68` — useEffect(load, [load]);
-* `src/screens/Voice.tsx:666` — useEffect(() => {
-* `src/screens/Voice.tsx:1010` — useEffect(() => {
-* `src/screens/Voice.tsx:1075` — useEffect(() => {
-* `src/screens/Voice.tsx:1079` — useEffect(
-* `src/screens/Voice.tsx:1143` — useEffect(() => {
-* `src/screens/Voice.tsx:1204` — useEffect(() => {
-* `src/screens/Voice.tsx:2415` — useEffect(() => {
-* `src/screens/Voice.tsx:2470` — useEffect(() => {
-* `src/screens/Voice.tsx:2480` — useEffect(() => {
-* `src/screens/Voice.tsx:2502` — useEffect(() => {
-* `src/screens/Voice.tsx:2673` — useEffect(() => {
-* `src/screens/Voice.tsx:2706` — useEffect(() => {
-* `src/screens/Voice.tsx:2731` — useEffect(() => {
-* `src/screens/Voice.tsx:2765` — useEffect(() => {
-* `src/screens/Voice.tsx:2771` — useEffect(() => {
-* `src/screens/Voice.tsx:2778` — useEffect(() => {
-* `src/screens/Voice.tsx:2803` — useEffect(() => {
-* `src/screens/Voice.tsx:2818` — useEffect(() => {
-* `src/screens/Voice.tsx:2844` — useEffect(() => {
-* `src/screens/Voice.tsx:2892` — useEffect(() => {
-* `src/screens/Voice.tsx:2898` — useEffect(() => {
-* `src/screens/Voice.tsx:2914` — useEffect(() => {
-* `src/screens/Voice.tsx:3153` — useEffect(() => {
-* `src/screens/Voice.tsx:3188` — useEffect(
+* `src/screens/Voice.tsx:668` — useEffect(() => {
+* `src/screens/Voice.tsx:1012` — useEffect(() => {
+* `src/screens/Voice.tsx:1077` — useEffect(() => {
+* `src/screens/Voice.tsx:1081` — useEffect(
+* `src/screens/Voice.tsx:1145` — useEffect(() => {
+* `src/screens/Voice.tsx:1206` — useEffect(() => {
+* `src/screens/Voice.tsx:2417` — useEffect(() => {
+* `src/screens/Voice.tsx:2472` — useEffect(() => {
+* `src/screens/Voice.tsx:2482` — useEffect(() => {
+* `src/screens/Voice.tsx:2504` — useEffect(() => {
+* `src/screens/Voice.tsx:2675` — useEffect(() => {
+* `src/screens/Voice.tsx:2708` — useEffect(() => {
+* `src/screens/Voice.tsx:2733` — useEffect(() => {
+* `src/screens/Voice.tsx:2767` — useEffect(() => {
+* `src/screens/Voice.tsx:2773` — useEffect(() => {
+* `src/screens/Voice.tsx:2780` — useEffect(() => {
+* `src/screens/Voice.tsx:2805` — useEffect(() => {
+* `src/screens/Voice.tsx:2820` — useEffect(() => {
+* `src/screens/Voice.tsx:2846` — useEffect(() => {
+* `src/screens/Voice.tsx:2894` — useEffect(() => {
+* `src/screens/Voice.tsx:2900` — useEffect(() => {
+* `src/screens/Voice.tsx:2916` — useEffect(() => {
+* `src/screens/Voice.tsx:3155` — useEffect(() => {
+* `src/screens/Voice.tsx:3190` — useEffect(
+* `src/screens/Voice.tsx:3279` — useEffect(() => {
 * `src/components/DownloadBar.tsx:73` — useEffect(() => {
 * `src/components/DownloadBar.tsx:80` — useEffect(() => {
 * `src/components/EveryDayCard.tsx:56` — useEffect(() => {
@@ -96,10 +97,10 @@
 * `src/components/TrustCard.tsx:72` — useEffect(() => {
 * `src/components/UpdateCard.tsx:70` — useEffect(() => {
 * `src/components/WeekStatsCard.tsx:57` — useEffect(() => {
-* `src/lib/useVoice.ts:662` — useEffect(() => {
-* `src/lib/useVoice.ts:699` — useEffect(
-* `src/lib/useVoice.ts:712` — useEffect(() => {
-* `src/lib/useVoice.ts:719` — useEffect(() => {
+* `src/lib/useVoice.ts:672` — useEffect(() => {
+* `src/lib/useVoice.ts:709` — useEffect(
+* `src/lib/useVoice.ts:722` — useEffect(() => {
+* `src/lib/useVoice.ts:729` — useEffect(() => {
 
 ## Сетевые вызовы и запись
 

@@ -2,6 +2,8 @@ import { makeStyles, Text, tokens } from "@fluentui/react-components";
 import { check as keyboardCheck, escape, steps } from "../lib/keyboardOnly";
 import { aria, check as alertCheck, queue } from "../lib/alertA11y";
 import { afterFullscreen, decide, notDo as fullNotDo } from "../lib/fullscreenGames";
+import { sameEverywhere } from "../lib/barge";
+import { LIMIT_MS, worst } from "../lib/bargeMeasure";
 
 /**
  * «Доступность» (шаги 193, 198).
@@ -113,6 +115,33 @@ export function Accessibility() {
             не должен терять начатое. */}
         <Text className={styles.muted} block>
           {`Esc: ${escape(steps().length - 1).said}`}
+        </Text>
+      </div>
+
+      {/* Перебивание числом (шаг 80): обещание «замолкаю быстро» проверяемо
+          только замером. Пока замеров не было — сказано, что и где мерится. */}
+      <div className={styles.card}>
+        <Text weight="semibold" block>
+          Перебивание: не дольше {LIMIT_MS} мс
+        </Text>
+        <ul className={styles.list}>
+          {sameEverywhere().map((place) => (
+            <li key={place}>
+              <Text className={styles.muted}>{place}</Text>
+            </li>
+          ))}
+        </ul>
+        {worst() === null ? (
+          <Text className={styles.muted} block>
+            ещё не мерили: перебейте приложение голосом — здесь появится число, а не «работает»
+          </Text>
+        ) : (
+          <Text className={styles.muted} block role="status" aria-live="polite">
+            {`худшее перебивание: ${worst()?.line ?? ""}`}
+          </Text>
+        )}
+        <Text className={styles.muted} block>
+          {`среднее не показываем: оно скрывает одно медленное за девятью быстрыми, а человек запоминает медленное`}
         </Text>
       </div>
 

@@ -9,6 +9,7 @@ import {
   fillPlan,
   facts,
   foregroundWindow,
+  isTauri,
   modelPrompt,
   planFor,
   say,
@@ -145,6 +146,7 @@ import {
 import { ActionList } from "../components/ActionList";
 import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { STALL_LINE, STALL_MS, decide as firstWordsDecide } from "../lib/firstWords";
+import { record as recordBarge, settleAfter as settleBarge } from "../lib/bargeMeasure";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
 import { differ as intentDiffer, missing as intentMissing, parse as parseIntent, say as intentWords } from "../lib/intent";
@@ -3267,6 +3269,38 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       });
   };
 
+  /**
+   * Засечка «человек заговорил из любой программы» (шаг 80).
+   *
+   * Обещание «замолкаю не дольше 200 мс» относится к трём местам; здесь — то,
+   * которое окно не видит: горячая клавиша в чужой программе. Глушим речь и
+   * закрываем замер там, где звук, а не в ядре.
+   */
+  useEffect(() => {
+    if (!isTauri()) return;
+    let stop: (() => void) | null = null;
+    let alive = true;
+    void import("@tauri-apps/api/event")
+      .then(({ listen }) =>
+        listen<string>("barge://spoken", (event) => {
+          if (event.payload !== "down") return;
+          const spokenAt = performance.now();
+          speechRef.current?.clear();
+          stopSpeaking();
+          settleBarge(Math.round(performance.now() - spokenAt));
+        }),
+      )
+      .then((off) => {
+        if (alive) stop = off;
+        else off();
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+      stop?.();
+    };
+  }, []);
+
   askModelRef.current = (requestedText: string) => {
     // Шаг 127: частый вопрос отвечается из реестра, **без модели**, и сказано, откуда
     // ответ. «Что ты умеешь» не должно ждать 3 секунды за пересказ того, что уже есть.
@@ -3517,8 +3551,13 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           // Перебивание в машине звука: из «говорю» — в «слушаю», а не в готовность.
           // Иначе приложение считало бы, что ещё говорит, и не открыло бы микрофон.
           soundRef.current?.send("bargeIn");
+          // Замер перебивания (шаг 80): «человек заговорил» — здесь, «стало
+          // тихо» — сразу после. Обещание числовое, значит и проверка числовая.
+          recordBarge();
+          const spokeAt = performance.now();
           speechRef.current?.clear();
           stopSpeaking();
+          settleBarge(Math.round(performance.now() - spokeAt));
           setCancelled(false);
           // Новая попытка — новая ошибка: старая не должна пугать до разбора.
           setVoiceError(null);
