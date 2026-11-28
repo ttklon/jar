@@ -665,20 +665,24 @@ pub async fn unfinished_forget() -> Result<(), String> {
 
 /// Сохранить незавершённое сейчас: перед сном, а не только при выходе.
 #[tauri::command]
-pub async fn unfinished_save(state: tauri::State<'_, crate::Unfinished>) -> crate::session::Saved {
+pub async fn unfinished_save(
+    state: tauri::State<'_, crate::Unfinished>,
+) -> Result<crate::session::Saved, String> {
     // Из памяти, а не с диска: на диске лежит вчерашнее, и записать его поверх
     // сегодняшнего — потерять ровно то, что хотели сохранить.
     // Значение берём ДО `match`: `tauri::State` — временная ссылка на обёртку, и
     // живое заимствование в ветке не даёт ей умереть (E0597/E0277).
+    // Async-команда, берущая `State<'_>`, обязана вернуть `Result`: иначе tauri
+    // не может гарантировать время жизни ссылки (AsyncCommandMustReturnResult).
     let found = crate::unfinished_of(&state);
-    match found {
+    Ok(match found {
         Some(need) => crate::session::save_now(&need),
         None => crate::session::Saved {
             allow: true,
             items: Vec::new(),
             said: "сохранять нечего: дел и фраз не было".to_string(),
         },
-    }
+    })
 }
 
 /// Люди за компьютером и кто действует сейчас.
