@@ -165,7 +165,8 @@ mod tests {
     fn only_what_can_be_resumed_is_saved() {
         let saved = save(&need(), true);
         assert_eq!(saved.items.len(), 3);
-        assert!(saved.items[0].contains("уборка загрузок") && saved.items[0].contains("шаг 3"));
+        // Формат — «на шаге 3»: сравниваем с настоящей строкой, а не с догадкой.
+        assert_eq!(saved.items[0], "дело «уборка загрузок» на шаге 3");
     }
 
     #[test]
