@@ -21,7 +21,7 @@ import { UninstallCard } from "../components/UninstallCard";
 import { SleepCard } from "../components/SleepCard";
 import { MonitorCard } from "../components/MonitorCard";
 import { Diagnostics } from "../components/Diagnostics";
-import { levels, show as noticeShow, type SuccessLevel } from "../lib/noticePolicy";
+import { cannotDisable, levels, show as noticeShow, type SuccessLevel } from "../lib/noticePolicy";
 
 /** Ключ настройки уведомлений. Один, чтобы не разъехаться с чтением. */
 const NOTICE_KEY = "zshelper.noticeSuccess";
@@ -31,6 +31,9 @@ const useStyles = makeStyles({
   // Отступ сверху больше, чем между карточками: раздел начинается заметно, а не
   // продолжается. Без этого три заголовка читаются как ещё три карточки.
   sectionTitle: { display: "block", marginTop: "10px" },
+  // Список причин — с отступом и без «точек во весь экран»: это объяснение, а
+  // не перечень опций.
+  mutedList: { margin: "0", paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "4px" },
   lead: { color: tokens.colorNeutralForeground2 },
   card: {
     display: "flex",
@@ -203,6 +206,35 @@ export function Settings({
             запомнилось, а не догадываться по подсветке кнопки. */}
         <Text className={styles.muted} block role="status" aria-live="polite">
           {noticeSaved === null ? levels().find((level) => level.value === successLevel)?.label ?? "" : `${t.settingsNoticeSaved}${noticeSaved}`}
+        </Text>
+      </div>
+
+      {/* «Почему уведомление пришло» (шаг 84). Правило `noticePolicy`
+          существовало и решало это верно — но человек видел только
+          переключатель: почему об успехе молчат, почему об ошибке сообщат даже
+          при «не сообщать» и что нельзя выключить вовсе — нигде не сказано.
+          Молчащий выключатель читается как поломка. */}
+      <div className={styles.card}>
+        <div>
+          <Text weight="semibold" block>{t.settingsNoticeWhyTitle}</Text>
+          <Text className={styles.muted} block>{t.settingsNoticeWhyLead}</Text>
+        </div>
+        <ul className={styles.mutedList}>
+          {levels().map((level) => (
+            <li key={level.value}>
+              <Text className={styles.muted} block>
+                {level.label}: {noticeShow("done", { success: level.value, atDesk: false }).said}
+              </Text>
+            </li>
+          ))}
+        </ul>
+        <Text className={styles.muted} block>
+          {t.settingsNoticeCannotDisable}: {cannotDisable().join(", ")}
+        </Text>
+        {/* Пропуск — не успех и не ошибка, и это тоже стоит сказать: иначе
+            «пропущено» в журнале выглядит как сбой. */}
+        <Text className={styles.muted} block>
+          {noticeShow("skipped", { success: successLevel, atDesk: false }).said}
         </Text>
       </div>
 

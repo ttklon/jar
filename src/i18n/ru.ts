@@ -114,6 +114,9 @@ export const t = {
   settingsNoticeSuccess: "Об успешных делах",
   settingsNoticeErrorsAlways: "об ошибках сообщаю всегда: это не настройка",
   settingsNoticeSaved: "запомнил: об успехах — ",
+  settingsNoticeWhyTitle: "Почему уведомление пришло",
+  settingsNoticeWhyLead: "правило одно и оно не настраивается: об ошибке сообщаем всегда — «не сообщать об ошибках» значит «сломайся тихо»",
+  settingsNoticeCannotDisable: "выключить нельзя",
 
   entryPlaceholder: "скажи или напиши — или назови экран",
   paletteTitle: "Куда перейти",
