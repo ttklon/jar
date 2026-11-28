@@ -903,6 +903,19 @@ export interface RollbackFile {
   looked_in: string;
 }
 
+/** Строка «что будет при таком запуске». */
+export interface StartupRow {
+  how: string;
+  window: boolean;
+  said: string;
+}
+
+/** Что видно при старте: тихий ли запуск и что будет при каждом способе. */
+export interface StartupStatus {
+  quiet: boolean;
+  rows: StartupRow[];
+}
+
 /** Что пауза останавливает и чего не трогает. */
 export interface PauseExplains {
   stops: string[];

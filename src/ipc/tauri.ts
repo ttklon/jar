@@ -25,6 +25,7 @@ import type {
   HandDraft,
   HashCheck,
   PeopleBook,
+  StartupStatus,
   UnfinishedNeed,
   UnfinishedSaved,
   RollbackFile,
@@ -459,6 +460,15 @@ export function schedules(): Promise<ScheduleRow[]> {
 
 export function scheduleAdd(what: string, cadence: string, minute: number): Promise<ScheduleRow[]> {
   return invoke<ScheduleRow[]>("schedule_add", { what, cadence, minute });
+}
+
+/** Тихий старт: что выбрано и что будет при каждом способе запуска. */
+export function startupStatus(): Promise<StartupStatus> {
+  return invoke<StartupStatus>("startup_status");
+}
+
+export function startupSetQuiet(quiet: boolean): Promise<boolean> {
+  return invoke<boolean>("startup_set_quiet", { quiet });
 }
 
 /** Пауза: поставить или снять. */

@@ -665,6 +665,31 @@ pub fn pause_explains() -> (Vec<&'static str>, Vec<&'static str>) {
     (crate::pause::stops(), crate::pause::keeps())
 }
 
+/// Что видно при старте: тихий ли запуск выбран и что будет при каждом
+/// способе запуска (шаг 77).
+#[tauri::command]
+pub fn startup_status() -> serde_json::Value {
+    let quiet = crate::startup::quiet_setting();
+    serde_json::json!({
+        "quiet": quiet,
+        "rows": [
+            {"how": "autostart", "window": !quiet,
+             "said": if quiet { "запуск при входе: тихо в трее, подсказка один раз" }
+                     else { "запуск при входе: окно, потому что тихий старт выключен" }},
+            {"how": "shortcut", "window": true,
+             "said": "двойной клик по ярлыку: окно всегда — иначе кажется, что программа не запустилась"},
+            {"how": "firstRun", "window": true,
+             "said": "первый запуск после установки: окно всегда — иначе непонятно, что установилось"},
+        ],
+    })
+}
+
+/// Включить или выключить тихий старт. Действует по факту чтения файла обратно.
+#[tauri::command]
+pub fn startup_set_quiet(quiet: bool) -> bool {
+    crate::startup::set_quiet_setting(quiet)
+}
+
 /// Запомнить незавершённое дело — чтобы сон или выключение его не потеряли.
 #[tauri::command]
 pub async fn unfinished_set(

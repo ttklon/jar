@@ -50,6 +50,27 @@ pub fn query_args() -> Vec<String> {
     ]
 }
 
+/// Аргумент «старт в трее»: по нему приложение узнаёт, что его поднял Windows
+/// при входе, а не человек двойным кликом (шаг 77).
+///
+/// Флаг, а не отдельный exe и не настройка «всегда тихо»: правило
+/// `trayStart` говорит, что окно зависит **от способа запуска**. Двойной клик
+/// по ярлыку обязан показать окно — иначе это выглядит как «программа не
+/// запустилась».
+pub const QUIET_FLAG: &str = "--quiet";
+
+/// Другой запуск — другой вид: автозапуск, второй экземпляр, после обновления
+/// или обычный. Значение совпадает со словами правила `trayStart` (`How`).
+pub fn how_from_args(args: &[String], first_run: bool) -> &'static str {
+    if first_run {
+        return "firstRun";
+    }
+    if args.iter().any(|arg| arg == QUIET_FLAG) {
+        return "autostart";
+    }
+    "shortcut"
+}
+
 /// Аргументы `reg.exe` для включения автозапуска.
 ///
 /// `/d` — команда запуска. Кавычки вокруг пути ставим сами: путь может содержать
@@ -64,7 +85,10 @@ pub fn add_args(target: &str) -> Vec<String> {
         "/t".into(),
         "REG_SZ".into(),
         "/d".into(),
-        quoted(target),
+        // Флаг старта в трее — часть команды запуска, а не отдельная запись:
+        // иначе Windows поднимет приложение без него, и «тихо» перестанет
+        // работать после первого же включения автозапуска.
+        format!("{} {}", quoted(target), QUIET_FLAG),
         "/f".into(),
     ]
 }
@@ -174,11 +198,22 @@ pub fn missing_entry(note: &str) -> bool {
 }
 
 /// Одна ли и та же программа: сравниваем без кавычек и без учёта регистра.
+///
+/// Флаг `--quiet` не делает программу другой: запись `"…zshelper.exe" --quiet`
+/// — это наш автозапуск, и говорить «тут чужая запись» было бы враньём.
 pub fn same_target(command: &str, target: &str) -> bool {
-    command
-        .trim()
-        .trim_matches('"')
-        .eq_ignore_ascii_case(target.trim().trim_matches('"'))
+    let left = command.trim();
+    // Путь может быть в кавычках (тогда флаг идёт после закрывающей) либо без
+    // них (тогда путь — первое слово). Разбираем оба вида, а не «обычно так».
+    let path = if let Some(rest) = left.strip_prefix('"') {
+        match rest.find('"') {
+            Some(end) => &rest[..end],
+            None => rest,
+        }
+    } else {
+        left.split_whitespace().next().unwrap_or("")
+    };
+    path.eq_ignore_ascii_case(target.trim().trim_matches('"'))
 }
 
 /// Выполнить `reg.exe` с аргументами и вернуть stdout.
@@ -234,9 +269,11 @@ mod tests {
     fn path_with_spaces_is_quoted_exactly_once() {
         let args = add_args(r"C:\Program Files\ZShelper\zshelper.exe");
         let position = args.iter().position(|a| a == "/d").expect("/d есть");
+        // Путь в кавычках один раз, и сразу за ним — флаг старта в трее: он
+        // часть команды, а не отдельная запись в реестре.
         assert_eq!(
             args[position + 1],
-            r#""C:\Program Files\ZShelper\zshelper.exe""#
+            r#""C:\Program Files\ZShelper\zshelper.exe" --quiet"#
         );
         // Уже закавыченный путь не получает вторые кавычки: важно ровно одно
         // обрамление, а не то, что строка совпала символ в символ.
@@ -254,6 +291,38 @@ mod tests {
             !args.iter().any(|a| a == "/d"),
             "пустое значение — не выключение"
         );
+    }
+
+    #[test]
+    fn the_quiet_flag_makes_autostart_look_like_autostart() {
+        // Правило `trayStart`: тихо — только при входе в Windows. Флаг едет
+        // вместе с командой запуска, иначе Windows поднимет приложение без него.
+        let args = add_args(r"C:\Tools\zshelper.exe");
+        let quiet = args.iter().any(|arg| arg == QUIET_FLAG);
+        assert!(quiet, "флага старта в трее нет в команде автозапуска: {args:?}");
+        assert_eq!(
+            how_from_args(&[QUIET_FLAG.to_string()], false),
+            "autostart"
+        );
+        // Двойной клик по ярлыку — окно: «тихо» здесь значит «ничего не произошло».
+        assert_eq!(how_from_args(&[], false), "shortcut");
+        // Первый запуск после установки важнее способа: иначе непонятно, что
+        // установилось.
+        assert_eq!(how_from_args(&[QUIET_FLAG.to_string()], true), "firstRun");
+    }
+
+    #[test]
+    fn our_own_command_with_the_flag_is_still_ours() {
+        // Настоящий дефект, который поймался бы только у людей: запись
+        // `"…zshelper.exe" --quiet` не совпадала бы с путём, и настройка
+        // говорила бы «в автозапуске чужая запись» про нашу же.
+        let target = r"C:\Program Files\ZShelper\zshelper.exe";
+        let command = r#""C:\Program Files\ZShelper\zshelper.exe" --quiet"#;
+        assert!(same_target(command, target), "свой запуск принят за чужой");
+        assert!(same_target(target, target), "путь без кавычек перестал совпадать");
+        assert!(!same_target(r#""C:\Other\zshelper.exe" --quiet"#, target));
+        // Кавычки не закрыты — не паникуем и не считаем совпадением.
+        assert!(!same_target(r#""C:\Program Files\ZS"#, target));
     }
 
     #[test]

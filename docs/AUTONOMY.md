@@ -40,7 +40,7 @@
 * `src/screens/Models.tsx:221` — useEffect(load, [load]);
 * `src/screens/People.tsx:77` — useEffect(load, [load]);
 * `src/screens/Schedule.tsx:145` — useEffect(load, [load]);
-* `src/screens/Settings.tsx:86` — useEffect(() => {
+* `src/screens/Settings.tsx:87` — useEffect(() => {
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
 * `src/screens/Undo.tsx:68` — useEffect(load, [load]);
@@ -91,6 +91,7 @@
 * `src/components/ResourceReport.tsx:58` — useEffect(load, []);
 * `src/components/RightNowCard.tsx:40` — useEffect(() => {
 * `src/components/SleepCard.tsx:44` — useEffect(() => {
+* `src/components/StartupCard.tsx:35` — useEffect(() => {
 * `src/components/TrustCard.tsx:72` — useEffect(() => {
 * `src/components/UpdateCard.tsx:70` — useEffect(() => {
 * `src/components/WeekStatsCard.tsx:57` — useEffect(() => {

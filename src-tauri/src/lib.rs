@@ -83,6 +83,7 @@ pub mod server;
 pub mod services;
 pub mod session;
 pub mod step;
+pub mod startup;
 pub mod stt;
 pub mod stt_audio;
 pub mod stt_http;
@@ -454,6 +455,8 @@ pub fn run() {
             ipc::paused,
             ipc::set_paused,
             ipc::pause_explains,
+            ipc::startup_status,
+            ipc::startup_set_quiet,
             ipc::unfinished_set,
             ipc::unfinished,
             ipc::unfinished_forget,
@@ -503,6 +506,18 @@ pub fn run() {
             ipc::cancel_tool
         ])
         .setup(|app| {
+            // Способ запуска решает, показывать ли окно — до того, как человек
+            // увидит что-либо (шаг 77). Решение принимается здесь, а не в
+            // настройках: двойной клик по ярлыку обязан показать окно.
+            let args: Vec<String> = std::env::args().skip(1).collect();
+            let first_run = startup::take_first_run();
+            let start = startup::decide(&args, first_run, startup::quiet_setting());
+            tracing::info!(window = start.window, hint = start.hint, said = start.said, "старт");
+            if !start.window {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.hide();
+                }
+            }
             hotkey::install(app);
             if let Err(error) = tray::install(app.handle()) {
                 // Без трея приложение работает — окно открыто, логи есть.

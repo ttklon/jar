@@ -15,6 +15,7 @@ import { MemoryBackups } from "../components/MemoryBackups";
 import { MemoryFacts } from "../components/MemoryFacts";
 import { TextSizeCard } from "../components/TextSizeCard";
 import { HotkeyCard } from "../components/HotkeyCard";
+import { StartupCard } from "../components/StartupCard";
 import { UpdateCard } from "../components/UpdateCard";
 import { UninstallCard } from "../components/UninstallCard";
 import { SleepCard } from "../components/SleepCard";
@@ -245,6 +246,10 @@ export function Settings({
           </Text>
         ) : null}
       </div>
+
+      {/* Тихий старт — сразу после автозапуска: это одна тема «что будет при
+          входе в Windows», и человек не должен искать вторую половину ниже. */}
+      <StartupCard />
 
       {/* Назначение клавиши — с проверкой до сохранения (шаг 97). Раньше здесь
           стояла строка значения: «занята другой программой» человек узнавал
