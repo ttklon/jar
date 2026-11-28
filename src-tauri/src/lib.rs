@@ -95,6 +95,7 @@ pub mod wake;
 pub mod weak;
 pub mod webview2;
 pub mod window;
+pub mod window_place;
 
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
@@ -484,9 +485,9 @@ pub fn run() {
                 return;
             }
             let window = webview.window();
-            let Some(saved) = window::load() else { return };
-            let Some(list) = window::monitors(&window) else { return };
-            let (placed, moved, why) = window::place(saved, &list);
+            let Some(saved) = window_place::load() else { return };
+            let Some(list) = window_place::monitors(&window) else { return };
+            let (placed, moved, why) = window_place::place(saved, &list);
             if !moved {
                 return;
             }
@@ -505,13 +506,13 @@ pub fn run() {
                 let size = window.inner_size();
                 let scale = window.scale_factor().unwrap_or(1.0);
                 if let (Ok(position), Ok(size)) = (position, size) {
-                    let placed = window::Box4 {
+                    let placed = window_place::Box4 {
                         x: (f64::from(position.x) / scale).round() as i32,
                         y: (f64::from(position.y) / scale).round() as i32,
                         width: (f64::from(size.width) / scale).round() as u32,
                         height: (f64::from(size.height) / scale).round() as u32,
                     };
-                    if let Err(error) = window::save(placed) {
+                    if let Err(error) = window_place::save(placed) {
                         tracing::warn!(%error, "место окна не сохранено");
                     }
                 }
