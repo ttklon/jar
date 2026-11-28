@@ -17,6 +17,8 @@
 //! сохранённое место.
 
 use serde::{Deserialize, Serialize};
+#[cfg(windows)]
+use tauri::Manager;
 
 /// Прямоугольник в логических координатах.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
