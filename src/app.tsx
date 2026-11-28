@@ -23,6 +23,7 @@ import {
   BranchRegular,
   CalendarClockRegular,
   DocumentBulletListRegular,
+  GaugeRegular,
   HandRightRegular,
   HistoryRegular,
   HomeRegular,
@@ -59,6 +60,7 @@ const Licenses = lazy(() => import("./screens/Licenses").then((m) => ({ default:
 const Schedule = lazy(() => import("./screens/Schedule").then((m) => ({ default: m.Schedule })));
 const People = lazy(() => import("./screens/People").then((m) => ({ default: m.People })));
 const Accessibility = lazy(() => import("./screens/Accessibility").then((m) => ({ default: m.Accessibility })));
+const Requirements = lazy(() => import("./screens/Requirements").then((m) => ({ default: m.Requirements })));
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
 import { applyScale, readScale } from "./components/TextSizeCard";
@@ -96,7 +98,8 @@ type Screen =
   | "licenses"
   | "schedule"
   | "people"
-  | "accessibility";
+  | "accessibility"
+  | "requirements";
 
 const useStyles = makeStyles({
   shell: {
@@ -234,6 +237,7 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement; keywords: read
   // «Люди» — рядом с приложениями: и то и другое про «кто чем пользуется».
   { id: "people", label: "Люди", icon: <PeopleRegular />, keywords: ["люди", "профиль", "гость", "people", "семья"] },
   { id: "accessibility", label: "Доступность", icon: <AccessibilityRegular />, keywords: ["доступность", "клавиатура", "диктор", "a11y", "не мышь"] },
+  { id: "requirements", label: "Требования", icon: <GaugeRegular />, keywords: ["требования", "батарея", "слабая машина", "экономия", "4 гб"] },
 ];
 
 /**
@@ -785,6 +789,8 @@ export function App() {
                 <People />
               ) : screen === "accessibility" ? (
                 <Accessibility />
+              ) : screen === "requirements" ? (
+                <Requirements />
               ) : (
                 <Settings
                   theme={choice}
