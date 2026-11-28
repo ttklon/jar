@@ -756,6 +756,11 @@ export interface AuditEvent {
   args_fingerprint: string;
   outcome: string;
   duration_ms: number;
+  /**
+   * Чей профиль выполнил дело (шаг 414). Нет поля — профилей тогда не было;
+   * подставлять «я» нельзя, это была бы догадка в журнале.
+   */
+  author?: string;
 }
 
 /**

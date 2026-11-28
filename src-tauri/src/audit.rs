@@ -31,6 +31,13 @@ pub struct AuditEvent {
     /// Короткий итог: `ok`, `error: …`, `denied: …`.
     pub outcome: String,
     pub duration_ms: u64,
+    /// Чей профиль выполнил дело (шаг 414). Пусто — профилей на момент записи
+    /// ещё не было; это честнее, чем подставить «я».
+    ///
+    /// `skip_serializing_if` — чтобы старые записи и старые потребители не
+    /// ломались: поле добавляется, а не заменяет что-то.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub author: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -192,6 +199,7 @@ mod tests {
             args_fingerprint: "abc".into(),
             outcome: outcome.into(),
             duration_ms: 12,
+            author: String::new(),
         }
     }
 
@@ -365,5 +373,38 @@ mod tests {
         assert!(audit.tail(10).is_empty());
 
         let _ = std::fs::remove_dir_all(&dir);
+    }
+}
+
+#[cfg(test)]
+mod author_tests {
+    use super::*;
+
+    /// Старые записи журнала поля `author` не содержат. Они обязаны читаться:
+    /// журнал — история, и «новая версия не понимает старых записей» значит
+    /// «история потеряна».
+    #[test]
+    fn old_entries_without_an_author_still_read() {
+        let old = r#"{"at_ms":1,"kind":"requested","subject":"files|удалить|папку","risk":"dangerous","decision":"allow","args_fingerprint":"abc","outcome":"ok","duration_ms":12}"#;
+        let event: AuditEvent = serde_json::from_str(old).expect("старая запись читается");
+        assert_eq!(event.author, "");
+        assert_eq!(event.outcome, "ok");
+    }
+
+    #[test]
+    fn an_empty_author_is_not_written_at_all() {
+        let event = AuditEvent {
+            at_ms: 1,
+            kind: AuditKind::Requested,
+            subject: "files|удалить|папку".into(),
+            risk: "dangerous".into(),
+            decision: "allow".into(),
+            args_fingerprint: "abc".into(),
+            outcome: "ok".into(),
+            duration_ms: 12,
+            author: String::new(),
+        };
+        let text = serde_json::to_string(&event).expect("пишется");
+        assert!(!text.contains("author"), "пустое поле не пишем: {text}");
     }
 }

@@ -348,6 +348,8 @@ struct Entry<'a> {
     fingerprint: &'a str,
     outcome: &'a str,
     duration_ms: u64,
+    /// Чей профиль выполняет. `None` — профилей нет.
+    author: Option<&'a str>,
 }
 
 fn audit(inner: &Inner, entry: Entry<'_>) {
@@ -360,6 +362,7 @@ fn audit(inner: &Inner, entry: Entry<'_>) {
         args_fingerprint: entry.fingerprint.to_string(),
         outcome: entry.outcome.to_string(),
         duration_ms: entry.duration_ms,
+        author: entry.author.unwrap_or_default().to_string(),
     });
 }
 
@@ -2833,6 +2836,7 @@ pub async fn ui_press(
             fingerprint: "ui_press",
             // В журнал идёт и «нажато, но ничего не изменилось»: это не успех и не сбой.
             outcome: &line,
+            author: None,
             duration_ms: duration,
         },
     );
@@ -2893,7 +2897,8 @@ pub async fn ui_type(
             decision: "confirmed",
             fingerprint: "ui_type",
             outcome: &line,
-            duration_ms: duration,
+            author: None,
+        duration_ms: duration,
         },
     );
 
@@ -3173,7 +3178,8 @@ pub fn confirm_tool(
                     decision: decision.as_str(),
                     fingerprint: &fingerprint,
                     outcome: "confirmed",
-                    duration_ms: 0,
+                    author: None,
+        duration_ms: 0,
                 },
             );
             Ok(ConfirmToken {
@@ -3210,7 +3216,8 @@ pub async fn run_tool(
                     decision: "deny",
                     fingerprint: &fingerprint,
                     outcome: reason,
-                    duration_ms: 0,
+                    author: None,
+        duration_ms: 0,
                 },
             );
             return Ok(StepResult::failed(&registry, reason));
@@ -3229,7 +3236,8 @@ pub async fn run_tool(
                             decision: "confirm",
                             fingerprint: &fingerprint,
                             outcome: reason,
-                            duration_ms: 0,
+                            author: None,
+        duration_ms: 0,
                         },
                     );
                     return Ok(StepResult::failed(&registry, reason));
@@ -3245,7 +3253,8 @@ pub async fn run_tool(
                         decision: "confirm",
                         fingerprint: &fingerprint,
                         outcome: error.as_str(),
-                        duration_ms: 0,
+                        author: None,
+        duration_ms: 0,
                     },
                 );
                 return Ok(StepResult::failed(&registry, error.as_str()));
@@ -3268,7 +3277,8 @@ pub async fn run_tool(
             decision: decision.as_str(),
             fingerprint: &fingerprint,
             outcome: "requested",
-            duration_ms: 0,
+            author: None,
+        duration_ms: 0,
         },
     );
 
@@ -3324,7 +3334,8 @@ pub async fn run_tool(
             decision: decision.as_str(),
             fingerprint: &fingerprint,
             outcome: summary,
-            duration_ms: outcome.duration_ms,
+            author: None,
+        duration_ms: outcome.duration_ms,
         },
     );
 
@@ -3500,7 +3511,8 @@ pub async fn run_plan(
                     decision: decision.as_str(),
                     fingerprint: &fingerprint,
                     outcome: "approved in plan",
-                    duration_ms: 0,
+                    author: None,
+        duration_ms: 0,
                 },
             );
             if let Err(error) = inner.policy.consume(token, &key, &args) {
@@ -3518,7 +3530,8 @@ pub async fn run_plan(
                 decision: decision.as_str(),
                 fingerprint: &fingerprint,
                 outcome: "requested",
-                duration_ms: 0,
+                author: None,
+        duration_ms: 0,
             },
         );
 
@@ -3557,7 +3570,8 @@ pub async fn run_plan(
                 decision: decision.as_str(),
                 fingerprint: &fingerprint,
                 outcome: status,
-                duration_ms: outcome.duration_ms,
+                author: None,
+        duration_ms: outcome.duration_ms,
             },
         );
 

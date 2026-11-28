@@ -677,6 +677,9 @@ export function Journal({
               <th className={styles.head}>{journal.columns.subject}</th>
               <th className={styles.head}>{journal.columns.risk}</th>
               <th className={styles.head}>{journal.columns.decision}</th>
+              {/* Чей профиль выполнил (шаг 414): «попросила Аня, выполнил
+                  профиль Сына» — без этого журнал врёт про авторство. */}
+              <th className={styles.head}>кто выполнил</th>
               <th className={styles.head}>{journal.columns.outcome}</th>
               <th className={styles.head}>{journal.columns.duration}</th>
               {/* Отчёт — действие, а не колонка: но стоит последним, чтобы
@@ -695,6 +698,11 @@ export function Journal({
                 <td className={styles.cell}>{event.subject}</td>
                 <td className={styles.cell}>{event.risk}</td>
                 <td className={styles.cell}>{event.decision}</td>
+                <td className={styles.cell}>
+                  {event.author === undefined || event.author === ""
+                    ? "профилей тогда не было"
+                    : event.author}
+                </td>
                 <td className={outcomeClass(styles, event.outcome)}>{event.outcome}</td>
                 <td className={styles.cell}>{journal.duration(event.duration_ms)}</td>
                 <td className={styles.cell}>
