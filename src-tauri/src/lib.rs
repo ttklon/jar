@@ -389,7 +389,9 @@ pub fn run() {
         // Незавершённое дело: обновляется командами, читается при выходе. Без
         // этого «сохранить при выключении» — обещание без содержимого.
         .manage(Unfinished(Arc::new(std::sync::Mutex::new(None))))
-        .manage(Paused(Arc::new(std::sync::Mutex::new(pause::Pause::default()))))
+        .manage(Paused(Arc::new(std::sync::Mutex::new(
+            pause::Pause::default(),
+        ))))
         .invoke_handler(tauri::generate_handler![
             ipc::registry_snapshot,
             ipc::app_status,

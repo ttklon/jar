@@ -70,7 +70,10 @@ mod tests {
 
     #[test]
     fn a_pause_is_named_with_its_length() {
-        let state = Pause { paused: true, since_ms: 0 };
+        let state = Pause {
+            paused: true,
+            since_ms: 0,
+        };
         assert!(say(state, 30_000, 0).starts_with("на паузе:"));
         assert!(say(state, 5 * 60_000, 0).starts_with("на паузе 5 мин:"));
     }
@@ -82,7 +85,14 @@ mod tests {
 
     #[test]
     fn missed_deeds_are_not_run_all_at_once() {
-        let said = say(Pause { paused: true, since_ms: 0 }, 10 * 60_000, 4);
+        let said = say(
+            Pause {
+                paused: true,
+                since_ms: 0,
+            },
+            10 * 60_000,
+            4,
+        );
         assert!(said.contains("пропущено 4"), "{said}");
         assert!(said.contains("по одному"), "не «всё разом»: {said}");
     }
