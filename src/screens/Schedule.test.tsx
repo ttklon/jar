@@ -273,3 +273,59 @@ describe("расписание переживает перезапуск и со
     expect(screen.getByText(/пропущенное спросим один раз, а не очередью/)).toBeTruthy();
   });
 });
+
+describe("условие «только если…» словами (шаг 87)", () => {
+  beforeEach(() => {
+    // Поле условия — часть настоящего экрана: в браузере расписаний нет, и
+    // проверять там нечем. Это та же настройка, что у остальных тестов файла.
+    tauri.mockReturnValue(true);
+  });
+
+  it("непонятое условие называется, а не проглатывается", async () => {
+    // Правило plainCondition умело разбирать условие, но экран его не
+    // спрашивал: человек писал «только если места меньше 10 %», а правило
+    // срабатывало всегда — «только если» молча пропадало.
+    render(<Schedule />);
+    // Поле условия появляется после загрузки списка — ждём его, а не «сразу».
+    const field = await screen.findByLabelText("условие: только если");
+    fireEvent.change(field, { target: { value: "на улице дождь" } });
+    const note = screen.getByText(/не понял условие «на улице дождь»/);
+    // Три примера того, что понимаем: иначе «не понял» — тупик.
+    expect(note.textContent).toContain("места меньше 10 %");
+    expect(note.textContent).toContain("сегодня ещё не было");
+  });
+
+  it("понятое условие названо словами правила и проверено", async () => {
+    render(<Schedule />);
+    const field = await screen.findByLabelText("условие: только если");
+    fireEvent.change(field, { target: { value: "места меньше 10%" } });
+    const note = screen.getByText(/только если места меньше 10 %/);
+    // Что было бы сейчас — словами, а не «ок»: без чисел честно «нечем».
+    expect(note.textContent).toMatch(/проверить нечем|сейчас сработало бы|сейчас не сработало бы/);
+  });
+
+  it("условие названо в подтверждении, а не потеряно при сохранении", async () => {
+    // Дефект шага 87 был именно такой: разбор есть, а условие не доезжает до
+    // человека — он думает, что сказал «только если», а правило срабатывает
+    // всегда. Проверяем то, что видно после нажатия «добавить».
+    render(<Schedule />);
+    fireEvent.change(await screen.findByLabelText("расписание фразой"), {
+      target: { value: "каждый день в 9 — отчёт о диске" },
+    });
+    fireEvent.change(screen.getByLabelText("условие: только если"), {
+      target: { value: "места меньше 10%" },
+    });
+    fireEvent.click(screen.getByText("добавить"));
+
+    const said = await screen.findByText(/добавлено: каждый день в 09:00/);
+    expect(said.textContent).toContain("условие:");
+    expect(said.textContent).toContain("только если места меньше 10 %");
+  });
+
+  it("пустое условие — не показываем ничего, а не «не понял»", async () => {
+    render(<Schedule />);
+    const field = await screen.findByLabelText("условие: только если");
+    fireEvent.change(field, { target: { value: "" } });
+    expect(screen.queryByText(/не понял условие/)).toBeNull();
+  });
+});

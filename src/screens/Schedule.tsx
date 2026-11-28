@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
 import {
   isTauri,
@@ -21,6 +21,14 @@ import { deferred as nightDeferred, isNight, safeList } from "../lib/nightTasks"
 import { longSleep, survivesRestart } from "../lib/scheduleSurvives";
 import { parse as parseWhenThen, summary as rulesSummary, type Rule as WhenThenRule, type When } from "../lib/whenThen";
 import { check as checkTrigger, describe as describeTrigger, limits as triggerLimits, type Trigger } from "../lib/whenTriggers";
+// Шаг 87: условие «только если…» словами — разбор и проверка правилом, не экраном.
+import {
+  classify as classifyCondition,
+  describe as describeCondition,
+  holds,
+  notUnderstood,
+  type Facts,
+} from "../lib/plainCondition";
 
 /**
  * «Расписание» — всё в одном списке (шаг 327, фраза — шаг 321).
@@ -120,6 +128,17 @@ export function Schedule() {
   const [items, setItems] = useState<ScheduleRow[] | null>(null);
   const [rules, setRules] = useState<WhenThenRow[] | null>(null);
   const [phraseWhen, setPhraseWhen] = useState("");
+  /**
+   * Условие «только если…» (шаг 87).
+   *
+   * Правило `plainCondition` разбирало фразу и умело проверять условие, но
+   * экран его не спрашивал: человек писал «отчёт каждый день в 9, только если
+   * места меньше 10 %», и условие молча пропадало — правило срабатывало
+   * всегда, хотя человек сказал «только если».
+   */
+  const [conditionText, setConditionText] = useState("");
+  /** Что видно про условие: разобрано ли оно и что было бы сейчас. */
+  const [conditionLine, setConditionLine] = useState<string | null>(null);
   const [phrase, setPhrase] = useState("");
   const [said, setSaid] = useState<string | null>(null);
   const [bad, setBad] = useState(false);
@@ -128,6 +147,45 @@ export function Schedule() {
 
   const load = useCallback(() => {
     scheduleList();
+  }, []);
+
+  /**
+   * Факты для проверки условия.
+   *
+   * Пока экран их не читает — `holds` вернёт `null` («не знаю»), и это честнее
+   * выдуманного «да»: неизвестное условие не запускает дело.
+   */
+  const facts: Facts = { freePercent: Number.NaN, files: Number.NaN, ranToday: false };
+  const factsRef = useRef(facts);
+  factsRef.current = facts;
+
+  /**
+   * Спросить условие у правила — и показать ответ словами.
+   *
+   * Не «понял/не понял» галочкой: у неизвестного условия три примера того, что
+   * понимаем. И сказано, что будет при непонятном — правило не сработает молча
+   * (пропуск с причиной, шаг 326).
+   */
+  /**
+   * Разбор условия одной функцией — и для показа, и для сохранения.
+   *
+   * Две копии разбора разъехались бы: в поле человек пишет само условие
+   * («места меньше 10 %»), а в сохранённой фразе может быть «только если…» —
+   * заголовок поля уже сказал слова, поэтому берём `classify`.
+   */
+  const readCondition = useCallback((text: string): string | null => {
+    const trimmed = text.trim();
+    if (trimmed === "") return null;
+    const condition = classifyCondition(trimmed);
+    if (condition.kind === "unknown") return notUnderstood(condition.text);
+    const yes = holds(condition, factsRef.current);
+    return `${describeCondition(condition)} — ${
+      yes === null
+        ? "проверить нечем: нужны числа, их даёт ядро"
+        : yes
+          ? "сейчас сработало бы"
+          : "сейчас не сработало бы"
+    }`;
   }, []);
 
   function scheduleList() {
@@ -166,7 +224,22 @@ export function Schedule() {
         setItems(got);
         setPhrase("");
         const when = wanted.at === "hourly" ? "каждый час" : `каждый день в ${clockText(minute)}`;
-        setSaid([`добавлено: ${when} — ${wanted.what}`, night ?? "", confirm(wanted)].filter((part) => part !== "").join("\n"));
+        // Условие не отправляем молча: если оно не понято, правило не должно
+        // срабатывать «всегда» — человек сказал «только если».
+        const condition = conditionText.trim();
+        const line = readCondition(condition);
+        setSaid(
+          [
+            `добавлено: ${when} — ${wanted.what}`,
+            night ?? "",
+            confirm(wanted),
+            condition === ""
+              ? ""
+              : `условие: ${line ?? "не понято — правило не сработает, пока условие не названо понятно"}`,
+          ]
+            .filter((part) => part !== "")
+            .join("\n"),
+        );
       })
       .catch((reason: unknown) => {
         setBad(true);
@@ -314,6 +387,33 @@ export function Schedule() {
           добавить
         </Button>
       </div>
+
+      {/* Условие — отдельным полем, а не «допишите в фразе» (шаг 87). Правило
+          `plainCondition` разбирает «только если…» словами; пока его не
+          спрашивали, человек думал, что сказал «только если», а правило
+          срабатывало всегда. */}
+      <div className={styles.row}>
+        <Input
+          aria-label="условие: только если"
+          className={styles.wide}
+          placeholder="только если места меньше 10 %"
+          value={conditionText}
+          onChange={(_, data) => {
+            setConditionText(data.value);
+            setConditionLine(readCondition(data.value));
+          }}
+        />
+      </div>
+      {conditionLine !== null ? (
+        <Text className={styles.muted} role="status" aria-live="polite">
+          {conditionLine}
+        </Text>
+      ) : null}
+      {conditionText.trim() !== "" && conditionLine === null ? (
+        <Text className={styles.muted}>
+          условие будет записано словами: пока оно не понято, правило не сработает молча
+        </Text>
+      ) : null}
 
       {items === null ? (
         <div role="status" aria-live="polite">
