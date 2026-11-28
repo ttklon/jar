@@ -2898,7 +2898,7 @@ pub async fn ui_type(
             fingerprint: "ui_type",
             outcome: &line,
             author: None,
-        duration_ms: duration,
+            duration_ms: duration,
         },
     );
 
@@ -3179,7 +3179,7 @@ pub fn confirm_tool(
                     fingerprint: &fingerprint,
                     outcome: "confirmed",
                     author: None,
-        duration_ms: 0,
+                    duration_ms: 0,
                 },
             );
             Ok(ConfirmToken {
@@ -3217,7 +3217,7 @@ pub async fn run_tool(
                     fingerprint: &fingerprint,
                     outcome: reason,
                     author: None,
-        duration_ms: 0,
+                    duration_ms: 0,
                 },
             );
             return Ok(StepResult::failed(&registry, reason));
@@ -3237,7 +3237,7 @@ pub async fn run_tool(
                             fingerprint: &fingerprint,
                             outcome: reason,
                             author: None,
-        duration_ms: 0,
+                            duration_ms: 0,
                         },
                     );
                     return Ok(StepResult::failed(&registry, reason));
@@ -3254,7 +3254,7 @@ pub async fn run_tool(
                         fingerprint: &fingerprint,
                         outcome: error.as_str(),
                         author: None,
-        duration_ms: 0,
+                        duration_ms: 0,
                     },
                 );
                 return Ok(StepResult::failed(&registry, error.as_str()));
@@ -3278,7 +3278,7 @@ pub async fn run_tool(
             fingerprint: &fingerprint,
             outcome: "requested",
             author: None,
-        duration_ms: 0,
+            duration_ms: 0,
         },
     );
 
@@ -3335,7 +3335,7 @@ pub async fn run_tool(
             fingerprint: &fingerprint,
             outcome: summary,
             author: None,
-        duration_ms: outcome.duration_ms,
+            duration_ms: outcome.duration_ms,
         },
     );
 
@@ -3512,7 +3512,7 @@ pub async fn run_plan(
                     fingerprint: &fingerprint,
                     outcome: "approved in plan",
                     author: None,
-        duration_ms: 0,
+                    duration_ms: 0,
                 },
             );
             if let Err(error) = inner.policy.consume(token, &key, &args) {
@@ -3531,7 +3531,7 @@ pub async fn run_plan(
                 fingerprint: &fingerprint,
                 outcome: "requested",
                 author: None,
-        duration_ms: 0,
+                duration_ms: 0,
             },
         );
 
@@ -3571,7 +3571,7 @@ pub async fn run_plan(
                 fingerprint: &fingerprint,
                 outcome: status,
                 author: None,
-        duration_ms: outcome.duration_ms,
+                duration_ms: outcome.duration_ms,
             },
         );
 
