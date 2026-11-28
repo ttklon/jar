@@ -38,7 +38,8 @@
 * `src/screens/Journal.tsx:196` — useEffect(() => {
 * `src/screens/Journal.tsx:387` — useEffect(load, [load]);
 * `src/screens/Models.tsx:221` — useEffect(load, [load]);
-* `src/screens/People.tsx:77` — useEffect(load, [load]);
+* `src/screens/People.tsx:81` — useEffect(load, [load]);
+* `src/screens/People.tsx:89` — useEffect(() => {
 * `src/screens/Schedule.tsx:145` — useEffect(load, [load]);
 * `src/screens/Settings.tsx:87` — useEffect(() => {
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {

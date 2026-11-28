@@ -24,8 +24,14 @@ type Book = { current: string; people: PersonRow[] };
 let book: Book = { current: "", people: [] };
 const tauri = vi.fn(() => true);
 
+let runs: unknown[] = [];
+let engine = { running: false };
+
 vi.mock("../ipc", () => ({
   isTauri: () => tauri(),
+  // Снимок «что живо» (шаг 78): черновик, шаги идущего дела, движок.
+  memoryRuns: async () => runs,
+  engineStatus: async () => engine,
   people: async () => book,
   personAdd: async (name: string, guest: boolean) => {
     const id = `p${book.people.length + 1}`;
@@ -47,6 +53,9 @@ vi.mock("../ipc", () => ({
 
 beforeEach(() => {
   book = { current: "", people: [] };
+  runs = [];
+  engine = { running: false };
+  globalThis.localStorage.clear();
   tauri.mockReturnValue(true);
 });
 afterEach(() => {
@@ -72,6 +81,62 @@ describe("экран «Люди»", () => {
     await waitFor(() => expect(screen.getByRole("status").textContent).toMatch(/заведён «Аня»: пока человек один/));
     // Память по человеку — числом, а не «своя».
     expect(screen.getByText(/фактов в его памяти: 0/)).toBeTruthy();
+  });
+
+  it("переключение говорит, что сохранилось — по снимку, а не по обещанию (шаг 78)", async () => {
+    book = {
+      current: "p1",
+      people: [
+        { id: "p1", name: "Аня", guest: false, facts: 2 },
+        { id: "p2", name: "Гость", guest: true, facts: 0 },
+      ],
+    };
+    // Живое до переключения: набранная фраза, один выполненный шаг, движок.
+    globalThis.localStorage.setItem("zshelper.draft.phrase", "убери загрузки");
+    runs = [
+      {
+        id: 1,
+        kind: "plan",
+        subject: "уборка",
+        started_ms: 0,
+        finished_ms: null,
+        outcome: "running",
+        steps: [{ position: 0, tool: "files", ok: true, reason: "", evidence: "" }],
+        session: "",
+      },
+    ];
+    engine = { running: true };
+
+    render(<People />);
+    fireEvent.click(await screen.findByRole("button", { name: "это Гость" }));
+
+    const report = await screen.findByText(/осталось на месте:/i);
+    expect(report.textContent).toContain("набранная фраза");
+    expect(report.textContent).toContain("выполнено шагов 1");
+    expect(report.textContent).toContain("загруженная модель");
+    // И то же самое одной строкой — в объявлении для диктора.
+    await waitFor(() =>
+      expect(screen.getByRole("status").textContent).toMatch(/без перезапуска/),
+    );
+    // Перезапускать нечего было: цена названа числом.
+    expect(screen.getByText(/Перезапусков ноль/)).toBeTruthy();
+  });
+
+  it("карточка без переключения говорит, что именно проверит", async () => {
+    book = {
+      current: "p1",
+      people: [
+        { id: "p1", name: "Аня", guest: false, facts: 2 },
+        { id: "p2", name: "Гость", guest: true, facts: 0 },
+      ],
+    };
+    render(<People />);
+    expect(await screen.findByText("Переключение без перезапуска")).toBeTruthy();
+    // Обещание проверки названо до проверки: четыре вещи, каждая своим именем.
+    const promise = screen.getByText(/при первом переключении проверю по факту/);
+    for (const thing of ["фраза в поле ввода", "шаги идущего дела", "загруженная модель", "открытое окно"]) {
+      expect(promise.textContent).toContain(thing);
+    }
   });
 
   it("гость назван гостем и опасного не получает", async () => {

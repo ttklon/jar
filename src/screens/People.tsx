@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, makeStyles, Spinner, Text, tokens } from "@fluentui/react-components";
-import { isTauri, people, personAdd, personRemove, personSwitch } from "../ipc";
-import type { PeopleBook } from "../ipc";
+import { engineStatus, isTauri, memoryRuns, people, personAdd, personRemove, personSwitch } from "../ipc";
+import type { PeopleBook, RunRecord } from "../ipc";
 import { ask as askWho, need as needWho, after as afterWho } from "../lib/whoNow";
 import { absent as localAbsent, contents as localContents, worksOffline } from "../lib/localProfile";
 import { entry as journalEntry } from "../lib/whoAsked";
@@ -15,6 +15,8 @@ import { after as transferAfter, pack, type Bundle } from "../lib/profileTransfe
 import { build as exportBuild, fileName as exportName, summary as exportSummary } from "../lib/profileExport";
 import { conflict, notDo, read as readProfile } from "../lib/importChecks";
 import { ANON, FULL, hide } from "../lib/anonTransfer";
+import { cost as switchCost } from "../lib/switchNoRestart";
+import { keptAndLost, snap, summaryOf, type Snapshot } from "../lib/switchCheck";
 
 /**
  * «Люди» — кто за этим компьютером и кто действует сейчас (шаги 401–406).
@@ -63,6 +65,8 @@ export function People() {
   const [carried, setCarried] = useState("");
   const [brought, setBrought] = useState<string | null>(null);
   const [bad, setBad] = useState(false);
+  // Что переключение сохранило и что потеряло — по двум снимкам, а не по обещанию.
+  const [kept, setKept] = useState<{ kept: string[]; lost: string[] } | null>(null);
   const tauri = isTauri();
 
   const load = useCallback(() => {
@@ -77,6 +81,53 @@ export function People() {
   useEffect(load, [load]);
 
   const current = book?.people.find((person) => person.id === book.current) ?? null;
+
+  // Что живо: последние запуски и движок. Держим в ссылках, чтобы снимок
+  // читался синхронно в момент нажатия, а не ждал ответа ядра.
+  const lastRuns = useRef<readonly RunRecord[]>([]);
+  const lastEngine = useRef<{ running: boolean } | null>(null);
+  useEffect(() => {
+    if (!isTauri()) return;
+    let alive = true;
+    const tick = () => {
+      if (document.visibilityState === "hidden") return;
+      void memoryRuns(10)
+        .then((runs) => {
+          if (alive) lastRuns.current = runs;
+        })
+        .catch(() => {
+          // Журнал недоступен — снимок будет пустым, и отчёт скажет «нечего
+          // было терять», а не соврёт про сохранённое.
+        });
+      void engineStatus()
+        .then((status) => {
+          if (alive) lastEngine.current = { running: status.running };
+        })
+        .catch(() => {
+          if (alive) lastEngine.current = null;
+        });
+    };
+    tick();
+    const timer = setInterval(tick, 5000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+  }, []);
+
+  /**
+   * Прочитать «что живо» прямо сейчас: черновик, шаги идущего дела, движок.
+   *
+   * `memoryRuns` и `engineStatus` — те же команды, что у плашки и экрана
+   * «Модели»: своего источника правды для «идёт ли дело» быть не должно.
+   * Не сумели прочитать — считаем пустым и говорим об этом в отчёте.
+   */
+  const liveSnapshot = (): Snapshot =>
+    snap(
+      lastRuns.current,
+      lastEngine.current,
+      globalThis.localStorage ?? null,
+    );
 
   const add = () => {
     personAdd(name, guest)
@@ -98,14 +149,21 @@ export function People() {
   };
 
   const switchTo = (id: string) => {
+    // Снимок «что живо» — **до** переключения, иначе сравнивать не с чем и
+    // «ничего не потерялось» будет обещанием, а не наблюдением (шаг 78).
+    const before = liveSnapshot();
     personSwitch(id)
       .then((got) => {
         setBook(got);
         setBad(false);
         const picked = got.people.find((person) => person.id === id);
         if (picked !== undefined && current !== null) {
-          // Слова правила: дело не начинается заново, уже выполненные шаги остаются.
-          setSaid(afterWho(picked, current).said);
+          const after = liveSnapshot();
+          const report = keptAndLost(before, after, picked.name);
+          // Две вещи разными словами: что меняется (правило `whoNow`) и что
+          // доказано снимком. Одно «теперь он» без второго — обещание.
+          setSaid(`${afterWho(picked, current).said}. ${summaryOf(before, after, picked.name)}`);
+          setKept(report);
         }
       })
       .catch((reason: unknown) => {
@@ -231,6 +289,49 @@ export function People() {
               Профиль живёт в файле на диске: ни аккаунта, ни пароля, ни сети.
             </Text>
           </div>
+
+          {/* Переключение без перезапуска (шаг 78): не обещание, а отчёт по двум
+              снимкам. Пока не переключали — сказано, что именно проверится. */}
+          {book.people.length > 1 ? (
+            <div className={styles.card}>
+              <Text weight="semibold" block>
+                Переключение без перезапуска
+              </Text>
+              <Text className={styles.muted} block>
+                {switchCost().said}
+              </Text>
+              {kept === null ? (
+                <Text className={styles.muted} block>
+                  при первом переключении проверю по факту: фраза в поле ввода, шаги идущего
+                  дела, загруженная модель, открытое окно
+                </Text>
+              ) : (
+                // Подробности — здесь, одной строкой для диктора — в
+                // объявлении выше. Дважды одно и то же читать вслух нельзя:
+                // второе повторение превращает отчёт в шум.
+                <div>
+                  {kept.kept.length > 0 ? (
+                    <Text className={styles.muted} block>
+                      осталось на месте: {kept.kept.join(", ")}
+                    </Text>
+                  ) : null}
+                  {kept.lost.length > 0 ? (
+                    <Text className={styles.muted} block role="alert">
+                      пропало: {kept.lost.join(", ")}
+                    </Text>
+                  ) : (
+                    <Text className={styles.muted} block>
+                      потерь не найдено — сравнение до и после, а не обещание
+                    </Text>
+                  )}
+                </div>
+              )}
+              <Text className={styles.muted} block>
+                почему не перезапуск: идущее дело потерялось бы, набранная фраза исчезла бы, а
+                модель на слабой машине грузилась бы заново десятки секунд
+              </Text>
+            </div>
+          ) : null}
 
           {/* Что бывает перед опасным делом: вопрос «это вы?» внутри дела, а не
               экран настроек. Показано словами правила. */}
