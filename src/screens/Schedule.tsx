@@ -15,6 +15,7 @@ import {
 import type { ScheduleRow, WhenThenRow } from "../ipc";
 import { clockText, confirm, nightNotice, parse } from "../lib/plainSchedule";
 import { row as scheduleRow } from "../lib/scheduleScreen";
+import { EveryDayCard } from "../components/EveryDayCard";
 import { line as missedLine, type Policy } from "../lib/catchUp";
 import { deferred as nightDeferred, isNight, safeList } from "../lib/nightTasks";
 import { longSleep, survivesRestart } from "../lib/scheduleSurvives";
@@ -454,6 +455,9 @@ export function Schedule() {
         </>
       )}
 
+
+      {/* Правило из уже сделанного дела: одна кнопка, без формы (шаги 332/329). */}
+      <EveryDayCard />
 
       {/* Где живёт расписание и что будет после сна. Это не украшение: раньше
           расписание жило в памяти процесса и исчезало вместе с ним — человек

@@ -28,6 +28,9 @@ const tauri = vi.fn(() => true);
 
 vi.mock("../ipc", () => ({
   isTauri: () => tauri(),
+  // «Каждый день» ищет последнее выполненное дело — без дел кнопки нет, и это
+  // правильное поведение, а не ошибка мока.
+  memoryRuns: async () => [],
   schedules: async () => rows,
   scheduleAdd: async (what: string, cadence: string, minute: number) => {
     const when = cadence === "hourly" ? "каждый час в :00" : `каждый день в ${String(Math.floor(minute / 60)).padStart(2, "0")}:00`;

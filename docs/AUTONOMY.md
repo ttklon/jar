@@ -38,7 +38,7 @@
 * `src/screens/Journal.tsx:387` — useEffect(load, [load]);
 * `src/screens/Models.tsx:221` — useEffect(load, [load]);
 * `src/screens/People.tsx:77` — useEffect(load, [load]);
-* `src/screens/Schedule.tsx:144` — useEffect(load, [load]);
+* `src/screens/Schedule.tsx:145` — useEffect(load, [load]);
 * `src/screens/Settings.tsx:86` — useEffect(() => {
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
@@ -69,6 +69,7 @@
 * `src/screens/Voice.tsx:3184` — useEffect(
 * `src/components/DownloadBar.tsx:73` — useEffect(() => {
 * `src/components/DownloadBar.tsx:80` — useEffect(() => {
+* `src/components/EveryDayCard.tsx:56` — useEffect(() => {
 * `src/components/HotkeyCard.tsx:86` — useEffect(() => {
 * `src/components/MemoryBackups.tsx:87` — useEffect(() => {
 * `src/components/MemoryFacts.tsx:76` — useEffect(load, [load]);
