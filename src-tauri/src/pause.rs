@@ -14,17 +14,14 @@
 use serde::{Deserialize, Serialize};
 
 /// Состояние паузы.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+///
+/// `Default` — «не на паузе»: приложение стартует работающим, а не
+/// заторможенным.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct Pause {
     pub paused: bool,
     /// Когда поставили — миллисекунды от старта.
     pub since_ms: i64,
-}
-
-impl Default for Pause {
-    fn default() -> Self {
-        Pause { paused: false, since_ms: 0 }
-    }
 }
 
 /// Что пауза останавливает.

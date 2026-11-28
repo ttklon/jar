@@ -48,15 +48,7 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
                 };
                 // Один пункт переключает, а не требует двух разных: человек не
                 // должен искать «снять паузу» там, где ставил.
-                let was = state.0.load(std::sync::atomic::Ordering::SeqCst);
-                let paused = !was;
-                state.0.store(paused, std::sync::atomic::Ordering::SeqCst);
-                let now = crate::hold::now_ms();
-                let said = crate::pause::say(
-                    crate::pause::Pause { paused, since_ms: if paused { now } else { 0 } },
-                    now,
-                    0,
-                );
+                let (paused, said) = state.toggle(crate::hold::now_ms());
                 tracing::info!(paused, %said, "трей: пауза");
                 if let Err(error) = app.emit("pause://changed", paused) {
                     tracing::warn!(%error, "смена паузы не отправлена окну");

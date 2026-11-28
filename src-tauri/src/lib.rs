@@ -171,8 +171,37 @@ pub struct Unfinished(pub Arc<std::sync::Mutex<Option<session::Need>>>);
 /// Пауза (шаг 441): одно состояние на всё приложение.
 ///
 /// Отдельное состояние, а не флаг в `AppState`: ставить и снимать будет трей,
-/// читать — все, кто что-то запускает.
-pub struct Paused(pub Arc<std::sync::atomic::AtomicBool>);
+/// читать — все, кто что-то запускает. Внутри — `pause::Pause`, а не голый
+/// флаг: человеку нужно ещё и «на паузе 12 мин», и когда её поставили.
+pub struct Paused(pub Arc<std::sync::Mutex<pause::Pause>>);
+
+impl Paused {
+    /// На паузе ли сейчас. Испорченная блокировка = «да»: пусть лучше дело
+    /// не запустится, чем запустится, когда человек сказал «не сейчас».
+    pub fn is_on(&self) -> bool {
+        self.0.lock().map(|state| state.paused).unwrap_or(true)
+    }
+
+    /// Поставить или снять. Возвращает новое состояние и слова для человека.
+    pub fn toggle(&self, now: i64) -> (bool, String) {
+        let Ok(mut state) = self.0.lock() else {
+            return (true, "пауза не переключается: состояние занято".to_string());
+        };
+        let paused = !state.paused;
+        state.paused = paused;
+        state.since_ms = if paused { now } else { 0 };
+        let said = pause::say(*state, now, 0);
+        (paused, said)
+    }
+}
+
+/// На паузе ли приложение — из любого места, где есть `AppHandle`.
+pub fn paused_now(handle: &tauri::AppHandle) -> bool {
+    handle
+        .try_state::<Paused>()
+        .map(|state| state.is_on())
+        .unwrap_or(false)
+}
 
 /// Отдать незавершённое, если оно есть. `None` — сохранять нечего.
 ///
@@ -360,7 +389,7 @@ pub fn run() {
         // Незавершённое дело: обновляется командами, читается при выходе. Без
         // этого «сохранить при выключении» — обещание без содержимого.
         .manage(Unfinished(Arc::new(std::sync::Mutex::new(None))))
-        .manage(Paused(Arc::new(std::sync::atomic::AtomicBool::new(false))))
+        .manage(Paused(Arc::new(std::sync::Mutex::new(pause::Pause::default()))))
         .invoke_handler(tauri::generate_handler![
             ipc::registry_snapshot,
             ipc::app_status,
@@ -588,4 +617,41 @@ pub fn run() {
                 Err(error) => tracing::warn!(%error, "движок не остановился при выходе"),
             }
         });
+}
+
+#[cfg(test)]
+mod pause_state_tests {
+    use super::*;
+
+    fn fresh() -> Paused {
+        Paused(Arc::new(std::sync::Mutex::new(pause::Pause::default())))
+    }
+
+    #[test]
+    fn a_toggle_turns_it_on_and_off_with_one_click() {
+        // Один пункт меню — одно нажатие. Двух пунктов «поставить» и «снять»
+        // нет, поэтому переключение обязано работать в обе стороны.
+        let state = fresh();
+        assert!(!state.is_on());
+        let (on, said) = state.toggle(1_000);
+        assert!(on);
+        assert!(said.starts_with("на паузе:"), "слова на паузе: {said}");
+        let (off, said) = state.toggle(2_000);
+        assert!(!off);
+        assert!(said.is_empty());
+        assert!(!state.is_on());
+    }
+
+    #[test]
+    fn a_pause_remembers_when_it_started() {
+        // «На паузе 12 мин» — не украшение: по этому числу человек решает,
+        // не забыл ли он снять паузу.
+        let state = fresh();
+        state.toggle(60_000);
+        let guard = state.0.lock().unwrap();
+        assert_eq!(guard.since_ms, 60_000);
+        drop(guard);
+        state.toggle(120_000);
+        assert_eq!(state.0.lock().unwrap().since_ms, 0);
+    }
 }

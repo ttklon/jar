@@ -636,20 +636,32 @@ pub async fn schedule_add(
 }
 
 /// Пауза: поставить или снять. Одно состояние на всё приложение.
+///
+/// Не `async`: `State<'_, …>` — ссылка, а асинхронная команда со ссылкой
+/// обязана возвращать `Result` (иначе borrow живёт дольше будущего). Команде
+/// нечего ждать: одно чтение атомарного флага.
 #[tauri::command]
-pub async fn paused(state: tauri::State<'_, crate::Paused>) -> bool {
-    state.0.load(std::sync::atomic::Ordering::SeqCst)
+pub fn paused(state: tauri::State<'_, crate::Paused>) -> bool {
+    state.is_on()
 }
 
 #[tauri::command]
-pub async fn set_paused(state: tauri::State<'_, crate::Paused>, on: bool) -> Result<bool, String> {
-    state.0.store(on, std::sync::atomic::Ordering::SeqCst);
-    Ok(on)
+pub fn set_paused(state: tauri::State<'_, crate::Paused>, on: bool) -> bool {
+    let now = crate::hold::now_ms();
+    let Ok(mut pause) = state.0.lock() else {
+        return state.is_on();
+    };
+    if pause.paused != on {
+        pause.paused = on;
+        pause.since_ms = if on { now } else { 0 };
+        tracing::info!(paused = on, "пауза из окна");
+    }
+    pause.paused
 }
 
 /// Что пауза останавливает и чего не трогает — словами, для экрана.
 #[tauri::command]
-pub async fn pause_explains() -> (Vec<&'static str>, Vec<&'static str>) {
+pub fn pause_explains() -> (Vec<&'static str>, Vec<&'static str>) {
     (crate::pause::stops(), crate::pause::keeps())
 }
 

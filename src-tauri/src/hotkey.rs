@@ -360,11 +360,7 @@ pub fn install(app: &mut tauri::App) {
             // Пауза — раньше всего остального: «не надо» значит не надо, и
             // клавиша возвращается игре и работе (шаг 441).
             if down {
-                let paused = app
-                    .try_state::<crate::Paused>()
-                    .map(|state| state.0.load(std::sync::atomic::Ordering::SeqCst))
-                    .unwrap_or(false);
-                if paused {
+                if crate::paused_now(app) {
                     tracing::debug!("пауза: горячие клавиши не работают");
                     return;
                 }
