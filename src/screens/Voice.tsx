@@ -148,6 +148,8 @@ import {
 import { ActionList } from "../components/ActionList";
 import { clearDraft, readDraft, saveDraft } from "../lib/draft";
 import { STALL_LINE, STALL_MS, decide as firstWordsDecide } from "../lib/firstWords";
+// Шаг 86: пустой экран — три примера, а не «догадайся сам».
+import { screen as emptyScreenOf } from "../lib/firstScreen";
 import { record as recordBarge, settleAfter as settleBarge } from "../lib/bargeMeasure";
 import { MIC_WORD, sayWord, type MicState } from "../lib/listening";
 import { cue, cueForState, cueWord, playCue, type Cue } from "../lib/micSound";
@@ -700,6 +702,13 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     heardField.current?.focus();
   }, [handed]);
   const [items, setItems] = useState<PlanItem[] | null>(null);
+  /**
+   * Пустой экран: подсказка и три примера из правила (шаг 86).
+   *
+   * Имя человека не передаём: экран его не знает, а выдуманное обращение хуже
+   * никакого.
+   */
+  const emptyScreen = emptyScreenOf();
   const [busy, setBusy] = useState(false);
   const searchRequestRef = useRef(0);
   /**
@@ -6823,7 +6832,37 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       ) : items === null ? (
         <Text className={styles.note}>{voice.nothingYet}</Text>
       ) : items.length === 0 ? (
-        <Text className={styles.note}>{voice.spokenNothing}</Text>
+        <>
+          <Text className={styles.note}>{voice.spokenNothing}</Text>
+          {/* Пустой экран — не «догадайся сам» (шаг 86). Правило `firstScreen`
+              было написано (шаг 379) и не подключено: три примера разных
+              жанров, первым — самое безопасное, и сказано, что будет по
+              каждому. Пустое поле без примеров человек читает как «надо знать
+              словарь». */}
+          <div className={styles.section} aria-label="с чего начать">
+            <Text className={styles.title}>{emptyScreen.hint}</Text>
+            {emptyScreen.examples.map((example) => (
+              <div key={example.said} className={styles.bar}>
+                <Text className={styles.note}>«{example.said}»</Text>
+                <Text className={styles.note}>{`— ${example.what}`}</Text>
+                <Button
+                  size="small"
+                  appearance="subtle"
+                  aria-label={`подставить: ${example.said}`}
+                  onClick={() => {
+                    // Подставляем в поле, а не отправляем: последний взгляд
+                    // перед действием остаётся человеку.
+                    setText(example.said);
+                    saveDraft(example.said);
+                    heardField.current?.focus();
+                  }}
+                >
+                  подставить
+                </Button>
+              </div>
+            ))}
+          </div>
+        </>
       ) : (
         <ActionList items={items} />
       )}
