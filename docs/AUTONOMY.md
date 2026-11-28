@@ -39,7 +39,7 @@
 * `src/screens/Models.tsx:221` — useEffect(load, [load]);
 * `src/screens/People.tsx:74` — useEffect(load, [load]);
 * `src/screens/Schedule.tsx:144` — useEffect(load, [load]);
-* `src/screens/Settings.tsx:85` — useEffect(() => {
+* `src/screens/Settings.tsx:86` — useEffect(() => {
 * `src/screens/StateRoute.tsx:37` — useEffect(() => {
 * `src/screens/StateRoute.tsx:78` — useEffect(() => {
 * `src/screens/Undo.tsx:68` — useEffect(load, [load]);

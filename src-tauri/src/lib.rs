@@ -477,9 +477,44 @@ pub fn run() {
                 timing::mark_window_ready();
             }
         })
+        // Место окна восстанавливаем после загрузки страницы: до неё окно ещё
+        // не имеет нужных размеров, и «вернуть на экран» нечего.
+        .on_page_load(|webview, payload| {
+            if webview.label() != "main" || !matches!(payload.event(), tauri::webview::PageLoadEvent::Finished) {
+                return;
+            }
+            let window = webview.window();
+            let Some(saved) = window::load() else { return };
+            let Some(list) = window::monitors(&window) else { return };
+            let (placed, moved, why) = window::place(saved, &list);
+            if !moved {
+                return;
+            }
+            tracing::info!(%why, "окно возвращено на экран");
+            if let Err(error) = window.set_position(tauri::LogicalPosition::new(placed.x, placed.y)) {
+                tracing::warn!(%error, "окно не удалось вернуть на экран");
+            }
+        })
         .on_window_event(|window, event| {
             if window.label() != "main" {
                 return;
+            }
+            // Место — до скрытия: скрытое окно уже не отдаёт координаты.
+            if matches!(event, tauri::WindowEvent::CloseRequested { .. } | tauri::WindowEvent::Destroyed) {
+                let position = window.outer_position();
+                let size = window.inner_size();
+                let scale = window.scale_factor().unwrap_or(1.0);
+                if let (Ok(position), Ok(size)) = (position, size) {
+                    let placed = window::Box4 {
+                        x: (f64::from(position.x) / scale).round() as i32,
+                        y: (f64::from(position.y) / scale).round() as i32,
+                        width: (f64::from(size.width) / scale).round() as u32,
+                        height: (f64::from(size.height) / scale).round() as u32,
+                    };
+                    if let Err(error) = window::save(placed) {
+                        tracing::warn!(%error, "место окна не сохранено");
+                    }
+                }
             }
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 // X означает «убрать окно»: выход — только явным пунктом трея,

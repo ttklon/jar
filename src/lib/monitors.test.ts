@@ -137,3 +137,28 @@ describe("физические координаты не путаются с л�
     expect(toLogical({ x: 100, y: 100 }, broken)).toEqual({ x: 100, y: 100 });
   });
 });
+
+describe("шаг 66: подсказка остаётся на экране, где окно", () => {
+  const NOTE: Monitor = { x: 0, y: 0, width: 1280, height: 800, scale: 1.5, primary: true };
+  const SCREEN: Monitor = { x: 1280, y: 0, width: 2560, height: 1440, scale: 1 };
+  const BOX = { x: 1200, y: 300, width: 200, height: 60 };
+  const HINT = { width: 320, height: 120 };
+
+  it("у границы мониторов берётся тот экран, где цель в основном", () => {
+    // Цель начинается на ноутбуке (1200 < 1280) и на 80% лежит на мониторе.
+    // «Первый пересечённый» дал бы подсказку на ноутбуке — в 320 пикселях
+    // слева от окна, то есть на соседнем экране.
+    const box = hintBox(BOX, HINT, [NOTE, SCREEN]);
+    expect(box.x).toBeGreaterThanOrEqual(SCREEN.x);
+    // И подсказка того же размера, что просили: менять размер — не её дело.
+    expect(box.width).toBe(HINT.width);
+    expect(box.height).toBe(HINT.height);
+  });
+
+  it("подсказка не выходит за экран, даже если не влезает ни с одной стороны", () => {
+    const tiny: Monitor = { x: 0, y: 0, width: 400, height: 300, scale: 1, primary: true };
+    const box = hintBox({ x: 100, y: 100, width: 120, height: 40 }, HINT, [tiny]);
+    expect(box.x).toBeGreaterThanOrEqual(tiny.x);
+    expect(box.x + box.width).toBeLessThanOrEqual(tiny.x + tiny.width);
+  });
+});

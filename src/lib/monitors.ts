@@ -150,8 +150,13 @@ export function hintBox(target: Box, hint: { width: number; height: number }, mo
   if (monitors.length === 0) {
     return { x: target.x, y: target.y + target.height, width: hint.width, height: hint.height };
   }
-  const host =
-    monitors.find((monitor) => overlap(target, monitor) > 0) ?? primaryOf(monitors)!;
+  // Экран — тот, где цель находится **в основном**, а не первый, с которым она
+  // пересекается. Окно у границы мониторов иначе получает подсказку на соседнем
+  // экране — ровно тот дефект, ради которого правило и написано.
+  const host = monitors.reduce(
+    (best, monitor) => (overlap(target, monitor) > overlap(target, best) ? monitor : best),
+    primaryOf(monitors)!,
+  );
   const right = { x: target.x + target.width, y: target.y };
   const left = { x: target.x - hint.width, y: target.y };
   const below = { x: target.x, y: target.y + target.height };
