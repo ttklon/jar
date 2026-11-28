@@ -55,8 +55,6 @@ pub fn fullscreen_now() -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     /// Правило то же, что в `fullscreen_now`: его и проверяем отдельно, чтобы
     /// ошибка в допуске не зависела от живой Windows.
     pub fn covers(window: (i32, i32, i32, i32), screen: (i32, i32, i32, i32)) -> bool {
