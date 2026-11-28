@@ -35,13 +35,16 @@ import {
   SettingsRegular,
   WrenchRegular,
 } from "@fluentui/react-icons";
-import { afterWake, engineStatus, isTauri, registrySnapshot } from "./ipc";
+import { afterWake, engineStatus, isTauri, memoryRuns, registrySnapshot } from "./ipc";
 import { watchWake } from "./lib/wakeWatch";
 import { startBeat } from "./lib/idleBeat";
 import { choose } from "./lib/locale";
 import type { RegistrySnapshot } from "./ipc";
 import { Voice } from "./screens/Voice";
 import { Welcome } from "./screens/Welcome";
+import { PauseSwitch } from "./components/PauseSwitch";
+import { RunningStrip } from "./components/RunningStrip";
+import type { Running } from "./lib/runningGlobally";
 // Экраны грузятся по требованию (шаги 387/393). Зачем: все одиннадцать в
 // первом бандле — это мегабайты разбора до первого кадра, хотя человеку при
 // запуске нужен один экран. `Voice` и `Welcome` остаются статическими: они
@@ -273,6 +276,56 @@ export function App() {
   // Знакомство показывается один раз. Решение — в `firstRun`, чтобы его проверяли тесты,
   // а не глаза: «один раз» слишком легко превращается в «каждый раз».
   const [welcome, setWelcome] = useState(() => shouldShowWelcome());
+  /**
+   * Что идёт и что ждёт ответа — на всех экранах (шаги 367/376).
+   *
+   * Отдельное состояние, а не чтение на каждом экране: плашка одна, и её данные
+   * приходят из одного места. Пусто — плашки нет.
+   */
+  const [runningNow, setRunningNow] = useState<readonly Running[]>([]);
+  const [waitingFor, setWaitingFor] = useState(0);
+
+  // Опрос — раз в пять секунд, а не по каждому событию: плашка индикатор, и
+  // «обновляется» не значит «дёргает диск на каждое нажатие». Скрытая вкладка
+  // не опрашивает вовсе — иначе фоновая программа будила бы диск без дела.
+  useEffect(() => {
+    let stopped = false;
+    const tick = () => {
+      if (stopped || document.visibilityState === "hidden") return;
+      memoryRuns(10)
+        .then((runs) => {
+          if (stopped) return;
+          const live = runs
+            .filter((run) => run.outcome === "running")
+            .map((run) => ({
+              what: run.subject,
+              done: run.steps.filter((step) => step.ok).length,
+              total: run.steps.length,
+              // «Ждёт» — не «идёт»: дело, которое встало на подтверждении, само
+              // не сдвинется, и человек должен это видеть на любом экране.
+              waiting: run.steps.length > 0 && run.steps.every((step) => !step.ok && step.reason !== ""),
+              cancellable: true,
+            }));
+          setRunningNow(live);
+          // Сколько минут самое долгое из них ждёт: по нему правило решает, когда
+          // напомнить — через 5 минут, потом через 30.
+          const oldest = runs
+            .filter((run) => run.outcome === "running")
+            .reduce<number>((min, run) => Math.min(min, run.started_ms), Number.POSITIVE_INFINITY);
+          setWaitingFor(Number.isFinite(oldest) ? Math.max(0, Math.round((Date.now() - oldest) / 60_000)) : 0);
+        })
+        .catch(() => {
+          // Журнал недоступен — плашки нет. Это индикатор, а не условие работы.
+          if (!stopped) setRunningNow([]);
+        });
+    };
+    tick();
+    const timer = globalThis.setInterval(tick, 5000);
+    return () => {
+      stopped = true;
+      globalThis.clearInterval(timer);
+    };
+  }, []);
   // Опрос идёт только пока есть загрузка; без неё таймера нет (шаг 384).
   const progress = useDownloadProgress();
   // Тема — не украшение: раньше она была зашита тёмной и системная настройка
@@ -714,6 +767,11 @@ export function App() {
         </form>
 
         <main className={styles.main} style={layout.narrow ? { padding: "16px 14px 40px" } : undefined}>
+          {/* Плашка «что сейчас происходит» — надо ВСЕМИ экранами, а не на
+              экране дел: человек ушёл с него именно поэтому (шаги 367/376). */}
+          <RunningStrip running={runningNow} waitedSinceMin={waitingFor} />
+          {/* Пауза — рядом с плашкой: увидел «идёт» — тут же решил «не сейчас». */}
+          <PauseSwitch />
           {!error && snapshot && !welcome ? (
             <div
               style={{ display: screen === "voice" ? "contents" : "none" }}

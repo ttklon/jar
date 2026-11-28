@@ -65,6 +65,7 @@ pub mod places;
 pub mod plan;
 // Шаг 225: проверка WebView2 до первого окна. Без неё самый частый сбой
 // установки — белое окно без причины.
+pub mod pause;
 pub mod people;
 pub mod planner;
 pub mod policy;
@@ -166,6 +167,12 @@ fn show_old_windows() {
 /// Отдельное состояние, а не поле `AppState`: писать в него будут команды,
 /// и брать блокировку на всё приложение ради номера шага незачем.
 pub struct Unfinished(pub Arc<std::sync::Mutex<Option<session::Need>>>);
+
+/// Пауза (шаг 441): одно состояние на всё приложение.
+///
+/// Отдельное состояние, а не флаг в `AppState`: ставить и снимать будет трей,
+/// читать — все, кто что-то запускает.
+pub struct Paused(pub Arc<std::sync::atomic::AtomicBool>);
 
 /// Отдать незавершённое, если оно есть. `None` — сохранять нечего.
 ///
@@ -353,6 +360,7 @@ pub fn run() {
         // Незавершённое дело: обновляется командами, читается при выходе. Без
         // этого «сохранить при выключении» — обещание без содержимого.
         .manage(Unfinished(Arc::new(std::sync::Mutex::new(None))))
+        .manage(Paused(Arc::new(std::sync::atomic::AtomicBool::new(false))))
         .invoke_handler(tauri::generate_handler![
             ipc::registry_snapshot,
             ipc::app_status,
@@ -412,6 +420,9 @@ pub fn run() {
             ipc::schedule_add,
             ipc::schedule_pause,
             ipc::schedule_policy,
+            ipc::paused,
+            ipc::set_paused,
+            ipc::pause_explains,
             ipc::unfinished_set,
             ipc::unfinished,
             ipc::unfinished_forget,

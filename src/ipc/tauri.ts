@@ -461,6 +461,20 @@ export function scheduleAdd(what: string, cadence: string, minute: number): Prom
   return invoke<ScheduleRow[]>("schedule_add", { what, cadence, minute });
 }
 
+/** Пауза: поставить или снять. */
+export function paused(): Promise<boolean> {
+  return invoke<boolean>("paused");
+}
+
+export function setPaused(on: boolean): Promise<boolean> {
+  return invoke<boolean>("set_paused", { on });
+}
+
+/** Что пауза останавливает и чего не трогает. */
+export function pauseExplains(): Promise<[string[], string[]]> {
+  return invoke<[string[], string[]]>("pause_explains");
+}
+
 /** Запомнить незавершённое дело: сон и выключение его не потеряют. */
 export function unfinishedSet(need: UnfinishedNeed): Promise<void> {
   return invoke<void>("unfinished_set", {

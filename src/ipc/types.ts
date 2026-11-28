@@ -903,6 +903,12 @@ export interface RollbackFile {
   looked_in: string;
 }
 
+/** Что пауза останавливает и чего не трогает. */
+export interface PauseExplains {
+  stops: string[];
+  keeps: string[];
+}
+
 /**
  * Незавершённое дело (шаг 458): что сохраняет выключение и что ждёт ответа после
  * включения. Пустой `deed` и пустые фразы — сохранять нечего.

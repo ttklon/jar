@@ -347,7 +347,7 @@ pub fn install(app: &mut tauri::App) {
     let talk_hold = std::sync::Arc::new(crate::hold::Hold::default());
     let main_hold = std::sync::Arc::new(crate::hold::Hold::default());
     let plugin = tauri_plugin_global_shortcut::Builder::new()
-        .with_handler(move |_app, pressed, event| {
+        .with_handler(move |app, pressed, event| {
             let active = accelerator_of(&active_spec())
                 .and_then(|accel| Shortcut::from_str(&accel).ok())
                 .unwrap_or_else(shortcut);
@@ -356,6 +356,19 @@ pub fn install(app: &mut tauri::App) {
             // «назначена», а окно не показывается.
             let down = event.state() == ShortcutState::Pressed;
             let now = crate::hold::now_ms();
+
+            // Пауза — раньше всего остального: «не надо» значит не надо, и
+            // клавиша возвращается игре и работе (шаг 441).
+            if down {
+                let paused = app
+                    .try_state::<crate::Paused>()
+                    .map(|state| state.0.load(std::sync::atomic::Ordering::SeqCst))
+                    .unwrap_or(false);
+                if paused {
+                    tracing::debug!("пауза: горячие клавиши не работают");
+                    return;
+                }
+            }
 
             // Полноэкранное приложение — повод не мешать: клавиша, открывающая
             // окно, выкидывает из игры посреди матча (шаги 444/455). Решение

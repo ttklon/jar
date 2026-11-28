@@ -635,6 +635,24 @@ pub async fn schedule_add(
     })
 }
 
+/// Пауза: поставить или снять. Одно состояние на всё приложение.
+#[tauri::command]
+pub async fn paused(state: tauri::State<'_, crate::Paused>) -> bool {
+    state.0.load(std::sync::atomic::Ordering::SeqCst)
+}
+
+#[tauri::command]
+pub async fn set_paused(state: tauri::State<'_, crate::Paused>, on: bool) -> Result<bool, String> {
+    state.0.store(on, std::sync::atomic::Ordering::SeqCst);
+    Ok(on)
+}
+
+/// Что пауза останавливает и чего не трогает — словами, для экрана.
+#[tauri::command]
+pub async fn pause_explains() -> (Vec<&'static str>, Vec<&'static str>) {
+    (crate::pause::stops(), crate::pause::keeps())
+}
+
 /// Запомнить незавершённое дело — чтобы сон или выключение его не потеряли.
 #[tauri::command]
 pub async fn unfinished_set(

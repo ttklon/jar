@@ -13,9 +13,12 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
     let stop_voice =
         MenuItem::with_id(app, "stop-voice", "Остановить микрофон", true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
+    // Пауза — отдельный пункт, а не «закрыть окно»: закрытие окна работу не
+    // останавливает, и человек, ждавший тишины, получал обратное (шаг 441).
+    let pause = MenuItem::with_id(app, "pause", "Пауза", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Выход", true, None::<&str>)?;
 
-    let menu = Menu::with_items(app, &[&show, &stop_voice, &separator, &quit])?;
+    let menu = Menu::with_items(app, &[&show, &stop_voice, &pause, &separator, &quit])?;
 
     let mut builder = TrayIconBuilder::with_id("main")
         .tooltip("жду вашу фразу")
@@ -23,10 +26,42 @@ pub fn install(app: &AppHandle) -> tauri::Result<()> {
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
             "quit" => {
+                // Выход во время дела — сначала предупреждение, а не «пропало»
+                // (правило `exitWarn` из `src/lib/trayNative.ts`). Выход не
+                // отменяем: человек уже решил. Но дело сохраняем и говорим, с
+                // какого шага продолжим — иначе «выход» стирает работу молча.
+                let need = app
+                    .try_state::<crate::Unfinished>()
+                    .and_then(|state| crate::unfinished_of(&state));
+                if let Some(need) = need {
+                    let saved = crate::session::save_now(&need);
+                    tracing::info!(said = %saved.said, "трей: выход при незавершённом деле");
+                    show_main_window(app);
+                }
                 tracing::info!("трей: выход");
                 app.exit(0);
             }
             "show" => show_main_window(app),
+            "pause" => {
+                let Some(state) = app.try_state::<crate::Paused>() else {
+                    return;
+                };
+                // Один пункт переключает, а не требует двух разных: человек не
+                // должен искать «снять паузу» там, где ставил.
+                let was = state.0.load(std::sync::atomic::Ordering::SeqCst);
+                let paused = !was;
+                state.0.store(paused, std::sync::atomic::Ordering::SeqCst);
+                let now = crate::hold::now_ms();
+                let said = crate::pause::say(
+                    crate::pause::Pause { paused, since_ms: if paused { now } else { 0 } },
+                    now,
+                    0,
+                );
+                tracing::info!(paused, %said, "трей: пауза");
+                if let Err(error) = app.emit("pause://changed", paused) {
+                    tracing::warn!(%error, "смена паузы не отправлена окну");
+                }
+            }
             "stop-voice" => {
                 // Не ставим ready здесь: emit лишь отправляет запрос, а не доказывает,
                 // что UI получил его и действительно закрыл микрофон.
