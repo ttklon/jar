@@ -76,9 +76,9 @@ pub mod runtime;
 pub mod sandbox;
 pub mod schedule;
 pub mod selfcheck;
-pub mod session;
 pub mod server;
 pub mod services;
+pub mod session;
 pub mod step;
 pub mod stt;
 pub mod stt_audio;
@@ -504,7 +504,9 @@ pub fn run() {
 
             // Незавершённое дело — до остановки движка: у нас секунды, и
             // сохранить номер шага важнее, чем аккуратно погасить сервер.
-            let unfinished = app.try_state::<Unfinished>().and_then(|state| unfinished_of(&state));
+            let unfinished = app
+                .try_state::<Unfinished>()
+                .and_then(|state| unfinished_of(&state));
             if let Some(need) = unfinished {
                 let saved = session::save_now(&need);
                 tracing::info!(said = %saved.said, "незавершённое сохранено при выходе");

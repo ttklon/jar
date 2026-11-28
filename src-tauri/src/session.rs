@@ -72,7 +72,10 @@ pub fn save(need: &Need, ok: bool) -> Saved {
         said: if items.is_empty() {
             "сохранять нечего: дел и фраз не было".to_string()
         } else {
-            format!("сохранено: {}. После включения можно продолжить", items.join(", "))
+            format!(
+                "сохранено: {}. После включения можно продолжить",
+                items.join(", ")
+            )
         },
         items,
     }

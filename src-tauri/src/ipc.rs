@@ -641,7 +641,12 @@ pub async fn unfinished_set(
     said: String,
     draft: String,
 ) -> Result<(), String> {
-    let need = crate::session::Need { deed, step, said, draft };
+    let need = crate::session::Need {
+        deed,
+        step,
+        said,
+        draft,
+    };
     let mut guard = state
         .0
         .lock()
