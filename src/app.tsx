@@ -16,6 +16,7 @@ import {
   webLightTheme,
 } from "@fluentui/react-components";
 import {
+  AccessibilityRegular,
   AppGenericRegular,
   AppsListDetailRegular,
   BrainCircuitRegular,
@@ -57,6 +58,7 @@ const Settings = lazy(() => import("./screens/Settings").then((m) => ({ default:
 const Licenses = lazy(() => import("./screens/Licenses").then((m) => ({ default: m.Licenses })));
 const Schedule = lazy(() => import("./screens/Schedule").then((m) => ({ default: m.Schedule })));
 const People = lazy(() => import("./screens/People").then((m) => ({ default: m.People })));
+const Accessibility = lazy(() => import("./screens/Accessibility").then((m) => ({ default: m.Accessibility })));
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
 import { applyScale, readScale } from "./components/TextSizeCard";
@@ -93,7 +95,8 @@ type Screen =
   | "state"
   | "licenses"
   | "schedule"
-  | "people";
+  | "people"
+  | "accessibility";
 
 const useStyles = makeStyles({
   shell: {
@@ -230,6 +233,7 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement; keywords: read
   { id: "schedule", label: "Расписание", icon: <CalendarClockRegular />, keywords: ["расписание", "каждый день", "schedule", "авто", "утром"] },
   // «Люди» — рядом с приложениями: и то и другое про «кто чем пользуется».
   { id: "people", label: "Люди", icon: <PeopleRegular />, keywords: ["люди", "профиль", "гость", "people", "семья"] },
+  { id: "accessibility", label: "Доступность", icon: <AccessibilityRegular />, keywords: ["доступность", "клавиатура", "диктор", "a11y", "не мышь"] },
 ];
 
 /**
@@ -779,6 +783,8 @@ export function App() {
                 <Schedule />
               ) : screen === "people" ? (
                 <People />
+              ) : screen === "accessibility" ? (
+                <Accessibility />
               ) : (
                 <Settings
                   theme={choice}
