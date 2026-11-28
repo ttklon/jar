@@ -45,6 +45,8 @@ pub mod evals;
 pub mod executor;
 pub mod flows;
 pub mod hand;
+pub mod fullscreen_now;
+pub mod hold;
 pub mod hotkey;
 pub mod idle;
 pub mod intent;

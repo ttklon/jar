@@ -1,6 +1,7 @@
 import { makeStyles, Text, tokens } from "@fluentui/react-components";
 import { check as keyboardCheck, escape, steps } from "../lib/keyboardOnly";
 import { aria, check as alertCheck, queue } from "../lib/alertA11y";
+import { afterFullscreen, decide, notDo as fullNotDo } from "../lib/fullscreenGames";
 
 /**
  * «Доступность» (шаги 193, 198).
@@ -57,6 +58,34 @@ export function Accessibility() {
           Главный сценарий проходит без мыши, а ошибки слышны экранному диктору. Здесь —
           проверка, а не обещание.
         </Text>
+      </div>
+
+      <div className={styles.card}>
+        <Text weight="semibold" block>
+          Игры и полноэкранные приложения
+        </Text>
+        <ul className={styles.list}>
+          <li>
+            <Text className={styles.muted}>
+              {`опасное дело само: ${decide({ fullscreen: true, byPerson: false, dangerous: true }).said}`}
+            </Text>
+          </li>
+          <li>
+            <Text className={styles.muted}>
+              {`вы нажали сами: ${decide({ fullscreen: true, byPerson: true, dangerous: false }).said}`}
+            </Text>
+          </li>
+          <li>
+            <Text className={styles.muted}>
+              {`после игры: ${afterFullscreen(2)}`}
+            </Text>
+          </li>
+          {fullNotDo().map((line) => (
+            <li key={line}>
+              <Text className={styles.muted}>{`не делаем: ${line}`}</Text>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className={styles.card}>

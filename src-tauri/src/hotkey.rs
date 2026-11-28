@@ -341,6 +341,11 @@ pub fn toggle_main(app: &AppHandle) {
 /// без клавиши приложение работает, окно открывается из трея.
 pub fn install(app: &mut tauri::App) {
     let handle = app.handle().clone();
+    // Состояние удержания — своё для каждой клавиши. Автоповтор Windows
+    // присылает поток `Pressed`, и без карантина разговор начинается заново
+    // десяток раз за одно удержание (шаг 460).
+    let talk_hold = std::sync::Arc::new(crate::hold::Hold::default());
+    let main_hold = std::sync::Arc::new(crate::hold::Hold::default());
     let plugin = tauri_plugin_global_shortcut::Builder::new()
         .with_handler(move |_app, pressed, event| {
             let active = accelerator_of(&active_spec())
@@ -349,20 +354,31 @@ pub fn install(app: &mut tauri::App) {
             // Сравнение с **действующей** клавишей, а не с константой: человек
             // назначает свою, и обработчик обязан знать про неё, иначе клавиша
             // «назначена», а окно не показывается.
-            if pressed == &active && event.state() == ShortcutState::Pressed {
+            let down = event.state() == ShortcutState::Pressed;
+            let now = crate::hold::now_ms();
+
+            // Полноэкранное приложение — повод не мешать: клавиша, открывающая
+            // окно, выкидывает из игры посреди матча (шаги 444/455). Решение
+            // принимается ДО перехвата: в обработчике уже поздно.
+            if down && crate::fullscreen_now::fullscreen_now() {
+                tracing::debug!("полноэкранное приложение: горячие клавиши не срабатывают");
+                return;
+            }
+
+            if pressed == &active && main_hold.pressed(down, now) {
                 toggle_main(&handle);
             }
 
             if pressed == &talk_shortcut() {
-                match event.state() {
-                    ShortcutState::Pressed => {
-                        crate::tray::set_voice_hold(&handle, true);
-                        emit_talk(&handle, "down");
-                    }
-                    ShortcutState::Released => {
-                        crate::tray::set_voice_hold(&handle, false);
-                        emit_talk(&handle, "up");
-                    }
+                // Спрашиваем у карантина, а не у Windows: удержание — это один
+                // нажим, а не поток нажатий.
+                if talk_hold.pressed(down, now) {
+                    crate::tray::set_voice_hold(&handle, true);
+                    emit_talk(&handle, "down");
+                }
+                if !down {
+                    crate::tray::set_voice_hold(&handle, false);
+                    emit_talk(&handle, "up");
                 }
             }
         })

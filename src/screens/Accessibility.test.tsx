@@ -43,4 +43,23 @@ describe("экран «Доступность»", () => {
     render(<Accessibility />);
     expect(screen.getByText(/^Esc:/)).toBeTruthy();
   });
-});
+
+  it("игра: дела по расписанию не запускаются, окна и клавиши не мешают", () => {
+    render(<Accessibility />);
+    expect(
+      screen.getByText(/открыто полноэкранное приложение: дела по расписанию не запускаю/),
+    ).toBeTruthy();
+  });
+
+  it("нажал сам — выполняется без уведомления, иначе «нажал, а ничего не произошло»", () => {
+    render(<Accessibility />);
+    expect(
+      screen.getByText(/вы попросили сами: выполняю, но уведомление не покажу/),
+    ).toBeTruthy();
+  });
+
+  it("пропущенное в игре не догоняется скопом: спрашиваем по одному", () => {
+    render(<Accessibility />);
+    expect(screen.getByText(/пропущено 2 дела — спрошу, выполнять ли, по одному/)).toBeTruthy();
+  });
+})
