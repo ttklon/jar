@@ -35,7 +35,15 @@ describe("заголовки экранов", () => {
     // Экраны, которые не самостоятельные: рисуются внутри другого экрана.
     // `StateRoute.tsx` — обёртка: спрашивает данные и рисует `State.tsx`, у которого
     // заголовок есть. Заголовок в обёртке был бы вторым на том же экране.
-    const embedded = new Set(["DataPlaces.tsx", "SelfCheck.tsx", "Undo.tsx", "StateRoute.tsx"]);
+    // `ScreenSnapshots.tsx` — карточка внутри «Покрытия» (шаг 85): заголовок
+    // `h3` при `h1` экрана. Заголовок в карточке был бы вторым на том же экране.
+    const embedded = new Set([
+      "DataPlaces.tsx",
+      "SelfCheck.tsx",
+      "ScreenSnapshots.tsx",
+      "Undo.tsx",
+      "StateRoute.tsx",
+    ]);
     const missing: string[] = [];
     for (const file of screenFiles()) {
       const name = file.split("/").pop() ?? "";

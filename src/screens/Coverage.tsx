@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Button, makeStyles, Text, tokens } from "@fluentui/react-components";
+import { ScreenSnapshots } from "./ScreenSnapshots";
 import {
   check,
   checks,
@@ -139,6 +140,9 @@ export function Coverage() {
           ))}
         </ul>
       </div>
+      {/* Снимок интерфейса как данные (шаг 85): правило видно человеку, а не
+          только в тесте. */}
+      <ScreenSnapshots />
     </div>
   );
 }
