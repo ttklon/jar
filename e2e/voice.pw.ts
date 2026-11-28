@@ -30,6 +30,16 @@ async function released(page: Page) {
   await expect.poll(() => page.evaluate(() => window.voiceSimulation.state.streams.every(s => s.getTracks().every(t => t.readyState === "ended")))).toBe(true);
 }
 
+/**
+ * Ждём, что экран вообще поднялся.
+ *
+ * Ожидание с запасом: на холодной машине CI первый разбор модулей и
+ * «есть ли локальное распознавание» занимают больше пяти секунд, и тест
+ * падал на скорости машины, а не на поведении. Это не ослабление проверки:
+ * элемент тот же и обязан быть — просто ждём дольше.
+ */
+const SCREEN_UP = { timeout: 20_000 };
+
 test.beforeEach(async ({ page }) => {
   // Block unintended external transfers even if production code changes.
   await page.route("**/*", route => {
@@ -37,7 +47,7 @@ test.beforeEach(async ({ page }) => {
     return url.hostname === "127.0.0.1" ? route.continue() : route.abort("blockedbyclient");
   });
   await page.goto("/e2e/voice.html");
-  await expect(page.getByText(/локальное распознавание работает здесь/)).toBeVisible();
+  await expect(page.getByText(/локальное распознавание работает здесь/)).toBeVisible(SCREEN_UP);
   await micExplained(page);
 });
 
@@ -46,7 +56,7 @@ test("первый разговор сначала объясняет, что у
   // `beforeEach`, снимаем — это и есть состояние нового человека.
   await page.evaluate(() => localStorage.clear());
   await page.reload();
-  await expect(page.getByText(/локальное распознавание работает здесь/)).toBeVisible();
+  await expect(page.getByText(/локальное распознавание работает здесь/)).toBeVisible(SCREEN_UP);
 
   const button = page.getByRole("button", { name: "Держать и говорить", exact: true });
   await button.dispatchEvent("pointerdown");
