@@ -114,19 +114,25 @@ pub fn quoted(target: &str) -> String {
 /// `    ZShelper    REG_SZ    "C:\...\zshelper.exe"`; нам нужна последняя часть.
 pub fn parse_query(output: &str) -> Option<String> {
     for line in output.lines() {
-        let parts: Vec<&str> = line.split_whitespace().collect();
-        if parts.len() < 3 || parts[0] != VALUE_NAME {
+        // Имя значения и тип — по словам, а **значение берём как есть**: между
+        // типом и путём Windows ставит несколько пробелов, а сам путь может
+        // содержать двойные пробелы («Program  Files»). Пересборка из слов
+        // склеила бы их в один и путь перестал бы совпадать с настоящим.
+        let trimmed = line.trim_start();
+        let Some(rest) = trimmed.strip_prefix(VALUE_NAME) else {
+            continue;
+        };
+        if !rest.starts_with(char::is_whitespace) {
             continue;
         }
-        // Между типом и значением — пробелы; значение может само содержать пробелы,
-        // поэтому склеиваем всё, что после типа, а не берём одно слово.
-        if let Some(position) = parts.iter().position(|part| *part == "REG_SZ") {
-            let value = parts[position + 1..].join(" ");
-            if value.is_empty() {
-                return None;
-            }
-            return Some(value);
+        let Some((_, after_type)) = rest.split_once("REG_SZ") else {
+            continue;
+        };
+        let value = after_type.trim_start();
+        if value.is_empty() {
+            return None;
         }
+        return Some(value.trim_end().to_string());
     }
     None
 }
@@ -203,6 +209,14 @@ pub fn missing_entry(note: &str) -> bool {
 /// — это наш автозапуск, и говорить «тут чужая запись» было бы враньём.
 pub fn same_target(command: &str, target: &str) -> bool {
     let left = command.trim();
+    let want = target.trim().trim_matches('"');
+    // Простой случай — сначала и целиком: команда без флага совпадает с путём
+    // байт в байт, включая путь с пробелами и без кавычек. Сравниваем без
+    // учёта регистра: `eq_ignore_ascii_case` латиницу приводит, а кириллицу
+    // нет — «C:\\Пользователи» и «c:\\пользователи» разошлись бы.
+    if left.trim_matches('"').to_lowercase() == want.to_lowercase() {
+        return true;
+    }
     // Путь может быть в кавычках (тогда флаг идёт после закрывающей) либо без
     // них (тогда путь — первое слово). Разбираем оба вида, а не «обычно так».
     let path = if let Some(rest) = left.strip_prefix('"') {
@@ -213,7 +227,7 @@ pub fn same_target(command: &str, target: &str) -> bool {
     } else {
         left.split_whitespace().next().unwrap_or("")
     };
-    path.eq_ignore_ascii_case(target.trim().trim_matches('"'))
+    path.to_lowercase() == want.to_lowercase()
 }
 
 /// Выполнить `reg.exe` с аргументами и вернуть stdout.
@@ -298,8 +312,17 @@ mod tests {
         // Правило `trayStart`: тихо — только при входе в Windows. Флаг едет
         // вместе с командой запуска, иначе Windows поднимет приложение без него.
         let args = add_args(r"C:\Tools\zshelper.exe");
-        let quiet = args.iter().any(|arg| arg == QUIET_FLAG);
-        assert!(quiet, "флага старта в трее нет в команде автозапуска: {args:?}");
+        // Флаг едет **внутрь** значения `/d`: в реестре команда запуска — одна
+        // строка, и отдельного аргумента `reg.exe` для неё не бывает.
+        let command = args
+            .iter()
+            .position(|arg| arg == "/d")
+            .map(|at| args[at + 1].clone())
+            .expect("/d есть");
+        assert!(
+            command.ends_with(QUIET_FLAG),
+            "флага старта в трее нет в команде автозапуска: {command}"
+        );
         assert_eq!(
             how_from_args(&[QUIET_FLAG.to_string()], false),
             "autostart"
@@ -323,6 +346,12 @@ mod tests {
         assert!(!same_target(r#""C:\Other\zshelper.exe" --quiet"#, target));
         // Кавычки не закрыты — не паникуем и не считаем совпадением.
         assert!(!same_target(r#""C:\Program Files\ZS"#, target));
+        // Регистр кириллицы: `eq_ignore_ascii_case` её не приводит, и путь
+        // «C:\Пользователи» разошёлся бы сам с собой.
+        assert!(same_target(
+            r#""c:\пользователи\zshelper.exe" --quiet"#,
+            r"C:\Пользователи\zshelper.exe"
+        ));
     }
 
     #[test]
@@ -337,6 +366,17 @@ mod tests {
         );
         // Чужое имя не считается нашим.
         assert_eq!(parse_query("    Другое    REG_SZ    x.exe"), None);
+        // Путь с двойным пробелом читается как есть: пересборка из слов
+        // склеила бы его в один и автозапуск перестал бы узнаваться.
+        let spaced = concat!(
+            "    ZShelper    REG_SZ    \"C:\\Program  Files\\z.exe\" --quiet\r\n"
+        );
+        assert_eq!(
+            parse_query(spaced).as_deref(),
+            Some("\"C:\\Program  Files\\z.exe\" --quiet")
+        );
+        // Тип не тот — не наше значение, и не «почти совпало».
+        assert_eq!(parse_query("    ZShelper    REG_EXPAND_SZ    x.exe"), None);
         // Ошибка чтения — не повод падать.
         assert_eq!(parse_query("ошибка: не найдено"), None);
     }
