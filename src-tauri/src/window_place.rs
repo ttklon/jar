@@ -56,7 +56,8 @@ pub fn save(placed: Box4) -> Result<(), String> {
         std::fs::create_dir_all(dir).map_err(|error| format!("папка окна: {error}"))?;
     }
     let text = serde_json::to_string(&placed).map_err(|error| error.to_string())?;
-    std::fs::write(&path, format!("{text}\n")).map_err(|error| format!("запись места окна: {error}"))
+    std::fs::write(&path, format!("{text}\n"))
+        .map_err(|error| format!("запись места окна: {error}"))
 }
 
 /// Прочитать место. Битый файл — `None`: окно откроется по умолчанию, а не
@@ -181,15 +182,32 @@ mod tests {
     use super::*;
 
     fn primary() -> Monitor {
-        Monitor { x: 0, y: 0, width: 1920, height: 1080, primary: true }
+        Monitor {
+            x: 0,
+            y: 0,
+            width: 1920,
+            height: 1080,
+            primary: true,
+        }
     }
 
     fn second() -> Monitor {
-        Monitor { x: 1920, y: 0, width: 2560, height: 1440, primary: false }
+        Monitor {
+            x: 1920,
+            y: 0,
+            width: 2560,
+            height: 1440,
+            primary: false,
+        }
     }
 
     fn window() -> Box4 {
-        Box4 { x: 100, y: 100, width: 1200, height: 800 }
+        Box4 {
+            x: 100,
+            y: 100,
+            width: 1200,
+            height: 800,
+        }
     }
 
     #[test]
@@ -203,7 +221,12 @@ mod tests {
     #[test]
     fn a_window_from_a_disconnected_monitor_comes_back_with_a_reason() {
         // Внешний монитор отключили: место осталось за правым краем.
-        let lost = Box4 { x: 2600, y: 200, width: 1200, height: 800 };
+        let lost = Box4 {
+            x: 2600,
+            y: 200,
+            width: 1200,
+            height: 800,
+        };
         let (placed, moved, why) = place(lost, &[primary()]);
         assert!(moved);
         assert_eq!(placed.width, 1200, "окно не должно схлопнуться");
@@ -216,7 +239,12 @@ mod tests {
         // Ноутбук 150% → 100%: окно выше экрана, но видно 68%. Правило — про
         // видимость, а не про «влезает целиком»: молча уменьшить чужое окно —
         // свой дефект. Граница правила названа в комментарии модуля.
-        let tall = Box4 { x: 0, y: 0, width: 1200, height: 1600 };
+        let tall = Box4 {
+            x: 0,
+            y: 0,
+            width: 1200,
+            height: 1600,
+        };
         let fraction = visible_fraction(tall, &[primary()]);
         assert!(fraction > VISIBLE_PART, "видно {fraction}");
         let (placed, moved, _) = place(tall, &[primary()]);
@@ -228,7 +256,12 @@ mod tests {
     fn a_lost_tall_window_is_fitted_into_the_screen() {
         // Потерянное окно возвращаем в размер экрана, а не «как было»: иначе
         // вернули бы его за тот же край.
-        let lost = Box4 { x: 5000, y: 5000, width: 1200, height: 1600 };
+        let lost = Box4 {
+            x: 5000,
+            y: 5000,
+            width: 1200,
+            height: 1600,
+        };
         let (placed, moved, _) = place(lost, &[primary()]);
         assert!(moved);
         assert_eq!(placed.height, 1080);
@@ -239,7 +272,12 @@ mod tests {
     fn a_quarter_visible_is_still_fine() {
         // Человек сам сдвинул окно, оставив полосу — это его решение.
         // 420 × 580 из 1200 × 800 — это 25.4%, чуть больше четверти.
-        let edge = Box4 { x: 1500, y: 500, width: 1200, height: 800 };
+        let edge = Box4 {
+            x: 1500,
+            y: 500,
+            width: 1200,
+            height: 800,
+        };
         let fraction = visible_fraction(edge, &[primary()]);
         assert!(fraction > VISIBLE_PART, "видно {fraction}");
         let (_, moved, _) = place(edge, &[primary()]);
@@ -249,7 +287,12 @@ mod tests {
     #[test]
     fn less_than_a_quarter_means_the_window_is_lost() {
         // 220 × 580 — это 13%: окно уже не найти, хотя полоска видна.
-        let sliver = Box4 { x: 1700, y: 500, width: 1200, height: 800 };
+        let sliver = Box4 {
+            x: 1700,
+            y: 500,
+            width: 1200,
+            height: 800,
+        };
         assert!(visible_fraction(sliver, &[primary()]) < VISIBLE_PART);
         let (_, moved, why) = place(sliver, &[primary()]);
         assert!(moved);

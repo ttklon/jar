@@ -481,18 +481,25 @@ pub fn run() {
         // Место окна восстанавливаем после загрузки страницы: до неё окно ещё
         // не имеет нужных размеров, и «вернуть на экран» нечего.
         .on_page_load(|webview, payload| {
-            if webview.label() != "main" || !matches!(payload.event(), tauri::webview::PageLoadEvent::Finished) {
+            if webview.label() != "main"
+                || !matches!(payload.event(), tauri::webview::PageLoadEvent::Finished)
+            {
                 return;
             }
             let window = webview.window();
-            let Some(saved) = window_place::load() else { return };
-            let Some(list) = window_place::monitors(&window) else { return };
+            let Some(saved) = window_place::load() else {
+                return;
+            };
+            let Some(list) = window_place::monitors(&window) else {
+                return;
+            };
             let (placed, moved, why) = window_place::place(saved, &list);
             if !moved {
                 return;
             }
             tracing::info!(%why, "окно возвращено на экран");
-            if let Err(error) = window.set_position(tauri::LogicalPosition::new(placed.x, placed.y)) {
+            if let Err(error) = window.set_position(tauri::LogicalPosition::new(placed.x, placed.y))
+            {
                 tracing::warn!(%error, "окно не удалось вернуть на экран");
             }
         })
@@ -501,7 +508,10 @@ pub fn run() {
                 return;
             }
             // Место — до скрытия: скрытое окно уже не отдаёт координаты.
-            if matches!(event, tauri::WindowEvent::CloseRequested { .. } | tauri::WindowEvent::Destroyed) {
+            if matches!(
+                event,
+                tauri::WindowEvent::CloseRequested { .. } | tauri::WindowEvent::Destroyed
+            ) {
                 let position = window.outer_position();
                 let size = window.inner_size();
                 let scale = window.scale_factor().unwrap_or(1.0);
