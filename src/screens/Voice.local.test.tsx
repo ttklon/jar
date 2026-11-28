@@ -1258,8 +1258,41 @@ describe("локальное распознавание на экране", () =
     );
   });
 
+  it("зрение начинается с согласия и кончается выключением (шаг 83)", async () => {
+    vi.mocked(uiDump).mockResolvedValue({
+      title: "Вход",
+      process: "chrome.exe",
+      elements: [],
+      truncated: false,
+      note: "чтение экрана: UI Automation, только чтение",
+      text: "Вход (chrome.exe)",
+    });
+    render(<Voice onOpen={() => {}} />);
+    await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    // До нажатия — ни одного снимка: зрение начинается с разрешения.
+    expect(vi.mocked(uiDump)).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByText("Что на экране"));
+    // Сказано, что попадёт в кадр, и что кадры не сохраняются — до снимка.
+    const said = await screen.findByText(/в кадр попадёт только это окно/);
+    expect(said.textContent).toContain("Кадры не сохраняются");
+    // Срок назван по-русски: «осталось 2 минуты», а не «120 с».
+    expect(screen.getAllByText(/осталось/).length).toBeGreaterThan(0);
+
+    // И видно, сколько раз смотрели: «посмотрели 1 раз», а не «работает».
+    await waitFor(() => expect(screen.getByText(/посмотрели 1 раз/)).toBeTruthy());
+
+    fireEvent.click(screen.getByText("выключить зрение"));
+    expect(
+      await screen.findByText(/зрение выключено: посмотрели 1 раз и ничего не сохранили/),
+    ).toBeTruthy();
+    // После выключения снимка экрана на экране нет: он не остаётся висеть.
+    expect(screen.queryByText(/Вход \(chrome.exe\)/)).toBeNull();
+  });
+
   it("модель получает элементы окна, а не только заголовок", async () => {
-    vi.mocked(uiDump).mockResolvedValueOnce({
+    vi.mocked(uiDump).mockResolvedValue({
       title: "Вход",
       process: "chrome.exe",
       elements: [],
@@ -1273,6 +1306,11 @@ describe("локальное распознавание на экране", () =
 
     render(<Voice onOpen={() => {}} />);
     await waitFor(() => expect(screen.getByText(/Сейчас перед вами/)).toBeTruthy());
+
+    // Шаг 83: экран не читается без согласия. Одно нажатие — и сессия на две
+    // минуты: раньше снимок делался сам, без спроса.
+    fireEvent.click(await screen.findByText("Что на экране"));
+    await waitFor(() => expect(vi.mocked(uiDump)).toHaveBeenCalled());
 
     fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "нажми эту кнопку" } });
     fireEvent.click(screen.getByText("Найти"));
@@ -1570,8 +1608,10 @@ describe("локальное распознавание на экране", () =
     await waitFor(() => expect(screen.getByText(/программа не приняла/)).toBeTruthy());
   });
 
-  it("окно не читается — об этом сказано, и поиск по словам всё равно работает", async () => {
-    vi.mocked(uiDump).mockRejectedValueOnce(new Error("UI Automation не поднялся"));
+  it("без согласия на зрение модель экрана не получает — и это не ошибка", async () => {
+    // Шаг 83: раньше здесь проверялась ошибка UI Automation, но до неё дело не
+    // доходит по другой причине — снимка экрана нет вовсе, пока человек не
+    // разрешил сессию. Это не «не получилось», а «не спрашивали».
     vi.mocked(planFor).mockResolvedValueOnce([]);
     vi.mocked(draftPlan).mockResolvedValueOnce(null);
     vi.mocked(think).mockResolvedValueOnce(null as never);
@@ -1582,9 +1622,8 @@ describe("локальное распознавание на экране", () =
     fireEvent.change(screen.getByLabelText("Услышал"), { target: { value: "нажми эту кнопку" } });
     fireEvent.click(screen.getByText("Найти"));
 
-    await waitFor(() =>
-      expect(screen.getByText(/экран не прочитан: UI Automation не поднялся/)).toBeTruthy(),
-    );
+    await waitFor(() => expect(vi.mocked(think)).toHaveBeenCalled());
+    expect(vi.mocked(uiDump)).not.toHaveBeenCalled();
     expect(vi.mocked(think).mock.calls[0]?.[1]).toMatchObject({ screen: null });
   });
 

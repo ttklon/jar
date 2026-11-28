@@ -541,6 +541,16 @@ import {
 } from "../lib/micPause";
 import { markMicExplained, micExplained } from "../lib/firstRun";
 import { voice, microphoneCheck as micTestText } from "../i18n/ru";
+// Шаг 83: зрение — сессия с согласием, а не чтение экрана «на всякий случай».
+import {
+  begin as beginGaze,
+  end as endGaze,
+  left as gazeLeftOf,
+  looked as gazeLooked,
+  mayLook,
+  warning as gazeWarning,
+  type Session as GazeSession,
+} from "../lib/screenSight";
 
 /**
  * Главный экран. Человек ничего здесь не выбирает: он держит кнопку, говорит задачу,
@@ -1859,10 +1869,59 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     }
   }, []);
 
-  const readScreen = useCallback(async (): Promise<string | null> => {
+  /**
+   * Зрение — сессия с явным согласием, а не «прочитаю экран на всякий случай»
+   * (шаг 83).
+   *
+   * Дефект: на каждую фразу экран читался сам, без согласия, а правило
+   * `screenSight` требует обратного — сначала назвать, **что** попадёт в кадр,
+   * потом две минуты, потом само выключается. Снимок экрана — это документы,
+   * переписка и чужие имена; спрашивать о них «потом» нельзя.
+   */
+  const [gaze, setGaze] = useState<GazeSession | null>(null);
+  /** Сколько секунд осталось — обновляется, чтобы «осталось» не врало. */
+  const [gazeLeft, setGazeLeft] = useState("");
+  /** Что человеку сказано про кадр — до первого снимка, а не после. */
+  const [gazeSaid, setGazeSaid] = useState("");
+  useEffect(() => {
+    if (gaze === null) {
+      setGazeLeft("");
+      return;
+    }
+    const tick = () => {
+      setGazeLeft(gazeLeftOf(gaze, Date.now()));
+      if (!mayLook(gaze, Date.now()).ok) setGaze(null);
+    };
+    tick();
+    const timer = globalThis.setInterval(tick, 1000);
+    return () => globalThis.clearInterval(timer);
+  }, [gaze]);
+
+  /** Сессия для `readScreen`: колбэк не должен меняться от каждого кадра. */
+  const gazeRef = useRef<GazeSession | null>(null);
+  useEffect(() => {
+    gazeRef.current = gaze;
+  }, [gaze]);
+
+  /**
+   * `session` передаётся явно при нажатии: сессия только что создана, а `ref`
+   * обновится лишь после рендера — и первое же нажатие получало бы «зрение
+   * выключено». Настоящий дефект, поймавшийся экранным тестом.
+   */
+  const readScreen = useCallback(async (session?: GazeSession | null): Promise<string | null> => {
+    const current = session === undefined ? gazeRef.current : session;
+    // Без согласия не смотрим: возвращаем «экрана нет», а не молча читаем.
+    const allowed = mayLook(current, Date.now());
+    if (!allowed.ok) {
+      setScreen(null);
+      setScreenError(allowed.said);
+      return null;
+    }
     setScreenBusy(true);
     try {
       const dump = await uiDump(SCREEN_NODES);
+      // Кадр посчитан — это видно словами «посмотрели N раз», а не «несколько».
+      setGaze((current) => (current === null ? null : gazeLooked(current)));
       setScreen(dump);
       setScreenError(null);
       return dump.text.trim().length > 0 ? dump.text : null;
@@ -2210,7 +2269,9 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         if (!proposal) {
           const window = frontRef.current;
           // Экран читаем до вопроса: без него у «нажми эту кнопку» нет адресата.
-          const screenText = window ? await readScreen() : null;
+          // Но только когда человек разрешил зрение на сессию (шаг 83): иначе
+          // снимок экрана попадал в модель без спроса.
+          const screenText = window && mayLook(gazeRef.current, Date.now()).ok ? await readScreen() : null;
           if (request !== searchRequestRef.current) return;
           try {
             answered = await think(
@@ -6273,16 +6334,6 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
           <Button
             size="small"
             appearance="subtle"
-            disabled={screenBusy}
-            onClick={() => {
-              void readScreen();
-            }}
-          >
-            {screenBusy ? voice.screenReading : voice.screenShow}
-          </Button>
-          <Button
-            size="small"
-            appearance="subtle"
             disabled={machineBusy}
             onClick={() => {
               void measureMachine();
@@ -6580,9 +6631,67 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
         </div>
       ) : null}
 
-      {screen || screenError ? (
+      {/* Согласие на зрение, его срок и что попадёт в кадр — до снимка, а не
+          после. Это не баннер: строка живёт ровно столько, сколько сессия. */}
+      {gaze !== null || gazeSaid !== "" ? (
+        <div className={styles.section}>
+          {gaze !== null ? (
+            <>
+              <Text className={styles.note} role="status" aria-live="polite">
+                {gazeSaid} {gazeLeft}
+              </Text>
+              <Text className={styles.note}>
+                посмотрели {gaze.looks} {gaze.looks === 1 ? "раз" : "раза"}, кадры не сохранены
+              </Text>
+            </>
+          ) : (
+            <Text className={styles.note} role="status" aria-live="polite">
+              {gazeSaid}
+            </Text>
+          )}
+        </div>
+      ) : null}
+
+      {/* Секция видна всегда: иначе кнопка «Что на экране» появлялась бы только
+          после первого снимка — то есть зрение надо было бы сначала угадать, а
+          потом разрешить. Так было в первой правке шага 83, и это поймал тест. */}
+      {(
         <div className={styles.section}>
           <Text className={styles.title}>{voice.screenTitle}</Text>
+          {/* Кнопка здесь, а не в панели: она относится к этой секции и видна с
+              самого начала, ещё до первого снимка (шаг 83). */}
+          {/* Зрение — кнопка с согласием (шаг 83). Одно нажатие: сначала
+              сказать, что попадёт в кадр, потом смотреть две минуты. */}
+          {gaze === null ? (
+            <Button
+              size="small"
+              appearance="subtle"
+              disabled={screenBusy}
+              onClick={() => {
+                const started = beginGaze("window", Date.now());
+                setGaze(started.session);
+                setGazeSaid(gazeWarning("window"));
+                void readScreen(started.session);
+              }}
+            >
+              {screenBusy ? voice.screenReading : voice.screenShow}
+            </Button>
+          ) : (
+            <Button
+              size="small"
+              appearance="subtle"
+              onClick={() => {
+                const ended = endGaze(gaze, Date.now());
+                setGaze(ended.session);
+                setGazeSaid(ended.said);
+                setScreen(null);
+                setScreenError(null);
+              }}
+            >
+              выключить зрение
+            </Button>
+          )}
+
           {screen ? <Text className={styles.note}>{screen.note}</Text> : null}
           {screen ? <pre className={styles.prompt}>{screen.text}</pre> : null}
           {screen
@@ -6684,7 +6793,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
             <Text className={styles.error} role="alert" aria-live="polite">{voice.screenError(screenError)}</Text>
           ) : null}
         </div>
-      ) : null}
+      )}
 
       {spoken ? <Text className={styles.spoken}>{spoken}</Text> : null}
 

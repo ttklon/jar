@@ -85,7 +85,11 @@ describe("первые слова (шаг 79)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Ответить словами" }));
 
     // Сразу после нажатия — тишина: «ещё думаю» раньше секунды было бы шумом.
-    await waitFor(() => expect(spoken).not.toContain(STALL_LINE));
+    // Проверка синхронная, а не через `waitFor`: `waitFor` ждёт выполнения
+    // условия, а здесь нужен **снимок** состояния до порога. Под нагрузкой
+    // полного прогона ожидание успевало переждать секунду и «находило» шум,
+    // которого в момент нажатия не было.
+    expect(spoken).not.toContain(STALL_LINE);
     // Через порог молчания — сказано, а не промолчано.
     await waitFor(() => expect(spoken).toContain(STALL_LINE), { timeout: 3000 });
   });
