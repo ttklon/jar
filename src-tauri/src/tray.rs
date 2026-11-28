@@ -262,7 +262,10 @@ mod tests {
             voice_tooltip("key-down").unwrap(),
             "голосовая клавиша зажата"
         );
-        assert_eq!(voice_tooltip("paused").unwrap(), "на паузе: дела не запускаются");
+        assert_eq!(
+            voice_tooltip("paused").unwrap(),
+            "на паузе: дела не запускаются"
+        );
         assert_eq!(voice_tooltip("listening").unwrap(), "слушаю");
         assert_eq!(voice_tooltip("working").unwrap(), "обрабатываю запрос");
         assert_eq!(
