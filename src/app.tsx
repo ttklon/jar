@@ -32,6 +32,7 @@ import {
   PeopleRegular,
   SearchRegular,
   SettingsRegular,
+  WrenchRegular,
 } from "@fluentui/react-icons";
 import { afterWake, engineStatus, isTauri, registrySnapshot } from "./ipc";
 import { watchWake } from "./lib/wakeWatch";
@@ -61,6 +62,7 @@ const Schedule = lazy(() => import("./screens/Schedule").then((m) => ({ default:
 const People = lazy(() => import("./screens/People").then((m) => ({ default: m.People })));
 const Accessibility = lazy(() => import("./screens/Accessibility").then((m) => ({ default: m.Accessibility })));
 const Requirements = lazy(() => import("./screens/Requirements").then((m) => ({ default: m.Requirements })));
+const Build = lazy(() => import("./screens/Build").then((m) => ({ default: m.Build })));
 import { markWelcomeSeen, shouldShowWelcome } from "./lib/firstRun";
 import { DownloadBar, useDownloadProgress } from "./components/DownloadBar";
 import { applyScale, readScale } from "./components/TextSizeCard";
@@ -99,7 +101,8 @@ type Screen =
   | "schedule"
   | "people"
   | "accessibility"
-  | "requirements";
+  | "requirements"
+  | "build";
 
 const useStyles = makeStyles({
   shell: {
@@ -238,6 +241,7 @@ const NAV: { id: Screen; label: string; icon: React.ReactElement; keywords: read
   { id: "people", label: "Люди", icon: <PeopleRegular />, keywords: ["люди", "профиль", "гость", "people", "семья"] },
   { id: "accessibility", label: "Доступность", icon: <AccessibilityRegular />, keywords: ["доступность", "клавиатура", "диктор", "a11y", "не мышь"] },
   { id: "requirements", label: "Требования", icon: <GaugeRegular />, keywords: ["требования", "батарея", "слабая машина", "экономия", "4 гб"] },
+  { id: "build", label: "Сборка", icon: <WrenchRegular />, keywords: ["сборка", "проверки", "тесты", "прогон", "рука", "ci"] },
 ];
 
 /**
@@ -791,6 +795,8 @@ export function App() {
                 <Accessibility />
               ) : screen === "requirements" ? (
                 <Requirements />
+              ) : screen === "build" ? (
+                <Build />
               ) : (
                 <Settings
                   theme={choice}
