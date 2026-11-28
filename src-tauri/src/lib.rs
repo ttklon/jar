@@ -82,8 +82,8 @@ pub mod selfcheck;
 pub mod server;
 pub mod services;
 pub mod session;
-pub mod step;
 pub mod startup;
+pub mod step;
 pub mod stt;
 pub mod stt_audio;
 pub mod stt_http;
@@ -512,7 +512,12 @@ pub fn run() {
             let args: Vec<String> = std::env::args().skip(1).collect();
             let first_run = startup::take_first_run();
             let start = startup::decide(&args, first_run, startup::quiet_setting());
-            tracing::info!(window = start.window, hint = start.hint, said = start.said, "старт");
+            tracing::info!(
+                window = start.window,
+                hint = start.hint,
+                said = start.said,
+                "старт"
+            );
             if !start.window {
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.hide();

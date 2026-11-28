@@ -323,10 +323,7 @@ mod tests {
             command.ends_with(QUIET_FLAG),
             "флага старта в трее нет в команде автозапуска: {command}"
         );
-        assert_eq!(
-            how_from_args(&[QUIET_FLAG.to_string()], false),
-            "autostart"
-        );
+        assert_eq!(how_from_args(&[QUIET_FLAG.to_string()], false), "autostart");
         // Двойной клик по ярлыку — окно: «тихо» здесь значит «ничего не произошло».
         assert_eq!(how_from_args(&[], false), "shortcut");
         // Первый запуск после установки важнее способа: иначе непонятно, что
@@ -342,7 +339,10 @@ mod tests {
         let target = r"C:\Program Files\ZShelper\zshelper.exe";
         let command = r#""C:\Program Files\ZShelper\zshelper.exe" --quiet"#;
         assert!(same_target(command, target), "свой запуск принят за чужой");
-        assert!(same_target(target, target), "путь без кавычек перестал совпадать");
+        assert!(
+            same_target(target, target),
+            "путь без кавычек перестал совпадать"
+        );
         assert!(!same_target(r#""C:\Other\zshelper.exe" --quiet"#, target));
         // Кавычки не закрыты — не паникуем и не считаем совпадением.
         assert!(!same_target(r#""C:\Program Files\ZS"#, target));
