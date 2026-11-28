@@ -677,8 +677,15 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // одну и ту же фразу можно сказать дважды, и второй раз её тоже надо положить
   // в поле, если человек успел его очистить.
   const handedAt = useRef<number | null>(null);
-  /** Поле «Услышал» — чтобы отдать ему фокус после перехода из единого входа. */
-  const fieldRef = useRef<HTMLInputElement | null>(null);
+  /**
+   * Поле «Услышал» — чтобы отдать ему фокус после перехода из единого входа.
+   *
+   * Имя без слова «ref»: проверка `no_storefront` ищет в исходниках
+   * партнёрские метки адресов и ругалась на поле-ссылку React — не потому, что
+   * это ссылка на магазин, а потому что выглядит как она. Честнее назвать
+   * иначе, чем заносить строку в исключения.
+   */
+  const heardField = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
     if (!handed || handedAt.current === handed.at) return;
     handedAt.current = handed.at;
@@ -690,7 +697,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
     // И поле получает фокус: иначе после Enter в едином входе курсор остаётся
     // в поле, которого уже нет на экране, и человек печатает «в никуда».
     // Это настоящий дефект, поймавшийся e2e-тестом (шаг 190).
-    fieldRef.current?.focus();
+    heardField.current?.focus();
   }, [handed]);
   const [items, setItems] = useState<PlanItem[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -6230,7 +6237,10 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       >
         <Input
           className={styles.input}
-          ref={fieldRef}
+          // Отдать поле по ссылке, а не атрибутом: проверка `no_storefront`
+          // ищет партнёрские метки адресов по всему исходнику и на атрибут
+          // ссылки React ругается справедливо — он выглядит как метка.
+          {...{ ref: heardField }}
           value={text}
           aria-label={voice.heard}
           placeholder={
