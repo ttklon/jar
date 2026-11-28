@@ -677,10 +677,20 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
   // одну и ту же фразу можно сказать дважды, и второй раз её тоже надо положить
   // в поле, если человек успел его очистить.
   const handedAt = useRef<number | null>(null);
+  /** Поле «Услышал» — чтобы отдать ему фокус после перехода из единого входа. */
+  const fieldRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => {
     if (!handed || handedAt.current === handed.at) return;
     handedAt.current = handed.at;
     setText(handed.text);
+    // Черновик сохраняется и здесь: фраза пришла из единого входа, человек мог
+    // переключить экран или закрыть окно — и она должна пережить это так же,
+    // как набранная руками (шаг 26).
+    saveDraft(handed.text);
+    // И поле получает фокус: иначе после Enter в едином входе курсор остаётся
+    // в поле, которого уже нет на экране, и человек печатает «в никуда».
+    // Это настоящий дефект, поймавшийся e2e-тестом (шаг 190).
+    fieldRef.current?.focus();
   }, [handed]);
   const [items, setItems] = useState<PlanItem[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -6220,6 +6230,7 @@ export function Voice({ onOpen, active = true, handed = null }: VoiceScreenProps
       >
         <Input
           className={styles.input}
+          ref={fieldRef}
           value={text}
           aria-label={voice.heard}
           placeholder={
