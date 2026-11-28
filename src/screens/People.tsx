@@ -6,6 +6,9 @@ import { ask as askWho, need as needWho, after as afterWho } from "../lib/whoNow
 import { absent as localAbsent, contents as localContents, worksOffline } from "../lib/localProfile";
 import { entry as journalEntry } from "../lib/whoAsked";
 import { may as personMay } from "../lib/personRights";
+import { confirm as forgetConfirm, stays as forgetStays, willGo } from "../lib/forgetProfile";
+import { guard, sweep } from "../lib/memoryGuard";
+import { hear, wantsNoMemory } from "../lib/dontStore";
 import { allowed as guestAllowed, askOwner, wholePlan } from "../lib/guestHands";
 import { decide as guestDecide, howWord as attemptWord } from "../lib/guestCannotDanger";
 import { after as transferAfter, pack, type Bundle } from "../lib/profileTransfer";
@@ -360,6 +363,71 @@ export function People() {
                 </Text>
               </li>
             </ul>
+          </div>
+
+          {/* Память: чего в ней не бывает и как её забыть. */}
+          <div className={styles.card}>
+            <Text weight="semibold" block>
+              Память: что в неё не попадает
+            </Text>
+            <Text className={styles.muted} block>
+              {guard({ kind: "ключ", value: "api key sk-live-4f9a2b7c1d3e5f60" }).said}
+            </Text>
+            <Text className={styles.muted} block>
+              {`проверка идёт ДО записи: у памяти нет «отменить», и вычищать записанное значит переписывать историю. ${sweep([{ kind: "пароль", value: "hunter2" }]).said}`}
+            </Text>
+            <Text className={styles.muted} block>
+              {`«не запоминай это» — отдельная фраза: ${
+                wantsNoMemory("не запоминай это")
+                  ? hear("не запоминай это", { kind: "папка", value: "Загрузки" }, Date.now()).ask
+                  : "фраза не распознана"
+              }`}
+            </Text>
+            <div className={styles.row}>
+              <Button
+                appearance="subtle"
+                disabled={current === null}
+                onClick={() => {
+                  const person = current;
+                  if (person === null) return;
+                  // Подтверждение называет и то, что исчезнет, и то, что останется:
+                  // иначе кнопка «забыть» выглядит как «потерять всё».
+                  setBad(false);
+                  setSaid(
+                    forgetConfirm(
+                      {
+                        person: { id: person.id, name: person.name },
+                        facts: [],
+                        allowed: [],
+                        guest: person.guest,
+                      },
+                      7,
+                    ),
+                  );
+                }}
+              >
+                {`что будет, если забыть профиль${current === null ? "" : ` «${current.name}»`}`}
+              </Button>
+            </div>
+            {current !== null ? (
+              <details>
+                <summary className={styles.muted}>исчезнет и останется</summary>
+                <ul className={styles.list}>
+                  {willGo({ person: { id: current.id, name: current.name }, facts: [], allowed: [], guest: current.guest }).map(
+                    (line) => (
+                      <li key={line}>
+                        <Text className={styles.muted}>{`исчезнет: ${line}`}</Text>
+                      </li>
+                    ),
+                  )}
+                  {forgetStays().map((line) => (
+                    <li key={line}>
+                      <Text className={styles.muted}>{`останется: ${line}`}</Text>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
           </div>
 
           {/* Гость: что можно, чего нельзя и почему. Не «ограниченный режим», а

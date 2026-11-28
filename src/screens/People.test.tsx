@@ -192,4 +192,28 @@ describe("экран «Люди»", () => {
       expect(screen.getByRole("status").textContent).toMatch(/профиль «Аня» собран в один файл/),
     );
   });
+
+  it("память не хранит секреты, и проверка идёт ДО записи", async () => {
+    book = { current: "p1", people: [{ id: "p1", name: "Аня", guest: false, facts: 2 }] };
+    render(<People />);
+    await screen.findByText(/Сейчас действует: Аня/);
+
+    // Само значение не повторяется: иначе секрет попадёт в журнал.
+    const card = screen.getByText(/Память: что в неё не попадает/).closest("div") as HTMLElement;
+    expect(card.textContent).not.toMatch(/sk-live-4f9a2b7c1d3e5f60/);
+    expect(card.textContent).toMatch(/проверка идёт ДО записи/);
+  });
+
+  it("«забыть профиль» называет и что уйдёт, и что останется", async () => {
+    book = { current: "p1", people: [{ id: "p1", name: "Аня", guest: false, facts: 2 }] };
+    render(<People />);
+    await screen.findByText(/Сейчас действует: Аня/);
+
+    fireEvent.click(screen.getByRole("button", { name: /что будет, если забыть профиль «Аня»/ }));
+    const said = screen.getByRole("status").textContent ?? "";
+    expect(said).toMatch(/Забыть профиль «Аня»/);
+    expect(said).toMatch(/Исчезнет: имя «Аня»/);
+    expect(said).toMatch(/Останется: скачанная модель/);
+    expect(said).toMatch(/Можно передумать 7 дней/);
+  });
 })
