@@ -51,6 +51,20 @@ describe("D-018: тесты не трогают настоящий диск че
     expect(session).toContain("std::thread::current().id()");
   });
 
+  it("cfg-блок с путём — последнее выражение функции, без return", () => {
+    // clippy: `unneeded return statement` — и он прав. Ошибка была настоящей:
+    // с `return` внутри `#[cfg(test)]` блоков компилятор ругался на мёртвый
+    // код в ветке `not(test)`, а CI останавливался на clippy, не дойдя до
+    // тестов. Правило и Rust держатся вместе.
+    for (const name of ["people.rs", "session.rs"]) {
+      const text = readFileSync(join(DIR.pathname, name), "utf8");
+      const start = text.indexOf("fn base_dir()");
+      expect(start).toBeGreaterThan(-1);
+      const body = text.slice(start, text.indexOf("\n}", start));
+      expect(body).not.toContain("return ");
+    }
+  });
+
   it("прогон, который пишет в настоящий список, назван тестом по имени", () => {
     const people = readFileSync(join(DIR.pathname, "people.rs"), "utf8");
     expect(people).toContain("fn tests_do_not_touch_the_real_list_of_people");

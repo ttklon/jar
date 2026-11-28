@@ -68,11 +68,11 @@ fn base_dir() -> std::path::PathBuf {
         // Папка на процесс **и на поток**: тесты идут параллельно, каждый в
         // своём потоке, и общая папка вернула бы ту же гонку — только тише.
         // Настоящий список людей при этом не трогается вовсе.
-        return std::env::temp_dir().join(format!(
+        std::env::temp_dir().join(format!(
             "zshelper-people-test-{}-{:?}",
             std::process::id(),
             std::thread::current().id()
-        ));
+        ))
     }
     #[cfg(not(test))]
     {

@@ -50,11 +50,11 @@ pub fn file() -> std::path::PathBuf {
 fn base_dir() -> std::path::PathBuf {
     #[cfg(test)]
     {
-        return std::env::temp_dir().join(format!(
+        std::env::temp_dir().join(format!(
             "zshelper-session-test-{}-{:?}",
             std::process::id(),
             std::thread::current().id()
-        ));
+        ))
     }
     #[cfg(not(test))]
     {
