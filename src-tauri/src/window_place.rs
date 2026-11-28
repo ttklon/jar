@@ -15,6 +15,12 @@
 //!
 //! Мониторов не знаем — **не двигаем**: догадка о чужих экранах хуже, чем
 //! сохранённое место.
+//!
+//! Граница правила, названная честно: окно, которое **выше экрана, но видно**
+//! (больше четверти), не уменьшается. Молча сделать чужое окно меньше — свой
+//! дефект, а человек может дотянуться до края и сам. Уменьшается только окно,
+//! которое мы **возвращаем** с потерянного места: иначе вернули бы его за тот
+//! же край.
 
 use serde::{Deserialize, Serialize};
 #[cfg(windows)]
@@ -206,21 +212,48 @@ mod tests {
     }
 
     #[test]
-    fn a_window_taller_than_the_screen_is_fitted_not_cut() {
-        // Ноутбук 150% → 100%: окно выше экрана.
+    fn a_tall_but_visible_window_is_not_touched() {
+        // Ноутбук 150% → 100%: окно выше экрана, но видно 68%. Правило — про
+        // видимость, а не про «влезает целиком»: молча уменьшить чужое окно —
+        // свой дефект. Граница правила названа в комментарии модуля.
         let tall = Box4 { x: 0, y: 0, width: 1200, height: 1600 };
+        let fraction = visible_fraction(tall, &[primary()]);
+        assert!(fraction > VISIBLE_PART, "видно {fraction}");
         let (placed, moved, _) = place(tall, &[primary()]);
+        assert!(!moved);
+        assert_eq!(placed, tall, "не трогаем: окно видно");
+    }
+
+    #[test]
+    fn a_lost_tall_window_is_fitted_into_the_screen() {
+        // Потерянное окно возвращаем в размер экрана, а не «как было»: иначе
+        // вернули бы его за тот же край.
+        let lost = Box4 { x: 5000, y: 5000, width: 1200, height: 1600 };
+        let (placed, moved, _) = place(lost, &[primary()]);
         assert!(moved);
-        assert_eq!(placed.height, 1080, "окно влезает в экран целиком");
+        assert_eq!(placed.height, 1080);
+        assert_eq!(placed.width, 1200);
     }
 
     #[test]
     fn a_quarter_visible_is_still_fine() {
         // Человек сам сдвинул окно, оставив полосу — это его решение.
-        let edge = Box4 { x: 1700, y: 500, width: 1200, height: 800 };
-        assert!(visible_fraction(edge, &[primary()]) > VISIBLE_PART);
+        // 420 × 580 из 1200 × 800 — это 25.4%, чуть больше четверти.
+        let edge = Box4 { x: 1500, y: 500, width: 1200, height: 800 };
+        let fraction = visible_fraction(edge, &[primary()]);
+        assert!(fraction > VISIBLE_PART, "видно {fraction}");
         let (_, moved, _) = place(edge, &[primary()]);
         assert!(!moved);
+    }
+
+    #[test]
+    fn less_than_a_quarter_means_the_window_is_lost() {
+        // 220 × 580 — это 13%: окно уже не найти, хотя полоска видна.
+        let sliver = Box4 { x: 1700, y: 500, width: 1200, height: 800 };
+        assert!(visible_fraction(sliver, &[primary()]) < VISIBLE_PART);
+        let (_, moved, why) = place(sliver, &[primary()]);
+        assert!(moved);
+        assert!(why.contains("видно 13%"), "{why}");
     }
 
     #[test]
